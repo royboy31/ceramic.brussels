@@ -14,7 +14,10 @@ import type { LocaleId } from '../lib/locales';
 interface Item {
   label: string;
   href: string;
+  /** Built-in section, used to look up a descriptive line. */
   route?: string;
+  /** Already-resolved descriptive line, when the caller has one. */
+  sub?: string;
   external?: boolean;
 }
 
@@ -44,7 +47,7 @@ function subtitle(route?: string): string | null {
   <nav aria-label={t('nav.menu')}>
     {
       items.map((item) => {
-        const sub = subtitle(item.route);
+        const sub = item.sub ?? subtitle(item.route);
         return (
           <section class="menu-row">
             <a href={item.href} {...(item.external ? { rel: 'noopener noreferrer' } : {})}>
@@ -106,6 +109,9 @@ function subtitle(route?: string): string | null {
   .menu-row > a,
   .menu-newsletter {
     display: block;
+    /* The identity sets the menu lowercase; some labels come from shared
+       strings that are title-case elsewhere, so it is settled here. */
+    text-transform: lowercase;
     font-size: clamp(2rem, 4vw, 2.75rem);
     line-height: 1;
     letter-spacing: -0.05em;

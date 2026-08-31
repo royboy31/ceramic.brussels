@@ -1,7 +1,8 @@
 ---
 import { LOCALES, type LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
-import { getSettings, getNavPages, getNavigation } from '../lib/queries';
+import { getSettings, getNavPages, getNavigation, getPageSlugs } from '../lib/queries';
+import { USE_DESIGN_MENU, DESIGN_MENU, resolveDesignEntry } from '../lib/designMenu';
 import { urlFor } from '../sanity/image';
 import EditLink from '../components/EditLink.astro';
 import Header from '../components/Header.astro';
@@ -30,10 +31,11 @@ const { lang, title, description, path = '', altPaths, noIndex, theme = 'default
   Astro.props;
 const t = useTranslations(lang);
 
-const [settings, navPages, navigation] = await Promise.all([
+const [settings, navPages, navigation, pageSlugs] = await Promise.all([
   getSettings(lang),
   getNavPages(lang),
   getNavigation(lang),
+  USE_DESIGN_MENU ? getPageSlugs() : Promise.resolve([]),
 ]);
 
 const siteName = settings?.siteName ?? 'Ceramic Brussels';
@@ -99,7 +101,25 @@ const fallbackNav = [
   ...navPages.map((p: any) => ({ label: p.label, href: localePath(lang, p.slug) })),
 ];
 
+/**
+ * The slide-in menu shows the groups from the signed-off design until the
+ * navigation document in Sanity carries them - see src/lib/designMenu.ts.
+ * The header, footer and everything else keep using the editable menu.
+ */
+const designNav = USE_DESIGN_MENU
+  ? DESIGN_MENU.map((entry) => {
+      const path = resolveDesignEntry(entry, lang, pageSlugs);
+      if (path === null) return null;
+      return {
+        label: t(entry.label as any),
+        href: localePath(lang, path),
+        sub: entry.sub ? t(entry.sub as any) : undefined,
+      };
+    }).filter(Boolean)
+  : [];
+
 const nav = editorNav.length ? editorNav : fallbackNav;
+const menuNav = designNav.length ? designNav : nav;
 
 /**
  * Footer links come from two places - the editable footer menu and the contact
@@ -167,7 +187,7 @@ const current = Astro.url.pathname.replace(/\/$/, '');
     <a class="skip" href="#main">Skip to content</a>
 
     <Header lang={lang} siteName={siteName} path={path} altPaths={altPaths} />
-    <MenuOverlay lang={lang} items={nav} newsletterUrl={settings?.newsletterUrl} />
+    <MenuOverlay lang={lang} items={menuNav} newsletterUrl={settings?.newsletterUrl} />
 
     <div class="edit-bar">
       <EditLink id="navigation" type="navigation" label="Edit menu" />
