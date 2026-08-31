@@ -294,6 +294,77 @@ const current = Astro.url.pathname.replace(/\/$/, '');
     }
   }
 
+  /* Shared page furniture from the frames: a lowercase section title, panel
+     headings with a rule, the large intro paragraph and the body size. */
+  .section-title {
+    text-transform: lowercase;
+    font-size: clamp(2rem, 4.8vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    margin: 0 0 1.5rem;
+  }
+
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 0;
+    margin: 0;
+    padding: 0 0 1.75rem;
+  }
+  .section-head .section-title {
+    margin: 0;
+  }
+
+  .panel-title {
+    text-transform: lowercase;
+    border-bottom: 2px solid var(--ink);
+    margin: 0 0 1.25rem;
+    padding-bottom: 0.2rem;
+    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+  }
+
+  .intro-large {
+    max-width: 1160px;
+    margin: 0 0 2.5rem;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    line-height: 1.25;
+    letter-spacing: -0.035em;
+  }
+
+  .body-24 {
+    font-size: clamp(1rem, 1.5vw, 1.5rem);
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .tabs .pill {
+    border-radius: 0;
+    padding: 0.35rem 1.1rem;
+    font-family: inherit;
+    font-size: clamp(1rem, 1.8vw, 1.75rem);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .tabs .pill[aria-pressed='true'],
+  .tabs .pill[aria-current] {
+    background: var(--acid);
+  }
+
   /* Type helpers from the design system. */
   .display {
     letter-spacing: -0.052em;

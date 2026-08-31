@@ -48,8 +48,8 @@ const altPaths = Object.fromEntries(
   editId={page._id}
   editType={page._type}
 >
-  <h1>{page.title}</h1>
-  {page.intro && <p class="lede">{page.intro}</p>}
+  <h1 class="section-title">{page.title}</h1>
+  {page.intro && <p class="intro-large">{page.intro}</p>}
 
   {
     page.cover?.asset && (
@@ -66,7 +66,7 @@ const altPaths = Object.fromEntries(
 
   {
     page.body && (
-      <div class="prose">
+      <div class="body-24 page-body">
         <PortableText value={page.body} />
       </div>
     )
@@ -75,7 +75,36 @@ const altPaths = Object.fromEntries(
 
 <style>
   .cover {
-    margin: 1.8rem 0;
+    margin: 0 0 2.5rem;
     width: 100%;
+  }
+
+  /* Editors write the panel headings ("the fair", "goals", "development") as
+     h2s inside the body, so they pick up the rule from the design here. */
+  .page-body :global(h2) {
+    text-transform: lowercase;
+    border-bottom: 2px solid var(--ink);
+    margin: 3rem 0 1.25rem;
+    padding-bottom: 0.2rem;
+    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+  }
+  .page-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .page-body :global(h3) {
+    font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+    letter-spacing: -0.02em;
+    margin: 2rem 0 0.5rem;
+  }
+  .page-body :global(p) {
+    margin: 0 0 1.5rem;
+    max-width: 62ch;
+  }
+  .page-body :global(ul),
+  .page-body :global(ol) {
+    max-width: 62ch;
   }
 </style>

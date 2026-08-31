@@ -15,22 +15,42 @@ const editions = await getEditions(lang);
 ---
 
 <Base lang={lang} title={t('nav.editions')} path="editions">
-  <h1>{t('nav.editions')}</h1>
+  <h1 class="section-title">{t('nav.editions')}</h1>
 
   {
     editions.length ? (
-      <ul class="grid">
-        {editions.map((e: any) => (
-          <li class="card">
-            <SanityImage image={e.cover} aspect={4 / 3} sizes="(max-width: 700px) 50vw, 260px" />
-            <h3>
-              {e.title ?? `Ceramic Brussels ${e.year}`}
-              {e.isCurrent && <span class="pill current">{t('home.currentEdition')}</span>}
-            </h3>
-            <p class="meta">{formatDateRange(e.startDate, e.endDate, lang)}</p>
-            <p class="meta">
-              {e.exhibitorCount} {t('editions.exhibitorCount')}
-            </p>
+      <ul class="editions">
+        {editions.map((edition: any) => (
+          <li class="edition">
+            <div class="shot">
+              {edition.cover?.asset ? (
+                <SanityImage
+                  image={edition.cover}
+                  aspect={1.5}
+                  sizes="(max-width: 700px) 100vw, 40vw"
+                  widths={[400, 600, 900, 1200]}
+                />
+              ) : (
+                <div class="shot-empty" />
+              )}
+            </div>
+
+            <div class="about">
+              <p class="year">{edition.year}</p>
+              <h2>
+                {edition.title ?? `Ceramic Brussels ${edition.year}`}
+                {edition.isCurrent && <span class="pill current">{t('home.currentEdition')}</span>}
+              </h2>
+
+              <p class="dates">{formatDateRange(edition.startDate, edition.endDate, lang)}</p>
+              {edition.venue && <p class="dates">{edition.venue}</p>}
+
+              {edition.exhibitorCount > 0 && (
+                <p class="count">
+                  {edition.exhibitorCount} {t('editions.exhibitorCount')}
+                </p>
+              )}
+            </div>
           </li>
         ))}
       </ul>
@@ -43,8 +63,63 @@ const editions = await getEditions(lang);
 </Base>
 
 <style>
+  .editions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .edition {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 2.5rem;
+    align-items: start;
+    padding: 2.5rem 0;
+    border-top: 1px solid var(--ink);
+  }
+  .editions .edition:last-child {
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .shot-empty {
+    aspect-ratio: 1.5;
+    background: var(--surface-2);
+  }
+
+  .year {
+    margin: 0;
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    color: var(--ink-2);
+  }
+  .about h2 {
+    margin: 0.25rem 0 1rem;
+    font-size: clamp(1.75rem, 3.6vw, 3rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    font-weight: 400;
+  }
   .current {
-    margin-left: 0.5rem;
+    margin-left: 0.75rem;
     vertical-align: middle;
+    font-size: 0.8rem;
+    text-transform: lowercase;
+    background: var(--acid);
+    border-color: var(--acid);
+  }
+  .dates {
+    margin: 0 0 0.3rem;
+    font-size: clamp(1rem, 1.6vw, 1.35rem);
+    letter-spacing: -0.02em;
+  }
+  .count {
+    margin: 1rem 0 0;
+    font-size: 0.95rem;
+    color: var(--ink-2);
+  }
+
+  @media (max-width: 700px) {
+    .edition {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
   }
 </style>

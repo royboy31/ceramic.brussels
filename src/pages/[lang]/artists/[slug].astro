@@ -18,6 +18,8 @@ const t = useTranslations(lang);
 const artist = await getArtist(lang, slug);
 if (!artist) return Astro.rewrite('/404');
 
+const origin = [artist.birthYear && `°${artist.birthYear}`, artist.nationality].filter(Boolean).join(', ');
+
 const personSchema = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -39,108 +41,257 @@ const personSchema = {
 >
   <script type="application/ld+json" set:html={JSON.stringify(personSchema)} slot="head" />
 
-  <a class="back" href={localePath(lang, 'artists')}>&larr; {t('common.backTo')} {t('nav.artists')}</a>
+  <h1 class="section-title">{t('nav.artists')}</h1>
 
-  <div class="head">
+  <article class="page-grid artist">
+    <figure class="portrait">
+      {
+        artist.portrait?.asset ? (
+          <SanityImage
+            image={artist.portrait}
+            aspect={0.8}
+            loading="eager"
+            sizes="(max-width: 900px) 100vw, 33vw"
+            widths={[400, 600, 900, 1200]}
+          />
+        ) : (
+          <div class="portrait-empty" />
+        )
+      }
+    </figure>
+
+    <div class="detail">
+      <header class="detail-head">
+        <div>
+          {artist.isGuestOfHonour && <p class="guest">{t('artists.guestOfHonour')}</p>}
+          <h2>{artist.name}</h2>
+          {origin && <p class="origin">{origin}</p>}
+
+          <p class="links">
+            {
+              artist.instagram && (
+                <a class="pill" href={`https://instagram.com/${artist.instagram}`} rel="noopener noreferrer">
+                  instagram ↗
+                </a>
+              )
+            }
+            {
+              artist.website && (
+                <a class="pill" href={artist.website} rel="noopener noreferrer">
+                  {t('common.website')} ↗
+                </a>
+              )
+            }
+          </p>
+        </div>
+
+        {
+          artist.exhibitors?.length > 0 && (
+            <div class="shown">
+              <p class="eyebrow-plain">{t('artists.shownBy')}</p>
+              <h3>
+                {artist.exhibitors.map((e: any, i: number) => (
+                  <>
+                    {i > 0 && ', '}
+                    <a href={localePath(lang, `exhibitors/${e.slug}`)}>{e.name}</a>
+                  </>
+                ))}
+              </h3>
+            </div>
+          )
+        }
+      </header>
+
+      {
+        artist.bio && (
+          <div class="bio">
+            <PortableText value={artist.bio} />
+          </div>
+        )
+      }
+    </div>
+
     {
-      artist.portrait?.asset && (
-        <SanityImage image={artist.portrait} aspect={1} widths={[300, 500, 700]} sizes="220px" class="portrait" />
+      artist.works?.length > 0 && (
+        <section class="works">
+          <h3 class="panel-title">{t('artists.works')}</h3>
+          <ul class="work-grid">
+            {artist.works.map((work: any) => (
+              <li>
+                {work.image?.asset ? (
+                  <SanityImage
+                    image={work.image}
+                    aspect={0.75}
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                    widths={[300, 500, 700, 900]}
+                  />
+                ) : (
+                  <div class="work-empty" />
+                )}
+                <h4>{work.title}</h4>
+                <p class="meta">
+                  {[
+                    work.year,
+                    work.materials,
+                    work.dimensions?.height
+                      ? `${work.dimensions.height} × ${work.dimensions.width ?? '?'} × ${work.dimensions.depth ?? '?'} cm`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
       )
     }
-    <div>
-      {artist.isGuestOfHonour && <p class="pill">{t('artists.guestOfHonour')}</p>}
-      <h1>{artist.name}</h1>
-      <p class="lede">
-        {[artist.nationality, artist.birthYear ? `b. ${artist.birthYear}` : null]
-          .filter(Boolean)
-          .join(' · ')}
-      </p>
-      <p class="links">
-        {artist.website && <a href={artist.website}>{t('common.website')}</a>}
-        {artist.instagram && <a href={`https://instagram.com/${artist.instagram}`}>@{artist.instagram}</a>}
-      </p>
-    </div>
-  </div>
 
-  {
-    artist.bio && (
-      <div class="prose">
-        <PortableText value={artist.bio} />
-      </div>
-    )
-  }
-
-  {
-    artist.exhibitors?.length > 0 && (
-      <section>
-        <h2>{t('artists.shownBy')}</h2>
-        <ul class="plain-list">
-          {artist.exhibitors.map((e: any) => (
-            <li>
-              <a href={localePath(lang, `exhibitors/${e.slug}`)}>{e.name}</a>
-              <span class="meta">{[e.booth, e.year].filter(Boolean).join(' · ')}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
-  {
-    artist.works?.length > 0 && (
-      <section>
-        <h2>{t('artists.works')}</h2>
-        <ul class="grid">
-          {artist.works.map((w: any) => (
-            <li class="card">
-              <SanityImage image={w.image} aspect={3 / 4} sizes="(max-width: 700px) 50vw, 260px" />
-              <h3>{w.title}</h3>
-              <p class="meta">
-                {[
-                  w.year,
-                  w.materials,
-                  w.dimensions?.height
-                    ? `${w.dimensions.height} × ${w.dimensions.width ?? '?'} × ${w.dimensions.depth ?? '?'} cm`
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
+    <p class="back-row">
+      <a class="text-link" href={localePath(lang, 'artists')}>{t('exhibitors.backToAll')} →</a>
+    </p>
+  </article>
 </Base>
 
 <style>
-  .head {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.6rem;
-    align-items: flex-start;
-    margin-bottom: 2rem;
+  .artist {
+    row-gap: 3rem;
   }
+
   .portrait {
-    width: 220px;
-    flex: none;
+    grid-column: span 4;
+    margin: 0;
   }
+  .portrait-empty {
+    aspect-ratio: 0.8;
+    background: var(--surface-2);
+  }
+
+  .detail {
+    grid-column: span 8;
+  }
+  .detail-head {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 2.5rem;
+    border-top: 1px solid var(--ink);
+    padding-top: 0.75rem;
+  }
+
+  .guest {
+    display: inline-block;
+    background: var(--acid);
+    padding: 0.1rem 0.7rem;
+    margin: 0 0 0.6rem;
+    font-size: 0.85rem;
+    text-transform: lowercase;
+  }
+  .detail h2 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.75rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 400;
+  }
+  .origin {
+    margin: 1.25rem 0 0;
+    font-size: clamp(1.25rem, 2.5vw, 2.25rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
   .links {
     display: flex;
-    gap: 1.2rem;
-    font-size: 0.9rem;
-    margin: 0.6rem 0 0;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
   }
-  .plain-list {
+  .links .pill {
+    text-transform: lowercase;
+    text-decoration: none;
+    padding: 0.15rem 1.1rem;
+    font-size: inherit;
+  }
+  .links .pill:hover {
+    background: var(--acid);
+  }
+
+  .shown {
+    padding-top: 0.5rem;
+  }
+  .eyebrow-plain {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+  .shown h3 {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.8vw, 2.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    font-weight: 400;
+  }
+  .shown a {
+    text-decoration: none;
+  }
+  .shown a:hover {
+    text-decoration: underline;
+  }
+
+  .bio {
+    margin-top: 3rem;
+    columns: 2;
+    column-gap: 2.5rem;
+    font-size: clamp(1rem, 1.5vw, 1.4rem);
+    line-height: 1.3;
+  }
+  .bio :global(p) {
+    margin: 0 0 1.5rem;
+    break-inside: avoid;
+  }
+
+  .works {
+    grid-column: 1 / -1;
+  }
+  .work-grid {
     list-style: none;
     padding: 0;
-    margin: 0.8rem 0 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem 1.5rem;
   }
-  .plain-list .meta {
-    margin-left: 0.6rem;
+  .work-empty {
+    aspect-ratio: 0.75;
+    background: var(--surface-2);
+  }
+  .work-grid h4 {
+    margin: 0.5rem 0 0.15rem;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+
+  .back-row {
+    grid-column: 1 / -1;
+    margin: 1rem 0 0;
+    font-size: clamp(1.2rem, 2.4vw, 2rem);
+  }
+
+  @media (max-width: 900px) {
+    .portrait,
+    .detail {
+      grid-column: 1 / -1;
+    }
+    .detail-head {
+      grid-template-columns: 1fr;
+      row-gap: 1.5rem;
+    }
+    .bio {
+      columns: 1;
+    }
+    .work-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 </style>

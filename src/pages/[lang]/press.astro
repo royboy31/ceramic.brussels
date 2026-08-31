@@ -11,46 +11,53 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 const clips = await getPressClips();
+
+// Newest first, grouped by year, which is how a press list is actually read.
+const years = [...new Set(clips.map((c: any) => c.publishedAt?.slice(0, 4)))]
+  .filter(Boolean)
+  .sort((a, b) => String(b).localeCompare(String(a)));
 ---
 
 <Base lang={lang} title={t('nav.press')} path="press">
-  <h1>{t('nav.press')}</h1>
-  <p class="lede">{clips.length}</p>
+  <h1 class="section-title">{t('nav.press')}</h1>
 
   {
     clips.length ? (
-      <div class="scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Outlet</th>
-              <th>Article</th>
-              <th>Lang</th>
-            </tr>
-          </thead>
-          <tbody>
-            {clips.map((clip: any) => (
-              <tr>
-                <td class="nowrap">{formatDate(clip.publishedAt, lang)}</td>
-                <td>{clip.outlet}</td>
-                <td>
-                  {clip.url ? <a href={clip.url}>{clip.title}</a> : clip.title}
-                  {clip.pdfUrl && (
-                    <>
-                      {' '}
-                      <a class="meta" href={clip.pdfUrl}>
-                        PDF
+      years.map((year) => (
+        <section class="year">
+          <h2 class="panel-title">{year}</h2>
+
+          <ul class="clips">
+            {clips
+              .filter((c: any) => c.publishedAt?.slice(0, 4) === year)
+              .map((clip: any) => (
+                <li class="clip">
+                  <p class="outlet">{clip.outlet}</p>
+
+                  <h3>
+                    {clip.url ? (
+                      <a href={clip.url} rel="noopener noreferrer">
+                        {clip.title} ↗
                       </a>
-                    </>
-                  )}
-                </td>
-                <td class="nowrap">{clip.language}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    ) : (
+                      clip.title
+                    )}
+                  </h3>
+
+                  <p class="foot">
+                    <time datetime={clip.publishedAt}>{formatDate(clip.publishedAt, lang)}</time>
+                    {clip.language && <span class="lang">{clip.language}</span>}
+                    {clip.pdfUrl && (
+                      <a class="pill" href={clip.pdfUrl} rel="noopener noreferrer">
+                        pdf ↓
+                      </a>
+                    )}
+                  </p>
+                </li>
+              ))}
+          </ul>
+        </section>
+      ))
     ) : (
       <p class="empty">
         {t('press.empty')} Add clippings in <a href="/studio">the Studio</a>.
@@ -60,34 +67,74 @@ const clips = await getPressClips();
 </Base>
 
 <style>
-  .scroll {
-    overflow-x: auto;
-    margin-top: 1.5rem;
-    border: 1px solid var(--rule);
+  .year {
+    margin-bottom: 3.5rem;
   }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 0.92rem;
+  .clips {
+    list-style: none;
+    padding: 0;
+    margin: 0;
   }
-  th,
-  td {
-    text-align: left;
-    padding: 0.6rem 0.8rem;
+  .clip {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1rem 2.5rem;
+    align-items: baseline;
+    padding: 1.25rem 0;
     border-bottom: 1px solid var(--rule);
-    vertical-align: top;
   }
-  th {
-    background: var(--surface-2);
-    font-size: 0.75rem;
+  .outlet {
+    margin: 0;
+    font-size: clamp(1rem, 1.6vw, 1.35rem);
+    letter-spacing: -0.02em;
+  }
+  .clip h3 {
+    margin: 0;
+    font-size: clamp(1.15rem, 2.2vw, 1.9rem);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    font-weight: 400;
+  }
+  .clip h3 a {
+    text-decoration: none;
+  }
+  .clip h3 a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.1em;
+  }
+  .foot {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.9rem;
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    color: var(--ink-2);
+  }
+  .lang {
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--ink-3);
+    font-size: 0.78rem;
   }
-  tbody tr:last-child td {
-    border-bottom: 0;
+  .foot .pill {
+    text-transform: lowercase;
+    text-decoration: none;
+    color: var(--ink);
+    padding: 0.1rem 0.8rem;
+    font-size: 0.82rem;
   }
-  .nowrap {
-    white-space: nowrap;
+  .foot .pill:hover {
+    background: var(--acid);
+  }
+
+  @media (max-width: 700px) {
+    .clip {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+    }
+    .foot {
+      grid-column: 1;
+    }
   }
 </style>
