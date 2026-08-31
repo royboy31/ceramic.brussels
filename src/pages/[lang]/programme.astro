@@ -2,7 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import PortableText from '../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { useTranslations, localePath, formatDate, formatTime } from '../../lib/i18n';
+import { useTranslations, localePath, formatWeekday, formatTime } from '../../lib/i18n';
 import { getProgramme } from '../../lib/queries';
 
 export function getStaticPaths() {
@@ -12,6 +12,15 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 const events = await getProgramme(lang);
+
+/**
+ * The frame shows tabs for "ceramic brussels x La Cambre", "talks", "awards"
+ * and "VIP". Those are event kinds; the schema offers talk, tour, workshop and
+ * ceremony, so the tabs are built from the kinds actually present rather than
+ * from the frame's list. Anything new in the field turns up here on its own.
+ */
+const KINDS = ['talk', 'tour', 'workshop', 'ceremony'] as const;
+const kinds = KINDS.filter((kind) => events.some((event: any) => event.kind === kind));
 
 // Group by calendar day so the schedule reads like a schedule.
 const byDay = new Map<string, any[]>();
@@ -24,47 +33,73 @@ const days = [...byDay.entries()].sort(([a], [b]) => a.localeCompare(b));
 ---
 
 <Base lang={lang} title={t('nav.programme')} path="programme">
-  <h1>{t('nav.programme')}</h1>
+  <div class="section-head">
+    <h1 class="section-title">{t('nav.programme')}</h1>
+
+    {
+      kinds.length > 1 && (
+        <nav class="tabs" aria-label={t('nav.programme')}>
+          <button type="button" class="pill" data-kind="" aria-pressed="true">
+            {t('programme.allKinds')}
+          </button>
+          {kinds.map((kind) => (
+            <button type="button" class="pill" data-kind={kind} aria-pressed="false">
+              {t(`programme.${kind}`)}
+            </button>
+          ))}
+        </nav>
+      )
+    }
+  </div>
 
   {
     days.length ? (
-      days.map(([day, items]) => (
-        <section class="day">
-          <h2>{formatDate(day, lang)}</h2>
-          <ul class="schedule">
-            {items.map((event: any) => (
-              <li>
-                <div class="time">
-                  <time datetime={event.startsAt}>{formatTime(event.startsAt, lang)}</time>
-                  {event.endsAt && <span class="meta">&ndash;{formatTime(event.endsAt, lang)}</span>}
-                </div>
-                <div>
-                  <h3>{event.title}</h3>
-                  <p class="meta">
-                    {[event.kind, event.location].filter(Boolean).join(' · ')}
-                  </p>
-                  {event.speakers?.length > 0 && (
+      <div class="days">
+        {days.map(([day, items], i) => (
+          <details class="day" data-day open={i === 0}>
+            <summary>
+              <span class="day-name">{day === 'tbc' ? t('programme.empty') : formatWeekday(day, lang)}</span>
+              <span class="arrow" aria-hidden="true">↓</span>
+            </summary>
+
+            <ul class="schedule">
+              {items.map((event: any) => (
+                <li data-kind={event.kind ?? ''}>
+                  <div class="time">
+                    <time datetime={event.startsAt}>{formatTime(event.startsAt, lang)}</time>
+                    {event.endsAt && <span class="meta">–{formatTime(event.endsAt, lang)}</span>}
+                  </div>
+
+                  <div class="event">
+                    <h3>{event.title}</h3>
                     <p class="meta">
-                      {t('programme.speakers')}{' '}
-                      {event.speakers.map((s: any, i: number) => (
-                        <>
-                          {i > 0 && ', '}
-                          <a href={localePath(lang, `artists/${s.slug}`)}>{s.name}</a>
-                        </>
-                      ))}
+                      {[event.kind && t(`programme.${event.kind}`), event.location].filter(Boolean).join(' · ')}
                     </p>
-                  )}
-                  {event.description && (
-                    <div class="prose desc">
-                      <PortableText value={event.description} />
-                    </div>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))
+
+                    {event.speakers?.length > 0 && (
+                      <p class="meta">
+                        {t('programme.speakers')}{' '}
+                        {event.speakers.map((s: any, j: number) => (
+                          <>
+                            {j > 0 && ', '}
+                            <a href={localePath(lang, `artists/${s.slug}`)}>{s.name}</a>
+                          </>
+                        ))}
+                      </p>
+                    )}
+
+                    {event.description && (
+                      <div class="prose desc">
+                        <PortableText value={event.description} />
+                      </div>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </details>
+        ))}
+      </div>
     ) : (
       <p class="empty">
         {t('programme.empty')} Add talks in <a href="/studio">the Studio</a>.
@@ -74,21 +109,91 @@ const days = [...byDay.entries()].sort(([a], [b]) => a.localeCompare(b));
 </Base>
 
 <style>
-  .day h2 {
-    border-bottom: 1px solid var(--rule);
-    padding-bottom: 0.4rem;
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 0;
+    margin: 0;
+    padding: 0 0 2rem;
   }
+  .section-title {
+    text-transform: lowercase;
+    font-size: clamp(2rem, 4.8vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .tabs .pill {
+    border-radius: 0;
+    padding: 0.35rem 1.1rem;
+    font-family: inherit;
+    font-size: clamp(1rem, 1.8vw, 1.75rem);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .tabs .pill[aria-pressed='true'] {
+    background: var(--acid);
+  }
+
+  .day {
+    border-top: 1px solid var(--ink);
+  }
+  .days .day:last-of-type {
+    border-bottom: 1px solid var(--ink);
+  }
+  .day[hidden] {
+    display: none;
+  }
+
+  .day summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    cursor: pointer;
+    list-style: none;
+    font-size: clamp(1.75rem, 4vw, 3.25rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+  .day summary::-webkit-details-marker {
+    display: none;
+  }
+  .arrow {
+    font-size: 0.8em;
+    transition: transform 0.2s ease;
+  }
+  .day[open] .arrow {
+    transform: rotate(180deg);
+  }
+
   .schedule {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0 0 1.5rem;
   }
   .schedule li {
     display: grid;
     grid-template-columns: 7rem 1fr;
     gap: 1rem;
     padding: 1.1rem 0;
-    border-bottom: 1px solid var(--rule);
+    border-top: 1px solid var(--rule);
+  }
+  .schedule li[hidden] {
+    display: none;
   }
   .time {
     font-variant-numeric: tabular-nums;
@@ -96,12 +201,20 @@ const days = [...byDay.entries()].sort(([a], [b]) => a.localeCompare(b));
   }
   .schedule h3 {
     margin: 0 0 0.2rem;
-    font-size: 1.02rem;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
   }
   .desc {
     margin-top: 0.5rem;
     font-size: 0.94rem;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arrow {
+      transition: none;
+    }
+  }
+
   @media (max-width: 600px) {
     .schedule li {
       grid-template-columns: 1fr;
@@ -109,3 +222,33 @@ const days = [...byDay.entries()].sort(([a], [b]) => a.localeCompare(b));
     }
   }
 </style>
+
+<script>
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-kind][aria-pressed]')];
+  const days = [...document.querySelectorAll<HTMLDetailsElement>('[data-day]')];
+
+  for (const tab of tabs) {
+    tab.addEventListener('click', () => {
+      const kind = tab.dataset.kind ?? '';
+
+      for (const other of tabs) {
+        other.setAttribute('aria-pressed', String(other === tab));
+      }
+
+      for (const day of days) {
+        const items = [...day.querySelectorAll<HTMLLIElement>('.schedule li')];
+        let visible = 0;
+
+        for (const item of items) {
+          const match = !kind || item.dataset.kind === kind;
+          item.hidden = !match;
+          if (match) visible++;
+        }
+
+        // A day with nothing left in it should not sit there as an empty row.
+        day.hidden = visible === 0;
+        if (visible > 0 && kind) day.open = true;
+      }
+    });
+  }
+</script>

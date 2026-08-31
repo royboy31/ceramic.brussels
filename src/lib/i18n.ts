@@ -45,6 +45,11 @@ const STRINGS = {
     'news.empty': 'No news published yet.',
     'news.readMore': 'Read more',
     'programme.empty': 'The programme has not been announced yet.',
+    'programme.talk': 'talks',
+    'programme.tour': 'guided tours',
+    'programme.workshop': 'workshops',
+    'programme.ceremony': 'awards',
+    'programme.allKinds': 'all',
     'programme.speakers': 'With',
     'partners.empty': 'No partners published yet.',
     'partners.main': 'main partner',
@@ -100,6 +105,11 @@ const STRINGS = {
     'news.empty': 'Aucune actualité publiée pour le moment.',
     'news.readMore': 'Lire la suite',
     'programme.empty': 'Le programme n’a pas encore été annoncé.',
+    'programme.talk': 'conférences',
+    'programme.tour': 'visites guidées',
+    'programme.workshop': 'ateliers',
+    'programme.ceremony': 'prix',
+    'programme.allKinds': 'tout',
     'programme.speakers': 'Avec',
     'partners.empty': 'Aucun partenaire publié pour le moment.',
     'partners.main': 'partenaire principal',
@@ -155,6 +165,11 @@ const STRINGS = {
     'news.empty': 'Nog geen nieuws gepubliceerd.',
     'news.readMore': 'Lees meer',
     'programme.empty': 'Het programma is nog niet bekendgemaakt.',
+    'programme.talk': 'lezingen',
+    'programme.tour': 'rondleidingen',
+    'programme.workshop': 'workshops',
+    'programme.ceremony': 'prijzen',
+    'programme.allKinds': 'alles',
     'programme.speakers': 'Met',
     'partners.empty': 'Nog geen partners gepubliceerd.',
     'partners.main': 'hoofdpartner',
@@ -193,6 +208,20 @@ export function formatDate(value: string | undefined, lang: LocaleId): string {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+  }).format(new Date(value));
+}
+
+/**
+ * Weekday, day and month - the schedule headings in the design read
+ * "Thursday 21 January", with no year because the edition is implicit.
+ */
+export function formatWeekday(value: string | undefined, lang: LocaleId): string {
+  if (!value) return '';
+  const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
+  return new Intl.DateTimeFormat(locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
   }).format(new Date(value));
 }
 
