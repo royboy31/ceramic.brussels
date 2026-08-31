@@ -3,15 +3,7 @@ import Base from '../../layouts/Base.astro';
 import SanityImage from '../../components/SanityImage.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations, localePath, formatDateRange } from '../../lib/i18n';
-import {
-  getCurrentEdition,
-  getNews,
-  getArtists,
-  getExhibitors,
-  getPartners,
-  getPressClips,
-  getSettings,
-} from '../../lib/queries';
+import { getCurrentEdition, getNews, getPartners, getSettings } from '../../lib/queries';
 
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
@@ -20,13 +12,10 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 
-const [edition, news, artists, exhibitors, partners, clips, settings] = await Promise.all([
+const [edition, news, partners, settings] = await Promise.all([
   getCurrentEdition(lang),
   getNews(lang),
-  getArtists(lang),
-  getExhibitors(lang),
   getPartners(lang),
-  getPressClips(),
   getSettings(lang),
 ]);
 
@@ -35,15 +24,22 @@ const spotlight = partners.find((p: any) => p.tier === 'main');
 const headline = settings?.tagline ?? edition?.title ?? settings?.siteName;
 
 /**
- * The frame shows five figures. Visitors and VIP numbers are not recorded
- * anywhere in the schema, so only the three that can be counted are shown -
- * they stay true on their own as content is added.
+ * Last edition's figures, as supplied with the design. These are reported
+ * numbers rather than anything countable in Sanity, so they live here with
+ * the year they describe - change the year in the same edit as the numbers.
+ * The separator follows the locale, so French reads 19 200, not 19,200.
  */
+const FIGURES_YEAR = 2026;
+const num = (value: number) =>
+  new Intl.NumberFormat({ en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang]).format(value);
+
 const figures = [
-  { value: exhibitors.length, label: t('exhibitors.count') },
-  { value: artists.length, label: t('home.artists') },
-  { value: clips.length, label: t('home.pressClips') },
-].filter((figure) => figure.value > 0);
+  { value: num(19200), label: t('home.visitors') },
+  { value: '70', label: t('home.exhibitors2') },
+  { value: '200+', label: t('home.artists') },
+  { value: num(3500), label: t('home.vips') },
+  { value: '230+', label: t('home.pressClips') },
+];
 
 const eventSchema = edition
   ? {
@@ -134,6 +130,20 @@ const eventSchema = edition
     )
   }
 
+  <section class="video">
+    <div class="video-frame">
+      <img
+        src="/assets/video-still.webp"
+        alt=""
+        width="1600"
+        height="1066"
+        loading="lazy"
+        decoding="async"
+      />
+      <p>{t('home.watch')}</p>
+    </div>
+  </section>
+
   {
     spotlight && (
       <section class="feature partner">
@@ -156,7 +166,7 @@ const eventSchema = edition
     figures.length > 0 && (
       <section class="stats">
         <p class="stats-title">
-          {t('home.keyFigures')} {edition?.year}
+          {t('home.keyFigures')} {FIGURES_YEAR}
         </p>
 
         <div class="stats-table">
@@ -181,6 +191,7 @@ const eventSchema = edition
   .hero,
   .quicklinks,
   .feature,
+  .video,
   .stats,
   .final-cta {
     margin-inline: -30px;
@@ -306,6 +317,33 @@ const eventSchema = edition
     letter-spacing: -0.05em;
   }
 
+  .video {
+    margin-top: 3rem;
+    overflow: hidden;
+  }
+  .video-frame {
+    position: relative;
+  }
+  .video img {
+    width: 100%;
+    height: clamp(300px, 47.6vw, 686px);
+    object-fit: cover;
+  }
+  .video p {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 0 1rem;
+    text-align: center;
+    text-transform: lowercase;
+    color: var(--acid);
+    font-size: clamp(2.5rem, 8.9vw, 8rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
   .stats {
     margin-top: 3.4rem;
   }
@@ -346,7 +384,6 @@ const eventSchema = edition
     font-weight: 400;
   }
   .stat span {
-    text-transform: lowercase;
     font-size: clamp(1.5rem, 3.4vw, 3.1rem);
     line-height: 1;
     letter-spacing: -0.04em;
@@ -399,6 +436,7 @@ const eventSchema = edition
     .hero,
     .quicklinks,
     .feature,
+    .video,
     .stats,
     .final-cta {
       margin-inline: -10px;
