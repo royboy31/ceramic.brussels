@@ -144,6 +144,10 @@ const eventSchema = edition
     )
   }
 
+  <a class="cta cta-gradient" href={localePath(lang, 'editions')}>
+    {t('home.inImages').replace('{year}', String(FIGURES_YEAR))} →
+  </a>
+
   <VideoEmbed
     url="https://www.youtube.com/watch?v=IyklMBqj4L4"
     poster="/assets/video-still.webp"
@@ -180,9 +184,7 @@ const eventSchema = edition
   {
     figures.length > 0 && (
       <section class="stats">
-        <p class="stats-title">
-          {t('home.keyFigures')} {FIGURES_YEAR}
-        </p>
+        <p class="stats-title">{t('home.keyFigures').replace('{year}', String(FIGURES_YEAR))}</p>
 
         <div class="stats-table">
           {figures.map((figure) => (
@@ -196,8 +198,8 @@ const eventSchema = edition
     )
   }
 
-  <a class="final-cta" href={localePath(lang, 'exhibitors')}>
-    {t('nav.exhibitors')} →
+  <a class="cta cta-solid" href={localePath(lang, 'editions')}>
+    {t('home.inImages').replace('{year}', String(FIGURES_YEAR))} →
   </a>
 </Base>
 
@@ -207,7 +209,7 @@ const eventSchema = edition
      to action run edge to edge. */
   .video,
   .stats,
-  .final-cta {
+  .cta {
     margin-inline: -30px;
   }
 
@@ -267,8 +269,8 @@ const eventSchema = edition
     line-height: 1;
     letter-spacing: -0.05em;
   }
+  /* Tickets is the same acid block, with a rule around it. */
   .quicklinks a.outline {
-    background: none;
     border: 1px solid var(--ink);
   }
   .quicklinks a:hover {
@@ -379,19 +381,46 @@ const eventSchema = edition
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    min-height: clamp(105px, 10vw, 145px);
-    padding: 0.75rem 30px;
     border-bottom: 1px solid var(--ink);
   }
-  .stat:nth-child(odd) {
+  .stats-table {
+    grid-auto-rows: clamp(105px, 10vw, 145px);
+  }
+
+  /* visitors - left, ruled off from exhibitors */
+  .stat:nth-child(1) {
+    padding-left: 30px;
     border-right: 1px solid var(--ink);
   }
-  /* An odd last figure spans the row, as the press cell does in the frame. */
+  /* exhibitors - left, further in */
+  .stat:nth-child(2) {
+    padding-left: 40px;
+  }
+  /* artists - centred, ruled off from VIPs */
+  .stat:nth-child(3) {
+    justify-content: center;
+    border-right: 1px solid var(--ink);
+  }
+  /* VIPs - right */
+  .stat:nth-child(4) {
+    justify-content: flex-end;
+    padding-right: 30px;
+  }
+  /* press clips - the full row, centred, closing the table */
+  .stat:nth-child(5) {
+    grid-column: 1 / -1;
+    justify-content: center;
+    gap: 10px;
+    border-bottom: 0;
+    min-height: clamp(120px, 11.25vw, 162px);
+  }
+  /* An odd trailing figure always takes the whole row. */
   .stat:last-child:nth-child(odd) {
     grid-column: 1 / -1;
     justify-content: center;
     border-right: 0;
   }
+
   .stat strong {
     font-size: clamp(3.5rem, 8vw, 7.5rem);
     line-height: 0.7;
@@ -404,18 +433,25 @@ const eventSchema = edition
     letter-spacing: -0.04em;
   }
 
-  .final-cta {
+  .cta {
     display: grid;
     place-items: center;
-    min-height: clamp(110px, 10.5vw, 152px);
-    margin-top: 3.5rem;
+    min-height: clamp(100px, 10.5vw, 152px);
     padding: 0.6rem 1rem;
-    background: var(--acid);
     text-align: center;
     text-decoration: none;
-    text-transform: uppercase;
+    text-transform: lowercase;
     font-size: clamp(1.9rem, 4.2vw, 3.75rem);
     line-height: 1;
+  }
+  .cta-gradient {
+    margin-top: 3.4rem;
+    background: linear-gradient(180deg, var(--acid) 0%, var(--ground) 50%, var(--acid) 100%);
+    letter-spacing: -0.05em;
+  }
+  .cta-solid {
+    margin-top: 5rem;
+    background: var(--acid);
     letter-spacing: -0.02em;
     font-weight: 600;
   }
@@ -453,7 +489,7 @@ const eventSchema = edition
     }
     .video,
     .stats,
-    .final-cta {
+    .cta {
       margin-inline: -10px;
     }
     .stats-title,
