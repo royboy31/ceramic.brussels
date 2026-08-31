@@ -1,0 +1,145 @@
+---
+import { useTranslations } from '../lib/i18n';
+import type { LocaleId } from '../lib/locales';
+
+/**
+ * Full-height slide-in menu. Items come from the same resolved Sanity
+ * navigation that Base.astro builds, so the editor menu drives both this and
+ * the fallback. `sub` is the descriptive line under each entry in the design;
+ * `navItem` has no field for it yet, so it simply renders nothing until one
+ * exists rather than being hard-coded here.
+ */
+interface Item {
+  label: string;
+  href: string;
+  sub?: string;
+  external?: boolean;
+}
+
+interface Props {
+  lang: LocaleId;
+  items: Item[];
+  newsletterUrl?: string;
+}
+
+const { lang, items, newsletterUrl } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<dialog id="site-menu" class="menu" data-menu aria-label={t('nav.menu')}>
+  <button type="button" class="menu-close" data-menu-close aria-label={t('nav.closeMenu')}>
+    <img src="/assets/close.svg" alt="" width="28" height="28" />
+  </button>
+
+  <nav aria-label={t('nav.menu')}>
+    {
+      items.map((item) => (
+        <section class="menu-row">
+          <a href={item.href} {...(item.external ? { rel: 'noopener noreferrer' } : {})}>
+            {item.label}
+          </a>
+          {item.sub && <p class="menu-sub">{item.sub}</p>}
+        </section>
+      ))
+    }
+
+    {
+      newsletterUrl && (
+        <a class="menu-row menu-newsletter" href={newsletterUrl}>
+          → {t('nav.newsletter')}
+        </a>
+      )
+    }
+  </nav>
+</dialog>
+
+<style>
+  .menu {
+    margin: 0 0 0 auto;
+    height: 100dvh;
+    max-height: none;
+    width: 100%;
+    max-width: 548px;
+    border: 0;
+    padding: 0;
+    background: var(--ground);
+    color: var(--ink);
+    overflow-y: auto;
+  }
+  .menu::backdrop {
+    background: rgb(0 0 0 / 0.15);
+  }
+
+  .menu-close {
+    position: absolute;
+    left: 28px;
+    top: 20px;
+    z-index: 1;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .menu-row {
+    display: block;
+    background: linear-gradient(180deg, var(--acid) 0%, var(--ground) 74%);
+    min-height: clamp(90px, 15.5vh, 159px);
+    padding: 0.75rem 2rem;
+    text-align: right;
+  }
+  .menu-row > a,
+  .menu-newsletter {
+    display: block;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    text-decoration: none;
+  }
+  .menu-row > a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.08em;
+  }
+
+  .menu-sub {
+    margin: 0.5rem 0 0 auto;
+    max-width: 490px;
+    font-size: clamp(1rem, 2.25vw, 1.875rem);
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+    color: var(--ink-3);
+  }
+
+  .menu-newsletter {
+    padding: 1rem 2rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-menu]');
+  const opener = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+
+  const setExpanded = (value: boolean) => opener?.setAttribute('aria-expanded', String(value));
+
+  opener?.addEventListener('click', () => {
+    dialog?.showModal();
+    setExpanded(true);
+  });
+
+  document.querySelector('[data-menu-close]')?.addEventListener('click', () => dialog?.close());
+
+  // Clicking the backdrop closes; clicking a panel inside must not.
+  dialog?.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+
+  dialog?.addEventListener('close', () => setExpanded(false));
+</script>
