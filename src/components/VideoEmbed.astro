@@ -1,11 +1,14 @@
 ---
 /**
- * Click-to-load video. Shows the still until someone asks for the film, then
- * swaps in the player.
+ * Silent looping preview that becomes the real film when someone presses it.
  *
- * Nothing is requested from YouTube on page load - no iframe, no cookies, no
- * third-party script - which keeps the page fast and keeps the fair out of
- * needing consent for a video most visitors never press.
+ * The muted loop starts on its own once the section scrolls into view - never
+ * on page load, so it costs nothing to visitors who never reach it. Pressing
+ * it reloads the player with sound and controls.
+ *
+ * Browsers only allow autoplay while a video is muted, so the silent pass is
+ * a requirement rather than a preference. Anyone who has asked their system
+ * for reduced motion gets the still and a play button instead.
  */
 interface Props {
   url: string;
@@ -23,24 +26,37 @@ function youtubeId(value: string): string | null {
 }
 
 const id = youtubeId(url);
-const embed = id
-  ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`
+const base = id ? `https://www.youtube-nocookie.com/embed/${id}` : null;
+
+// loop needs playlist set to the same id; disablekb keeps the silent pass inert.
+const preview = base
+  ? `${base}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&disablekb=1&modestbranding=1&playsinline=1&rel=0`
   : null;
+const full = base ? `${base}?autoplay=1&mute=0&controls=1&playsinline=1&rel=0` : null;
 ---
 
 <section class:list={['video', className]}>
   {
-    embed ? (
-      <div class="frame" data-video data-embed={embed} data-title={label}>
+    preview && full ? (
+      <div class="frame" data-video data-preview={preview} data-full={full} data-title={label}>
+        <img
+          class="poster"
+          src={poster}
+          alt=""
+          width="1600"
+          height="1066"
+          loading="lazy"
+          decoding="async"
+        />
+
         <button type="button" class="cover" data-video-play>
-          <img src={poster} alt="" width="1600" height="1066" loading="lazy" decoding="async" />
           <span class="label">{label}</span>
           <span class="play" aria-hidden="true">▶</span>
         </button>
       </div>
     ) : (
       <a class="frame fallback" href={url} rel="noopener noreferrer">
-        <img src={poster} alt="" width="1600" height="1066" loading="lazy" decoding="async" />
+        <img class="poster" src={poster} alt="" width="1600" height="1066" loading="lazy" decoding="async" />
         <span class="label">{label}</span>
       </a>
     )
@@ -55,9 +71,25 @@ const embed = id
   .frame {
     position: relative;
     display: block;
+    background: var(--ink);
   }
-  .cover {
+
+  .poster,
+  .frame :global(iframe) {
     display: block;
+    width: 100%;
+    height: clamp(300px, 47.6vw, 686px);
+    border: 0;
+    object-fit: cover;
+  }
+  /* Once the silent loop is playing the still is redundant. */
+  .frame.is-playing .poster {
+    visibility: hidden;
+  }
+
+  .cover {
+    position: absolute;
+    inset: 0;
     width: 100%;
     padding: 0;
     border: 0;
@@ -66,11 +98,10 @@ const embed = id
     font: inherit;
     color: inherit;
   }
-  .frame img {
-    width: 100%;
-    height: clamp(300px, 47.6vw, 686px);
-    object-fit: cover;
+  .frame.is-sound .cover {
+    display: none;
   }
+
   .label {
     position: absolute;
     inset: 0;
@@ -105,28 +136,49 @@ const embed = id
     background: var(--acid);
   }
   .cover:focus-visible {
-    outline: 3px solid var(--ink);
+    outline: 3px solid var(--acid);
     outline-offset: -3px;
-  }
-
-  /* Once the player is in, it fills the same box. */
-  .frame :global(iframe) {
-    display: block;
-    width: 100%;
-    height: clamp(300px, 47.6vw, 686px);
-    border: 0;
   }
 </style>
 
 <script>
   document.querySelectorAll<HTMLElement>('[data-video]').forEach((frame) => {
-    frame.querySelector('[data-video-play]')?.addEventListener('click', () => {
-      const iframe = document.createElement('iframe');
-      iframe.src = frame.dataset.embed ?? '';
-      iframe.title = frame.dataset.title ?? 'Video';
-      iframe.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen';
-      iframe.allowFullscreen = true;
-      frame.replaceChildren(iframe);
+    const button = frame.querySelector<HTMLButtonElement>('[data-video-play]');
+    const title = frame.dataset.title ?? 'Video';
+    const quiet = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const mount = (src: string) => {
+      let iframe = frame.querySelector('iframe');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.title = title;
+        iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+        iframe.allowFullscreen = true;
+        frame.prepend(iframe);
+      }
+      iframe.src = src;
+      return iframe;
+    };
+
+    // The silent loop waits until the section is actually near the viewport.
+    if (!quiet && frame.dataset.preview && 'IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            observer.disconnect();
+            mount(frame.dataset.preview!);
+            frame.classList.add('is-playing');
+          }
+        },
+        { rootMargin: '200px' },
+      );
+      observer.observe(frame);
+    }
+
+    button?.addEventListener('click', () => {
+      const iframe = mount(frame.dataset.full ?? '');
+      frame.classList.add('is-playing', 'is-sound');
       iframe.focus();
     });
   });
