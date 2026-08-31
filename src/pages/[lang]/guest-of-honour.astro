@@ -1,10 +1,11 @@
 ---
 import Base from '../../layouts/Base.astro';
-import SanityImage from '../../components/SanityImage.astro';
+import Figure from '../../components/Figure.astro';
 import PortableText from '../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations, localePath } from '../../lib/i18n';
 import { getArtists, getArtist } from '../../lib/queries';
+import { GUEST_PORTRAIT } from '../../lib/placeholders';
 
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
@@ -36,17 +37,17 @@ const origin = [guest?.birthYear && `°${guest.birthYear}`, guest?.nationality].
     guest ? (
       <div class="page-grid guest">
         <figure class="portrait">
-          {guest.portrait?.asset ? (
-            <SanityImage
-              image={guest.portrait}
-              aspect={0.72}
-              loading="eager"
-              sizes="(max-width: 900px) 100vw, 33vw"
-              widths={[400, 600, 900, 1200]}
-            />
-          ) : (
-            <div class="portrait-empty" />
-          )}
+          <Figure
+            image={guest.portrait}
+            pool="portrait"
+            seed={guest.slug ?? guest.name}
+            fallback={GUEST_PORTRAIT}
+            aspect={0.72}
+            loading="eager"
+            priority
+            sizes="(max-width: 900px) 100vw, 33vw"
+            widths={[400, 600, 900, 1200]}
+          />
         </figure>
 
         <section class="intro">
@@ -84,14 +85,14 @@ const origin = [guest?.birthYear && `°${guest.birthYear}`, guest?.nationality].
             <div class="work-grid">
               {guest.works.map((work: any) => (
                 <figure>
-                  {work.image?.asset && (
-                    <SanityImage
-                      image={work.image}
-                      aspect={1.5}
-                      sizes="(max-width: 700px) 100vw, 46vw"
-                      widths={[400, 600, 900, 1200]}
-                    />
-                  )}
+                  <Figure
+                    image={work.image}
+                    pool="work"
+                    seed={work.title ?? ''}
+                    aspect={1.5}
+                    sizes="(max-width: 700px) 100vw, 46vw"
+                    widths={[400, 600, 900, 1200]}
+                  />
                   <figcaption>
                     {[guest.name, work.title, work.year].filter(Boolean).join(', ')}
                     {work.materials && <span class="materials"> · {work.materials}</span>}

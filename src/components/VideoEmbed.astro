@@ -1,0 +1,133 @@
+---
+/**
+ * Click-to-load video. Shows the still until someone asks for the film, then
+ * swaps in the player.
+ *
+ * Nothing is requested from YouTube on page load - no iframe, no cookies, no
+ * third-party script - which keeps the page fast and keeps the fair out of
+ * needing consent for a video most visitors never press.
+ */
+interface Props {
+  url: string;
+  poster: string;
+  label: string;
+  class?: string;
+}
+
+const { url, poster, label, class: className } = Astro.props;
+
+/** Accepts a watch?v=, youtu.be/ or /embed/ address. */
+function youtubeId(value: string): string | null {
+  const match = value.match(/(?:v=|youtu\.be\/|\/embed\/)([\w-]{11})/);
+  return match ? match[1] : null;
+}
+
+const id = youtubeId(url);
+const embed = id
+  ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`
+  : null;
+---
+
+<section class:list={['video', className]}>
+  {
+    embed ? (
+      <div class="frame" data-video data-embed={embed} data-title={label}>
+        <button type="button" class="cover" data-video-play>
+          <img src={poster} alt="" width="1600" height="1066" loading="lazy" decoding="async" />
+          <span class="label">{label}</span>
+          <span class="play" aria-hidden="true">▶</span>
+        </button>
+      </div>
+    ) : (
+      <a class="frame fallback" href={url} rel="noopener noreferrer">
+        <img src={poster} alt="" width="1600" height="1066" loading="lazy" decoding="async" />
+        <span class="label">{label}</span>
+      </a>
+    )
+  }
+</section>
+
+<style>
+  .video {
+    margin-top: 3rem;
+    overflow: hidden;
+  }
+  .frame {
+    position: relative;
+    display: block;
+  }
+  .cover {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+  }
+  .frame img {
+    width: 100%;
+    height: clamp(300px, 47.6vw, 686px);
+    object-fit: cover;
+  }
+  .label {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 0 1rem;
+    text-align: center;
+    text-transform: lowercase;
+    color: var(--acid);
+    font-size: clamp(2.5rem, 8.9vw, 8rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    pointer-events: none;
+  }
+  .play {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1.5rem, 5vw, 4rem);
+    transform: translateX(-50%);
+    display: grid;
+    place-items: center;
+    width: clamp(56px, 7vw, 96px);
+    height: clamp(48px, 6vw, 82px);
+    border-radius: clamp(12px, 2vw, 28px);
+    background: var(--ground);
+    color: var(--ink);
+    font-size: clamp(1.5rem, 2.6vw, 2.75rem);
+    padding-left: 0.12em;
+    pointer-events: none;
+  }
+  .cover:hover .play {
+    background: var(--acid);
+  }
+  .cover:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: -3px;
+  }
+
+  /* Once the player is in, it fills the same box. */
+  .frame :global(iframe) {
+    display: block;
+    width: 100%;
+    height: clamp(300px, 47.6vw, 686px);
+    border: 0;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-video]').forEach((frame) => {
+    frame.querySelector('[data-video-play]')?.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = frame.dataset.embed ?? '';
+      iframe.title = frame.dataset.title ?? 'Video';
+      iframe.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen';
+      iframe.allowFullscreen = true;
+      frame.replaceChildren(iframe);
+      iframe.focus();
+    });
+  });
+</script>

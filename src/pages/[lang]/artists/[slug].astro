@@ -1,10 +1,11 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import SanityImage from '../../../components/SanityImage.astro';
+import Figure from '../../../components/Figure.astro';
 import PortableText from '../../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
 import { getArtist, getArtistSlugs } from '../../../lib/queries';
+import { GUEST_PORTRAIT } from '../../../lib/placeholders';
 
 export async function getStaticPaths() {
   const slugs = await getArtistSlugs();
@@ -45,19 +46,16 @@ const personSchema = {
 
   <article class="page-grid artist">
     <figure class="portrait">
-      {
-        artist.portrait?.asset ? (
-          <SanityImage
-            image={artist.portrait}
-            aspect={0.8}
-            loading="eager"
-            sizes="(max-width: 900px) 100vw, 33vw"
-            widths={[400, 600, 900, 1200]}
-          />
-        ) : (
-          <div class="portrait-empty" />
-        )
-      }
+      <Figure
+        image={artist.portrait}
+        pool="portrait"
+        seed={slug}
+        fallback={artist.isGuestOfHonour ? GUEST_PORTRAIT : undefined}
+        aspect={0.8}
+        loading="eager"
+        sizes="(max-width: 900px) 100vw, 33vw"
+        widths={[400, 600, 900, 1200]}
+      />
     </figure>
 
     <div class="detail">
@@ -118,16 +116,14 @@ const personSchema = {
           <ul class="work-grid">
             {artist.works.map((work: any) => (
               <li>
-                {work.image?.asset ? (
-                  <SanityImage
-                    image={work.image}
-                    aspect={0.75}
-                    sizes="(max-width: 640px) 50vw, 25vw"
-                    widths={[300, 500, 700, 900]}
-                  />
-                ) : (
-                  <div class="work-empty" />
-                )}
+                <Figure
+                  image={work.image}
+                  pool="work"
+                  seed={`${slug}-${work.title ?? ''}`}
+                  aspect={0.75}
+                  sizes="(max-width: 640px) 50vw, 25vw"
+                  widths={[300, 500, 700, 900]}
+                />
                 <h4>{work.title}</h4>
                 <p class="meta">
                   {[

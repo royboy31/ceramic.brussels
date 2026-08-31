@@ -1,6 +1,6 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import SanityImage from '../../../components/SanityImage.astro';
+import Figure from '../../../components/Figure.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath, formatDate } from '../../../lib/i18n';
 import { getNews } from '../../../lib/queries';
@@ -24,17 +24,16 @@ const [lead, ...rest] = news;
       <>
         <a class="lead" href={localePath(lang, `news/${lead.slug}`)}>
           <div class="shot">
-            {lead.cover?.asset ? (
-              <SanityImage
-                image={lead.cover}
-                aspect={1.6}
-                loading="eager"
-                sizes="(max-width: 900px) 100vw, 60vw"
-                widths={[600, 900, 1200, 1600]}
-              />
-            ) : (
-              <div class="shot-empty" />
-            )}
+            <Figure
+              image={lead.cover}
+              pool="fair"
+              seed={lead.slug}
+              aspect={1.6}
+              loading="eager"
+              priority
+              sizes="(max-width: 900px) 100vw, 60vw"
+              widths={[600, 900, 1200, 1600]}
+            />
           </div>
 
           <div class="lead-text">
@@ -54,16 +53,14 @@ const [lead, ...rest] = news;
               <li class="entry">
                 <a href={localePath(lang, `news/${item.slug}`)}>
                   <div class="shot">
-                    {item.cover?.asset ? (
-                      <SanityImage
-                        image={item.cover}
-                        aspect={1.5}
-                        sizes="(max-width: 640px) 100vw, 33vw"
-                        widths={[400, 600, 900]}
-                      />
-                    ) : (
-                      <div class="shot-empty" />
-                    )}
+                    <Figure
+                      image={item.cover}
+                      pool="fair"
+                      seed={item.slug}
+                      aspect={1.5}
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                      widths={[400, 600, 900]}
+                    />
                   </div>
 
                   <p class="meta">

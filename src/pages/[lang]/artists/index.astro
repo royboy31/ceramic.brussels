@@ -1,6 +1,6 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import SanityImage from '../../../components/SanityImage.astro';
+import Figure from '../../../components/Figure.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
 import { getArtists } from '../../../lib/queries';
@@ -55,16 +55,14 @@ const used = new Set(artists.map((a: any) => initial(a.name)));
             <li class="card" data-letter={initial(a.name)}>
               <a href={localePath(lang, `artists/${a.slug}`)}>
                 <div class="thumb">
-                  {a.portrait?.asset ? (
-                    <SanityImage
-                      image={a.portrait}
-                      aspect={0.8}
-                      sizes="(max-width: 640px) 50vw, (max-width: 900px) 33vw, 25vw"
-                      widths={[300, 500, 700, 900]}
-                    />
-                  ) : (
-                    <div class="thumb-empty" />
-                  )}
+                  <Figure
+                    image={a.portrait}
+                    pool="portrait"
+                    seed={a.slug}
+                    aspect={0.8}
+                    sizes="(max-width: 640px) 50vw, (max-width: 900px) 33vw, 25vw"
+                    widths={[300, 500, 700, 900]}
+                  />
                   {a.isGuestOfHonour && <span class="badge">{t('artists.guestOfHonour')}</span>}
                 </div>
 
