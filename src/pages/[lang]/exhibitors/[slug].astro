@@ -4,7 +4,7 @@ import SanityImage from '../../../components/SanityImage.astro';
 import PortableText from '../../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
-import { getExhibitor, getExhibitorSlugs } from '../../../lib/queries';
+import { getExhibitor, getExhibitorSlugs, getExhibitors } from '../../../lib/queries';
 
 export async function getStaticPaths() {
   const slugs = await getExhibitorSlugs();
@@ -15,10 +15,18 @@ const lang = Astro.params.lang as LocaleId;
 const slug = Astro.params.slug as string;
 const t = useTranslations(lang);
 
-const exhibitor = await getExhibitor(lang, slug);
+const [exhibitor, siblings] = await Promise.all([getExhibitor(lang, slug), getExhibitors(lang)]);
 if (!exhibitor) return Astro.rewrite('/404');
 
 const path = `exhibitors/${slug}`;
+const images = exhibitor.images ?? [];
+
+// Previous/next walk the same alphabetical list the index shows.
+const index = siblings.findIndex((e: any) => e.slug === slug);
+const previous = index > 0 ? siblings[index - 1] : null;
+const next = index > -1 && index < siblings.length - 1 ? siblings[index + 1] : null;
+
+const place = [exhibitor.city, exhibitor.country && `(${exhibitor.country})`].filter(Boolean).join(' ');
 
 const orgSchema = {
   '@context': 'https://schema.org',
@@ -34,108 +42,356 @@ const orgSchema = {
   title={exhibitor.seo?.title ?? exhibitor.name}
   description={exhibitor.seo?.description}
   noIndex={exhibitor.seo?.noIndex}
-  image={exhibitor.seo?.ogImage ?? exhibitor.images?.[0]}
+  image={exhibitor.seo?.ogImage ?? images[0]}
   path={path}
   editId={exhibitor._id}
   editType={exhibitor._type}
 >
   <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} slot="head" />
 
-  <a class="back" href={localePath(lang, 'exhibitors')}>&larr; {t('common.backTo')} {t('nav.exhibitors')}</a>
+  <h1 class="section-title">{t('nav.exhibitors')}</h1>
 
-  <header class="detail-head">
-    <h1>{exhibitor.name}</h1>
-    <p class="lede">
-      {exhibitor.booth && <span class="booth">{t('exhibitors.booth')} {exhibitor.booth}</span>}
-      {[exhibitor.city, exhibitor.country].filter(Boolean).join(', ')}
-      {exhibitor.year && <span class="meta"> · {exhibitor.year}</span>}
-    </p>
-
-    <p class="links">
-      {exhibitor.website && <a href={exhibitor.website}>{t('common.website')}</a>}
+  <article class="page-grid exhibitor">
+    <figure class="gallery">
       {
-        exhibitor.instagram && (
-          <a href={`https://instagram.com/${exhibitor.instagram}`}>@{exhibitor.instagram}</a>
+        images.length > 0 ? (
+          <>
+            <div class="frame">
+              {images.map((img: any, i: number) => (
+                <div class="slide" data-slide hidden={i > 0}>
+                  <SanityImage
+                    image={img}
+                    aspect={0.8}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                    widths={[400, 600, 900, 1200]}
+                  />
+                </div>
+              ))}
+
+              {images.length > 1 && (
+                <div class="dots" role="group" aria-label={exhibitor.name}>
+                  {images.map((_: any, i: number) => (
+                    <button
+                      type="button"
+                      data-dot
+                      aria-label={`${i + 1} / ${images.length}`}
+                      aria-current={i === 0 ? 'true' : undefined}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <figcaption>
+              <span data-counter>1/{images.length}</span>
+              <span class="credit">
+                {images.map((img: any, i: number) => (
+                  <span data-credit hidden={i > 0}>{img.credit ?? img.alt ?? ''}</span>
+                ))}
+              </span>
+            </figcaption>
+          </>
+        ) : (
+          <div class="frame frame-empty" />
         )
       }
-    </p>
-  </header>
+    </figure>
 
-  {
-    exhibitor.bio && (
-      <div class="prose">
-        <PortableText value={exhibitor.bio} />
-      </div>
-    )
-  }
+    <div class="detail">
+      <header class="detail-head">
+        <div class="identity">
+          <h2>{exhibitor.name}</h2>
+          {place && <p class="place">{place}</p>}
+          {exhibitor.booth && <p class="booth">{exhibitor.booth}</p>}
 
-  {
-    exhibitor.artists?.length > 0 && (
-      <section>
-        <h2>{t('exhibitors.represents')}</h2>
-        <ul class="grid">
-          {exhibitor.artists.map((a: any) => (
-            <li class="card">
-              <a class="card-link" href={localePath(lang, `artists/${a.slug}`)}>
-                <SanityImage image={a.portrait} aspect={1} sizes="(max-width: 700px) 50vw, 220px" />
-                <h3>{a.name}</h3>
-                {a.nationality && <p class="meta">{a.nationality}</p>}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
-  {
-    exhibitor.images?.length > 0 && (
-      <section>
-        <h2>Images</h2>
-        <div class="gallery">
-          {exhibitor.images.map((img: any, i: number) => (
-            <figure>
-              <SanityImage
-                image={img}
-                loading={i === 0 ? 'eager' : 'lazy'}
-                sizes="(max-width: 700px) 100vw, 560px"
-              />
-              {img.credit && <figcaption class="meta">{img.credit}</figcaption>}
-            </figure>
-          ))}
+          <p class="links">
+            {
+              exhibitor.instagram && (
+                <a class="pill" href={`https://instagram.com/${exhibitor.instagram}`} rel="noopener noreferrer">
+                  {t('common.instagram')} ↗
+                </a>
+              )
+            }
+            {
+              exhibitor.website && (
+                <a class="pill" href={exhibitor.website} rel="noopener noreferrer">
+                  {t('common.website')} ↗
+                </a>
+              )
+            }
+          </p>
         </div>
-      </section>
-    )
-  }
+
+        {
+          exhibitor.artists?.length > 0 && (
+            <div class="presenting">
+              <p class="eyebrow-plain">{t('exhibitors.presenting')}</p>
+              <h3>
+                {exhibitor.artists.map((a: any, i: number) => (
+                  <>
+                    {i > 0 && ', '}
+                    {a.slug ? <a href={localePath(lang, `artists/${a.slug}`)}>{a.name}</a> : a.name}
+                  </>
+                ))}
+              </h3>
+            </div>
+          )
+        }
+      </header>
+
+      {
+        exhibitor.bio && (
+          <div class="bio">
+            <PortableText value={exhibitor.bio} />
+          </div>
+        )
+      }
+
+      <nav class="pager" aria-label={t('nav.exhibitors')}>
+        {
+          previous ? (
+            <a class="pager-prev" href={localePath(lang, `exhibitors/${previous.slug}`)}>
+              ← {t('common.previous')}
+            </a>
+          ) : (
+            <span />
+          )
+        }
+
+        <a class="back-all text-link" href={localePath(lang, 'exhibitors')}>
+          {t('exhibitors.backToAll')} →
+        </a>
+
+        {
+          next ? (
+            <a class="pager-next" href={localePath(lang, `exhibitors/${next.slug}`)}>
+              {t('common.next')} →
+            </a>
+          ) : (
+            <span />
+          )
+        }
+      </nav>
+    </div>
+  </article>
 </Base>
 
 <style>
-  .detail-head {
-    margin-bottom: 2rem;
+  .section-title {
+    /* Section headings are lowercase in the identity; the label itself still
+       comes from Sanity, so this is presentation only. */
+    text-transform: lowercase;
+    font-size: clamp(2rem, 4.8vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    margin: 0 0 1.75rem;
   }
-  .booth {
-    display: inline-block;
-    background: var(--surface-2);
-    padding: 0.1rem 0.45rem;
-    margin-right: 0.5rem;
-    font-size: 0.9rem;
+
+  .exhibitor {
+    row-gap: 2.5rem;
   }
-  .links {
-    display: flex;
-    gap: 1.2rem;
-    font-size: 0.9rem;
-    margin: 0.6rem 0 0;
-  }
+
+  /* ---- left column: image carousel ---- */
   .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.4rem;
-    margin-top: 1.2rem;
-  }
-  .gallery figure {
+    grid-column: span 4;
     margin: 0;
   }
+  .frame {
+    position: relative;
+  }
+  .frame-empty {
+    aspect-ratio: 0.8;
+    background: var(--surface-2);
+  }
+  .slide[hidden] {
+    display: none;
+  }
+
+  .dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 12px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  .dots button {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.25);
+    cursor: pointer;
+  }
+  .dots button[aria-current] {
+    background: var(--ink);
+  }
+
   .gallery figcaption {
-    margin-top: 0.35rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+  }
+  .credit [hidden] {
+    display: none;
+  }
+
+  /* ---- right column ---- */
+  .detail {
+    grid-column: span 8;
+  }
+  .detail-head {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 2.5rem;
+    border-top: 1px solid var(--ink);
+    padding-top: 0.75rem;
+  }
+
+  .detail h2 {
+    font-size: clamp(2rem, 4vw, 3.75rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 400;
+    margin: 0;
+  }
+  .place,
+  .booth {
+    font-size: clamp(1.35rem, 2.7vw, 2.5rem);
+    line-height: 1.15;
+    margin: 0;
+  }
+  .place {
+    margin-top: 1.5rem;
+  }
+  .booth::before {
+    content: '● ';
+    font-size: 0.7em;
+    vertical-align: 0.15em;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+    font-size: clamp(1.1rem, 2vw, 1.75rem);
+  }
+  .links .pill {
+    /* The design sets these labels lowercase; common.website is title-case
+       because other pages use it as a heading. */
+    text-transform: lowercase;
+    padding: 0.15rem 1.25rem;
+    font-size: inherit;
+    text-decoration: none;
+  }
+  .links .pill:hover {
+    background: var(--acid);
+  }
+
+  .presenting {
+    padding-top: 0.5rem;
+  }
+  .eyebrow-plain {
+    font-size: 1.125rem;
+    margin: 0;
+  }
+  .presenting h3 {
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 400;
+    margin: 0;
+  }
+  .presenting a {
+    text-decoration: none;
+  }
+  .presenting a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.08em;
+  }
+
+  /* The bio is one field in Sanity; the design runs it across two columns. */
+  .bio {
+    margin-top: 3rem;
+    columns: 2;
+    column-gap: 2.5rem;
+    font-size: clamp(1.05rem, 1.7vw, 1.5rem);
+    line-height: 1.25;
+  }
+  .bio :global(p) {
+    margin: 0 0 1.5rem;
+    break-inside: avoid;
+  }
+
+  .pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 5rem;
+    font-size: clamp(1.1rem, 2vw, 1.6rem);
+  }
+  .pager a {
+    text-decoration: none;
+  }
+  .back-all {
+    font-size: clamp(1.6rem, 3vw, 2.5rem);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 900px) {
+    .gallery {
+      grid-column: span 6;
+    }
+    .detail {
+      grid-column: span 6;
+    }
+    .detail-head {
+      grid-template-columns: 1fr;
+      row-gap: 2rem;
+    }
+    .bio {
+      columns: 1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .gallery,
+    .detail {
+      grid-column: 1 / -1;
+    }
+    .pager {
+      flex-wrap: wrap;
+      justify-content: center;
+      row-gap: 1.5rem;
+    }
   }
 </style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.gallery').forEach((gallery) => {
+    const slides = [...gallery.querySelectorAll<HTMLElement>('[data-slide]')];
+    const dots = [...gallery.querySelectorAll<HTMLButtonElement>('[data-dot]')];
+    const credits = [...gallery.querySelectorAll<HTMLElement>('[data-credit]')];
+    const counter = gallery.querySelector<HTMLElement>('[data-counter]');
+    if (slides.length < 2) return;
+
+    const show = (next: number) => {
+      slides.forEach((slide, i) => (slide.hidden = i !== next));
+      credits.forEach((credit, i) => (credit.hidden = i !== next));
+      dots.forEach((dot, i) =>
+        i === next ? dot.setAttribute('aria-current', 'true') : dot.removeAttribute('aria-current'),
+      );
+      if (counter) counter.textContent = `${next + 1}/${slides.length}`;
+    };
+
+    dots.forEach((dot, i) => dot.addEventListener('click', () => show(i)));
+  });
+</script>
