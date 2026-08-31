@@ -1,0 +1,18 @@
+# Cloudflare Pages configuration.
+#
+# The whole app - site and Studio - is static: `astro build` produces plain HTML
+# plus assets, so there is no adapter and no Worker runtime. The Studio is a
+# client-side React app on hash routing, which means /studio is one HTML file
+# and every screen inside it lives after the '#'. That is why it needs no
+# server-side catch-all rule.
+#
+# Deploys are driven by Git: a push to `main` builds production, any other
+# branch builds a preview. `pages_build_output_dir` is read by Pages CI and
+# overrides the output directory set in the dashboard, so the build output
+# lives in version control rather than in a dashboard field.
+#
+# Manual deploy (rarely needed):  npx wrangler pages deploy dist
+
+name = "ceramic-brussels"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-08-01"

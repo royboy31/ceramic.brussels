@@ -1,0 +1,80 @@
+---
+import Base from '../../layouts/Base.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, DEFAULT_LOCALE, type LocaleId } from '../../lib/locales';
+import { getPage, getPageSlugs } from '../../lib/queries';
+
+/**
+ * Editor-created pages: about, art prize, visitor info, food & drinks and so on.
+ * Each locale gets its own slug, so French and Dutch have real translated URLs
+ * rather than the half-translated mix the current site carries.
+ */
+export async function getStaticPaths() {
+  const pages = await getPageSlugs();
+
+  return LOCALE_IDS.flatMap((lang) =>
+    pages
+      .map(({ slugs }) => {
+        const slug = slugs[lang] ?? slugs[DEFAULT_LOCALE];
+        if (!slug) return null;
+        return { params: { lang, slug }, props: { slugs } };
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null),
+  );
+}
+
+const lang = Astro.params.lang as LocaleId;
+const slug = Astro.params.slug as string;
+const { slugs } = Astro.props as { slugs: Record<string, string | undefined> };
+
+const page = await getPage(lang, slug);
+if (!page) return Astro.rewrite('/404');
+
+// Each language links to its own slug, so the language switcher never 404s.
+const altPaths = Object.fromEntries(
+  LOCALE_IDS.map((l) => [l, slugs[l] ?? slugs[DEFAULT_LOCALE] ?? slug]),
+) as Partial<Record<LocaleId, string>>;
+---
+
+<Base
+  lang={lang}
+  title={page.seo?.title ?? page.title}
+  description={page.seo?.description ?? page.intro}
+  noIndex={page.seo?.noIndex}
+  path={slug}
+  altPaths={altPaths}
+  editId={page._id}
+  editType={page._type}
+>
+  <h1>{page.title}</h1>
+  {page.intro && <p class="lede">{page.intro}</p>}
+
+  {
+    page.cover?.asset && (
+      <SanityImage
+        image={page.cover}
+        loading="eager"
+        aspect={16 / 9}
+        widths={[600, 900, 1200, 1600]}
+        sizes="(max-width: 1140px) 100vw, 1140px"
+        class="cover"
+      />
+    )
+  }
+
+  {
+    page.body && (
+      <div class="prose">
+        <PortableText value={page.body} />
+      </div>
+    )
+  }
+</Base>
+
+<style>
+  .cover {
+    margin: 1.8rem 0;
+    width: 100%;
+  }
+</style>

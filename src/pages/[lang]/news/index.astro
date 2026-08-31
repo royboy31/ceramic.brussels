@@ -1,0 +1,99 @@
+---
+import Base from '../../../layouts/Base.astro';
+import SanityImage from '../../../components/SanityImage.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { useTranslations, localePath, formatDate } from '../../../lib/i18n';
+import { getNews } from '../../../lib/queries';
+
+export function getStaticPaths() {
+  return LOCALE_IDS.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as LocaleId;
+const t = useTranslations(lang);
+const news = await getNews(lang);
+---
+
+<Base lang={lang} title={t('nav.news')} path="news">
+  <h1>{t('nav.news')}</h1>
+
+  {
+    news.length ? (
+      <ul class="feed">
+        {news.map((item: any) => (
+          <li class="entry">
+            <a class="card-link" href={localePath(lang, `news/${item.slug}`)}>
+              {item.cover?.asset && (
+                <SanityImage image={item.cover} aspect={16 / 9} sizes="(max-width: 700px) 100vw, 300px" class="thumb" />
+              )}
+              <div>
+                <p class="meta">
+                  <time datetime={item.publishedAt}>{formatDate(item.publishedAt, lang)}</time>
+                  {item.category && <span class="pill">{item.category}</span>}
+                </p>
+                <h3>{item.title}</h3>
+                {item.excerpt && <p class="excerpt">{item.excerpt}</p>}
+                <span class="more">{t('news.readMore')} &rarr;</span>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="empty">
+        {t('news.empty')} Write the first post in <a href="/studio">the Studio</a>.
+      </p>
+    )
+  }
+</Base>
+
+<style>
+  .feed {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .entry {
+    border-top: 1px solid var(--rule);
+  }
+  .entry:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+  .entry .card-link {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1.4rem;
+    padding: 1.4rem 0;
+    color: inherit;
+    text-decoration: none;
+  }
+  .entry .card-link:hover h3 {
+    text-decoration: underline;
+  }
+  .entry h3 {
+    margin: 0.35rem 0 0.4rem;
+    font-size: 1.15rem;
+  }
+  .entry .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin: 0;
+  }
+  .excerpt {
+    color: var(--ink-2);
+    max-width: var(--measure);
+    margin: 0 0 0.5rem;
+  }
+  .more {
+    font-size: 0.88rem;
+    color: var(--accent);
+  }
+  @media (max-width: 700px) {
+    .entry .card-link {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

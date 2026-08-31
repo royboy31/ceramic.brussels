@@ -1,0 +1,71 @@
+---
+import { urlFor } from '../sanity/image';
+
+/**
+ * Responsive Sanity image. Emits a real srcset ladder, lets the CDN pick the
+ * format, and always sets width/height so nothing shifts while loading.
+ */
+interface Props {
+  image: any;
+  widths?: number[];
+  sizes?: string;
+  aspect?: number;
+  loading?: 'lazy' | 'eager';
+  class?: string;
+}
+
+const {
+  image,
+  widths = [400, 600, 900, 1200, 1600],
+  sizes = '(max-width: 700px) 100vw, 700px',
+  aspect,
+  loading = 'lazy',
+  class: className,
+} = Astro.props;
+
+const hasAsset = !!image?.asset;
+
+const build = (w: number) => {
+  let b = urlFor(image).width(w).auto('format').quality(78);
+  if (aspect) b = b.height(Math.round(w / aspect)).fit('crop');
+  return b.url();
+};
+
+const dims = image?.dimensions;
+const width = widths[widths.length - 1];
+const height = aspect
+  ? Math.round(width / aspect)
+  : dims?.aspectRatio
+    ? Math.round(width / dims.aspectRatio)
+    : undefined;
+
+const srcset = hasAsset ? widths.map((w) => `${build(w)} ${w}w`).join(', ') : '';
+const lqip = image?.lqip;
+---
+
+{
+  hasAsset ? (
+    <img
+      src={build(width)}
+      srcset={srcset}
+      sizes={sizes}
+      width={width}
+      height={height}
+      alt={image.alt ?? ''}
+      loading={loading}
+      decoding="async"
+      class={className}
+      style={lqip ? `background-image:url(${lqip});background-size:cover;background-position:center;` : undefined}
+    />
+  ) : (
+    <div class:list={['img-placeholder', className]} aria-hidden="true" />
+  )
+}
+
+<style>
+  .img-placeholder {
+    background: var(--surface-2);
+    aspect-ratio: 4 / 3;
+    width: 100%;
+  }
+</style>

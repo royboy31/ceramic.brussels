@@ -1,0 +1,9 @@
+# Cloudflare Pages redirect rules. Astro emits /index.html as a redirect to /en,
+# so the root is already handled by the build.
+#
+# Old Laravel URLs go here at migration time, e.g.:
+#   /en/partners-3            /en/partners            301
+#   /en/food-and-drinks-2     /en/food-and-drinks     301
+#   /fr/invitee-d-honneur     /fr/invite-d-honneur    301
+#
+# Generate these from the `legacyPath` field rather than typing them by hand.

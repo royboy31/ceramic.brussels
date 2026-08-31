@@ -1,0 +1,167 @@
+import type { LocaleId } from './locales';
+
+/**
+ * UI strings. Content comes from Sanity; these are the labels around it.
+ * Kept in code deliberately - they change with the build, not with an editor.
+ */
+const STRINGS = {
+  en: {
+    'nav.exhibitors': 'Exhibitors',
+    'nav.artists': 'Artists',
+    'nav.news': 'News',
+    'nav.programme': 'Programme',
+    'nav.partners': 'Partners',
+    'nav.press': 'Press',
+    'nav.awards': 'Awards',
+    'nav.editions': 'Past editions',
+    'home.currentEdition': 'Current edition',
+    'home.latestNews': 'Latest news',
+    'home.exhibitors': 'Exhibitors',
+    'home.viewAll': 'View all',
+    'home.tickets': 'Tickets',
+    'home.catalogue': 'Catalogue',
+    'exhibitors.count': 'galleries',
+    'exhibitors.booth': 'Booth',
+    'exhibitors.filter': 'Filter by name, country or booth',
+    'exhibitors.noneMatch': 'No galleries match that filter.',
+    'exhibitors.represents': 'Represented artists',
+    'exhibitors.empty': 'No exhibitors published yet.',
+    'artists.guestOfHonour': 'Guest of honour',
+    'artists.works': 'Works',
+    'artists.shownBy': 'Shown by',
+    'artists.empty': 'No artists published yet.',
+    'news.empty': 'No news published yet.',
+    'news.readMore': 'Read more',
+    'programme.empty': 'The programme has not been announced yet.',
+    'programme.speakers': 'With',
+    'partners.empty': 'No partners published yet.',
+    'press.empty': 'No press coverage published yet.',
+    'press.readArticle': 'Read article',
+    'awards.empty': 'No awards published yet.',
+    'editions.exhibitorCount': 'exhibitors',
+    'common.backTo': 'Back to',
+    'common.website': 'Website',
+    'common.language': 'Language',
+    'notFound.title': 'Page not found',
+  },
+  fr: {
+    'nav.exhibitors': 'Exposants',
+    'nav.artists': 'Artistes',
+    'nav.news': 'Actualités',
+    'nav.programme': 'Programme',
+    'nav.partners': 'Partenaires',
+    'nav.press': 'Presse',
+    'nav.awards': 'Prix',
+    'nav.editions': 'Éditions précédentes',
+    'home.currentEdition': 'Édition en cours',
+    'home.latestNews': 'Dernières actualités',
+    'home.exhibitors': 'Exposants',
+    'home.viewAll': 'Voir tout',
+    'home.tickets': 'Billets',
+    'home.catalogue': 'Catalogue',
+    'exhibitors.count': 'galeries',
+    'exhibitors.booth': 'Stand',
+    'exhibitors.filter': 'Filtrer par nom, pays ou stand',
+    'exhibitors.noneMatch': 'Aucune galerie ne correspond.',
+    'exhibitors.represents': 'Artistes représentés',
+    'exhibitors.empty': 'Aucun exposant publié pour le moment.',
+    'artists.guestOfHonour': 'Invité d’honneur',
+    'artists.works': 'Œuvres',
+    'artists.shownBy': 'Présenté par',
+    'artists.empty': 'Aucun artiste publié pour le moment.',
+    'news.empty': 'Aucune actualité publiée pour le moment.',
+    'news.readMore': 'Lire la suite',
+    'programme.empty': 'Le programme n’a pas encore été annoncé.',
+    'programme.speakers': 'Avec',
+    'partners.empty': 'Aucun partenaire publié pour le moment.',
+    'press.empty': 'Aucune revue de presse publiée pour le moment.',
+    'press.readArticle': 'Lire l’article',
+    'awards.empty': 'Aucun prix publié pour le moment.',
+    'editions.exhibitorCount': 'exposants',
+    'common.backTo': 'Retour à',
+    'common.website': 'Site web',
+    'common.language': 'Langue',
+    'notFound.title': 'Page introuvable',
+  },
+  nl: {
+    'nav.exhibitors': 'Exposanten',
+    'nav.artists': 'Kunstenaars',
+    'nav.news': 'Nieuws',
+    'nav.programme': 'Programma',
+    'nav.partners': 'Partners',
+    'nav.press': 'Pers',
+    'nav.awards': 'Prijzen',
+    'nav.editions': 'Vorige edities',
+    'home.currentEdition': 'Huidige editie',
+    'home.latestNews': 'Laatste nieuws',
+    'home.exhibitors': 'Exposanten',
+    'home.viewAll': 'Alles bekijken',
+    'home.tickets': 'Tickets',
+    'home.catalogue': 'Catalogus',
+    'exhibitors.count': 'galerieën',
+    'exhibitors.booth': 'Stand',
+    'exhibitors.filter': 'Filter op naam, land of stand',
+    'exhibitors.noneMatch': 'Geen galerieën gevonden.',
+    'exhibitors.represents': 'Vertegenwoordigde kunstenaars',
+    'exhibitors.empty': 'Nog geen exposanten gepubliceerd.',
+    'artists.guestOfHonour': 'Eregast',
+    'artists.works': 'Werken',
+    'artists.shownBy': 'Getoond door',
+    'artists.empty': 'Nog geen kunstenaars gepubliceerd.',
+    'news.empty': 'Nog geen nieuws gepubliceerd.',
+    'news.readMore': 'Lees meer',
+    'programme.empty': 'Het programma is nog niet bekendgemaakt.',
+    'programme.speakers': 'Met',
+    'partners.empty': 'Nog geen partners gepubliceerd.',
+    'press.empty': 'Nog geen persberichten gepubliceerd.',
+    'press.readArticle': 'Lees artikel',
+    'awards.empty': 'Nog geen prijzen gepubliceerd.',
+    'editions.exhibitorCount': 'exposanten',
+    'common.backTo': 'Terug naar',
+    'common.website': 'Website',
+    'common.language': 'Taal',
+    'notFound.title': 'Pagina niet gevonden',
+  },
+} as const;
+
+export type StringKey = keyof (typeof STRINGS)['en'];
+
+export function useTranslations(lang: LocaleId) {
+  return function t(key: StringKey): string {
+    return STRINGS[lang][key] ?? STRINGS.en[key] ?? key;
+  };
+}
+
+/** Build a locale-prefixed path. */
+export function localePath(lang: LocaleId, path = ''): string {
+  const clean = path.replace(/^\/+|\/+$/g, '');
+  return clean ? `/${lang}/${clean}` : `/${lang}`;
+}
+
+export function formatDate(value: string | undefined, lang: LocaleId): string {
+  if (!value) return '';
+  const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
+  return new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(value));
+}
+
+export function formatDateRange(start: string, end: string, lang: LocaleId): string {
+  if (!start || !end) return '';
+  const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
+  return new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).formatRange(new Date(start), new Date(end));
+}
+
+export function formatTime(value: string | undefined, lang: LocaleId): string {
+  if (!value) return '';
+  const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
+  return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(
+    new Date(value),
+  );
+}

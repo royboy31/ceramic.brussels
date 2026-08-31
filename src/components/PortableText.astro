@@ -1,0 +1,138 @@
+---
+import SanityImage from './SanityImage.astro';
+
+/**
+ * Minimal Portable Text renderer - blocks, lists, marks and inline figures.
+ * Hand-rolled rather than pulled from a package so there is one less dependency
+ * between the CMS and the page.
+ */
+interface Props {
+  value: any[] | undefined;
+}
+const { value } = Astro.props;
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+const MARK_TAGS: Record<string, string> = {
+  strong: 'strong',
+  em: 'em',
+  underline: 'u',
+  'strike-through': 's',
+  code: 'code',
+};
+
+/** Turn one block's children into HTML, applying marks and link definitions. */
+function renderSpans(block: any): string {
+  const defs: any[] = block.markDefs ?? [];
+
+  return (block.children ?? [])
+    .map((span: any) => {
+      let html = escapeHtml(span.text ?? '');
+
+      for (const mark of span.marks ?? []) {
+        const tag = MARK_TAGS[mark];
+        if (tag) {
+          html = `<${tag}>${html}</${tag}>`;
+          continue;
+        }
+        // Anything else is a mark definition key - most often a link.
+        const def = defs.find((d) => d._key === mark);
+        const href = def?.href ?? def?.external;
+        if (href) {
+          const external = /^https?:\/\//.test(href);
+          const attrs = external ? ' target="_blank" rel="noopener noreferrer"' : '';
+          html = `<a href="${escapeHtml(href)}"${attrs}>${html}</a>`;
+        }
+      }
+
+      return html;
+    })
+    .join('');
+}
+
+/** Group consecutive list items of the same kind into a single list element. */
+function group(blocks: any[]) {
+  const out: any[] = [];
+  for (const block of blocks) {
+    const last = out[out.length - 1];
+    if (block.listItem) {
+      if (last?.kind === 'list' && last.listItem === block.listItem) {
+        last.items.push(block);
+      } else {
+        out.push({ kind: 'list', listItem: block.listItem, items: [block] });
+      }
+    } else {
+      out.push({ kind: 'block', block });
+    }
+  }
+  return out;
+}
+
+const grouped = Array.isArray(value) ? group(value.filter(Boolean)) : [];
+---
+
+<div class="rich-text">
+  {
+    grouped.map((entry) => {
+      if (entry.kind === 'list') {
+        const items = entry.items.map((item: any) => renderSpans(item));
+        return entry.listItem === 'number' ? (
+          <ol set:html={items.map((h: string) => `<li>${h}</li>`).join('')} />
+        ) : (
+          <ul set:html={items.map((h: string) => `<li>${h}</li>`).join('')} />
+        );
+      }
+
+      const block = entry.block;
+
+      if (block._type === 'figure') {
+        return (
+          <figure>
+            <SanityImage image={block} />
+            {block.credit && <figcaption>{block.credit}</figcaption>}
+          </figure>
+        );
+      }
+
+      if (block._type !== 'block') return null;
+
+      const html = renderSpans(block);
+      const style = block.style ?? 'normal';
+
+      if (style === 'h1' || style === 'h2') return <h2 set:html={html} />;
+      if (style === 'h3') return <h3 set:html={html} />;
+      if (style === 'h4') return <h4 set:html={html} />;
+      if (style === 'blockquote') return <blockquote set:html={html} />;
+      return <p set:html={html} />;
+    })
+  }
+</div>
+
+<style>
+  .rich-text > :global(*:first-child) {
+    margin-top: 0;
+  }
+  .rich-text > :global(*:last-child) {
+    margin-bottom: 0;
+  }
+  .rich-text :global(blockquote) {
+    margin: 1.5rem 0;
+    padding-left: 1rem;
+    border-left: 3px solid var(--accent);
+    color: var(--ink-2);
+  }
+  .rich-text :global(figure) {
+    margin: 1.75rem 0;
+  }
+  .rich-text :global(figcaption) {
+    font-size: 0.8rem;
+    color: var(--ink-3);
+    margin-top: 0.4rem;
+  }
+</style>

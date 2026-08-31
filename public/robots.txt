@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# The Studio is a private editing tool, not a public page. It is already left
+# out of the sitemap; this keeps crawlers off it too.
+Disallow: /studio
+
+Sitemap: https://www.ceramic.brussels/sitemap-index.xml

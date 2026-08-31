@@ -1,0 +1,185 @@
+---
+import Base from '../../layouts/Base.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations, localePath, formatDateRange, formatDate } from '../../lib/i18n';
+import { getCurrentEdition, getExhibitors, getNews } from '../../lib/queries';
+
+export function getStaticPaths() {
+  return LOCALE_IDS.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as LocaleId;
+const t = useTranslations(lang);
+
+const [edition, exhibitors, news] = await Promise.all([
+  getCurrentEdition(lang),
+  getExhibitors(lang),
+  getNews(lang),
+]);
+
+const featured = exhibitors.slice(0, 8);
+const latest = news.slice(0, 3);
+
+// Event structured data - what puts dates and venue into search results.
+const eventSchema = edition
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'ExhibitionEvent',
+      name: edition.title ?? `Ceramic Brussels ${edition.year}`,
+      startDate: edition.startDate,
+      endDate: edition.endDate,
+      eventStatus: 'https://schema.org/EventScheduled',
+      location: { '@type': 'Place', name: edition.venue, address: 'Brussels, Belgium' },
+      organizer: { '@type': 'Organization', name: 'Ceramic Brussels' },
+      ...(edition.ticketsUrl ? { offers: { '@type': 'Offer', url: edition.ticketsUrl } } : {}),
+    }
+  : null;
+---
+
+<Base
+  lang={lang}
+  title="Ceramic Brussels"
+  description={edition?.title}
+  editId={edition?._id}
+  editType={edition?._type}
+>
+  {eventSchema && <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} slot="head" />}
+
+  {
+    edition ? (
+      <section class="hero">
+        <p class="pill">{t('home.currentEdition')}</p>
+        <h1>{edition.title ?? `Ceramic Brussels ${edition.year}`}</h1>
+        <p class="lede">
+          {formatDateRange(edition.startDate, edition.endDate, lang)}
+          {edition.venue && ` · ${edition.venue}`}
+        </p>
+
+        {edition.intro && (
+          <div class="prose">
+            <PortableText value={edition.intro} />
+          </div>
+        )}
+
+        <p class="hero-actions">
+          {edition.ticketsUrl && (
+            <a class="btn" href={edition.ticketsUrl}>
+              {t('home.tickets')}
+            </a>
+          )}
+          {edition.catalogueUrl && <a href={edition.catalogueUrl}>{t('home.catalogue')}</a>}
+        </p>
+
+        {edition.cover?.asset && (
+          <SanityImage
+            image={edition.cover}
+            loading="eager"
+            aspect={16 / 9}
+            sizes="(max-width: 1140px) 100vw, 1140px"
+            widths={[600, 900, 1200, 1600, 2000]}
+            class="hero-image"
+          />
+        )}
+      </section>
+    ) : (
+      <section>
+        <h1>Ceramic Brussels</h1>
+        <p class="empty">
+          No edition is marked as current yet. Create one in <a href="/studio">the Studio</a> and tick
+          <strong> Current edition</strong>.
+        </p>
+      </section>
+    )
+  }
+
+  <section>
+    <div class="section-head">
+      <h2>{t('home.exhibitors')}</h2>
+      <a href={localePath(lang, 'exhibitors')}>{t('home.viewAll')} ({exhibitors.length})</a>
+    </div>
+
+    {
+      featured.length ? (
+        <ul class="grid">
+          {featured.map((ex: any) => (
+            <li class="card">
+              <a class="card-link" href={localePath(lang, `exhibitors/${ex.slug}`)}>
+                <SanityImage image={ex.image} aspect={4 / 3} sizes="(max-width: 700px) 50vw, 260px" />
+                <h3>{ex.name}</h3>
+                <p class="meta">{[ex.booth, ex.country].filter(Boolean).join(' · ')}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">{t('exhibitors.empty')}</p>
+      )
+    }
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>{t('home.latestNews')}</h2>
+      <a href={localePath(lang, 'news')}>{t('home.viewAll')}</a>
+    </div>
+
+    {
+      latest.length ? (
+        <ul class="grid">
+          {latest.map((item: any) => (
+            <li class="card">
+              <a class="card-link" href={localePath(lang, `news/${item.slug}`)}>
+                <SanityImage image={item.cover} aspect={16 / 9} sizes="(max-width: 700px) 100vw, 340px" />
+                <h3>{item.title}</h3>
+                <p class="meta">{formatDate(item.publishedAt, lang)}</p>
+                {item.excerpt && <p>{item.excerpt}</p>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">{t('news.empty')}</p>
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .hero {
+    margin-bottom: 1rem;
+  }
+  .hero-image {
+    margin-top: 1.8rem;
+    width: 100%;
+  }
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin: 1.2rem 0 0;
+  }
+  .btn {
+    background: var(--ink);
+    color: var(--ground);
+    text-decoration: none;
+    padding: 0.55rem 1.1rem;
+    font-size: 0.92rem;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.5rem;
+    margin-top: 3rem;
+  }
+  .section-head h2 {
+    margin: 0;
+  }
+  .section-head a {
+    font-size: 0.88rem;
+  }
+</style>

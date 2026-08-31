@@ -1,0 +1,55 @@
+---
+import Base from '../../../layouts/Base.astro';
+import SanityImage from '../../../components/SanityImage.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { useTranslations, localePath } from '../../../lib/i18n';
+import { getArtists } from '../../../lib/queries';
+
+export function getStaticPaths() {
+  return LOCALE_IDS.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as LocaleId;
+const t = useTranslations(lang);
+const artists = await getArtists(lang);
+---
+
+<Base lang={lang} title={t('nav.artists')} path="artists">
+  <h1>{t('nav.artists')}</h1>
+  <p class="lede">{artists.length}</p>
+
+  {
+    artists.length ? (
+      <ul class="grid">
+        {artists.map((a: any) => (
+          <li class="card">
+            <a class="card-link" href={localePath(lang, `artists/${a.slug}`)}>
+              <SanityImage image={a.portrait} aspect={1} sizes="(max-width: 700px) 50vw, 240px" />
+              <h3>{a.name}</h3>
+              <p class="meta">
+                {[a.nationality, a.birthYear ? `b. ${a.birthYear}` : null].filter(Boolean).join(' · ')}
+              </p>
+            </a>
+            {a.isGuestOfHonour && <p class="pill">{t('artists.guestOfHonour')}</p>}
+            {a.exhibitors?.length > 0 && (
+              <p class="meta shown">
+                {t('artists.shownBy')} {a.exhibitors.map((e: any) => e.name).join(', ')}
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="empty">
+        {t('artists.empty')} Add them in <a href="/studio">the Studio</a>.
+      </p>
+    )
+  }
+</Base>
+
+<style>
+  .shown {
+    margin: 0.3rem 0 0;
+    font-size: 0.8rem;
+  }
+</style>

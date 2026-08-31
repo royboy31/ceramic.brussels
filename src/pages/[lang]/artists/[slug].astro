@@ -1,0 +1,145 @@
+---
+import Base from '../../../layouts/Base.astro';
+import SanityImage from '../../../components/SanityImage.astro';
+import PortableText from '../../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { useTranslations, localePath } from '../../../lib/i18n';
+import { getArtist, getArtistSlugs } from '../../../lib/queries';
+
+export async function getStaticPaths() {
+  const slugs = await getArtistSlugs();
+  return LOCALE_IDS.flatMap((lang) => slugs.map(({ slug }) => ({ params: { lang, slug } })));
+}
+
+const lang = Astro.params.lang as LocaleId;
+const slug = Astro.params.slug as string;
+const t = useTranslations(lang);
+
+const artist = await getArtist(lang, slug);
+if (!artist) return Astro.rewrite('/404');
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: artist.name,
+  ...(artist.nationality ? { nationality: artist.nationality } : {}),
+  ...(artist.website ? { url: artist.website } : {}),
+};
+---
+
+<Base
+  lang={lang}
+  title={artist.seo?.title ?? artist.name}
+  description={artist.seo?.description}
+  noIndex={artist.seo?.noIndex}
+  path={`artists/${slug}`}
+  editId={artist._id}
+  editType={artist._type}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(personSchema)} slot="head" />
+
+  <a class="back" href={localePath(lang, 'artists')}>&larr; {t('common.backTo')} {t('nav.artists')}</a>
+
+  <div class="head">
+    {
+      artist.portrait?.asset && (
+        <SanityImage image={artist.portrait} aspect={1} widths={[300, 500, 700]} sizes="220px" class="portrait" />
+      )
+    }
+    <div>
+      {artist.isGuestOfHonour && <p class="pill">{t('artists.guestOfHonour')}</p>}
+      <h1>{artist.name}</h1>
+      <p class="lede">
+        {[artist.nationality, artist.birthYear ? `b. ${artist.birthYear}` : null]
+          .filter(Boolean)
+          .join(' · ')}
+      </p>
+      <p class="links">
+        {artist.website && <a href={artist.website}>{t('common.website')}</a>}
+        {artist.instagram && <a href={`https://instagram.com/${artist.instagram}`}>@{artist.instagram}</a>}
+      </p>
+    </div>
+  </div>
+
+  {
+    artist.bio && (
+      <div class="prose">
+        <PortableText value={artist.bio} />
+      </div>
+    )
+  }
+
+  {
+    artist.exhibitors?.length > 0 && (
+      <section>
+        <h2>{t('artists.shownBy')}</h2>
+        <ul class="plain-list">
+          {artist.exhibitors.map((e: any) => (
+            <li>
+              <a href={localePath(lang, `exhibitors/${e.slug}`)}>{e.name}</a>
+              <span class="meta">{[e.booth, e.year].filter(Boolean).join(' · ')}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    artist.works?.length > 0 && (
+      <section>
+        <h2>{t('artists.works')}</h2>
+        <ul class="grid">
+          {artist.works.map((w: any) => (
+            <li class="card">
+              <SanityImage image={w.image} aspect={3 / 4} sizes="(max-width: 700px) 50vw, 260px" />
+              <h3>{w.title}</h3>
+              <p class="meta">
+                {[
+                  w.year,
+                  w.materials,
+                  w.dimensions?.height
+                    ? `${w.dimensions.height} × ${w.dimensions.width ?? '?'} × ${w.dimensions.depth ?? '?'} cm`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.6rem;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+  .portrait {
+    width: 220px;
+    flex: none;
+  }
+  .links {
+    display: flex;
+    gap: 1.2rem;
+    font-size: 0.9rem;
+    margin: 0.6rem 0 0;
+  }
+  .plain-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.8rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .plain-list .meta {
+    margin-left: 0.6rem;
+  }
+</style>

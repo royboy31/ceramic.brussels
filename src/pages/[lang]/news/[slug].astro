@@ -1,0 +1,87 @@
+---
+import Base from '../../../layouts/Base.astro';
+import SanityImage from '../../../components/SanityImage.astro';
+import PortableText from '../../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { useTranslations, localePath, formatDate } from '../../../lib/i18n';
+import { getNewsItem, getNewsSlugs } from '../../../lib/queries';
+
+export async function getStaticPaths() {
+  const slugs = await getNewsSlugs();
+  return LOCALE_IDS.flatMap((lang) => slugs.map(({ slug }) => ({ params: { lang, slug } })));
+}
+
+const lang = Astro.params.lang as LocaleId;
+const slug = Astro.params.slug as string;
+const t = useTranslations(lang);
+
+const item = await getNewsItem(lang, slug);
+if (!item) return Astro.rewrite('/404');
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: item.title,
+  datePublished: item.publishedAt,
+  ...(item.excerpt ? { description: item.excerpt } : {}),
+  publisher: { '@type': 'Organization', name: 'Ceramic Brussels' },
+};
+---
+
+<Base
+  lang={lang}
+  title={item.seo?.title ?? item.title}
+  description={item.seo?.description ?? item.excerpt}
+  noIndex={item.seo?.noIndex}
+  path={`news/${slug}`}
+  editId={item._id}
+  editType={item._type}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} slot="head" />
+
+  <a class="back" href={localePath(lang, 'news')}>&larr; {t('common.backTo')} {t('nav.news')}</a>
+
+  <article>
+    <p class="meta">
+      <time datetime={item.publishedAt}>{formatDate(item.publishedAt, lang)}</time>
+      {item.category && <span class="pill">{item.category}</span>}
+    </p>
+
+    <h1>{item.title}</h1>
+    {item.excerpt && <p class="lede">{item.excerpt}</p>}
+
+    {
+      item.cover?.asset && (
+        <SanityImage
+          image={item.cover}
+          loading="eager"
+          aspect={16 / 9}
+          widths={[600, 900, 1200, 1600]}
+          sizes="(max-width: 1140px) 100vw, 1140px"
+          class="cover"
+        />
+      )
+    }
+
+    {
+      item.body && (
+        <div class="prose">
+          <PortableText value={item.body} />
+        </div>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  article .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.4rem;
+  }
+  .cover {
+    margin: 1.8rem 0;
+    width: 100%;
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+import Base from '../../layouts/Base.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations, formatDateRange } from '../../lib/i18n';
+import { getEditions } from '../../lib/queries';
+
+export function getStaticPaths() {
+  return LOCALE_IDS.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as LocaleId;
+const t = useTranslations(lang);
+const editions = await getEditions(lang);
+---
+
+<Base lang={lang} title={t('nav.editions')} path="editions">
+  <h1>{t('nav.editions')}</h1>
+
+  {
+    editions.length ? (
+      <ul class="grid">
+        {editions.map((e: any) => (
+          <li class="card">
+            <SanityImage image={e.cover} aspect={4 / 3} sizes="(max-width: 700px) 50vw, 260px" />
+            <h3>
+              {e.title ?? `Ceramic Brussels ${e.year}`}
+              {e.isCurrent && <span class="pill current">{t('home.currentEdition')}</span>}
+            </h3>
+            <p class="meta">{formatDateRange(e.startDate, e.endDate, lang)}</p>
+            <p class="meta">
+              {e.exhibitorCount} {t('editions.exhibitorCount')}
+            </p>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="empty">
+        No editions yet. Create one in <a href="/studio">the Studio</a>.
+      </p>
+    )
+  }
+</Base>
+
+<style>
+  .current {
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+</style>

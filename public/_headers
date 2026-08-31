@@ -1,0 +1,25 @@
+# Cloudflare Pages / Workers static assets.
+#
+# Astro fingerprints everything under /_astro/, so those files can be cached
+# permanently. HTML must not be, or a rebuild after a publish would not reach
+# anyone still holding a cached copy.
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+# The Studio ships an app shell that must always be revalidated, and it should
+# never be framed or indexed.
+/studio
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Robots-Tag: noindex
+  X-Frame-Options: DENY
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

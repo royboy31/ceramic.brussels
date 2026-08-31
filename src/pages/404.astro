@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+import { DEFAULT_LOCALE } from '../lib/locales';
+import { localePath } from '../lib/i18n';
+---
+
+<Base lang={DEFAULT_LOCALE} title="Page not found" noIndex>
+  <h1>Page not found</h1>
+  <p class="lede">That address does not exist on this site.</p>
+  <p><a href={localePath(DEFAULT_LOCALE)}>Go to the homepage</a></p>
+</Base>

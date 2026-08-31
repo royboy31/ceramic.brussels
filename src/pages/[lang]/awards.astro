@@ -1,0 +1,66 @@
+---
+import Base from '../../layouts/Base.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations, localePath } from '../../lib/i18n';
+import { getAwards } from '../../lib/queries';
+
+export function getStaticPaths() {
+  return LOCALE_IDS.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as LocaleId;
+const t = useTranslations(lang);
+const awards = await getAwards(lang);
+
+const years = [...new Set(awards.map((a: any) => a.year))].filter(Boolean).sort((a, b) => b - a);
+---
+
+<Base lang={lang} title={t('nav.awards')} path="awards">
+  <h1>{t('nav.awards')}</h1>
+
+  {
+    awards.length ? (
+      years.map((year) => (
+        <section>
+          <h2>{year}</h2>
+          <ul class="grid">
+            {awards
+              .filter((a: any) => a.year === year)
+              .map((a: any) => (
+                <li class="card">
+                  <SanityImage image={a.image} aspect={4 / 3} sizes="(max-width: 700px) 100vw, 260px" />
+                  <h3>{a.name}</h3>
+                  <p class="meta">
+                    {a.gallery && (
+                      <a href={localePath(lang, `exhibitors/${a.gallery.slug}`)}>{a.gallery.name}</a>
+                    )}
+                    {a.gallery && a.artist && ' · '}
+                    {a.artist && <a href={localePath(lang, `artists/${a.artist.slug}`)}>{a.artist.name}</a>}
+                  </p>
+                  {a.citation && (
+                    <div class="prose citation">
+                      <PortableText value={a.citation} />
+                    </div>
+                  )}
+                </li>
+              ))}
+          </ul>
+        </section>
+      ))
+    ) : (
+      <p class="empty">
+        {t('awards.empty')} Add them in <a href="/studio">the Studio</a>.
+      </p>
+    )
+  }
+</Base>
+
+<style>
+  .citation {
+    font-size: 0.9rem;
+    color: var(--ink-2);
+    margin-top: 0.4rem;
+  }
+</style>

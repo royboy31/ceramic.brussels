@@ -1,0 +1,72 @@
+---
+import { LOCALES, type LocaleId } from '../lib/locales';
+
+/**
+ * Deep-links straight into the Studio for the document this page renders.
+ *
+ * Uses Sanity's intent router rather than a desk path, so the link keeps
+ * working if the desk structure is reorganised. The embedded Studio runs on
+ * hash history, hence the `#`.
+ *
+ * Shown in dev by default. Set PUBLIC_SHOW_EDIT_LINKS=true to keep them on a
+ * deployed build — useful on a staging domain, not on the public site.
+ */
+interface Props {
+  id: string | undefined;
+  type: string | undefined;
+  lang?: LocaleId;
+  /** Field path to focus, e.g. "title" - jumps the editor straight to it. */
+  focus?: string;
+  label?: string;
+}
+
+const { id, type, lang, focus, label = 'Edit' } = Astro.props;
+
+const enabled = import.meta.env.DEV || import.meta.env.PUBLIC_SHOW_EDIT_LINKS === 'true';
+
+// Drafts carry a `drafts.` prefix; the intent router wants the published id.
+const publishedId = id?.replace(/^drafts\./, '');
+
+const params = [`id=${publishedId}`, `type=${type}`];
+if (focus) params.push(`path=${encodeURIComponent(focus)}`);
+const href = `/studio#/intent/edit/${params.join(';')}`;
+---
+
+{
+  enabled && publishedId && type && (
+    <a class="edit-link" href={href} title={`Open ${type} in the Studio`}>
+      <span aria-hidden="true">✎</span>
+      {label}
+      {lang && <span class="edit-lang">{lang.toUpperCase()}</span>}
+    </a>
+  )
+}
+
+<style>
+  .edit-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    line-height: 1;
+    padding: 0.3rem 0.55rem;
+    border: 1px dashed var(--rule);
+    border-radius: 3px;
+    color: var(--ink-2);
+    text-decoration: none;
+    background: var(--surface);
+    vertical-align: middle;
+  }
+  .edit-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    border-style: solid;
+  }
+  .edit-lang {
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    border-left: 1px solid var(--rule);
+    padding-left: 0.35rem;
+  }
+</style>

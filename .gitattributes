@@ -1,0 +1,13 @@
+# Normalise to LF in the repository. Without this, a commit from Windows and a
+# commit from macOS/Linux rewrite every line of a file they touch, and reviews
+# drown in whitespace-only diffs.
+* text=auto eol=lf
+
+# Binary - never touch these.
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.woff binary
+*.woff2 binary
