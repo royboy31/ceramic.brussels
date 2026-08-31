@@ -65,8 +65,9 @@ const eventSchema = edition
 >
   {eventSchema && <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} slot="head" />}
 
-  <section class="hero">
-    <Figure
+  <section class="page-grid hero">
+    <div class="hero-shot">
+      <Figure
       image={edition?.cover}
       pool="fair"
       seed="hero"
@@ -76,12 +77,12 @@ const eventSchema = edition
         width: 1600,
         height: 1067,
       }}
-      aspect={1.5}
       loading="eager"
       priority
-      sizes="(max-width: 700px) 100vw, 65vw"
+      sizes="(max-width: 640px) 100vw, 66vw"
       widths={[600, 900, 1200, 1600, 2000]}
-    />
+      />
+    </div>
 
     <div class="hero-copy">
       <h1 class="display">{headline}</h1>
@@ -115,7 +116,7 @@ const eventSchema = edition
       <>
         <h2 class="latest">{t('home.latestNews')}</h2>
 
-        <section class="feature">
+        <section class="page-grid feature">
           <div class="feature-copy">
             {lead.category && <p class="eyebrow-lg">{lead.category}</p>}
             <h3>{lead.title}</h3>
@@ -124,6 +125,7 @@ const eventSchema = edition
             </a>
           </div>
 
+          <div class="feature-shot">
           <Figure
             image={lead.cover}
             pool="fair"
@@ -134,9 +136,9 @@ const eventSchema = edition
               width: 1200,
               height: 800,
             }}
-            aspect={1.5}
-            sizes="(max-width: 700px) 100vw, 33vw"
+            sizes="(max-width: 640px) 100vw, 50vw"
           />
+          </div>
         </section>
       </>
     )
@@ -150,7 +152,8 @@ const eventSchema = edition
 
   {
     spotlight && (
-      <section class="feature partner">
+      <section class="page-grid feature partner">
+        <div class="feature-shot">
         <Figure
           image={spotlight.logo}
           pool="fair"
@@ -161,9 +164,9 @@ const eventSchema = edition
             width: 800,
             height: 533,
           }}
-          aspect={1.5}
-          sizes="(max-width: 700px) 100vw, 65vw"
+          sizes="(max-width: 640px) 100vw, 50vw"
         />
+        </div>
 
         <div class="feature-copy">
           <p class="eyebrow-lg">{t('home.partnerSpotlight')}</p>
@@ -199,10 +202,9 @@ const eventSchema = edition
 </Base>
 
 <style>
-  /* The frame runs the homepage full-bleed; main's gutter is cancelled here. */
-  .hero,
-  .quicklinks,
-  .feature,
+  /* Hero, quicklinks and the feature blocks sit inside the page gutter, as
+     they do in the hand-off. Only the video, the figures table and the call
+     to action run edge to edge. */
   .video,
   .stats,
   .final-cta {
@@ -210,30 +212,29 @@ const eventSchema = edition
   }
 
   .hero {
-    display: grid;
-    grid-template-columns: 65% 35%;
     align-items: stretch;
+    row-gap: 1.5rem;
   }
-  .hero :global(img),
-  .hero > img,
-  .hero-empty {
+  .hero-shot {
+    grid-column: span 8;
+  }
+  .hero-shot :global(img) {
     width: 100%;
-    height: 100%;
+    height: 43vw;
+    max-height: 625px;
+    min-height: 320px;
     object-fit: cover;
   }
-  .hero-empty {
-    aspect-ratio: 1.5;
-    background: var(--surface-2);
-  }
   .hero-copy {
+    grid-column: span 4;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 0 2rem 0 2.5rem;
+    padding: 2rem 0;
   }
   .hero-copy h1 {
     margin: 0;
-    font-size: clamp(2rem, 4.85vw, 4.4rem);
+    font-size: clamp(3rem, 5vw, 4.5rem);
     font-weight: 400;
   }
   .hero-dates {
@@ -242,8 +243,8 @@ const eventSchema = edition
   }
   .hero-copy a {
     display: inline-block;
-    margin-top: 1.75rem;
-    font-size: clamp(1.15rem, 2.75vw, 2.5rem);
+    margin-top: 2rem;
+    font-size: clamp(1.25rem, 2.7vw, 2.5rem);
     letter-spacing: -0.05em;
   }
 
@@ -252,7 +253,6 @@ const eventSchema = edition
     grid-template-columns: repeat(4, 1fr);
     gap: 21px;
     margin-top: 27px;
-    padding-inline: 30px;
   }
   .quicklinks a {
     display: grid;
@@ -287,48 +287,48 @@ const eventSchema = edition
   }
 
   .feature {
-    display: grid;
-    grid-template-columns: 65.7% 31.4%;
-    gap: 2.9%;
     align-items: center;
+    row-gap: 1.25rem;
     margin-top: 30px;
-    padding-inline: 30px;
+    padding-bottom: 2.5rem;
   }
-  /* Guest/news feature puts copy first; the partner block mirrors it. */
-  .feature .feature-copy {
-    order: -1;
+  .feature-copy {
+    grid-column: span 6;
+    padding: 1.5rem 0;
   }
-  .feature.partner .feature-copy {
-    order: 0;
+  .feature-shot {
+    grid-column: span 6;
   }
-  .feature :global(img),
-  .feature > img,
-  .feature-empty {
+  .feature-shot :global(img) {
     width: 100%;
-    height: auto;
+    height: 31vw;
+    min-height: 280px;
+    object-fit: cover;
   }
-  .feature-empty {
-    aspect-ratio: 1.5;
-    background: var(--surface-2);
+  /* The partner block puts the image first, the news feature the copy. */
+  .feature.partner {
+    align-items: start;
+    padding: 1.5rem 0 0;
   }
+
   .eyebrow-lg {
     margin: 0;
     text-transform: lowercase;
-    font-size: clamp(1.15rem, 2.75vw, 2.5rem);
+    font-size: clamp(1.25rem, 2.7vw, 2.5rem);
     line-height: 1.05;
     letter-spacing: -0.05em;
   }
   .feature-copy h3 {
     margin: 0.5rem 0 0;
-    font-size: clamp(1.5rem, 2.75vw, 2.5rem);
-    line-height: 1.05;
+    font-size: clamp(2rem, 3.6vw, 3.2rem);
+    line-height: 1.02;
     letter-spacing: -0.04em;
     font-weight: 400;
   }
   .feature-copy a {
     display: inline-block;
     margin-top: 2rem;
-    font-size: clamp(1.15rem, 2.75vw, 2.5rem);
+    font-size: clamp(1.3rem, 2.6vw, 2.5rem);
     letter-spacing: -0.05em;
   }
 
@@ -427,38 +427,35 @@ const eventSchema = edition
     }
   }
 
-  @media (max-width: 700px) {
-    .hero,
-    .feature {
-      display: flex;
-      flex-direction: column;
-      gap: 1.1rem;
+  /* Below 640 the grid is 4 columns, so both halves take the full width and
+     the picture leads, as max-sm:col-span-full does in the hand-off. */
+  @media (max-width: 640px) {
+    .hero-shot,
+    .hero-copy,
+    .feature-copy,
+    .feature-shot {
+      grid-column: 1 / -1;
     }
-    .hero {
-      gap: 0;
-    }
-    .hero-copy {
-      padding: 1.4rem 10px 0.9rem;
-    }
-    .feature :global(img),
-    .feature > img,
-    .feature-empty {
+    .feature-shot {
       order: -1;
     }
-    .feature .feature-copy,
-    .feature.partner .feature-copy {
-      order: 0;
+    .hero-copy {
+      padding: 1.4rem 0 0.9rem;
     }
-    .hero,
-    .quicklinks,
-    .feature,
+    .hero-shot :global(img) {
+      height: 67vw;
+      min-height: 260px;
+    }
+    .feature-shot :global(img) {
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 1.5;
+    }
     .video,
     .stats,
     .final-cta {
       margin-inline: -10px;
     }
-    .quicklinks,
-    .feature,
     .stats-title,
     .stat {
       padding-inline: 10px;

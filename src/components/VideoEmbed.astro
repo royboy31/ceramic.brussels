@@ -51,7 +51,6 @@ const full = base ? `${base}?autoplay=1&mute=0&controls=1&playsinline=1&rel=0` :
 
         <button type="button" class="cover" data-video-play>
           <span class="label">{label}</span>
-          <span class="play" aria-hidden="true">▶</span>
         </button>
       </div>
     ) : (
@@ -68,24 +67,41 @@ const full = base ? `${base}?autoplay=1&mute=0&controls=1&playsinline=1&rel=0` :
     margin-top: 3rem;
     overflow: hidden;
   }
+  /* The box owns the height; the still and the player both fill it, so
+     mounting the iframe cannot add a second video's worth of height. */
   .frame {
     position: relative;
     display: block;
+    height: clamp(300px, 47.6vw, 686px);
     background: var(--ink);
+    overflow: hidden;
   }
 
   .poster,
   .frame :global(iframe) {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
-    height: clamp(300px, 47.6vw, 686px);
+    height: 100%;
     border: 0;
     object-fit: cover;
   }
-  /* Once the silent loop is playing the still is redundant. */
-  .frame.is-playing .poster {
-    visibility: hidden;
+
+  /* Order matters: all three overlap, and the DOM alone would paint the still
+     over the player. Still underneath, player over it, button on top. */
+  .poster {
+    z-index: 0;
   }
+  .frame :global(iframe) {
+    z-index: 1;
+  }
+  .cover {
+    z-index: 2;
+  }
+  /* The still stays put underneath the player, which sits on top of it. If
+     YouTube is slow, blocked or refused, the section still shows a picture
+     instead of a black rectangle. */
 
   .cover {
     position: absolute;
@@ -116,24 +132,9 @@ const full = base ? `${base}?autoplay=1&mute=0&controls=1&playsinline=1&rel=0` :
     letter-spacing: -0.05em;
     pointer-events: none;
   }
-  .play {
-    position: absolute;
-    left: 50%;
-    bottom: clamp(1.5rem, 5vw, 4rem);
-    transform: translateX(-50%);
-    display: grid;
-    place-items: center;
-    width: clamp(56px, 7vw, 96px);
-    height: clamp(48px, 6vw, 82px);
-    border-radius: clamp(12px, 2vw, 28px);
-    background: var(--ground);
-    color: var(--ink);
-    font-size: clamp(1.5rem, 2.6vw, 2.75rem);
-    padding-left: 0.12em;
-    pointer-events: none;
-  }
-  .cover:hover .play {
-    background: var(--acid);
+  .cover:hover .label {
+    text-decoration: underline;
+    text-underline-offset: 0.06em;
   }
   .cover:focus-visible {
     outline: 3px solid var(--acid);
