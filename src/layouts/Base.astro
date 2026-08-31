@@ -17,6 +17,8 @@ interface Props {
   /** Per-locale paths, when slugs differ per language. */
   altPaths?: Partial<Record<LocaleId, string>>;
   noIndex?: boolean;
+  /** 'acid' paints the whole page yellow, as the art prize section is. */
+  theme?: 'default' | 'acid';
   /** Social share image for this page. Falls back to the one in Site settings. */
   image?: any;
   /** Document this page renders, so the Edit button can deep-link to it. */
@@ -24,7 +26,8 @@ interface Props {
   editType?: string;
 }
 
-const { lang, title, description, path = '', altPaths, noIndex, image, editId, editType } = Astro.props;
+const { lang, title, description, path = '', altPaths, noIndex, theme = 'default', image, editId, editType } =
+  Astro.props;
 const t = useTranslations(lang);
 
 const [settings, navPages, navigation] = await Promise.all([
@@ -158,7 +161,7 @@ const current = Astro.url.pathname.replace(/\/$/, '');
     <slot name="head" />
   </head>
 
-  <body>
+  <body class={theme === 'acid' ? 'acid-page' : undefined}>
     <a class="skip" href="#main">Skip to content</a>
 
     <Header lang={lang} siteName={siteName} path={path} altPaths={altPaths} />
@@ -226,6 +229,11 @@ const current = Astro.url.pathname.replace(/\/$/, '');
   body {
     margin: 0;
     min-width: 320px;
+    /* Short pages still push the footer to the bottom, so the page background
+       never shows underneath it. */
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
     background: var(--ground);
     color: var(--ink);
     font-family: var(--font);
@@ -256,6 +264,11 @@ const current = Astro.url.pathname.replace(/\/$/, '');
   ::selection {
     background: var(--acid);
     color: var(--ink);
+  }
+
+  /* Whole-page acid, used by the art prize section. */
+  body.acid-page {
+    background: var(--acid);
   }
 
   /* 12-column grid, 30px gutters - the spine of every page in the design. */
@@ -331,6 +344,7 @@ const current = Astro.url.pathname.replace(/\/$/, '');
 
   /* content primitives - still used by the pages that are not ported yet */
   main {
+    flex: 1;
     padding: 0 30px 4rem;
   }
 

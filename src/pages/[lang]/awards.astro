@@ -17,36 +17,54 @@ const awards = await getAwards(lang);
 const years = [...new Set(awards.map((a: any) => a.year))].filter(Boolean).sort((a, b) => b - a);
 ---
 
-<Base lang={lang} title={t('nav.awards')} path="awards">
-  <h1>{t('nav.awards')}</h1>
+<Base lang={lang} title={t('nav.awards')} path="awards" theme="acid">
+  <h1 class="section-title">{t('nav.awards')}</h1>
 
   {
     awards.length ? (
       years.map((year) => (
-        <section>
-          <h2>{year}</h2>
-          <ul class="grid">
+        <section class="year">
+          {years.length > 1 && <h2 class="year-title">{year}</h2>}
+
+          <div class="awards">
             {awards
               .filter((a: any) => a.year === year)
-              .map((a: any) => (
-                <li class="card">
-                  <SanityImage image={a.image} aspect={4 / 3} sizes="(max-width: 700px) 100vw, 260px" />
-                  <h3>{a.name}</h3>
-                  <p class="meta">
-                    {a.gallery && (
-                      <a href={localePath(lang, `exhibitors/${a.gallery.slug}`)}>{a.gallery.name}</a>
-                    )}
-                    {a.gallery && a.artist && ' · '}
-                    {a.artist && <a href={localePath(lang, `artists/${a.artist.slug}`)}>{a.artist.name}</a>}
-                  </p>
-                  {a.citation && (
-                    <div class="prose citation">
-                      <PortableText value={a.citation} />
+              .map((award: any) => (
+                <article class="award">
+                  <h3>{award.name}</h3>
+
+                  {(award.artist || award.gallery) && (
+                    <p class="winner">
+                      <span aria-hidden="true">→ </span>
+                      {award.artist && (
+                        <a href={localePath(lang, `artists/${award.artist.slug}`)}>{award.artist.name}</a>
+                      )}
+                      {award.artist && award.gallery && ' · '}
+                      {award.gallery && (
+                        <a href={localePath(lang, `exhibitors/${award.gallery.slug}`)}>{award.gallery.name}</a>
+                      )}
+                    </p>
+                  )}
+
+                  {award.citation && (
+                    <div class="citation">
+                      <PortableText value={award.citation} />
                     </div>
                   )}
-                </li>
+
+                  {award.image?.asset && (
+                    <figure class="shot">
+                      <SanityImage
+                        image={award.image}
+                        sizes="(max-width: 800px) 100vw, 45vw"
+                        widths={[400, 600, 900, 1200]}
+                      />
+                      {award.image.credit && <figcaption>{award.image.credit}</figcaption>}
+                    </figure>
+                  )}
+                </article>
               ))}
-          </ul>
+          </div>
         </section>
       ))
     ) : (
@@ -58,9 +76,77 @@ const years = [...new Set(awards.map((a: any) => a.year))].filter(Boolean).sort(
 </Base>
 
 <style>
+  .section-title {
+    text-transform: lowercase;
+    font-size: clamp(2rem, 4.8vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    margin: 0 0 2rem;
+  }
+
+  .year-title {
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+    letter-spacing: -0.03em;
+  }
+
+  /* The frame runs the awards as two independent columns that pack tightly,
+     which is what CSS columns give without any measuring. */
+  .awards {
+    columns: 2;
+    column-gap: 3rem;
+  }
+
+  .award {
+    break-inside: avoid;
+    margin: 0 0 3rem;
+  }
+
+  .award h3 {
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 0.35rem;
+    margin: 0 0 1rem;
+    font-size: clamp(1.15rem, 1.9vw, 1.6rem);
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  .winner {
+    font-size: clamp(1.15rem, 2.1vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 1rem;
+  }
+  .winner a {
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+  }
+
   .citation {
-    font-size: 0.9rem;
-    color: var(--ink-2);
-    margin-top: 0.4rem;
+    font-size: clamp(0.9rem, 1.25vw, 1.05rem);
+    line-height: 1.4;
+  }
+  .citation :global(p) {
+    margin: 0 0 1rem;
+  }
+
+  .shot {
+    margin: 1.25rem 0 0;
+  }
+  .shot figcaption {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+  }
+
+  .empty {
+    background: transparent;
+    border-color: var(--ink);
+  }
+
+  @media (max-width: 800px) {
+    .awards {
+      columns: 1;
+    }
   }
 </style>

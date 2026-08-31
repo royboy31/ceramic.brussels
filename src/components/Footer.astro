@@ -48,6 +48,12 @@ const year = new Date().getFullYear();
     font-size: 0.875rem;
   }
 
+  /* Sampled from the art prize frames: on an acid page the band inverts -
+     white at the top resolving back into the page colour at the bottom. */
+  :global(body.acid-page) .site-footer {
+    background: linear-gradient(180deg, var(--ground) 0px, var(--ground) 40px, var(--acid) 80px);
+  }
+
   .copyright {
     margin: 0;
   }

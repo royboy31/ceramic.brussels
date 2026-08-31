@@ -68,6 +68,10 @@ const t = useTranslations(lang);
     position: relative;
     z-index: 40;
   }
+  :global(body.acid-page) .site-header {
+    background: var(--acid);
+  }
+
   .header-inner {
     align-items: center;
     height: clamp(88px, 11vw, 159px);
