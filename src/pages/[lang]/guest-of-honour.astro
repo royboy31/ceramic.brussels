@@ -1,0 +1,258 @@
+---
+import Base from '../../layouts/Base.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations, localePath } from '../../lib/i18n';
+import { getArtists, getArtist } from '../../lib/queries';
+
+export function getStaticPaths() {
+  return LOCALE_IDS.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as LocaleId;
+const t = useTranslations(lang);
+
+// The index query carries the flag; the detail query carries the bio and works.
+const artists = await getArtists(lang);
+const flagged = artists.find((a: any) => a.isGuestOfHonour);
+const guest = flagged ? await getArtist(lang, flagged.slug) : null;
+
+const origin = [guest?.birthYear && `°${guest.birthYear}`, guest?.nationality].filter(Boolean).join(', ');
+---
+
+<Base
+  lang={lang}
+  title={guest ? `${t('artists.guestOfHonour')} — ${guest.name}` : t('artists.guestOfHonour')}
+  description={guest?.seo?.description}
+  path="guest-of-honour"
+  image={guest?.seo?.ogImage ?? guest?.portrait}
+  editId={guest?._id}
+  editType={guest?._type}
+>
+  <h1 class="section-title">{t('artists.guestOfHonour')}</h1>
+
+  {
+    guest ? (
+      <div class="page-grid guest">
+        <figure class="portrait">
+          {guest.portrait?.asset ? (
+            <SanityImage
+              image={guest.portrait}
+              aspect={0.72}
+              loading="eager"
+              sizes="(max-width: 900px) 100vw, 33vw"
+              widths={[400, 600, 900, 1200]}
+            />
+          ) : (
+            <div class="portrait-empty" />
+          )}
+        </figure>
+
+        <section class="intro">
+          <div class="title-row">
+            <h2>{guest.name}</h2>
+            {origin && <p class="origin">{origin}</p>}
+          </div>
+
+          <p class="links">
+            {guest.instagram && (
+              <a class="pill" href={`https://instagram.com/${guest.instagram}`} rel="noopener noreferrer">
+                instagram ↗
+              </a>
+            )}
+            {guest.website && (
+              <a class="pill" href={guest.website} rel="noopener noreferrer">
+                {t('common.website')} ↗
+              </a>
+            )}
+          </p>
+
+          {guest.bio && (
+            <>
+              <h3 class="panel-title">{t('artists.biography')}</h3>
+              <div class="body-copy">
+                <PortableText value={guest.bio} />
+              </div>
+            </>
+          )}
+        </section>
+
+        {guest.works?.length > 0 && (
+          <section class="works">
+            <h3 class="panel-title">{t('artists.selectedWorks')}</h3>
+            <div class="work-grid">
+              {guest.works.map((work: any) => (
+                <figure>
+                  {work.image?.asset && (
+                    <SanityImage
+                      image={work.image}
+                      aspect={1.5}
+                      sizes="(max-width: 700px) 100vw, 46vw"
+                      widths={[400, 600, 900, 1200]}
+                    />
+                  )}
+                  <figcaption>
+                    {[guest.name, work.title, work.year].filter(Boolean).join(', ')}
+                    {work.materials && <span class="materials"> · {work.materials}</span>}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {guest.exhibitors?.length > 0 && (
+          <p class="shown-by">
+            {t('artists.shownBy')}{' '}
+            {guest.exhibitors.map((e: any, i: number) => (
+              <>
+                {i > 0 && ', '}
+                <a href={localePath(lang, `exhibitors/${e.slug}`)}>{e.name}</a>
+              </>
+            ))}
+          </p>
+        )}
+      </div>
+    ) : (
+      <p class="empty">
+        {t('artists.empty')} Tick <strong>Guest of honour</strong> on an artist in{' '}
+        <a href="/studio">the Studio</a>.
+      </p>
+    )
+  }
+</Base>
+
+<style>
+  .section-title {
+    text-transform: lowercase;
+    font-size: clamp(2rem, 4.8vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    margin: 0 0 1.5rem;
+  }
+
+  .guest {
+    row-gap: 3.5rem;
+  }
+
+  .portrait {
+    grid-column: span 4;
+    margin: 0;
+  }
+  .portrait-empty {
+    aspect-ratio: 0.72;
+    background: var(--surface-2);
+  }
+
+  .intro {
+    grid-column: span 8;
+  }
+  .title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-top: 2px solid var(--ink);
+    padding-top: 0.4rem;
+  }
+  .title-row h2 {
+    margin: 0;
+    font-size: clamp(2rem, 4.2vw, 3.75rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 400;
+  }
+  .origin {
+    margin: 0;
+    font-size: clamp(1.25rem, 2.8vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+  }
+  .links .pill {
+    text-transform: lowercase;
+    text-decoration: none;
+    padding: 0.15rem 1.1rem;
+    font-size: inherit;
+  }
+  .links .pill:hover {
+    background: var(--acid);
+  }
+
+  .panel-title {
+    text-transform: lowercase;
+    border-bottom: 2px solid var(--ink);
+    margin: 3.5rem 0 1.5rem;
+    padding-bottom: 0.2rem;
+    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+  }
+
+  /* One bio field in Sanity, two columns in the design. */
+  .body-copy {
+    columns: 2;
+    column-gap: 2.5rem;
+    font-size: clamp(1rem, 1.5vw, 1.5rem);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+  .body-copy :global(p) {
+    margin: 0 0 1.5rem;
+    break-inside: avoid;
+  }
+
+  .works {
+    grid-column: 1 / -1;
+  }
+  .work-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+  }
+  .work-grid figure {
+    margin: 0;
+  }
+  .work-grid figcaption {
+    margin-top: 0.5rem;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+  .materials {
+    color: var(--ink-3);
+  }
+
+  .shown-by {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  @media (max-width: 900px) {
+    .portrait,
+    .intro {
+      grid-column: 1 / -1;
+    }
+    .body-copy {
+      columns: 1;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .work-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+</style>

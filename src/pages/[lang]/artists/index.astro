@@ -12,33 +12,72 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 const artists = await getArtists(lang);
+
+const LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+/** Files an artist under the first letter of their name, accents folded. */
+const initial = (name: string) =>
+  (name ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .charAt(0)
+    .toLowerCase();
+
+const used = new Set(artists.map((a: any) => initial(a.name)));
 ---
 
 <Base lang={lang} title={t('nav.artists')} path="artists">
-  <h1>{t('nav.artists')}</h1>
-  <p class="lede">{artists.length}</p>
+  <h1 class="section-title">{t('nav.artists')}</h1>
 
   {
     artists.length ? (
-      <ul class="grid">
-        {artists.map((a: any) => (
-          <li class="card">
-            <a class="card-link" href={localePath(lang, `artists/${a.slug}`)}>
-              <SanityImage image={a.portrait} aspect={1} sizes="(max-width: 700px) 50vw, 240px" />
-              <h3>{a.name}</h3>
-              <p class="meta">
-                {[a.nationality, a.birthYear ? `b. ${a.birthYear}` : null].filter(Boolean).join(' · ')}
-              </p>
-            </a>
-            {a.isGuestOfHonour && <p class="pill">{t('artists.guestOfHonour')}</p>}
-            {a.exhibitors?.length > 0 && (
-              <p class="meta shown">
-                {t('artists.shownBy')} {a.exhibitors.map((e: any) => e.name).join(', ')}
-              </p>
-            )}
-          </li>
-        ))}
-      </ul>
+      <>
+        <nav class="alphabet" aria-label={t('exhibitors.byLetter')}>
+          {LETTERS.map((letter, i) => (
+            <>
+              {i > 0 && <span class="dash" aria-hidden="true">–</span>}
+              {used.has(letter) ? (
+                <button type="button" data-letter={letter} aria-pressed="false">
+                  {letter}
+                </button>
+              ) : (
+                <span class="letter-off">{letter}</span>
+              )}
+            </>
+          ))}
+        </nav>
+
+        <p class="empty" id="no-match" hidden>{t('exhibitors.noneMatch')}</p>
+
+        <ul class="page-grid cards" id="artist-list">
+          {artists.map((a: any) => (
+            <li class="card" data-letter={initial(a.name)}>
+              <a href={localePath(lang, `artists/${a.slug}`)}>
+                <div class="thumb">
+                  {a.portrait?.asset ? (
+                    <SanityImage
+                      image={a.portrait}
+                      aspect={0.8}
+                      sizes="(max-width: 640px) 50vw, (max-width: 900px) 33vw, 25vw"
+                      widths={[300, 500, 700, 900]}
+                    />
+                  ) : (
+                    <div class="thumb-empty" />
+                  )}
+                  {a.isGuestOfHonour && <span class="badge">{t('artists.guestOfHonour')}</span>}
+                </div>
+
+                <h2>
+                  {a.name}
+                  {a.birthYear && <sup>°{a.birthYear}</sup>}
+                </h2>
+                {a.nationality && <p class="meta">{a.nationality}</p>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </>
     ) : (
       <p class="empty">
         {t('artists.empty')} Add them in <a href="/studio">the Studio</a>.
@@ -48,8 +87,153 @@ const artists = await getArtists(lang);
 </Base>
 
 <style>
-  .shown {
-    margin: 0.3rem 0 0;
-    font-size: 0.8rem;
+  .section-title {
+    text-transform: lowercase;
+    font-size: clamp(2rem, 4.8vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    margin: 0 0 1.25rem;
+  }
+
+  .alphabet {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.35em;
+    font-size: clamp(1.25rem, 3.2vw, 2.6rem);
+    letter-spacing: -0.04em;
+  }
+  .alphabet button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+  .alphabet button:hover,
+  .alphabet button[aria-pressed='true'] {
+    background: var(--acid);
+  }
+  .letter-off,
+  .dash {
+    color: var(--ink-3);
+  }
+
+  .cards {
+    list-style: none;
+    margin: 2rem 0 0;
+    row-gap: 1.75rem;
+    padding-inline: 0;
+  }
+  .card {
+    grid-column: span 3;
+  }
+  .card[hidden] {
+    display: none;
+  }
+  .card a {
+    display: block;
+    text-decoration: none;
+  }
+
+  .thumb {
+    position: relative;
+    overflow: hidden;
+  }
+  .thumb-empty {
+    aspect-ratio: 0.8;
+    background: var(--surface-2);
+  }
+  .thumb :global(img) {
+    width: 100%;
+    transition: transform 0.5s ease;
+  }
+  .card a:hover .thumb :global(img) {
+    transform: scale(1.025);
+  }
+
+  .badge {
+    position: absolute;
+    right: 0.6rem;
+    top: 0.6rem;
+    background: var(--ink);
+    color: var(--ground);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.72rem;
+    line-height: 1.1;
+    max-width: 5.5rem;
+    text-align: center;
+  }
+
+  .card h2 {
+    margin: 0.5rem 0 0;
+    font-size: clamp(1.15rem, 2vw, 1.75rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 400;
+  }
+  .card sup {
+    font-size: 0.5em;
+    letter-spacing: normal;
+    margin-left: 0.2em;
+  }
+  .card .meta {
+    margin: 0.25rem 0 0;
+  }
+
+  #no-match {
+    margin-top: 2rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .thumb :global(img),
+    .card a:hover .thumb :global(img) {
+      transition: none;
+      transform: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .card {
+      grid-column: span 4;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .card {
+      grid-column: span 2;
+    }
   }
 </style>
+
+<script>
+  const list = document.getElementById('artist-list');
+  const noMatch = document.getElementById('no-match');
+
+  if (list && noMatch) {
+    const cards = [...list.querySelectorAll<HTMLLIElement>('li.card')];
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-letter][aria-pressed]')];
+    let letter = '';
+
+    for (const button of buttons) {
+      button.addEventListener('click', () => {
+        letter = button.dataset.letter === letter ? '' : (button.dataset.letter ?? '');
+
+        let visible = 0;
+        for (const card of cards) {
+          const match = !letter || card.dataset.letter === letter;
+          card.hidden = !match;
+          if (match) visible++;
+        }
+
+        noMatch.hidden = visible > 0;
+        for (const other of buttons) {
+          other.setAttribute('aria-pressed', String(other.dataset.letter === letter));
+        }
+      });
+    }
+  }
+</script>
