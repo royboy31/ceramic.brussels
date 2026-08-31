@@ -33,6 +33,7 @@ const articleSchema = {
   title={item.seo?.title ?? item.title}
   description={item.seo?.description ?? item.excerpt}
   noIndex={item.seo?.noIndex}
+  image={item.seo?.ogImage ?? item.cover}
   path={`news/${slug}`}
   editId={item._id}
   editType={item._type}

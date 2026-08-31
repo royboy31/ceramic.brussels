@@ -34,6 +34,7 @@ const orgSchema = {
   title={exhibitor.seo?.title ?? exhibitor.name}
   description={exhibitor.seo?.description}
   noIndex={exhibitor.seo?.noIndex}
+  image={exhibitor.seo?.ogImage ?? exhibitor.images?.[0]}
   path={path}
   editId={exhibitor._id}
   editType={exhibitor._type}

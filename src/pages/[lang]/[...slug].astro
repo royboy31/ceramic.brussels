@@ -42,6 +42,7 @@ const altPaths = Object.fromEntries(
   title={page.seo?.title ?? page.title}
   description={page.seo?.description ?? page.intro}
   noIndex={page.seo?.noIndex}
+  image={page.seo?.ogImage ?? page.cover}
   path={slug}
   altPaths={altPaths}
   editId={page._id}

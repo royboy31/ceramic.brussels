@@ -2,7 +2,11 @@
 import { LOCALES, type LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
 import { getSettings, getNavPages, getNavigation } from '../lib/queries';
+import { urlFor } from '../sanity/image';
 import EditLink from '../components/EditLink.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import MenuOverlay from '../components/MenuOverlay.astro';
 
 interface Props {
   lang: LocaleId;
@@ -13,12 +17,14 @@ interface Props {
   /** Per-locale paths, when slugs differ per language. */
   altPaths?: Partial<Record<LocaleId, string>>;
   noIndex?: boolean;
+  /** Social share image for this page. Falls back to the one in Site settings. */
+  image?: any;
   /** Document this page renders, so the Edit button can deep-link to it. */
   editId?: string;
   editType?: string;
 }
 
-const { lang, title, description, path = '', altPaths, noIndex, editId, editType } = Astro.props;
+const { lang, title, description, path = '', altPaths, noIndex, image, editId, editType } = Astro.props;
 const t = useTranslations(lang);
 
 const [settings, navPages, navigation] = await Promise.all([
@@ -33,6 +39,18 @@ const metaDescription = description ?? settings?.defaultSeo?.description ?? sett
 
 const site = Astro.site ?? new URL('http://localhost:4321');
 const canonical = new URL(localePath(lang, path), site).href;
+
+/**
+ * Social share image. Facebook, LinkedIn and WhatsApp all want an absolute URL
+ * and refuse to crop, so pin it to the 1200x630 they expect rather than passing
+ * the original through. Falls back to the site-wide image in Site settings, so
+ * a page that sets nothing still shares with a picture.
+ */
+const shareImage = image?.asset ? image : settings?.defaultSeo?.ogImage;
+const ogImage = shareImage?.asset
+  ? urlFor(shareImage).width(1200).height(630).fit('crop').auto('format').quality(80).url()
+  : null;
+const ogImageAlt = shareImage?.alt ?? undefined;
 
 const alternates = LOCALES.map((l) => ({
   lang: l.id,
@@ -119,7 +137,22 @@ const current = Astro.url.pathname.replace(/\/$/, '');
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     {metaDescription && <meta property="og:description" content={metaDescription} />}
+    <meta property="og:locale" content={lang} />
+    {
+      ogImage && (
+        <>
+          <meta property="og:image" content={ogImage} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          {ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
+        </>
+      )
+    }
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
 
+    <link rel="preload" href="/fonts/noi-grotesk-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://cdn.sanity.io" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <slot name="head" />
@@ -128,116 +161,142 @@ const current = Astro.url.pathname.replace(/\/$/, '');
   <body>
     <a class="skip" href="#main">Skip to content</a>
 
-    <header class="site-header">
-      <div class="shell header-inner">
-        <a class="brand" href={localePath(lang)}>
-          {siteName}
-          {settings?.tagline && <span class="tagline">{settings.tagline}</span>}
-        </a>
+    <Header lang={lang} siteName={siteName} path={path} altPaths={altPaths} />
+    <MenuOverlay lang={lang} items={nav} newsletterUrl={settings?.newsletterUrl} />
 
-        <nav class="locales" aria-label={t('common.language')}>
-          {
-            LOCALES.map((l) => (
-              <a
-                href={localePath(l.id, altPaths?.[l.id] ?? path)}
-                hreflang={l.id}
-                aria-current={l.id === lang ? 'true' : undefined}
-              >
-                {l.id}
-              </a>
-            ))
-          }
-        </nav>
-      </div>
+    <div class="edit-bar">
+      <EditLink id="navigation" type="navigation" label="Edit menu" />
+      {editId && editType && <EditLink id={editId} type={editType} lang={lang} label="Edit this content" />}
+    </div>
 
-      <nav class="main-nav" aria-label="Main">
-        <div class="shell nav-row">
-          <ul>
-            {
-              nav.map((item) => (
-                <li>
-                  <a
-                    href={item.href}
-                    aria-current={current === item.href ? 'page' : undefined}
-                    {...(item.external ? { rel: 'noopener noreferrer' } : {})}
-                  >
-                    {item.label}
-                  </a>
-                </li>
-              ))
-            }
-          </ul>
-          <EditLink id="navigation" type="navigation" label="Edit menu" />
-        </div>
-      </nav>
-    </header>
-
-    {
-      (editId || Astro.url.pathname) && (
-        <div class="edit-bar shell">
-          {editId && editType && <EditLink id={editId} type={editType} lang={lang} label="Edit this content" />}
-        </div>
-      )
-    }
-
-    <main id="main" class="shell">
+    <main id="main">
       <slot />
     </main>
 
-    <footer class="site-footer">
-      <div class="shell footer-inner">
-        <div>
-          <strong>{siteName}</strong>
-          {settings?.practicalInfo?.address && <p class="addr">{settings.practicalInfo.address}</p>}
-        </div>
-        <div class="footer-links">
-          {footerNav.map((item) => <a href={item.href}>{item.label}</a>)}
-        </div>
-      </div>
-    </footer>
+    <Footer siteName={siteName} links={footerNav} />
+
   </body>
 </html>
 
 <style is:global>
+  /* Noi Grotesk - the two weights the design uses. Swap these two files when
+     the licensed (non-trial) cut arrives; nothing else needs to change. */
+  @font-face {
+    font-family: 'Noi Grotesk';
+    src: url('/fonts/noi-grotesk-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Noi Grotesk';
+    src: url('/fonts/noi-grotesk-600.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+
   :root {
+    --acid: #fff350;
     --ground: #ffffff;
     --surface: #fafaf9;
     --surface-2: #f0efed;
-    --ink: #1a1a19;
+    --ink: #050505;
     --ink-2: #55534f;
     --ink-3: #8a8781;
     --rule: #e0dedb;
-    --accent: #1f4fa3;
+    --accent: #050505;
     --measure: 68ch;
     --shell: 1140px;
-    --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font: 'Noi Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --ground: #121211;
-      --surface: #1a1a19;
-      --surface-2: #232322;
-      --ink: #ececea;
-      --ink-2: #a8a5a0;
-      --ink-3: #7a7772;
-      --rule: #2e2e2c;
-      --accent: #8fb0e8;
-    }
-  }
+  /* The Figma is a light, acid-on-white identity with no dark counterpart, so
+     the palette deliberately does not invert. Reinstating dark mode means
+     designing it first - see the note in the handover. */
 
   * {
     box-sizing: border-box;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     margin: 0;
+    min-width: 320px;
     background: var(--ground);
     color: var(--ink);
     font-family: var(--font);
     font-size: 16px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: inherit;
+  }
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  button {
+    font: inherit;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  ::selection {
+    background: var(--acid);
+    color: var(--ink);
+  }
+
+  /* 12-column grid, 30px gutters - the spine of every page in the design. */
+  .page-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0 30px;
+    padding-inline: 30px;
+  }
+
+  @media (max-width: 900px) {
+    .page-grid {
+      gap: 0 16px;
+      padding-inline: 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .page-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0 10px;
+      padding-inline: 10px;
+    }
+  }
+
+  /* Type helpers from the design system. */
+  .display {
+    letter-spacing: -0.052em;
+    line-height: 0.92;
+  }
+  .eyebrow {
+    font-size: clamp(0.72rem, 1vw, 1rem);
+    text-transform: uppercase;
+  }
+  .text-link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.12em;
+  }
+  .rule {
+    border-top: 1px solid currentColor;
   }
 
   .shell {
@@ -253,125 +312,54 @@ const current = Astro.url.pathname.replace(/\/$/, '');
   .skip:focus {
     left: 1rem;
     top: 1rem;
-    z-index: 10;
+    z-index: 50;
     background: var(--ink);
     color: var(--ground);
     padding: 0.5rem 0.9rem;
   }
 
-  a {
-    color: var(--accent);
-  }
-  a:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  /* header */
-  .site-header {
-    border-bottom: 1px solid var(--rule);
-    margin-bottom: 2.5rem;
-  }
-  .header-inner {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    padding-top: 1.4rem;
-    padding-bottom: 1rem;
-  }
-  .brand {
-    font-weight: 700;
-    font-size: 1.15rem;
-    letter-spacing: -0.01em;
-    color: var(--ink);
-    text-decoration: none;
-  }
-  .brand .tagline {
-    display: block;
-    font-weight: 400;
-    font-size: 0.8rem;
-    color: var(--ink-3);
-    letter-spacing: 0;
-  }
-  .locales {
-    display: flex;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-  .locales a {
-    color: var(--ink-3);
-    text-decoration: none;
-    padding: 0.15rem 0.35rem;
-  }
-  .locales a[aria-current] {
-    color: var(--ground);
-    background: var(--ink);
-  }
-
-  .nav-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-  }
   .edit-bar {
     display: flex;
     justify-content: flex-end;
+    padding-inline: 30px;
     gap: 0.5rem;
-    margin-top: -1.75rem;
-    margin-bottom: 1rem;
-    min-height: 0;
+    padding-top: 0.5rem;
   }
   .edit-bar:empty {
     display: none;
   }
 
-  .main-nav ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 1.1rem;
-    list-style: none;
-    margin: 0;
-    padding: 0 0 0.9rem;
-    font-size: 0.88rem;
-  }
-  .main-nav a {
-    color: var(--ink-2);
-    text-decoration: none;
-    padding: 0.2rem 0;
-    border-bottom: 2px solid transparent;
-  }
-  .main-nav a:hover {
-    color: var(--ink);
-  }
-  .main-nav a[aria-current='page'] {
-    color: var(--ink);
-    border-bottom-color: var(--accent);
+  /* content primitives - still used by the pages that are not ported yet */
+  main {
+    padding: 0 30px 4rem;
   }
 
-  /* content primitives */
-  main {
-    padding-bottom: 4rem;
+  @media (max-width: 900px) {
+    main {
+      padding-inline: 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    main {
+      padding-inline: 10px;
+    }
+  }
+
+  /* main already carries the gutter, so a grid inside it must not add another. */
+  main .page-grid {
+    padding-inline: 0;
   }
   h1 {
     font-size: clamp(1.8rem, 4vw, 2.6rem);
     line-height: 1.1;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.04em;
     margin: 0 0 0.5rem;
     text-wrap: balance;
   }
   h2 {
     font-size: 1.3rem;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     margin: 2.5rem 0 0.8rem;
   }
   h3 {
@@ -400,9 +388,6 @@ const current = Astro.url.pathname.replace(/\/$/, '');
     padding: 1.5rem;
     color: var(--ink-2);
   }
-  .empty a {
-    color: var(--accent);
-  }
 
   .grid {
     display: grid;
@@ -427,13 +412,10 @@ const current = Astro.url.pathname.replace(/\/$/, '');
 
   .pill {
     display: inline-block;
-    font-size: 0.72rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    background: var(--surface-2);
-    color: var(--ink-2);
-    padding: 0.15rem 0.45rem;
-    border-radius: 2px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: 0.15rem 0.9rem;
+    font-size: 0.9rem;
   }
 
   .back {
@@ -442,27 +424,13 @@ const current = Astro.url.pathname.replace(/\/$/, '');
     font-size: 0.88rem;
   }
 
-  /* footer */
-  .site-footer {
-    border-top: 1px solid var(--rule);
-    padding: 2rem 0 3rem;
-    font-size: 0.87rem;
-    color: var(--ink-2);
-  }
-  .footer-inner {
+  .section-head {
     display: flex;
-    flex-wrap: wrap;
+    align-items: baseline;
     justify-content: space-between;
-    gap: 1.5rem;
-  }
-  .footer-inner .addr {
-    white-space: pre-line;
-    margin: 0.4rem 0 0;
-    color: var(--ink-3);
-  }
-  .footer-links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
+    gap: 1rem;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.5rem;
+    margin-top: 3rem;
   }
 </style>

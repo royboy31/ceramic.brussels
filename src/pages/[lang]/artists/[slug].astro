@@ -32,6 +32,7 @@ const personSchema = {
   title={artist.seo?.title ?? artist.name}
   description={artist.seo?.description}
   noIndex={artist.seo?.noIndex}
+  image={artist.seo?.ogImage ?? artist.portrait}
   path={`artists/${slug}`}
   editId={artist._id}
   editType={artist._type}
