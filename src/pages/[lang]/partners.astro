@@ -13,40 +13,68 @@ const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 const partners = await getPartners(lang);
 
-const TIERS = ['main', 'institutional', 'media', 'supplier'];
-const TIER_LABELS: Record<string, string> = {
-  main: 'Main partners',
-  institutional: 'Institutional partners',
-  media: 'Media partners',
-  supplier: 'Suppliers',
-};
+/**
+ * Tabs follow the tiers the schema defines. The design also shows "hotel" and
+ * "event partners"; there are no such tiers yet, so they appear as soon as the
+ * field offers them rather than being invented here. Only tiers that actually
+ * have partners get a tab.
+ */
+const TIERS = ['main', 'institutional', 'media', 'supplier'] as const;
 
-const grouped = TIERS.map((tier) => ({
+const groups = TIERS.map((tier) => ({
   tier,
-  label: TIER_LABELS[tier],
+  label: t(`partners.${tier}`),
   items: partners.filter((p: any) => p.tier === tier),
-})).filter((g) => g.items.length > 0);
+})).filter((group) => group.items.length > 0);
 ---
 
 <Base lang={lang} title={t('nav.partners')} path="partners">
-  <h1>{t('nav.partners')}</h1>
+  <div class="section-head">
+    <h1 class="section-title">{t('nav.partners')}</h1>
+
+    {
+      groups.length > 1 && (
+        <nav class="tabs" aria-label={t('nav.partners')}>
+          {groups.map((group, i) => (
+            <button type="button" class="pill" data-tab={group.tier} aria-pressed={i === 0 ? 'true' : 'false'}>
+              {group.label}
+            </button>
+          ))}
+        </nav>
+      )
+    }
+  </div>
 
   {
-    grouped.length ? (
-      grouped.map((group) => (
-        <section>
-          <h2>{group.label}</h2>
-          <ul class="grid logos">
-            {group.items.map((p: any) => (
-              <li class="card">
-                <a class="card-link" href={p.url ?? '#'}>
-                  <SanityImage image={p.logo} aspect={3 / 2} sizes="200px" widths={[200, 400, 600]} />
-                  <h3>{p.name}</h3>
-                </a>
-                {p.description && <p class="meta">{p.description}</p>}
-              </li>
+    groups.length ? (
+      groups.map((group, i) => (
+        <section class="tier" data-panel={group.tier} hidden={i > 0}>
+          <h2 class="tier-title">{group.label}</h2>
+
+          <div class="partners">
+            {group.items.map((partner: any) => (
+              <article class="partner">
+                <h3>{partner.name}</h3>
+                {partner.description && <p class="body">{partner.description}</p>}
+
+                <div class="foot">
+                  {partner.url && (
+                    <a class="pill" href={partner.url} rel="noopener noreferrer">
+                      {t('common.website')} ↗
+                    </a>
+                  )}
+                  {partner.logo?.asset && (
+                    <SanityImage
+                      image={partner.logo}
+                      sizes="200px"
+                      widths={[200, 400, 600]}
+                      class="logo"
+                    />
+                  )}
+                </div>
+              </article>
             ))}
-          </ul>
+          </div>
         </section>
       ))
     ) : (
@@ -58,7 +86,121 @@ const grouped = TIERS.map((tier) => ({
 </Base>
 
 <style>
-  .logos {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 0;
+    margin: 0;
+    padding: 0 0 1.75rem;
+  }
+  .section-title {
+    text-transform: lowercase;
+    font-size: clamp(2rem, 4.8vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .tabs .pill {
+    border-radius: 0;
+    padding: 0.35rem 1.1rem;
+    font-family: inherit;
+    font-size: clamp(1rem, 1.8vw, 1.75rem);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .tabs .pill[aria-pressed='true'] {
+    background: var(--acid);
+  }
+
+  .tier[hidden] {
+    display: none;
+  }
+  .tier-title {
+    text-transform: lowercase;
+    border-top: 1px solid var(--ink);
+    padding-top: 0.75rem;
+    margin: 0 0 2rem;
+    font-size: clamp(1.75rem, 3.4vw, 2.8rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    font-weight: 400;
+  }
+
+  .partners {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem 3rem;
+  }
+
+  .partner h3 {
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 0.4rem;
+    margin: 0 0 1.1rem;
+    font-size: clamp(1.25rem, 2.1vw, 1.75rem);
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  .partner .body {
+    font-size: clamp(0.95rem, 1.35vw, 1.125rem);
+    line-height: 1.4;
+    margin: 0 0 1.5rem;
+    white-space: pre-line;
+  }
+
+  .foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  .foot .pill {
+    text-transform: lowercase;
+    text-decoration: none;
+    padding: 0.25rem 1.1rem;
+    white-space: nowrap;
+  }
+  .foot .pill:hover {
+    background: var(--acid);
+  }
+  .foot :global(.logo) {
+    max-width: 200px;
+    max-height: 90px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  @media (max-width: 800px) {
+    .partners {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
   }
 </style>
+
+<script>
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+  const panels = [...document.querySelectorAll<HTMLElement>('[data-panel]')];
+
+  for (const tab of tabs) {
+    tab.addEventListener('click', () => {
+      for (const other of tabs) {
+        other.setAttribute('aria-pressed', String(other === tab));
+      }
+      for (const panel of panels) {
+        panel.hidden = panel.dataset.panel !== tab.dataset.tab;
+      }
+    });
+  }
+</script>
