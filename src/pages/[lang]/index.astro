@@ -2,8 +2,16 @@
 import Base from '../../layouts/Base.astro';
 import SanityImage from '../../components/SanityImage.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { useTranslations, localePath, formatDate, formatDateRange } from '../../lib/i18n';
-import { getCurrentEdition, getNews, getArtists, getPartners, getSettings } from '../../lib/queries';
+import { useTranslations, localePath, formatDateRange } from '../../lib/i18n';
+import {
+  getCurrentEdition,
+  getNews,
+  getArtists,
+  getExhibitors,
+  getPartners,
+  getPressClips,
+  getSettings,
+} from '../../lib/queries';
 
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
@@ -12,20 +20,30 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 
-const [edition, news, artists, partners, settings] = await Promise.all([
+const [edition, news, artists, exhibitors, partners, clips, settings] = await Promise.all([
   getCurrentEdition(lang),
   getNews(lang),
   getArtists(lang),
+  getExhibitors(lang),
   getPartners(lang),
+  getPressClips(),
   getSettings(lang),
 ]);
 
-const latest = news.slice(0, 3);
-const guest = artists.find((a: any) => a.isGuestOfHonour);
-// The spotlight is whichever main partner is ordered first in the Studio.
+const lead = news[0];
 const spotlight = partners.find((p: any) => p.tier === 'main');
-
 const headline = settings?.tagline ?? edition?.title ?? settings?.siteName;
+
+/**
+ * The frame shows five figures. Visitors and VIP numbers are not recorded
+ * anywhere in the schema, so only the three that can be counted are shown -
+ * they stay true on their own as content is added.
+ */
+const figures = [
+  { value: exhibitors.length, label: t('exhibitors.count') },
+  { value: artists.length, label: t('home.artists') },
+  { value: clips.length, label: t('home.pressClips') },
+].filter((figure) => figure.value > 0);
 
 const eventSchema = edition
   ? {
@@ -50,26 +68,23 @@ const eventSchema = edition
 >
   {eventSchema && <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} slot="head" />}
 
-  <section class="page-grid hero">
-    <div class="hero-shot">
-      {
-        edition?.cover?.asset ? (
-          <SanityImage
-            image={edition.cover}
-            aspect={1.4}
-            loading="eager"
-            sizes="(max-width: 640px) 100vw, 66vw"
-            widths={[600, 900, 1200, 1600, 2000]}
-          />
-        ) : (
-          <div class="hero-empty" />
-        )
-      }
-    </div>
+  <section class="hero">
+    {
+      edition?.cover?.asset ? (
+        <SanityImage
+          image={edition.cover}
+          aspect={1.5}
+          loading="eager"
+          sizes="(max-width: 700px) 100vw, 65vw"
+          widths={[600, 900, 1200, 1600, 2000]}
+        />
+      ) : (
+        <div class="hero-empty" />
+      )
+    }
 
-    <div class="hero-text">
+    <div class="hero-copy">
       <h1 class="display">{headline}</h1>
-
       {
         edition && (
           <p class="hero-dates">
@@ -78,14 +93,7 @@ const eventSchema = edition
           </p>
         )
       }
-
-      <p class="hero-links">
-        {edition?.ticketsUrl && (
-          <a class="text-link" href={edition.ticketsUrl}>
-            {t('home.tickets')} →
-          </a>
-        )}
-      </p>
+      <a class="text-link" href={localePath(lang, 'about')}>{t('home.moreOnFair')} →</a>
     </div>
   </section>
 
@@ -93,241 +101,321 @@ const eventSchema = edition
     <a href={localePath(lang, 'exhibitors')}>{t('nav.exhibitors')}</a>
     <a href={localePath(lang, 'awards')}>{t('nav.awards')}</a>
     <a href={localePath(lang, 'programme')}>{t('nav.programme')}</a>
-    {edition?.catalogueUrl && <a href={edition.catalogueUrl}>{t('home.catalogue')}</a>}
+    {
+      edition?.ticketsUrl && (
+        <a class="outline" href={edition.ticketsUrl}>
+          {t('home.tickets')}
+        </a>
+      )
+    }
   </nav>
 
   {
-    guest && (
-      <section class="page-grid feature">
-        <div class="feature-text">
-          <p class="eyebrow">{t('artists.guestOfHonour')}</p>
-          <h2>{guest.name}</h2>
-          {guest.nationality && <p class="feature-meta">{guest.nationality}</p>}
-          <a class="text-link feature-link" href={localePath(lang, 'guest-of-honour')}>
-            {t('home.discover')} →
-          </a>
-        </div>
+    lead && (
+      <>
+        <h2 class="latest">{t('home.latestNews')}</h2>
 
-        <div class="feature-shot">
-          {guest.portrait?.asset ? (
-            <SanityImage image={guest.portrait} aspect={1.2} sizes="(max-width: 640px) 100vw, 50vw" widths={[500, 800, 1200]} />
+        <section class="feature">
+          <div class="feature-copy">
+            {lead.category && <p class="eyebrow-lg">{lead.category}</p>}
+            <h3>{lead.title}</h3>
+            <a class="text-link" href={localePath(lang, `news/${lead.slug}`)}>
+              {t('news.readMore')} →
+            </a>
+          </div>
+
+          {lead.cover?.asset ? (
+            <SanityImage image={lead.cover} aspect={1.5} sizes="(max-width: 700px) 100vw, 33vw" widths={[400, 700, 1100]} />
           ) : (
             <div class="feature-empty" />
           )}
-        </div>
-      </section>
-    )
-  }
-
-  {
-    latest.length > 0 && (
-      <section class="news">
-        <div class="section-head">
-          <h2 class="section-title">{t('home.latestNews')}</h2>
-          <a class="text-link" href={localePath(lang, 'news')}>
-            {t('home.viewAll')} →
-          </a>
-        </div>
-
-        <ul class="page-grid feed">
-          {latest.map((item: any) => (
-            <li class="entry">
-              <a href={localePath(lang, `news/${item.slug}`)}>
-                <div class="shot">
-                  {item.cover?.asset ? (
-                    <SanityImage image={item.cover} aspect={1.5} sizes="(max-width: 640px) 100vw, 33vw" widths={[400, 600, 900]} />
-                  ) : (
-                    <div class="shot-empty" />
-                  )}
-                </div>
-                <p class="meta">
-                  <time datetime={item.publishedAt}>{formatDate(item.publishedAt, lang)}</time>
-                </p>
-                <h3>{item.title}</h3>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
+        </section>
+      </>
     )
   }
 
   {
     spotlight && (
-      <section class="page-grid feature reverse">
-        <div class="feature-shot">
-          {spotlight.logo?.asset ? (
-            <SanityImage image={spotlight.logo} sizes="(max-width: 640px) 100vw, 50vw" widths={[400, 700, 1000]} />
-          ) : (
-            <div class="feature-empty" />
-          )}
-        </div>
+      <section class="feature partner">
+        {spotlight.logo?.asset ? (
+          <SanityImage image={spotlight.logo} aspect={1.5} sizes="(max-width: 700px) 100vw, 65vw" widths={[600, 1000, 1400]} />
+        ) : (
+          <div class="feature-empty" />
+        )}
 
-        <div class="feature-text">
-          <p class="eyebrow">{t('home.partnerSpotlight')}</p>
-          <h2>{spotlight.name}</h2>
-          <a class="text-link feature-link" href={localePath(lang, 'partners')}>
-            {t('nav.partners')} →
-          </a>
+        <div class="feature-copy">
+          <p class="eyebrow-lg">{t('home.partnerSpotlight')}</p>
+          <h3>{spotlight.name}</h3>
+          <a class="text-link" href={localePath(lang, 'partners')}>{t('nav.partners')} →</a>
         </div>
       </section>
     )
   }
+
+  {
+    figures.length > 0 && (
+      <section class="stats">
+        <p class="stats-title">
+          {t('home.keyFigures')} {edition?.year}
+        </p>
+
+        <div class="stats-table">
+          {figures.map((figure) => (
+            <div class="stat">
+              <strong>{figure.value}</strong>
+              <span>{figure.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <a class="final-cta" href={localePath(lang, 'exhibitors')}>
+    {t('nav.exhibitors')} →
+  </a>
 </Base>
 
 <style>
-  .hero {
-    align-items: stretch;
-    row-gap: 1.5rem;
+  /* The frame runs the homepage full-bleed; main's gutter is cancelled here. */
+  .hero,
+  .quicklinks,
+  .feature,
+  .stats,
+  .final-cta {
+    margin-inline: -30px;
   }
-  .hero-shot {
-    grid-column: span 8;
+
+  .hero {
+    display: grid;
+    grid-template-columns: 65% 35%;
+    align-items: stretch;
+  }
+  .hero :global(img),
+  .hero-empty {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .hero-empty {
-    aspect-ratio: 1.4;
-    background: var(--surface-2);
-  }
-  .hero-text {
-    grid-column: span 4;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 1rem 0;
-  }
-  .hero-text h1 {
-    margin: 0;
-    font-size: clamp(2rem, 3.6vw, 4.5rem);
-    font-weight: 400;
-  }
-  .hero-dates {
-    margin: 1.5rem 0 0;
-    font-size: clamp(1rem, 1.5vw, 1.35rem);
-  }
-  .hero-links {
-    margin: 2rem 0 0;
-    font-size: clamp(1.15rem, 2.2vw, 2rem);
-  }
-
-  .quicklinks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 2.5rem;
-    margin: 3.5rem 0;
-    padding: 1rem 0;
-    border-top: 1px solid var(--ink);
-    border-bottom: 1px solid var(--ink);
-    font-size: clamp(1.15rem, 2.6vw, 2.25rem);
-    letter-spacing: -0.04em;
-    text-transform: lowercase;
-  }
-  .quicklinks a {
-    text-decoration: none;
-  }
-  .quicklinks a:hover {
-    background: var(--acid);
-  }
-
-  .feature {
-    align-items: center;
-    row-gap: 1.5rem;
-    margin: 3.5rem 0;
-  }
-  .feature-text {
-    grid-column: span 6;
-  }
-  .feature-shot {
-    grid-column: span 6;
-  }
-  .reverse .feature-shot {
-    order: -1;
-  }
-  .feature-empty {
-    aspect-ratio: 1.2;
-    background: var(--surface-2);
-  }
-  .feature-text h2 {
-    margin: 0.5rem 0 0;
-    font-size: clamp(2rem, 3.6vw, 3.2rem);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
-    font-weight: 400;
-  }
-  .feature-meta {
-    margin: 0.5rem 0 0;
-    font-size: clamp(1rem, 1.5vw, 1.3rem);
-    color: var(--ink-2);
-  }
-  .feature-link {
-    display: inline-block;
-    margin-top: 2rem;
-    font-size: clamp(1.15rem, 2.2vw, 2rem);
-  }
-
-  .news {
-    margin-top: 4rem;
-  }
-  .feed {
-    list-style: none;
-    margin: 0;
-    padding-inline: 0;
-    row-gap: 2rem;
-  }
-  .entry {
-    grid-column: span 4;
-  }
-  .entry a {
-    display: block;
-    text-decoration: none;
-  }
-  .shot {
-    overflow: hidden;
-  }
-  .shot-empty {
     aspect-ratio: 1.5;
     background: var(--surface-2);
   }
-  .shot :global(img) {
-    width: 100%;
-    transition: transform 0.5s ease;
+  .hero-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 2rem 0 2.5rem;
   }
-  .entry a:hover .shot :global(img) {
-    transform: scale(1.025);
-  }
-  .entry h3 {
-    margin: 0.3rem 0 0;
-    font-size: clamp(1.15rem, 1.9vw, 1.6rem);
-    line-height: 1.05;
-    letter-spacing: -0.035em;
+  .hero-copy h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4.85vw, 4.4rem);
     font-weight: 400;
   }
-  .entry .meta {
-    margin: 0.6rem 0 0;
+  .hero-dates {
+    margin: 1.25rem 0 0;
+    font-size: clamp(0.95rem, 1.4vw, 1.3rem);
+  }
+  .hero-copy a {
+    display: inline-block;
+    margin-top: 1.75rem;
+    font-size: clamp(1.15rem, 2.75vw, 2.5rem);
+    letter-spacing: -0.05em;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .shot :global(img),
-    .entry a:hover .shot :global(img) {
-      transition: none;
-      transform: none;
-    }
+  .quicklinks {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 21px;
+    margin-top: 27px;
+    padding-inline: 30px;
+  }
+  .quicklinks a {
+    display: grid;
+    place-items: center;
+    min-height: clamp(52px, 4.8vw, 69px);
+    background: var(--acid);
+    text-align: center;
+    text-decoration: none;
+    text-transform: lowercase;
+    padding: 0.4rem 0.6rem;
+    font-size: clamp(1.1rem, 2.75vw, 2.5rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .quicklinks a.outline {
+    background: none;
+    border: 1px solid var(--ink);
+  }
+  .quicklinks a:hover {
+    background: var(--ink);
+    color: var(--ground);
+  }
+
+  .latest {
+    margin: 2.5rem 0 0;
+    text-align: center;
+    text-transform: lowercase;
+    font-size: clamp(2.4rem, 4.85vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+  }
+
+  .feature {
+    display: grid;
+    grid-template-columns: 65.7% 31.4%;
+    gap: 2.9%;
+    align-items: center;
+    margin-top: 30px;
+    padding-inline: 30px;
+  }
+  /* Guest/news feature puts copy first; the partner block mirrors it. */
+  .feature .feature-copy {
+    order: -1;
+  }
+  .feature.partner .feature-copy {
+    order: 0;
+  }
+  .feature :global(img),
+  .feature-empty {
+    width: 100%;
+  }
+  .feature-empty {
+    aspect-ratio: 1.5;
+    background: var(--surface-2);
+  }
+  .eyebrow-lg {
+    margin: 0;
+    text-transform: lowercase;
+    font-size: clamp(1.15rem, 2.75vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+  }
+  .feature-copy h3 {
+    margin: 0.5rem 0 0;
+    font-size: clamp(1.5rem, 2.75vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    font-weight: 400;
+  }
+  .feature-copy a {
+    display: inline-block;
+    margin-top: 2rem;
+    font-size: clamp(1.15rem, 2.75vw, 2.5rem);
+    letter-spacing: -0.05em;
+  }
+
+  .stats {
+    margin-top: 3.4rem;
+  }
+  .stats-title {
+    margin: 0;
+    padding: 0 30px;
+    text-transform: lowercase;
+    font-size: clamp(1.25rem, 2.75vw, 2.5rem);
+    line-height: 2;
+    letter-spacing: -0.05em;
+  }
+  .stats-table {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-top: 1px solid var(--ink);
+  }
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: clamp(105px, 10vw, 145px);
+    padding: 0.75rem 30px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .stat:nth-child(odd) {
+    border-right: 1px solid var(--ink);
+  }
+  /* An odd last figure spans the row, as the press cell does in the frame. */
+  .stat:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-content: center;
+    border-right: 0;
+  }
+  .stat strong {
+    font-size: clamp(3.5rem, 8vw, 7.5rem);
+    line-height: 0.7;
+    letter-spacing: -0.05em;
+    font-weight: 400;
+  }
+  .stat span {
+    text-transform: lowercase;
+    font-size: clamp(1.5rem, 3.4vw, 3.1rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .final-cta {
+    display: grid;
+    place-items: center;
+    min-height: clamp(110px, 10.5vw, 152px);
+    margin-top: 3.5rem;
+    padding: 0.6rem 1rem;
+    background: var(--acid);
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: clamp(1.9rem, 4.2vw, 3.75rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-weight: 600;
   }
 
   @media (max-width: 900px) {
-    .entry {
-      grid-column: span 6;
+    .quicklinks {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
     }
   }
 
-  @media (max-width: 640px) {
-    .hero-shot,
-    .hero-text,
-    .feature-text,
-    .feature-shot,
-    .entry {
-      grid-column: 1 / -1;
+  @media (max-width: 700px) {
+    .hero,
+    .feature {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
     }
-    .reverse .feature-shot {
+    .hero {
+      gap: 0;
+    }
+    .hero-copy {
+      padding: 1.4rem 10px 0.9rem;
+    }
+    .feature :global(img),
+    .feature-empty {
+      order: -1;
+    }
+    .feature .feature-copy,
+    .feature.partner .feature-copy {
       order: 0;
+    }
+    .hero,
+    .quicklinks,
+    .feature,
+    .stats,
+    .final-cta {
+      margin-inline: -10px;
+    }
+    .quicklinks,
+    .feature,
+    .stats-title,
+    .stat {
+      padding-inline: 10px;
+    }
+    .stats-table {
+      display: block;
+      border-bottom: 0;
+    }
+    .stat {
+      justify-content: space-between;
+      border-right: 0 !important;
     }
   }
 </style>
