@@ -222,20 +222,22 @@ const eventSchema = edition
   }
   .hero-shot :global(img) {
     width: 100%;
-    height: 43vw;
-    max-height: 625px;
-    min-height: 320px;
+    height: 47vw;
+    max-height: 690px;
+    min-height: 340px;
     object-fit: cover;
   }
   .hero-copy {
     grid-column: span 4;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: 2rem 0;
+    justify-content: flex-start;
+    padding: 0;
   }
   .hero-copy h1 {
-    margin: 0;
+    /* Pulled up by the leading above the caps, so the first line sits level
+       with the top edge of the picture rather than a line-height below it. */
+    margin: -0.11em 0 0;
     font-size: clamp(3rem, 5vw, 4.5rem);
     font-weight: 400;
   }
