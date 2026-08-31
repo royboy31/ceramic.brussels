@@ -70,8 +70,9 @@ function resolveNavItem(item: any) {
   if (item.kind === 'page') {
     return item.pageSlug ? { label: item.label, href: localePath(lang, item.pageSlug) } : null;
   }
-  // 'route', and anything unset, points at a built-in section.
-  return { label: item.label, href: localePath(lang, item.route ?? '') };
+  // 'route', and anything unset, points at a built-in section. The route is
+  // kept so the menu can find that section's descriptive line.
+  return { label: item.label, href: localePath(lang, item.route ?? ''), route: item.route ?? '' };
 }
 
 /**
@@ -82,18 +83,19 @@ function resolveNavItem(item: any) {
 const editorNav = (navigation?.items ?? []).map(resolveNavItem).filter(Boolean) as {
   label: string;
   href: string;
+  route?: string;
   external?: boolean;
 }[];
 
 const fallbackNav = [
-  { label: t('nav.exhibitors'), href: localePath(lang, 'exhibitors') },
-  { label: t('nav.artists'), href: localePath(lang, 'artists') },
-  { label: t('nav.programme'), href: localePath(lang, 'programme') },
-  { label: t('nav.news'), href: localePath(lang, 'news') },
-  { label: t('nav.awards'), href: localePath(lang, 'awards') },
-  { label: t('nav.partners'), href: localePath(lang, 'partners') },
-  { label: t('nav.press'), href: localePath(lang, 'press') },
-  { label: t('nav.editions'), href: localePath(lang, 'editions') },
+  { label: t('nav.exhibitors'), href: localePath(lang, 'exhibitors'), route: 'exhibitors' },
+  { label: t('nav.artists'), href: localePath(lang, 'artists'), route: 'artists' },
+  { label: t('nav.programme'), href: localePath(lang, 'programme'), route: 'programme' },
+  { label: t('nav.news'), href: localePath(lang, 'news'), route: 'news' },
+  { label: t('nav.awards'), href: localePath(lang, 'awards'), route: 'awards' },
+  { label: t('nav.partners'), href: localePath(lang, 'partners'), route: 'partners' },
+  { label: t('nav.press'), href: localePath(lang, 'press'), route: 'press' },
+  { label: t('nav.editions'), href: localePath(lang, 'editions'), route: 'editions' },
   ...navPages.map((p: any) => ({ label: p.label, href: localePath(lang, p.slug) })),
 ];
 

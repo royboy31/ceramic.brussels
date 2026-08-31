@@ -62,9 +62,9 @@ const t = useTranslations(lang);
 </header>
 
 <style>
-  /* Sampled from the Figma frames: acid at the top edge, white by 80px. */
+  /* The three-stop wash from the hand-off's global.css. */
   .site-header {
-    background: linear-gradient(180deg, var(--acid) 0%, var(--ground) 80px);
+    background: linear-gradient(180deg, #fff680 0%, #fff9b8 24%, var(--ground) 58%);
     position: relative;
     z-index: 40;
   }
@@ -74,7 +74,7 @@ const t = useTranslations(lang);
 
   .header-inner {
     align-items: center;
-    height: clamp(88px, 11vw, 159px);
+    height: clamp(92px, 11vw, 159px);
   }
 
   .site-date {
@@ -93,7 +93,7 @@ const t = useTranslations(lang);
   }
   .site-wordmark img {
     width: clamp(76px, 10vw, 144px);
-    height: auto;
+    height: clamp(40px, 5.2vw, 75px);
   }
 
   .site-actions {
@@ -142,14 +142,29 @@ const t = useTranslations(lang);
     }
   }
 
-  /* Below 640px the grid drops to 4 columns - see .page-grid in Base. */
+  /* Below 640px the grid drops to 4 columns - see .page-grid in Base - and
+     the lockups take the fixed sizes from the hand-off. */
   @media (max-width: 640px) {
+    .header-inner {
+      height: 88px;
+    }
     .site-date {
       grid-column: span 2;
+      width: 132px;
     }
-    .site-wordmark,
+    .site-wordmark {
+      grid-column: span 1;
+    }
+    .site-wordmark img {
+      width: 58px;
+      height: 34px;
+    }
     .site-actions {
       grid-column: span 1;
+    }
+    .menu-toggle {
+      width: 36px;
+      height: 24px;
     }
     .locales {
       display: none;

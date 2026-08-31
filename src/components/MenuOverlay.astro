@@ -5,14 +5,16 @@ import type { LocaleId } from '../lib/locales';
 /**
  * Full-height slide-in menu. Items come from the same resolved Sanity
  * navigation that Base.astro builds, so the editor menu drives both this and
- * the fallback. `sub` is the descriptive line under each entry in the design;
- * `navItem` has no field for it yet, so it simply renders nothing until one
- * exists rather than being hard-coded here.
+ * the fallback.
+ *
+ * The descriptive line under an entry comes from STRINGS, keyed by the
+ * built-in section it points at - it names sub-sections rather than content,
+ * which is what STRINGS is for. Editor pages and outside links have none.
  */
 interface Item {
   label: string;
   href: string;
-  sub?: string;
+  route?: string;
   external?: boolean;
 }
 
@@ -24,6 +26,14 @@ interface Props {
 
 const { lang, items, newsletterUrl } = Astro.props;
 const t = useTranslations(lang);
+
+/** Only some sections have a descriptive line; t() returns the key if absent. */
+function subtitle(route?: string): string | null {
+  if (!route) return null;
+  const key = `nav.sub.${route}` as Parameters<typeof t>[0];
+  const value = t(key);
+  return value === key ? null : value;
+}
 ---
 
 <dialog id="site-menu" class="menu" data-menu aria-label={t('nav.menu')}>
@@ -33,14 +43,17 @@ const t = useTranslations(lang);
 
   <nav aria-label={t('nav.menu')}>
     {
-      items.map((item) => (
-        <section class="menu-row">
-          <a href={item.href} {...(item.external ? { rel: 'noopener noreferrer' } : {})}>
-            {item.label}
-          </a>
-          {item.sub && <p class="menu-sub">{item.sub}</p>}
-        </section>
-      ))
+      items.map((item) => {
+        const sub = subtitle(item.route);
+        return (
+          <section class="menu-row">
+            <a href={item.href} {...(item.external ? { rel: 'noopener noreferrer' } : {})}>
+              {item.label}
+            </a>
+            {sub && <p class="menu-sub">{sub}</p>}
+          </section>
+        );
+      })
     }
 
     {
