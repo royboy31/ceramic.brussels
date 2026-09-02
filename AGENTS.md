@@ -245,7 +245,9 @@ field is for.
 Cloudflare Pages, connected to this repo. A push to `main` builds production;
 any other branch builds a preview. Build command is `npm run build`; the output
 directory comes from `pages_build_output_dir` in `wrangler.toml`, not from a
-dashboard field.
+dashboard field. The same goes for build environment variables: Pages ignores
+the dashboard ones when `wrangler.toml` exists and reads `[vars]` /
+`[env.preview.vars]` from the file, so `PUBLIC_*` values are set there.
 
 `public/_headers` marks `/_astro/*` immutable and forces HTML to revalidate —
 without that, a rebuild would never reach anyone holding a cached page.

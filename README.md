@@ -227,6 +227,13 @@ npx wrangler pages deploy dist
 
 ### Build environment variables
 
+**They live in `wrangler.toml`, not in the dashboard.** When a Wrangler
+config file is present, Pages CI reads `[vars]` (and `[env.preview.vars]`)
+from it and ignores the dashboard's build variables — the build log says
+`Build environment variables: (none found)` when they are set only there. The
+values below are already in `wrangler.toml`; the dashboard copy is
+documentation at best.
+
 Pages keeps two sets, **Production** and **Preview**. Both need the Sanity
 coordinates and the Node version; they differ in the canonical origin.
 
