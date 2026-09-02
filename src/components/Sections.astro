@@ -5,63 +5,181 @@ import SanityImage from './SanityImage.astro';
 import LinkPill from './LinkPill.astro';
 
 /**
- * Renders a list of `contentSection` objects: heading + rule + text + images +
- * pill links. The unit every text page in the design is built from.
+ * Renders a list of `contentSection` objects the way the design builds every
+ * text page: a lowercase heading over a rule, body copy at 24px, an optional
+ * row of images and a row of pill links.
+ *
+ * `columns` is how many sections share a row - the about page puts "goals"
+ * and "development" side by side. `textColumns` is how the body copy flows
+ * inside one section: a full-width section runs its text in two columns like
+ * the guest-of-honour biography, a section already sitting in a narrow column
+ * keeps one.
  */
 interface Props {
   lang: LocaleId;
   sections: any[] | undefined;
+  columns?: 1 | 2;
+  textColumns?: 1 | 2;
+  class?: string;
 }
 
-const { lang, sections = [] } = Astro.props;
+const { lang, sections = [], columns = 1, class: className } = Astro.props;
+const textColumns = Astro.props.textColumns ?? (columns === 1 ? 2 : 1);
+const list = (sections ?? []).filter(Boolean);
 ---
 
 {
-  (sections ?? []).map((section: any) => (
-    <section class="content-section" id={section.anchor ?? undefined}>
-      {section.heading && <h2>{section.heading}</h2>}
-      {section.body && (
-        <div class="prose">
-          <PortableText value={section.body} />
-        </div>
-      )}
-      {section.images?.length > 0 && (
-        <ul class="image-row">
-          {section.images.map((img: any) => (
-            <li>
-              <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 360px" />
-            </li>
-          ))}
-        </ul>
-      )}
-      {section.links?.length > 0 && (
-        <p class="links">
-          {section.links.map((link: any) => (
-            <LinkPill lang={lang} link={link} />
-          ))}
-        </p>
-      )}
-    </section>
-  ))
+  list.length > 0 && (
+    <div class:list={['sections', `cols-${columns}`, `text-${textColumns}`, className]}>
+      {list.map((section: any) => {
+        const images = (section.images ?? []).filter((img: any) => img?.asset);
+        const links = (section.links ?? []).filter(Boolean);
+        return (
+          <section class="cs" id={section.anchor || undefined}>
+            {section.heading && <h2 class="panel-title">{section.heading}</h2>}
+            {section.body && (
+              <div class="body-24 cs-body">
+                <PortableText value={section.body} />
+              </div>
+            )}
+            {images.length > 0 && (
+              <ul class="cs-images" data-count={Math.min(images.length, 3)}>
+                {images.map((img: any) => (
+                  <li>
+                    <SanityImage
+                      image={img}
+                      aspect={1.5}
+                      sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw"
+                      widths={[400, 600, 900, 1200]}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+            {links.length > 0 && (
+              <p class="cs-links">
+                {links.map((link: any) => (
+                  <LinkPill lang={lang} link={link} />
+                ))}
+              </p>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  )
 }
 
 <style>
-  .content-section h2 {
-    border-top: 1px solid var(--ink);
-    padding-top: 0.5rem;
-    text-transform: lowercase;
-  }
-  .image-row {
+  .sections {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1rem;
+    gap: 3rem 30px;
+    margin: 0 0 3rem;
+  }
+  .cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .cs {
+    min-width: 0;
+  }
+  .cs .panel-title {
+    margin-bottom: 1.25rem;
+  }
+
+  /* Body copy: 24px, paragraphs spaced by one line, two columns when the
+     section has the whole width to itself. */
+  .text-2 .cs-body {
+    columns: 2;
+    column-gap: 30px;
+  }
+  .cs-body :global(p) {
+    margin: 0 0 1.25rem;
+    break-inside: avoid;
+  }
+  .cs-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  .cs-body :global(h2),
+  .cs-body :global(h3),
+  .cs-body :global(h4) {
+    margin: 1.5rem 0 0.5rem;
+    font-size: 1em;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .cs-body :global(a) {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.12em;
+  }
+
+  /* Bulleted lines carry the design's "↘" instead of a disc. */
+  .cs-body :global(ul) {
     list-style: none;
     padding: 0;
-    margin: 1rem 0;
+    margin: 0 0 1.25rem;
   }
-  .links {
+  .cs-body :global(ul li) {
+    padding-left: 1.5em;
+    text-indent: -1.5em;
+    break-inside: avoid;
+  }
+  .cs-body :global(ul li::before) {
+    content: '↘';
+    display: inline-block;
+    width: 1.5em;
+    text-indent: 0;
+  }
+  .cs-body :global(ol) {
+    padding-left: 1.5em;
+    margin: 0 0 1.25rem;
+  }
+
+  /* Image row: three 3:2 images across, fewer when there are fewer. */
+  .cs-images {
+    list-style: none;
+    padding: 0;
+    margin: 1.75rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 30px;
+  }
+  .cs-images[data-count='1'] {
+    grid-template-columns: 1fr;
+  }
+  .cs-images[data-count='2'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cs-images :global(img) {
+    width: 100%;
+  }
+
+  .cs-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.75rem 1rem;
+    margin: 1.75rem 0 0;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+  }
+
+  @media (max-width: 900px) {
+    .cols-2 {
+      grid-template-columns: 1fr;
+    }
+    .text-2 .cs-body {
+      columns: 1;
+    }
+    .cs-images,
+    .cs-images[data-count='2'] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .cs-images,
+    .cs-images[data-count='2'] {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

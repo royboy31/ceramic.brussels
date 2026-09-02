@@ -1,63 +1,234 @@
 ---
 import SanityImage from './SanityImage.astro';
+import Figure from './Figure.astro';
+import type { PoolName } from '../lib/placeholders';
 
 /**
- * A list of images with the design's counter ("1/5") and caption line
- * ("Artist, *Title*, 2024"). Skeleton: renders every slide stacked; the
- * carousel behaviour is a styling concern for later.
+ * The design's image carousel: one frame, dots on the picture, and a caption
+ * line underneath with the counter ("1/5") at the left and the caption
+ * ("Artist, *Title*, 2024 © credit") at the right.
+ *
+ * Works without JavaScript as a scroll-snap row - swipe, scroll, or use the
+ * dots, which are plain anchors to each slide. Each slide carries its own
+ * counter and caption, so they always match what is in view. The script only
+ * smooths the dot clicks and keeps the active dot in step with scrolling.
  */
 interface Props {
   images: any[] | undefined;
   aspect?: number;
   sizes?: string;
+  widths?: number[];
+  /** Placeholder pool and seed, used when the document has no images yet. */
+  pool?: PoolName;
+  seed?: string;
+  /** Accessible name for the dots group - usually the document's title. */
+  label?: string;
+  /** Prefix for the slide ids the dots link to. One slideshow per page needs no change. */
+  id?: string;
   class?: string;
 }
 
-const { images = [], aspect, sizes = '(max-width: 700px) 100vw, 440px', class: className } = Astro.props;
+const {
+  images = [],
+  aspect,
+  sizes = '(max-width: 640px) 100vw, 33vw',
+  widths = [400, 600, 900, 1200],
+  pool,
+  seed = '',
+  label,
+  id = 'slideshow',
+  class: className,
+} = Astro.props;
+
 const slides = (images ?? []).filter((img) => img?.asset);
+const slideId = (i: number) => `${id}-${i + 1}`;
 ---
 
 {
-  slides.length > 0 && (
-    <div class:list={['slideshow', className]} data-slides={slides.length}>
-      {slides.map((img, i) => (
-        <figure class="slide">
-          <SanityImage image={img} aspect={aspect} sizes={sizes} />
-          <figcaption>
-            <span class="counter">
-              {i + 1}/{slides.length}
-            </span>
-            <span class="caption">
-              {img.caption}
-              {img.workTitle && (
-                <>
-                  {img.caption ? ', ' : ''}
-                  <em>{img.workTitle}</em>
-                </>
-              )}
-              {img.year && `, ${img.year}`}
-              {img.credit && <span class="credit"> © {img.credit}</span>}
-            </span>
-          </figcaption>
-        </figure>
-      ))}
+  slides.length > 0 ? (
+    <div
+      class:list={['slideshow', className, { 'no-aspect': !aspect }]}
+      id={id}
+      data-slides={slides.length}
+      style={aspect ? `--aspect: ${aspect}` : undefined}
+    >
+      <div class="track" data-track tabindex={slides.length > 1 ? 0 : undefined}>
+        {slides.map((img, i) => (
+          <figure class="slide" id={slideId(i)} data-slide>
+            <SanityImage
+              image={img}
+              aspect={aspect}
+              sizes={sizes}
+              widths={widths}
+              loading={i === 0 ? 'eager' : 'lazy'}
+            />
+            <figcaption>
+              <span class="counter">
+                {i + 1}/{slides.length}
+              </span>
+              <span class="caption">
+                {img.caption}
+                {img.workTitle && (
+                  <>
+                    {img.caption ? ', ' : ''}
+                    <em>{img.workTitle}</em>
+                  </>
+                )}
+                {img.year && `, ${img.year}`}
+                {img.credit && <span class="credit"> © {img.credit}</span>}
+              </span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+
+      {slides.length > 1 && (
+        <div class="dots" role="group" aria-label={label}>
+          {slides.map((_, i) => (
+            <a
+              href={`#${slideId(i)}`}
+              data-dot
+              aria-label={`${i + 1} / ${slides.length}`}
+              aria-current={i === 0 ? 'true' : undefined}
+            />
+          ))}
+        </div>
+      )}
     </div>
-  )
+  ) : pool ? (
+    <div class:list={['slideshow', 'slideshow-empty', className]}>
+      <Figure image={null} pool={pool} seed={seed} aspect={aspect} sizes={sizes} widths={widths} loading="eager" />
+    </div>
+  ) : null
 }
 
 <style>
-  .slide {
-    margin: 0 0 1rem;
+  .slideshow {
+    position: relative;
   }
+
+  /* The frame: one slide wide, snapping, no visible scrollbar. */
+  .track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .track::-webkit-scrollbar {
+    display: none;
+  }
+  .track:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    margin: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .slide :global(img) {
+    width: 100%;
+  }
+
+  /* Counter left, caption right - the line under the picture in the design. */
   figcaption {
     display: flex;
     justify-content: space-between;
-    gap: 1rem;
-    font-size: 0.8rem;
-    color: var(--ink-2);
-    margin-top: 0.4rem;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.3;
+  }
+  .counter {
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+  }
+  .caption {
+    text-align: right;
   }
   .credit {
     color: var(--ink-3);
   }
+
+  /* The dots sit on the picture. A box with the same aspect as the image,
+     laid over the top of the slideshow, puts them at the picture's bottom
+     edge without knowing how tall the caption below it is. */
+  .dots {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    aspect-ratio: var(--aspect);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 10px;
+    padding-bottom: 12px;
+    pointer-events: none;
+  }
+  .no-aspect .dots {
+    position: static;
+    aspect-ratio: auto;
+    padding: 0.5rem 0 0;
+  }
+  .dots a {
+    pointer-events: auto;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.25);
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.5);
+  }
+  .dots a[aria-current] {
+    background: var(--ink);
+  }
+  .dots a:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
 </style>
+
+<script>
+  // Progressive enhancement: smooth the dot clicks and keep the active dot in
+  // step when someone swipes. Without this, the dots are anchors and the row
+  // still scrolls.
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLElement>('.slideshow[data-slides]').forEach((show) => {
+    const track = show.querySelector<HTMLElement>('[data-track]');
+    const slides = [...show.querySelectorAll<HTMLElement>('[data-slide]')];
+    const dots = [...show.querySelectorAll<HTMLAnchorElement>('[data-dot]')];
+    if (!track || slides.length < 2) return;
+
+    const mark = (index: number) =>
+      dots.forEach((dot, i) =>
+        i === index ? dot.setAttribute('aria-current', 'true') : dot.removeAttribute('aria-current'),
+      );
+
+    dots.forEach((dot, i) =>
+      dot.addEventListener('click', (event) => {
+        event.preventDefault();
+        track.scrollTo({ left: i * track.clientWidth, behavior: reduced ? 'auto' : 'smooth' });
+        mark(i);
+      }),
+    );
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) mark(slides.indexOf(entry.target as HTMLElement));
+          }
+        },
+        { root: track, threshold: 0.6 },
+      );
+      slides.forEach((slide) => observer.observe(slide));
+    }
+  });
+</script>

@@ -5,9 +5,13 @@ import { HUBS, hubTabPath } from '../lib/hubs';
 
 /**
  * The title band of a hub page: the hub name on the left and its pill tabs on
- * the right, as in the design. Tabs come from HUBS; a `page` document with the
- * same English slug can override a tab's label, and any extra hub page an
- * editor adds becomes an additional tab.
+ * the right, as in the design (the `.section-head` + `.tabs .pill` system of
+ * the partners and programme frames). Tabs come from HUBS; a `page` document
+ * with the same English slug can override a tab's label, and any extra hub
+ * page an editor adds becomes an additional tab.
+ *
+ * The active pill is acid on a white page and black on an acid page - the
+ * layout marks the body `acid-page`, so nothing has to be passed down.
  */
 interface Props {
   lang: LocaleId;
@@ -15,9 +19,10 @@ interface Props {
   active: string;
   /** Hub pages from getHubPages, for label overrides and extra tabs. */
   pages?: any[];
+  class?: string;
 }
 
-const { lang, route, active, pages = [] } = Astro.props;
+const { lang, route, active, pages = [], class: className } = Astro.props;
 const t = useTranslations(lang);
 const hub = HUBS[route];
 
@@ -33,47 +38,64 @@ const tabs = [
 ];
 ---
 
-<div class="hub-head">
-  <h1>{t(hub.title)}</h1>
-  <nav class="tabs" aria-label={t(hub.title)}>
-    {
-      tabs.map((tab) => (
-        <a href={localePath(lang, hubTabPath(route, tab.slug))} aria-current={tab.slug === active ? 'page' : undefined}>
-          {tab.label}
-        </a>
-      ))
-    }
-  </nav>
+<div class:list={['section-head', className]}>
+  <h1 class="section-title">{t(hub.title)}</h1>
+
+  {
+    tabs.length > 1 && (
+      <nav class="tabs" aria-label={t(hub.title)}>
+        {tabs.map((tab) => (
+          <a
+            class="pill"
+            href={localePath(lang, hubTabPath(route, tab.slug))}
+            aria-current={tab.slug === active ? 'page' : undefined}
+          >
+            {tab.label}
+          </a>
+        ))}
+      </nav>
+    )
+  }
 </div>
 
 <style>
-  .hub-head {
+  /* Base.astro carries two .section-head rules; this is the frame's version. */
+  .section-head {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
-    gap: 1rem 2rem;
-    margin-bottom: 2rem;
-  }
-  .hub-head h1 {
+    gap: 1rem;
+    border: 0;
     margin: 0;
-    text-transform: lowercase;
+    padding: 0 0 1.75rem;
   }
+  .section-title {
+    margin: 0;
+  }
+
   .tabs {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
-  .tabs a {
-    border: 1px solid var(--ink);
-    border-radius: 999px;
-    padding: 0.3rem 0.9rem;
-    color: var(--ink);
+  .pill {
+    text-transform: lowercase;
     text-decoration: none;
-    font-size: 0.95rem;
+    color: var(--ink);
   }
-  .tabs a[aria-current='page'] {
-    background: var(--brand);
-    border-color: var(--brand);
+  .pill:hover {
+    background: var(--acid);
+  }
+  .pill[aria-current] {
+    background: var(--acid);
+  }
+
+  /* On the acid pages the yellow pill would vanish, so the active tab goes black. */
+  :global(body.acid-page) .pill:hover,
+  :global(body.acid-page) .pill[aria-current] {
+    background: var(--ink);
+    color: var(--ground);
+    border-color: var(--ink);
   }
 </style>

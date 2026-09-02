@@ -6,6 +6,10 @@ import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath, formatDate } from '../../../lib/i18n';
 import { getNewsItem, getNewsSlugs } from '../../../lib/queries';
 
+/**
+ * One post: date and category, a big title, the excerpt as the lead, the
+ * cover, then the body at 24px. Design by Lilanga.
+ */
 export async function getStaticPaths() {
   const slugs = await getNewsSlugs();
   return LOCALE_IDS.flatMap((lang) => slugs.map(({ slug }) => ({ params: { lang, slug } })));
@@ -33,22 +37,21 @@ const articleSchema = {
   title={item.seo?.title ?? item.title}
   description={item.seo?.description ?? item.excerpt}
   noIndex={item.seo?.noIndex}
+  image={item.seo?.ogImage ?? item.cover}
   path={`news/${slug}`}
   editId={item._id}
   editType={item._type}
 >
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} slot="head" />
 
-  <a class="back" href={localePath(lang, 'news')}>&larr; {t('common.backTo')} {t('nav.news')}</a>
-
-  <article>
+  <article class="post">
     <p class="meta">
       <time datetime={item.publishedAt}>{formatDate(item.publishedAt, lang)}</time>
-      {item.category && <span class="pill">{item.category}</span>}
+      {item.category && <span class="cat">{item.category}</span>}
     </p>
 
-    <h1>{item.title}</h1>
-    {item.excerpt && <p class="lede">{item.excerpt}</p>}
+    <h1 class="title">{item.title}</h1>
+    {item.excerpt && <p class="intro-large">{item.excerpt}</p>}
 
     {
       item.cover?.asset && (
@@ -57,7 +60,7 @@ const articleSchema = {
           loading="eager"
           aspect={16 / 9}
           widths={[600, 900, 1200, 1600]}
-          sizes="(max-width: 1140px) 100vw, 1140px"
+          sizes="(max-width: 1160px) 100vw, 1160px"
           class="cover"
         />
       )
@@ -65,23 +68,62 @@ const articleSchema = {
 
     {
       item.body && (
-        <div class="prose">
+        <div class="body-24 post-body">
           <PortableText value={item.body} />
         </div>
       )
     }
+
+    <p class="back-row">
+      <a class="text-link" href={localePath(lang, 'news')}>← {t('common.backTo')} {t('nav.news')}</a>
+    </p>
   </article>
 </Base>
 
 <style>
-  article .meta {
+  .post {
+    max-width: 1160px;
+  }
+  .post .meta {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.7rem;
-    margin-bottom: 0.4rem;
+    gap: 0.75rem;
+    margin: 0 0 0.75rem;
+  }
+  .cat {
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: 0.05rem 0.7rem;
+    font-size: 0.78rem;
+    text-transform: lowercase;
+  }
+  .title {
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+    margin: 0 0 1.25rem;
   }
   .cover {
-    margin: 1.8rem 0;
+    margin: 0 0 2.5rem;
     width: 100%;
+  }
+  .post-body :global(p) {
+    margin: 0 0 1.5rem;
+    max-width: 62ch;
+  }
+  .post-body :global(h2) {
+    text-transform: lowercase;
+    border-bottom: 2px solid var(--ink);
+    margin: 2.5rem 0 1.25rem;
+    padding-bottom: 0.2rem;
+    font-size: clamp(1.35rem, 2.4vw, 2rem);
+    letter-spacing: -0.04em;
+    font-weight: 600;
+  }
+  .back-row {
+    margin: 3.5rem 0 0;
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
   }
 </style>

@@ -1,17 +1,21 @@
 ---
 import { LOCALES, type LocaleId } from '../lib/locales';
-import { useTranslations, localePath, formatDateRange } from '../lib/i18n';
+import { useTranslations, localePath } from '../lib/i18n';
 import { getSettings, getNavPages, getNavigation, getCurrentEdition } from '../lib/queries';
 import { resolveNavItem } from '../lib/links';
 import { HUBS } from '../lib/hubs';
+import { urlFor } from '../sanity/image';
 import EditLink from '../components/EditLink.astro';
-import SanityImage from '../components/SanityImage.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import MenuOverlay from '../components/MenuOverlay.astro';
 
 /**
- * The frame around every page, laid out as in the design: a header with the
- * dates mark, the wordmark, the language switcher and a hamburger that opens
- * the menu overlay; a footer with the copyright line and the social pills.
- * Skeleton styling only - the tokens below are the place to restyle it.
+ * The frame around every page: the design's header (dates mark, wordmark,
+ * language switcher, menu button), the slide-in menu, and the footer band.
+ * Everything textual comes from Sanity; the lockups are brand artwork.
+ *
+ * Design by Lilanga (identity, chrome, type system); data wiring by Kamindu.
  */
 interface Props {
   lang: LocaleId;
@@ -22,14 +26,31 @@ interface Props {
   /** Per-locale paths, when slugs differ per language. */
   altPaths?: Partial<Record<LocaleId, string>>;
   noIndex?: boolean;
+  /** 'acid' paints the whole page yellow, as the art prize section is. */
+  theme?: 'default' | 'acid';
+  /** Alias kept for pages written against the skeleton: 'brand' = 'acid'. */
+  tone?: 'default' | 'brand';
+  /** Social share image for this page. Falls back to the one in Site settings. */
+  image?: any;
   /** Document this page renders, so the Edit button can deep-link to it. */
   editId?: string;
   editType?: string;
-  /** Yellow page background, as on the art-prize pages. */
-  tone?: 'default' | 'brand';
 }
 
-const { lang, title, description, path = '', altPaths, noIndex, editId, editType, tone = 'default' } = Astro.props;
+const {
+  lang,
+  title,
+  description,
+  path = '',
+  altPaths,
+  noIndex,
+  theme = 'default',
+  tone = 'default',
+  image,
+  editId,
+  editType,
+} = Astro.props;
+const acid = theme === 'acid' || tone === 'brand';
 const t = useTranslations(lang);
 
 const [settings, navPages, navigation, edition] = await Promise.all([
@@ -46,42 +67,55 @@ const metaDescription = description ?? settings?.defaultSeo?.description ?? sett
 const site = Astro.site ?? new URL('http://localhost:4321');
 const canonical = new URL(localePath(lang, path), site).href;
 
+/**
+ * Social share image. Facebook, LinkedIn and WhatsApp all want an absolute URL
+ * and refuse to crop, so pin it to the 1200x630 they expect. Falls back to the
+ * site-wide image in Site settings, so a page that sets nothing still shares
+ * with a picture.
+ */
+const shareImage = image?.asset ? image : settings?.defaultSeo?.ogImage;
+const ogImage = shareImage?.asset
+  ? urlFor(shareImage).width(1200).height(630).fit('crop').auto('format').quality(80).url()
+  : null;
+const ogImageAlt = shareImage?.alt ?? undefined;
+
 const alternates = LOCALES.map((l) => ({
   lang: l.id,
   href: new URL(localePath(l.id, altPaths?.[l.id] ?? path), site).href,
 }));
 
 /**
- * The menu comes from Sanity, sub-items included. If nobody has filled it in
- * yet, fall back to the hubs plus any standalone page that set a navigation
- * label - so the site is never left without a menu.
+ * The menu comes from Sanity, sub-items included: each item's children become
+ * the small line under it in the overlay ("about / laureates / awards / jury").
+ * If nobody has filled it in yet, fall back to the hubs plus any standalone
+ * page that set a navigation label, so the site is never without a menu.
  */
 const editorNav = (navigation?.items ?? [])
   .map((item: any) => {
     const link = resolveNavItem(lang, item);
     if (!link) return null;
     const children = (item.children ?? []).map((c: any) => resolveNavItem(lang, c)).filter(Boolean);
-    return { ...link, children };
+    return { ...link, children, sub: children.length ? children.map((c: any) => c.label).join(' / ') : undefined };
   })
-  .filter(Boolean) as { label: string; href: string; external: boolean; children: any[] }[];
+  .filter(Boolean) as { label: string; href: string; external: boolean; sub?: string; children: any[] }[];
 
 const fallbackNav = [
-  { label: t('nav.exhibitors'), href: localePath(lang, 'exhibitors'), external: false, children: [] },
+  { label: t('nav.exhibitors'), href: localePath(lang, 'exhibitors'), external: false, sub: t('nav.sub.exhibitors'), children: [] },
   ...Object.values(HUBS).map((hub) => ({
     label: t(hub.title),
     href: localePath(lang, hub.route),
     external: false,
+    sub: hub.tabs.map((tab) => t(tab.label)).join(' / '),
     children: [],
   })),
-  { label: t('nav.news'), href: localePath(lang, 'news'), external: false, children: [] },
   ...navPages.map((p: any) => ({ label: p.label, href: localePath(lang, p.slug), external: false, children: [] })),
 ];
 
 const nav = editorNav.length ? editorNav : fallbackNav;
 
-const footerLinks = [
-  ...(navigation?.footerItems ?? []).map((i: any) => resolveNavItem(lang, i)).filter(Boolean),
-].filter(Boolean) as { label: string; href: string; external: boolean }[];
+const footerLinks = (navigation?.footerItems ?? [])
+  .map((i: any) => resolveNavItem(lang, i))
+  .filter(Boolean) as { label: string; href: string; external: boolean }[];
 
 const fallbackFooter = [
   settings?.instagramUrl && { label: t('common.instagram'), href: settings.instagramUrl, external: true },
@@ -91,9 +125,6 @@ const fallbackFooter = [
 
 const footerNav = footerLinks.length ? footerLinks : fallbackFooter;
 const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
-
-const current = Astro.url.pathname.replace(/\/$/, '');
-const isCurrent = (href: string) => current === href || (href !== localePath(lang) && current.startsWith(href + '/'));
 ---
 
 <!doctype html>
@@ -113,168 +144,249 @@ const isCurrent = (href: string) => current === href || (href !== localePath(lan
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     {metaDescription && <meta property="og:description" content={metaDescription} />}
+    <meta property="og:locale" content={lang} />
+    {
+      ogImage && (
+        <>
+          <meta property="og:image" content={ogImage} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          {ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
+        </>
+      )
+    }
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
 
+    <link rel="preload" href="/fonts/noi-grotesk-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://cdn.sanity.io" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <slot name="head" />
   </head>
 
-  <body data-tone={tone}>
+  <body class={acid ? 'acid-page' : undefined}>
     <a class="skip" href="#main">Skip to content</a>
 
-    <header class="site-header">
-      <div class="shell header-inner">
-        <a class="dates" href={localePath(lang, 'visit')}>
-          {
-            edition?.datesMark?.asset ? (
-              <SanityImage image={edition.datesMark} widths={[300, 600]} sizes="300px" loading="eager" />
-            ) : edition ? (
-              <span>{formatDateRange(edition.startDate, edition.endDate, lang)}</span>
-            ) : null
-          }
-        </a>
+    <Header lang={lang} siteName={siteName} path={path} altPaths={altPaths} datesMark={edition?.datesMark} />
+    <MenuOverlay lang={lang} items={nav} newsletterUrl={settings?.newsletterUrl} />
 
-        <a class="brand" href={localePath(lang)}>{siteName}</a>
+    <div class="edit-bar">
+      <EditLink id="navigation" type="navigation" label="Edit menu" />
+      {editId && editType && <EditLink id={editId} type={editType} lang={lang} label="Edit this content" />}
+    </div>
 
-        <div class="header-right">
-          <nav class="locales" aria-label={t('common.language')}>
-            {
-              LOCALES.map((l, i) => (
-                <>
-                  {i > 0 && <span aria-hidden="true">/</span>}
-                  <a
-                    href={localePath(l.id, altPaths?.[l.id] ?? path)}
-                    hreflang={l.id}
-                    aria-current={l.id === lang ? 'true' : undefined}
-                  >
-                    {l.id}
-                  </a>
-                </>
-              ))
-            }
-          </nav>
-
-          <details class="menu">
-            <summary aria-label={t('nav.menu')}>
-              <span class="burger" aria-hidden="true"></span>
-            </summary>
-            <nav class="menu-panel" aria-label="Main">
-              <ul>
-                {
-                  nav.map((item) => (
-                    <li>
-                      <a
-                        href={item.href}
-                        aria-current={isCurrent(item.href) ? 'page' : undefined}
-                        {...(item.external ? { rel: 'noopener noreferrer' } : {})}
-                      >
-                        {item.label}
-                      </a>
-                      {item.children?.length > 0 && (
-                        <p class="sub">
-                          {item.children.map((c: any, i: number) => (
-                            <>
-                              {i > 0 && ' / '}
-                              <a href={c.href}>{c.label}</a>
-                            </>
-                          ))}
-                        </p>
-                      )}
-                    </li>
-                  ))
-                }
-                {
-                  settings?.newsletterUrl && (
-                    <li class="newsletter">
-                      <a href={settings.newsletterUrl} rel="noopener noreferrer">
-                        → {t('nav.newsletter')}
-                      </a>
-                    </li>
-                  )
-                }
-              </ul>
-              <EditLink id="navigation" type="navigation" label="Edit menu" />
-            </nav>
-          </details>
-        </div>
-      </div>
-    </header>
-
-    {
-      editId && editType && (
-        <div class="edit-bar shell">
-          <EditLink id={editId} type={editType} lang={lang} label="Edit this content" />
-        </div>
-      )
-    }
-
-    <main id="main" class="shell">
+    <main id="main">
       <slot />
     </main>
 
-    <footer class="site-footer">
-      <div class="shell footer-inner">
-        <p class="copyright">{copyright}</p>
-        <div class="footer-links">
-          {
-            footerNav.map((item) => (
-              <a href={item.href} {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-                {item.label}
-              </a>
-            ))
-          }
-          <a class="studio" href="/studio">Studio</a>
-        </div>
-      </div>
-    </footer>
+    <Footer siteName={siteName} links={footerNav} copyright={copyright} />
   </body>
 </html>
 
 <style is:global>
+  /* Noi Grotesk - the two weights the design uses. Swap these two files when
+     the licensed (non-trial) cut arrives; nothing else needs to change. */
+  @font-face {
+    font-family: 'Noi Grotesk';
+    src: url('/fonts/noi-grotesk-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Noi Grotesk';
+    src: url('/fonts/noi-grotesk-600.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+
   :root {
+    --acid: #fff350;
     --ground: #ffffff;
     --surface: #fafaf9;
     --surface-2: #f0efed;
-    --ink: #1a1a19;
+    --ink: #050505;
     --ink-2: #55534f;
     --ink-3: #8a8781;
     --rule: #e0dedb;
-    --accent: #1a1a19;
-    --brand: #fff350;
+    --accent: #050505;
     --measure: 68ch;
-    --shell: 1380px;
-    --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --shell: 1140px;
+    --font: 'Noi Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    /* aliases used by the hub components */
+    --brand: var(--acid);
+    --paper: #f6f5ec;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --ground: #121211;
-      --surface: #1a1a19;
-      --surface-2: #232322;
-      --ink: #ececea;
-      --ink-2: #a8a5a0;
-      --ink-3: #7a7772;
-      --rule: #2e2e2c;
-      --accent: #ececea;
-      --brand: #d9ce2a;
-    }
-  }
+  /* The Figma is a light, acid-on-white identity with no dark counterpart, so
+     the palette deliberately does not invert. Reinstating dark mode means
+     designing it first - see the note in the handover. */
 
   * {
     box-sizing: border-box;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     margin: 0;
+    min-width: 320px;
+    /* Short pages still push the footer to the bottom, so the page background
+       never shows underneath it. */
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
     background: var(--ground);
     color: var(--ink);
     font-family: var(--font);
     font-size: 16px;
-    line-height: 1.5;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
-  body[data-tone='brand'] {
-    background: var(--brand);
+
+  a {
+    color: inherit;
+  }
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  button {
+    font: inherit;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  ::selection {
+    background: var(--acid);
+    color: var(--ink);
+  }
+
+  /* Whole-page acid, used by the art prize section. */
+  body.acid-page {
+    background: var(--acid);
+  }
+
+  /* 12-column grid, 30px gutters - the spine of every page in the design. */
+  .page-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0 30px;
+    padding-inline: 30px;
+  }
+
+  @media (max-width: 900px) {
+    .page-grid {
+      gap: 0 16px;
+      padding-inline: 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .page-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0 10px;
+      padding-inline: 10px;
+    }
+  }
+
+  /* Shared page furniture from the frames: a lowercase section title, panel
+     headings with a rule, the large intro paragraph and the body size. */
+  .section-title {
+    text-transform: lowercase;
+    font-size: clamp(2rem, 4.8vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+    margin: 0 0 1.5rem;
+  }
+
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 0;
+    margin: 0;
+    padding: 0 0 1.75rem;
+  }
+  .section-head .section-title {
+    margin: 0;
+  }
+
+  .panel-title {
+    text-transform: lowercase;
+    border-bottom: 2px solid var(--ink);
+    margin: 0 0 1.25rem;
+    padding-bottom: 0.2rem;
+    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+  }
+
+  .intro-large {
+    max-width: 1160px;
+    margin: 0 0 2.5rem;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    line-height: 1.25;
+    letter-spacing: -0.035em;
+  }
+
+  .body-24 {
+    font-size: clamp(1rem, 1.5vw, 1.5rem);
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .tabs .pill {
+    border-radius: 0;
+    padding: 0.35rem 1.1rem;
+    font-family: inherit;
+    font-size: clamp(1rem, 1.8vw, 1.75rem);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .tabs .pill[aria-pressed='true'],
+  .tabs .pill[aria-current] {
+    background: var(--acid);
+  }
+
+  /* Type helpers from the design system. */
+  .display {
+    letter-spacing: -0.052em;
+    line-height: 0.92;
+  }
+  .eyebrow {
+    font-size: clamp(0.72rem, 1vw, 1rem);
+    text-transform: uppercase;
+  }
+  .text-link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.12em;
+  }
+  .rule {
+    border-top: 1px solid currentColor;
   }
 
   .shell {
@@ -290,212 +402,69 @@ const isCurrent = (href: string) => current === href || (href !== localePath(lan
   .skip:focus {
     left: 1rem;
     top: 1rem;
-    z-index: 10;
+    z-index: 50;
     background: var(--ink);
     color: var(--ground);
     padding: 0.5rem 0.9rem;
   }
 
-  a {
-    color: var(--accent);
-  }
-  a:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  /* header */
-  .site-header {
-    background: linear-gradient(var(--brand), var(--ground));
-    margin-bottom: 2rem;
-  }
-  .header-inner {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 1rem;
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
-  }
-  .dates {
-    color: var(--ink);
-    text-decoration: none;
-    font-size: 1.2rem;
-  }
-  .dates img {
-    max-width: 290px;
-  }
-  .brand {
-    font-weight: 500;
-    font-size: 1.4rem;
-    letter-spacing: -0.01em;
-    color: var(--ink);
-    text-decoration: none;
-    text-align: center;
-  }
-  .header-right {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 1.5rem;
-  }
-  .locales {
-    display: flex;
-    gap: 0.4rem;
-    font-size: 0.95rem;
-    text-transform: uppercase;
-  }
-  .locales a {
-    color: var(--ink);
-    text-decoration: none;
-  }
-  .locales a[aria-current] {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-
-  /* menu overlay */
-  .menu summary {
-    list-style: none;
-    cursor: pointer;
-    width: 2.6rem;
-    height: 2rem;
-    display: grid;
-    place-items: center;
-  }
-  .menu summary::-webkit-details-marker,
-  .menu summary::marker {
-    display: none;
-    content: '';
-  }
-  .burger,
-  .burger::before,
-  .burger::after {
-    display: block;
-    width: 2.4rem;
-    height: 3px;
-    background: var(--ink);
-    content: '';
-  }
-  .burger {
-    position: relative;
-  }
-  .burger::before {
-    position: absolute;
-    top: -9px;
-  }
-  .burger::after {
-    position: absolute;
-    top: 9px;
-  }
-  .menu-panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: min(100%, 30rem);
-    background: var(--brand);
-    color: #1a1a19;
-    padding: 4rem 2rem 2rem;
-    overflow-y: auto;
-    z-index: 20;
-    text-align: right;
-  }
-  .menu-panel ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .menu-panel li {
-    padding: 0.6rem 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-  }
-  .menu-panel li > a {
-    font-size: 1.6rem;
-    color: #1a1a19;
-    text-decoration: none;
-  }
-  .menu-panel li > a[aria-current='page'] {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-  .menu-panel .sub {
-    margin: 0.2rem 0 0;
-    font-size: 0.85rem;
-    color: #55534f;
-  }
-  .menu-panel .sub a {
-    color: inherit;
-    text-decoration: none;
-  }
-  .menu-panel .newsletter {
-    border: 0;
-    margin-top: 1rem;
-  }
-  .menu[open] summary {
-    position: fixed;
-    top: 1.5rem;
-    right: 1.5rem;
-    z-index: 21;
-  }
-  .menu[open] .burger {
-    background: transparent;
-  }
-  .menu[open] .burger::before {
-    top: 0;
-    transform: rotate(45deg);
-  }
-  .menu[open] .burger::after {
-    top: 0;
-    transform: rotate(-45deg);
-  }
-
   .edit-bar {
     display: flex;
     justify-content: flex-end;
+    padding-inline: 30px;
     gap: 0.5rem;
-    margin-top: -1.25rem;
-    margin-bottom: 1rem;
+    padding-top: 0.5rem;
+  }
+  .edit-bar:empty {
+    display: none;
   }
 
-  /* content primitives */
+  /* content primitives - still used by the pages that are not ported yet */
   main {
-    padding-bottom: 4rem;
+    flex: 1;
+    padding: 0 30px 4rem;
+  }
+
+  @media (max-width: 900px) {
+    main {
+      padding-inline: 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    main {
+      padding-inline: 10px;
+    }
+  }
+
+  /* main already carries the gutter, so a grid inside it must not add another. */
+  main .page-grid {
+    padding-inline: 0;
   }
   h1 {
-    font-size: clamp(2rem, 5vw, 3.6rem);
-    font-weight: 600;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
     margin: 0 0 0.5rem;
     text-wrap: balance;
   }
   h2 {
-    font-size: 1.6rem;
-    font-weight: 400;
-    letter-spacing: -0.01em;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
     margin: 2.5rem 0 0.8rem;
   }
   h3 {
-    font-size: 1.15rem;
-    margin: 1.4rem 0 0.4rem;
+    font-size: 1.05rem;
+    margin: 1.6rem 0 0.4rem;
   }
   p {
     margin: 0 0 1rem;
   }
 
   .lede {
-    font-size: clamp(1.3rem, 2.5vw, 2rem);
-    line-height: 1.25;
-    max-width: 30ch;
-    margin-bottom: 2rem;
-    text-wrap: balance;
+    color: var(--ink-2);
+    font-size: 1.05rem;
+    max-width: var(--measure);
   }
   .prose {
     max-width: var(--measure);
@@ -503,12 +472,6 @@ const isCurrent = (href: string) => current === href || (href !== localePath(lan
   .meta {
     color: var(--ink-3);
     font-size: 0.85rem;
-  }
-  .kicker {
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    font-size: 0.95rem;
-    margin: 0 0 0.4rem;
   }
   .empty {
     background: var(--surface);
@@ -519,82 +482,37 @@ const isCurrent = (href: string) => current === href || (href !== localePath(lan
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 2rem 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 1.6rem 1.4rem;
     list-style: none;
     padding: 0;
     margin: 1.5rem 0 0;
   }
-  .two-col {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem 3rem;
-  }
+
   .card a.card-link {
     color: inherit;
     text-decoration: none;
   }
   .card h3 {
     margin: 0.6rem 0 0.15rem;
+    font-size: 1rem;
   }
   .card a.card-link:hover h3 {
     text-decoration: underline;
   }
 
-  .rule {
-    border: 0;
-    border-top: 1px solid var(--ink);
-    margin: 2rem 0;
-  }
-  .pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 1rem 0;
-  }
-  .band {
-    display: block;
-    background: var(--brand);
-    color: #1a1a19;
-    text-align: center;
-    text-transform: uppercase;
-    font-size: clamp(1.2rem, 3vw, 2.2rem);
-    padding: 1.6rem 1rem;
-    margin: 2.5rem 0;
-    text-decoration: none;
+  .pill {
+    display: inline-block;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: 0.15rem 0.9rem;
+    font-size: 0.9rem;
   }
 
-  /* footer */
-  .site-footer {
-    background: linear-gradient(var(--ground), var(--brand));
-    padding: 2rem 0 1.5rem;
-    font-size: 0.9rem;
-    color: var(--ink);
+  .back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    font-size: 0.88rem;
   }
-  .footer-inner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .copyright {
-    margin: 0;
-  }
-  .footer-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .footer-links a {
-    border: 1px solid var(--ink);
-    border-radius: 999px;
-    padding: 0.3rem 0.9rem;
-    color: var(--ink);
-    text-decoration: none;
-  }
-  .footer-links .studio {
-    border-style: dashed;
-    color: var(--ink-3);
-  }
+
 </style>

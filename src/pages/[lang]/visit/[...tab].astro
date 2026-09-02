@@ -3,6 +3,7 @@ import Base from '../../../layouts/Base.astro';
 import HubNav from '../../../components/HubNav.astro';
 import Sections from '../../../components/Sections.astro';
 import Slideshow from '../../../components/Slideshow.astro';
+import Figure from '../../../components/Figure.astro';
 import SanityImage from '../../../components/SanityImage.astro';
 import PortableText from '../../../components/PortableText.astro';
 import LinkPill from '../../../components/LinkPill.astro';
@@ -10,12 +11,16 @@ import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations } from '../../../lib/i18n';
 import { getHubPages, getSettings, getCurrentEdition, getPartners } from '../../../lib/queries';
 import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
+import { instagramUrl } from '../../../lib/links';
 
 /**
- * Visitors info. Practical info is assembled from the current edition (hours,
- * tickets) and site settings (address, access, hotel deal); food & drinks
- * lists the `food-drinks` partners; floor plan and FAQ read the edition's map
- * and the settings' FAQ. A hub page with the same slug adds intro and text.
+ * Visitors info. Practical info is the design's two-column page: photo,
+ * address, tickets and hotel deal on the left; intro, opening hours and
+ * access on the right - assembled from the current edition (hours, tickets)
+ * and site settings (address, access, hotel deal). Food & drinks is a 2x2
+ * grid of the `food-drinks` partners; floor plan and FAQ read the edition's
+ * map and the settings' FAQ. A hub page with the same slug adds intro and
+ * text to any tab.
  */
 export function getStaticPaths() {
   return hubTabParams('visit', LOCALE_IDS);
@@ -32,38 +37,70 @@ const [pages, settings, edition, partners] = await Promise.all([
   getPartners(lang),
 ]);
 const page = pageForTab(pages, tab);
+const hubTab = HUBS.visit.tabs.find((x) => x.slug === tab);
+const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
+
+const practical = tab === 'practical-info';
 const info = settings?.practicalInfo ?? {};
 const vendors = partners.filter((p: any) => p.tier === 'food-drinks');
 const hotel = info.hotelDeal?.partner;
+const hotelUrl = info.hotelDeal?.url ?? hotel?.url;
+const intro = page?.intro ?? (practical ? info.intro : undefined);
+/** The photo row at the foot of the page: site-settings images, then the hub page's own. */
+const gallery: any[] = practical ? [...(info.images ?? []), ...(page?.images ?? [])] : (page?.images ?? []);
 const path = hubTabPath('visit', tab);
 ---
 
-<Base lang={lang} title={`${t('nav.visit')} — ${page?.tabLabel ?? tab}`} description={page?.intro ?? info.intro} path={path} editId={tab === 'practical-info' ? 'siteSettings' : page?._id} editType={tab === 'practical-info' ? 'siteSettings' : page?._type}>
+<Base
+  lang={lang}
+  title={`${t('nav.visit')} — ${tabLabel}`}
+  description={page?.seo?.description ?? intro}
+  image={page?.seo?.ogImage ?? page?.cover ?? (practical ? info.heroImage : undefined)}
+  path={path}
+  editId={practical ? 'siteSettings' : page?._id}
+  editType={practical ? 'siteSettings' : page?._type}
+>
   <HubNav lang={lang} route="visit" active={tab} pages={pages} />
 
   {
-    tab === 'practical-info' && (
-      <div class="practical">
-        <div class="col">
-          <SanityImage image={info.heroImage} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 670px" />
+    practical && (
+      <div class="practical page-grid">
+        <div class="col col-left">
+          <Figure
+            image={info.heroImage}
+            pool="fair"
+            seed="practical-info"
+            aspect={3 / 2}
+            sizes="(max-width: 800px) 100vw, 670px"
+            widths={[670, 1000, 1340]}
+            loading="eager"
+            alt=""
+            class="hero"
+          />
 
-          <section id="address">
-            <h2>{t('visit.address')}</h2>
-            {info.venueName && <p class="strong">{info.venueName}</p>}
-            {info.address && <p class="addr">{info.address}</p>}
-            {info.mapUrl && <LinkPill lang={lang} href={info.mapUrl} label="Google Maps" variant="text" />}
+          <section class="panel" id="address">
+            <h2 class="panel-title">{t('visit.address')}</h2>
+            <div class="body-24">
+              {info.venueName && <p class="label">{info.venueName}</p>}
+              {info.address && <p class="addr">{info.address}</p>}
+            </div>
+            {info.mapUrl && (
+              <p class="map-link">
+                <LinkPill lang={lang} href={info.mapUrl} label="Google Maps" variant="text" />
+              </p>
+            )}
           </section>
 
-          <section id="tickets">
-            <h2>{t('visit.tickets')}</h2>
+          <section class="panel" id="tickets">
+            <h2 class="panel-title">{t('visit.tickets')}</h2>
             {edition?.tickets?.length ? (
-              <dl class="tickets">
+              <dl class="rows body-24">
                 {edition.tickets.map((tk: any) => (
-                  <div>
+                  <div class="row">
                     <dt>{tk.name}</dt>
                     <dd>
                       {tk.price}
-                      {tk.note && <span class="meta"> ({tk.note})</span>}
+                      {tk.note && <span class="note"> ({tk.note})</span>}
                     </dd>
                   </div>
                 ))}
@@ -71,34 +108,46 @@ const path = hubTabPath('visit', tab);
             ) : (
               <p class="empty">No ticket prices on the current edition yet.</p>
             )}
-            {edition?.ticketsNote && <p class="meta">{edition.ticketsNote}</p>}
-            {edition?.ticketsUrl && <LinkPill lang={lang} href={edition.ticketsUrl} label={t('visit.bookTickets')} variant="solid" />}
+            {edition?.ticketsNote && <p class="note-line">{edition.ticketsNote}</p>}
+            {edition?.ticketsUrl && (
+              <p class="cta">
+                <LinkPill lang={lang} href={edition.ticketsUrl} label={t('visit.bookTickets')} variant="solid" />
+              </p>
+            )}
           </section>
 
           {(hotel || info.hotelDeal?.text) && (
-            <section id="hotel">
-              <h2>{t('visit.hotelDeal')}</h2>
-              {hotel?.name && <p class="strong">{hotel.name}</p>}
-              {info.hotelDeal.text && <p>{info.hotelDeal.text}</p>}
-              {(info.hotelDeal.url ?? hotel?.url) && <LinkPill lang={lang} href={info.hotelDeal.url ?? hotel.url} label={t('visit.discoverHotel')} variant="solid" />}
+            <section class="panel" id="hotel">
+              <h2 class="panel-title">{t('visit.hotelDeal')}</h2>
+              <div class="body-24">
+                {hotel?.name && <p class="label">{hotel.name}</p>}
+                {info.hotelDeal.text && <p class="deal">{info.hotelDeal.text}</p>}
+              </div>
+              {hotelUrl && (
+                <p class="cta">
+                  <LinkPill lang={lang} href={hotelUrl} label={t('visit.discoverHotel')} variant="solid" />
+                </p>
+              )}
             </section>
           )}
         </div>
 
-        <div class="col">
-          {(page?.intro ?? info.intro) && <p class="lede">{page?.intro ?? info.intro}</p>}
+        <div class="col col-right">
+          {intro && <p class="intro-large practical-intro">{intro}</p>}
 
-          <section id="opening-hours">
-            <h2>{t('visit.openingHours')}</h2>
+          <section class="panel" id="opening-hours">
+            <h2 class="panel-title">{t('visit.openingHours')}</h2>
             {edition?.openingHours?.length ? (
-              <dl class="hours">
+              <dl class="rows body-24">
                 {edition.openingHours.map((d: any) => (
-                  <div>
+                  <div class="row">
                     <dt>{d.label}</dt>
                     {(d.slots ?? []).map((s: any) => (
                       <dd>
-                        {s.time} {s.label}
-                        {s.invitationOnly && ` (${t('visit.invitation')})`}
+                        {s.time && <span class="slot-time">{s.time}</span>}
+                        {s.time && s.label && ' '}
+                        {s.label}
+                        {s.invitationOnly && <span class="note"> ({t('visit.invitation')})</span>}
                       </dd>
                     ))}
                   </div>
@@ -107,21 +156,21 @@ const path = hubTabPath('visit', tab);
             ) : (
               <p class="empty">No opening hours on the current edition yet.</p>
             )}
-            {edition?.lastEntry && <p class="meta">{edition.lastEntry}</p>}
+            {edition?.lastEntry && <p class="note-line">{edition.lastEntry}</p>}
           </section>
 
           {info.access?.length > 0 && (
-            <section id="access">
-              <h2>{t('visit.access')}</h2>
-              <dl class="access">
+            <section class="panel" id="access">
+              <h2 class="panel-title">{t('visit.access')}</h2>
+              <dl class="rows body-24">
                 {info.access.map((a: any) => (
-                  <div>
+                  <div class="row">
                     <dt>{a.mode}</dt>
-                    <dd>{a.text}</dd>
+                    <dd class="access-text">{a.text}</dd>
                   </div>
                 ))}
               </dl>
-              {info.accessibility && <p>{info.accessibility}</p>}
+              {info.accessibility && <p class="body-24 accessibility">{info.accessibility}</p>}
             </section>
           )}
         </div>
@@ -129,43 +178,64 @@ const path = hubTabPath('visit', tab);
     )
   }
 
-  {tab !== 'practical-info' && page?.intro && <p class="lede">{page.intro}</p>}
+  {!practical && intro && <p class="intro-large">{intro}</p>}
 
   {
-    tab === 'food-drinks' && (
-      <div class="two-col">
-        {vendors.length ? (
-          vendors.map((v: any) => (
+    !practical && page?.cover?.asset && (
+      <SanityImage
+        image={page.cover}
+        loading="eager"
+        aspect={16 / 9}
+        widths={[600, 900, 1200, 1600]}
+        sizes="(max-width: 1440px) 100vw, 1380px"
+        class="cover"
+      />
+    )
+  }
+
+  {
+    tab === 'food-drinks' &&
+      (vendors.length ? (
+        <div class="vendors">
+          {vendors.map((v: any) => (
             <article class="vendor">
-              <h2>
+              <h2 class="name">
                 {v.url ? (
                   <a href={v.url} target="_blank" rel="noopener noreferrer">
-                    {v.name} ↗
+                    {v.name}&nbsp;<span aria-hidden="true">↗</span>
                   </a>
                 ) : (
                   v.name
                 )}
               </h2>
-              {v.subtitle && <p class="meta">{v.subtitle}</p>}
-              <Slideshow images={v.images} aspect={3 / 2} />
+              {v.subtitle && <p class="subtitle">{v.subtitle}</p>}
+              {v.images?.length > 0 ? (
+                <Slideshow images={v.images} aspect={3 / 2} sizes="(max-width: 800px) 100vw, 670px" class="vendor-slides" />
+              ) : (
+                <Figure pool="fair" seed={v._id} aspect={3 / 2} sizes="(max-width: 800px) 100vw, 670px" widths={[670, 1000, 1340]} alt="" class="vendor-ph" />
+              )}
               {v.description && (
-                <div class="prose">
+                <div class="body-24 text">
                   <PortableText value={v.description} />
                 </div>
               )}
+              {v.instagram && (
+                <p class="pills">
+                  <LinkPill lang={lang} href={instagramUrl(v.instagram)} label={t('common.instagram')} />
+                </p>
+              )}
             </article>
-          ))
-        ) : (
-          <p class="empty">{t('partners.empty')}</p>
-        )}
-      </div>
-    )
+          ))}
+        </div>
+      ) : (
+        <p class="empty">{t('partners.empty')}</p>
+      ))
   }
 
   {
     tab === 'floor-plan' &&
       (edition?.fairMapUrl ? (
-        <p>
+        <p class="cta">
           <LinkPill lang={lang} href={edition.fairMapUrl} label={t('visit.downloadMap')} variant="solid" />
         </p>
       ) : (
@@ -176,14 +246,21 @@ const path = hubTabPath('visit', tab);
   {
     tab === 'faq' &&
       (settings?.faq?.length ? (
-        settings.faq.map((q: any) => (
-          <details class="faq">
-            <summary>{q.question}</summary>
-            <div class="prose">
-              <PortableText value={q.answer} />
-            </div>
-          </details>
-        ))
+        <div class="faq-list">
+          {settings.faq.map((q: any) => (
+            <details class="faq">
+              <summary>
+                <span class="question">{q.question}</span>
+                <span class="arrow" aria-hidden="true">
+                  ↓
+                </span>
+              </summary>
+              <div class="body-24 answer">
+                <PortableText value={q.answer} />
+              </div>
+            </details>
+          ))}
+        </div>
       ) : (
         <p class="empty">No questions in Site settings yet.</p>
       ))
@@ -192,17 +269,18 @@ const path = hubTabPath('visit', tab);
   {page && <Sections lang={lang} sections={page.sections} />}
   {
     page?.body && (
-      <div class="prose">
+      <div class="body-24 page-body">
         <PortableText value={page.body} />
       </div>
     )
   }
+
   {
-    tab === 'practical-info' && info.images?.length > 0 && (
-      <ul class="grid">
-        {info.images.map((img: any) => (
+    gallery.length > 0 && (
+      <ul class="image-row">
+        {gallery.map((img: any) => (
           <li>
-            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 430px" />
+            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 640px) 100vw, 440px" widths={[440, 880]} />
           </li>
         ))}
       </ul>
@@ -211,25 +289,57 @@ const path = hubTabPath('visit', tab);
 </Base>
 
 <style>
+  /* Practical info: the design's two 6-column halves. */
   .practical {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem 3rem;
+    row-gap: 0;
+    margin-top: 0.5rem;
   }
-  .practical section h2 {
-    border-top: 1px solid var(--ink);
-    padding-top: 0.5rem;
+  .col-left {
+    grid-column: 1 / span 6;
   }
-  .strong {
+  .col-right {
+    grid-column: 7 / span 6;
+  }
+  .col :global(.hero) {
+    width: 100%;
+    margin: 0 0 2.5rem;
+  }
+  .practical-intro {
+    margin-bottom: 2.5rem;
+  }
+
+  .panel {
+    margin: 0 0 3rem;
+  }
+  .panel .panel-title {
+    margin-bottom: 1rem;
+  }
+  .panel .body-24 > p {
+    margin: 0;
+  }
+  .label {
     font-weight: 600;
     text-transform: uppercase;
-    margin: 0 0 0.2rem;
   }
   .addr {
     white-space: pre-line;
   }
-  dl > div {
-    margin-bottom: 0.8rem;
+  .panel .body-24 > p.deal {
+    margin-top: 0.5rem;
+  }
+  .map-link {
+    margin: 0.75rem 0 0;
+  }
+
+  /* Rows of "LABEL / text", as the hours, access and ticket lists. */
+  .rows {
+    margin: 0;
+  }
+  .row {
+    margin: 0 0 1.1rem;
+  }
+  .row:last-child {
+    margin-bottom: 0;
   }
   dt {
     font-weight: 600;
@@ -238,27 +348,175 @@ const path = hubTabPath('visit', tab);
   dd {
     margin: 0;
   }
-  .vendor h2 {
-    border-top: 1px solid var(--ink);
-    padding-top: 0.5rem;
-    margin-top: 0;
+  .access-text {
+    white-space: pre-line;
+  }
+  .slot-time {
+    font-variant-numeric: tabular-nums;
+  }
+  .note-line {
+    margin: 1rem 0 0;
+    font-size: clamp(0.95rem, 1.2vw, 1.125rem);
+    color: var(--ink-2);
+  }
+  .accessibility {
+    margin: 1.1rem 0 0;
+  }
+  .cta {
+    margin: 1.5rem 0 0;
+  }
+
+  .cover {
+    margin: 0 0 2.5rem;
+    width: 100%;
+  }
+
+  /* Food & drinks: 2x2 vendor grid, the name doubling as the external link. */
+  .vendors {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3.5rem 30px;
+  }
+  .vendor .name {
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 0.3rem;
+    margin: 0 0 1.25rem;
+    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.04em;
     font-weight: 600;
   }
-  .vendor h2 a {
-    color: inherit;
+  .vendor .name a {
     text-decoration: none;
+  }
+  .vendor .name a:hover,
+  .vendor .name a:focus-visible {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.1em;
+  }
+  .subtitle {
+    margin: -0.75rem 0 1.25rem;
+    font-size: clamp(1rem, 1.3vw, 1.25rem);
+    letter-spacing: -0.01em;
+    color: var(--ink-2);
+  }
+  .vendor :global(.vendor-slides),
+  .vendor :global(.vendor-ph) {
+    width: 100%;
+    margin: 0 0 1.25rem;
+  }
+  .text :global(p) {
+    margin: 0 0 1em;
+  }
+  .text :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1.25rem 0 0;
+  }
+
+  /* FAQ: the same accordion as the programme days. */
+  .faq-list {
+    margin-top: 1rem;
   }
   .faq {
     border-top: 1px solid var(--ink);
-    padding: 0.8rem 0;
+  }
+  .faq-list .faq:last-of-type {
+    border-bottom: 1px solid var(--ink);
   }
   .faq summary {
-    font-size: 1.2rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 0;
     cursor: pointer;
+    list-style: none;
+    font-size: clamp(1.25rem, 2.2vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    font-weight: 600;
   }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .arrow {
+    font-size: 0.8em;
+    transition: transform 0.2s ease;
+  }
+  .faq[open] .arrow {
+    transform: rotate(180deg);
+  }
+  .answer {
+    padding: 0 0 1.5rem;
+    max-width: 62ch;
+  }
+  .answer :global(p) {
+    margin: 0 0 1em;
+  }
+
+  .page-body :global(h2) {
+    text-transform: lowercase;
+    border-bottom: 2px solid var(--ink);
+    margin: 3rem 0 1.25rem;
+    padding-bottom: 0.2rem;
+    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+  }
+  .page-body :global(p) {
+    margin: 0 0 1.5rem;
+    max-width: 62ch;
+  }
+
+  .image-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 30px;
+    list-style: none;
+    padding: 0;
+    margin: 3rem 0 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arrow {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .vendors {
+      gap: 2.5rem 16px;
+    }
+    .image-row {
+      gap: 16px;
+    }
+  }
+
   @media (max-width: 800px) {
-    .practical {
+    .col-left,
+    .col-right {
+      grid-column: 1 / -1;
+    }
+    /* The intro and the hours read first on a phone. */
+    .col-right {
+      order: -1;
+    }
+    .vendors {
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .image-row {
+      grid-template-columns: 1fr;
+      gap: 10px;
     }
   }
 </style>

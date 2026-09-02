@@ -2,18 +2,23 @@
 import Base from '../../../layouts/Base.astro';
 import HubNav from '../../../components/HubNav.astro';
 import Sections from '../../../components/Sections.astro';
+import Figure from '../../../components/Figure.astro';
 import SanityImage from '../../../components/SanityImage.astro';
 import PortableText from '../../../components/PortableText.astro';
 import PersonCard from '../../../components/PersonCard.astro';
 import LinkPill from '../../../components/LinkPill.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, formatDate } from '../../../lib/i18n';
+import { instagramUrl } from '../../../lib/links';
 import { getHubPages, getPeople, getPressClips, getSettings, getEditions } from '../../../lib/queries';
 import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
 
 /**
- * About hub. Tabs: the fair (a page), advisory board and team (people),
- * press (contacts + clippings), images (the galleries of past editions).
+ * About hub. Tabs: the fair (a page: intro, hero, "the fair / goals /
+ * development", closing image row), advisory board and team (person cards in
+ * two columns, the team followed by its collaborators), press (contacts, the
+ * press kit and the clippings by year), images (the photo gallery of every
+ * edition that has one).
  */
 export function getStaticPaths() {
   return hubTabParams('about', LOCALE_IDS);
@@ -23,42 +28,125 @@ const lang = Astro.params.lang as LocaleId;
 const tab = (Astro.params.tab as string | undefined) ?? HUBS.about.tabs[0].slug;
 const t = useTranslations(lang);
 
+/* Labels this hub needs that STRINGS does not carry yet - all three locales,
+   so nothing ships in English on a French page. To move into src/lib/i18n.ts. */
+const LOCAL = {
+  en: {
+    collaborators: 'collaborators',
+    pressKit: 'press kit',
+    imagesEmpty: 'No edition has a photo gallery yet.',
+    peopleEmpty: 'Nobody has been published in this group yet.',
+    pageEmpty: 'This page has no content yet.',
+  },
+  fr: {
+    collaborators: 'collaborateurs',
+    pressKit: 'dossier de presse',
+    imagesEmpty: 'Aucune édition n’a encore de galerie photo.',
+    peopleEmpty: 'Personne n’a encore été publié dans ce groupe.',
+    pageEmpty: 'Cette page n’a pas encore de contenu.',
+  },
+  nl: {
+    collaborators: 'medewerkers',
+    pressKit: 'perskit',
+    imagesEmpty: 'Nog geen enkele editie heeft een fotogalerij.',
+    peopleEmpty: 'Nog niemand gepubliceerd in deze groep.',
+    pageEmpty: 'Deze pagina heeft nog geen inhoud.',
+  },
+} as const;
+const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key];
+
 const pages = await getHubPages(lang, 'about');
 const page = pageForTab(pages, tab);
+const hubTab = HUBS.about.tabs.find((x) => x.slug === tab);
+const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
 
 const board = tab === 'advisory-board' ? await getPeople(lang, 'advisory-board') : [];
 const team = tab === 'team' ? await getPeople(lang, 'team') : [];
 const collaborators = tab === 'team' ? await getPeople(lang, 'collaborator') : [];
+const people = tab === 'team' ? team : board;
+
 const [clips, settings] = tab === 'press' ? await Promise.all([getPressClips(), getSettings(lang)]) : [[], null];
-const editions = tab === 'images' ? (await getEditions(lang)).filter((e: any) => e.images?.length) : [];
+// Newest first, grouped by year, which is how a press list is actually read.
+const years = [...new Set(clips.map((c: any) => c.publishedAt?.slice(0, 4)))]
+  .filter(Boolean)
+  .sort((a, b) => String(b).localeCompare(String(a)));
+
+const editions = tab === 'images' ? (await getEditions(lang)).filter((e: any) => e.images?.some((img: any) => img?.asset)) : [];
+
+// The fair: the first section sits beside the hero, the rest share rows of two.
+const [leadSection, ...moreSections] = page?.sections ?? [];
+const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
 const path = hubTabPath('about', tab);
+
+const captionOf = (img: any) =>
+  [img.caption, img.workTitle, img.year].filter(Boolean).length > 0 || img.credit;
 ---
 
-<Base lang={lang} title={`${t('nav.about')} — ${page?.tabLabel ?? tab}`} description={page?.seo?.description ?? page?.intro} path={path} editId={page?._id} editType={page?._type}>
+<Base
+  lang={lang}
+  title={`${t('nav.about')} — ${tabLabel}`}
+  description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
+  image={page?.seo?.ogImage ?? page?.cover}
+  path={path}
+  editId={page?._id}
+  editType={page?._type}
+>
   <HubNav lang={lang} route="about" active={tab} pages={pages} />
 
-  {page?.intro && <p class="lede">{page.intro}</p>}
+  {page?.intro && <p class="intro-large">{page.intro}</p>}
 
+  {/* ---------------------------------------------------------- the fair */}
   {
-    tab === 'the-fair' && page?.cover?.asset && (
-      <SanityImage image={page.cover} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 900px" widths={[600, 900, 1400]} />
-    )
+    tab === 'the-fair' &&
+      (page ? (
+        <>
+          <div class="page-grid fair-lead">
+            <figure class="fair-hero">
+              <Figure
+                image={page.cover}
+                pool="fair"
+                seed="about-the-fair"
+                aspect={1.5}
+                loading="eager"
+                priority
+                sizes="(max-width: 900px) 100vw, 66vw"
+                widths={[600, 900, 1200, 1600]}
+              />
+            </figure>
+            {leadSection && (
+              <div class="fair-first">
+                <Sections lang={lang} sections={[leadSection]} textColumns={1} />
+              </div>
+            )}
+          </div>
+          <Sections lang={lang} sections={moreSections} columns={2} />
+        </>
+      ) : (
+        <p class="empty">
+          {s('pageEmpty')} <a href="/studio">Studio</a>
+        </p>
+      ))
   }
 
+  {/* --------------------------------------------- advisory board / team */}
   {
-    (tab === 'advisory-board' || tab === 'team') && (
-      <div class="two-col">
-        {(tab === 'team' ? team : board).map((p: any) => (
-          <PersonCard lang={lang} person={p} />
-        ))}
-      </div>
-    )
+    (tab === 'advisory-board' || tab === 'team') &&
+      (people.length ? (
+        <div class="people">
+          {people.map((p: any) => (
+            <PersonCard lang={lang} person={p} />
+          ))}
+        </div>
+      ) : (
+        <p class="empty">{s('peopleEmpty')}</p>
+      ))
   }
   {
     tab === 'team' && collaborators.length > 0 && (
-      <section>
-        <h2>Collaborators</h2>
-        <div class="two-col">
+      <section class="group">
+        <h2 class="group-title">{s('collaborators')}</h2>
+        <div class="people">
           {collaborators.map((p: any) => (
             <PersonCard lang={lang} person={p} />
           ))}
@@ -67,43 +155,87 @@ const path = hubTabPath('about', tab);
     )
   }
 
+  {/* ------------------------------------------------------------- press */}
   {
     tab === 'press' && (
       <>
         {settings?.pressContacts?.length > 0 && (
-          <section>
-            <h2>{t('press.contacts')}</h2>
-            <div class="two-col">
+          <section class="press-contacts">
+            <h2 class="panel-title">{t('press.contacts')}</h2>
+            <ul class="contacts">
               {settings.pressContacts.map((c: any) => (
-                <article>
-                  <h3>{c.region ?? c.name}</h3>
-                  <p>{c.region && c.name}</p>
-                  <p class="pills">
-                    {c.email && <a href={`mailto:${c.email}`}>{c.email}</a>}
-                    {c.url && <LinkPill lang={lang} href={c.url} label={t('common.website')} />}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
-        <section>
-          <h2>{t('press.clips')}</h2>
-          {settings?.pressKitUrl && <LinkPill lang={lang} href={settings.pressKitUrl} label={t('press.clips')} variant="solid" />}
-          {clips.length ? (
-            <ul class="clips">
-              {clips.map((c: any) => (
-                <li>
-                  <span class="meta">{formatDate(c.publishedAt, lang)}</span> · <strong>{c.outlet}</strong> ·{' '}
-                  {c.url ? <a href={c.url} target="_blank" rel="noopener noreferrer">{c.title} ↗</a> : c.title}
-                  {c.pdfUrl && (
-                    <a href={c.pdfUrl} target="_blank" rel="noopener noreferrer">
-                      PDF
-                    </a>
+                <li class="contact">
+                  {c.region && <p class="eyebrow">{c.region}</p>}
+                  {c.name && <p class="contact-name">{c.name}</p>}
+                  {c.email && (
+                    <p class="contact-email">
+                      <a class="text-link" href={`mailto:${c.email}`}>
+                        {c.email}
+                      </a>
+                    </p>
+                  )}
+                  {(c.url || c.instagram) && (
+                    <p class="pills">
+                      {c.url && <LinkPill lang={lang} href={c.url} label={t('common.website')} external />}
+                      {c.instagram && (
+                        <LinkPill lang={lang} href={instagramUrl(c.instagram)} label={t('common.instagram')} external />
+                      )}
+                    </p>
                   )}
                 </li>
               ))}
             </ul>
+          </section>
+        )}
+
+        {(settings?.pressKitUrl || settings?.pressEmail) && (
+          <p class="press-kit">
+            {settings.pressKitUrl && (
+              <LinkPill lang={lang} href={settings.pressKitUrl} label={s('pressKit')} variant="solid" external />
+            )}
+            {settings.pressEmail && (
+              <a class="text-link" href={`mailto:${settings.pressEmail}`}>
+                {settings.pressEmail}
+              </a>
+            )}
+          </p>
+        )}
+
+        <section class="press-clips">
+          <h2 class="panel-title">{t('press.clips')}</h2>
+          {clips.length ? (
+            years.map((year) => (
+              <section class="year">
+                <h3 class="year-label">{year}</h3>
+                <ul class="clips">
+                  {clips
+                    .filter((c: any) => c.publishedAt?.slice(0, 4) === year)
+                    .map((clip: any) => (
+                      <li class="clip">
+                        <p class="outlet">{clip.outlet}</p>
+                        <h4>
+                          {clip.url ? (
+                            <a href={clip.url} target="_blank" rel="noopener noreferrer">
+                              {clip.title} ↗
+                            </a>
+                          ) : (
+                            clip.title
+                          )}
+                        </h4>
+                        <p class="foot">
+                          <time datetime={clip.publishedAt}>{formatDate(clip.publishedAt, lang)}</time>
+                          {clip.language && <span class="lang">{clip.language}</span>}
+                          {clip.pdfUrl && (
+                            <a class="pill" href={clip.pdfUrl} target="_blank" rel="noopener noreferrer">
+                              pdf ↓
+                            </a>
+                          )}
+                        </p>
+                      </li>
+                    ))}
+                </ul>
+              </section>
+            ))
           ) : (
             <p class="empty">{t('press.empty')}</p>
           )}
@@ -112,40 +244,69 @@ const path = hubTabPath('about', tab);
     )
   }
 
+  {/* ------------------------------------------------------------ images */}
   {
     tab === 'images' &&
       (editions.length ? (
         editions.map((e: any) => (
-          <section>
-            <h2>{e.title ?? `ceramic brussels ${e.year}`}</h2>
-            <ul class="grid">
-              {e.images.map((img: any) => (
-                <li>
-                  <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 430px" />
-                </li>
-              ))}
+          <section class="gallery">
+            <h2 class="group-title">{e.title ?? `ceramic brussels ${e.year}`}</h2>
+            <ul class="page-grid shots">
+              {e.images
+                .filter((img: any) => img?.asset)
+                .map((img: any) => (
+                  <li class="shot">
+                    <figure>
+                      <SanityImage
+                        image={img}
+                        aspect={1.5}
+                        sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw"
+                        widths={[400, 600, 900, 1200]}
+                      />
+                      {captionOf(img) && (
+                        <figcaption>
+                          {img.caption}
+                          {img.workTitle && (
+                            <>
+                              {img.caption ? ', ' : ''}
+                              <em>{img.workTitle}</em>
+                            </>
+                          )}
+                          {img.year && `, ${img.year}`}
+                          {img.credit && <span class="credit"> © {img.credit}</span>}
+                        </figcaption>
+                      )}
+                    </figure>
+                  </li>
+                ))}
             </ul>
           </section>
         ))
       ) : (
-        <p class="empty">No edition has a photo gallery yet.</p>
+        <p class="empty">{s('imagesEmpty')}</p>
       ))
   }
 
-  {page && <Sections lang={lang} sections={page.sections} />}
+  {/* ------------------------------ page text on the tabs that carry one */}
+  {page && tab !== 'the-fair' && <Sections lang={lang} sections={page.sections} />}
   {
     page?.body && (
-      <div class="prose">
+      <div class="body-24 page-body">
         <PortableText value={page.body} />
       </div>
     )
   }
   {
-    page?.images?.length > 0 && (
-      <ul class="grid">
-        {page.images.map((img: any) => (
-          <li>
-            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 430px" />
+    closingImages.length > 0 && (
+      <ul class="page-grid shots closing">
+        {closingImages.map((img: any) => (
+          <li class="shot">
+            <SanityImage
+              image={img}
+              aspect={1.5}
+              sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw"
+              widths={[400, 600, 900, 1200]}
+            />
           </li>
         ))}
       </ul>
@@ -154,12 +315,225 @@ const path = hubTabPath('about', tab);
 </Base>
 
 <style>
+  /* the fair: hero on eight columns, the first section on the last four */
+  .fair-lead {
+    align-items: start;
+    margin-bottom: 3rem;
+  }
+  .fair-hero {
+    grid-column: span 8;
+    margin: 0;
+  }
+  .fair-hero:only-child {
+    grid-column: 1 / -1;
+  }
+  .fair-hero :global(img) {
+    width: 100%;
+  }
+  .fair-first {
+    grid-column: span 4;
+  }
+
+  /* A section name over a full-width rule, as "institutions" on partners. */
+  .group-title {
+    margin: 3rem 0 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--ink);
+    font-size: clamp(1.75rem, 4vw, 3.75rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    text-transform: lowercase;
+  }
+
+  .people {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3rem 30px;
+    margin-bottom: 3rem;
+  }
+
+  /* press */
+  .contacts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 30px;
+  }
+  .contact .eyebrow {
+    margin: 0 0 0.25rem;
+    color: var(--ink-2);
+  }
+  .contact-name {
+    margin: 0;
+    font-size: clamp(1.25rem, 2.2vw, 1.9rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  .contact-email {
+    margin: 0.4rem 0 0;
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+  }
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1rem 0 0;
+  }
+  .press-kit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin: 2.5rem 0 3.5rem;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+  }
+  .press-clips {
+    margin-top: 1rem;
+  }
+  .year {
+    margin-bottom: 3rem;
+  }
+  .year-label {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
   .clips {
     list-style: none;
     padding: 0;
+    margin: 0;
   }
-  .clips li {
-    border-top: 1px solid var(--rule);
-    padding: 0.6rem 0;
+  .clip {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1rem 2.5rem;
+    align-items: baseline;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .outlet {
+    margin: 0;
+    font-size: clamp(1rem, 1.6vw, 1.35rem);
+    letter-spacing: -0.02em;
+  }
+  .clip h4 {
+    margin: 0;
+    font-size: clamp(1.15rem, 2.2vw, 1.9rem);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    font-weight: 400;
+  }
+  .clip h4 a {
+    text-decoration: none;
+  }
+  .clip h4 a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.1em;
+  }
+  .foot {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.9rem;
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    color: var(--ink-2);
+  }
+  .lang {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.78rem;
+  }
+  .foot .pill {
+    text-transform: lowercase;
+    text-decoration: none;
+    color: var(--ink);
+    padding: 0.1rem 0.8rem;
+    font-size: 0.82rem;
+  }
+  .foot .pill:hover {
+    background: var(--acid);
+  }
+
+  /* images: three 3:2 shots across, per edition */
+  .gallery {
+    margin-bottom: 3rem;
+  }
+  .shots {
+    list-style: none;
+    margin: 0;
+    padding-inline: 0;
+    row-gap: 30px;
+  }
+  .shots.closing {
+    margin-top: 1rem;
+    margin-bottom: 3rem;
+  }
+  .shot {
+    grid-column: span 4;
+  }
+  .shot figure {
+    margin: 0;
+  }
+  .shot :global(img) {
+    width: 100%;
+  }
+  .shot figcaption {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--ink-2);
+  }
+  .credit {
+    color: var(--ink-3);
+  }
+
+  .page-body {
+    margin-bottom: 3rem;
+  }
+  .page-body :global(p) {
+    margin: 0 0 1.5rem;
+    max-width: 62ch;
+  }
+
+  @media (max-width: 900px) {
+    .fair-hero,
+    .fair-first {
+      grid-column: 1 / -1;
+    }
+    .fair-first {
+      margin-top: 1.5rem;
+    }
+    .shot {
+      grid-column: span 6;
+    }
+    .shots {
+      row-gap: 16px;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .people,
+    .contacts {
+      grid-template-columns: 1fr;
+    }
+    .clip {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+    }
+    .foot {
+      grid-column: 1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .shot {
+      grid-column: 1 / -1;
+    }
   }
 </style>

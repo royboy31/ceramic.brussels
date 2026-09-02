@@ -1,6 +1,7 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import HubNav from '../../../components/HubNav.astro';
+import Figure from '../../../components/Figure.astro';
 import Sections from '../../../components/Sections.astro';
 import Slideshow from '../../../components/Slideshow.astro';
 import SanityImage from '../../../components/SanityImage.astro';
@@ -14,15 +15,17 @@ import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
 import { instagramUrl } from '../../../lib/links';
 
 /**
- * The art prize hub, on the yellow ground of the design. Tabs: about (a
- * page), laureates (per edition), awards (per edition), jury (people).
+ * The art prize hub, on the acid ground of the design. Tabs: about (a page
+ * document), laureates (per edition, slideshow and text alternating sides),
+ * awards (two packed columns of award blocks per edition) and jury (people).
  */
 export function getStaticPaths() {
   return hubTabParams('art-prize', LOCALE_IDS);
 }
 
 const lang = Astro.params.lang as LocaleId;
-const tab = (Astro.params.tab as string | undefined) ?? HUBS['art-prize'].tabs[0].slug;
+const hub = HUBS['art-prize'];
+const tab = (Astro.params.tab as string | undefined) ?? hub.tabs[0].slug;
 const t = useTranslations(lang);
 
 const pages = await getHubPages(lang, 'art-prize');
@@ -32,50 +35,96 @@ const laureateYears = tab === 'laureates' ? await getLaureates(lang) : [];
 const awards = tab === 'awards' ? (await getAwards(lang)).filter((a: any) => a.family === 'art-prize') : [];
 const jury = tab === 'jury' ? await getPeople(lang, 'jury') : [];
 
-const awardYears = [...new Set(awards.map((a: any) => a.year))] as number[];
+const awardYears = [...new Set(awards.map((a: any) => a.year))].filter(Boolean) as number[];
 const path = hubTabPath('art-prize', tab);
+
+const tabKey = hub.tabs.find((x) => x.slug === tab)?.label;
+const tabLabel = page?.tabLabel ?? (tabKey ? t(tabKey) : tab);
+
+/** "A, B & C" with each name linked to the artist page. */
+const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ' & ' : ', ');
 ---
 
-<Base lang={lang} title={`${t('nav.artPrize')} — ${page?.tabLabel ?? tab}`} description={page?.seo?.description ?? page?.intro} path={path} tone="brand" editId={page?._id} editType={page?._type}>
+<Base
+  lang={lang}
+  title={`${t('nav.artPrize')} — ${tabLabel}`}
+  description={page?.seo?.description ?? page?.intro}
+  path={path}
+  theme="acid"
+  image={page?.seo?.ogImage ?? page?.cover}
+  editId={page?._id}
+  editType={page?._type}
+>
   <HubNav lang={lang} route="art-prize" active={tab} pages={pages} />
 
-  {page?.intro && <p class="lede">{page.intro}</p>}
+  {page?.intro && <p class="intro-large">{page.intro}</p>}
 
   {
     tab === 'laureates' &&
       (laureateYears.length ? (
         laureateYears.map((year: any) => (
-          <section>
-            <h2>{t('artPrize.laureatesOf', { year: year.year })}</h2>
-            {year.laureates.map((l: any, i: number) => (
-              <article class:list={['laureate', { flip: i % 2 === 1 }]}>
-                <div class="media">
-                  <Slideshow images={l.images} aspect={4 / 5} />
-                </div>
-                <div>
-                  <h3>
-                    <a href={localePath(lang, `artists/${l.artist?.slug}`)}>{l.artist?.name}</a>
-                  </h3>
-                  <p class="born">
-                    {l.artist?.birthYear && `°${l.artist.birthYear}`}
-                    {l.artist?.basedIn && (
-                      <>
-                        <br />
-                        {t('artists.basedIn')} {l.artist.basedIn}
-                      </>
+          <section class="edition">
+            <h2 class="panel-title">{t('artPrize.laureatesOf', { year: year.year })}</h2>
+
+            {year.laureates.map((l: any, i: number) => {
+              const artist = l.artist ?? {};
+              const hasImages = (l.images ?? []).some((img: any) => img?.asset);
+              return (
+                <article class:list={['page-grid', 'laureate', { flip: i % 2 === 1 }]}>
+                  <div class="media">
+                    {hasImages ? (
+                      <Slideshow images={l.images} aspect={4 / 5} sizes="(max-width: 900px) 100vw, 50vw" />
+                    ) : (
+                      <Figure
+                        image={artist.portrait}
+                        pool="work"
+                        seed={artist.slug ?? artist.name ?? l._id}
+                        aspect={4 / 5}
+                        sizes="(max-width: 900px) 100vw, 50vw"
+                        widths={[400, 600, 900, 1200]}
+                      />
                     )}
-                  </p>
-                  {l.artist?.instagram && (
-                    <p class="pills">
-                      <LinkPill lang={lang} href={instagramUrl(l.artist.instagram)} label={t('common.instagram')} />
-                    </p>
-                  )}
-                  <div class="prose">
-                    <PortableText value={l.statement ?? l.artist?.bio} />
                   </div>
-                </div>
-              </article>
-            ))}
+
+                  <div class="copy">
+                    <div class="title-row">
+                      <h3>
+                        {artist.slug ? (
+                          <a href={localePath(lang, `artists/${artist.slug}`)}>{artist.name}</a>
+                        ) : (
+                          artist.name
+                        )}
+                        {artist.countryCode && <sup class="country">{artist.countryCode}</sup>}
+                      </h3>
+                      {(artist.birthYear || artist.basedIn) && (
+                        <p class="origin">
+                          {artist.birthYear && <span>°{artist.birthYear}</span>}
+                          {artist.basedIn && (
+                            <span>
+                              {t('artists.basedIn')} {artist.basedIn}
+                            </span>
+                          )}
+                        </p>
+                      )}
+                    </div>
+
+                    {artist.instagram && (
+                      <p class="links">
+                        <a class="pill" href={instagramUrl(artist.instagram)} target="_blank" rel="noopener noreferrer">
+                          {t('common.instagram')} ↗
+                        </a>
+                      </p>
+                    )}
+
+                    {(l.statement ?? artist.bio) && (
+                      <div class="body-24 statement">
+                        <PortableText value={l.statement ?? artist.bio} />
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
           </section>
         ))
       ) : (
@@ -87,33 +136,48 @@ const path = hubTabPath('art-prize', tab);
     tab === 'awards' &&
       (awardYears.length ? (
         awardYears.map((year) => (
-          <section>
-            <h2>{t('artPrize.awardsOf', { year })}</h2>
-            <div class="two-col">
+          <section class="edition">
+            <h2 class="panel-title">{t('artPrize.awardsOf', { year })}</h2>
+
+            <div class="awards">
               {awards
                 .filter((a: any) => a.year === year)
                 .map((a: any) => (
                   <article class="award">
                     <h3>{a.name}</h3>
+
                     {(a.laureates?.length > 0 || a.outcome) && (
-                      <p class="result">
-                        →{' '}
+                      <p class="winner">
+                        <span aria-hidden="true">→ </span>
                         {(a.laureates ?? []).map((l: any, i: number) => (
                           <>
-                            {i > 0 && (i === a.laureates.length - 1 ? ' & ' : ', ')}
-                            <a href={localePath(lang, `artists/${l.slug}`)}>{l.name}</a>
+                            {joiner(i, a.laureates.length)}
+                            {l.slug ? <a href={localePath(lang, `artists/${l.slug}`)}>{l.name}</a> : l.name}
                           </>
-                        ))}{' '}
+                        ))}
+                        {a.laureates?.length > 0 && a.outcome && ' '}
                         {a.outcome}
                       </p>
                     )}
+
                     {a.description && (
-                      <div class="prose">
+                      <div class="citation">
                         <PortableText value={a.description} />
                       </div>
                     )}
-                    {a.partner?.url && <LinkPill lang={lang} href={a.partner.url} label={t('common.website')} />}
-                    {a.image?.asset && <SanityImage image={a.image} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 670px" />}
+
+                    {a.image?.asset && (
+                      <figure class="shot">
+                        <SanityImage image={a.image} aspect={1.5} sizes="(max-width: 800px) 100vw, 45vw" widths={[400, 600, 900, 1200]} />
+                        {a.image.credit && <figcaption>{a.image.credit}</figcaption>}
+                      </figure>
+                    )}
+
+                    {a.partner?.url && (
+                      <p class="links">
+                        <LinkPill lang={lang} href={a.partner.url} label={t('common.website')} />
+                      </p>
+                    )}
                   </article>
                 ))}
             </div>
@@ -125,27 +189,40 @@ const path = hubTabPath('art-prize', tab);
   }
 
   {
-    tab === 'jury' && (
-      <div class="two-col">
-        {jury.length ? jury.map((p: any) => <PersonCard lang={lang} person={p} />) : <p class="empty">No jury published yet.</p>}
-      </div>
-    )
+    tab === 'jury' &&
+      (jury.length ? (
+        <div class="people">
+          {jury.map((p: any) => (
+            <PersonCard lang={lang} person={p} />
+          ))}
+        </div>
+      ) : (
+        <p class="empty">No jury published yet.</p>
+      ))
   }
 
-  {page && <Sections lang={lang} sections={page.sections} />}
+  {page?.sections?.length > 0 && <Sections lang={lang} sections={page.sections} />}
+
   {
     page?.body && (
-      <div class="prose">
+      <div class="body-24 page-body">
         <PortableText value={page.body} />
       </div>
     )
   }
+
   {
     page?.images?.length > 0 && (
-      <ul class="grid">
+      <ul class="closing">
         {page.images.map((img: any) => (
           <li>
-            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 430px" />
+            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 50vw" widths={[400, 600, 900, 1200]} />
+            {(img.caption || img.credit) && (
+              <p class="caption">
+                {img.caption}
+                {img.credit && <span class="credit"> © {img.credit}</span>}
+              </p>
+            )}
           </li>
         ))}
       </ul>
@@ -154,42 +231,197 @@ const path = hubTabPath('art-prize', tab);
 </Base>
 
 <style>
-  .laureate {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 2.5rem;
-    border-top: 1px solid var(--ink);
-    padding-top: 1rem;
+  .intro-large {
     margin-bottom: 3rem;
+  }
+
+  .edition + .edition {
+    margin-top: 4rem;
+  }
+  .edition .panel-title {
+    margin-bottom: 2rem;
+  }
+
+  /* laureates - the picture and the text swap sides on every other block. */
+  .laureate {
+    row-gap: 1.5rem;
+    margin-bottom: 4rem;
+  }
+  .laureate .media {
+    grid-column: span 6;
+  }
+  .laureate .copy {
+    grid-column: span 6;
   }
   .laureate.flip .media {
     order: 2;
   }
-  .laureate h3 {
-    font-size: 2.2rem;
-    margin: 0;
+
+  .title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    border-top: 2px solid var(--ink);
+    padding-top: 0.4rem;
   }
-  .laureate h3 a {
-    color: inherit;
+  .title-row h3 {
+    margin: 0;
+    font-size: clamp(1.75rem, 3.6vw, 3rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 400;
+  }
+  .title-row h3 a {
     text-decoration: none;
   }
-  .born {
-    font-size: 1.4rem;
+  .title-row h3 a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.1em;
+  }
+  .country {
+    font-size: 0.5em;
+    margin-left: 0.3em;
+    letter-spacing: 0;
+  }
+  .origin {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin: 0;
+    text-align: right;
+    font-size: clamp(1.1rem, 2vw, 1.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+  }
+  .links .pill {
+    text-transform: lowercase;
+    text-decoration: none;
+    padding: 0.15rem 1.1rem;
+    font-size: inherit;
+  }
+  .links .pill:hover,
+  .links :global(.link.pill:hover) {
+    background: var(--ink);
+    color: var(--ground);
+  }
+
+  .statement {
+    margin-top: 1.5rem;
+  }
+  .statement :global(p) {
+    margin: 0 0 1.25rem;
+  }
+
+  /* awards - two independent columns that pack tightly, as in the frame. */
+  .awards {
+    columns: 2;
+    column-gap: 30px;
+  }
+  .award {
+    break-inside: avoid;
+    margin: 0 0 3rem;
   }
   .award h3 {
-    border-top: 1px solid var(--ink);
-    padding-top: 0.5rem;
-    font-size: 1.6rem;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 0.35rem;
+    margin: 0 0 1rem;
+    font-size: clamp(1.15rem, 1.9vw, 1.6rem);
+    letter-spacing: -0.02em;
+    font-weight: 600;
   }
-  .result {
-    font-size: 1.4rem;
+  .winner {
+    font-size: clamp(1.15rem, 2.1vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 1rem;
   }
-  @media (max-width: 800px) {
-    .laureate {
-      grid-template-columns: 1fr;
+  .winner a {
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+  }
+  .citation {
+    font-size: clamp(0.9rem, 1.25vw, 1.05rem);
+    line-height: 1.4;
+  }
+  .citation :global(p) {
+    margin: 0 0 1rem;
+  }
+  .shot {
+    margin: 1.25rem 0 0;
+  }
+  .shot figcaption {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+  }
+  .award .links {
+    margin-top: 1.25rem;
+    font-size: 1rem;
+  }
+
+  /* jury */
+  .people {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem 30px;
+  }
+
+  /* about - the page's own sections, body and closing pictures. */
+  .page-body {
+    max-width: var(--measure);
+    margin-top: 2rem;
+  }
+  .closing {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 30px;
+    list-style: none;
+    padding: 0;
+    margin: 3rem 0 0;
+  }
+  .caption {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+  }
+  .credit {
+    color: var(--ink-2);
+  }
+
+  .empty {
+    background: transparent;
+    border-color: var(--ink);
+  }
+
+  @media (max-width: 900px) {
+    .laureate .media,
+    .laureate .copy {
+      grid-column: 1 / -1;
     }
     .laureate.flip .media {
       order: 0;
+    }
+    .awards {
+      column-gap: 16px;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .awards {
+      columns: 1;
+    }
+    .people,
+    .closing {
+      grid-template-columns: 1fr;
+      gap: 2rem 16px;
     }
   }
 </style>

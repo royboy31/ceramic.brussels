@@ -3,9 +3,10 @@ import type { LocaleId } from '../lib/locales';
 import { resolveLink, type ResolvedLink } from '../lib/links';
 
 /**
- * A pill button or an underlined text link, with the design's arrow: "→" for
- * internal links, "↗" for external ones. Pass either a Sanity `link` object
- * or a plain href + label.
+ * The design's link treatments: an outline pill ("instagram ↗", "website ↗"),
+ * the black solid pill of the calls to action ("book your tickets ↗") and an
+ * underlined text link. The arrow is "→" for internal links and "↗" for
+ * external ones. Pass either a Sanity `link` object or a plain href + label.
  */
 interface Props {
   lang: LocaleId;
@@ -33,7 +34,7 @@ const resolved: ResolvedLink | null = link
       href={resolved.href}
       {...(resolved.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
     >
-      {resolved.label} <span aria-hidden="true">{resolved.arrow}</span>
+      {resolved.label}&nbsp;<span class="arrow" aria-hidden="true">{resolved.arrow}</span>
     </a>
   )
 }
@@ -42,23 +43,54 @@ const resolved: ResolvedLink | null = link
   .link {
     display: inline-block;
     color: var(--ink);
+    line-height: 1.3;
   }
-  .pill {
-    border: 1px solid var(--ink);
+
+  /* Outline pill, as on the exhibitor, artist and partner pages. The design
+     sets these labels lowercase; some callers pass title-case strings that
+     double as headings elsewhere. */
+  .pill,
+  .solid {
+    border: 1px solid currentColor;
     border-radius: 999px;
-    padding: 0.3rem 0.9rem;
+    padding: 0.2rem 1.25rem;
+    font-size: clamp(1rem, 1.6vw, 1.375rem);
+    letter-spacing: -0.01em;
+    text-transform: lowercase;
     text-decoration: none;
-    font-size: 0.95rem;
+    white-space: nowrap;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
   }
+  .pill:hover,
+  .pill:focus-visible {
+    background: var(--acid);
+  }
+
+  /* The black call-to-action pill: "book your tickets ↗", "discover the hotel ↗". */
   .solid {
     background: var(--ink);
+    border-color: var(--ink);
     color: var(--ground);
-    border-radius: 999px;
-    padding: 0.4rem 1rem;
-    text-decoration: none;
   }
+  .solid:hover,
+  .solid:focus-visible {
+    background: var(--acid);
+    border-color: var(--acid);
+    color: var(--ink);
+  }
+
   .text {
     text-decoration: underline;
-    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.12em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pill,
+    .solid {
+      transition: none;
+    }
   }
 </style>
