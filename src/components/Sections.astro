@@ -1,0 +1,67 @@
+---
+import type { LocaleId } from '../lib/locales';
+import PortableText from './PortableText.astro';
+import SanityImage from './SanityImage.astro';
+import LinkPill from './LinkPill.astro';
+
+/**
+ * Renders a list of `contentSection` objects: heading + rule + text + images +
+ * pill links. The unit every text page in the design is built from.
+ */
+interface Props {
+  lang: LocaleId;
+  sections: any[] | undefined;
+}
+
+const { lang, sections = [] } = Astro.props;
+---
+
+{
+  (sections ?? []).map((section: any) => (
+    <section class="content-section" id={section.anchor ?? undefined}>
+      {section.heading && <h2>{section.heading}</h2>}
+      {section.body && (
+        <div class="prose">
+          <PortableText value={section.body} />
+        </div>
+      )}
+      {section.images?.length > 0 && (
+        <ul class="image-row">
+          {section.images.map((img: any) => (
+            <li>
+              <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 360px" />
+            </li>
+          ))}
+        </ul>
+      )}
+      {section.links?.length > 0 && (
+        <p class="links">
+          {section.links.map((link: any) => (
+            <LinkPill lang={lang} link={link} />
+          ))}
+        </p>
+      )}
+    </section>
+  ))
+}
+
+<style>
+  .content-section h2 {
+    border-top: 1px solid var(--ink);
+    padding-top: 0.5rem;
+    text-transform: lowercase;
+  }
+  .image-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+</style>

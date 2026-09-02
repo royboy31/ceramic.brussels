@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import SanityImage from '../../components/SanityImage.astro';
 import PortableText from '../../components/PortableText.astro';
+import Sections from '../../components/Sections.astro';
 import { LOCALE_IDS, DEFAULT_LOCALE, type LocaleId } from '../../lib/locales';
 import { getPage, getPageSlugs } from '../../lib/queries';
 
@@ -63,11 +64,25 @@ const altPaths = Object.fromEntries(
     )
   }
 
+  <Sections lang={lang} sections={page.sections} />
+
   {
     page.body && (
       <div class="prose">
         <PortableText value={page.body} />
       </div>
+    )
+  }
+
+  {
+    page.images?.length > 0 && (
+      <ul class="grid">
+        {page.images.map((img: any) => (
+          <li>
+            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 430px" />
+          </li>
+        ))}
+      </ul>
     )
   }
 </Base>

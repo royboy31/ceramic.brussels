@@ -1,0 +1,63 @@
+---
+import SanityImage from './SanityImage.astro';
+
+/**
+ * A list of images with the design's counter ("1/5") and caption line
+ * ("Artist, *Title*, 2024"). Skeleton: renders every slide stacked; the
+ * carousel behaviour is a styling concern for later.
+ */
+interface Props {
+  images: any[] | undefined;
+  aspect?: number;
+  sizes?: string;
+  class?: string;
+}
+
+const { images = [], aspect, sizes = '(max-width: 700px) 100vw, 440px', class: className } = Astro.props;
+const slides = (images ?? []).filter((img) => img?.asset);
+---
+
+{
+  slides.length > 0 && (
+    <div class:list={['slideshow', className]} data-slides={slides.length}>
+      {slides.map((img, i) => (
+        <figure class="slide">
+          <SanityImage image={img} aspect={aspect} sizes={sizes} />
+          <figcaption>
+            <span class="counter">
+              {i + 1}/{slides.length}
+            </span>
+            <span class="caption">
+              {img.caption}
+              {img.workTitle && (
+                <>
+                  {img.caption ? ', ' : ''}
+                  <em>{img.workTitle}</em>
+                </>
+              )}
+              {img.year && `, ${img.year}`}
+              {img.credit && <span class="credit"> © {img.credit}</span>}
+            </span>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  )
+}
+
+<style>
+  .slide {
+    margin: 0 0 1rem;
+  }
+  figcaption {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--ink-2);
+    margin-top: 0.4rem;
+  }
+  .credit {
+    color: var(--ink-3);
+  }
+</style>

@@ -134,6 +134,18 @@ the dev server 404 the `/studio` route that `@sanity/astro` injects, and the
 static build still emits it, so the breakage only shows up in dev. There is a
 comment saying so in `astro.config.mjs`. Don't "fix" this by turning it on.
 
+The site is a set of **hubs with tabs**, mirroring the Figma menu. Each hub
+is a `[...tab].astro` route: `guest-of-honour`, `art-prize`, `programme`,
+`partners`, `visit`, `about`. The tab list, its stable English slugs and
+its label keys live in `src/lib/hubs.ts`; the first tab is the hub root
+(`/en/art-prize`), the others are `/en/art-prize/laureates` and so on. A
+`page` document with a matching `section` and English slug supplies a tab's
+text; list tabs (laureates, awards, jury, talks, vendors, people) come from
+their own documents. `src/lib/links.ts` turns Sanity `link` and navigation
+objects into hrefs, so a menu anchor like `art-prize` + `laureates` lands on
+the right tab. The shared pieces are `HubNav`, `Sections`, `Slideshow`,
+`PersonCard`, `ExhibitorCard` and `LinkPill` in `src/components/`.
+
 `page` slugs are per-language, which produces genuinely translated URLs
 (`/en/about`, `/fr/a-propos`, `/nl/over`). hreflang is generated from those same
 slugs via the `altPaths` prop on the layout, so the language switcher and the
@@ -199,18 +211,43 @@ Also in `i18n.ts`: `localePath(lang, path)` for building links, and
 
 ### Data
 
-Page frontmatter calls a helper from `src/lib/queries.ts` — `getExhibitors`,
-`getArtist`, `getNews`, `getPage`, `getProgramme`, and so on. Each takes `lang`
-and returns content already resolved to that language. Localised fields hold
-EN/FR/NL together in one document and **fall back to English when a translation
-is empty**, so a missing translation never renders as a blank page.
+Page frontmatter calls a helper from `src/lib/queries.ts` — `getHomepage`,
+`getCurrentEdition`, `getExhibitors`, `getGuestOfHonour`, `getLaureates`,
+`getAwards`, `getPeople`, `getPartners`, `getProgramme`, `getHubPages`,
+`getPage`, and so on. Each takes `lang` and returns content already resolved
+to that language. Localised fields hold EN/FR/NL together in one document and
+**fall back to English when a translation is empty**, so a missing translation
+never renders as a blank page.
+
+The content model follows the 2027 Figma design. The shape to keep in mind:
+
+- **Hubs and tabs.** about, art prize, programme, visitors info and partners
+  are hub routes with pill tabs. The text tabs are `page` documents with a
+  `section` (fetched with `getHubPages(lang, section)`); the list tabs
+  (laureates, awards, jury, talks, food & drinks…) come from their own
+  documents. Anchors in `navigation` and `link` name those tabs.
+- **Edition-scoped data.** Dates, the dates mark, opening hours, tickets, key
+  figures, guest of honour, country focus, film and photo gallery live on
+  `edition`; the current one comes from `getCurrentEdition`.
+- **Images carry their caption.** `figure` has `caption` (artist),
+  `workTitle` (render italic) and `year` next to `alt` and `credit`; the
+  design's "Artist, *Title*, 2024" line is assembled from those.
+- **Links are objects.** A `link` is a route + optional anchor, a document
+  reference, or an external URL. Internal ones get "→", external ones "↗".
+
+`README.md` has the full table of document types and where each shows.
+`docs/design-inventory.md` and `docs/legacy-site-inventory.md` are the two
+inventories the model was derived from — check them before asking what a
+field is for.
 
 ## Deployment
 
 Cloudflare Pages, connected to this repo. A push to `main` builds production;
 any other branch builds a preview. Build command is `npm run build`; the output
 directory comes from `pages_build_output_dir` in `wrangler.toml`, not from a
-dashboard field.
+dashboard field. The same goes for build environment variables: Pages ignores
+the dashboard ones when `wrangler.toml` exists and reads `[vars]` /
+`[env.preview.vars]` from the file, so `PUBLIC_*` values are set there.
 
 `public/_headers` marks `/_astro/*` immutable and forces HTML to revalidate —
 without that, a rebuild would never reach anyone holding a cached page.

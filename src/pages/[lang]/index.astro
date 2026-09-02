@@ -1,11 +1,17 @@
 ---
 import Base from '../../layouts/Base.astro';
 import SanityImage from '../../components/SanityImage.astro';
-import PortableText from '../../components/PortableText.astro';
+import LinkPill from '../../components/LinkPill.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { useTranslations, localePath, formatDateRange, formatDate } from '../../lib/i18n';
-import { getCurrentEdition, getExhibitors, getNews } from '../../lib/queries';
+import { useTranslations, localePath } from '../../lib/i18n';
+import { getHomepage, getCurrentEdition, getEditions, getNews } from '../../lib/queries';
+import { resolveLink } from '../../lib/links';
 
+/**
+ * The homepage is curated block by block on the `homepage` document. Key
+ * figures come from the most recent edition that has them, the film from the
+ * current edition unless the homepage overrides it.
+ */
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
 }
@@ -13,173 +19,213 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 
-const [edition, exhibitors, news] = await Promise.all([
+const [home, edition, editions, news] = await Promise.all([
+  getHomepage(lang),
   getCurrentEdition(lang),
-  getExhibitors(lang),
+  getEditions(lang),
   getNews(lang),
 ]);
 
-const featured = exhibitors.slice(0, 8);
-const latest = news.slice(0, 3);
+const figuresEdition = editions.find((e: any) => e.keyFigures?.length) ?? null;
+const spotlights = home?.spotlights?.length
+  ? home.spotlights
+  : news.slice(0, 2).map((item: any) => ({
+      kicker: item.category,
+      headline: item.title,
+      image: item.cover,
+      link: { kind: 'internal', internal: { _type: 'newsItem', slug: item.slug }, label: t('news.readMore') },
+    }));
+const banner = resolveLink(lang, home?.banner?.link);
+const closing = resolveLink(lang, home?.closingBanner?.link);
+const video = home?.video?.url ? home.video : edition?.film;
 
-// Event structured data - what puts dates and venue into search results.
 const eventSchema = edition
   ? {
       '@context': 'https://schema.org',
       '@type': 'ExhibitionEvent',
-      name: edition.title ?? `Ceramic Brussels ${edition.year}`,
+      name: edition.title ?? `ceramic brussels ${edition.year}`,
       startDate: edition.startDate,
       endDate: edition.endDate,
       eventStatus: 'https://schema.org/EventScheduled',
       location: { '@type': 'Place', name: edition.venue, address: 'Brussels, Belgium' },
-      organizer: { '@type': 'Organization', name: 'Ceramic Brussels' },
+      organizer: { '@type': 'Organization', name: 'ceramic brussels' },
       ...(edition.ticketsUrl ? { offers: { '@type': 'Offer', url: edition.ticketsUrl } } : {}),
     }
   : null;
 ---
 
-<Base
-  lang={lang}
-  title="Ceramic Brussels"
-  description={edition?.title}
-  editId={edition?._id}
-  editType={edition?._type}
->
+<Base lang={lang} title="ceramic brussels" description={home?.seo?.description ?? home?.heroText} editId="homepage" editType="homepage">
   {eventSchema && <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} slot="head" />}
 
+  <section class="hero">
+    <SanityImage image={home?.heroImage} loading="eager" aspect={3 / 2} sizes="(max-width: 900px) 100vw, 940px" widths={[600, 900, 1200, 1900]} />
+    <div>
+      <h1>{home?.heroText ?? 'ceramic brussels'}</h1>
+      {home?.heroLink && <LinkPill lang={lang} link={home.heroLink} variant="text" />}
+    </div>
+  </section>
+
   {
-    edition ? (
-      <section class="hero">
-        <p class="pill">{t('home.currentEdition')}</p>
-        <h1>{edition.title ?? `Ceramic Brussels ${edition.year}`}</h1>
-        <p class="lede">
-          {formatDateRange(edition.startDate, edition.endDate, lang)}
-          {edition.venue && ` · ${edition.venue}`}
-        </p>
+    home?.quickLinks?.length > 0 && (
+      <nav class="quick-links" aria-label="Quick links">
+        {home.quickLinks.map((link: any, i: number) => {
+          const r = resolveLink(lang, link);
+          return (
+            r && (
+              <a href={r.href} class:list={{ cta: i === home.quickLinks.length - 1 }} {...(r.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+                {r.label}
+              </a>
+            )
+          );
+        })}
+      </nav>
+    )
+  }
 
-        {edition.intro && (
-          <div class="prose">
-            <PortableText value={edition.intro} />
-          </div>
-        )}
-
-        <p class="hero-actions">
-          {edition.ticketsUrl && (
-            <a class="btn" href={edition.ticketsUrl}>
-              {t('home.tickets')}
-            </a>
-          )}
-          {edition.catalogueUrl && <a href={edition.catalogueUrl}>{t('home.catalogue')}</a>}
-        </p>
-
-        {edition.cover?.asset && (
-          <SanityImage
-            image={edition.cover}
-            loading="eager"
-            aspect={16 / 9}
-            sizes="(max-width: 1140px) 100vw, 1140px"
-            widths={[600, 900, 1200, 1600, 2000]}
-            class="hero-image"
-          />
-        )}
+  <h2 class="centered">{t('home.latestNews')}</h2>
+  {
+    spotlights.map((s: any, i: number) => (
+      <section class:list={['spotlight', { flip: i % 2 === 1 }]}>
+        <div>
+          {s.kicker && <p class="kicker">{s.kicker}</p>}
+          <p class="headline">{s.headline}</p>
+          {s.link && <LinkPill lang={lang} link={s.link} variant="text" />}
+        </div>
+        <SanityImage image={s.image} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 670px" />
       </section>
-    ) : (
-      <section>
-        <h1>Ceramic Brussels</h1>
-        <p class="empty">
-          No edition is marked as current yet. Create one in <a href="/studio">the Studio</a> and tick
-          <strong> Current edition</strong>.
-        </p>
+    ))
+  }
+
+  {
+    home?.banner?.text && (
+      <a class="band" href={banner?.href ?? '#'}>
+        {home.banner.text} →
+      </a>
+    )
+  }
+
+  {
+    video?.url && (
+      <section class="video">
+        <a href={video.url} target="_blank" rel="noopener noreferrer">
+          <SanityImage image={video.poster} aspect={21 / 10} sizes="(max-width: 1440px) 100vw, 1440px" widths={[800, 1200, 1600, 2000]} />
+          <span>{video.title ?? t('common.video')} ↗</span>
+        </a>
       </section>
     )
   }
 
-  <section>
-    <div class="section-head">
-      <h2>{t('home.exhibitors')}</h2>
-      <a href={localePath(lang, 'exhibitors')}>{t('home.viewAll')} ({exhibitors.length})</a>
-    </div>
-
-    {
-      featured.length ? (
-        <ul class="grid">
-          {featured.map((ex: any) => (
-            <li class="card">
-              <a class="card-link" href={localePath(lang, `exhibitors/${ex.slug}`)}>
-                <SanityImage image={ex.image} aspect={4 / 3} sizes="(max-width: 700px) 50vw, 260px" />
-                <h3>{ex.name}</h3>
-                <p class="meta">{[ex.booth, ex.country].filter(Boolean).join(' · ')}</p>
-              </a>
-            </li>
+  {
+    figuresEdition && (
+      <section class="figures">
+        <p class="kicker">{t('home.keyFigures', { year: figuresEdition.year })}</p>
+        <dl>
+          {figuresEdition.keyFigures.map((f: any) => (
+            <div>
+              <dd>{f.value}</dd>
+              <dt>{f.label}</dt>
+            </div>
           ))}
-        </ul>
-      ) : (
-        <p class="empty">{t('exhibitors.empty')}</p>
-      )
-    }
-  </section>
+        </dl>
+        {home?.figuresLink && <LinkPill lang={lang} link={home.figuresLink} variant="text" />}
+        {home?.figuresImage?.asset && <SanityImage image={home.figuresImage} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 670px" />}
+      </section>
+    )
+  }
 
-  <section>
-    <div class="section-head">
-      <h2>{t('home.latestNews')}</h2>
-      <a href={localePath(lang, 'news')}>{t('home.viewAll')}</a>
-    </div>
-
-    {
-      latest.length ? (
-        <ul class="grid">
-          {latest.map((item: any) => (
-            <li class="card">
-              <a class="card-link" href={localePath(lang, `news/${item.slug}`)}>
-                <SanityImage image={item.cover} aspect={16 / 9} sizes="(max-width: 700px) 100vw, 340px" />
-                <h3>{item.title}</h3>
-                <p class="meta">{formatDate(item.publishedAt, lang)}</p>
-                {item.excerpt && <p>{item.excerpt}</p>}
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p class="empty">{t('news.empty')}</p>
-      )
-    }
-  </section>
+  {
+    home?.closingBanner?.text && (
+      <a class="band" href={closing?.href ?? localePath(lang, 'about/images')}>
+        {home.closingBanner.text} →
+      </a>
+    )
+  }
 </Base>
 
 <style>
   .hero {
-    margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    align-items: start;
   }
-  .hero-image {
-    margin-top: 1.8rem;
-    width: 100%;
+  .quick-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
   }
-  .hero-actions {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    margin: 1.2rem 0 0;
+  .quick-links a {
+    background: var(--brand);
+    color: #1a1a19;
+    text-decoration: none;
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.4rem;
   }
-  .btn {
-    background: var(--ink);
+  .quick-links a.cta {
+    outline: 2px solid #1a1a19;
+    outline-offset: -2px;
+  }
+  .centered {
+    text-align: center;
+    font-size: 2.4rem;
+    font-weight: 600;
+  }
+  .spotlight {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin: 2rem 0;
+  }
+  .spotlight.flip > div {
+    order: 2;
+  }
+  .headline {
+    font-size: clamp(1.3rem, 2.5vw, 2rem);
+    line-height: 1.25;
+    max-width: 24ch;
+  }
+  .video a {
+    position: relative;
+    display: block;
     color: var(--ground);
     text-decoration: none;
-    padding: 0.55rem 1.1rem;
-    font-size: 0.92rem;
   }
-  .section-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
+  .video span {
+    position: absolute;
+    inset: auto 1rem 1rem auto;
+    background: var(--ink);
+    padding: 0.4rem 0.8rem;
+  }
+  .figures dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    margin: 1rem 0;
+  }
+  .figures dl > div {
+    padding: 1rem;
     border-bottom: 1px solid var(--rule);
-    padding-bottom: 0.5rem;
-    margin-top: 3rem;
   }
-  .section-head h2 {
+  .figures dd {
     margin: 0;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 1;
   }
-  .section-head a {
-    font-size: 0.88rem;
+  .figures dt {
+    font-size: 1.3rem;
+  }
+  @media (max-width: 800px) {
+    .hero,
+    .spotlight {
+      grid-template-columns: 1fr;
+    }
+    .spotlight.flip > div {
+      order: 0;
+    }
   }
 </style>

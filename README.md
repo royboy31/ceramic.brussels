@@ -100,25 +100,42 @@ documents. Field-level i18n (`localeString` / `localeText` / `localeBlock`)
 keeps language-neutral data — booth number, country, images — in a single
 document instead of duplicating it per language.
 
-| Document | Route | Notes |
+| Document | Where it shows | Notes |
 | :-- | :-- | :-- |
-| `edition` | `/[lang]/editions` | Anchors everything dated. Exactly one is `isCurrent`. |
-| `exhibitor` | `/[lang]/exhibitors/[slug]` | Gallery. Index has a client-side filter. |
-| `artist` | `/[lang]/artists/[slug]` | Embeds `artwork` objects. |
-| `newsItem` | `/[lang]/news/[slug]` | The blog. |
-| `page` | `/[lang]/[...slug]` | Editor-created pages, **slug per locale**. |
-| `programmeEvent` | `/[lang]/programme` | Grouped by day. |
-| `award` | `/[lang]/awards` | Grouped by edition year. |
-| `partner` | `/[lang]/partners` | Grouped by tier. |
-| `pressClip` | `/[lang]/press` | Sortable table. |
-| `siteSettings` | — | Singleton; not creatable or deletable in the Studio. |
+| `edition` | home, visitors info, past editions | Anchors everything dated. Exactly one is `isCurrent`. Holds the dates mark, opening hours, tickets, key figures, film and photo gallery of that year. |
+| `exhibitor` | `/exhibitors`, `/exhibitors/[slug]` | One document per participation. `kind` (gallery / publisher / jury-prize / tribute), `soloShow` and `inCountryFocus` drive the filter pills and badges. |
+| `artist` | `/artists/[slug]`, guest of honour, laureates | One per person, reused across years. The "Feature page" group (lead, sections, carousel, video, interview) is what the guest-of-honour page renders. |
+| `laureate` | art prize → laureates | Links an artist to the edition they were selected for, with a slideshow and optional statement. |
+| `award` | art prize → awards, past editions | `family` is `art-prize` (jury prize, partner residencies) or `fair` (best booth…). "→ Marie Pic will present a solo show" is `laureates` + `outcome`. |
+| `person` | about → advisory board / team, art prize → jury | `groups` says where they appear; `edition` scopes jury and team by year. |
+| `partner` | `/partners`, visitors info, home | `tier` mirrors the partner tabs. Food & drinks vendors are the `food-drinks` tier. |
+| `programmeEvent` | `/programme` | `section` picks the programme tab; grouped by day in the page. |
+| `page` | hub tabs, `/[lang]/[...slug]` | With a `section` it becomes a pill tab of that hub (about, art-prize, programme, visit, partners); without one it is a standalone page with **slug per locale**. Built from a lead paragraph + `contentSection`s + closing images. |
+| `newsItem` | `/news/[slug]` | The blog. |
+| `pressClip` | about → press | Sortable table. |
+| `homepage` | `/` | Singleton. Hero, quick links, spotlights, banner, video, closing banner. Key figures come from the current edition. |
+| `siteSettings` | header, footer, visitors info | Singleton. Identity, social links, venue and access, hotel deal, FAQ, press contacts. |
+| `navigation` | menu overlay | Singleton. Items with optional `children` sub-items; each targets a route + anchor, a page, or a URL. |
+
+Reusable objects worth knowing: `figure` (image + alt + caption / work title /
+year / credit), `link` (route + anchor, document, or URL), `contentSection`
+(heading + rule + rich text + images + links), `spotlight`, `video`, and the
+visitor-info rows (`openingDay`, `ticketType`, `accessMode`, `faqItem`).
+
+The two documents that drove this model are checked in: `docs/design-inventory.md`
+(every Figma frame, verbatim copy) and `docs/legacy-site-inventory.md` (the old
+site's URLs, content and facts, for the migration and the redirects file).
 
 ### Demo content
 
 ```sh
-npm run seed              # create/update ~32 demo documents
+npm run seed              # create/update ~140 demo documents
 npm run seed -- --clear   # remove them again
 ```
+
+Seeded IDs are prefixed `demo-`. `node scripts/import-exhibitors.mjs 2026` imports
+the real exhibitor list crawled from the old site (`scripts/legacy/`), and is
+the first step of the content migration.
 
 Seeded IDs are prefixed `demo-`. **Do not use a dot in a document ID** — Sanity
 treats a dotted ID as path-prefixed and therefore private (the same mechanism
@@ -209,6 +226,13 @@ npx wrangler pages deploy dist
 ```
 
 ### Build environment variables
+
+**They live in `wrangler.toml`, not in the dashboard.** When a Wrangler
+config file is present, Pages CI reads `[vars]` (and `[env.preview.vars]`)
+from it and ignores the dashboard's build variables — the build log says
+`Build environment variables: (none found)` when they are set only there. The
+values below are already in `wrangler.toml`; the dashboard copy is
+documentation at best.
 
 Pages keeps two sets, **Production** and **Preview**. Both need the Sanity
 coordinates and the Node version; they differ in the canonical origin.

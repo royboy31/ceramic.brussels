@@ -16,3 +16,21 @@
 name = "ceramic-brussels"
 pages_build_output_dir = "./dist"
 compatibility_date = "2026-08-01"
+
+# Build-time environment. Because this file exists, Pages CI ignores the
+# environment variables set in the dashboard ("Build environment variables:
+# (none found)" in the build log) and reads them from here instead. All of
+# these are public: the dataset is ACL-public and the values ship in the client
+# bundle anyway. SANITY_API_WRITE_TOKEN must never be added here.
+[vars]
+PUBLIC_SANITY_PROJECT_ID = "uia5r1rc"
+PUBLIC_SANITY_DATASET = "production"
+PUBLIC_SITE_URL = "https://ceramic-brussels.pages.dev"
+
+# Branch previews: canonical tags and the sitemap must point at the preview
+# host, and editors get an Edit button on every page.
+[env.preview.vars]
+PUBLIC_SANITY_PROJECT_ID = "uia5r1rc"
+PUBLIC_SANITY_DATASET = "production"
+PUBLIC_SITE_URL = "https://dev.ceramic-brussels.pages.dev"
+PUBLIC_SHOW_EDIT_LINKS = "true"
