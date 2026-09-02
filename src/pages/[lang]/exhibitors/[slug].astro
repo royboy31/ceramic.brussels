@@ -1,11 +1,17 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import SanityImage from '../../../components/SanityImage.astro';
+import Slideshow from '../../../components/Slideshow.astro';
 import PortableText from '../../../components/PortableText.astro';
+import LinkPill from '../../../components/LinkPill.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
-import { getExhibitor, getExhibitorSlugs } from '../../../lib/queries';
+import { getExhibitor, getExhibitorSlugs, getExhibitors } from '../../../lib/queries';
+import { instagramUrl } from '../../../lib/links';
 
+/**
+ * One exhibitor: slideshow, city + booth, pills, description, the artists
+ * presented, and previous / next through the current list.
+ */
 export async function getStaticPaths() {
   const slugs = await getExhibitorSlugs();
   return LOCALE_IDS.flatMap((lang) => slugs.map(({ slug }) => ({ params: { lang, slug } })));
@@ -15,126 +21,119 @@ const lang = Astro.params.lang as LocaleId;
 const slug = Astro.params.slug as string;
 const t = useTranslations(lang);
 
-const exhibitor = await getExhibitor(lang, slug);
+const [exhibitor, all] = await Promise.all([getExhibitor(lang, slug), getExhibitors(lang)]);
 if (!exhibitor) return Astro.rewrite('/404');
 
-const path = `exhibitors/${slug}`;
+const index = all.findIndex((ex: any) => ex.slug === slug);
+const previous = index > 0 ? all[index - 1] : null;
+const next = index >= 0 && index < all.length - 1 ? all[index + 1] : null;
 
-const orgSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: exhibitor.name,
-  ...(exhibitor.website ? { url: exhibitor.website } : {}),
-  ...(exhibitor.country ? { address: { '@type': 'PostalAddress', addressCountry: exhibitor.country } } : {}),
-};
+const place = [exhibitor.city, exhibitor.countryCode && `(${exhibitor.countryCode})`].filter(Boolean).join(' ');
+const presenting = exhibitor.artists?.length ? exhibitor.artists : null;
 ---
 
 <Base
   lang={lang}
-  title={exhibitor.seo?.title ?? exhibitor.name}
+  title={exhibitor.name}
   description={exhibitor.seo?.description}
+  path={`exhibitors/${slug}`}
   noIndex={exhibitor.seo?.noIndex}
-  path={path}
   editId={exhibitor._id}
   editType={exhibitor._type}
 >
-  <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} slot="head" />
+  <p class="kicker">{t('nav.exhibitors')}</p>
+  <h1>{exhibitor.name}</h1>
 
-  <a class="back" href={localePath(lang, 'exhibitors')}>&larr; {t('common.backTo')} {t('nav.exhibitors')}</a>
+  <div class="detail">
+    <div class="media">
+      <Slideshow images={exhibitor.images} aspect={4 / 5} />
+      {exhibitor.soloShow && <span class="badge">{t('exhibitors.soloShow')}</span>}
+    </div>
 
-  <header class="detail-head">
-    <h1>{exhibitor.name}</h1>
-    <p class="lede">
-      {exhibitor.booth && <span class="booth">{t('exhibitors.booth')} {exhibitor.booth}</span>}
-      {[exhibitor.city, exhibitor.country].filter(Boolean).join(', ')}
-      {exhibitor.year && <span class="meta"> · {exhibitor.year}</span>}
-    </p>
-
-    <p class="links">
-      {exhibitor.website && <a href={exhibitor.website}>{t('common.website')}</a>}
-      {
-        exhibitor.instagram && (
-          <a href={`https://instagram.com/${exhibitor.instagram}`}>@{exhibitor.instagram}</a>
-        )
-      }
-    </p>
-  </header>
-
-  {
-    exhibitor.bio && (
-      <div class="prose">
-        <PortableText value={exhibitor.bio} />
-      </div>
-    )
-  }
-
-  {
-    exhibitor.artists?.length > 0 && (
-      <section>
-        <h2>{t('exhibitors.represents')}</h2>
-        <ul class="grid">
-          {exhibitor.artists.map((a: any) => (
-            <li class="card">
-              <a class="card-link" href={localePath(lang, `artists/${a.slug}`)}>
-                <SanityImage image={a.portrait} aspect={1} sizes="(max-width: 700px) 50vw, 220px" />
-                <h3>{a.name}</h3>
-                {a.nationality && <p class="meta">{a.nationality}</p>}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
-  {
-    exhibitor.images?.length > 0 && (
-      <section>
-        <h2>Images</h2>
-        <div class="gallery">
-          {exhibitor.images.map((img: any, i: number) => (
-            <figure>
-              <SanityImage
-                image={img}
-                loading={i === 0 ? 'eager' : 'lazy'}
-                sizes="(max-width: 700px) 100vw, 560px"
-              />
-              {img.credit && <figcaption class="meta">{img.credit}</figcaption>}
-            </figure>
-          ))}
+    <div class="facts">
+      {place && <p class="place">{place}</p>}
+      {exhibitor.booth && <p class="booth">● {exhibitor.booth}</p>}
+      <p class="pills">
+        {exhibitor.instagram && <LinkPill lang={lang} href={instagramUrl(exhibitor.instagram)} label={t('common.instagram')} />}
+        {exhibitor.website && <LinkPill lang={lang} href={exhibitor.website} label={t('common.website')} />}
+      </p>
+      {exhibitor.bio && (
+        <div class="prose">
+          <PortableText value={exhibitor.bio} />
         </div>
-      </section>
-    )
-  }
+      )}
+    </div>
+
+    <div class="artists">
+      {(presenting || exhibitor.artistsText) && (
+        <>
+          <p class="kicker">{t('exhibitors.presenting')}</p>
+          <p class="names">
+            {presenting
+              ? presenting.map((a: any, i: number) => (
+                  <>
+                    {i > 0 && ', '}
+                    <a href={localePath(lang, `artists/${a.slug}`)}>{a.name}</a>
+                  </>
+                ))
+              : exhibitor.artistsText}
+          </p>
+        </>
+      )}
+      {exhibitor.artistsNote && (
+        <div class="prose">
+          <PortableText value={exhibitor.artistsNote} />
+        </div>
+      )}
+    </div>
+  </div>
+
+  <nav class="pager" aria-label="Exhibitors">
+    {previous ? <a href={localePath(lang, `exhibitors/${previous.slug}`)}>← {t('exhibitors.previous')}</a> : <span />}
+    <a href={localePath(lang, 'exhibitors')}>{t('exhibitors.backToAll')} →</a>
+    {next ? <a href={localePath(lang, `exhibitors/${next.slug}`)}>{t('exhibitors.next')} →</a> : <span />}
+  </nav>
 </Base>
 
 <style>
-  .detail-head {
-    margin-bottom: 2rem;
-  }
-  .booth {
-    display: inline-block;
-    background: var(--surface-2);
-    padding: 0.1rem 0.45rem;
-    margin-right: 0.5rem;
-    font-size: 0.9rem;
-  }
-  .links {
-    display: flex;
-    gap: 1.2rem;
-    font-size: 0.9rem;
-    margin: 0.6rem 0 0;
-  }
-  .gallery {
+  .detail {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.4rem;
-    margin-top: 1.2rem;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2.5rem;
+    margin-top: 1.5rem;
   }
-  .gallery figure {
-    margin: 0;
+  .media {
+    position: relative;
   }
-  .gallery figcaption {
-    margin-top: 0.35rem;
+  .badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: var(--ink);
+    color: var(--ground);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.6rem;
+  }
+  .place,
+  .booth,
+  .names {
+    font-size: 1.6rem;
+    margin: 0 0 0.4rem;
+  }
+  .names a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    font-size: 1.3rem;
+  }
+  @media (max-width: 900px) {
+    .detail {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

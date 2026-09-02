@@ -1,0 +1,132 @@
+---
+import Base from '../../../layouts/Base.astro';
+import HubNav from '../../../components/HubNav.astro';
+import Sections from '../../../components/Sections.astro';
+import Slideshow from '../../../components/Slideshow.astro';
+import SanityImage from '../../../components/SanityImage.astro';
+import PortableText from '../../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { useTranslations, localePath } from '../../../lib/i18n';
+import { getGuestOfHonour, getHubPages } from '../../../lib/queries';
+import { HUBS, hubTabParams, hubTabPath } from '../../../lib/hubs';
+
+/**
+ * The current edition's guest of honour. Tabs: about (lead, sections,
+ * carousel, video) and interview. Everything comes from the artist document
+ * the edition points at.
+ */
+export function getStaticPaths() {
+  return hubTabParams('guest-of-honour', LOCALE_IDS);
+}
+
+const lang = Astro.params.lang as LocaleId;
+const tab = (Astro.params.tab as string | undefined) ?? HUBS['guest-of-honour'].tabs[0].slug;
+const t = useTranslations(lang);
+
+const [data, pages] = await Promise.all([getGuestOfHonour(lang), getHubPages(lang, 'guest-of-honour')]);
+const artist = data?.artist;
+const path = hubTabPath('guest-of-honour', tab);
+---
+
+<Base lang={lang} title={artist?.name ? `${t('nav.guestOfHonour')} — ${artist.name}` : t('nav.guestOfHonour')} path={path} editId={artist?._id} editType={artist?._type}>
+  <HubNav lang={lang} route="guest-of-honour" active={tab} pages={pages} />
+
+  {
+    !artist ? (
+      <p class="empty">No guest of honour is set on the current edition yet.</p>
+    ) : tab === 'interview' ? (
+      <article>
+        <h2>{artist.name}</h2>
+        {artist.interview ? (
+          <div class="prose">
+            <PortableText value={artist.interview} />
+          </div>
+        ) : (
+          <p class="empty">The interview has not been published yet.</p>
+        )}
+      </article>
+    ) : (
+      <article class="guest">
+        <header class="guest-head">
+          <h2>{artist.name}</h2>
+          <p class="born">
+            {artist.birthYear && `°${artist.birthYear}`}
+            {artist.nationality && `, ${artist.nationality}`}
+          </p>
+        </header>
+
+        <div class="guest-intro">
+          <SanityImage image={artist.portrait} aspect={4 / 5} sizes="(max-width: 700px) 100vw, 440px" />
+          <div>
+            {artist.intro && (
+              <div class="lede">
+                <PortableText value={artist.intro} />
+              </div>
+            )}
+            {artist.gallery && <p class="meta">{artist.gallery}</p>}
+          </div>
+        </div>
+
+        <Sections lang={lang} sections={artist.sections} />
+
+        {artist.carousel?.length > 0 && <Slideshow images={artist.carousel} aspect={3 / 2} class="carousel" />}
+
+        {artist.video?.url && (
+          <p>
+            <a href={artist.video.url} target="_blank" rel="noopener noreferrer">
+              {artist.video.poster?.asset && <SanityImage image={artist.video.poster} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 900px" />}
+              {artist.video.title ?? t('common.video')} ↗
+            </a>
+          </p>
+        )}
+      </article>
+    )
+  }
+
+  {
+    data?.previous?.length > 0 && (
+      <section>
+        <h2>{t('artists.previousGuests')}</h2>
+        <ul class="grid">
+          {data.previous.map((p: any) => (
+            <li class="card">
+              <a class="card-link" href={localePath(lang, `artists/${p.artist?.slug}`)}>
+                <SanityImage image={p.artist?.portrait} aspect={4 / 5} sizes="260px" />
+                <h3>{p.artist?.name}</h3>
+                <p class="meta">{p.year}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .guest-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px solid var(--ink);
+    padding-top: 0.5rem;
+  }
+  .guest-head h2 {
+    margin: 0;
+    font-size: 2.4rem;
+  }
+  .born {
+    font-size: 1.6rem;
+  }
+  .guest-intro {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2.5rem;
+    margin: 1.5rem 0 2rem;
+  }
+  @media (max-width: 800px) {
+    .guest-intro {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -5,7 +5,7 @@ import { structure } from './src/sanity/structure';
 import { StudioNavbar } from './src/sanity/components/StudioNavbar';
 
 // Singletons must not be creatable or deletable from the Studio.
-const SINGLETONS = new Set(['siteSettings', 'navigation']);
+const SINGLETONS = new Set(['siteSettings', 'navigation', 'homepage']);
 
 export default defineConfig({
   name: 'ceramic-brussels',

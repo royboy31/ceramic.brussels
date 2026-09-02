@@ -1,0 +1,264 @@
+---
+import Base from '../../../layouts/Base.astro';
+import HubNav from '../../../components/HubNav.astro';
+import Sections from '../../../components/Sections.astro';
+import Slideshow from '../../../components/Slideshow.astro';
+import SanityImage from '../../../components/SanityImage.astro';
+import PortableText from '../../../components/PortableText.astro';
+import LinkPill from '../../../components/LinkPill.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { useTranslations } from '../../../lib/i18n';
+import { getHubPages, getSettings, getCurrentEdition, getPartners } from '../../../lib/queries';
+import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
+
+/**
+ * Visitors info. Practical info is assembled from the current edition (hours,
+ * tickets) and site settings (address, access, hotel deal); food & drinks
+ * lists the `food-drinks` partners; floor plan and FAQ read the edition's map
+ * and the settings' FAQ. A hub page with the same slug adds intro and text.
+ */
+export function getStaticPaths() {
+  return hubTabParams('visit', LOCALE_IDS);
+}
+
+const lang = Astro.params.lang as LocaleId;
+const tab = (Astro.params.tab as string | undefined) ?? HUBS.visit.tabs[0].slug;
+const t = useTranslations(lang);
+
+const [pages, settings, edition, partners] = await Promise.all([
+  getHubPages(lang, 'visit'),
+  getSettings(lang),
+  getCurrentEdition(lang),
+  getPartners(lang),
+]);
+const page = pageForTab(pages, tab);
+const info = settings?.practicalInfo ?? {};
+const vendors = partners.filter((p: any) => p.tier === 'food-drinks');
+const hotel = info.hotelDeal?.partner;
+const path = hubTabPath('visit', tab);
+---
+
+<Base lang={lang} title={`${t('nav.visit')} — ${page?.tabLabel ?? tab}`} description={page?.intro ?? info.intro} path={path} editId={tab === 'practical-info' ? 'siteSettings' : page?._id} editType={tab === 'practical-info' ? 'siteSettings' : page?._type}>
+  <HubNav lang={lang} route="visit" active={tab} pages={pages} />
+
+  {
+    tab === 'practical-info' && (
+      <div class="practical">
+        <div class="col">
+          <SanityImage image={info.heroImage} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 670px" />
+
+          <section id="address">
+            <h2>{t('visit.address')}</h2>
+            {info.venueName && <p class="strong">{info.venueName}</p>}
+            {info.address && <p class="addr">{info.address}</p>}
+            {info.mapUrl && <LinkPill lang={lang} href={info.mapUrl} label="Google Maps" variant="text" />}
+          </section>
+
+          <section id="tickets">
+            <h2>{t('visit.tickets')}</h2>
+            {edition?.tickets?.length ? (
+              <dl class="tickets">
+                {edition.tickets.map((tk: any) => (
+                  <div>
+                    <dt>{tk.name}</dt>
+                    <dd>
+                      {tk.price}
+                      {tk.note && <span class="meta"> ({tk.note})</span>}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <p class="empty">No ticket prices on the current edition yet.</p>
+            )}
+            {edition?.ticketsNote && <p class="meta">{edition.ticketsNote}</p>}
+            {edition?.ticketsUrl && <LinkPill lang={lang} href={edition.ticketsUrl} label={t('visit.bookTickets')} variant="solid" />}
+          </section>
+
+          {(hotel || info.hotelDeal?.text) && (
+            <section id="hotel">
+              <h2>{t('visit.hotelDeal')}</h2>
+              {hotel?.name && <p class="strong">{hotel.name}</p>}
+              {info.hotelDeal.text && <p>{info.hotelDeal.text}</p>}
+              {(info.hotelDeal.url ?? hotel?.url) && <LinkPill lang={lang} href={info.hotelDeal.url ?? hotel.url} label={t('visit.discoverHotel')} variant="solid" />}
+            </section>
+          )}
+        </div>
+
+        <div class="col">
+          {(page?.intro ?? info.intro) && <p class="lede">{page?.intro ?? info.intro}</p>}
+
+          <section id="opening-hours">
+            <h2>{t('visit.openingHours')}</h2>
+            {edition?.openingHours?.length ? (
+              <dl class="hours">
+                {edition.openingHours.map((d: any) => (
+                  <div>
+                    <dt>{d.label}</dt>
+                    {(d.slots ?? []).map((s: any) => (
+                      <dd>
+                        {s.time} {s.label}
+                        {s.invitationOnly && ` (${t('visit.invitation')})`}
+                      </dd>
+                    ))}
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <p class="empty">No opening hours on the current edition yet.</p>
+            )}
+            {edition?.lastEntry && <p class="meta">{edition.lastEntry}</p>}
+          </section>
+
+          {info.access?.length > 0 && (
+            <section id="access">
+              <h2>{t('visit.access')}</h2>
+              <dl class="access">
+                {info.access.map((a: any) => (
+                  <div>
+                    <dt>{a.mode}</dt>
+                    <dd>{a.text}</dd>
+                  </div>
+                ))}
+              </dl>
+              {info.accessibility && <p>{info.accessibility}</p>}
+            </section>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  {tab !== 'practical-info' && page?.intro && <p class="lede">{page.intro}</p>}
+
+  {
+    tab === 'food-drinks' && (
+      <div class="two-col">
+        {vendors.length ? (
+          vendors.map((v: any) => (
+            <article class="vendor">
+              <h2>
+                {v.url ? (
+                  <a href={v.url} target="_blank" rel="noopener noreferrer">
+                    {v.name} ↗
+                  </a>
+                ) : (
+                  v.name
+                )}
+              </h2>
+              {v.subtitle && <p class="meta">{v.subtitle}</p>}
+              <Slideshow images={v.images} aspect={3 / 2} />
+              {v.description && (
+                <div class="prose">
+                  <PortableText value={v.description} />
+                </div>
+              )}
+            </article>
+          ))
+        ) : (
+          <p class="empty">{t('partners.empty')}</p>
+        )}
+      </div>
+    )
+  }
+
+  {
+    tab === 'floor-plan' &&
+      (edition?.fairMapUrl ? (
+        <p>
+          <LinkPill lang={lang} href={edition.fairMapUrl} label={t('visit.downloadMap')} variant="solid" />
+        </p>
+      ) : (
+        <p class="empty">No floor plan on the current edition yet.</p>
+      ))
+  }
+
+  {
+    tab === 'faq' &&
+      (settings?.faq?.length ? (
+        settings.faq.map((q: any) => (
+          <details class="faq">
+            <summary>{q.question}</summary>
+            <div class="prose">
+              <PortableText value={q.answer} />
+            </div>
+          </details>
+        ))
+      ) : (
+        <p class="empty">No questions in Site settings yet.</p>
+      ))
+  }
+
+  {page && <Sections lang={lang} sections={page.sections} />}
+  {
+    page?.body && (
+      <div class="prose">
+        <PortableText value={page.body} />
+      </div>
+    )
+  }
+  {
+    tab === 'practical-info' && info.images?.length > 0 && (
+      <ul class="grid">
+        {info.images.map((img: any) => (
+          <li>
+            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 430px" />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>
+
+<style>
+  .practical {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem 3rem;
+  }
+  .practical section h2 {
+    border-top: 1px solid var(--ink);
+    padding-top: 0.5rem;
+  }
+  .strong {
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 0 0 0.2rem;
+  }
+  .addr {
+    white-space: pre-line;
+  }
+  dl > div {
+    margin-bottom: 0.8rem;
+  }
+  dt {
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  dd {
+    margin: 0;
+  }
+  .vendor h2 {
+    border-top: 1px solid var(--ink);
+    padding-top: 0.5rem;
+    margin-top: 0;
+    font-weight: 600;
+  }
+  .vendor h2 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .faq {
+    border-top: 1px solid var(--ink);
+    padding: 0.8rem 0;
+  }
+  .faq summary {
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  @media (max-width: 800px) {
+    .practical {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

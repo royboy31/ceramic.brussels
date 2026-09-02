@@ -1,0 +1,77 @@
+---
+import type { LocaleId } from '../lib/locales';
+import { useTranslations } from '../lib/i18n';
+import { instagramUrl } from '../lib/links';
+import PortableText from './PortableText.astro';
+import SanityImage from './SanityImage.astro';
+import LinkPill from './LinkPill.astro';
+
+/**
+ * Name + rule, portrait, bold-italic role, bio, instagram / website pills.
+ * Used for the advisory board, the team and the art-prize jury.
+ */
+interface Props {
+  lang: LocaleId;
+  person: any;
+}
+
+const { lang, person } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<article class="person">
+  <h3>
+    {person.name}
+    {person.countryCode && <sup class="country">{person.countryCode}</sup>}
+  </h3>
+  <div class="person-body">
+    {person.portrait?.asset && <SanityImage image={person.portrait} aspect={3 / 4} sizes="140px" widths={[140, 280, 420]} class="portrait" />}
+    <div>
+      {person.role && <p class="role">{person.role}</p>}
+      {person.bio && (
+        <div class="prose">
+          <PortableText value={person.bio} />
+        </div>
+      )}
+      <p class="links">
+        {person.instagram && <LinkPill lang={lang} href={instagramUrl(person.instagram)} label={t('common.instagram')} />}
+        {person.website && <LinkPill lang={lang} href={person.website} label={t('common.website')} />}
+        {person.email && <a href={`mailto:${person.email}`}>{person.email}</a>}
+        {person.phone && <a href={`tel:${person.phone.replace(/\s+/g, '')}`}>{person.phone}</a>}
+      </p>
+    </div>
+  </div>
+</article>
+
+<style>
+  .person h3 {
+    border-top: 1px solid var(--ink);
+    padding-top: 0.5rem;
+    font-size: 1.3rem;
+    margin: 0 0 0.8rem;
+  }
+  .country {
+    font-size: 0.6em;
+    margin-left: 0.3em;
+  }
+  .person-body {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1.2rem;
+  }
+  .person-body :global(.portrait) {
+    width: 140px;
+  }
+  .role {
+    font-weight: 700;
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.8rem;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+</style>

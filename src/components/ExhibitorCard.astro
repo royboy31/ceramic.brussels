@@ -1,0 +1,81 @@
+---
+import type { LocaleId } from '../lib/locales';
+import { useTranslations, localePath } from '../lib/i18n';
+import SanityImage from './SanityImage.astro';
+
+/**
+ * A card in the exhibitor grid: image with badges, name, country code.
+ * `data-*` attributes carry what the client-side filters and the A–Z index
+ * need, so both work on an already-rendered list.
+ */
+interface Props {
+  lang: LocaleId;
+  exhibitor: any;
+}
+
+const { lang, exhibitor: ex } = Astro.props;
+const t = useTranslations(lang);
+
+const sortKey = (ex.sortName ?? ex.name ?? '').trim();
+const letter = sortKey.charAt(0).toUpperCase();
+const filters = [
+  ex.soloShow && 'solo-show',
+  ex.inCountryFocus && 'country-focus',
+  ex.kind === 'publisher' && 'publishers',
+  ex.kind === 'jury-prize' && 'jury-prize',
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<li class="card exhibitor-card" data-letter={letter} data-filters={filters} data-search={[ex.name, ex.country, ex.city, ex.booth].filter(Boolean).join(' ').toLowerCase()}>
+  <a class="card-link" href={localePath(lang, `exhibitors/${ex.slug}`)}>
+    <div class="media">
+      <SanityImage image={ex.image} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 360px" />
+      <span class="badges">
+        {ex.soloShow && <span class="badge">{t('exhibitors.soloShow')}</span>}
+        {ex.inCountryFocus && <span class="badge focus">{ex.countryFocusLabel ?? t('exhibitors.countryFocus')}</span>}
+        {ex.kind === 'jury-prize' && <span class="badge">{t('exhibitors.juryPrize')}</span>}
+      </span>
+    </div>
+    <h3>
+      {ex.name}
+      {ex.countryCode && <sup class="country">{ex.countryCode}</sup>}
+    </h3>
+  </a>
+</li>
+
+<style>
+  .media {
+    position: relative;
+  }
+  .badges {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.3rem;
+  }
+  .badge {
+    background: var(--ink);
+    color: var(--ground);
+    border-radius: 999px;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.5rem;
+    line-height: 1.1;
+    text-align: center;
+  }
+  .badge.focus {
+    background: var(--ground);
+    color: var(--ink);
+    border: 1px solid var(--ink);
+  }
+  .exhibitor-card h3 {
+    font-size: 1.15rem;
+    font-weight: 400;
+  }
+  .country {
+    font-size: 0.6em;
+    margin-left: 0.3em;
+  }
+</style>

@@ -1,0 +1,64 @@
+---
+import type { LocaleId } from '../lib/locales';
+import { resolveLink, type ResolvedLink } from '../lib/links';
+
+/**
+ * A pill button or an underlined text link, with the design's arrow: "→" for
+ * internal links, "↗" for external ones. Pass either a Sanity `link` object
+ * or a plain href + label.
+ */
+interface Props {
+  lang: LocaleId;
+  link?: any;
+  href?: string;
+  label?: string;
+  external?: boolean;
+  variant?: 'pill' | 'text' | 'solid';
+  class?: string;
+}
+
+const { lang, link, href, label, external, variant = 'pill', class: className } = Astro.props;
+
+const resolved: ResolvedLink | null = link
+  ? resolveLink(lang, link)
+  : href
+    ? { href, label: label ?? href, external: external ?? /^https?:\/\//.test(href), arrow: external ?? /^https?:\/\//.test(href) ? '↗' : '→' }
+    : null;
+---
+
+{
+  resolved && (
+    <a
+      class:list={['link', variant, className]}
+      href={resolved.href}
+      {...(resolved.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+    >
+      {resolved.label} <span aria-hidden="true">{resolved.arrow}</span>
+    </a>
+  )
+}
+
+<style>
+  .link {
+    display: inline-block;
+    color: var(--ink);
+  }
+  .pill {
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    padding: 0.3rem 0.9rem;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  .solid {
+    background: var(--ink);
+    color: var(--ground);
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    text-decoration: none;
+  }
+  .text {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>
