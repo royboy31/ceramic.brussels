@@ -1,11 +1,48 @@
 ---
 import Base from '../layouts/Base.astro';
 import { DEFAULT_LOCALE } from '../lib/locales';
-import { localePath } from '../lib/i18n';
+import { localePath, useTranslations } from '../lib/i18n';
+
+const t = useTranslations(DEFAULT_LOCALE);
 ---
 
-<Base lang={DEFAULT_LOCALE} title="Page not found" noIndex>
-  <h1>Page not found</h1>
-  <p class="lede">That address does not exist on this site.</p>
-  <p><a href={localePath(DEFAULT_LOCALE)}>Go to the homepage</a></p>
+<Base lang={DEFAULT_LOCALE} title={t('notFound.title')} noIndex>
+  <div class="not-found">
+    <p class="code">404</p>
+    <h1 class="section-title">{t('notFound.title')}</h1>
+    <p class="intro-large">{t('notFound.body')}</p>
+
+    <p class="actions">
+      <a class="pill" href={localePath(DEFAULT_LOCALE)}>{t('notFound.home')} →</a>
+      <a class="pill" href={localePath(DEFAULT_LOCALE, 'exhibitors')}>{t('nav.exhibitors')} →</a>
+      <a class="pill" href={localePath(DEFAULT_LOCALE, 'programme')}>{t('nav.programme')} →</a>
+    </p>
+  </div>
 </Base>
+
+<style>
+  .not-found {
+    padding: 2rem 0 6rem;
+  }
+  .code {
+    font-size: clamp(4rem, 14vw, 11rem);
+    line-height: 0.85;
+    letter-spacing: -0.052em;
+    margin: 0 0 1rem;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 0;
+  }
+  .actions .pill {
+    text-transform: lowercase;
+    text-decoration: none;
+    padding: 0.3rem 1.2rem;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+  }
+  .actions .pill:hover {
+    background: var(--acid);
+  }
+</style>

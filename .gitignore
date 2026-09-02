@@ -22,3 +22,9 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# design reference project (Figma exports + unoptimised PNGs) - not shipped
+design/
+ceramic-brussels-project.zip
+# raw trial typeface - only the two WOFF2 in public/fonts/ are used
+font/

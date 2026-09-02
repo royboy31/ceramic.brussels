@@ -1,0 +1,186 @@
+---
+/**
+ * Silent looping preview that becomes the real film when someone presses it.
+ *
+ * The muted loop starts on its own once the section scrolls into view - never
+ * on page load, so it costs nothing to visitors who never reach it. Pressing
+ * it reloads the player with sound and controls.
+ *
+ * Browsers only allow autoplay while a video is muted, so the silent pass is
+ * a requirement rather than a preference. Anyone who has asked their system
+ * for reduced motion gets the still and a play button instead.
+ */
+interface Props {
+  url: string;
+  poster: string;
+  label: string;
+  class?: string;
+}
+
+const { url, poster, label, class: className } = Astro.props;
+
+/** Accepts a watch?v=, youtu.be/ or /embed/ address. */
+function youtubeId(value: string): string | null {
+  const match = value.match(/(?:v=|youtu\.be\/|\/embed\/)([\w-]{11})/);
+  return match ? match[1] : null;
+}
+
+const id = youtubeId(url);
+const base = id ? `https://www.youtube-nocookie.com/embed/${id}` : null;
+
+// loop needs playlist set to the same id; disablekb keeps the silent pass inert.
+const preview = base
+  ? `${base}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&disablekb=1&modestbranding=1&playsinline=1&rel=0`
+  : null;
+const full = base ? `${base}?autoplay=1&mute=0&controls=1&playsinline=1&rel=0` : null;
+---
+
+<section class:list={['video', className]}>
+  {
+    preview && full ? (
+      <div class="frame" data-video data-preview={preview} data-full={full} data-title={label}>
+        <img
+          class="poster"
+          src={poster}
+          alt=""
+          width="1600"
+          height="1066"
+          loading="lazy"
+          decoding="async"
+        />
+
+        <button type="button" class="cover" data-video-play>
+          <span class="label">{label}</span>
+        </button>
+      </div>
+    ) : (
+      <a class="frame fallback" href={url} rel="noopener noreferrer">
+        <img class="poster" src={poster} alt="" width="1600" height="1066" loading="lazy" decoding="async" />
+        <span class="label">{label}</span>
+      </a>
+    )
+  }
+</section>
+
+<style>
+  .video {
+    margin-top: 3rem;
+    overflow: hidden;
+  }
+  /* The box owns the height; the still and the player both fill it, so
+     mounting the iframe cannot add a second video's worth of height. */
+  .frame {
+    position: relative;
+    display: block;
+    height: clamp(300px, 47.6vw, 686px);
+    background: var(--ink);
+    overflow: hidden;
+  }
+
+  .poster,
+  .frame :global(iframe) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    object-fit: cover;
+  }
+
+  /* Order matters: all three overlap, and the DOM alone would paint the still
+     over the player. Still underneath, player over it, button on top. */
+  .poster {
+    z-index: 0;
+  }
+  .frame :global(iframe) {
+    z-index: 1;
+  }
+  .cover {
+    z-index: 2;
+  }
+  /* The still stays put underneath the player, which sits on top of it. If
+     YouTube is slow, blocked or refused, the section still shows a picture
+     instead of a black rectangle. */
+
+  .cover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+  }
+  .frame.is-sound .cover {
+    display: none;
+  }
+
+  .label {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 0 1rem;
+    text-align: center;
+    text-transform: lowercase;
+    color: var(--acid);
+    font-size: clamp(2.5rem, 8.9vw, 8rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    pointer-events: none;
+  }
+  .cover:hover .label {
+    text-decoration: underline;
+    text-underline-offset: 0.06em;
+  }
+  .cover:focus-visible {
+    outline: 3px solid var(--acid);
+    outline-offset: -3px;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-video]').forEach((frame) => {
+    const button = frame.querySelector<HTMLButtonElement>('[data-video-play]');
+    const title = frame.dataset.title ?? 'Video';
+    const quiet = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const mount = (src: string) => {
+      let iframe = frame.querySelector('iframe');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.title = title;
+        iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+        iframe.allowFullscreen = true;
+        frame.prepend(iframe);
+      }
+      iframe.src = src;
+      return iframe;
+    };
+
+    // The silent loop waits until the section is actually near the viewport.
+    if (!quiet && frame.dataset.preview && 'IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            observer.disconnect();
+            mount(frame.dataset.preview!);
+            frame.classList.add('is-playing');
+          }
+        },
+        { rootMargin: '200px' },
+      );
+      observer.observe(frame);
+    }
+
+    button?.addEventListener('click', () => {
+      const iframe = mount(frame.dataset.full ?? '');
+      frame.classList.add('is-playing', 'is-sound');
+      iframe.focus();
+    });
+  });
+</script>

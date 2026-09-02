@@ -2,6 +2,7 @@
 import Base from '../../../layouts/Base.astro';
 import HubNav from '../../../components/HubNav.astro';
 import Sections from '../../../components/Sections.astro';
+import Figure from '../../../components/Figure.astro';
 import SanityImage from '../../../components/SanityImage.astro';
 import PortableText from '../../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
@@ -10,8 +11,11 @@ import { getHubPages, getProgramme } from '../../../lib/queries';
 import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
 
 /**
- * The programme hub. Tabs: La Cambre (a page), talks / awards / VIP (events
- * of the current edition filtered on `section`, grouped by day).
+ * The programme hub. Tabs: La Cambre (a rich-text page), talks / awards / VIP
+ * (events of the current edition filtered on `section`, grouped by day into
+ * the design's accordion: day heading + arrow, then one row per event with
+ * "{ category }" left and the time right over a rule, the title, a
+ * languages / speakers line and a thumbnail that alternates sides).
  */
 export function getStaticPaths() {
   return hubTabParams('programme', LOCALE_IDS);
@@ -23,126 +27,373 @@ const t = useTranslations(lang);
 
 const [pages, events] = await Promise.all([getHubPages(lang, 'programme'), getProgramme(lang)]);
 const page = pageForTab(pages, tab);
+const hubTab = HUBS.programme.tabs.find((x) => x.slug === tab);
+const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
 
+/**
+ * The category shown in braces above each event, "{ Artist Talk }". Mirrors
+ * EVENT_KINDS in the schema. There is no UI string for these yet, so the
+ * Studio's English titles are used in every locale.
+ */
 const KIND_LABEL: Record<string, string> = {
   'artist-talk': 'Artist Talk',
   roundtable: 'Roundtable',
   talk: 'Talk',
-  'book-launch': 'Book launch',
-  tour: 'Guided tour',
+  'book-launch': 'Book Launch',
+  tour: 'Guided Tour',
   workshop: 'Workshop',
-  ceremony: 'Award ceremony',
+  ceremony: 'Award Ceremony',
   opening: 'Preview',
+  other: 'Event',
 };
 
 const section = tab === 'la-cambre' ? 'project' : tab;
-const listed = events.filter((e: any) => e.section === section);
+const listed = events.filter((e: any) => e.section === section && e.startsAt);
 const days = [...new Set(listed.map((e: any) => e.startsAt.slice(0, 10)))] as string[];
+const onDay = (day: string) => listed.filter((e: any) => e.startsAt.startsWith(day));
+
+/** Artists link to their page; other speaker types have no route. */
+const speakerHref = (s: any) => (s?._type === 'artist' && s.slug ? localePath(lang, `artists/${s.slug}`) : undefined);
+
+/**
+ * The small line under the title: "FR / with A, B & C". A free-text
+ * speakers line is shown verbatim (editors write the "with" themselves);
+ * structured speakers get the translated prefix and links.
+ */
+type MetaPart = { text: string } | { prefix: string; people: any[] };
+function metaParts(e: any): MetaPart[] {
+  const parts: MetaPart[] = [];
+  if (e.languages?.length) parts.push({ text: e.languages.join(', ') });
+  if (e.speakersText) parts.push({ text: e.speakersText });
+  else if (e.speakers?.length) parts.push({ prefix: t('programme.speakers'), people: e.speakers });
+  if (e.moderator) parts.push({ text: e.moderator });
+  if (e.location) parts.push({ text: e.location });
+  if (e.invitationOnly) parts.push({ text: t('visit.invitation') });
+  return parts;
+}
+
+const showEmpty = days.length === 0 && (tab !== 'la-cambre' || !page);
 const path = hubTabPath('programme', tab);
 ---
 
-<Base lang={lang} title={`${t('nav.programme')} — ${page?.tabLabel ?? tab}`} description={page?.seo?.description ?? page?.intro} path={path} editId={page?._id} editType={page?._type}>
+<Base
+  lang={lang}
+  title={`${t('nav.programme')} — ${tabLabel}`}
+  description={page?.seo?.description ?? page?.intro}
+  image={page?.seo?.ogImage ?? page?.cover}
+  path={path}
+  editId={page?._id}
+  editType={page?._type}
+>
   <HubNav lang={lang} route="programme" active={tab} pages={pages} />
 
-  {page?.intro && <p class="lede">{page.intro}</p>}
+  {page?.intro && <p class="intro-large">{page.intro}</p>}
+
+  {
+    page?.cover?.asset && (
+      <SanityImage
+        image={page.cover}
+        loading="eager"
+        aspect={16 / 9}
+        widths={[600, 900, 1200, 1600]}
+        sizes="(max-width: 1440px) 100vw, 1380px"
+        class="cover"
+      />
+    )
+  }
+
   {page && <Sections lang={lang} sections={page.sections} />}
+
   {
     page?.body && (
-      <div class="prose">
+      <div class="body-24 page-body">
         <PortableText value={page.body} />
       </div>
     )
   }
 
   {
-    days.length > 0 ? (
-      days.map((day, i) => (
-        <details class="day" open={i === 0}>
-          <summary>
-            <span>{formatDay(day, lang)}</span>
-            <span aria-hidden="true">↓</span>
-          </summary>
-          <ul class="events">
-            {listed
-              .filter((e: any) => e.startsAt.startsWith(day))
-              .map((e: any, j: number) => (
-                <li class:list={['event', { flip: j % 2 === 1 }]}>
-                  <div>
-                    <p class="event-head">
-                      <span class="kind">{e.kind && `{ ${KIND_LABEL[e.kind] ?? e.kind} }`}</span>
-                      <span class="time">
-                        {formatTime(e.startsAt, lang)}
-                        {e.endsAt && ` – ${formatTime(e.endsAt, lang)}`}
-                      </span>
-                    </p>
-                    <h3>{e.title}</h3>
-                    <p class="meta">
-                      {e.languages?.length > 0 && <span>{e.languages.join(', ')} </span>}
-                      {e.speakersText ?? (e.speakers?.length > 0 && `${t('programme.speakers')} ${e.speakers.map((s: any) => s.name).join(', ')}`)}
-                      {e.moderator && ` · ${e.moderator}`}
-                      {e.location && ` · ${e.location}`}
-                      {e.invitationOnly && ` · ${t('visit.invitation')}`}
-                    </p>
-                    {e.description && (
-                      <div class="prose">
-                        <PortableText value={e.description} />
-                      </div>
-                    )}
-                  </div>
-                  {e.image?.asset && <SanityImage image={e.image} aspect={3 / 2} sizes="200px" widths={[200, 400]} class="thumb" />}
-                </li>
-              ))}
-          </ul>
-        </details>
-      ))
-    ) : tab !== 'la-cambre' ? (
-      <p class="empty">{t('programme.empty')}</p>
-    ) : null
+    page?.images?.length > 0 && (
+      <ul class="image-row">
+        {page.images.map((img: any) => (
+          <li>
+            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 640px) 100vw, 440px" widths={[440, 880]} />
+          </li>
+        ))}
+      </ul>
+    )
   }
+
+  {
+    days.length > 0 && (
+      <div class="days">
+        {days.map((day, i) => (
+          <details class="day" open={i === 0}>
+            <summary>
+              <span class="day-name">{formatDay(day, lang)}</span>
+              <span class="arrow" aria-hidden="true">
+                ↓
+              </span>
+            </summary>
+
+            <ul class="schedule">
+              {onDay(day).map((e: any, j: number) => {
+                const parts = metaParts(e);
+                return (
+                  <li class:list={['event', { flip: j % 2 === 1 }]}>
+                    <div class="event-text">
+                      <p class="event-head">
+                        <span class="kind">{e.kind ? `{ ${KIND_LABEL[e.kind] ?? e.kind} }` : ''}</span>
+                        <span class="time">
+                          <time datetime={e.startsAt}>{formatTime(e.startsAt, lang)}</time>
+                          {e.endsAt && (
+                            <>
+                              –<time datetime={e.endsAt}>{formatTime(e.endsAt, lang)}</time>
+                            </>
+                          )}
+                        </span>
+                      </p>
+
+                      <h3 class="event-title">{e.title}</h3>
+
+                      {parts.length > 0 && (
+                        <p class="event-meta">
+                          {parts.map((part, k) => (
+                            <>
+                              {k > 0 && <span class="sep"> / </span>}
+                              {'people' in part ? (
+                                <>
+                                  <span class="with">{part.prefix}</span>{' '}
+                                  {part.people.map((s: any, n: number) => (
+                                    <>
+                                      {n > 0 && (n === part.people.length - 1 ? ' & ' : ', ')}
+                                      {speakerHref(s) ? <a href={speakerHref(s)}>{s.name}</a> : s.name}
+                                    </>
+                                  ))}
+                                </>
+                              ) : (
+                                part.text
+                              )}
+                            </>
+                          ))}
+                        </p>
+                      )}
+
+                      {e.description && (
+                        <div class="event-desc">
+                          <PortableText value={e.description} />
+                        </div>
+                      )}
+                    </div>
+
+                    <Figure
+                      image={e.image}
+                      pool="fair"
+                      seed={e.slug ?? e._id}
+                      aspect={18 / 11}
+                      sizes="180px"
+                      widths={[180, 360, 540]}
+                      class="thumb"
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
+        ))}
+      </div>
+    )
+  }
+
+  {showEmpty && <p class="empty">{t('programme.empty')}</p>}
 </Base>
 
 <style>
+  .cover {
+    margin: 0 0 2.5rem;
+    width: 100%;
+  }
+
+  /* Editors write panel headings as h2s inside the body, so they pick up the
+     heading + rule treatment from the design here. */
+  .page-body :global(h2) {
+    text-transform: lowercase;
+    border-bottom: 2px solid var(--ink);
+    margin: 3rem 0 1.25rem;
+    padding-bottom: 0.2rem;
+    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+  }
+  .page-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .page-body :global(h3) {
+    font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+    letter-spacing: -0.02em;
+    margin: 2rem 0 0.5rem;
+  }
+  .page-body :global(p) {
+    margin: 0 0 1.5rem;
+    max-width: 62ch;
+  }
+  .page-body :global(ul),
+  .page-body :global(ol) {
+    max-width: 62ch;
+  }
+
+  .image-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 30px;
+    list-style: none;
+    padding: 0;
+    margin: 2.5rem 0;
+  }
+
+  /* The accordion by day. */
+  .days {
+    margin-top: 1rem;
+  }
   .day {
     border-top: 1px solid var(--ink);
   }
+  .days .day:last-of-type {
+    border-bottom: 1px solid var(--ink);
+  }
   .day summary {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    font-size: 1.6rem;
-    padding: 0.8rem 0;
+    gap: 1rem;
+    padding: 0.9rem 0;
     cursor: pointer;
     list-style: none;
+    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
   }
   .day summary::-webkit-details-marker {
     display: none;
   }
-  .day[open] summary span:last-child {
+  .arrow {
+    font-size: 0.8em;
+    transition: transform 0.2s ease;
+  }
+  .day[open] .arrow {
     transform: rotate(180deg);
   }
-  .events {
+
+  .schedule {
     list-style: none;
     padding: 0;
-    margin: 0 0 2rem;
+    margin: 0.5rem 0 2.5rem;
+    display: grid;
+    gap: 1.5rem;
   }
+
+  /* One event: text column plus a ~180px thumbnail that alternates sides. */
   .event {
     display: grid;
-    grid-template-columns: 1fr 200px;
-    gap: 2rem;
-    padding: 1rem 0;
-    border-top: 1px solid var(--rule);
+    grid-template-columns: minmax(0, 1fr) 180px;
+    gap: 30px;
+    align-items: start;
+  }
+  .event.flip {
+    grid-template-columns: 180px minmax(0, 1fr);
+  }
+  .event.flip .event-text {
+    order: 2;
   }
   .event.flip :global(.thumb) {
-    order: -1;
+    order: 1;
   }
+  .event :global(.thumb) {
+    width: 100%;
+    margin: 0;
+  }
+
   .event-head {
     display: flex;
     justify-content: space-between;
-    font-weight: 600;
+    gap: 1rem;
     margin: 0;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--ink);
+    font-weight: 600;
+    font-size: clamp(1rem, 1.5vw, 1.5rem);
+    line-height: 1.25;
+    letter-spacing: -0.025em;
   }
-  .event h3 {
-    margin: 0.3rem 0;
+  .time {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .event-title {
+    margin: 0.5rem 0 0.3rem;
     font-weight: 400;
-    font-size: 1.3rem;
+    font-size: clamp(1rem, 1.5vw, 1.5rem);
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+  .event-meta {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  .event-meta a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.12em;
+  }
+  .with {
+    text-transform: lowercase;
+  }
+  .event-desc {
+    margin-top: 0.75rem;
+    max-width: 62ch;
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+  .event-desc :global(p) {
+    margin: 0 0 0.75rem;
+  }
+  .event-desc :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arrow {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .image-row {
+      gap: 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .image-row {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .event,
+    .event.flip {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    .event.flip .event-text {
+      order: 1;
+    }
+    .event.flip :global(.thumb) {
+      order: 2;
+    }
+    .event :global(.thumb) {
+      max-width: 180px;
+    }
   }
 </style>

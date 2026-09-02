@@ -7,9 +7,10 @@ import { LOCALE_IDS, DEFAULT_LOCALE, type LocaleId } from '../../lib/locales';
 import { getPage, getPageSlugs } from '../../lib/queries';
 
 /**
- * Editor-created pages: about, art prize, visitor info, food & drinks and so on.
- * Each locale gets its own slug, so French and Dutch have real translated URLs
- * rather than the half-translated mix the current site carries.
+ * Standalone editor pages - anything that is not a hub tab. Title, the lead
+ * paragraph at 40px, the cover, the ruled sections, the body at 24px and a
+ * closing row of images. Each locale gets its own slug, so French and Dutch
+ * have real translated URLs.
  */
 export async function getStaticPaths() {
   const pages = await getPageSlugs();
@@ -36,6 +37,8 @@ if (!page) return Astro.rewrite('/404');
 const altPaths = Object.fromEntries(
   LOCALE_IDS.map((l) => [l, slugs[l] ?? slugs[DEFAULT_LOCALE] ?? slug]),
 ) as Partial<Record<LocaleId, string>>;
+
+const closingImages = (page.images ?? []).filter((img: any) => img?.asset);
 ---
 
 <Base
@@ -43,13 +46,14 @@ const altPaths = Object.fromEntries(
   title={page.seo?.title ?? page.title}
   description={page.seo?.description ?? page.intro}
   noIndex={page.seo?.noIndex}
+  image={page.seo?.ogImage ?? page.cover}
   path={slug}
   altPaths={altPaths}
   editId={page._id}
   editType={page._type}
 >
-  <h1>{page.title}</h1>
-  {page.intro && <p class="lede">{page.intro}</p>}
+  <h1 class="section-title">{page.title}</h1>
+  {page.intro && <p class="intro-large">{page.intro}</p>}
 
   {
     page.cover?.asset && (
@@ -58,7 +62,7 @@ const altPaths = Object.fromEntries(
         loading="eager"
         aspect={16 / 9}
         widths={[600, 900, 1200, 1600]}
-        sizes="(max-width: 1140px) 100vw, 1140px"
+        sizes="(max-width: 1380px) 100vw, 1380px"
         class="cover"
       />
     )
@@ -68,18 +72,23 @@ const altPaths = Object.fromEntries(
 
   {
     page.body && (
-      <div class="prose">
+      <div class="body-24 page-body">
         <PortableText value={page.body} />
       </div>
     )
   }
 
   {
-    page.images?.length > 0 && (
-      <ul class="grid">
-        {page.images.map((img: any) => (
-          <li>
-            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 430px" />
+    closingImages.length > 0 && (
+      <ul class="page-grid shots">
+        {closingImages.map((img: any) => (
+          <li class="shot">
+            <SanityImage
+              image={img}
+              aspect={1.5}
+              sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw"
+              widths={[400, 600, 900, 1200]}
+            />
           </li>
         ))}
       </ul>
@@ -89,7 +98,66 @@ const altPaths = Object.fromEntries(
 
 <style>
   .cover {
-    margin: 1.8rem 0;
+    margin: 0 0 3rem;
     width: 100%;
+  }
+
+  /* Editors may still write panel headings ("the fair", "goals") as h2s
+     inside the body; they pick up the rule from the design here. */
+  .page-body {
+    margin-bottom: 3rem;
+  }
+  .page-body :global(h2) {
+    text-transform: lowercase;
+    border-bottom: 2px solid var(--ink);
+    margin: 3rem 0 1.25rem;
+    padding-bottom: 0.2rem;
+    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+  }
+  .page-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .page-body :global(h3) {
+    font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+    letter-spacing: -0.02em;
+    margin: 2rem 0 0.5rem;
+  }
+  .page-body :global(p) {
+    margin: 0 0 1.5rem;
+    max-width: 62ch;
+  }
+  .page-body :global(ul),
+  .page-body :global(ol) {
+    max-width: 62ch;
+  }
+
+  .shots {
+    list-style: none;
+    margin: 0 0 3rem;
+    padding-inline: 0;
+    row-gap: 30px;
+  }
+  .shot {
+    grid-column: span 4;
+  }
+  .shot :global(img) {
+    width: 100%;
+  }
+
+  @media (max-width: 900px) {
+    .shot {
+      grid-column: span 6;
+    }
+    .shots {
+      row-gap: 16px;
+    }
+  }
+  @media (max-width: 640px) {
+    .shot {
+      grid-column: 1 / -1;
+    }
   }
 </style>

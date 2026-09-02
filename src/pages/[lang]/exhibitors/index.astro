@@ -6,9 +6,10 @@ import { useTranslations } from '../../../lib/i18n';
 import { getExhibitors, getCurrentEdition } from '../../../lib/queries';
 
 /**
- * Current-edition exhibitors: A–Z index, filter pills (solo show, country
- * focus, publishers, jury prize) and the card grid. Filters and letters work
- * on the rendered list; the page is complete without JavaScript.
+ * Current-edition exhibitors: the A–Z row, the FILTERS pills (solo show,
+ * country focus, publishers, jury prize) and the three-column card grid.
+ * Letters are anchors to the first card of that initial and filters work on
+ * the rendered list, so the page is complete without JavaScript.
  */
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
@@ -18,32 +19,55 @@ const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 const [exhibitors, edition] = await Promise.all([getExhibitors(lang), getCurrentEdition(lang)]);
 
-const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
-const present = new Set(exhibitors.map((ex: any) => (ex.sortName ?? ex.name ?? '').trim().charAt(0).toLowerCase()));
+const LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+/** First letter of the sort name, folded so "Éclat" files under E. */
+const initial = (ex: any) =>
+  (ex.sortName ?? ex.name ?? '')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .trim()
+    .charAt(0)
+    .toLowerCase();
+
+const present = new Set(exhibitors.map(initial));
 
 const filters = [
-  { id: 'solo-show', label: t('exhibitors.soloShow') },
-  { id: 'country-focus', label: edition?.countryFocus ?? t('exhibitors.countryFocus') },
-  { id: 'publishers', label: t('exhibitors.publishers') },
-  { id: 'jury-prize', label: `${t('exhibitors.juryPrize')}${edition?.year ? ` ${edition.year - 1}` : ''}` },
-].filter((f) => exhibitors.some((ex: any) => (ex.soloShow && f.id === 'solo-show') || (ex.inCountryFocus && f.id === 'country-focus') || (ex.kind === 'publisher' && f.id === 'publishers') || (ex.kind === 'jury-prize' && f.id === 'jury-prize')));
+  { id: 'solo-show', label: t('exhibitors.soloShow'), has: (ex: any) => ex.soloShow },
+  { id: 'country-focus', label: edition?.countryFocus ?? t('exhibitors.countryFocus'), has: (ex: any) => ex.inCountryFocus },
+  { id: 'publishers', label: t('exhibitors.publishers'), has: (ex: any) => ex.kind === 'publisher' },
+  {
+    id: 'jury-prize',
+    label: `${t('exhibitors.juryPrize')}${edition?.year ? ` ${edition.year - 1}` : ''}`,
+    has: (ex: any) => ex.kind === 'jury-prize',
+  },
+].filter((f) => exhibitors.some(f.has));
 ---
 
 <Base lang={lang} title={t('nav.exhibitors')} path="exhibitors">
-  <h1>{t('nav.exhibitors')}</h1>
+  <h1 class="section-title">{t('nav.exhibitors')}</h1>
 
   {
     exhibitors.length ? (
       <>
-        <nav class="alphabet" aria-label="A–Z">
-          {letters.map((l) => (present.has(l) ? <a href={`#letter-${l}`}>{l}</a> : <span>{l}</span>))}
+        <nav class="alphabet" aria-label={t('exhibitors.byLetter')}>
+          {LETTERS.map((letter, i) => (
+            <>
+              {i > 0 && (
+                <span class="dash" aria-hidden="true">
+                  –
+                </span>
+              )}
+              {present.has(letter) ? <a href={`#letter-${letter}`}>{letter}</a> : <span class="letter-off">{letter}</span>}
+            </>
+          ))}
         </nav>
 
         {filters.length > 0 && (
           <div class="filters" id="exhibitor-filters">
             <span class="filters-label">{t('exhibitors.filters')}</span>
             {filters.map((f) => (
-              <button type="button" data-filter={f.id} aria-pressed="false">
+              <button type="button" class="pill" data-filter={f.id} aria-pressed="false">
                 {f.label}
               </button>
             ))}
@@ -54,16 +78,11 @@ const filters = [
           {t('exhibitors.noneMatch')}
         </p>
 
-        <ul class="grid" id="exhibitor-list">
+        <ul class="page-grid cards" id="exhibitor-list">
           {exhibitors.map((ex: any, i: number) => {
-            const letter = (ex.sortName ?? ex.name ?? '').trim().charAt(0).toLowerCase();
-            const prev = i > 0 ? (exhibitors[i - 1].sortName ?? exhibitors[i - 1].name ?? '').trim().charAt(0).toLowerCase() : null;
-            return (
-              <>
-                {letter !== prev && <li class="letter" id={`letter-${letter}`} aria-hidden="true" />}
-                <ExhibitorCard lang={lang} exhibitor={ex} />
-              </>
-            );
+            const letter = initial(ex);
+            const first = i === 0 || initial(exhibitors[i - 1]) !== letter;
+            return <ExhibitorCard lang={lang} exhibitor={ex} id={first ? `letter-${letter}` : undefined} />;
           })}
         </ul>
       </>
@@ -73,9 +92,69 @@ const filters = [
   }
 </Base>
 
+<style>
+  .alphabet {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.35em;
+    font-size: clamp(1.25rem, 3.2vw, 2.6rem);
+    letter-spacing: -0.04em;
+    line-height: 1.2;
+  }
+  .alphabet a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .alphabet a:hover,
+  .alphabet a[aria-current] {
+    background: var(--acid);
+  }
+  .letter-off,
+  .dash {
+    color: var(--ink-3);
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0 0;
+    font-size: clamp(1rem, 2vw, 1.75rem);
+  }
+  .filters-label {
+    text-transform: uppercase;
+  }
+  .filters .pill {
+    padding: 0.15rem 1rem;
+    font-size: inherit;
+    text-transform: lowercase;
+    background: none;
+    color: inherit;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .filters .pill:hover,
+  .filters .pill[aria-pressed='true'] {
+    background: var(--acid);
+  }
+
+  .cards {
+    list-style: none;
+    margin: 2rem 0 0;
+    row-gap: 1.75rem;
+    padding-inline: 0;
+  }
+
+  #no-match {
+    margin-top: 2rem;
+  }
+</style>
+
 <script>
   // Filter pills toggle; a card stays visible when it matches every active
-  // filter. Works on the already-rendered list, costs nothing until clicked.
+  // filter. Works on the already-rendered list and costs nothing until clicked.
   const bar = document.getElementById('exhibitor-filters');
   const list = document.getElementById('exhibitor-list');
   const noMatch = document.getElementById('no-match');
@@ -103,48 +182,15 @@ const filters = [
       });
     }
   }
-</script>
 
-<style>
-  .alphabet {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.2rem 0.6rem;
-    font-size: 1.4rem;
-    margin: 1rem 0;
-  }
-  .alphabet a {
-    color: var(--ink);
-    text-decoration: none;
-  }
-  .alphabet span {
-    color: var(--ink-3);
-  }
-  .filters {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 1rem 0 2rem;
-  }
-  .filters-label {
-    text-transform: uppercase;
-    margin-right: 0.5rem;
-  }
-  .filters button {
-    font: inherit;
-    background: var(--ground);
-    color: var(--ink);
-    border: 1px solid var(--ink);
-    border-radius: 999px;
-    padding: 0.3rem 0.9rem;
-    cursor: pointer;
-  }
-  .filters button[aria-pressed='true'] {
-    background: var(--ink);
-    color: var(--ground);
-  }
-  .letter {
-    display: none;
-  }
-</style>
+  // The letter row is plain anchors; this only paints the one just used.
+  const letters = Array.from(document.querySelectorAll<HTMLAnchorElement>('.alphabet a[href^="#letter-"]'));
+  const markLetter = () => {
+    for (const a of letters) {
+      if (a.getAttribute('href') === location.hash) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    }
+  };
+  window.addEventListener('hashchange', markLetter);
+  markLetter();
+</script>

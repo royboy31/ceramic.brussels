@@ -1,10 +1,14 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import SanityImage from '../../../components/SanityImage.astro';
+import Figure from '../../../components/Figure.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath, formatDate } from '../../../lib/i18n';
 import { getNews } from '../../../lib/queries';
 
+/**
+ * The newest post leads on seven columns, the rest follow three to a row.
+ * Design by Lilanga.
+ */
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
 }
@@ -12,88 +16,174 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 const news = await getNews(lang);
+
+const [lead, ...rest] = news;
 ---
 
 <Base lang={lang} title={t('nav.news')} path="news">
-  <h1>{t('nav.news')}</h1>
+  <h1 class="section-title">{t('nav.news')}</h1>
 
   {
     news.length ? (
-      <ul class="feed">
-        {news.map((item: any) => (
-          <li class="entry">
-            <a class="card-link" href={localePath(lang, `news/${item.slug}`)}>
-              {item.cover?.asset && (
-                <SanityImage image={item.cover} aspect={16 / 9} sizes="(max-width: 700px) 100vw, 300px" class="thumb" />
-              )}
-              <div>
-                <p class="meta">
-                  <time datetime={item.publishedAt}>{formatDate(item.publishedAt, lang)}</time>
-                  {item.category && <span class="pill">{item.category}</span>}
-                </p>
-                <h3>{item.title}</h3>
-                {item.excerpt && <p class="excerpt">{item.excerpt}</p>}
-                <span class="more">{t('news.readMore')} &rarr;</span>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
+      <>
+        <a class="lead" href={localePath(lang, `news/${lead.slug}`)}>
+          <div class="shot">
+            <Figure
+              image={lead.cover}
+              pool="fair"
+              seed={lead.slug}
+              aspect={1.6}
+              loading="eager"
+              priority
+              sizes="(max-width: 900px) 100vw, 60vw"
+              widths={[600, 900, 1200, 1600]}
+            />
+          </div>
+
+          <div class="lead-text">
+            <p class="meta">
+              <time datetime={lead.publishedAt}>{formatDate(lead.publishedAt, lang)}</time>
+              {lead.category && <span class="cat">{lead.category}</span>}
+            </p>
+            <h2>{lead.title}</h2>
+            {lead.excerpt && <p class="excerpt">{lead.excerpt}</p>}
+            <span class="more text-link">{t('news.readMore')} →</span>
+          </div>
+        </a>
+
+        {rest.length > 0 && (
+          <ul class="page-grid feed">
+            {rest.map((item: any) => (
+              <li class="entry">
+                <a href={localePath(lang, `news/${item.slug}`)}>
+                  <div class="shot">
+                    <Figure
+                      image={item.cover}
+                      pool="fair"
+                      seed={item.slug}
+                      aspect={1.5}
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                      widths={[400, 600, 900]}
+                    />
+                  </div>
+
+                  <p class="meta">
+                    <time datetime={item.publishedAt}>{formatDate(item.publishedAt, lang)}</time>
+                    {item.category && <span class="cat">{item.category}</span>}
+                  </p>
+                  <h3>{item.title}</h3>
+                  {item.excerpt && <p class="excerpt">{item.excerpt}</p>}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </>
     ) : (
       <p class="empty">
-        {t('news.empty')} Write the first post in <a href="/studio">the Studio</a>.
+        {t('news.empty')} Add posts in <a href="/studio">the Studio</a>.
       </p>
     )
   }
 </Base>
 
 <style>
+  .shot {
+    overflow: hidden;
+  }
+  .shot :global(img) {
+    width: 100%;
+    transition: transform 0.5s ease;
+  }
+  a:hover .shot :global(img) {
+    transform: scale(1.025);
+  }
+
+  .lead {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: 30px;
+    align-items: center;
+    text-decoration: none;
+    border-top: 1px solid var(--ink);
+    padding-top: 1.75rem;
+    margin-bottom: 3.5rem;
+  }
+  .lead h2 {
+    margin: 0.5rem 0 1rem;
+    font-size: clamp(1.75rem, 3.4vw, 3rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    font-weight: 400;
+  }
+  .lead .excerpt {
+    font-size: clamp(1rem, 1.4vw, 1.25rem);
+    line-height: 1.35;
+    margin-bottom: 1.25rem;
+  }
+
   .feed {
     list-style: none;
-    padding: 0;
-    margin: 1.5rem 0 0;
-    display: flex;
-    flex-direction: column;
+    margin: 0;
+    padding-inline: 0;
+    row-gap: 2.5rem;
   }
   .entry {
-    border-top: 1px solid var(--rule);
+    grid-column: span 4;
   }
-  .entry:last-child {
-    border-bottom: 1px solid var(--rule);
-  }
-  .entry .card-link {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 1.4rem;
-    padding: 1.4rem 0;
-    color: inherit;
+  .entry a {
+    display: block;
     text-decoration: none;
   }
-  .entry .card-link:hover h3 {
-    text-decoration: underline;
-  }
   .entry h3 {
-    margin: 0.35rem 0 0.4rem;
-    font-size: 1.15rem;
+    margin: 0.35rem 0 0.5rem;
+    font-size: clamp(1.15rem, 1.9vw, 1.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    font-weight: 400;
   }
-  .entry .meta {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
+  .entry .excerpt {
+    font-size: 0.95rem;
+    line-height: 1.35;
     margin: 0;
   }
-  .excerpt {
-    color: var(--ink-2);
-    max-width: var(--measure);
-    margin: 0 0 0.5rem;
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.6rem 0 0;
   }
-  .more {
-    font-size: 0.88rem;
-    color: var(--accent);
+  .cat {
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: 0.05rem 0.7rem;
+    font-size: 0.78rem;
+    text-transform: lowercase;
   }
-  @media (max-width: 700px) {
-    .entry .card-link {
+
+  @media (prefers-reduced-motion: reduce) {
+    .shot :global(img),
+    a:hover .shot :global(img) {
+      transition: none;
+      transform: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .lead {
       grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+    .entry {
+      grid-column: span 6;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .entry {
+      grid-column: 1 / -1;
     }
   }
 </style>
