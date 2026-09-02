@@ -1,0 +1,179 @@
+---
+import { LOCALES, type LocaleId } from '../lib/locales';
+import { localePath, useTranslations } from '../lib/i18n';
+import { urlFor } from '../sanity/image';
+
+/**
+ * Site header - date lockup left, wordmark centred, language switcher and
+ * menu button right. The two lockups are brand artwork rather than content,
+ * so they live in public/; everything textual comes from Sanity.
+ */
+interface Props {
+  lang: LocaleId;
+  siteName: string;
+  /** Locale-less path, so the language switcher stays on the current page. */
+  path?: string;
+  altPaths?: Partial<Record<LocaleId, string>>;
+  /** The current edition's dates mark from Sanity; the shipped PNG is the fallback. */
+  datesMark?: any;
+}
+
+const { lang, siteName, path = '', altPaths, datesMark } = Astro.props;
+const t = useTranslations(lang);
+const datesSrc = datesMark?.asset
+  ? urlFor(datesMark).width(600).auto('format').quality(85).url()
+  : '/assets/date-logo.png';
+---
+
+<header class="site-header">
+  <div class="page-grid header-inner">
+    <a class="site-date" href={localePath(lang, 'visit')} aria-label={datesMark?.alt ?? siteName}>
+      <img src={datesSrc} alt="" width="291" height="70" />
+    </a>
+
+    <a class="site-wordmark" href={localePath(lang)}>
+      <img src="/assets/wordmark.svg" alt={siteName} width="144" height="75" />
+    </a>
+
+    <div class="site-actions">
+      <nav class="locales" aria-label={t('common.language')}>
+        {
+          LOCALES.map((l, i) => (
+            <>
+              {i > 0 && <span class="sep" aria-hidden="true">/</span>}
+              <a
+                href={localePath(l.id, altPaths?.[l.id] ?? path)}
+                hreflang={l.id}
+                aria-current={l.id === lang ? 'true' : undefined}
+              >
+                {l.id.toUpperCase()}
+              </a>
+            </>
+          ))
+        }
+      </nav>
+
+      <button
+        type="button"
+        class="menu-toggle"
+        data-menu-open
+        aria-label={t('nav.openMenu')}
+        aria-controls="site-menu"
+        aria-expanded="false"
+      >
+        <img src="/assets/menu.svg" alt="" width="56" height="37" />
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  /* The three-stop wash from the hand-off's global.css. */
+  .site-header {
+    background: linear-gradient(180deg, #fff680 0%, #fff9b8 24%, var(--ground) 58%);
+    position: relative;
+    z-index: 40;
+  }
+  :global(body.acid-page) .site-header {
+    background: var(--acid);
+  }
+
+  .header-inner {
+    align-items: center;
+    height: clamp(92px, 11vw, 159px);
+  }
+
+  .site-date {
+    grid-column: span 3;
+    width: clamp(130px, 20vw, 291px);
+  }
+  .site-date img {
+    width: 100%;
+    height: auto;
+  }
+
+  .site-wordmark {
+    grid-column: span 6;
+    display: flex;
+    justify-content: center;
+  }
+  .site-wordmark img {
+    width: clamp(76px, 10vw, 144px);
+    height: clamp(40px, 5.2vw, 75px);
+  }
+
+  .site-actions {
+    grid-column: span 3;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: clamp(12px, 2vw, 34px);
+  }
+
+  .locales {
+    display: flex;
+    gap: 0.35em;
+    font-size: clamp(12px, 1.65vw, 24px);
+    letter-spacing: -0.05em;
+  }
+  .locales a {
+    text-decoration: none;
+  }
+  .locales a[aria-current] {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.16em;
+  }
+  .sep {
+    color: var(--ink-3);
+  }
+
+  .menu-toggle {
+    width: 46px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .menu-toggle img {
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .menu-toggle {
+      width: 56px;
+      height: 37px;
+    }
+  }
+
+  /* Below 640px the grid drops to 4 columns - see .page-grid in Base - and
+     the lockups take the fixed sizes from the hand-off. */
+  @media (max-width: 640px) {
+    .header-inner {
+      height: 88px;
+    }
+    .site-date {
+      grid-column: span 2;
+      width: 132px;
+    }
+    .site-wordmark {
+      grid-column: span 1;
+    }
+    .site-wordmark img {
+      width: 58px;
+      height: 34px;
+    }
+    .site-actions {
+      grid-column: span 1;
+    }
+    .menu-toggle {
+      width: 36px;
+      height: 24px;
+    }
+    .locales {
+      display: none;
+    }
+  }
+</style>

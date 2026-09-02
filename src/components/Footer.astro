@@ -1,0 +1,85 @@
+---
+/**
+ * Site footer. Links are already resolved and de-duplicated by Base.astro
+ * from the editable footer menu plus the contact details in Site settings,
+ * so nothing here is hard-coded.
+ */
+interface Props {
+  siteName: string;
+  links: { label: string; href: string; external?: boolean }[];
+  /** From Site settings; Base falls back to "© siteName, year". */
+  copyright?: string;
+}
+
+const { siteName, links, copyright } = Astro.props;
+const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
+---
+
+<footer class="site-footer">
+  <p class="copyright">{line}</p>
+
+  {
+    links.length > 0 && (
+      <nav class="footer-links" aria-label={siteName}>
+        {links.map((link) => (
+          <a
+            class="pill"
+            href={link.href}
+            {...(link.external ? { rel: 'noopener noreferrer' } : {})}
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
+    )
+  }
+</footer>
+
+<style>
+  /* Acid band at the top edge fading to white, mirroring the header. */
+  .site-footer {
+    background: linear-gradient(180deg, var(--acid) 0%, var(--ground) 74%);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 80px;
+    margin-top: 6rem;
+    padding: 1.25rem clamp(10px, 2vw, 30px);
+    font-size: 0.875rem;
+  }
+
+  /* Sampled from the art prize frames: on an acid page the band inverts -
+     white at the top resolving back into the page colour at the bottom. */
+  :global(body.acid-page) .site-footer {
+    background: linear-gradient(180deg, var(--ground) 0px, var(--ground) 40px, var(--acid) 80px);
+  }
+
+  .copyright {
+    margin: 0;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .pill {
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: 0.25rem 1.25rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .pill:hover {
+    background: var(--acid);
+  }
+
+  @media (min-width: 768px) {
+    .site-footer {
+      font-size: 1.125rem;
+    }
+  }
+</style>

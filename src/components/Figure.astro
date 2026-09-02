@@ -1,0 +1,82 @@
+---
+import SanityImage from './SanityImage.astro';
+import { placeholder, type PoolName, type Placeholder } from '../lib/placeholders';
+
+/**
+ * One image slot. Renders the Sanity image when the document has one, and
+ * otherwise a placeholder from the design hand-off, picked deterministically
+ * so a given record keeps the same picture between builds.
+ *
+ * Editor images always win, so nothing here has to be unpicked later.
+ */
+interface Props {
+  image?: any;
+  /** Which set of stand-ins to draw from when there is no Sanity image. */
+  pool: PoolName;
+  /** Usually the slug - keeps this record on one picture. */
+  seed?: string;
+  /** Overrides the pool entirely, for a slot with one obvious stand-in. */
+  fallback?: Placeholder;
+  aspect?: number;
+  sizes?: string;
+  widths?: number[];
+  loading?: 'lazy' | 'eager';
+  priority?: boolean;
+  alt?: string;
+  class?: string;
+}
+
+const {
+  image,
+  pool,
+  seed = '',
+  fallback,
+  aspect,
+  sizes = '100vw',
+  widths,
+  loading = 'lazy',
+  priority = false,
+  alt = '',
+  class: className,
+} = Astro.props;
+
+const stand = fallback ?? placeholder(pool, seed);
+
+// Match the placeholder to the slot's aspect so it crops rather than distorts.
+const height = aspect ? Math.round(stand.width / aspect) : stand.height;
+---
+
+{
+  image?.asset ? (
+    <SanityImage
+      image={image}
+      aspect={aspect}
+      sizes={sizes}
+      widths={widths}
+      loading={loading}
+      class={className}
+    />
+  ) : (
+    <img
+      class:list={['ph', className]}
+      src={stand.src}
+      srcset={stand.srcset}
+      sizes={sizes}
+      alt={alt}
+      width={stand.width}
+      height={height}
+      loading={priority ? 'eager' : loading}
+      decoding="async"
+      style={aspect ? `aspect-ratio: ${aspect}` : undefined}
+      {...(priority ? { fetchpriority: 'high' } : {})}
+    />
+  )
+}
+
+<style>
+  .ph {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+</style>

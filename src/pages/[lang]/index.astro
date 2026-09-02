@@ -1,16 +1,19 @@
 ---
 import Base from '../../layouts/Base.astro';
-import SanityImage from '../../components/SanityImage.astro';
-import LinkPill from '../../components/LinkPill.astro';
+import Figure from '../../components/Figure.astro';
+import VideoEmbed from '../../components/VideoEmbed.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { useTranslations, localePath } from '../../lib/i18n';
+import { useTranslations, localePath, formatDateRange } from '../../lib/i18n';
 import { getHomepage, getCurrentEdition, getEditions, getNews } from '../../lib/queries';
-import { resolveLink } from '../../lib/links';
+import { resolveLink, type ResolvedLink } from '../../lib/links';
+import { urlFor } from '../../sanity/image';
 
 /**
  * The homepage is curated block by block on the `homepage` document. Key
  * figures come from the most recent edition that has them, the film from the
- * current edition unless the homepage overrides it.
+ * current edition unless the homepage overrides it. The look is Lilanga's
+ * port of the Figma hand-off; every slot in it reads from Sanity and only
+ * falls back to the hand-off photography when an editor has left it empty.
  */
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
@@ -26,18 +29,46 @@ const [home, edition, editions, news] = await Promise.all([
   getNews(lang),
 ]);
 
-const figuresEdition = editions.find((e: any) => e.keyFigures?.length) ?? null;
-const spotlights = home?.spotlights?.length
-  ? home.spotlights
-  : news.slice(0, 2).map((item: any) => ({
-      kicker: item.category,
-      headline: item.title,
-      image: item.cover,
-      link: { kind: 'internal', internal: { _type: 'newsItem', slug: item.slug }, label: t('news.readMore') },
-    }));
+const headline = home?.heroText ?? edition?.title ?? 'ceramic brussels';
+const heroLink = resolveLink(lang, home?.heroLink);
+
+const quickLinks: ResolvedLink[] = (home?.quickLinks ?? [])
+  .map((link: any) => resolveLink(lang, link))
+  .filter(Boolean);
+
+/**
+ * Spotlights are editor-picked; when none are set the two most recent news
+ * items take the slots, so the block never goes empty on a fresh dataset.
+ */
+const spotlights: { key: string; kicker?: string; headline?: string; link: ResolvedLink | null; image?: any }[] =
+  home?.spotlights?.length
+    ? home.spotlights.map((s: any, i: number) => ({
+        key: s._key ?? `spotlight-${i}`,
+        kicker: s.kicker,
+        headline: s.headline,
+        link: resolveLink(lang, s.link),
+        image: s.image,
+      }))
+    : news.slice(0, 2).map((item: any) => ({
+        key: item.slug ?? item._id,
+        kicker: item.category,
+        headline: item.title,
+        link: { href: localePath(lang, `news/${item.slug}`), label: t('news.readMore'), external: false, arrow: '→' as const },
+        image: item.cover,
+      }));
+
 const banner = resolveLink(lang, home?.banner?.link);
 const closing = resolveLink(lang, home?.closingBanner?.link);
+
+// getHomepage already coalesces `video` with the current edition's film; the
+// second fallback only matters if the homepage document does not exist yet.
 const video = home?.video?.url ? home.video : edition?.film;
+const videoPoster = video?.poster?.asset
+  ? urlFor(video.poster).width(1600).height(1066).fit('crop').auto('format').quality(78).url()
+  : '/assets/video-still.webp';
+
+const figuresEdition = editions.find((e: any) => e.keyFigures?.length) ?? null;
+const figuresLink = resolveLink(lang, home?.figuresLink);
 
 const eventSchema = edition
   ? {
@@ -52,180 +83,442 @@ const eventSchema = edition
       ...(edition.ticketsUrl ? { offers: { '@type': 'Offer', url: edition.ticketsUrl } } : {}),
     }
   : null;
+
+const external = (link: ResolvedLink | null) =>
+  link?.external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
 ---
 
-<Base lang={lang} title="ceramic brussels" description={home?.seo?.description ?? home?.heroText} editId="homepage" editType="homepage">
+<Base
+  lang={lang}
+  title={home?.seo?.title ?? 'ceramic brussels'}
+  description={home?.seo?.description ?? home?.heroText ?? edition?.title}
+  noIndex={home?.seo?.noIndex}
+  image={home?.seo?.ogImage?.asset ? home.seo.ogImage : home?.heroImage}
+  editId="homepage"
+  editType="homepage"
+>
   {eventSchema && <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} slot="head" />}
 
-  <section class="hero">
-    <SanityImage image={home?.heroImage} loading="eager" aspect={3 / 2} sizes="(max-width: 900px) 100vw, 940px" widths={[600, 900, 1200, 1900]} />
-    <div>
-      <h1>{home?.heroText ?? 'ceramic brussels'}</h1>
-      {home?.heroLink && <LinkPill lang={lang} link={home.heroLink} variant="text" />}
+  <section class="page-grid hero">
+    <div class="hero-shot">
+      <Figure
+        image={home?.heroImage}
+        pool="fair"
+        seed="hero"
+        fallback={{
+          src: '/assets/home-hero-1600.webp',
+          srcset: '/assets/home-hero-900.webp 900w, /assets/home-hero-1600.webp 1600w',
+          width: 1600,
+          height: 1067,
+        }}
+        loading="eager"
+        priority
+        sizes="(max-width: 640px) 100vw, 66vw"
+        widths={[600, 900, 1200, 1600, 2000]}
+      />
+    </div>
+
+    <div class="hero-copy">
+      <h1 class="display">{headline}</h1>
+      {
+        edition && (
+          <p class="hero-dates">
+            {formatDateRange(edition.startDate, edition.endDate, lang)}
+            {edition.venue && <> · {edition.venue}</>}
+          </p>
+        )
+      }
+      {
+        heroLink && (
+          <a class="text-link" href={heroLink.href} {...external(heroLink)}>
+            {heroLink.label} {heroLink.arrow}
+          </a>
+        )
+      }
     </div>
   </section>
 
   {
-    home?.quickLinks?.length > 0 && (
-      <nav class="quick-links" aria-label="Quick links">
-        {home.quickLinks.map((link: any, i: number) => {
-          const r = resolveLink(lang, link);
-          return (
-            r && (
-              <a href={r.href} class:list={{ cta: i === home.quickLinks.length - 1 }} {...(r.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-                {r.label}
-              </a>
-            )
-          );
-        })}
+    quickLinks.length > 0 && (
+      <nav class="quicklinks" aria-label={t('nav.menu')}>
+        {quickLinks.map((link, i) => (
+          <a href={link.href} class:list={{ outline: i === quickLinks.length - 1 }} {...external(link)}>
+            {link.label}
+          </a>
+        ))}
       </nav>
     )
   }
 
-  <h2 class="centered">{t('home.latestNews')}</h2>
   {
-    spotlights.map((s: any, i: number) => (
-      <section class:list={['spotlight', { flip: i % 2 === 1 }]}>
-        <div>
-          {s.kicker && <p class="kicker">{s.kicker}</p>}
-          <p class="headline">{s.headline}</p>
-          {s.link && <LinkPill lang={lang} link={s.link} variant="text" />}
-        </div>
-        <SanityImage image={s.image} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 670px" />
-      </section>
-    ))
+    spotlights.length > 0 && (
+      <>
+        <h2 class="latest">{t('home.latestNews')}</h2>
+
+        {spotlights.map((s, i) => (
+          <section class:list={['page-grid', 'feature', { flip: i % 2 === 1 }]}>
+            <div class="feature-copy">
+              {s.kicker && <p class="eyebrow-lg">{s.kicker}</p>}
+              {s.headline && <h3>{s.headline}</h3>}
+              {s.link && (
+                <a class="text-link" href={s.link.href} {...external(s.link)}>
+                  {s.link.label} {s.link.arrow}
+                </a>
+              )}
+            </div>
+
+            <div class="feature-shot">
+              <Figure
+                image={s.image}
+                pool="fair"
+                seed={s.key}
+                fallback={
+                  i === 0
+                    ? {
+                        src: '/assets/guest-1200.webp',
+                        srcset: '/assets/guest-700.webp 700w, /assets/guest-1200.webp 1200w',
+                        width: 1200,
+                        height: 800,
+                      }
+                    : undefined
+                }
+                sizes="(max-width: 640px) 100vw, 50vw"
+              />
+            </div>
+          </section>
+        ))}
+      </>
+    )
   }
 
   {
     home?.banner?.text && (
-      <a class="band" href={banner?.href ?? '#'}>
-        {home.banner.text} →
+      <a class="cta cta-gradient" href={banner?.href ?? localePath(lang, 'editions')} {...external(banner)}>
+        {home.banner.text} {banner?.arrow ?? '→'}
       </a>
     )
   }
 
-  {
-    video?.url && (
-      <section class="video">
-        <a href={video.url} target="_blank" rel="noopener noreferrer">
-          <SanityImage image={video.poster} aspect={21 / 10} sizes="(max-width: 1440px) 100vw, 1440px" widths={[800, 1200, 1600, 2000]} />
-          <span>{video.title ?? t('common.video')} ↗</span>
-        </a>
-      </section>
-    )
-  }
+  {video?.url && <VideoEmbed class="film" url={video.url} poster={videoPoster} label={video.title ?? t('home.watch')} />}
 
   {
     figuresEdition && (
-      <section class="figures">
-        <p class="kicker">{t('home.keyFigures', { year: figuresEdition.year })}</p>
-        <dl>
-          {figuresEdition.keyFigures.map((f: any) => (
-            <div>
-              <dd>{f.value}</dd>
-              <dt>{f.label}</dt>
+      <section class="stats">
+        <p class="stats-title">{t('home.keyFigures', { year: figuresEdition.year })}</p>
+
+        <div class="stats-table">
+          {figuresEdition.keyFigures.map((figure: any) => (
+            <div class="stat">
+              <strong>{figure.value}</strong>
+              <span>{figure.label}</span>
             </div>
           ))}
-        </dl>
-        {home?.figuresLink && <LinkPill lang={lang} link={home.figuresLink} variant="text" />}
-        {home?.figuresImage?.asset && <SanityImage image={home.figuresImage} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 670px" />}
+        </div>
+
+        {
+          figuresLink && (
+            <p class="stats-link">
+              <a class="text-link" href={figuresLink.href} {...external(figuresLink)}>
+                {figuresLink.label} {figuresLink.arrow}
+              </a>
+            </p>
+          )
+        }
       </section>
     )
   }
 
   {
     home?.closingBanner?.text && (
-      <a class="band" href={closing?.href ?? localePath(lang, 'about/images')}>
-        {home.closingBanner.text} →
+      <a class="cta cta-solid" href={closing?.href ?? localePath(lang, 'about/images')} {...external(closing)}>
+        {home.closingBanner.text} {closing?.arrow ?? '→'}
       </a>
     )
   }
 </Base>
 
 <style>
+  /* Hero, quicklinks and the feature blocks sit inside the page gutter, as
+     they do in the hand-off. Only the video, the figures table and the call
+     to action run edge to edge. */
+  .film,
+  .stats,
+  .cta {
+    margin-inline: -30px;
+  }
+
   .hero {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-    align-items: start;
+    align-items: stretch;
+    row-gap: 1.5rem;
   }
-  .quick-links {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin: 2rem 0;
+  .hero-shot {
+    grid-column: span 8;
   }
-  .quick-links a {
-    background: var(--brand);
-    color: #1a1a19;
+  .hero-shot :global(img) {
+    width: 100%;
+    height: 47vw;
+    max-height: 690px;
+    min-height: 340px;
+    object-fit: cover;
+  }
+  .hero-copy {
+    grid-column: span 4;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 0;
+  }
+  .hero-copy h1 {
+    /* Pulled up by the leading above the caps, so the first line sits level
+       with the top edge of the picture rather than a line-height below it. */
+    margin: -0.11em 0 0;
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    font-weight: 400;
+  }
+  .hero-dates {
+    margin: 1.25rem 0 0;
+    font-size: clamp(0.95rem, 1.4vw, 1.3rem);
+  }
+  .hero-copy a {
+    display: inline-block;
+    margin-top: 2rem;
+    font-size: clamp(1.25rem, 2.7vw, 2.5rem);
+    letter-spacing: -0.05em;
+  }
+
+  .quicklinks {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 21px;
+    margin-top: 27px;
+  }
+  .quicklinks a {
+    display: grid;
+    place-items: center;
+    min-height: clamp(52px, 4.8vw, 69px);
+    background: var(--acid);
+    text-align: center;
     text-decoration: none;
-    text-align: center;
-    padding: 1rem;
-    font-size: 1.4rem;
+    text-transform: lowercase;
+    padding: 0.4rem 0.6rem;
+    font-size: clamp(1.1rem, 2.75vw, 2.5rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
   }
-  .quick-links a.cta {
-    outline: 2px solid #1a1a19;
-    outline-offset: -2px;
+  /* The last quick link is the call to action: the same acid block, with a
+     rule around it. */
+  .quicklinks a.outline {
+    border: 1px solid var(--ink);
   }
-  .centered {
+  .quicklinks a:hover {
+    background: var(--ink);
+    color: var(--ground);
+  }
+
+  .latest {
+    margin: 2.5rem 0 0;
     text-align: center;
-    font-size: 2.4rem;
+    text-transform: lowercase;
+    font-size: clamp(2.4rem, 4.85vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
     font-weight: 600;
   }
-  .spotlight {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+
+  .feature {
+    align-items: center;
+    row-gap: 1.25rem;
+    margin-top: 30px;
+    padding-bottom: 2.5rem;
+  }
+  .feature-copy {
+    grid-column: span 6;
+    padding: 1.5rem 0;
+  }
+  .feature-shot {
+    grid-column: span 6;
+  }
+  .feature-shot :global(img) {
+    width: 100%;
+    height: 31vw;
+    min-height: 280px;
+    object-fit: cover;
+  }
+  /* Spotlights alternate: the first leads with copy, the next with its
+     picture, as the news feature and the partner block do in the hand-off. */
+  .feature.flip {
     align-items: start;
-    margin: 2rem 0;
+    padding: 1.5rem 0 0;
   }
-  .spotlight.flip > div {
-    order: 2;
+  .feature.flip .feature-shot {
+    order: -1;
   }
-  .headline {
-    font-size: clamp(1.3rem, 2.5vw, 2rem);
-    line-height: 1.25;
-    max-width: 24ch;
-  }
-  .video a {
-    position: relative;
-    display: block;
-    color: var(--ground);
-    text-decoration: none;
-  }
-  .video span {
-    position: absolute;
-    inset: auto 1rem 1rem auto;
-    background: var(--ink);
-    padding: 0.4rem 0.8rem;
-  }
-  .figures dl {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0;
-    border-top: 1px solid var(--ink);
-    border-bottom: 1px solid var(--ink);
-    margin: 1rem 0;
-  }
-  .figures dl > div {
-    padding: 1rem;
-    border-bottom: 1px solid var(--rule);
-  }
-  .figures dd {
+
+  .eyebrow-lg {
     margin: 0;
-    font-size: clamp(2.5rem, 6vw, 5rem);
+    text-transform: lowercase;
+    font-size: clamp(1.25rem, 2.7vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+  }
+  .feature-copy h3 {
+    margin: 0.5rem 0 0;
+    font-size: clamp(2rem, 3.6vw, 3.2rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    font-weight: 400;
+  }
+  .feature-copy a {
+    display: inline-block;
+    margin-top: 2rem;
+    font-size: clamp(1.3rem, 2.6vw, 2.5rem);
+    letter-spacing: -0.05em;
+  }
+
+  .stats {
+    margin-top: 3.4rem;
+  }
+  .stats-title {
+    margin: 0;
+    padding: 0 30px;
+    text-transform: lowercase;
+    font-size: clamp(1.25rem, 2.75vw, 2.5rem);
+    line-height: 2;
+    letter-spacing: -0.05em;
+  }
+  .stats-table {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: clamp(105px, 10vw, 145px);
+    border-top: 1px solid var(--ink);
+  }
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  /* Two figures a row: the left one ruled off from the right, the outer
+     ones sitting on the page gutter. */
+  .stat:nth-child(odd) {
+    padding-left: 30px;
+    border-right: 1px solid var(--ink);
+  }
+  .stat:nth-child(even) {
+    justify-content: flex-end;
+    padding-right: 30px;
+  }
+  /* The hand-off's five: visitors / exhibitors, artists / VIPs, press clips. */
+  .stat:nth-child(2) {
+    justify-content: flex-start;
+    padding-left: 40px;
+    padding-right: 0;
+  }
+  .stat:nth-child(3) {
+    justify-content: center;
+    padding-left: 0;
+  }
+  /* An odd trailing figure takes the whole row, centred, closing the table. */
+  .stat:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-content: center;
+    gap: 10px;
+    padding-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    min-height: clamp(120px, 11.25vw, 162px);
+  }
+
+  .stat strong {
+    font-size: clamp(3.5rem, 8vw, 7.5rem);
+    line-height: 0.7;
+    letter-spacing: -0.05em;
+    font-weight: 400;
+  }
+  .stat span {
+    font-size: clamp(1.5rem, 3.4vw, 3.1rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .stats-link {
+    margin: 1.5rem 0 0;
+    padding: 0 30px;
+    font-size: clamp(1.25rem, 2.7vw, 2.5rem);
+    letter-spacing: -0.05em;
+  }
+
+  .cta {
+    display: grid;
+    place-items: center;
+    min-height: clamp(100px, 10.5vw, 152px);
+    padding: 0.6rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    text-transform: lowercase;
+    font-size: clamp(1.9rem, 4.2vw, 3.75rem);
     line-height: 1;
   }
-  .figures dt {
-    font-size: 1.3rem;
+  .cta-gradient {
+    margin-top: 3.4rem;
+    background: linear-gradient(180deg, var(--acid) 0%, var(--ground) 50%, var(--acid) 100%);
+    letter-spacing: -0.05em;
   }
-  @media (max-width: 800px) {
-    .hero,
-    .spotlight {
-      grid-template-columns: 1fr;
+  .cta-solid {
+    margin-top: 5rem;
+    background: var(--acid);
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  @media (max-width: 900px) {
+    .quicklinks {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
     }
-    .spotlight.flip > div {
-      order: 0;
+  }
+
+  /* Below 640 the grid is 4 columns, so both halves take the full width and
+     the picture leads, as max-sm:col-span-full does in the hand-off. */
+  @media (max-width: 640px) {
+    .hero-shot,
+    .hero-copy,
+    .feature-copy,
+    .feature-shot {
+      grid-column: 1 / -1;
+    }
+    .feature-shot {
+      order: -1;
+    }
+    .hero-copy {
+      padding: 1.4rem 0 0.9rem;
+    }
+    .hero-shot :global(img) {
+      height: 67vw;
+      min-height: 260px;
+    }
+    .feature-shot :global(img) {
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 1.5;
+    }
+    .film,
+    .stats,
+    .cta {
+      margin-inline: -10px;
+    }
+    .stats-title,
+    .stats-link,
+    .stat {
+      padding-inline: 10px;
+    }
+    .stats-table {
+      display: block;
+      border-bottom: 0;
+    }
+    .stat {
+      justify-content: space-between;
+      border-right: 0 !important;
     }
   }
 </style>

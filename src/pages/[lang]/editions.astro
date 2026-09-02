@@ -1,10 +1,19 @@
 ---
 import Base from '../../layouts/Base.astro';
-import SanityImage from '../../components/SanityImage.astro';
+import Figure from '../../components/Figure.astro';
+import Slideshow from '../../components/Slideshow.astro';
+import LinkPill from '../../components/LinkPill.astro';
+import PortableText from '../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { useTranslations, formatDateRange } from '../../lib/i18n';
+import { useTranslations, formatDateRange, localePath } from '../../lib/i18n';
 import { getEditions } from '../../lib/queries';
 
+/**
+ * The archive: every past edition with its cover, dates, country focus and
+ * guest of honour, the key figures in the homepage's ruled table, the
+ * catalogue / overview / press links and the photo gallery. Row layout by
+ * Lilanga.
+ */
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
 }
@@ -12,39 +21,304 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 const editions = await getEditions(lang);
+
+// Past editions only. If nothing but the current edition exists yet, show
+// that rather than an empty page - it is flagged as current either way.
+const past = editions.filter((e: any) => !e.isCurrent);
+const list = past.length ? past : editions;
+
+/* Labels STRINGS does not carry yet - to move into src/lib/i18n.ts. */
+const LOCAL = {
+  en: { overview: 'overview', film: 'film', empty: 'No editions published yet.' },
+  fr: { overview: 'bilan', film: 'film', empty: 'Aucune édition publiée pour le moment.' },
+  nl: { overview: 'overzicht', film: 'film', empty: 'Nog geen edities gepubliceerd.' },
+} as const;
+const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key];
 ---
 
 <Base lang={lang} title={t('nav.editions')} path="editions">
-  <h1>{t('nav.editions')}</h1>
+  <h1 class="section-title">{t('nav.editions')}</h1>
 
   {
-    editions.length ? (
-      <ul class="grid">
-        {editions.map((e: any) => (
-          <li class="card">
-            <SanityImage image={e.cover} aspect={4 / 3} sizes="(max-width: 700px) 50vw, 260px" />
-            <h3>
-              {e.title ?? `Ceramic Brussels ${e.year}`}
-              {e.isCurrent && <span class="pill current">{t('home.currentEdition')}</span>}
-            </h3>
-            <p class="meta">{formatDateRange(e.startDate, e.endDate, lang)}</p>
-            <p class="meta">
-              {e.exhibitorCount} {t('editions.exhibitorCount')}
-            </p>
-          </li>
-        ))}
+    list.length ? (
+      <ul class="editions">
+        {list.map((edition: any) => {
+          const images = (edition.images ?? []).filter((img: any) => img?.asset);
+          const hasLinks = edition.catalogueUrl || edition.overviewUrl || edition.pressClipsUrl || edition.film?.url;
+          return (
+            <li class="edition">
+              <div class="row">
+                <div class="shot">
+                  <Figure
+                    image={edition.cover}
+                    pool="fair"
+                    seed={String(edition.year ?? '')}
+                    aspect={1.5}
+                    sizes="(max-width: 700px) 100vw, 40vw"
+                    widths={[400, 600, 900, 1200]}
+                  />
+                </div>
+
+                <div class="about">
+                  <p class="year">{[edition.year, edition.ordinal].filter(Boolean).join(' · ')}</p>
+                  <h2>
+                    {edition.title ?? `ceramic brussels ${edition.year}`}
+                    {edition.isCurrent && <span class="pill current">{t('home.currentEdition')}</span>}
+                  </h2>
+
+                  {edition.startDate && edition.endDate && (
+                    <p class="dates">{formatDateRange(edition.startDate, edition.endDate, lang)}</p>
+                  )}
+                  {edition.venue && <p class="dates">{edition.venue}</p>}
+
+                  {edition.intro && (
+                    <div class="body-24 intro">
+                      <PortableText value={edition.intro} />
+                    </div>
+                  )}
+
+                  <dl class="facts">
+                    {edition.exhibitorCount > 0 && (
+                      <div>
+                        <dt>{t('editions.exhibitorCount')}</dt>
+                        <dd>{edition.exhibitorCount}</dd>
+                      </div>
+                    )}
+                    {edition.countryFocus && (
+                      <div>
+                        <dt>{t('exhibitors.countryFocus')}</dt>
+                        <dd>{edition.countryFocus}</dd>
+                      </div>
+                    )}
+                    {edition.guestOfHonour?.name && (
+                      <div>
+                        <dt>{t('artists.guestOfHonour')}</dt>
+                        <dd>
+                          {edition.guestOfHonour.slug ? (
+                            <a href={localePath(lang, `artists/${edition.guestOfHonour.slug}`)}>{edition.guestOfHonour.name}</a>
+                          ) : (
+                            edition.guestOfHonour.name
+                          )}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+
+                  {hasLinks && (
+                    <p class="links">
+                      {edition.catalogueUrl && (
+                        <LinkPill lang={lang} href={edition.catalogueUrl} label={t('home.catalogue')} external />
+                      )}
+                      {edition.overviewUrl && <LinkPill lang={lang} href={edition.overviewUrl} label={s('overview')} external />}
+                      {edition.pressClipsUrl && (
+                        <LinkPill lang={lang} href={edition.pressClipsUrl} label={t('home.pressClips')} external />
+                      )}
+                      {edition.film?.url && (
+                        <LinkPill lang={lang} href={edition.film.url} label={edition.film.title ?? s('film')} external />
+                      )}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {edition.keyFigures?.length > 0 && (
+                <section class="stats">
+                  <p class="stats-title">{t('home.keyFigures', { year: edition.year })}</p>
+                  <div class="stats-table">
+                    {edition.keyFigures.map((figure: any) => (
+                      <div class="stat">
+                        <strong>{figure.value}</strong>
+                        <span>{figure.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {images.length > 0 && (
+                <div class="gallery">
+                  <Slideshow images={images} aspect={1.5} sizes="(max-width: 900px) 100vw, 670px" />
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     ) : (
       <p class="empty">
-        No editions yet. Create one in <a href="/studio">the Studio</a>.
+        {s('empty')} <a href="/studio">Studio</a>
       </p>
     )
   }
 </Base>
 
 <style>
+  .editions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .edition {
+    padding: 2.5rem 0 3rem;
+    border-top: 1px solid var(--ink);
+  }
+  .editions .edition:last-child {
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 30px;
+    align-items: start;
+  }
+  .shot :global(img) {
+    width: 100%;
+  }
+
+  .year {
+    margin: 0;
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    color: var(--ink-2);
+  }
+  .about h2 {
+    margin: 0.25rem 0 1rem;
+    font-size: clamp(1.75rem, 3.6vw, 3rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    font-weight: 400;
+    text-transform: lowercase;
+  }
   .current {
-    margin-left: 0.5rem;
+    margin-left: 0.75rem;
     vertical-align: middle;
+    font-size: 0.8rem;
+    letter-spacing: normal;
+    text-transform: lowercase;
+    background: var(--acid);
+    border-color: var(--acid);
+  }
+  .dates {
+    margin: 0 0 0.3rem;
+    font-size: clamp(1rem, 1.6vw, 1.35rem);
+    letter-spacing: -0.02em;
+  }
+
+  .intro {
+    margin: 1.5rem 0 0;
+    max-width: 62ch;
+  }
+  .intro :global(p) {
+    margin: 0 0 1rem;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2.5rem;
+    margin: 1.5rem 0 0;
+  }
+  .facts div {
+    display: flex;
+    flex-direction: column;
+  }
+  .facts dt {
+    font-size: 0.85rem;
+    text-transform: lowercase;
+    color: var(--ink-2);
+  }
+  .facts dd {
+    margin: 0;
+    font-size: clamp(1.1rem, 1.8vw, 1.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  .facts dd a {
+    text-decoration: none;
+  }
+  .facts dd a:hover {
+    text-decoration: underline;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    margin: 1.75rem 0 0;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+  }
+
+  /* Key figures: the homepage's ruled table, two figures a row. */
+  .stats {
+    margin: 3rem 0 0;
+  }
+  .stats-title {
+    margin: 0;
+    text-transform: lowercase;
+    font-size: clamp(1.25rem, 2.75vw, 2.5rem);
+    line-height: 2;
+    letter-spacing: -0.05em;
+  }
+  .stats-table {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: clamp(105px, 10vw, 145px);
+    border-top: 1px solid var(--ink);
+  }
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-bottom: 1px solid var(--ink);
+  }
+  .stat:nth-child(odd) {
+    padding-left: 30px;
+    border-right: 1px solid var(--ink);
+  }
+  .stat:nth-child(even) {
+    justify-content: flex-end;
+    padding-right: 30px;
+  }
+  .stat:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-content: center;
+    gap: 10px;
+    padding-left: 0;
+    border-right: 0;
+  }
+  .stat strong {
+    font-size: clamp(3rem, 7vw, 6.5rem);
+    line-height: 0.7;
+    letter-spacing: -0.05em;
+    font-weight: 400;
+  }
+  .stat span {
+    font-size: clamp(1.25rem, 3vw, 2.75rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .gallery {
+    margin-top: 3rem;
+  }
+
+  @media (max-width: 700px) {
+    .row {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+    .stats-table {
+      grid-template-columns: 1fr;
+    }
+    .stat:nth-child(odd),
+    .stat:nth-child(even) {
+      justify-content: flex-start;
+      padding: 0 16px;
+      border-right: 0;
+    }
+    .stat:last-child:nth-child(odd) {
+      justify-content: flex-start;
+      padding-left: 16px;
+    }
   }
 </style>

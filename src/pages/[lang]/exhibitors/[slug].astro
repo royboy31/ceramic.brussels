@@ -9,8 +9,10 @@ import { getExhibitor, getExhibitorSlugs, getExhibitors } from '../../../lib/que
 import { instagramUrl } from '../../../lib/links';
 
 /**
- * One exhibitor: slideshow, city + booth, pills, description, the artists
- * presented, and previous / next through the current list.
+ * One exhibitor, in three columns: the slideshow; name, city (CC), booth,
+ * instagram / website pills and the description; then "presenting" with the
+ * artists shown and the note about them. Previous / next walk the same
+ * alphabetical list as the index.
  */
 export async function getStaticPaths() {
   const slugs = await getExhibitorSlugs();
@@ -24,116 +26,310 @@ const t = useTranslations(lang);
 const [exhibitor, all] = await Promise.all([getExhibitor(lang, slug), getExhibitors(lang)]);
 if (!exhibitor) return Astro.rewrite('/404');
 
+const images = exhibitor.images ?? [];
+
 const index = all.findIndex((ex: any) => ex.slug === slug);
 const previous = index > 0 ? all[index - 1] : null;
 const next = index >= 0 && index < all.length - 1 ? all[index + 1] : null;
 
 const place = [exhibitor.city, exhibitor.countryCode && `(${exhibitor.countryCode})`].filter(Boolean).join(' ');
 const presenting = exhibitor.artists?.length ? exhibitor.artists : null;
+const hasBadges = exhibitor.soloShow || exhibitor.inCountryFocus || exhibitor.kind === 'jury-prize';
+
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: exhibitor.name,
+  ...(exhibitor.website ? { url: exhibitor.website } : {}),
+  ...(exhibitor.countryCode
+    ? { address: { '@type': 'PostalAddress', addressLocality: exhibitor.city, addressCountry: exhibitor.countryCode } }
+    : {}),
+};
 ---
 
 <Base
   lang={lang}
-  title={exhibitor.name}
+  title={exhibitor.seo?.title ?? exhibitor.name}
   description={exhibitor.seo?.description}
-  path={`exhibitors/${slug}`}
   noIndex={exhibitor.seo?.noIndex}
+  image={exhibitor.seo?.ogImage ?? images[0]}
+  path={`exhibitors/${slug}`}
   editId={exhibitor._id}
   editType={exhibitor._type}
 >
-  <p class="kicker">{t('nav.exhibitors')}</p>
-  <h1>{exhibitor.name}</h1>
+  <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} slot="head" />
 
-  <div class="detail">
-    <div class="media">
-      <Slideshow images={exhibitor.images} aspect={4 / 5} />
-      {exhibitor.soloShow && <span class="badge">{t('exhibitors.soloShow')}</span>}
+  <h1 class="section-title">{t('nav.exhibitors')}</h1>
+
+  <article class="page-grid exhibitor">
+    <div class="gallery">
+      <Slideshow
+        images={images}
+        aspect={0.8}
+        pool="exhibitor"
+        seed={slug}
+        label={exhibitor.name}
+        sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw"
+      />
+      {
+        hasBadges && (
+          <span class="badges">
+            {exhibitor.soloShow && <span class="badge">{t('exhibitors.soloShow')}</span>}
+            {exhibitor.inCountryFocus && (
+              <span class="badge focus">{exhibitor.countryFocusLabel ?? t('exhibitors.countryFocus')}</span>
+            )}
+            {exhibitor.kind === 'jury-prize' && <span class="badge">{t('exhibitors.juryPrize')}</span>}
+          </span>
+        )
+      }
     </div>
 
-    <div class="facts">
+    <div class="identity">
+      <h2>{exhibitor.name}</h2>
       {place && <p class="place">{place}</p>}
-      {exhibitor.booth && <p class="booth">● {exhibitor.booth}</p>}
-      <p class="pills">
-        {exhibitor.instagram && <LinkPill lang={lang} href={instagramUrl(exhibitor.instagram)} label={t('common.instagram')} />}
-        {exhibitor.website && <LinkPill lang={lang} href={exhibitor.website} label={t('common.website')} />}
-      </p>
-      {exhibitor.bio && (
-        <div class="prose">
-          <PortableText value={exhibitor.bio} />
-        </div>
-      )}
-    </div>
+      {exhibitor.booth && <p class="booth">{exhibitor.booth}</p>}
 
-    <div class="artists">
-      {(presenting || exhibitor.artistsText) && (
-        <>
-          <p class="kicker">{t('exhibitors.presenting')}</p>
-          <p class="names">
-            {presenting
-              ? presenting.map((a: any, i: number) => (
-                  <>
-                    {i > 0 && ', '}
-                    <a href={localePath(lang, `artists/${a.slug}`)}>{a.name}</a>
-                  </>
-                ))
-              : exhibitor.artistsText}
+      {
+        (exhibitor.instagram || exhibitor.website) && (
+          <p class="links">
+            {exhibitor.instagram && (
+              <LinkPill lang={lang} href={instagramUrl(exhibitor.instagram)} label={t('common.instagram')} />
+            )}
+            {exhibitor.website && <LinkPill lang={lang} href={exhibitor.website} label={t('common.website')} />}
           </p>
-        </>
-      )}
-      {exhibitor.artistsNote && (
-        <div class="prose">
-          <PortableText value={exhibitor.artistsNote} />
-        </div>
-      )}
-    </div>
-  </div>
+        )
+      }
 
-  <nav class="pager" aria-label="Exhibitors">
-    {previous ? <a href={localePath(lang, `exhibitors/${previous.slug}`)}>← {t('exhibitors.previous')}</a> : <span />}
-    <a href={localePath(lang, 'exhibitors')}>{t('exhibitors.backToAll')} →</a>
-    {next ? <a href={localePath(lang, `exhibitors/${next.slug}`)}>{t('exhibitors.next')} →</a> : <span />}
-  </nav>
+      {
+        exhibitor.bio && (
+          <div class="bio">
+            <PortableText value={exhibitor.bio} />
+          </div>
+        )
+      }
+    </div>
+
+    <div class="presenting">
+      {
+        (presenting || exhibitor.artistsText) && (
+          <>
+            <p class="eyebrow-plain">{t('exhibitors.presenting')}</p>
+            <h3 class="names">
+              {presenting
+                ? presenting.map((a: any, i: number) => (
+                    <>
+                      {i > 0 && ', '}
+                      {a.slug ? <a href={localePath(lang, `artists/${a.slug}`)}>{a.name}</a> : a.name}
+                    </>
+                  ))
+                : exhibitor.artistsText}
+            </h3>
+          </>
+        )
+      }
+      {
+        exhibitor.artistsNote && (
+          <div class="note">
+            <PortableText value={exhibitor.artistsNote} />
+          </div>
+        )
+      }
+    </div>
+
+    <nav class="pager" aria-label={t('nav.exhibitors')}>
+      {
+        previous ? (
+          <a class="pager-prev" href={localePath(lang, `exhibitors/${previous.slug}`)}>
+            ← {t('exhibitors.previous')}
+          </a>
+        ) : (
+          <span />
+        )
+      }
+
+      <a class="back-all text-link" href={localePath(lang, 'exhibitors')}>
+        {t('exhibitors.backToAll')} →
+      </a>
+
+      {
+        next ? (
+          <a class="pager-next" href={localePath(lang, `exhibitors/${next.slug}`)}>
+            {t('exhibitors.next')} →
+          </a>
+        ) : (
+          <span />
+        )
+      }
+    </nav>
+  </article>
 </Base>
 
 <style>
-  .detail {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 2.5rem;
-    margin-top: 1.5rem;
+  .exhibitor {
+    row-gap: 2.5rem;
+    margin-top: 0.25rem;
   }
-  .media {
+
+  /* ---- left: slideshow ---- */
+  .gallery {
+    grid-column: span 4;
     position: relative;
   }
-  .badge {
+  .badges {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.75rem;
+    border-radius: 999px;
     background: var(--ink);
     color: var(--ground);
-    border-radius: 999px;
-    font-size: 0.75rem;
-    padding: 0.5rem 0.6rem;
+    font-size: clamp(0.75rem, 1vw, 0.95rem);
+    line-height: 1.3;
+    text-transform: lowercase;
+    white-space: nowrap;
+  }
+  .badge.focus {
+    background: var(--acid);
+    color: var(--ink);
+  }
+
+  /* ---- middle: identity ---- */
+  .identity {
+    grid-column: span 4;
+    border-top: 1px solid var(--ink);
+    padding-top: 0.75rem;
+  }
+  .identity h2 {
+    font-size: clamp(2rem, 4vw, 3.75rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 400;
+    margin: 0;
   }
   .place,
-  .booth,
+  .booth {
+    font-size: clamp(1.35rem, 2.7vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .place {
+    margin-top: 1.5rem;
+  }
+  .booth::before {
+    content: '● ';
+    font-size: 0.7em;
+    vertical-align: 0.15em;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+  }
+
+  .bio {
+    margin-top: 3rem;
+    font-size: clamp(1.05rem, 1.7vw, 1.5rem);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+  .bio :global(p) {
+    margin: 0 0 1.5rem;
+  }
+  .bio :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  /* ---- right: presenting ---- */
+  .presenting {
+    grid-column: span 4;
+    border-top: 1px solid var(--ink);
+    padding-top: 0.75rem;
+  }
+  .eyebrow-plain {
+    font-size: 1.125rem;
+    margin: 0;
+  }
   .names {
-    font-size: 1.6rem;
-    margin: 0 0 0.4rem;
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 400;
+    margin: 0;
   }
   .names a {
-    color: inherit;
     text-decoration: none;
   }
-  .pager {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 3rem;
-    font-size: 1.3rem;
+  .names a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.08em;
   }
+  .note {
+    margin-top: 1.5rem;
+    font-size: clamp(1.05rem, 1.7vw, 1.5rem);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+  .note :global(p) {
+    margin: 0 0 1.5rem;
+  }
+  .note :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  /* ---- previous / back to all / next ---- */
+  .pager {
+    grid-column: 5 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    font-size: clamp(1.1rem, 2vw, 1.6rem);
+  }
+  .pager a {
+    text-decoration: none;
+  }
+  .pager a:hover {
+    background: var(--acid);
+  }
+  .back-all {
+    font-size: clamp(1.6rem, 3vw, 2.5rem);
+    letter-spacing: -0.04em;
+    text-decoration: underline;
+  }
+
   @media (max-width: 900px) {
-    .detail {
-      grid-template-columns: 1fr;
+    .gallery,
+    .identity {
+      grid-column: span 6;
+    }
+    .presenting,
+    .pager {
+      grid-column: 7 / -1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .gallery,
+    .identity,
+    .presenting,
+    .pager {
+      grid-column: 1 / -1;
+    }
+    .pager {
+      flex-wrap: wrap;
+      justify-content: center;
+      row-gap: 1.5rem;
     }
   }
 </style>

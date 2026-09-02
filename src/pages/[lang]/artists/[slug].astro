@@ -1,11 +1,23 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import SanityImage from '../../../components/SanityImage.astro';
+import Figure from '../../../components/Figure.astro';
 import PortableText from '../../../components/PortableText.astro';
+import Sections from '../../../components/Sections.astro';
+import Slideshow from '../../../components/Slideshow.astro';
+import VideoEmbed from '../../../components/VideoEmbed.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
+import { instagramUrl } from '../../../lib/links';
 import { getArtist, getArtistSlugs } from '../../../lib/queries';
+import { GUEST_PORTRAIT } from '../../../lib/placeholders';
+import { urlFor } from '../../../sanity/image';
 
+/**
+ * One artist: portrait on four columns, name over a rule with origin and
+ * links, who shows them, the biography in two columns, then the works. A
+ * guest of honour also gets the feature sections, carousel and film that
+ * the guest-of-honour hub renders. Design by Lilanga.
+ */
 export async function getStaticPaths() {
   const slugs = await getArtistSlugs();
   return LOCALE_IDS.flatMap((lang) => slugs.map(({ slug }) => ({ params: { lang, slug } })));
@@ -17,6 +29,17 @@ const t = useTranslations(lang);
 
 const artist = await getArtist(lang, slug);
 if (!artist) return Astro.rewrite('/404');
+
+const origin = [artist.birthYear && `°${artist.birthYear}`, artist.nationality].filter(Boolean).join(', ');
+
+const exhibitors: any[] = artist.exhibitors ?? [];
+// Only spell out the year when the artist was shown across several editions.
+const showYear = new Set(exhibitors.map((e) => e.year).filter(Boolean)).size > 1;
+
+const carousel = (artist.carousel ?? []).filter((img: any) => img?.asset);
+const videoPoster = artist.video?.poster?.asset
+  ? urlFor(artist.video.poster).width(1600).height(1066).fit('crop').auto('format').quality(78).url()
+  : '/assets/video-still.webp';
 
 const personSchema = {
   '@context': 'https://schema.org',
@@ -32,114 +55,337 @@ const personSchema = {
   title={artist.seo?.title ?? artist.name}
   description={artist.seo?.description}
   noIndex={artist.seo?.noIndex}
+  image={artist.seo?.ogImage ?? artist.portrait}
   path={`artists/${slug}`}
   editId={artist._id}
   editType={artist._type}
 >
   <script type="application/ld+json" set:html={JSON.stringify(personSchema)} slot="head" />
 
-  <a class="back" href={localePath(lang, 'artists')}>&larr; {t('common.backTo')} {t('nav.artists')}</a>
+  <h1 class="section-title">{t('nav.artists')}</h1>
 
-  <div class="head">
+  <article class="page-grid artist">
+    <figure class="portrait">
+      <Figure
+        image={artist.portrait}
+        pool="portrait"
+        seed={slug}
+        fallback={artist.isGuestOfHonour ? GUEST_PORTRAIT : undefined}
+        aspect={0.8}
+        loading="eager"
+        priority
+        sizes="(max-width: 900px) 100vw, 33vw"
+        widths={[400, 600, 900, 1200]}
+      />
+    </figure>
+
+    <div class="detail">
+      <header class="detail-head">
+        <div>
+          {artist.isGuestOfHonour && <p class="guest">{t('artists.guestOfHonour')}</p>}
+          <h2>{artist.name}</h2>
+          {origin && <p class="origin">{origin}</p>}
+          {
+            artist.basedIn && (
+              <p class="based">
+                {t('artists.basedIn')} {artist.basedIn}
+              </p>
+            )
+          }
+
+          {
+            (artist.instagram || artist.website) && (
+              <p class="links">
+                {artist.instagram && (
+                  <a class="pill" href={instagramUrl(artist.instagram)} target="_blank" rel="noopener noreferrer">
+                    {t('common.instagram')} ↗
+                  </a>
+                )}
+                {artist.website && (
+                  <a class="pill" href={artist.website} target="_blank" rel="noopener noreferrer">
+                    {t('common.website')} ↗
+                  </a>
+                )}
+              </p>
+            )
+          }
+        </div>
+
+        {
+          (exhibitors.length > 0 || artist.gallery) && (
+            <div class="shown">
+              <p class="eyebrow-plain">{t('artists.shownBy')}</p>
+              <h3>
+                {exhibitors.length > 0
+                  ? exhibitors.map((e: any, i: number) => (
+                      <>
+                        {i > 0 && ', '}
+                        <a href={localePath(lang, `exhibitors/${e.slug}`)}>{e.name}</a>
+                        {showYear && e.year && <span class="year"> {e.year}</span>}
+                      </>
+                    ))
+                  : artist.gallery}
+              </h3>
+            </div>
+          )
+        }
+      </header>
+
+      {
+        artist.intro && (
+          <div class="intro-large intro">
+            <PortableText value={artist.intro} />
+          </div>
+        )
+      }
+
+      {
+        artist.bio && (
+          <section class="bio-block">
+            <h3 class="panel-title">{t('artists.biography')}</h3>
+            <div class="bio">
+              <PortableText value={artist.bio} />
+            </div>
+          </section>
+        )
+      }
+    </div>
+
     {
-      artist.portrait?.asset && (
-        <SanityImage image={artist.portrait} aspect={1} widths={[300, 500, 700]} sizes="220px" class="portrait" />
+      artist.sections?.length > 0 && (
+        <div class="wide">
+          <Sections lang={lang} sections={artist.sections} />
+        </div>
       )
     }
-    <div>
-      {artist.isGuestOfHonour && <p class="pill">{t('artists.guestOfHonour')}</p>}
-      <h1>{artist.name}</h1>
-      <p class="lede">
-        {[artist.nationality, artist.birthYear ? `b. ${artist.birthYear}` : null]
-          .filter(Boolean)
-          .join(' · ')}
-      </p>
-      <p class="links">
-        {artist.website && <a href={artist.website}>{t('common.website')}</a>}
-        {artist.instagram && <a href={`https://instagram.com/${artist.instagram}`}>@{artist.instagram}</a>}
-      </p>
-    </div>
-  </div>
 
-  {
-    artist.bio && (
-      <div class="prose">
-        <PortableText value={artist.bio} />
-      </div>
-    )
-  }
+    {
+      carousel.length > 0 && (
+        <div class="wide">
+          <Slideshow images={carousel} aspect={1.5} sizes="(max-width: 900px) 100vw, 670px" class="carousel" />
+        </div>
+      )
+    }
 
-  {
-    artist.exhibitors?.length > 0 && (
-      <section>
-        <h2>{t('artists.shownBy')}</h2>
-        <ul class="plain-list">
-          {artist.exhibitors.map((e: any) => (
-            <li>
-              <a href={localePath(lang, `exhibitors/${e.slug}`)}>{e.name}</a>
-              <span class="meta">{[e.booth, e.year].filter(Boolean).join(' · ')}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
+    {
+      artist.video?.url && (
+        <div class="wide">
+          <VideoEmbed url={artist.video.url} poster={videoPoster} label={artist.video.title ?? t('common.video')} class="film" />
+        </div>
+      )
+    }
 
-  {
-    artist.works?.length > 0 && (
-      <section>
-        <h2>{t('artists.works')}</h2>
-        <ul class="grid">
-          {artist.works.map((w: any) => (
-            <li class="card">
-              <SanityImage image={w.image} aspect={3 / 4} sizes="(max-width: 700px) 50vw, 260px" />
-              <h3>{w.title}</h3>
-              <p class="meta">
-                {[
-                  w.year,
-                  w.materials,
-                  w.dimensions?.height
-                    ? `${w.dimensions.height} × ${w.dimensions.width ?? '?'} × ${w.dimensions.depth ?? '?'} cm`
-                    : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
+    {
+      artist.works?.length > 0 && (
+        <section class="works">
+          <h3 class="panel-title">{t('artists.selectedWorks')}</h3>
+          <ul class="work-grid">
+            {artist.works.map((work: any) => (
+              <li>
+                <Figure
+                  image={work.image}
+                  pool="work"
+                  seed={`${slug}-${work._key ?? work.title ?? ''}`}
+                  aspect={0.75}
+                  sizes="(max-width: 640px) 50vw, 25vw"
+                  widths={[300, 500, 700, 900]}
+                />
+                {work.title && <h4>{work.title}</h4>}
+                <p class="meta">
+                  {[
+                    work.year,
+                    work.materials,
+                    work.dimensions?.height
+                      ? `${work.dimensions.height} × ${work.dimensions.width ?? '?'} × ${work.dimensions.depth ?? '?'} cm`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <p class="back-row">
+      <a class="text-link" href={localePath(lang, 'artists')}>{t('exhibitors.backToAll')} →</a>
+    </p>
+  </article>
 </Base>
 
 <style>
-  .head {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.6rem;
-    align-items: flex-start;
-    margin-bottom: 2rem;
+  .artist {
+    row-gap: 3rem;
   }
+
   .portrait {
-    width: 220px;
-    flex: none;
+    grid-column: span 4;
+    margin: 0;
   }
+  .portrait :global(img) {
+    width: 100%;
+  }
+
+  .detail {
+    grid-column: span 8;
+    min-width: 0;
+  }
+  .detail-head {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 30px;
+    border-top: 1px solid var(--ink);
+    padding-top: 0.75rem;
+  }
+
+  .guest {
+    display: inline-block;
+    background: var(--acid);
+    padding: 0.1rem 0.7rem;
+    margin: 0 0 0.6rem;
+    font-size: 0.85rem;
+    text-transform: lowercase;
+  }
+  .detail h2 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.75rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 400;
+  }
+  .origin {
+    margin: 1.25rem 0 0;
+    font-size: clamp(1.25rem, 2.5vw, 2.25rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+  .based {
+    margin: 0.35rem 0 0;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    letter-spacing: -0.02em;
+    color: var(--ink-2);
+  }
+
   .links {
     display: flex;
-    gap: 1.2rem;
-    font-size: 0.9rem;
-    margin: 0.6rem 0 0;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
   }
-  .plain-list {
+  .links .pill {
+    text-transform: lowercase;
+    text-decoration: none;
+    padding: 0.15rem 1.1rem;
+    font-size: inherit;
+  }
+  .links .pill:hover {
+    background: var(--acid);
+  }
+
+  .shown {
+    padding-top: 0.5rem;
+  }
+  .eyebrow-plain {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+  .shown h3 {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.8vw, 2.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    font-weight: 400;
+  }
+  .shown a {
+    text-decoration: none;
+  }
+  .shown a:hover {
+    text-decoration: underline;
+  }
+  .shown .year {
+    font-size: 0.5em;
+    letter-spacing: normal;
+    color: var(--ink-2);
+  }
+
+  .intro {
+    margin: 2.5rem 0 0;
+  }
+  .intro :global(p) {
+    margin: 0 0 1rem;
+  }
+
+  .bio-block {
+    margin-top: 3rem;
+  }
+  .bio {
+    columns: 2;
+    column-gap: 30px;
+    font-size: clamp(1rem, 1.5vw, 1.4rem);
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+  .bio :global(p) {
+    margin: 0 0 1.5rem;
+    break-inside: avoid;
+  }
+
+  .wide {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .wide :global(.film) {
+    margin-top: 0;
+  }
+
+  .works {
+    grid-column: 1 / -1;
+  }
+  .work-grid {
     list-style: none;
     padding: 0;
-    margin: 0.8rem 0 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2rem 30px;
   }
-  .plain-list .meta {
-    margin-left: 0.6rem;
+  .work-grid :global(img) {
+    width: 100%;
+  }
+  .work-grid h4 {
+    margin: 0.5rem 0 0.15rem;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+  .work-grid .meta {
+    margin: 0;
+  }
+
+  .back-row {
+    grid-column: 1 / -1;
+    margin: 1rem 0 0;
+    font-size: clamp(1.2rem, 2.4vw, 2rem);
+  }
+
+  @media (max-width: 900px) {
+    .portrait,
+    .detail {
+      grid-column: 1 / -1;
+    }
+    .detail-head {
+      grid-template-columns: 1fr;
+      row-gap: 1.5rem;
+    }
+    .bio {
+      columns: 1;
+    }
+    .work-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem 16px;
+    }
   }
 </style>
