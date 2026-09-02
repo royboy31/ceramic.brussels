@@ -1,133 +1,150 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import SanityImage from '../../../components/SanityImage.astro';
+import ExhibitorCard from '../../../components/ExhibitorCard.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { useTranslations, localePath } from '../../../lib/i18n';
-import { getExhibitors } from '../../../lib/queries';
+import { useTranslations } from '../../../lib/i18n';
+import { getExhibitors, getCurrentEdition } from '../../../lib/queries';
 
+/**
+ * Current-edition exhibitors: A–Z index, filter pills (solo show, country
+ * focus, publishers, jury prize) and the card grid. Filters and letters work
+ * on the rendered list; the page is complete without JavaScript.
+ */
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
 }
 
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
-const exhibitors = await getExhibitors(lang);
+const [exhibitors, edition] = await Promise.all([getExhibitors(lang), getCurrentEdition(lang)]);
+
+const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+const present = new Set(exhibitors.map((ex: any) => (ex.sortName ?? ex.name ?? '').trim().charAt(0).toLowerCase()));
+
+const filters = [
+  { id: 'solo-show', label: t('exhibitors.soloShow') },
+  { id: 'country-focus', label: edition?.countryFocus ?? t('exhibitors.countryFocus') },
+  { id: 'publishers', label: t('exhibitors.publishers') },
+  { id: 'jury-prize', label: `${t('exhibitors.juryPrize')}${edition?.year ? ` ${edition.year - 1}` : ''}` },
+].filter((f) => exhibitors.some((ex: any) => (ex.soloShow && f.id === 'solo-show') || (ex.inCountryFocus && f.id === 'country-focus') || (ex.kind === 'publisher' && f.id === 'publishers') || (ex.kind === 'jury-prize' && f.id === 'jury-prize')));
 ---
 
 <Base lang={lang} title={t('nav.exhibitors')} path="exhibitors">
   <h1>{t('nav.exhibitors')}</h1>
-  <p class="lede">{exhibitors.length} {t('exhibitors.count')}</p>
 
   {
     exhibitors.length ? (
       <>
-        <label class="filter">
-          <span class="visually-hidden">{t('exhibitors.filter')}</span>
-          <input type="search" id="exhibitor-filter" placeholder={t('exhibitors.filter')} autocomplete="off" />
-        </label>
+        <nav class="alphabet" aria-label="A–Z">
+          {letters.map((l) => (present.has(l) ? <a href={`#letter-${l}`}>{l}</a> : <span>{l}</span>))}
+        </nav>
+
+        {filters.length > 0 && (
+          <div class="filters" id="exhibitor-filters">
+            <span class="filters-label">{t('exhibitors.filters')}</span>
+            {filters.map((f) => (
+              <button type="button" data-filter={f.id} aria-pressed="false">
+                {f.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <p class="empty" id="no-match" hidden>
           {t('exhibitors.noneMatch')}
         </p>
 
         <ul class="grid" id="exhibitor-list">
-          {exhibitors.map((ex: any) => (
-            <li
-              class="card"
-              data-search={[ex.name, ex.country, ex.city, ex.booth, ...(ex.artists ?? []).map((a: any) => a.name)]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase()}
-            >
-              <a class="card-link" href={localePath(lang, `exhibitors/${ex.slug}`)}>
-                <SanityImage image={ex.image} aspect={4 / 3} sizes="(max-width: 700px) 50vw, 260px" />
-                <h3>{ex.name}</h3>
-                <p class="meta">
-                  {ex.booth && <span class="booth">{ex.booth}</span>}
-                  {[ex.city, ex.country].filter(Boolean).join(', ')}
-                </p>
-              </a>
-              {ex.artists?.length > 0 && (
-                <p class="artists">{ex.artists.map((a: any) => a.name).join(' · ')}</p>
-              )}
-            </li>
-          ))}
+          {exhibitors.map((ex: any, i: number) => {
+            const letter = (ex.sortName ?? ex.name ?? '').trim().charAt(0).toLowerCase();
+            const prev = i > 0 ? (exhibitors[i - 1].sortName ?? exhibitors[i - 1].name ?? '').trim().charAt(0).toLowerCase() : null;
+            return (
+              <>
+                {letter !== prev && <li class="letter" id={`letter-${letter}`} aria-hidden="true" />}
+                <ExhibitorCard lang={lang} exhibitor={ex} />
+              </>
+            );
+          })}
         </ul>
       </>
     ) : (
-      <p class="empty">
-        {t('exhibitors.empty')} Add galleries in <a href="/studio">the Studio</a> and tie them to the
-        current edition.
-      </p>
+      <p class="empty">{t('exhibitors.empty')}</p>
     )
   }
 </Base>
 
 <script>
-  // The one island on the site. Filters an already-rendered list, so it costs
-  // nothing until someone types and works fine without JavaScript.
-  const input = document.getElementById('exhibitor-filter') as HTMLInputElement | null;
+  // Filter pills toggle; a card stays visible when it matches every active
+  // filter. Works on the already-rendered list, costs nothing until clicked.
+  const bar = document.getElementById('exhibitor-filters');
   const list = document.getElementById('exhibitor-list');
   const noMatch = document.getElementById('no-match');
 
-  if (input && list && noMatch) {
-    const cards = Array.from(list.querySelectorAll<HTMLLIElement>('li[data-search]'));
+  if (bar && list && noMatch) {
+    const buttons = Array.from(bar.querySelectorAll<HTMLButtonElement>('button[data-filter]'));
+    const cards = Array.from(list.querySelectorAll<HTMLLIElement>('li[data-filters]'));
 
-    input.addEventListener('input', () => {
-      const term = input.value.trim().toLowerCase();
+    const apply = () => {
+      const active = buttons.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.filter!);
       let visible = 0;
-
       for (const card of cards) {
-        const match = !term || (card.dataset.search ?? '').includes(term);
+        const has = (card.dataset.filters ?? '').split(' ');
+        const match = active.every((f) => has.includes(f));
         card.hidden = !match;
         if (match) visible++;
       }
-
       noMatch.hidden = visible > 0;
-    });
+    };
+
+    for (const b of buttons) {
+      b.addEventListener('click', () => {
+        b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+        apply();
+      });
+    }
   }
 </script>
 
 <style>
-  .filter {
-    display: block;
-    margin: 1.5rem 0 0;
+  .alphabet {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.6rem;
+    font-size: 1.4rem;
+    margin: 1rem 0;
   }
-  .filter input {
-    width: 100%;
-    max-width: 26rem;
-    padding: 0.55rem 0.7rem;
-    font: inherit;
-    font-size: 0.95rem;
+  .alphabet a {
     color: var(--ink);
-    background: var(--ground);
-    border: 1px solid var(--rule);
+    text-decoration: none;
   }
-  .filter input:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 1px;
-  }
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-  .booth {
-    display: inline-block;
-    background: var(--surface-2);
-    padding: 0.05rem 0.35rem;
-    margin-right: 0.4rem;
-    font-variant-numeric: tabular-nums;
-  }
-  .artists {
-    font-size: 0.82rem;
+  .alphabet span {
     color: var(--ink-3);
-    margin: 0.3rem 0 0;
   }
-  #no-match {
-    margin-top: 1.5rem;
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0 2rem;
+  }
+  .filters-label {
+    text-transform: uppercase;
+    margin-right: 0.5rem;
+  }
+  .filters button {
+    font: inherit;
+    background: var(--ground);
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    padding: 0.3rem 0.9rem;
+    cursor: pointer;
+  }
+  .filters button[aria-pressed='true'] {
+    background: var(--ink);
+    color: var(--ground);
+  }
+  .letter {
+    display: none;
   }
 </style>

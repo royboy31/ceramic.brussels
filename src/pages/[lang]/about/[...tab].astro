@@ -1,0 +1,165 @@
+---
+import Base from '../../../layouts/Base.astro';
+import HubNav from '../../../components/HubNav.astro';
+import Sections from '../../../components/Sections.astro';
+import SanityImage from '../../../components/SanityImage.astro';
+import PortableText from '../../../components/PortableText.astro';
+import PersonCard from '../../../components/PersonCard.astro';
+import LinkPill from '../../../components/LinkPill.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { useTranslations, formatDate } from '../../../lib/i18n';
+import { getHubPages, getPeople, getPressClips, getSettings, getEditions } from '../../../lib/queries';
+import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
+
+/**
+ * About hub. Tabs: the fair (a page), advisory board and team (people),
+ * press (contacts + clippings), images (the galleries of past editions).
+ */
+export function getStaticPaths() {
+  return hubTabParams('about', LOCALE_IDS);
+}
+
+const lang = Astro.params.lang as LocaleId;
+const tab = (Astro.params.tab as string | undefined) ?? HUBS.about.tabs[0].slug;
+const t = useTranslations(lang);
+
+const pages = await getHubPages(lang, 'about');
+const page = pageForTab(pages, tab);
+
+const board = tab === 'advisory-board' ? await getPeople(lang, 'advisory-board') : [];
+const team = tab === 'team' ? await getPeople(lang, 'team') : [];
+const collaborators = tab === 'team' ? await getPeople(lang, 'collaborator') : [];
+const [clips, settings] = tab === 'press' ? await Promise.all([getPressClips(), getSettings(lang)]) : [[], null];
+const editions = tab === 'images' ? (await getEditions(lang)).filter((e: any) => e.images?.length) : [];
+const path = hubTabPath('about', tab);
+---
+
+<Base lang={lang} title={`${t('nav.about')} — ${page?.tabLabel ?? tab}`} description={page?.seo?.description ?? page?.intro} path={path} editId={page?._id} editType={page?._type}>
+  <HubNav lang={lang} route="about" active={tab} pages={pages} />
+
+  {page?.intro && <p class="lede">{page.intro}</p>}
+
+  {
+    tab === 'the-fair' && page?.cover?.asset && (
+      <SanityImage image={page.cover} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 900px" widths={[600, 900, 1400]} />
+    )
+  }
+
+  {
+    (tab === 'advisory-board' || tab === 'team') && (
+      <div class="two-col">
+        {(tab === 'team' ? team : board).map((p: any) => (
+          <PersonCard lang={lang} person={p} />
+        ))}
+      </div>
+    )
+  }
+  {
+    tab === 'team' && collaborators.length > 0 && (
+      <section>
+        <h2>Collaborators</h2>
+        <div class="two-col">
+          {collaborators.map((p: any) => (
+            <PersonCard lang={lang} person={p} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    tab === 'press' && (
+      <>
+        {settings?.pressContacts?.length > 0 && (
+          <section>
+            <h2>{t('press.contacts')}</h2>
+            <div class="two-col">
+              {settings.pressContacts.map((c: any) => (
+                <article>
+                  <h3>{c.region ?? c.name}</h3>
+                  <p>{c.region && c.name}</p>
+                  <p class="pills">
+                    {c.email && <a href={`mailto:${c.email}`}>{c.email}</a>}
+                    {c.url && <LinkPill lang={lang} href={c.url} label={t('common.website')} />}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+        <section>
+          <h2>{t('press.clips')}</h2>
+          {settings?.pressKitUrl && <LinkPill lang={lang} href={settings.pressKitUrl} label={t('press.clips')} variant="solid" />}
+          {clips.length ? (
+            <ul class="clips">
+              {clips.map((c: any) => (
+                <li>
+                  <span class="meta">{formatDate(c.publishedAt, lang)}</span> · <strong>{c.outlet}</strong> ·{' '}
+                  {c.url ? <a href={c.url} target="_blank" rel="noopener noreferrer">{c.title} ↗</a> : c.title}
+                  {c.pdfUrl && (
+                    <a href={c.pdfUrl} target="_blank" rel="noopener noreferrer">
+                      PDF
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="empty">{t('press.empty')}</p>
+          )}
+        </section>
+      </>
+    )
+  }
+
+  {
+    tab === 'images' &&
+      (editions.length ? (
+        editions.map((e: any) => (
+          <section>
+            <h2>{e.title ?? `ceramic brussels ${e.year}`}</h2>
+            <ul class="grid">
+              {e.images.map((img: any) => (
+                <li>
+                  <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 430px" />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      ) : (
+        <p class="empty">No edition has a photo gallery yet.</p>
+      ))
+  }
+
+  {page && <Sections lang={lang} sections={page.sections} />}
+  {
+    page?.body && (
+      <div class="prose">
+        <PortableText value={page.body} />
+      </div>
+    )
+  }
+  {
+    page?.images?.length > 0 && (
+      <ul class="grid">
+        {page.images.map((img: any) => (
+          <li>
+            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 430px" />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>
+
+<style>
+  .clips {
+    list-style: none;
+    padding: 0;
+  }
+  .clips li {
+    border-top: 1px solid var(--rule);
+    padding: 0.6rem 0;
+  }
+</style>

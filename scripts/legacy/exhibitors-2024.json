@@ -1,0 +1,973 @@
+[
+ {
+  "name": "AIFA (ch)",
+  "booth": "B29",
+  "id": "",
+  "chars": 768,
+  "links": [
+   "http://aifa.art"
+  ],
+  "imgs": [
+   "The Void, 2021 ©Yoshiki SHIGEMATSU (重松善樹)",
+   "Profile 5, 2022 ©Chisato Yasui",
+   "Profile 8, 2022 ©Chisato Yasui",
+   "Sai do ki 1, 2022 ©Kenji Gomi",
+   "Shi-tou, 2023 ©Kenji Gomi",
+   "Sai do ki 2, 2022 ©Kenji Gomi"
+  ]
+ },
+ {
+  "name": "Alice Gallery (be)",
+  "booth": "B1",
+  "id": "",
+  "chars": 348,
+  "links": [
+   "http://alicebxl.com",
+   "https://www.instagram.com/alice_bxl/"
+  ],
+  "imgs": [
+   "Eric Colonel Thomas Spit, 2023 ©M.Gillard",
+   "Eric Colonel Thomas Spit, 2023 ©M.Gillard",
+   "Eric Colonel Thomas Spit, 2023 ©M.Gillard",
+   "Eric Colonel Thomas Spit, 2023 ©M.Gillard"
+  ]
+ },
+ {
+  "name": "Almine Rech (be/fr/us)",
+  "booth": "A19",
+  "id": "",
+  "chars": 808,
+  "links": [
+   "http://alminerech.com",
+   "https://www.instagram.com/alminerech/"
+  ],
+  "imgs": [
+   "Johan Creten, A Sheep Called Bedotte, 2019-2021",
+   "Jean-Baptiste Bernadet, Untitled, 2022",
+   "Brian Calvin, Telemachus, 2021/2023"
+  ]
+ },
+ {
+  "name": "aquilaluna (be)",
+  "booth": "B8",
+  "id": "",
+  "chars": 1047,
+  "links": [
+   "http://aquilaluna.com",
+   "https://www.instagram.com/aquilaluna_galerie/"
+  ],
+  "imgs": [
+   "Kathy Le Vavasseur, Translocation 3 ©Kathy LeVavasseur",
+   "Kathy Le Vavasseur, moyenne neurone ©Thomas Deschamps",
+   "Kathy Le Vavasseur, moyenne neurone ©Thomas Deschamps",
+   "Kathy Le Vavasseur, sculpture circum colonne ©Thomas Deschamps"
+  ]
+ },
+ {
+  "name": "arsenicgalerie (fr)",
+  "booth": "B24",
+  "id": "",
+  "chars": 496,
+  "links": [
+   "http://arsenicgalerie.com",
+   "https://www.instagram.com/arsenicgalerie/"
+  ],
+  "imgs": [
+   "Michel Gouéry, G(or)gone N°20 ©Gilles Berquet",
+   "Michel Gouéry, Omniarque Omnivore, 2016 ©Gilles Berquet",
+   "Michel Gouéry, Anti-scaphandre N°21, 2013 ©Gilles Berquet"
+  ]
+ },
+ {
+  "name": "Atelier Ecru Gallery (be)",
+  "booth": "A23",
+  "id": "",
+  "chars": 964,
+  "links": [
+   "http://weareatelierecru.com",
+   "https://www.instagram.com/atelierecrugallery/"
+  ],
+  "imgs": [
+   "Jojo Corväiá, ceramic sculpture, 2021 @Tijs Vervecken",
+   "Jojo Corväiá, Ceramic Sculpture V 1241, 2022",
+   "Jojo Corväiá, Ceramic Sculpture V 1244, 2022"
+  ]
+ },
+ {
+  "name": "backslash (fr)",
+  "booth": "A3",
+  "id": "",
+  "chars": 1143,
+  "links": [
+   "http://backslashgallery.com",
+   "https://www.instagram.com/backslashgallery/"
+  ],
+  "imgs": [
+   "Odonchimeg Davaadorj, Sing Me A Song, 2023",
+   "Odonchimeg Davaadorj, Mothering 2, 2023",
+   "Odonchimeg Davaadorj, 32SA 4, 2023"
+  ]
+ },
+ {
+  "name": "BeCraft (be)",
+  "booth": "B9",
+  "id": "",
+  "chars": 2001,
+  "links": [
+   "http://becraft.org",
+   "https://www.instagram.com/becraftorg/?hl=fr"
+  ],
+  "imgs": [
+   "Léna Babinet, Série Anamnèse, 2020 © Amélie Hetier",
+   "Caroline Andrin, Rhyton Serpent, 2022 © Caroline Andrin",
+   "Caroline Andrin, Rhyton Lionne, 2022 © Caroline Andrin",
+   "Caroline Andrin, Rhytons Carafes, 2023 © Caroline Andrin",
+   "Caroline Andrin, Rhytons Carafes, 2023 © Caroline Andrin",
+   "Léna Babinet, Série Anamnèse, 2020 © Lena Babinet",
+   "Léna Babinet, Tinctura, 2023",
+   "Léna Babinet, Ce Qui Reste - Voile, 2021"
+  ]
+ },
+ {
+  "name": "Berman Contemporary (za)",
+  "booth": "B22",
+  "id": "",
+  "chars": 1130,
+  "links": [
+   "http://bermancontemporary.com",
+   "https://www.instagram.com/bermancontemporary/"
+  ],
+  "imgs": [
+   "Natalie de Morney, Vulnerability ,2022",
+   "Natalie de Morney, Where Next,2018",
+   "Natalie de Morney, Ancestors, 2023",
+   "Mellaney Roberts, Golden crown, 2022",
+   "Mellaney Roberts, Unwanted commentary, 2023",
+   "Mellaney Roberts, What resides within, 2023",
+   "Amogelang Maepa, This process is lengthy and indirect, 2022",
+   "Amogelang Maepa, This process is lengthy and indirect, 2022",
+   "Amogelang Maepa, This body is violence, 2022"
+  ]
+ },
+ {
+  "name": "CONSTELLATIONS GALLERY (za/be)",
+  "booth": "B21",
+  "id": "",
+  "chars": 1137,
+  "links": [],
+  "imgs": [
+   "Jack Fillery, Earth Flutes",
+   "Jack Fillery, Earth Flutes",
+   "Ian Garett, Alternate, 2023 ©Dillon Marsh",
+   "Guy van Leemput, Big Mind Circles, 2020",
+   "Guy van Leemput, 2020"
+  ]
+ },
+ {
+  "name": "Double V Gallery (fr)",
+  "booth": "A24",
+  "id": "",
+  "chars": 883,
+  "links": [
+   "https://www.double-v-gallery.com/",
+   "https://www.instagram.com/doublevgallery/"
+  ],
+  "imgs": [
+   "Maximilien Pellet, Les trois yeux, 2023 © Romain Darnaud",
+   "Maximilien Pellet, Tête au long nez, 2022 © Jean-Christophe Lett",
+   "Maximilien Pellet, La pierre aux grenouilles, 2023 © Jean-Christophe Lett"
+  ]
+ },
+ {
+  "name": "F R A C A S (be)",
+  "booth": "B5",
+  "id": "",
+  "chars": 1592,
+  "links": [
+   "http://fracas-online.com"
+  ],
+  "imgs": [
+   "Christopher Kelsall, Emoji Tripod II ©Christopher Kelsall",
+   "Sarah Pschorn Sirène 3, 2020 ©Jakob_Adolphi",
+   "Marianne Abergel Bloc Animal 3 © Marianne Abergel",
+   "Anton Reijnders (à gauche) Status 1, (à droite) Status 3, 1997-2003 ©FRACAS gallery",
+   "Romain les Bains, Victoire 3, 2023 © FRACASgallery",
+   "Sarah Pschorn Sirène 3, 2020 ©Jakob_Adolphi",
+   "Anton Reijnders, Nomen Nescio 6, 1988 ©Anton Reijnders",
+   "Coline Rosoux, 2023, Flamby Face  ©Lionel Jusseret"
+  ]
+ },
+ {
+  "name": "GALERIE BERNARD JORDAN (fr/de/ch)",
+  "booth": "B25",
+  "id": "",
+  "chars": 847,
+  "links": [
+   "http://www.galeriebernardjordan.com",
+   "https://www.instagram.com/galeriebernardjordan/"
+  ],
+  "imgs": [
+   "Elmar Trenkwalder, WVZ 311 S, 2016",
+   "Elmar Trenkwalder, WVZ 365 S, 2023",
+   "Elmar Trenkwalder, WVZ 137 B TRE 23, 2023"
+  ]
+ },
+ {
+  "name": "GALERIE CAPAZZA (fr)",
+  "booth": "B14 - B15",
+  "id": "",
+  "chars": 750,
+  "links": [
+   "http://galerie-capazza.com",
+   "https://www.instagram.com/galeriecapazza/"
+  ],
+  "imgs": [
+   "Bernard Dejonghe, 2022",
+   "Bernard Dejonghe, Cinq Areshimas, 2022 © Bernard Dejonghe",
+   "Bernard Dejonghe © Denis Durand"
+  ]
+ },
+ {
+  "name": "Galerie Christine Colon (be)",
+  "booth": "B6",
+  "id": "",
+  "chars": 637,
+  "links": [
+   "http://christinecolon.be",
+   "https://www.instagram.com/christine.colon2018/"
+  ],
+  "imgs": [
+   "Daphné Corregan, Nature Morte Au Carré, 2023 ©Gilles Suffren",
+   "Daphné Corregan, Carriers, 2023 ©Gilles Suffren",
+   "Daphné Corregan, Black Vase With White Lemon, 2023 ©Gilles Suffren"
+  ]
+ },
+ {
+  "name": "GALERIE DU PASSAGE (fr)",
+  "booth": "B19",
+  "id": "",
+  "chars": 1006,
+  "links": [
+   "http://GALERIEDUPASSAGE.COM",
+   "https://www.instagram.com/galeriedupassage/"
+  ],
+  "imgs": [
+   "Alexandre Mussard, Le dîner, 2022 © Francisco Nogueira",
+   "Agathe Brahami Ferron, Suzanne, 2021 ©Agathe Brahami-Ferron",
+   "Giuseppe Ducrot, Don Quichotte, 2013 © Maxime Champion",
+   "Marina Le Gall, Dancing Bears, 2022 © Julien de Gasquet",
+   "Clementine De Chabaneix, Soda Fauvette, 2023 ©Juan Cruz Ibañez"
+  ]
+ },
+ {
+  "name": "Galerie DYS (be)",
+  "booth": "A2",
+  "id": "",
+  "chars": 706,
+  "links": [
+   "http://www.galeriedys.com",
+   "http://www.instagram.com/galeriedys"
+  ],
+  "imgs": [
+   "Etienne Pottier, Victory, 2023",
+   "Etienne Pottier, Perroquet et Serpents, 2022",
+   "Etienne Pottier, Croco & Serpent Blanc, 2022"
+  ]
+ },
+ {
+  "name": "Galerie Fontana (nl)",
+  "booth": "B13",
+  "id": "",
+  "chars": 999,
+  "links": [
+   "http://www.galeriefontana.com",
+   "https://www.instagram.com/galeriefontana/"
+  ],
+  "imgs": [
+   "Carolein Smit, Uilenkan 2023 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+   "Carolein Smit, Pickles 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+   "Carolein Smit, Annunciatie 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+   "The Time Machine © VVB courtesy of Fontana & J.F. Kugel",
+   "© VVB courtesy of Fontana & J.F. Kugel",
+   "Exuberance © VVB courtesy of Fontana & J.F. Kugel"
+  ]
+ },
+ {
+  "name": "Galerie Grès (fr)",
+  "booth": "A5",
+  "id": "",
+  "chars": 843,
+  "links": [
+   "http://galerie-gres.com",
+   "https://www.instagram.com/galerie.gres/"
+  ],
+  "imgs": [
+   "Gnou, Ule Ewelt, ©Jeremy Logeay",
+   "Gnou, Ule Ewelt, ©Jeremy Logeay",
+   "Hélène Loussier, Grand Esprit 1, 2024",
+   "Capsule 3d n°4, Christine Coste, ©Atelier findart, 2022",
+   "Capsule 3d n°5, Christine Coste, ©Atelier findart, 2022"
+  ]
+ },
+ {
+  "name": "Galerie Jacques Cerami (be)",
+  "booth": "B28",
+  "id": "",
+  "chars": 1084,
+  "links": [
+   "http://www.galeriecerami.be",
+   "https://www.instagram.com/galeriejacquescerami/"
+  ],
+  "imgs": [
+   "Manuel Sanchez-Algora, 2023",
+   "Manuel Sanchez-Algora, 2023",
+   "Manuel Sanchez-Algora, 2023"
+  ]
+ },
+ {
+  "name": "Galerie La La Lande & SBA (fr)",
+  "booth": "B18",
+  "id": "",
+  "chars": 1161,
+  "links": [
+   "http://lalalande.art",
+   "https://www.instagram.com/galerielalalande/"
+  ],
+  "imgs": [
+   "Meriem Bouderbala, A Little Theatre Of Cruelty (5), 2023",
+   "Meriem Bouderbala, Grotesque (5), 2021",
+   "Meriem Bouderbala, Grotesque 1, 2023",
+   "Mesut Öztürk 4, de la Knot 2023",
+   "Mesut Öztürk 3,de la série CURBES AND LINES 2023",
+   "Mesut Öztürk 37, 2022"
+  ]
+ },
+ {
+  "name": "Galerie Lefebvre & Fils, Paris (fr)",
+  "booth": "B12",
+  "id": "",
+  "chars": 1976,
+  "links": [
+   "http://lefebvreetfils.fr",
+   "https://www.instagram.com/lefebvreetfils"
+  ],
+  "imgs": [
+   "Sans Titre, Laurent Dufour 2023",
+   "Sans Titre, Laurent Dufour 2023",
+   "Sans Titre, Laurent Dufour 2023"
+  ]
+ },
+ {
+  "name": "Galerie Maria Lund (fr)",
+  "booth": "B26",
+  "id": "",
+  "chars": 1172,
+  "links": [
+   "http://marialund.com",
+   "https://www.instagram.com/galeriemarialund/?hl=fr"
+  ],
+  "imgs": [
+   "Fee Kleiss, Barracetta, 2023",
+   "Bente Skjøttgaard, Family Tree #2326, 2023 ©Ole Akhøj",
+   "Bente Skjøttgaard, Family Tree #2320, 2023 ©Ole Akhøj",
+   "Pernille Pontoppidan Pedersen, Knots Knots Knots, 2023 ©Jacob Friis Holm Nielsen",
+   "Pernille Pontoppidan Pedersen, Her In A Sphere, 2023 ©Jacob Friis Holm Nielsen",
+   "Bente Skjøttgaard, Family Tree #2326 ©Ole Akhøj"
+  ]
+ },
+ {
+  "name": "Galerie Michel Giraud (fr)",
+  "booth": "A16",
+  "id": "",
+  "chars": 1245,
+  "links": [
+   "http://galeriemichelgiraud.com",
+   "https://www.instagram.com/galeriemichelgiraud"
+  ],
+  "imgs": [
+   "Antonio Recalcati, Vase N°587 1990",
+   "",
+   "Émile Decœur, Vase Coloquinte Rose et Mauve Circa 1907-1908",
+   "Émile Decœur, Vase Oblong à Couverte Brillante Circa 1910-1911",
+   "Jean Besnard, Vase Moleté Circa 1930",
+   "Claude Goutin, Grosse Terre 1988",
+   "Pierre Bayle, Carapace 1978",
+   "Jules Agard, La Danse Circa 1940",
+   "Pierre Bayle, Rouleau aux Femmes 1993",
+   "",
+   "Delphine Grenier, Allongé XII, 2022",
+   "Delphine Grenier, Allongée XX, 2023"
+  ]
+ },
+ {
+  "name": "Galerie Papillon (fr)",
+  "booth": "A17",
+  "id": "",
+  "chars": 1025,
+  "links": [
+   "http://galeriepapillonparis.com/",
+   "https://www.instagram.com/galeriepapillonparis/"
+  ],
+  "imgs": [
+   "JC Ruggirello, Feux Follets 2, 2022 © Florian Kleinefenn",
+   "Elsa Sahal Les Aretes Translucides 2023 ©David Bordes",
+   "Elsa Sahal Les Soleils Verts 2023 ©David Bordes",
+   "JC Ruggirello Memorial For Body Art 2, 2021 © Florian Kleinefenn",
+   "Mehdi Georges Lahlou, Petit Rameau, 2022",
+   "Hreinn Fridfinnsson, Roman Amphora, 2009"
+  ]
+ },
+ {
+  "name": "galerie Sator (fr)",
+  "booth": "A25",
+  "id": "",
+  "chars": 1064,
+  "links": [
+   "https://galeriesator.com",
+   "https://www.instagram.com/galeriesator/"
+  ],
+  "imgs": [
+   "Christian Gonzenbach, Retipuj Ua Nabrut, 2013",
+   "Christian Gonzenbach, Hanabi, 2019",
+   "Christian Gonzenbach, Hanabi, 2019"
+  ]
+ },
+ {
+  "name": "Galerie Transit (be)",
+  "booth": "A18",
+  "id": "",
+  "chars": 471,
+  "links": [
+   "https://www.instagram.com/galerietransit/?hl=nl",
+   "http://transit.be"
+  ],
+  "imgs": [
+   "Michael Sailstorfer, MCS 38, 2022",
+   "Johan Creten, Paysage Niçois I, 1993, © Bert de Leenheer",
+   "Mehdi-Georges Lahlou, ‘Casablanca, March 26, 2016’, 2022, © Bert de Leenheer"
+  ]
+ },
+ {
+  "name": "Galerie Vallois (fr)",
+  "booth": "A13",
+  "id": "",
+  "chars": 1049,
+  "links": [
+   "http://galerierobertvallois.com"
+  ],
+  "imgs": [
+   "King Houndekpinkou, Triboutelicia Givré,  2021",
+   "King Houndekpinkou, Gold Outer Space Ritual Vessel, 2022",
+   "King Houndekpinkou, Silver-Red Totem, 2020",
+   "Tania Antoshina, Squid, 2018",
+   "Tania Antoshina, Heron, 2018",
+   "Tania Antoshina, Great Lizards, 2018"
+  ]
+ },
+ {
+  "name": "Gallery Sofie Van den Bussche (be)",
+  "booth": "B7",
+  "id": "",
+  "chars": 1089,
+  "links": [
+   "http://sofievandenbussche.be",
+   "https://www.instagram.com/gallerysofievandenbussche/"
+  ],
+  "imgs": [
+   "Yves Malfliet, Processione di Primavera, 2022",
+   "Yves Malfliet, Kalt Im Walt, 2022",
+   "Yves Malfliet, EISTRAUM, 2022",
+   "Yves Malfliet, Au Bord de la Falaise, 2022",
+   "Yves Malfliet, Arcade, 2022"
+  ]
+ },
+ {
+  "name": "Grège Gallery (be)",
+  "booth": "A8",
+  "id": "",
+  "chars": 961,
+  "links": [
+   "http://www.gregegallery.com",
+   "https://www.instagram.com/grege_gallery/"
+  ],
+  "imgs": [
+   "Laura Pasquino, Untitled 95, Untitled 8, Untitled 80, 2023",
+   "Laura Pasquino, Untitled 27, 2023",
+   "Laura Pasquino, Untitled 27, 2023"
+  ]
+ },
+ {
+  "name": "Jonathan F. Kugel (be)",
+  "booth": "B13",
+  "id": "",
+  "chars": 857,
+  "links": [
+   "http://www.jonathanfkugel.com",
+   "https://www.instagram.com/jfkugel/"
+  ],
+  "imgs": [
+   "Carolein Smit, Cane Corso, 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+   "Carolein Smit, Juwelenkist 2023 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+   "Carolein Smit, Bloedhond de zieligste van al 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+   "Atoll © VVB courtesy of Fontana & J.F. Kugel",
+   "Haussmann's Island © VVB courtesy of Fontana & J.F. Kugel",
+   "Victory © VVB courtesy of Fontana & J.F. Kugel"
+  ]
+ },
+ {
+  "name": "Køppe Contemporary Objects (dk)",
+  "booth": "B23",
+  "id": "",
+  "chars": 1194,
+  "links": [],
+  "imgs": [
+   "Bodil Manz ©Køppe Contemporary",
+   "Michael Geertsen ©Kasper Agergaard",
+   "Michael Geertsen ©Kasper Agergaard",
+   "Michael Geertsen ©Kasper Agergaard",
+   "Lone Skov Madsen ©Kasper Agergaard",
+   "Lone Skov Madsen ©Kasper Agergaard",
+   "Malene Müllertz © Kasper Agergaard"
+  ]
+ },
+ {
+  "name": "La peau de l’ours (be)",
+  "booth": "A12",
+  "id": "",
+  "chars": 924,
+  "links": [
+   "http://www.lapeaudelours.net",
+   "https://www.instagram.com/lapeaudelours_art/"
+  ],
+  "imgs": [
+   "Studio Biskt, Tulumba, 2022 © Alexandra Colmares",
+   "Safia Hijos, Supernature, 2021 © La peau de l'ours",
+   "Studio Biskt, Ayna Mirror, 2022 © Alexandra Colmares",
+   "Rémy Pommeret, Actias Luna, 2023 © La peau de l'ours",
+   "Safia Hijos, Stalaktos lava 1, Dans les chambres l'herbe pousse, 2023 © La peau de l'ours",
+   "Safia Hijos, Salto Angel, Dans les chambres l'herbe pousse, 2023 © La peau de l'ours",
+   "Rémy Pommeret, Nuit d'été, Les Nouveaux Sauvages, 2023 © La peau de l'ours",
+   "Rémy Pommeret, Nuit d'été, Les Nouveaux Sauvages, 2023 © La peau de l'ours",
+   "Victor Levai"
+  ]
+ },
+ {
+  "name": "Lee Bauwens Gallery (be)",
+  "booth": "A15",
+  "id": "",
+  "chars": 1844,
+  "links": [
+   "http://www.leebauwens.com",
+   "https://www.instagram.com/leebauwensgallery"
+  ],
+  "imgs": [
+   "Meekyoung Shin ,Translation - Ghost Series, 2022",
+   "Nathalie Campion, Atelier de l'artiste, 2023 © Sebastian Schutyser",
+   "Sunghong Min, Play With Everyone, 2022",
+   "Nathalie Campion, Atelier de l'artiste, 2023 © Sebastian Schutyser",
+   "Sunghong Min, Overlapped Sensibility, 2022",
+   "Jiana Kim, Iceberg Blue Inside Skyblue 22-93, 2022 © Sebastian Schutyser",
+   "Sunghong Min, Overlapped Sensibility, 2022"
+  ]
+ },
+ {
+  "name": "Michel Rein (fr/be)",
+  "booth": "B2",
+  "id": "",
+  "chars": 427,
+  "links": [
+   "http://michelrein.com",
+   "https://www.instagram.com/galerie_michelrein/"
+  ],
+  "imgs": [
+   "Anne-Marie Schneider Untitled (à coeur ouvert), 2022 Courtesy of the artist and Michel Rein",
+   "Anne-Marie Schneider Unititled, 2022 Courtesy of the artist and Michel Rein",
+   "Anne-Marie Schneider Untitled (couple), 2022 Courtesy of the artist and Michel Rein",
+   "Michele Ciacciofera Le ventre mou du pouvoir, 2021 Courtesy of the artist and Michel Rein",
+   "Michele Ciacciofera Terre et mer, 2021 Courtesy of the artist and Michel Rein",
+   "Michele Ciacciofera L'enfant-fleur, 2021 Courtesy of the artist and Michel Rein"
+  ]
+ },
+ {
+  "name": "Migrant Bird Space (de/cn)",
+  "booth": "A7",
+  "id": "",
+  "chars": 1202,
+  "links": [
+   "http://www.migrantbirdspace.com",
+   "https://www.instagram.com/migrant_bird_space"
+  ],
+  "imgs": [
+   "Haoyu Wu, Encounters No.6, 2010",
+   "Haoyu Wu, New Stoneware No 2, 2018",
+   "Geng Xue",
+   "Qi Zhuo, 2023",
+   "Haoyu Wu, Encounters No. 1, 2008",
+   "Haoyu Wu, Encounters No 2, 2008",
+   "Haoyu Wu, New Stoneware No 4, 2018",
+   "Haoyu Wu, Encounters No 5, 2010"
+  ]
+ },
+ {
+  "name": "Modern Shapes Gallery (be)",
+  "booth": "A14",
+  "id": "",
+  "chars": 997,
+  "links": [
+   "https://modernshapes.com/",
+   "https://www.instagram.com/modernshapes/"
+  ],
+  "imgs": [
+   "Enric Mestre, ceramic & engobe, circa 1990",
+   "Enric Mestre, ceramic & engobe, circa 1990",
+   "Enric Mestre, ceramic & engobe, circa 1990"
+  ]
+ },
+ {
+  "name": "Modulab (fr)",
+  "booth": "A9",
+  "id": "",
+  "chars": 944,
+  "links": [
+   "http://modulab.fr",
+   "https://www.instagram.com/modulab/"
+  ],
+  "imgs": [
+   "Pierrick Naud, Rappel des nébuleuses, 2023 @Modulab",
+   "Pierrick Naud, Lueur d'ébène n°06, 2021 @Modulab",
+   "Pierrick Naud, Lueur d'ébène n°29, 2021 @Modulab"
+  ]
+ },
+ {
+  "name": "NeC nilsson et chiglien (fr)",
+  "booth": "A29",
+  "id": "",
+  "chars": 931,
+  "links": [
+   "https://galerienec.com",
+   "https://www.instagram.com/galerienec/"
+  ],
+  "imgs": [
+   "Kim Simonsson, Moss Twins with cauliflower hoodie, 2022",
+   "Kim Simonsson, Kneeling Biologist, 2023",
+   "Kim Simonsson, 2023"
+  ]
+ },
+ {
+  "name": "Nendo Galerie (fr)",
+  "booth": "A27",
+  "id": "",
+  "chars": 768,
+  "links": [
+   "http://nendogalerie.com",
+   "https://www.instagram.com/nendogalerie_officiel/"
+  ],
+  "imgs": [
+   "Christiane Filliatreau, Prêle, 2023",
+   "Yasuhisa Kohyama, Danpen #12, 1996 ©jean-christophe Lett",
+   "Enzo Bosse, untitled, 2023",
+   "Daniel Pontoreau, Première pierre, 2020 © Iliès Sarkantyu",
+   "Dan Kim, A Giddy Kick, 2022"
+  ]
+ },
+ {
+  "name": "NQ Gallery Antwerpen (be)",
+  "booth": "A26",
+  "id": "",
+  "chars": 945,
+  "links": [
+   "http://www.nqgallery.be",
+   "https://www.instagram.com/nqgallerybe/"
+  ],
+  "imgs": [
+   "Natasja Alers, Blue Figure © Lndw Studio",
+   "Nick Ervinck, Winoceraos, 2020-2021",
+   "Nick Ervinck, Elctanet, 2017",
+   "Natasja Alers, Toevase, 2023 © Lndwstudio",
+   "Natasja Alers, Orbit I © Lndwstudio",
+   "Nick Ervinck, Entunap, 2017",
+   "Johannes Nagel, cuts #56 ©Tom Dachs",
+   "Johannes Nagel, cuts #63 /crack ©Tom Dachs",
+   "Johannes Nagel, Silhouette #51/ colours ©Tom Dachs"
+  ]
+ },
+ {
+  "name": "olivier castaing / Team School Gallery (fr)",
+  "booth": "A21",
+  "id": "",
+  "chars": 1205,
+  "links": [
+   "https://www.schoolgallery.fr/",
+   "https://www.instagram.com/schoolgalleryparis/"
+  ],
+  "imgs": [
+   "Bachelot&Caron, applique écorce (arc en ciel) 2020",
+   "Bachelot&Caron, Le boeuf écorché, 2022",
+   "Bachelot&Caron, Vase tournesol vermillon, 2019",
+   "Muriel Persil, Miroir azuréen, 2023",
+   "Muriel Persil, La forêt, 2017",
+   "Muriel Persil, Une île, 2022"
+  ]
+ },
+ {
+  "name": "Patrick & Ondine Mestdagh From The Delville Collection (be)",
+  "booth": "A22",
+  "id": "",
+  "chars": 544,
+  "links": [
+   "http://www.galeriemestdagh.com",
+   "https://www.instagram.com/galerie_patrick_mestdagh/"
+  ],
+  "imgs": [
+   "Kino Satoshi, Diminished frost, 2022 © Kino Satoshi",
+   "Shozo Michikawa, Sculptural Form, 2022 © Paul Louis",
+   "Sakai Hiroshi, Vessel, 2020 © Paul Louis",
+   "Kaneta Masanao, 2022 © Paul Louis",
+   "Kimura Moriyasu, Tenmoku glaze, 2023 © Paul Louis"
+  ]
+ },
+ {
+  "name": "Peach Corner (dk)",
+  "booth": "B11",
+  "id": "",
+  "chars": 1164,
+  "links": [
+   "http://www.peachcorner.dk",
+   "https://www.instagram.com/peachcornergallery/"
+  ],
+  "imgs": [
+   "Jeppe Søndergaard, No title, Red, 2023 © Ole Akhøj",
+   "Jeppe Søndergaard, No title, Blue, 2023 © Ole Akhøj",
+   "Esben Kaldahl, Um & Tyn, 2022 © Ole Akhøj",
+   "Esben Kaldahl, Nymphs of Vingerling, 2022 © Ole Akhøj",
+   "Petra Dalström, Egg Circuit, 2023 © Ole Akhøj",
+   "Petra Dalström, Shishi-odoshi form home, 2023 © Ole Akhøj",
+   "Annelie Grimwade Olofsson, A Spot In The Sun - Chain Flower, 2023 © Ole Akhøj",
+   "Hilda Piazzolla, Differential Growth, 2023 © Ole Akhøj",
+   "Hilda Piazzolla, Differential Growth, 2023 © Ole Akhøj"
+  ]
+ },
+ {
+  "name": "Puls Ceramics (be)",
+  "booth": "A10",
+  "id": "",
+  "chars": 896,
+  "links": [
+   "http://pulsceramics.com",
+   "https://www.instagram.com/pulsceramics/"
+  ],
+  "imgs": [
+   "Sharon Van Overmeiren ©SVO",
+   "Sharon Van Overmeiren, 2023, ©SVO",
+   "Roger Coll, 2023, ©RC",
+   "Roger Coll, 2022, ©RC",
+   "Kazuma Koike, 2023, © KK",
+   "Kazuma Koike, 2023, ©KK",
+   "Ander Børgesen, 2023, ©AB",
+   "Anders Børgesen, 2023, ©AB",
+   "Barbara Leclercq, 2023, © BL",
+   "Barbara Leclercq, 2023, © BL",
+   "Wouter Hoste, 2023, ©WH"
+  ]
+ },
+ {
+  "name": "Romero Paprocki (fr)",
+  "booth": "A20",
+  "id": "",
+  "chars": 649,
+  "links": [
+   "http://www.romeropaprocki.com",
+   "www.instagram.com/romeropaprocki"
+  ],
+  "imgs": [
+   "Leo Luccioni, ©Allison Borgo",
+   "Leo Luccioni, © Allison Borgo",
+   "Leo Luccioni, © Allison Borgo"
+  ]
+ },
+ {
+  "name": "rossogranada (ch)",
+  "booth": "B23",
+  "id": "",
+  "chars": 1435,
+  "links": [
+   "https://rossogranada.art/",
+   "https://www.instagram.com/rossogranada/"
+  ],
+  "imgs": []
+ },
+ {
+  "name": "Sorry We’re Closed (be)",
+  "booth": "B20",
+  "id": "",
+  "chars": 687,
+  "links": [
+   "http://www.sorrywereclosed.com",
+   "https://www.instagram.com/sorrysorry_were_closed/"
+  ],
+  "imgs": [
+   "Natsuko Uchino, Adobe Fern, 2023 © Hugard & Vanoverschelde",
+   "Natsuko Uchino, Adobe Lychen, 2023 © Hugard & Vanoverschelde",
+   "Roger Herman, Orange/Black Cylinder, 2021",
+   "Perrine Boudy, Le cheval à carreau, 2023",
+   "Perrine Boudy, Flacon de parfum géant, 2023"
+  ]
+ },
+ {
+  "name": "SPAX Projects (be)",
+  "booth": "A1",
+  "id": "",
+  "chars": 1483,
+  "links": [
+   "https://www.instagram.com/spaxprojects/",
+   "https://www.spaxprojects.com"
+  ],
+  "imgs": [
+   "Soojin Choi, Don't Forget About Me, 2023",
+   "Stan Edmondson, Untitled (Gigantor), 2021",
+   "Feipel & Bechameil, Shelters, 2021-2023 ©Peter Tijhuis",
+   "Alejandro Garcia Contreras, Silverhawk/Ofrenda De Horus, 2023",
+   "Gregory Georgescu, R03, 2022 ©Courtesy of the artist",
+   "Sydnie Jimenez, Gargoyle Figures, 2023 ©Courtesy of the artist and Mindy Solomon Gallery",
+   "Krzysztof Strzelecki, Wild West, 2023 ©Courtesy of the artist and Anat Ebgi Gallery, Los Angeles",
+   "Taylor Lee, Asteroid Queen, 2022 ©Natacha Hostyn",
+   "Natsuki Shibata, S Jizou-Kun - Cap & Hoodie, 2023",
+   "Teruri Yamawaki, The Power Of Anger the Power Of Forgiveness, 2022"
+  ]
+ },
+ {
+  "name": "Spazio Nobile (be)",
+  "booth": "B17",
+  "id": "",
+  "chars": 989,
+  "links": [
+   "https://spazionobile.com",
+   "https://www.instagram.com/spazionobilegallery/"
+  ],
+  "imgs": [
+   "Structuring Chaos 2023, Kiki van Eijk",
+   "Structuring Chaos 2023, Kiki van Eijk",
+   "Sans début sans fin #1 2022, Marie Corbin",
+   "Sunday Morning 2022, Foyer Brisé, In collaboration with EKWC",
+   "Embodied#1 2022, Lisa Hellrup",
+   "Le Charme 2023, Bela Silva",
+   "Erizos de Mar, Bela Silva 2023",
+   "Echo 7/20 2022, Foyer Brisé, In collaboration with EKWC",
+   "Echo 9/20 2022, Foyer Brisé In collaboration with EKWC",
+   "Vases with blue flaps #1,2,3 2019, Piet Stockmans, PAD Paris",
+   "Spring Rush 2022, Kiki van Eijk",
+   "Story Flavour 2023, Kiki van Eijk",
+   "Calix 2021, Païvi Rintaniemi",
+   "Wilde Stripen XL 2017, Piet Stockmans",
+   "Ara 2010, Païvi Rintaniemi ©Sofia Rinatniemi",
+   "North 2020, Ann Beate Tempelhaug ©Margaux Nieto",
+   "Vase pierre 2023, Marie Corbin In collaboration with CRAFT Limoges"
+  ]
+ },
+ {
+  "name": "Szydlowski (ch/pl)",
+  "booth": "A28",
+  "id": "",
+  "chars": 1013,
+  "links": [
+   "http://www.galeria-szydlowski.pl",
+   "https://www.instagram.com/szydlowskigallery/"
+  ],
+  "imgs": [
+   "Felix Stöckle, Madame Helvetia 2023, courtesy artist",
+   "Felix Stöckle, Medusa und Freunde 2023, courtesy artist",
+   "Felix Stöckle, Johannes der Täufer, dann dachte ich an Meeresfrüchte 2023, courtesy artist"
+  ]
+ },
+ {
+  "name": "TATJANA PIETERS (be)",
+  "booth": "A6",
+  "id": "",
+  "chars": 1183,
+  "links": [
+   "http://tatjanapieters.com",
+   "https://www.instagram.com/tatjanapietersgallery/"
+  ],
+  "imgs": [
+   "Anne Marie Laureys, Sister Brainstorm, 2018 ©Peter Claeys",
+   "Anne Marie Laureys, MANDRA KANTRA lady slowly approaching, 2018 ©Peter Claeys",
+   "Anne Marie Laureys, Je suis swing, 2020 ©Peter Claeys",
+   "Kevin McNamee, Tweed_Lemon Tree, 2023",
+   "Kevin McNamee, Tweed_Room (Accumulation Narrative), 2023",
+   "Kevin McNamee, Tweed_Kiln Interior (Historical Narrative), 2023"
+  ]
+ },
+ {
+  "name": "The Second Act (uk)",
+  "booth": "B4",
+  "id": "",
+  "chars": 842,
+  "links": [
+   "http://secondactgallery.co.uk",
+   "https://www.instagram.com/second_act_gallery/"
+  ],
+  "imgs": [
+   "Jamie Holman, Seventeen Piece Service",
+   "Jamie Holman, Salient Passent, 2023",
+   "Jamie Holman, 24 Hands, 2023",
+   "James Bloomfield, In Service - Moplah Riots, 2017",
+   "James Bloomfield, In Service - Afghanistan, 2017"
+  ]
+ },
+ {
+  "name": "the Spaceless Gallery (fr/us)",
+  "booth": "B27",
+  "id": "",
+  "chars": 960,
+  "links": [
+   "http://www.thespacelessgallery.com",
+   "https://www.instagram.com/thespacelessgallery/"
+  ],
+  "imgs": [
+   "Ruan Hoffmann © Matteo Losurdo",
+   "Ruan Hoffmann, Sorry Honey 2020, courtesy of the Spaceless Gallery",
+   "Ruan Hoffmann, studio © Gabrielle Connolle",
+   "Olivia Walker courtesy of the Spaceless Gallery",
+   "Olivia Walker courtesy of Spaceless Gallery",
+   "Olivia Walker courtesy of Spaceless Gallery",
+   "Olga Sabko, studio views ©Gabrielle Connole",
+   "Olga Sabko, studio views ©Gabrielle Connole",
+   "Olga Sabko, studio views ©Gabrielle Connole",
+   "Lucian mMoriyama, Tiger lekythos",
+   "Lucian Moriyama, Self-portrait",
+   "Lucian Moriyama, Corethe ©spaceless gallery"
+  ]
+ },
+ {
+  "name": "Valerius Gallery (lu)",
+  "booth": "B10",
+  "id": "",
+  "chars": 974,
+  "links": [
+   "https://www.valeriusgallery.com",
+   "https://www.instagram.com/valeriusgallery/"
+  ],
+  "imgs": [
+   "Anni Mertens, Fourfold, 2023 © Anni Mertens",
+   "Anni Mertens, Mercury, 2023 © Anni Mertens",
+   "Anni Mertens, Floatie, 2023 © Anni Mertens"
+  ]
+ },
+ {
+  "name": "ZWART HUIS (be)",
+  "booth": "A11",
+  "id": "",
+  "chars": 846,
+  "links": [
+   "https://www.galeriezwarthuis.be",
+   "https://www.instagram.com/zwarthuis/"
+  ],
+  "imgs": [
+   "Robin Vermeersch, Milsani,2023",
+   "Robin Vermeersch, Hang In There #35, 2021 ©David Samyn",
+   "Robin Vermeersch, Haut Levee, 2022-2023 ©David Samyn",
+   "Robin Vermeersch, Hang In There #24, 2022 ©David Samyn",
+   "Robin Vermeersch, Zt, 2023"
+  ]
+ }
+]

@@ -1,0 +1,195 @@
+---
+import Base from '../../../layouts/Base.astro';
+import HubNav from '../../../components/HubNav.astro';
+import Sections from '../../../components/Sections.astro';
+import Slideshow from '../../../components/Slideshow.astro';
+import SanityImage from '../../../components/SanityImage.astro';
+import PortableText from '../../../components/PortableText.astro';
+import PersonCard from '../../../components/PersonCard.astro';
+import LinkPill from '../../../components/LinkPill.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { useTranslations, localePath } from '../../../lib/i18n';
+import { getHubPages, getLaureates, getAwards, getPeople } from '../../../lib/queries';
+import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
+import { instagramUrl } from '../../../lib/links';
+
+/**
+ * The art prize hub, on the yellow ground of the design. Tabs: about (a
+ * page), laureates (per edition), awards (per edition), jury (people).
+ */
+export function getStaticPaths() {
+  return hubTabParams('art-prize', LOCALE_IDS);
+}
+
+const lang = Astro.params.lang as LocaleId;
+const tab = (Astro.params.tab as string | undefined) ?? HUBS['art-prize'].tabs[0].slug;
+const t = useTranslations(lang);
+
+const pages = await getHubPages(lang, 'art-prize');
+const page = pageForTab(pages, tab);
+
+const laureateYears = tab === 'laureates' ? await getLaureates(lang) : [];
+const awards = tab === 'awards' ? (await getAwards(lang)).filter((a: any) => a.family === 'art-prize') : [];
+const jury = tab === 'jury' ? await getPeople(lang, 'jury') : [];
+
+const awardYears = [...new Set(awards.map((a: any) => a.year))] as number[];
+const path = hubTabPath('art-prize', tab);
+---
+
+<Base lang={lang} title={`${t('nav.artPrize')} — ${page?.tabLabel ?? tab}`} description={page?.seo?.description ?? page?.intro} path={path} tone="brand" editId={page?._id} editType={page?._type}>
+  <HubNav lang={lang} route="art-prize" active={tab} pages={pages} />
+
+  {page?.intro && <p class="lede">{page.intro}</p>}
+
+  {
+    tab === 'laureates' &&
+      (laureateYears.length ? (
+        laureateYears.map((year: any) => (
+          <section>
+            <h2>{t('artPrize.laureatesOf', { year: year.year })}</h2>
+            {year.laureates.map((l: any, i: number) => (
+              <article class:list={['laureate', { flip: i % 2 === 1 }]}>
+                <div class="media">
+                  <Slideshow images={l.images} aspect={4 / 5} />
+                </div>
+                <div>
+                  <h3>
+                    <a href={localePath(lang, `artists/${l.artist?.slug}`)}>{l.artist?.name}</a>
+                  </h3>
+                  <p class="born">
+                    {l.artist?.birthYear && `°${l.artist.birthYear}`}
+                    {l.artist?.basedIn && (
+                      <>
+                        <br />
+                        {t('artists.basedIn')} {l.artist.basedIn}
+                      </>
+                    )}
+                  </p>
+                  {l.artist?.instagram && (
+                    <p class="pills">
+                      <LinkPill lang={lang} href={instagramUrl(l.artist.instagram)} label={t('common.instagram')} />
+                    </p>
+                  )}
+                  <div class="prose">
+                    <PortableText value={l.statement ?? l.artist?.bio} />
+                  </div>
+                </div>
+              </article>
+            ))}
+          </section>
+        ))
+      ) : (
+        <p class="empty">No laureates published yet.</p>
+      ))
+  }
+
+  {
+    tab === 'awards' &&
+      (awardYears.length ? (
+        awardYears.map((year) => (
+          <section>
+            <h2>{t('artPrize.awardsOf', { year })}</h2>
+            <div class="two-col">
+              {awards
+                .filter((a: any) => a.year === year)
+                .map((a: any) => (
+                  <article class="award">
+                    <h3>{a.name}</h3>
+                    {(a.laureates?.length > 0 || a.outcome) && (
+                      <p class="result">
+                        →{' '}
+                        {(a.laureates ?? []).map((l: any, i: number) => (
+                          <>
+                            {i > 0 && (i === a.laureates.length - 1 ? ' & ' : ', ')}
+                            <a href={localePath(lang, `artists/${l.slug}`)}>{l.name}</a>
+                          </>
+                        ))}{' '}
+                        {a.outcome}
+                      </p>
+                    )}
+                    {a.description && (
+                      <div class="prose">
+                        <PortableText value={a.description} />
+                      </div>
+                    )}
+                    {a.partner?.url && <LinkPill lang={lang} href={a.partner.url} label={t('common.website')} />}
+                    {a.image?.asset && <SanityImage image={a.image} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 670px" />}
+                  </article>
+                ))}
+            </div>
+          </section>
+        ))
+      ) : (
+        <p class="empty">{t('awards.empty')}</p>
+      ))
+  }
+
+  {
+    tab === 'jury' && (
+      <div class="two-col">
+        {jury.length ? jury.map((p: any) => <PersonCard lang={lang} person={p} />) : <p class="empty">No jury published yet.</p>}
+      </div>
+    )
+  }
+
+  {page && <Sections lang={lang} sections={page.sections} />}
+  {
+    page?.body && (
+      <div class="prose">
+        <PortableText value={page.body} />
+      </div>
+    )
+  }
+  {
+    page?.images?.length > 0 && (
+      <ul class="grid">
+        {page.images.map((img: any) => (
+          <li>
+            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 700px) 100vw, 430px" />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</Base>
+
+<style>
+  .laureate {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2.5rem;
+    border-top: 1px solid var(--ink);
+    padding-top: 1rem;
+    margin-bottom: 3rem;
+  }
+  .laureate.flip .media {
+    order: 2;
+  }
+  .laureate h3 {
+    font-size: 2.2rem;
+    margin: 0;
+  }
+  .laureate h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .born {
+    font-size: 1.4rem;
+  }
+  .award h3 {
+    border-top: 1px solid var(--ink);
+    padding-top: 0.5rem;
+    font-size: 1.6rem;
+  }
+  .result {
+    font-size: 1.4rem;
+  }
+  @media (max-width: 800px) {
+    .laureate {
+      grid-template-columns: 1fr;
+    }
+    .laureate.flip .media {
+      order: 0;
+    }
+  }
+</style>

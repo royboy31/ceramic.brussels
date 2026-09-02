@@ -1,0 +1,79 @@
+---
+import type { LocaleId } from '../lib/locales';
+import { useTranslations, localePath } from '../lib/i18n';
+import { HUBS, hubTabPath } from '../lib/hubs';
+
+/**
+ * The title band of a hub page: the hub name on the left and its pill tabs on
+ * the right, as in the design. Tabs come from HUBS; a `page` document with the
+ * same English slug can override a tab's label, and any extra hub page an
+ * editor adds becomes an additional tab.
+ */
+interface Props {
+  lang: LocaleId;
+  route: string;
+  active: string;
+  /** Hub pages from getHubPages, for label overrides and extra tabs. */
+  pages?: any[];
+}
+
+const { lang, route, active, pages = [] } = Astro.props;
+const t = useTranslations(lang);
+const hub = HUBS[route];
+
+const known = new Set(hub.tabs.map((tab) => tab.slug));
+const tabs = [
+  ...hub.tabs.map((tab) => {
+    const page = pages.find((p) => p?.slugs?.en === tab.slug);
+    return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label) };
+  }),
+  ...pages
+    .filter((p) => p?.slugs?.en && !known.has(p.slugs.en))
+    .map((p) => ({ slug: p.slugs.en as string, label: p.tabLabel ?? p.title })),
+];
+---
+
+<div class="hub-head">
+  <h1>{t(hub.title)}</h1>
+  <nav class="tabs" aria-label={t(hub.title)}>
+    {
+      tabs.map((tab) => (
+        <a href={localePath(lang, hubTabPath(route, tab.slug))} aria-current={tab.slug === active ? 'page' : undefined}>
+          {tab.label}
+        </a>
+      ))
+    }
+  </nav>
+</div>
+
+<style>
+  .hub-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin-bottom: 2rem;
+  }
+  .hub-head h1 {
+    margin: 0;
+    text-transform: lowercase;
+  }
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .tabs a {
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    padding: 0.3rem 0.9rem;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  .tabs a[aria-current='page'] {
+    background: var(--brand);
+    border-color: var(--brand);
+  }
+</style>

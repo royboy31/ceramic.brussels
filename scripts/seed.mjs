@@ -7,8 +7,14 @@
  *   npm run seed            create or update the demo content
  *   npm run seed -- --clear remove everything this script created
  *
- * Content is modelled on the real fair but written for the demo - it is not
- * scraped from ceramic.brussels.
+ * Content follows the 2027 design (docs/design-inventory.md) and the facts on
+ * the old site (docs/legacy-site-inventory.md): real fair dates, real partner
+ * tiers, real laureates - but written for the demo, and only a handful of
+ * exhibitors. The full exhibitor lists are imported separately by
+ * scripts/import-exhibitors.mjs.
+ *
+ * Long texts are English-only on purpose: the site falls back to English when
+ * a translation is empty, and `npm run content` should show that gap.
  */
 import fs from 'node:fs';
 import { createClient } from '@sanity/client';
@@ -38,583 +44,1099 @@ const client = createClient({ projectId, dataset, token, apiVersion: '2024-01-01
 /** Every seeded document id starts with this, so cleanup is unambiguous. */
 const PREFIX = 'demo-';
 
-const block = (text) => ({
-  _type: 'block',
-  _key: Math.abs(hash(text)).toString(36).slice(0, 8),
-  style: 'normal',
-  markDefs: [],
-  children: [{ _type: 'span', _key: 's0', text, marks: [] }],
-});
+/* --------------------------------------------------------------- helpers */
 
 function hash(str) {
   let h = 0;
   for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
   return h;
 }
+const key = (s) => Math.abs(hash(s)).toString(36).slice(0, 8);
 
-const rich = (en, fr, nl) => ({ en: [block(en)], fr: [block(fr)], nl: [block(nl)] });
-const str = (en, fr, nl) => ({ _type: 'localeString', en, fr, nl });
-const text = (en, fr, nl) => ({ _type: 'localeText', en, fr, nl });
+const block = (text, style = 'normal') => ({
+  _type: 'block',
+  _key: key(text),
+  style,
+  markDefs: [],
+  children: [{ _type: 'span', _key: 's0', text, marks: [] }],
+});
 
-/* ------------------------------------------------------------------ data */
+/** Rich text from one or more paragraphs per language. `null` leaves a language empty. */
+const rich = (en, fr = null, nl = null) => {
+  const toBlocks = (v) => (v == null ? undefined : (Array.isArray(v) ? v : [v]).map((p) => block(p)));
+  return { en: toBlocks(en), fr: toBlocks(fr), nl: toBlocks(nl) };
+};
+const str = (en, fr = en, nl = en) => ({ _type: 'localeString', en, fr, nl });
+const text = (en, fr = en, nl = en) => ({ _type: 'localeText', en, fr, nl });
+const ref = (id) => ({ _type: 'reference', _ref: id });
+/** For singletons: a weak reference survives the target being deleted by --clear. */
+const weak = (id) => ({ _type: 'reference', _ref: id, _weak: true });
+const refs = (ids) => ids.map((id, i) => ({ _type: 'reference', _ref: id, _key: `r${i}` }));
+const withKeys = (items, type) => items.map((it, i) => ({ _type: type, _key: `${type}${i}`, ...it }));
+const route = (label, routeValue, anchor) => ({
+  _type: 'link',
+  kind: 'route',
+  route: routeValue,
+  ...(anchor ? { anchor } : {}),
+  label: str(...label),
+});
+const external = (label, url) => ({ _type: 'link', kind: 'external', external: url, label: str(...label) });
+const slugOf = (s) =>
+  s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+const id = {
+  edition: (y) => `${PREFIX}edition-${y}`,
+  artist: (n) => `${PREFIX}artist-${slugOf(n)}`,
+  exhibitor: (n, y) => `${PREFIX}exhibitor-${y}-${slugOf(n)}`,
+  partner: (n) => `${PREFIX}partner-${slugOf(n)}`,
+  person: (n, y) => `${PREFIX}person-${slugOf(n)}${y ? `-${y}` : ''}`,
+  page: (n) => `${PREFIX}page-${slugOf(n)}`,
+};
+
+/* --------------------------------------------------------------- editions */
 
 const EDITIONS = [
   {
-    id: `${PREFIX}edition-2026`,
+    year: 2027,
+    isCurrent: true,
+    startDate: '2027-01-20',
+    endDate: '2027-01-24',
+    ordinal: str('4th edition', '4e édition', '4de editie'),
+    guestOfHonour: id.artist('Marion Verboom'),
+    intro: rich(
+      "ceramic brussels' 4th edition will take place from 20 till 24 January 2027 at Tour & Taxis, Brussels.",
+      'La 4e édition de ceramic brussels se tiendra du 20 au 24 janvier 2027 à Tour & Taxis, Bruxelles.',
+      'De 4de editie van ceramic brussels vindt plaats van 20 tot 24 januari 2027 in Tour & Taxis, Brussel.',
+    ),
+    openingHours: withKeys(
+      [
+        {
+          label: str('Wednesday 20 January 2027', 'Mercredi 20 janvier 2027', 'Woensdag 20 januari 2027'),
+          date: '2027-01-20',
+          slots: withKeys(
+            [
+              { time: '14—17:00', label: str('Preview', 'Preview', 'Preview'), invitationOnly: true },
+              { time: '17—21:00', label: str('Vernissage', 'Vernissage', 'Vernissage'), invitationOnly: true },
+            ],
+            'openingSlot',
+          ),
+        },
+        {
+          label: str(
+            'Thursday 21 — Saturday 23 January 2027',
+            'Jeudi 21 — samedi 23 janvier 2027',
+            'Donderdag 21 — zaterdag 23 januari 2027',
+          ),
+          date: '2027-01-21',
+          slots: withKeys([{ time: '11—19:00', label: str('Public opening', 'Ouverture au public', 'Open voor publiek') }], 'openingSlot'),
+        },
+        {
+          label: str('Sunday 24 January 2027', 'Dimanche 24 janvier 2027', 'Zondag 24 januari 2027'),
+          date: '2027-01-24',
+          slots: withKeys([{ time: '11—18:00', label: str('Public opening', 'Ouverture au public', 'Open voor publiek') }], 'openingSlot'),
+        },
+      ],
+      'openingDay',
+    ),
+    lastEntry: str(
+      'Last entry 30 minutes before closing.',
+      'Dernière entrée 30 minutes avant la fermeture.',
+      'Laatste toegang 30 minuten voor sluitingstijd.',
+    ),
+    tickets: withKeys(
+      [
+        { name: str('Day ticket', 'Billet journée', 'Dagticket'), price: '20€' },
+        {
+          name: str('4-day pass', 'Pass 4 jours', '4-dagenpas'),
+          price: '38€',
+          note: text('valid from 21—24 January 2027', 'valable du 21 au 24 janvier 2027', 'geldig van 21 tot 24 januari 2027'),
+        },
+        {
+          name: str('Reduction ticket', 'Tarif réduit', 'Kortingsticket'),
+          price: '8€',
+          note: text(
+            'students under 22, job seekers, EU disability card holders',
+            'étudiants de moins de 22 ans, demandeurs d’emploi, titulaires de la carte européenne du handicap',
+            'studenten onder 22, werkzoekenden, houders van de Europese handicapkaart',
+          ),
+        },
+        {
+          name: str('Article 27', 'Article 27', 'Artikel 27'),
+          price: '1,25€',
+          note: text(
+            'no advance booking; at the ticket office upon presentation of the Article 27 voucher',
+            'pas de réservation ; à la billetterie sur présentation du ticket Article 27',
+            'geen voorverkoop; aan de kassa op vertoon van de Artikel 27-bon',
+          ),
+        },
+        { name: str('Under 12 years old', 'Moins de 12 ans', 'Onder 12 jaar'), price: 'Free' },
+      ],
+      'ticketType',
+    ),
+    ticketsUrl: 'https://ceramicbrussels27.tickoweb.be/selection',
+    ticketsNote: text(
+      'Tickets are also sold on site, by card or cash. Tickets are non-refundable. Cloakroom 2€.',
+      'Billets également en vente sur place, par carte ou en espèces. Billets non remboursables. Vestiaire 2€.',
+      'Tickets ook ter plaatse te koop, met kaart of cash. Tickets worden niet terugbetaald. Vestiaire 2€.',
+    ),
+  },
+  {
     year: 2026,
     startDate: '2026-01-21',
     endDate: '2026-01-25',
-    isCurrent: true,
-    title: str('Ceramic Brussels 2026', 'Ceramic Brussels 2026', 'Ceramic Brussels 2026'),
-    intro: rich(
-      'The fourth edition brings together more than seventy galleries from across Europe and beyond, all dedicated to contemporary ceramic art.',
-      'La quatrième édition réunit plus de soixante-dix galeries européennes et internationales, toutes consacrées à la céramique contemporaine.',
-      'De vierde editie brengt meer dan zeventig galerieën uit Europa en daarbuiten samen, allemaal gewijd aan hedendaagse keramiek.',
+    ordinal: str('3rd edition', '3e édition', '3de editie'),
+    countryFocus: str('focus España'),
+    guestOfHonour: id.artist('Elmar Trenkwalder'),
+    keyFigures: withKeys(
+      [
+        { value: '19,200', label: str('visitors', 'visiteurs', 'bezoekers') },
+        { value: '70', label: str('exhibitors', 'exposants', 'exposanten') },
+        { value: '200+', label: str('artists', 'artistes', 'kunstenaars') },
+        { value: '15', label: str('countries', 'pays', 'landen') },
+        { value: '3,500', label: str('VIPs') },
+        { value: '230+', label: str('press clips', 'articles de presse', 'persartikels') },
+      ],
+      'keyFigure',
     ),
-    ticketsUrl: 'https://www.ceramic.brussels/en/visitors-info',
-    catalogueUrl: 'https://www.ceramic.brussels/en/exhibitors',
+    film: { _type: 'video', url: 'https://youtu.be/IyklMBqj4L4', title: str('Visions behind ceramic brussels 2026') },
+    catalogueUrl: 'https://online.fliphtml5.com/qogyd/CB26_CATALOGUE/',
+    overviewUrl: 'https://online.fliphtml5.com/qogyd/ohtg/',
+    pressClipsUrl: 'https://online.fliphtml5.com/qogyd/CB26_press_clips/',
   },
   {
-    id: `${PREFIX}edition-2025`,
     year: 2025,
-    startDate: '2025-01-23',
+    startDate: '2025-01-22',
     endDate: '2025-01-26',
-    isCurrent: false,
-    title: str('Ceramic Brussels 2025', 'Ceramic Brussels 2025', 'Ceramic Brussels 2025'),
+    ordinal: str('2nd edition', '2e édition', '2de editie'),
+    countryFocus: str('focus Norway', 'focus Norvège', 'focus Noorwegen'),
+    guestOfHonour: id.artist('Elizabeth Jaeger'),
+    keyFigures: withKeys(
+      [
+        { value: '17,840', label: str('visitors', 'visiteurs', 'bezoekers') },
+        { value: '65', label: str('galleries', 'galeries', 'galerieën') },
+        { value: '200+', label: str('artists', 'artistes', 'kunstenaars') },
+        { value: '14', label: str('countries', 'pays', 'landen') },
+        { value: '13', label: str('talks', 'conférences', 'talks') },
+      ],
+      'keyFigure',
+    ),
+    overviewUrl: 'https://online.fliphtml5.com/qogyd/tozg/',
+  },
+  {
+    year: 2024,
+    startDate: '2024-01-24',
+    endDate: '2024-01-28',
+    ordinal: str('1st edition', '1re édition', '1ste editie'),
+    guestOfHonour: id.artist('Johan Creten'),
+    keyFigures: withKeys(
+      [
+        { value: '12,900', label: str('visitors', 'visiteurs', 'bezoekers') },
+        { value: '55', label: str('galleries', 'galeries', 'galerieën') },
+        { value: '200', label: str('artists', 'artistes', 'kunstenaars') },
+        { value: '10+', label: str('countries', 'pays', 'landen') },
+        { value: '100+', label: str('press clips', 'articles de presse', 'persartikels') },
+      ],
+      'keyFigure',
+    ),
   },
 ];
+
+/* ---------------------------------------------------------------- artists */
 
 const ARTISTS = [
   {
-    id: `${PREFIX}artist-marion-verboom`,
     name: 'Marion Verboom',
-    nationality: 'French',
     birthYear: 1983,
-    isGuestOfHonour: true,
-    bio: rich(
-      'Verboom builds stacked, totemic columns that read as core samples of imagined civilisations, layering plaster, resin and glazed ceramic.',
-      'Verboom élève des colonnes totémiques empilées, telles des carottes géologiques de civilisations imaginaires, superposant plâtre, résine et céramique émaillée.',
-      'Verboom bouwt gestapelde, totemachtige kolommen die lezen als boorkernen van verbeelde beschavingen, in gips, hars en geglazuurd keramiek.',
+    countryCode: 'FR',
+    nationality: str('France', 'France', 'Frankrijk'),
+    basedIn: str('Paris'),
+    gallery: 'Galerie Lelong, Paris',
+    intro: rich(
+      "Based in Paris, Verboom's work unfolds through a precise sculptural language informed by architecture, mythology and systems of writing, where forms evolve through layering and recomposition. A selection of her works will be presented at the entrance of the fair, in collaboration with Galerie Lelong.",
+      "Basée à Paris, Marion Verboom déploie un langage sculptural précis, nourri d'architecture, de mythologie et de systèmes d'écriture, où les formes évoluent par strates et recompositions. Une sélection de ses œuvres sera présentée à l'entrée de la foire, en collaboration avec la Galerie Lelong.",
     ),
+    sections: [
+      {
+        heading: str('biography', 'biographie', 'biografie'),
+        anchor: 'biography',
+        body: rich([
+          'Born in 1983, Marion Verboom lives and works in Paris. She graduated from the École nationale supérieure des Beaux-Arts in Paris in 2009 and continued her training at De Ateliers in Amsterdam between 2009 and 2011.',
+          'Since then, she has developed a distinctive body of work that occupies a singular position within contemporary sculpture, at the intersection of architecture, ornament and the history of forms.',
+          'Her work has been widely presented in institutional contexts in France and internationally, including solo exhibitions at La Verrière – Fondation d’entreprise Hermès in Brussels, Le Voyage à Nantes and the Frac Île-de-France. It is held in several public collections, including the Centre national des arts plastiques (CNAP), MAC VAL and the Musée d’Arts de Nantes.',
+        ]),
+      },
+      {
+        heading: str('sculptural practice', 'pratique sculpturale', 'sculpturale praktijk'),
+        anchor: 'practice',
+        body: rich([
+          'Marion Verboom’s work is based on a principle of iteration, assembling fragments into modular structures that can be combined, repeated and reorganised. Since 2015, she has been developing the ongoing series Achronies, a group of totemic sculptures that revisit the traditional architectural column.',
+          'Working across a wide variety of materials — including concrete, wood, plaster, bronze, clay and resin — she develops sculptures that unfold through a process combining technical precision and experimentation.',
+        ]),
+      },
+    ],
+    video: { _type: 'video', url: 'https://youtu.be/IyklMBqj4L4', title: str('Marion Verboom in the studio') },
+    interview: rich([
+      'How did ceramics enter your practice?',
+      'Through architecture, really. I was looking for a material that could hold a mould and a gesture at the same time, and clay does both.',
+    ]),
     works: [
       { title: 'Achronie XVII', year: 2025, materials: str('Glazed stoneware, plaster', 'Grès émaillé, plâtre', 'Geglazuurd steengoed, gips'), dimensions: { height: 180, width: 40, depth: 40 } },
-      { title: 'Strata', year: 2024, materials: str('Ceramic and resin', 'Céramique et résine', 'Keramiek en hars'), dimensions: { height: 95, width: 35, depth: 35 } },
+      { title: 'Chryséléphantine', year: 2023, materials: str('Ceramic, resin, bronze', 'Céramique, résine, bronze', 'Keramiek, hars, brons') },
     ],
   },
+  { name: 'Elmar Trenkwalder', birthYear: 1959, countryCode: 'AT', nationality: str('Austria', 'Autriche', 'Oostenrijk'), gallery: 'Galerie Bernard Jordan', bio: rich('Elmar Trenkwalder builds monumental glazed architectures whose ornament borrows from the baroque, the gothic and the body.') },
+  { name: 'Elizabeth Jaeger', birthYear: 1988, countryCode: 'US', nationality: str('United States', 'États-Unis', 'Verenigde Staten'), gallery: 'Mennour', bio: rich('Elizabeth Jaeger’s figures and vessels hover between stillness and threat; her installation AT TWILIGHT opened the 2025 fair.') },
+  { name: 'Johan Creten', birthYear: 1963, countryCode: 'BE', nationality: str('Belgium', 'Belgique', 'België'), bio: rich('A pioneer of the return of ceramics to contemporary art, Johan Creten was the guest of honour of the first edition in 2024.') },
+
+  /* 2026 laureates */
   {
-    id: `${PREFIX}artist-heidi-bjorgan`,
-    name: 'Heidi Bjørgan',
-    nationality: 'Norwegian',
-    birthYear: 1970,
-    bio: rich(
-      'Bjørgan works with found ceramic objects and thick, unruly glazes, treating the kiln as a collaborator rather than a tool.',
-      'Bjørgan travaille à partir d’objets céramiques trouvés et d’émaux épais et indociles, traitant le four en collaborateur plutôt qu’en outil.',
-      'Bjørgan werkt met gevonden keramische objecten en dikke, weerbarstige glazuren, en behandelt de oven als medewerker in plaats van gereedschap.',
-    ),
-    works: [
-      { title: 'Untitled (Green)', year: 2025, materials: str('Earthenware, glaze', 'Terre cuite, émail', 'Aardewerk, glazuur'), dimensions: { height: 42, width: 30, depth: 28 } },
-    ],
+    name: 'Lorie Ballage',
+    birthYear: 1994,
+    countryCode: 'FR',
+    basedIn: str('Norway', 'Norvège', 'Noorwegen'),
+    instagram: 'lorieballage',
+    bio: rich([
+      'Lorie Ballage’s practice emerges from a deep engagement with water — as a transformative element and a metaphor for the fluidity of human experience. She works predominantly with ceramic sculptures, combined with recycled industrial materials, narration, and sound to create environments that blur the line between the familiar and the uncanny.',
+      'These multi-sensory spaces aim to invite slowness and reflection, revealing hidden layers of connection. In a world saturated with ceramics — often invisible in their everyday utility — Ballage seeks to unearth the poetic and political potential of failure, absurdity, and disuse.',
+    ]),
   },
   {
-    id: `${PREFIX}artist-nils-martin`,
-    name: 'Nils Martin',
-    nationality: 'Norwegian',
-    birthYear: 1986,
+    name: 'Uriel Caspi',
+    birthYear: 1993,
+    countryCode: 'IL',
+    basedIn: str('The Netherlands', 'Pays-Bas', 'Nederland'),
+    instagram: 'caspiceramics',
     bio: rich(
-      'Martin makes vessels that hover between function and sculpture, finished in slips that record every movement of the hand.',
-      'Martin réalise des vases oscillant entre fonction et sculpture, finis dans des engobes qui enregistrent chaque geste de la main.',
-      'Martin maakt vaten die zweven tussen functie en sculptuur, afgewerkt met engobes die elke handbeweging vastleggen.',
+      'From early childhood, ceramic artist Uriel Caspi has been fascinated with clay. He earned a BFA in Ceramics from the Bezalel Academy, Jerusalem (2018), and an MFA from Alfred University, New York (2021). He has worked internationally as an academic fellow and artist-in-residence, including the Archie Bray Foundation, Yingge Ceramics Museum, EKWC and Cercco–HEAD Genève. Born in Haifa, Israel, Caspi is currently based in Tilburg, The Netherlands.',
     ),
-    works: [],
   },
   {
-    id: `${PREFIX}artist-montse-rego`,
-    name: 'Montse Rego',
-    nationality: 'Spanish',
-    birthYear: 1978,
-    bio: rich(
-      'Rego presses porcelain into thin, folded planes that behave more like textile than clay.',
-      'Rego presse la porcelaine en plans fins et pliés qui se comportent davantage comme du textile que comme de l’argile.',
-      'Rego perst porselein tot dunne, gevouwen vlakken die zich meer als textiel dan als klei gedragen.',
-    ),
-    works: [],
+    name: 'Danny Cremers',
+    birthYear: 1989,
+    countryCode: 'NL',
+    basedIn: str('The Netherlands', 'Pays-Bas', 'Nederland'),
+    instagram: 'nicevases',
+    bio: rich([
+      'Danny Cremers is an Amsterdam-based Dutch ceramic artist working with handbuilt porcelain. Trained in fashion design at Central Saint Martins, he explores classical forms through subtle imbalance and imperfection. His vases hold a quiet tension between freedom and control, with textured surfaces and loosely constructed forms.',
+      'Drawn to the energy of the sketch, open-ended, intuitive, and unconcerned with finality, he seeks to capture that same immediacy in each finished piece.',
+    ]),
   },
+  { name: 'Marie Pic', countryCode: 'FR', instagram: 'mariepic', bio: rich('Marie Pic won the 2026 jury prize and will present a solo show at ceramic brussels 2027.') },
+  { name: 'Ninon Hivert', countryCode: 'FR', bio: rich('Ninon Hivert is the laureate of the French Embassy monograph and the Centre Wallonie-Bruxelles | Paris exhibition prize 2026.') },
+  { name: 'Walter Yu', countryCode: 'CN', bio: rich('Walter Yu is the laureate of the Keramis residency 2026.') },
+  { name: 'Kira Fröse', countryCode: 'DE' },
+  { name: 'Santiago Insignares-Martínez', countryCode: 'CO' },
+  { name: 'Faye Papargyropoulou', countryCode: 'GR' },
+  { name: 'Angelika Stefaniak', countryCode: 'PL' },
+
+  /* 2025 jury prize → 2026 solo show */
+  { name: 'Léonore Chastagner', countryCode: 'FR', bio: rich('Winner of the 2025 jury prize, Léonore Chastagner presented a solo show at ceramic brussels 2026.') },
+
+  /* booth artists */
+  { name: 'Frédérique Fleury', countryCode: 'FR' },
+  { name: 'Barry Wolfryd', countryCode: 'US' },
+  { name: 'Tong Xindi & Shen Ting', countryCode: 'CN' },
+  { name: 'Heidi Bjørgan', countryCode: 'NO', birthYear: 1970 },
+  { name: 'Janis Löhrer', countryCode: 'DE' },
 ];
 
-const EXHIBITORS = [
+/* ------------------------------------------------------------- exhibitors */
+
+/** The twelve cards in the design plus the three special rows the old site carries. */
+const EXHIBITORS_2027 = [
+  { name: 'AIFA', city: 'Geneva', countryCode: 'CH', country: 'Switzerland', booth: 'A3', soloShow: true, website: 'https://aifa.ch', instagram: 'aifa.ch' },
   {
-    id: `${PREFIX}exhibitor-format-oslo`,
-    name: 'Format Oslo',
-    country: 'Norway',
-    city: 'Oslo',
-    booth: 'B32',
-    website: 'https://formatoslo.no',
-    instagram: 'formatoslo',
-    artists: [`${PREFIX}artist-heidi-bjorgan`, `${PREFIX}artist-nils-martin`],
-    bio: rich(
-      'Founded in 1991, Format is the leading gallery for contemporary crafts and design in Norway.',
-      'Fondée en 1991, Format est la première galerie norvégienne dédiée à l’artisanat et au design contemporains.',
-      'Format, opgericht in 1991, is de toonaangevende galerie voor hedendaagse vormgeving in Noorwegen.',
-    ),
-  },
-  {
-    id: `${PREFIX}exhibitor-metro-gallery`,
-    name: 'METRO Gallery',
-    country: 'Spain',
-    city: 'Vigo',
-    booth: 'B12',
-    website: 'https://metrogallery.es',
-    instagram: 'metrogallery',
-    artists: [`${PREFIX}artist-montse-rego`],
-    bio: rich(
-      'Founded and directed by Javier Blanco, METRO was created in 2007 to promote contemporary art from Galicia and beyond.',
-      'Fondée et dirigée par Javier Blanco, METRO a été créée en 2007 pour promouvoir l’art contemporain de Galice et d’ailleurs.',
-      'METRO, opgericht en geleid door Javier Blanco, ontstond in 2007 om hedendaagse kunst uit Galicië en daarbuiten te tonen.',
-    ),
-  },
-  {
-    id: `${PREFIX}exhibitor-al-tiba9`,
     name: 'Al-Tiba9 Gallery',
-    country: 'Spain',
     city: 'Barcelona',
+    countryCode: 'ES',
+    country: 'Spain',
     booth: 'B9',
-    website: 'https://altiba9.com',
+    soloShow: true,
+    inCountryFocus: true,
+    website: 'https://altiba9.gallery',
     instagram: 'altiba9',
-    artists: [],
-    bio: rich(
-      'Founded in Algeria in 2013, Al-Tiba9 opened its Barcelona space in October 2023.',
-      'Fondée en Algérie en 2013, Al-Tiba9 a ouvert son espace barcelonais en octobre 2023.',
-      'Al-Tiba9, in 2013 opgericht in Algerije, opende in oktober 2023 een ruimte in Barcelona.',
-    ),
+    artists: ['Barry Wolfryd'],
+    bio: rich('Founded in 2013 in Algeria and now based in Barcelona, Al-Tiba9 Gallery works with artists whose practices sit between craft, sculpture and conceptual art.'),
   },
   {
-    id: `${PREFIX}exhibitor-puls-contemporary`,
-    name: 'Puls Contemporary Ceramics',
-    country: 'Belgium',
-    city: 'Brussels',
-    booth: 'A21',
-    website: 'https://pulsceramics.com',
-    instagram: 'pulsceramics',
-    artists: [`${PREFIX}artist-marion-verboom`],
+    name: 'ANALORA',
+    city: 'Paris',
+    countryCode: 'FR',
+    country: 'France',
+    booth: 'B28',
+    soloShow: true,
+    website: 'https://galerieanalora.com/',
+    instagram: 'analora_by_annelaurepilet',
+    artists: ['Frédérique Fleury'],
     bio: rich(
-      'A Brussels gallery showing contemporary ceramics since 2000, with a particular focus on European studio practice.',
-      'Galerie bruxelloise consacrée à la céramique contemporaine depuis 2000, avec un intérêt marqué pour la pratique européenne en atelier.',
-      'Een Brusselse galerie die sinds 2000 hedendaagse keramiek toont, met bijzondere aandacht voor Europese atelierpraktijk.',
+      [
+        'Founded by Anne-Laure Pilet in 2021 in Lisbon, the gallery is now based in Paris. Contemporary ceramics hold a central place in its programme, while the gallery also showcases artists working in other media (painting, drawing, textile, plaster, etc.).',
+        'The selection is built around a genuine commitment from both the gallery and the artists. Its ambition is to work hand in hand with artists whose gestures are always meaningful and who push the boundaries of technique.',
+      ],
+      [
+        'Fondée par Anne-Laure Pilet en 2021 à Lisbonne, la galerie est aujourd’hui installée à Paris. La céramique contemporaine occupe une place centrale dans sa programmation, aux côtés d’artistes travaillant d’autres médiums (peinture, dessin, textile, plâtre…).',
+        'La sélection repose sur un engagement réel de la galerie comme des artistes, avec l’ambition de travailler main dans la main avec des artistes au geste toujours signifiant, qui repoussent les limites de la technique.',
+      ],
+    ),
+    artistsNote: rich(
+      'Anne-Laure Pilet enjoys presenting both emerging and established artists, with works that can sometimes be monumental. Her talent for discovery has been shaped primarily by her life in China and Portugal — two countries, two cultures, and two distinct approaches to contemporary art.',
     ),
   },
+  { name: 'Anna Laudel', city: 'Istanbul', countryCode: 'TR', country: 'Turkey', booth: 'B25', website: 'https://annalaudel.gallery', instagram: 'annalaudel.gallery' },
+  { name: 'arsenic galerie', city: 'Paris', countryCode: 'FR', country: 'France', booth: 'A14', website: 'https://arsenicgalerie.com' },
+  { name: 'Barrera Baldan Galeria', city: 'Madrid', countryCode: 'ES', country: 'Spain', booth: 'B11', inCountryFocus: true },
+  { name: 'Galerie Bernard Jordan', sortName: 'Bernard Jordan', city: 'Paris', countryCode: 'FR', country: 'France', booth: 'A19', soloShow: true, artists: ['Elmar Trenkwalder'], website: 'https://galeriebernardjordan.com' },
+  { name: 'Brazil Modernist', city: 'Paris', countryCode: 'FR', country: 'France', booth: 'A2' },
   {
-    id: `${PREFIX}exhibitor-galerie-marianne`,
-    name: 'Galerie Marianne Heller',
-    country: 'Germany',
-    city: 'Heidelberg',
-    booth: 'A4',
-    website: 'https://galerie-heller.de',
-    instagram: 'galeriehellerheidelberg',
-    artists: [],
-    bio: rich(
-      'One of the longest-running ceramic galleries in Germany, showing studio ceramics since 1989.',
-      'L’une des plus anciennes galeries de céramique d’Allemagne, présentant de la céramique d’atelier depuis 1989.',
-      'Een van de oudste keramiekgalerieën van Duitsland, actief met atelierkeramiek sinds 1989.',
+    name: 'CHAxARTxRTM',
+    city: 'Amsterdam',
+    countryCode: 'NL',
+    country: 'Netherlands',
+    booth: 'A5',
+    artists: ['Tong Xindi & Shen Ting'],
+    artistsText: str('Dong Quanbin, Liu Langqing, Tong Xindi & Shen Ting, Xin Yaoyao, Xu Chaoqi and Xu Qun'),
+    bio: rich([
+      'Founded in 2021, CHAxART is an intercultural initiative established by overseas Chinese in the Netherlands. It is dedicated to fostering meaningful exchange and integration between Eastern and Western cultures through the dual lenses of tea and contemporary art.',
+      'Positioned at the intersection of traditional tea culture and contemporary artistic practice, CHAxART engages both as powerful instruments for cultural dialogue, critical reflection, and embodied experience.',
+    ]),
+    artistsNote: rich(
+      'By recontextualizing tea within contemporary cultural discourse, CHAxART offers a distinctive curatorial approach that bridges artistic practice and cultural heritage.',
     ),
   },
+  { name: 'Deletaille Gallery', city: 'Brussels', countryCode: 'BE', country: 'Belgium', booth: 'A9', soloShow: true, website: 'https://deletaille.com' },
+  { name: 'Esther Verhaeghe — art concepts', sortName: 'Esther Verhaeghe', city: 'Brussels', countryCode: 'BE', country: 'Belgium', booth: 'A21' },
+  { name: 'Format Oslo', city: 'Oslo', countryCode: 'NO', country: 'Norway', booth: 'B32', artists: ['Heidi Bjørgan'], website: 'https://formatoslo.no', instagram: 'formatoslo' },
+  { name: 'Mercatorfonds', city: 'Brussels', countryCode: 'BE', country: 'Belgium', booth: 'C3', kind: 'publisher', website: 'https://mercatorfonds.be', instagram: 'mercatorfondsfondsmercator' },
+  { name: 'Marie Pic — jury prize 2026 solo show', sortName: 'Pic', city: 'Paris', countryCode: 'FR', country: 'France', booth: 'B16', kind: 'jury-prize', artists: ['Marie Pic'] },
 ];
 
-const NEWS = [
-  {
-    id: `${PREFIX}news-exhibitor-list-2026`,
-    slug: 'exhibitor-list-2026-announced',
-    publishedAt: '2025-10-14T09:00:00.000Z',
-    category: 'announcement',
-    title: str(
-      'The 2026 exhibitor list is announced',
-      'La liste des exposants 2026 est dévoilée',
-      'De exposantenlijst voor 2026 is bekend',
-    ),
-    excerpt: text(
-      'More than seventy galleries will take part in the fourth edition at Tour & Taxis.',
-      'Plus de soixante-dix galeries participeront à la quatrième édition à Tour & Taxis.',
-      'Meer dan zeventig galerieën nemen deel aan de vierde editie in Tour & Taxis.',
-    ),
-    body: rich(
-      'The selection committee has confirmed the galleries taking part in January. The list spans fifteen countries and includes eleven galleries showing at the fair for the first time.',
-      'Le comité de sélection a confirmé les galeries participant en janvier. La liste couvre quinze pays et compte onze galeries présentes pour la première fois.',
-      'De selectiecommissie heeft de deelnemende galerieën voor januari bevestigd. De lijst omvat vijftien landen en elf galerieën die voor het eerst deelnemen.',
-    ),
-  },
-  {
-    id: `${PREFIX}news-guest-of-honour-2026`,
-    slug: 'marion-verboom-guest-of-honour',
-    publishedAt: '2025-11-06T10:30:00.000Z',
-    category: 'announcement',
-    title: str(
-      'Marion Verboom is the 2026 guest of honour',
-      'Marion Verboom, invitée d’honneur 2026',
-      'Marion Verboom is eregast in 2026',
-    ),
-    excerpt: text(
-      'The French sculptor will present a new series of stacked ceramic columns.',
-      'La sculptrice française présentera une nouvelle série de colonnes céramiques empilées.',
-      'De Franse beeldhouwer toont een nieuwe reeks gestapelde keramische kolommen.',
-    ),
-    body: rich(
-      'Verboom will occupy the central hall with Achronie, an ongoing series of stacked columns that read as core samples of imagined civilisations.',
-      'Verboom occupera le hall central avec Achronie, série continue de colonnes empilées évoquant des carottes de civilisations imaginaires.',
-      'Verboom vult de centrale hal met Achronie, een doorlopende reeks gestapelde kolommen als boorkernen van verbeelde beschavingen.',
-    ),
-  },
-  {
-    id: `${PREFIX}news-2025-recap`,
-    slug: 'looking-back-at-2025',
-    publishedAt: '2025-02-04T12:00:00.000Z',
-    category: 'recap',
-    title: str('Looking back at 2025', 'Retour sur 2025', 'Terugblik op 2025'),
-    excerpt: text(
-      'Nineteen thousand visitors over four days, and a record number of first-time collectors.',
-      'Dix-neuf mille visiteurs en quatre jours et un nombre record de nouveaux collectionneurs.',
-      'Negentienduizend bezoekers in vier dagen en een recordaantal nieuwe verzamelaars.',
-    ),
-    body: rich(
-      'The third edition closed with strong sales across every price band and a noticeably younger audience than in previous years.',
-      'La troisième édition s’est clôturée sur de fortes ventes dans toutes les gammes de prix et un public sensiblement plus jeune.',
-      'De derde editie sloot af met sterke verkoop in alle prijsklassen en een merkbaar jonger publiek.',
-    ),
-  },
-];
-
-const PAGES = [
-  {
-    id: `${PREFIX}page-about`,
-    navOrder: 10,
-    title: str('About the fair', 'À propos', 'Over de beurs'),
-    navLabel: str('About', 'À propos', 'Over'),
-    slug: { en: 'about', fr: 'a-propos', nl: 'over' },
-    intro: text(
-      'The first international contemporary art fair dedicated to ceramics.',
-      'La première foire internationale d’art contemporain consacrée à la céramique.',
-      'De eerste internationale hedendaagse kunstbeurs gewijd aan keramiek.',
-    ),
-    body: rich(
-      'Ceramic Brussels was founded to give contemporary ceramic art the kind of stage usually reserved for painting and sculpture. Each January the fair takes over Tour & Taxis for five days.',
-      'Ceramic Brussels a été fondée pour offrir à la céramique contemporaine une scène habituellement réservée à la peinture et à la sculpture. Chaque janvier, la foire investit Tour & Taxis pendant cinq jours.',
-      'Ceramic Brussels werd opgericht om hedendaagse keramiek het podium te geven dat doorgaans voor schilderkunst en sculptuur is gereserveerd. Elke januari neemt de beurs vijf dagen lang Tour & Taxis over.',
-    ),
-  },
-  {
-    id: `${PREFIX}page-visitors`,
-    navOrder: 20,
-    title: str('Visitor information', 'Informations pratiques', 'Praktische info'),
-    navLabel: str('Visit', 'Infos pratiques', 'Bezoek'),
-    slug: { en: 'visit', fr: 'infos-pratiques', nl: 'praktische-info' },
-    intro: text(
-      'Opening hours, tickets and how to reach Tour & Taxis.',
-      'Horaires, billets et accès à Tour & Taxis.',
-      'Openingsuren, tickets en bereikbaarheid van Tour & Taxis.',
-    ),
-    body: rich(
-      'The fair runs from 21 to 25 January 2026. Doors open at 11:00 daily, with a late opening until 21:00 on Friday.',
-      'La foire se tient du 21 au 25 janvier 2026. Ouverture à 11h00 chaque jour, nocturne jusqu’à 21h00 le vendredi.',
-      'De beurs loopt van 21 tot 25 januari 2026. Dagelijks open vanaf 11.00 uur, met avondopening tot 21.00 uur op vrijdag.',
-    ),
-  },
-  {
-    id: `${PREFIX}page-applications`,
-    navOrder: 30,
-    title: str('Gallery applications', 'Candidatures galeries', 'Aanmelding galerieën'),
-    navLabel: str('Apply', 'Candidater', 'Aanmelden'),
-    slug: { en: 'gallery-applications', fr: 'candidatures-galeries', nl: 'aanmelding-galerieen' },
-    intro: text(
-      'Applications for the 2027 edition open in March.',
-      'Les candidatures pour l’édition 2027 ouvrent en mars.',
-      'Aanmeldingen voor de editie 2027 openen in maart.',
-    ),
-    body: rich(
-      'Galleries are selected by an independent committee. Applications require a booth proposal, artist list and images of recent presentations.',
-      'Les galeries sont sélectionnées par un comité indépendant. Le dossier comprend une proposition de stand, une liste d’artistes et des visuels de présentations récentes.',
-      'Galerieën worden geselecteerd door een onafhankelijke commissie. Een aanmelding bevat een standvoorstel, kunstenaarslijst en beelden van recente presentaties.',
-    ),
-  },
-];
-
-const PROGRAMME = [
-  {
-    id: `${PREFIX}event-opening-talk`,
-    slug: 'why-ceramics-now',
-    startsAt: '2026-01-22T14:00:00.000Z',
-    endsAt: '2026-01-22T15:00:00.000Z',
-    kind: 'talk',
-    location: 'Talks Room',
-    speakers: [`${PREFIX}artist-marion-verboom`],
-    title: str('Why ceramics, now?', 'Pourquoi la céramique, maintenant ?', 'Waarom keramiek, nu?'),
-    description: rich(
-      'A conversation on why ceramic practice has moved from the margins of contemporary art to its centre.',
-      'Une conversation sur le passage de la céramique des marges au centre de l’art contemporain.',
-      'Een gesprek over hoe keramiek van de marge naar het centrum van de hedendaagse kunst verhuisde.',
-    ),
-  },
-  {
-    id: `${PREFIX}event-glaze-workshop`,
-    slug: 'glaze-chemistry-workshop',
-    startsAt: '2026-01-23T11:00:00.000Z',
-    endsAt: '2026-01-23T13:00:00.000Z',
-    kind: 'workshop',
-    location: 'Workshop Space',
-    speakers: [`${PREFIX}artist-heidi-bjorgan`],
-    title: str('Glaze chemistry in practice', 'La chimie des émaux en pratique', 'Glazuurchemie in de praktijk'),
-    description: rich(
-      'A hands-on session on building glazes that behave unpredictably, and learning to work with that.',
-      'Une séance pratique sur la fabrication d’émaux imprévisibles et l’art de composer avec.',
-      'Een praktijksessie over glazuren die zich onvoorspelbaar gedragen, en leren daarmee te werken.',
-    ),
-  },
-  {
-    id: `${PREFIX}event-award-ceremony`,
-    slug: 'award-ceremony-2026',
-    startsAt: '2026-01-24T18:00:00.000Z',
-    endsAt: '2026-01-24T19:00:00.000Z',
-    kind: 'ceremony',
-    location: 'Main Hall',
-    speakers: [],
-    title: str('Award ceremony', 'Remise des prix', 'Prijsuitreiking'),
-    description: rich(
-      'The jury announces the Ceramic Brussels Art Prize and the Best Booth award.',
-      'Le jury annonce le Prix Ceramic Brussels et le prix du meilleur stand.',
-      'De jury maakt de Ceramic Brussels Art Prize en de prijs voor de beste stand bekend.',
-    ),
-  },
-];
+/* ------------------------------------------------------------- partners */
 
 const PARTNERS = [
-  { id: `${PREFIX}partner-tour-taxis`, name: 'Tour & Taxis', tier: 'main', order: 10, url: 'https://tour-taxis.com' },
-  { id: `${PREFIX}partner-visit-brussels`, name: 'visit.brussels', tier: 'institutional', order: 20, url: 'https://visit.brussels' },
-  { id: `${PREFIX}partner-wallonie-bruxelles`, name: 'Wallonie-Bruxelles International', tier: 'institutional', order: 30 },
-  { id: `${PREFIX}partner-the-art-newspaper`, name: 'The Art Newspaper', tier: 'media', order: 40 },
-  { id: `${PREFIX}partner-bruzz`, name: 'BRUZZ', tier: 'media', order: 50 },
+  { name: 'Puilaetco', tier: 'main', order: 10, url: 'https://www.puilaetco.be', description: rich('Puilaetco is the main partner of ceramic brussels since its first edition.') },
+  {
+    name: 'The Hoxton',
+    tier: 'hotel',
+    order: 20,
+    url: 'https://thehoxton.com/brussels/',
+    instagram: 'thehoxtonhotel',
+    description: rich([
+      'Set just above the Botanical Gardens and a short walk from Brussels’ historic centre, The Hoxton offers a vibrant base from which to experience the city during ceramic brussels. Spread across floors 13 to 21, its rooms open onto sweeping views of the Brussels skyline, combining modern comfort with a bold, 70s-inspired design language.',
+      'More than a place to stay, The Hoxton is also a lively meeting point in the city. Guests can discover Cantina Valentina’s Peruvian-inspired plates, head up to Tope for rooftop tacos and panoramic views, or step outside to explore the surrounding neighbourhood.',
+    ]),
+  },
+  { name: 'Embelco', tier: 'event', order: 30, instagram: 'embelco.art.shipping', subtitle: str('logistics', 'logistique', 'logistiek') },
+  {
+    name: 'LOEWE FOUNDATION',
+    tier: 'institutional',
+    order: 40,
+    url: 'https://loewefoundation.com',
+    description: rich([
+      'The LOEWE FOUNDATION was established as a private cultural foundation in 1988 by Enrique Loewe Lynch, a fourth-generation member of LOEWE’s founding family.',
+      'Today under the direction of his daughter Sheila Loewe, the Foundation’s mission is to promote creativity, educational programs and to safeguard heritage in the fields of poetry, dance, photography, art and craft.',
+    ]),
+  },
+  { name: 'City of Brussels', tier: 'institutional', order: 41, url: 'https://www.brussels.be' },
+  {
+    name: 'visit.brussels',
+    tier: 'institutional',
+    order: 42,
+    url: 'https://visit.brussels',
+    description: rich('visit.brussels is the regional organisation contributing to the influence of ceramic brussels and the Brussels visibility in general. visit.brussels is an organism of public interest subsidised by the Brussels-Capital Region.'),
+  },
+  { name: 'Brussels-Capital Region', tier: 'institutional', order: 43, url: 'https://be.brussels' },
+  {
+    name: 'Wallonia-Brussels International',
+    tier: 'institutional',
+    order: 44,
+    url: 'https://www.wbi.be',
+    description: rich('WBI is the organization responsible for the international relations of Wallonia-Brussels. It is the instrument of the international policy conducted by Wallonia, the Wallonia-Brussels Federation, and the French Community Commission of the Brussels-Capital Region, federated entities of Belgium.'),
+  },
+  {
+    name: 'Centre Wallonie-Bruxelles | Paris',
+    tier: 'institutional',
+    order: 45,
+    url: 'https://cwb.fr',
+    instagram: 'cwb_paris',
+    description: rich('The Centre Wallonie-Bruxelles | Paris, also known as Le Vaisseau, is a catalyst of reference for French-speaking Belgian contemporary creation and its artistic ecosystem.'),
+  },
+  {
+    name: 'Syndicat des négociants en art',
+    tier: 'institutional',
+    order: 46,
+    url: 'https://sna-france.com',
+    instagram: 'sna_officiel',
+    description: rich('The Syndicat des Négociants en Art is the French professional organization representing dealers and galleries active on the secondary market, from archaeology to modern and contemporary art.'),
+  },
+  { name: 'Atelier Coperta', tier: 'event', order: 50, url: 'https://atelier-coperta.com', instagram: 'ateliercoperta', subtitle: str('corporate') },
+  { name: 'Options', tier: 'event', order: 51, url: 'https://options.be', subtitle: str('furniture', 'mobilier', 'meubilair') },
+  { name: 'romarin uniforms', tier: 'event', order: 52, url: 'https://romarinuniforms.com', instagram: 'romarin_uniforms', subtitle: str('apparel', 'tenues', 'kleding') },
+  { name: 'BPS22', tier: 'exhibition-pass', order: 60, url: 'https://www.bps22.be', description: rich('Musée d’art de la Province de Hainaut, Charleroi.') },
+  { name: 'Centrale for contemporary art', tier: 'exhibition-pass', order: 61, url: 'https://centrale.brussels' },
+  { name: 'CID Grand-Hornu', tier: 'exhibition-pass', order: 62, url: 'https://www.cid-grand-hornu.be' },
+  { name: 'Keramis', tier: 'exhibition-pass', order: 63, url: 'https://www.keramis.be', description: rich('A museum and space for art and creation dedicated to ceramics, Keramis was built on the site of the old Boch faience factory in La Louvière.') },
+  { name: 'Ambassade de France en Belgique', tier: 'art-prize', order: 70, url: 'https://be.ambafrance.org' },
+  { name: 'Les Ateliers dans la Forêt', tier: 'art-prize', order: 71 },
+  { name: 'The Latvian Centre for Contemporary Ceramics', tier: 'art-prize', order: 72 },
+  { name: 'YXCCCA', tier: 'art-prize', order: 73, subtitle: str('Creative & Cultural Ceramic Avenue, Yixing') },
+  { name: 'MAD Brussels', tier: 'art-prize', order: 74, url: 'https://mad.brussels' },
+  { name: 'The Art Newspaper', tier: 'media', order: 80, url: 'https://www.theartnewspaper.com' },
+  { name: 'Le Quotidien de l’Art', tier: 'media', order: 81 },
+  { name: 'La Revue de la Céramique et du Verre', tier: 'media', order: 82 },
+  { name: 'Ceramics Now', tier: 'media', order: 83 },
+  { name: 'COLLECT AAA', tier: 'media', order: 84, url: 'https://collectaaa.be' },
+  { name: 'IDEAT', tier: 'media', order: 85, url: 'https://ideat.be' },
+  { name: 'BRUZZ', tier: 'media', order: 86 },
+  {
+    name: 'Traiteur Benjamin',
+    tier: 'food-drinks',
+    order: 90,
+    url: 'https://www.traiteurbenjamin.be',
+    subtitle: str('Chez Loulou', 'Chez Loulou', 'Chez Loulou'),
+    description: rich([
+      'Passionate about gastronomy, Benjamin Schijns learned from the best: he began his career at Le Pain et le Vin, a Michelin-starred restaurant in Brussels, before taking up a position as sommelier at the Sea Grill, chef Yves Mattagne’s 2-star restaurant.',
+      'In 2009, he launched Traiteur Benjamin, whose quality of service inspires confidence. He likes to surprise and delight, and will propose dishes that will awaken all the senses.',
+    ]),
+  },
+  {
+    name: 'Fernand Obb',
+    tier: 'food-drinks',
+    order: 91,
+    url: 'https://www.fernandobb.be',
+    description: rich('Opened in 2018 in the heart of Saint-Gilles, Fernand Obb Delicatessen proposes a popular cuisine made from the best ingredients, in a warm atmosphere. In October 2018 it won Brussels’ best grey shrimp croquette award.'),
+  },
+  {
+    name: 'Flora',
+    tier: 'food-drinks',
+    order: 92,
+    url: 'https://flora.brussels',
+    subtitle: str('Belgian craft beers', 'Bières artisanales belges', 'Belgische craft beers'),
+    description: rich('Flora is a craft beer project made with flowers, created in 2024 by Maxime and Thibault. Easy-to-drink beers enhanced with a floral touch and without added sugar.'),
+  },
+  {
+    name: 'MOK COFFEE',
+    tier: 'food-drinks',
+    order: 93,
+    url: 'https://mokcoffee.be',
+    description: rich('MOK COFFEE offers a complete coffee experience, from bean to cup. Two locations embody this philosophy: one, rustic and welcoming in Leuven, the other, modern and dynamic in Brussels’ Dansaert district.'),
+  },
 ];
 
-const PRESS = [
-  { id: `${PREFIX}press-1`, title: 'Ceramics finally gets its own art fair', outlet: 'The Art Newspaper', publishedAt: '2026-01-22', language: 'en', url: 'https://www.theartnewspaper.com' },
-  { id: `${PREFIX}press-2`, title: 'À Bruxelles, la céramique prend toute la place', outlet: 'Le Soir', publishedAt: '2026-01-23', language: 'fr' },
-  { id: `${PREFIX}press-3`, title: 'Keramiek verovert Tour & Taxis', outlet: 'BRUZZ', publishedAt: '2026-01-21', language: 'nl' },
-  { id: `${PREFIX}press-4`, title: 'The quiet rise of the ceramic collector', outlet: 'Financial Times', publishedAt: '2025-01-28', language: 'en' },
-];
+/* ------------------------------------------------------- awards & people */
 
 const AWARDS = [
   {
-    id: `${PREFIX}award-art-prize-2025`,
-    name: str('Ceramic Brussels Art Prize', 'Prix Ceramic Brussels', 'Ceramic Brussels Kunstprijs'),
-    edition: `${PREFIX}edition-2025`,
-    winnerArtist: `${PREFIX}artist-heidi-bjorgan`,
-    citation: rich(
-      'For a body of work that treats the kiln as a collaborator and accident as method.',
-      'Pour une œuvre qui fait du four un collaborateur et de l’accident une méthode.',
-      'Voor een oeuvre dat de oven als medewerker en het toeval als methode behandelt.',
-    ),
+    year: 2026,
+    family: 'art-prize',
+    order: 1,
+    name: str('jury prize', 'prix du jury', 'juryprijs'),
+    laureates: ['Marie Pic'],
+    outcome: str('will present a solo show during ceramic brussels 2027', 'présentera un solo show lors de ceramic brussels 2027', 'presenteert een solotentoonstelling tijdens ceramic brussels 2027'),
+    description: rich('The artist will be given the chance to present their work in a solo show during the 2027 edition of ceramic brussels.'),
   },
   {
-    id: `${PREFIX}award-best-booth-2025`,
-    name: str('Best Booth', 'Meilleur stand', 'Beste stand'),
-    edition: `${PREFIX}edition-2025`,
-    winnerExhibitor: `${PREFIX}exhibitor-format-oslo`,
-    citation: rich(
-      'For a presentation that gave each work the space it needed and none that it did not.',
-      'Pour une présentation offrant à chaque œuvre l’espace nécessaire, et rien de plus.',
-      'Voor een presentatie die elk werk precies de ruimte gaf die het nodig had.',
-    ),
+    year: 2026,
+    family: 'art-prize',
+    order: 2,
+    name: str('Ambassade de France en Belgique'),
+    partner: 'Ambassade de France en Belgique',
+    laureates: ['Ninon Hivert'],
+    outcome: str('is the laureate of a monograph devoted to her work'),
+    description: rich('The artist benefits from the publication of a monograph on their work, supported by the French Embassy in Brussels and produced in partnership with Les Éditions des Ateliers d’Art de France.'),
+  },
+  {
+    year: 2026,
+    family: 'art-prize',
+    order: 3,
+    name: str('Centre Wallonie-Bruxelles | Paris'),
+    partner: 'Centre Wallonie-Bruxelles | Paris',
+    laureates: ['Ninon Hivert'],
+    outcome: str('will take part in an exhibition in 2027 in Paris'),
+    description: rich('The artist awarded the Centre Prize will benefit from the presentation of one of their works within a group exhibition produced by the Centre in the 2027 season.'),
+  },
+  {
+    year: 2026,
+    family: 'art-prize',
+    order: 4,
+    name: str('Les Ateliers dans la Forêt'),
+    partner: 'Les Ateliers dans la Forêt',
+    laureates: ['Danny Cremers'],
+    outcome: str('will benefit from a 2-month residency'),
+    description: rich('A new artistic residency in France, in the heart of the Orléans forest. The artist will benefit from a 2-month research and creation residency in 2026, including accommodation on site and a fully equipped workshop.'),
+  },
+  {
+    year: 2026,
+    family: 'art-prize',
+    order: 5,
+    name: str('Keramis'),
+    partner: 'Keramis',
+    laureates: ['Walter Yu'],
+    outcome: str('will benefit from a residency in July 2026'),
+    description: rich('The artist will benefit from a 30-day residency in July 2026 at the Keramis residence, with a grant of €2,000 and a budget of €500 for kiln hire.'),
+  },
+  {
+    year: 2026,
+    family: 'art-prize',
+    order: 6,
+    name: str('The Latvian Centre for Contemporary Ceramics'),
+    partner: 'The Latvian Centre for Contemporary Ceramics',
+    laureates: ['Danny Cremers'],
+    outcome: str('is the laureate of a 3-week residency in Latvia'),
+    description: rich('A three-week residency in Latvia, developed in partnership with the Daugavpils Mark Rothko Museum, concluding with an exhibition at the museum.'),
+  },
+  {
+    year: 2026,
+    family: 'art-prize',
+    order: 7,
+    name: str('YXCCCA'),
+    partner: 'YXCCCA',
+    laureates: ['Marie Pic', 'Ninon Hivert'],
+    outcome: str('are the laureates of a 3-month residency'),
+    description: rich('Two artists are hosted for a 3-month residency in Yixing, the birthplace of Chinese purple clay, with free accommodation, studio access, materials and firings, and a grant of 15,000 RMB.'),
+  },
+  {
+    year: 2026,
+    family: 'fair',
+    order: 10,
+    name: str('best booth', 'meilleur stand', 'beste stand'),
+    exhibitor: ['Galerie Bernard Jordan', 2027],
+    laureates: ['Janis Löhrer'],
+    citation: rich('For a booth that let the works breathe and the visitors slow down.'),
+  },
+  {
+    year: 2025,
+    family: 'art-prize',
+    order: 1,
+    name: str('jury prize', 'prix du jury', 'juryprijs'),
+    laureates: ['Léonore Chastagner'],
+    outcome: str('presented a solo show during ceramic brussels 2026'),
   },
 ];
 
-/* --------------------------------------------------------------- helpers */
+const PEOPLE = [
+  {
+    name: 'Christine Germain-Donnat',
+    groups: ['advisory-board', 'jury'],
+    countryCode: 'FR',
+    order: 1,
+    role: str('Patrimony Curator, Ministère de la Culture de France'),
+    bio: rich('Trained as a historian and art historian, Christine Germain-Donnat has directed the Musée de la Chasse et de la Nature in Paris since 2019 and previously the Musée National de la Céramique at Sèvres.'),
+  },
+  { name: 'Florence Reckinger Taddeï', groups: ['advisory-board'], countryCode: 'LU', order: 2, role: str('President of Les Amis des Musées d’art et d’histoire Luxembourg'), bio: rich('In 2019 she founded the Regala gallery and residency program in Arles. She serves on the boards of Mudam, the Edward Steichen Award and Les Rencontres d’Arles.') },
+  { name: 'Ludovic Recchia', groups: ['advisory-board'], countryCode: 'BE', order: 3, role: str('Director of Keramis'), bio: rich('Art historian and curator specialising in modern and contemporary ceramics, director and curator of Keramis Museum and Art Center, which he founded in 2015.') },
+  { name: 'Geertje Jacobs', groups: ['advisory-board'], countryCode: 'NL', order: 4, role: str('Director of the EKWC'), bio: rich('Director of the European Ceramics Centre (EKWC) in the Netherlands, an international artists’ residency and centre of excellence for ceramics.') },
+  { name: 'Magdalena Gerber', groups: ['advisory-board'], countryCode: 'CH', order: 5, role: str('Artist, Professor and Head of CERCCO, HEAD-Geneva'), bio: rich('Since 2013 director of CERCCO, the Centre for Contemporary Ceramics at HEAD – Geneva.') },
+  { name: 'Henri Jobbé-Duval', groups: ['advisory-board'], countryCode: 'FR', order: 6, role: str('Co-founder of the Fiac'), bio: rich('A pioneering force in the art market, he helped set up the FIAC organizing committee and contributed to the creation of Art Paris Abu Dhabi.') },
+  { name: 'Gilles Parmentier', groups: ['team'], order: 1, role: str('co-director', 'co-directeur', 'co-directeur'), email: 'gilles@ceramic.brussels' },
+  { name: 'Jean-Marc Dimanche', groups: ['team', 'jury'], countryCode: 'FR', order: 2, role: str('co-director', 'co-directeur', 'co-directeur'), email: 'jean-marc@ceramic.brussels' },
+  { name: 'Tiphaine Quéguineur', groups: ['team'], order: 3, role: str('exhibitors relations & fair coordination', 'relations exposants & coordination', 'relaties exposanten & coördinatie'), email: 'tiphaine@ceramic.brussels' },
+  { name: 'Julie Alluin', groups: ['team'], order: 4, role: str('communication & partners relations', 'communication & relations partenaires', 'communicatie & partnerrelaties'), email: 'julie@ceramic.brussels' },
+  { name: 'Léonie Lefere', groups: ['team'], order: 5, role: str('graphic designer', 'graphiste', 'grafisch ontwerper'), email: 'leonie@ceramic.brussels' },
+  { name: 'Charles Kaisin', groups: ['jury'], year: 2027, countryCode: 'BE', order: 1, role: str('Designer & Scenographer') },
+  { name: 'Duan Zhang de Courrèges', groups: ['jury'], year: 2027, countryCode: 'FR', order: 2, role: str('curator & art advisor') },
+  { name: 'Galila', groups: ['jury'], year: 2027, countryCode: 'BE', order: 3, role: str('Founder of Galila’s P.O.C') },
+  { name: 'Shinsuke Kawahara', groups: ['jury'], year: 2027, countryCode: 'JP', order: 4, role: str('Pluridisciplinary artist') },
+];
 
-const ref = (id) => ({ _type: 'reference', _ref: id });
-const refArray = (ids) =>
-  ids.map((id, i) => ({ _type: 'reference', _ref: id, _key: `r${i}` }));
+/* -------------------------------------------------------------- programme */
+
+const PROGRAMME = [
+  { year: 2027, section: 'talks', startsAt: '2027-01-21T14:00:00+01:00', kind: 'artist-talk', languages: ['EN'], title: str('Exclusive interview of Marion Verboom, guest of honour 2027'), speakers: ['Marion Verboom'], location: str('talk area, hall B') },
+  {
+    year: 2027,
+    section: 'talks',
+    startsAt: '2027-01-21T15:00:00+01:00',
+    kind: 'roundtable',
+    languages: ['FR'],
+    title: str('Exposer la céramique dans les institutions'),
+    speakersText: text('with Christine Germain-Donnat (French Ministry of Culture), Ludovic Recchia (Keramis, BE) & Geertje Jacobs (EKWC, NL)'),
+    location: str('talk area, hall B'),
+  },
+  { year: 2027, section: 'talks', startsAt: '2027-01-22T11:30:00+01:00', kind: 'artist-talk', languages: ['EN'], title: str('Thinking Hands: ways of teaching ceramics today'), speakersText: text('with Magdalena Gerber (CERCCO — HEAD Geneva, CH), Geertje Jacobs (EKWC, NL) & Caroline Andrin (ENSAV La Cambre, BE)') },
+  { year: 2027, section: 'talks', startsAt: '2027-01-22T13:30:00+01:00', kind: 'artist-talk', languages: ['ES', 'FR'], title: str('In conversation with the 2026 laureates'), speakersText: text('with Lorie Ballage, Uriel Caspi & Danny Cremers') },
+  { year: 2027, section: 'awards', startsAt: '2027-01-21T12:00:00+01:00', endsAt: '2027-01-21T13:30:00+01:00', kind: 'ceremony', title: str('Art prize award ceremony', 'Remise des prix', 'Prijsuitreiking'), location: str('art prize area, entrance') },
+  { year: 2027, section: 'vip', startsAt: '2027-01-20T14:00:00+01:00', endsAt: '2027-01-20T17:00:00+01:00', kind: 'opening', invitationOnly: true, title: str('Preview', 'Preview', 'Preview') },
+  { year: 2027, section: 'vip', startsAt: '2027-01-20T17:00:00+01:00', endsAt: '2027-01-20T21:00:00+01:00', kind: 'opening', invitationOnly: true, title: str('Vernissage') },
+];
+
+/* ------------------------------------------------------------------ pages */
+
+const PAGES = [
+  {
+    key: 'about-the-fair',
+    section: 'about',
+    order: 1,
+    title: str('ceramic brussels'),
+    tabLabel: str('ceramic brussels'),
+    intro: text(
+      'ceramic brussels is the first international contemporary art fair dedicated to ceramics.',
+      'ceramic brussels est la première foire internationale d’art contemporain dédiée à la céramique.',
+      'ceramic brussels is de eerste internationale beurs voor hedendaagse kunst gewijd aan keramiek.',
+    ),
+    sections: [
+      {
+        heading: str('the fair', 'la foire', 'de beurs'),
+        anchor: 'the-fair',
+        body: rich(
+          'ceramic brussels develops an international marketplace and exchange platform while offering the encounter of curated content within a unique experience. Founded in January 2024, ceramic brussels is a committed fair, firmly focused on promoting contemporary ceramics and built around an intense programme of visits, exhibitions, and talks.',
+        ),
+      },
+      {
+        heading: str('goals', 'objectifs', 'doelstellingen'),
+        anchor: 'goals',
+        body: rich([
+          'ceramic brussels aims to showcase the vitality and diversity of contemporary ceramics practice, support contemporary creation and stimulate new exchanges between artists, institutions, galleries and the audience. Its aims are:',
+          '↘ to showcase the diversity of artistic approaches to ceramics through the selection of international galleries and the involvement of leading global institutions and key players',
+          '↘ to offer a unique forum for high-level exchanges, networking, and induce interactions and collaborations',
+          '↘ to deliver the ceramic brussels art prize, a European call for projects with an international jury, and several additional prizes to be awarded during the fair',
+          '↘ to support the production and dissemination of content dedicated to ceramics',
+        ]),
+      },
+      {
+        heading: str('development', 'développement', 'ontwikkeling'),
+        anchor: 'development',
+        body: rich(
+          'Since its first edition, the fair has chosen to invite an artist of honour and to highlight their work through a series of initiatives throughout the fair. In 2026, the artist Elmar Trenkwalder was the guest of honour, following American artist Elizabeth Jaeger (2025) and Belgian artist Johan Creten (2024). From its second edition onwards, ceramic brussels broadened its scope by integrating modern ceramics and introducing a country focus (Norway 2025, Spain 2026).',
+        ),
+      },
+    ],
+  },
+  { key: 'about-advisory-board', section: 'about', order: 2, title: str('advisory board', 'comité consultatif', 'adviesraad'), intro: text('The fair has the support of renowned international experts in the field of ceramics as its advisory board:', 'La foire bénéficie du soutien d’experts internationaux reconnus dans le domaine de la céramique, réunis en comité consultatif :', 'De beurs wordt gesteund door een adviesraad van gerenommeerde internationale experts in keramiek:') },
+  { key: 'about-team', section: 'about', order: 3, title: str('team', 'équipe', 'team') },
+  { key: 'about-press', section: 'about', order: 4, title: str('press', 'presse', 'pers'), intro: text('Press clips, press kit and contacts for the Benelux, France and international press.', 'Revue de presse, dossier de presse et contacts pour le Benelux, la France et la presse internationale.', 'Persoverzicht, persmap en contacten voor de Benelux, Frankrijk en de internationale pers.') },
+  { key: 'about-images', section: 'about', order: 5, title: str('images', 'images', 'beelden') },
+  {
+    key: 'art-prize-about',
+    section: 'art-prize',
+    order: 1,
+    title: str('about', 'à propos', 'over'),
+    intro: text(
+      'The art prize aims to highlight the vitality and diversity of contemporary ceramic practice while supporting young contemporary creators.',
+      'Le prix vise à mettre en lumière la vitalité et la diversité de la céramique contemporaine tout en soutenant les jeunes créateurs.',
+      'De prijs wil de vitaliteit en diversiteit van hedendaagse keramiek in de kijker zetten en jonge makers ondersteunen.',
+    ),
+    sections: [
+      { heading: str('the prize', 'le prix', 'de prijs'), anchor: 'the-prize', body: rich(['5 laureates will be presented in a group show at ceramic brussels 2027.', 'The selection will be made by an international jury and organized by Jean-Marc Dimanche, co-director of the fair. The laureates will also benefit from awards given by institutional partners, such as residencies, exhibitions and monographies.']) },
+      { heading: str('applications', 'candidatures', 'kandidaturen'), anchor: 'applications', body: rich(['The call is open to art students and/or young artists:', '→ based in the EU', '→ with less than 10 years’ practice & research in the field of ceramics', '→ not represented by a gallery', 'Applications for 2027 are now closed.']) },
+      { heading: str('partners', 'partenaires', 'partners'), anchor: 'partners', body: rich('On the occasion of the art prize, MAD Brussels, Action et Service and ceramic brussels launched an open call for a Brussels-based designer or studio to imagine a new scenography for the laureates’ works. The studio selected for the third edition is A S C P Studio.') },
+    ],
+  },
+  { key: 'art-prize-laureates', section: 'art-prize', order: 2, title: str('laureates', 'lauréats', 'laureaten') },
+  { key: 'art-prize-awards', section: 'art-prize', order: 3, title: str('awards', 'prix', 'prijzen'), intro: text('Expanding opportunities for the laureates, the fair’s institutional partners also grant a prestigious selection of parallel awards, residencies, and exhibition prizes.', 'Les partenaires institutionnels de la foire offrent aux lauréats une sélection de prix parallèles, résidences et expositions.', 'De institutionele partners van de beurs kennen de laureaten bovendien parallelle prijzen, residenties en tentoonstellingen toe.') },
+  { key: 'art-prize-jury', section: 'art-prize', order: 4, title: str('jury') },
+  {
+    key: 'programme-la-cambre',
+    section: 'programme',
+    order: 1,
+    title: str('ceramic brussels x La Cambre'),
+    intro: text(
+      'La Cambre celebrates its centenary at the heart of ceramic brussels! For this 4th edition, the prestigious Brussels art school takes over the fair with a unique, cross-disciplinary project. From artistic ceramic furniture designed by its alumni to live printing demonstrations with the Letterrestres project, discover how a new generation of artists is pushing boundaries and reshaping the medium.',
+    ),
+  },
+  { key: 'programme-talks', section: 'programme', order: 2, title: str('talks'), intro: text('Open to the public for four days, the fair features around fifteen talks and conferences, including book launches, roundtables and artist talks.', 'Ouverte au public pendant quatre jours, la foire propose une quinzaine de conférences : lancements de livres, tables rondes et rencontres d’artistes.', 'Vier dagen lang biedt de beurs een vijftiental talks: boekvoorstellingen, rondetafels en artist talks.') },
+  { key: 'programme-awards', section: 'programme', order: 3, title: str('awards', 'prix', 'prijzen') },
+  { key: 'programme-vip', section: 'programme', order: 4, title: str('VIP') },
+  { key: 'visit-practical-info', section: 'visit', order: 1, title: str('practical info', 'infos pratiques', 'praktische info') },
+  {
+    key: 'visit-food-drinks',
+    section: 'visit',
+    order: 2,
+    title: str('food & drinks'),
+    intro: text(
+      'Each year, ceramic brussels develops collaborations with partners committed to the promotion of Belgian and Brussels know-how. These collaborations make it possible to offer unique, high-quality areas for visitors to discover and take a break, in the heart of the fair.',
+      'Chaque année, ceramic brussels développe des collaborations avec des partenaires engagés dans la promotion du savoir-faire belge et bruxellois, pour offrir aux visiteurs des espaces de découverte et de pause au cœur de la foire.',
+      'Elk jaar werkt ceramic brussels samen met partners die de Belgische en Brusselse knowhow promoten, om bezoekers unieke plekken te bieden om te ontdekken en te pauzeren, in het hart van de beurs.',
+    ),
+  },
+  { key: 'visit-floor-plan', section: 'visit', order: 3, title: str('floor plan', 'plan', 'plattegrond') },
+  { key: 'visit-faq', section: 'visit', order: 4, title: str('FAQ') },
+  {
+    key: 'gallery-applications',
+    order: 10,
+    title: str('gallery applications', 'candidatures galeries', 'aanmelding galerieën'),
+    navLabel: str('Apply', 'Candidater', 'Aanmelden'),
+    slug: { en: 'gallery-applications', fr: 'candidatures-galeries', nl: 'aanmelding-galerieen' },
+    intro: text('Applications for the 2027 edition are open until 30 September.', 'Les candidatures pour l’édition 2027 sont ouvertes jusqu’au 30 septembre.', 'Kandidaturen voor de editie 2027 zijn open tot 30 september.'),
+    body: rich('Galleries wishing to take part send their application through the form below. Questions go to tiphaine@ceramic.brussels.', 'Les galeries souhaitant participer envoient leur candidature via le formulaire ci-dessous. Questions : tiphaine@ceramic.brussels.', 'Galerieën die willen deelnemen sturen hun kandidatuur via onderstaand formulier. Vragen: tiphaine@ceramic.brussels.'),
+  },
+];
+
+/* ------------------------------------------------------------------ news */
+
+const NEWS = [
+  {
+    slug: 'marion-verboom-guest-of-honour-2027',
+    publishedAt: '2026-06-10T09:00:00.000Z',
+    category: 'announcement',
+    year: 2027,
+    title: str('Marion Verboom is the guest of honour of ceramic brussels 2027', 'Marion Verboom, invitée d’honneur de ceramic brussels 2027', 'Marion Verboom is eregast van ceramic brussels 2027'),
+    excerpt: text('A selection of her works will be presented at the entrance of the fair, in collaboration with Galerie Lelong.', 'Une sélection de ses œuvres sera présentée à l’entrée de la foire, en collaboration avec la Galerie Lelong.', 'Een selectie van haar werk wordt aan de ingang van de beurs getoond, in samenwerking met Galerie Lelong.'),
+    body: rich('Every year, ceramic brussels invites an artist whose work marks the field. In 2027 the fair welcomes French sculptor Marion Verboom.'),
+  },
+  {
+    slug: 'gallery-applications-2027-open',
+    publishedAt: '2026-05-02T09:00:00.000Z',
+    category: 'announcement',
+    year: 2027,
+    title: str('Gallery applications are open', 'Les candidatures galeries sont ouvertes', 'Aanmeldingen voor galerieën zijn open'),
+    excerpt: text('Galleries can apply for the 4th edition until 30 September 2026.', 'Les galeries peuvent candidater à la 4e édition jusqu’au 30 septembre 2026.', 'Galerieën kunnen zich tot 30 september 2026 aanmelden voor de 4de editie.'),
+  },
+  {
+    slug: 'looking-back-at-2026',
+    publishedAt: '2026-02-03T12:00:00.000Z',
+    category: 'recap',
+    year: 2026,
+    title: str('Looking back at 2026', 'Retour sur 2026', 'Terugblik op 2026'),
+    excerpt: text('19,200 visitors, 70 exhibitors from 15 countries, 3,500 VIPs: the third edition in numbers.', '19 200 visiteurs, 70 exposants de 15 pays, 3 500 VIP : la troisième édition en chiffres.', '19.200 bezoekers, 70 exposanten uit 15 landen, 3.500 VIP’s: de derde editie in cijfers.'),
+  },
+];
+
+const PRESS = [
+  { title: 'Ceramics finally gets its own art fair', outlet: 'The Art Newspaper', publishedAt: '2026-01-22', language: 'en', url: 'https://www.theartnewspaper.com' },
+  { title: 'À Bruxelles, la céramique prend toute la place', outlet: 'Le Soir', publishedAt: '2026-01-23', language: 'fr' },
+  { title: 'Keramiek verovert Tour & Taxis', outlet: 'BRUZZ', publishedAt: '2026-01-21', language: 'nl' },
+  { title: 'The quiet rise of the ceramic collector', outlet: 'Financial Times', publishedAt: '2025-01-28', language: 'en' },
+];
+
+/* ------------------------------------------------------------ build docs */
 
 function buildDocs() {
   const docs = [];
+  const artistId = (name) => id.artist(name);
+  const partnerId = (name) => id.partner(name);
 
   docs.push({
     _id: 'siteSettings',
     _type: 'siteSettings',
-    siteName: 'Ceramic Brussels',
+    siteName: 'ceramic brussels',
     tagline: str(
-      'The international fair for contemporary ceramic art',
-      'La foire internationale d’art céramique contemporain',
-      'De internationale beurs voor hedendaagse keramiek',
+      'the first international contemporary art fair dedicated to ceramics',
+      'la première foire internationale d’art contemporain dédiée à la céramique',
+      'de eerste internationale beurs voor hedendaagse kunst gewijd aan keramiek',
     ),
+    copyright: '© ceramic brussels, 2026',
     contactEmail: 'info@ceramic.brussels',
-    instagramUrl: 'https://www.instagram.com/ceramic.brussels/',
     newsletterUrl: 'https://mailchi.mp/ceramic/ceramic-brussels',
+    instagramUrl: 'https://www.instagram.com/ceramic.brussels/',
+    linkedinUrl: 'https://www.linkedin.com/company/ceramic-brussels/',
+    facebookUrl: 'https://www.facebook.com/profile.php?id=100094708248221',
+    applicationsUrl: 'https://www.ceramic.brussels/en/gallery-applications',
+    pressEmail: 'press@sophiecarree.be',
+    pressKitUrl: 'https://online.fliphtml5.com/qogyd/CB26_press_clips/',
+    pressContacts: withKeys(
+      [
+        { region: str('Benelux'), name: 'Sophie Carrée PR', email: 'press@sophiecarree.be', url: 'https://sophiecarree.com' },
+        { region: str('France'), name: 'FAVORI', url: 'https://favoriparis.com' },
+        { region: str('International'), name: 'A R T Communication + Brand Consultancy', url: 'https://annarosathomae.com', instagram: 'a_r_t_communication' },
+      ],
+      'pressContact',
+    ),
+    faq: withKeys(
+      [
+        { question: str('Can I bring my dog?', 'Puis-je venir avec mon chien ?', 'Mag ik mijn hond meenemen?'), answer: rich('No pets are allowed, assistance animals excepted.', 'Les animaux ne sont pas admis, à l’exception des chiens d’assistance.', 'Huisdieren zijn niet toegelaten, met uitzondering van assistentiehonden.') },
+        { question: str('Is the fair accessible to wheelchair users?', 'La foire est-elle accessible aux personnes à mobilité réduite ?', 'Is de beurs toegankelijk voor rolstoelgebruikers?'), answer: rich('Yes. The sheds are on one level and the entrance at Shed 2bis is step-free.', 'Oui. Les sheds sont de plain-pied et l’entrée par le Shed 2bis est sans marche.', 'Ja. De sheds liggen gelijkvloers en de ingang via Shed 2bis is drempelloos.') },
+        { question: str('Can I take photographs?', 'Puis-je prendre des photos ?', 'Mag ik foto’s nemen?'), answer: rich('For personal use only.', 'Pour un usage personnel uniquement.', 'Enkel voor persoonlijk gebruik.') },
+      ],
+      'faqItem',
+    ),
     practicalInfo: {
-      address: 'Tour & Taxis\nAvenue du Port 88\n1000 Brussels',
-      openingHours: text(
-        'Daily 11:00 – 19:00, Friday until 21:00',
-        'Tous les jours 11h00 – 19h00, vendredi jusqu’à 21h00',
-        'Dagelijks 11.00 – 19.00 uur, vrijdag tot 21.00 uur',
+      venueName: 'Tour & Taxis — Sheds 1 & 2bis',
+      address: 'Rue Picard 3\n1000 Brussels',
+      mapUrl: 'https://goo.gl/maps/KXxSTzu3L6dfdWDD6',
+      intro: text(
+        "ceramic brussels' 4th edition will take place from 20 till 24 January 2027 at Tour & Taxis, Brussels.",
+        'La 4e édition de ceramic brussels se tiendra du 20 au 24 janvier 2027 à Tour & Taxis, Bruxelles.',
+        'De 4de editie van ceramic brussels vindt plaats van 20 tot 24 januari 2027 in Tour & Taxis, Brussel.',
       ),
-      transport: text(
-        'Metro Yser, then a ten minute walk along the canal.',
-        'Métro Yser, puis dix minutes à pied le long du canal.',
-        'Metro IJzer, daarna tien minuten wandelen langs het kanaal.',
+      access: withKeys(
+        [
+          { mode: str('By public transport', 'En transports en commun', 'Met het openbaar vervoer'), text: text('Metro lines 2 and 6, stop Ribeaucourt or Yser (10 min walk). Bus 14, 20, 46, 86, stop Suzan Daniel.', 'Métro lignes 2 et 6, arrêt Ribeaucourt ou Yser (10 min à pied). Bus 14, 20, 46, 86, arrêt Suzan Daniel.', 'Metro lijnen 2 en 6, halte Ribeaucourt of IJzer (10 min wandelen). Bus 14, 20, 46, 86, halte Suzan Daniel.') },
+          { mode: str('By train', 'En train', 'Met de trein'), text: text('Free shuttle service from Brussels-North station, stop at Tour & Taxis.', 'Navette gratuite depuis la gare de Bruxelles-Nord, arrêt Tour & Taxis.', 'Gratis shuttle vanaf station Brussel-Noord, halte Tour & Taxis.') },
+          { mode: str('By bike', 'À vélo', 'Met de fiets'), text: text('Bike racks in front of Maison de la Poste, rue Picard 1—11 or avenue du Port 86C. Villo! station at the Gare Maritime, rue Picard 7.', 'Range-vélos devant la Maison de la Poste, rue Picard 1—11 ou avenue du Port 86C. Station Villo! à la Gare Maritime, rue Picard 7.', 'Fietsenstalling voor het Maison de la Poste, Picardstraat 1—11 of Havenlaan 86C. Villo!-station aan de Gare Maritime, Picardstraat 7.') },
+          { mode: str('Car park', 'Parking', 'Parking'), text: text('Park Lane, rue Picard 13. Esplanade Parking, avenue du Port 86C.', 'Park Lane, rue Picard 13. Parking Esplanade, avenue du Port 86C.', 'Park Lane, Picardstraat 13. Esplanade Parking, Havenlaan 86C.') },
+        ],
+        'accessMode',
       ),
+      hotelDeal: {
+        partner: weak(partnerId('The Hoxton')),
+        url: 'https://thehoxton.com/brussels/',
+        text: text(
+          'For its fourth edition, ceramic brussels partners with The Hoxton, ideally located above the Botanical Gardens and within easy reach of the fair and Brussels’ historic centre.',
+          'Pour sa quatrième édition, ceramic brussels s’associe à The Hoxton, idéalement situé au-dessus du Jardin botanique, à deux pas de la foire et du centre historique.',
+          'Voor zijn vierde editie werkt ceramic brussels samen met The Hoxton, ideaal gelegen boven de Kruidtuin, dicht bij de beurs en het historische centrum.',
+        ),
+      },
+    },
+  });
+
+  docs.push({
+    _id: 'homepage',
+    _type: 'homepage',
+    heroText: text(
+      'the first international contemporary art fair dedicated to ceramics',
+      'la première foire internationale d’art contemporain dédiée à la céramique',
+      'de eerste internationale beurs voor hedendaagse kunst gewijd aan keramiek',
+    ),
+    heroLink: route(['more on the fair', 'en savoir plus sur la foire', 'meer over de beurs'], 'about'),
+    quickLinks: withKeys(
+      [
+        route(['galleries', 'galeries', 'galerieën'], 'exhibitors'),
+        route(['art prize', 'prix', 'prijs'], 'art-prize'),
+        route(['visitors info', 'infos pratiques', 'praktische info'], 'visit'),
+        external(['tickets', 'billets', 'tickets'], 'https://ceramicbrussels27.tickoweb.be/selection'),
+      ],
+      'link',
+    ),
+    spotlights: withKeys(
+      [
+        {
+          kicker: str('guest of honour', 'invitée d’honneur', 'eregast'),
+          headline: text('French artist Marion Verboom is the guest of honour of ceramic brussels 2027.', 'L’artiste française Marion Verboom est l’invitée d’honneur de ceramic brussels 2027.', 'De Franse kunstenares Marion Verboom is eregast van ceramic brussels 2027.'),
+          link: route(['discover her work', 'découvrir son travail', 'ontdek haar werk'], 'guest-of-honour'),
+        },
+        {
+          kicker: str('partner spotlight', 'partenaire à la une', 'partner in de kijker'),
+          headline: text('The Hoxton joins ceramic brussels as a new partner for 2027.', 'The Hoxton rejoint ceramic brussels comme nouveau partenaire pour 2027.', 'The Hoxton wordt nieuwe partner van ceramic brussels voor 2027.'),
+          link: route(['discover The Hoxton', 'découvrir The Hoxton', 'ontdek The Hoxton'], 'partners', 'hotel'),
+        },
+      ],
+      'spotlight',
+    ),
+    banner: {
+      text: str('gallery applications are open', 'les candidatures galeries sont ouvertes', 'aanmeldingen voor galerieën zijn open'),
+      link: { _type: 'link', kind: 'internal', internal: weak(id.page('gallery-applications')), label: str('apply', 'candidater', 'aanmelden') },
+    },
+    figuresLink: route(['more on the fair', 'en savoir plus sur la foire', 'meer over de beurs'], 'about'),
+    closingBanner: {
+      text: str('ceramic brussels 2026 in images', 'ceramic brussels 2026 en images', 'ceramic brussels 2026 in beeld'),
+      link: route(['in images', 'en images', 'in beeld'], 'about', 'images'),
     },
   });
 
   docs.push({
     _id: 'navigation',
     _type: 'navigation',
-    items: [
-      { _key: 'n1', _type: 'navItem', kind: 'route', route: 'exhibitors', label: str('Exhibitors', 'Exposants', 'Exposanten') },
-      { _key: 'n2', _type: 'navItem', kind: 'route', route: 'artists', label: str('Artists', 'Artistes', 'Kunstenaars') },
-      { _key: 'n3', _type: 'navItem', kind: 'route', route: 'programme', label: str('Programme', 'Programme', 'Programma') },
-      { _key: 'n4', _type: 'navItem', kind: 'route', route: 'news', label: str('News', 'Actualités', 'Nieuws') },
-      { _key: 'n5', _type: 'navItem', kind: 'page', page: ref(`${PREFIX}page-about`), label: str('About', 'À propos', 'Over') },
-      { _key: 'n6', _type: 'navItem', kind: 'page', page: ref(`${PREFIX}page-visitors`), label: str('Visit', 'Infos pratiques', 'Bezoek') },
-      { _key: 'n7', _type: 'navItem', kind: 'route', route: 'awards', label: str('Awards', 'Prix', 'Prijzen') },
-      { _key: 'n8', _type: 'navItem', kind: 'route', route: 'partners', label: str('Partners', 'Partenaires', 'Partners') },
-      { _key: 'n9', _type: 'navItem', kind: 'route', route: 'press', label: str('Press', 'Presse', 'Pers') },
-      { _key: 'n10', _type: 'navItem', kind: 'route', route: 'editions', label: str('Past editions', 'Éditions précédentes', 'Vorige edities') },
-      { _key: 'n11', _type: 'navItem', kind: 'page', page: ref(`${PREFIX}page-applications`), label: str('Apply', 'Candidater', 'Aanmelden') },
-    ],
-    footerItems: [
-      { _key: 'f1', _type: 'navItem', kind: 'page', page: ref(`${PREFIX}page-visitors`), label: str('Visitor information', 'Infos pratiques', 'Praktische info') },
-      { _key: 'f2', _type: 'navItem', kind: 'external', url: 'https://www.instagram.com/ceramic.brussels/', label: str('Instagram', 'Instagram', 'Instagram') },
-    ],
+    items: withKeys(
+      [
+        {
+          label: str('exhibitors', 'exposants', 'exposanten'),
+          kind: 'route',
+          route: 'exhibitors',
+          children: withKeys(
+            [
+              { label: str('galleries', 'galeries', 'galerieën'), kind: 'route', route: 'exhibitors', anchor: 'galleries' },
+              { label: str('country focus', 'focus pays', 'landenfocus'), kind: 'route', route: 'exhibitors', anchor: 'focus' },
+              { label: str('publishers', 'éditeurs', 'uitgevers'), kind: 'route', route: 'exhibitors', anchor: 'publishers' },
+              { label: str('jury prize 2026', 'prix du jury 2026', 'juryprijs 2026'), kind: 'route', route: 'exhibitors', anchor: 'jury-prize' },
+            ],
+            'navChild',
+          ),
+        },
+        { label: str('guest of honour', 'invitée d’honneur', 'eregast'), kind: 'route', route: 'guest-of-honour' },
+        {
+          label: str('art prize', 'prix', 'prijs'),
+          kind: 'route',
+          route: 'art-prize',
+          children: withKeys(
+            ['about', 'laureates', 'awards', 'jury'].map((a, i) => ({
+              label: str(a, ['à propos', 'lauréats', 'prix', 'jury'][i], ['over', 'laureaten', 'prijzen', 'jury'][i]),
+              kind: 'route',
+              route: 'art-prize',
+              anchor: a,
+            })),
+            'navChild',
+          ),
+        },
+        {
+          label: str('programme', 'programme', 'programma'),
+          kind: 'route',
+          route: 'programme',
+          children: withKeys(
+            [
+              { label: str('ceramic brussels x La Cambre'), kind: 'route', route: 'programme', anchor: 'la-cambre' },
+              { label: str('talks'), kind: 'route', route: 'programme', anchor: 'talks' },
+              { label: str('awards', 'prix', 'prijzen'), kind: 'route', route: 'programme', anchor: 'awards' },
+              { label: str('VIP'), kind: 'route', route: 'programme', anchor: 'vip' },
+            ],
+            'navChild',
+          ),
+        },
+        { label: str('partners', 'partenaires', 'partners'), kind: 'route', route: 'partners' },
+        {
+          label: str('visitors info', 'infos pratiques', 'praktische info'),
+          kind: 'route',
+          route: 'visit',
+          children: withKeys(
+            [
+              { label: str('opening hours', 'horaires', 'openingsuren'), kind: 'route', route: 'visit', anchor: 'opening-hours' },
+              { label: str('access', 'accès', 'bereikbaarheid'), kind: 'route', route: 'visit', anchor: 'access' },
+              { label: str('food & drinks'), kind: 'route', route: 'visit', anchor: 'food-drinks' },
+              { label: str('floor plan', 'plan', 'plattegrond'), kind: 'route', route: 'visit', anchor: 'floor-plan' },
+              { label: str('FAQ'), kind: 'route', route: 'visit', anchor: 'faq' },
+            ],
+            'navChild',
+          ),
+        },
+        {
+          label: str('about', 'à propos', 'over'),
+          kind: 'route',
+          route: 'about',
+          children: withKeys(
+            [
+              { label: str('ceramic brussels'), kind: 'route', route: 'about', anchor: 'the-fair' },
+              { label: str('advisory board', 'comité consultatif', 'adviesraad'), kind: 'route', route: 'about', anchor: 'advisory-board' },
+              { label: str('team', 'équipe', 'team'), kind: 'route', route: 'about', anchor: 'team' },
+              { label: str('press', 'presse', 'pers'), kind: 'route', route: 'about', anchor: 'press' },
+              { label: str('images', 'images', 'beelden'), kind: 'route', route: 'about', anchor: 'images' },
+            ],
+            'navChild',
+          ),
+        },
+      ],
+      'navItem',
+    ),
+    footerItems: withKeys(
+      [
+        { label: str('instagram'), kind: 'external', url: 'https://www.instagram.com/ceramic.brussels/' },
+        { label: str('newsletter'), kind: 'external', url: 'https://mailchi.mp/ceramic/ceramic-brussels' },
+        { label: str('linkedin'), kind: 'external', url: 'https://www.linkedin.com/company/ceramic-brussels/' },
+      ],
+      'navItem',
+    ),
   });
 
   for (const e of EDITIONS) {
+    const { year, guestOfHonour, ...rest } = e;
     docs.push({
-      _id: e.id,
+      _id: id.edition(year),
       _type: 'edition',
-      year: e.year,
-      title: e.title,
-      startDate: e.startDate,
-      endDate: e.endDate,
+      year,
+      title: str(`ceramic brussels ${year}`),
       venue: 'Tour & Taxis, Brussels',
-      isCurrent: e.isCurrent,
-      ...(e.intro ? { intro: e.intro } : {}),
-      ...(e.ticketsUrl ? { ticketsUrl: e.ticketsUrl } : {}),
-      ...(e.catalogueUrl ? { catalogueUrl: e.catalogueUrl } : {}),
+      isCurrent: !!e.isCurrent,
+      ...(guestOfHonour ? { guestOfHonour: ref(guestOfHonour) } : {}),
+      ...rest,
     });
   }
 
   for (const a of ARTISTS) {
+    const { name, sections, works, ...rest } = a;
     docs.push({
-      _id: a.id,
+      _id: artistId(name),
       _type: 'artist',
-      name: a.name,
-      slug: { _type: 'slug', current: a.id.replace(`${PREFIX}artist-`, '') },
-      nationality: a.nationality,
-      birthYear: a.birthYear,
-      isGuestOfHonour: !!a.isGuestOfHonour,
-      bio: a.bio,
-      works: (a.works ?? []).map((w, i) => ({
-        _type: 'artwork',
-        _key: `w${i}`,
-        title: w.title,
-        year: w.year,
-        materials: w.materials,
-        dimensions: w.dimensions,
-      })),
+      name,
+      slug: { _type: 'slug', current: slugOf(name) },
+      ...rest,
+      ...(sections ? { sections: withKeys(sections, 'contentSection') } : {}),
+      ...(works ? { works: withKeys(works, 'artwork') } : {}),
     });
   }
 
-  for (const x of EXHIBITORS) {
+  for (const x of EXHIBITORS_2027) {
+    const { name, artists, ...rest } = x;
     docs.push({
-      _id: x.id,
+      _id: id.exhibitor(name, 2027),
       _type: 'exhibitor',
-      name: x.name,
-      slug: { _type: 'slug', current: x.id.replace(`${PREFIX}exhibitor-`, '') },
-      edition: ref(`${PREFIX}edition-2026`),
-      booth: x.booth,
-      country: x.country,
-      city: x.city,
-      website: x.website,
-      instagram: x.instagram,
-      bio: x.bio,
-      artists: refArray(x.artists ?? []),
-    });
-  }
-
-  for (const n of NEWS) {
-    docs.push({
-      _id: n.id,
-      _type: 'newsItem',
-      title: n.title,
-      slug: { _type: 'slug', current: n.slug },
-      publishedAt: n.publishedAt,
-      category: n.category,
-      excerpt: n.excerpt,
-      body: n.body,
-      edition: ref(`${PREFIX}edition-2026`),
-    });
-  }
-
-  for (const p of PAGES) {
-    docs.push({
-      _id: p.id,
-      _type: 'page',
-      title: p.title,
-      navLabel: p.navLabel,
-      navOrder: p.navOrder,
-      slug: {
-        en: { _type: 'slug', current: p.slug.en },
-        fr: { _type: 'slug', current: p.slug.fr },
-        nl: { _type: 'slug', current: p.slug.nl },
-      },
-      intro: p.intro,
-      body: p.body,
-    });
-  }
-
-  for (const e of PROGRAMME) {
-    docs.push({
-      _id: e.id,
-      _type: 'programmeEvent',
-      title: e.title,
-      slug: { _type: 'slug', current: e.slug },
-      edition: ref(`${PREFIX}edition-2026`),
-      startsAt: e.startsAt,
-      endsAt: e.endsAt,
-      kind: e.kind,
-      location: e.location,
-      speakers: refArray(e.speakers ?? []),
-      description: e.description,
+      name,
+      slug: { _type: 'slug', current: slugOf(name) },
+      edition: ref(id.edition(2027)),
+      kind: 'gallery',
+      soloShow: false,
+      inCountryFocus: false,
+      ...rest,
+      artists: refs((artists ?? []).map(artistId)),
     });
   }
 
   for (const p of PARTNERS) {
+    const { name, ...rest } = p;
+    docs.push({ _id: partnerId(name), _type: 'partner', name, ...rest });
+  }
+
+  for (const [i, l] of ['Lorie Ballage', 'Uriel Caspi', 'Danny Cremers', 'Kira Fröse', 'Ninon Hivert', 'Santiago Insignares-Martínez', 'Faye Papargyropoulou', 'Marie Pic', 'Angelika Stefaniak', 'Walter Yu'].entries()) {
     docs.push({
-      _id: p.id,
-      _type: 'partner',
-      name: p.name,
-      tier: p.tier,
-      order: p.order,
-      ...(p.url ? { url: p.url } : {}),
+      _id: `${PREFIX}laureate-2026-${slugOf(l)}`,
+      _type: 'laureate',
+      artist: ref(artistId(l)),
+      edition: ref(id.edition(2026)),
+      order: i + 1,
     });
   }
 
-  for (const p of PRESS) {
+  for (const [i, a] of AWARDS.entries()) {
+    const { year, laureates, partner, exhibitor, ...rest } = a;
     docs.push({
-      _id: p.id,
-      _type: 'pressClip',
-      title: p.title,
-      outlet: p.outlet,
-      publishedAt: p.publishedAt,
-      language: p.language,
-      ...(p.url ? { url: p.url } : {}),
-    });
-  }
-
-  for (const a of AWARDS) {
-    docs.push({
-      _id: a.id,
+      _id: `${PREFIX}award-${year}-${i + 1}`,
       _type: 'award',
-      name: a.name,
-      edition: ref(a.edition),
-      ...(a.winnerArtist ? { winnerArtist: ref(a.winnerArtist) } : {}),
-      ...(a.winnerExhibitor ? { winnerExhibitor: ref(a.winnerExhibitor) } : {}),
-      citation: a.citation,
+      edition: ref(id.edition(year)),
+      laureates: refs((laureates ?? []).map(artistId)),
+      ...(partner ? { partner: ref(partnerId(partner)) } : {}),
+      ...(exhibitor ? { winnerExhibitor: ref(id.exhibitor(exhibitor[0], exhibitor[1])) } : {}),
+      ...rest,
     });
+  }
+
+  for (const p of PEOPLE) {
+    const { name, year, ...rest } = p;
+    docs.push({
+      _id: id.person(name, year),
+      _type: 'person',
+      name,
+      ...(year ? { edition: ref(id.edition(year)) } : {}),
+      ...rest,
+    });
+  }
+
+  for (const [i, ev] of PROGRAMME.entries()) {
+    const { year, speakers, title, ...rest } = ev;
+    docs.push({
+      _id: `${PREFIX}event-${year}-${i + 1}`,
+      _type: 'programmeEvent',
+      title,
+      slug: { _type: 'slug', current: slugOf(title.en) },
+      edition: ref(id.edition(year)),
+      speakers: refs((speakers ?? []).map(artistId)),
+      ...rest,
+    });
+  }
+
+  for (const p of PAGES) {
+    const { key: k, sections, slug, ...rest } = p;
+    // Hub tabs are matched to the frontend's tab list on their English slug
+    // (see src/lib/hubs.ts), so a tab page's slug is the tab slug in every
+    // language: "about-the-fair" → "the-fair".
+    const tabSlug = k.replace(/^(about|art-prize|programme|visit)-/, '');
+    docs.push({
+      _id: id.page(k),
+      _type: 'page',
+      ...rest,
+      ...(sections ? { sections: withKeys(sections, 'contentSection') } : {}),
+      slug: {
+        en: { _type: 'slug', current: slug?.en ?? tabSlug },
+        fr: { _type: 'slug', current: slug?.fr ?? tabSlug },
+        nl: { _type: 'slug', current: slug?.nl ?? tabSlug },
+      },
+    });
+  }
+
+  for (const n of NEWS) {
+    const { slug, year, ...rest } = n;
+    docs.push({
+      _id: `${PREFIX}news-${slug}`,
+      _type: 'newsItem',
+      slug: { _type: 'slug', current: slug },
+      edition: ref(id.edition(year)),
+      ...rest,
+    });
+  }
+
+  for (const [i, p] of PRESS.entries()) {
+    docs.push({ _id: `${PREFIX}press-${i + 1}`, _type: 'pressClip', ...p });
   }
 
   return docs;
@@ -630,17 +1152,46 @@ if (clear) {
     console.log('Nothing to clear.');
     process.exit(0);
   }
+  // Earlier seeds pointed the singletons at demo documents with strong
+  // references, which would block the delete. Detach them first.
+  // Each on its own: a patch on a singleton that does not exist yet would
+  // fail the whole transaction and leave the others in place.
+  const detach = [
+    ['navigation', ['items', 'footerItems']],
+    ['siteSettings', ['practicalInfo.hotelDeal']],
+    ['homepage', ['banner', 'spotlights', 'quickLinks', 'heroLink', 'figuresLink', 'closingBanner']],
+  ];
+  for (const [docId, paths] of detach) {
+    await client.patch(docId).unset(paths).commit().catch(() => {});
+  }
   const tx = ids.reduce((t, id) => t.delete(id).delete(`drafts.${id}`), client.transaction());
   await tx.commit();
-  console.log(`Deleted ${ids.length} seeded documents. siteSettings was left in place.`);
+  console.log(`Deleted ${ids.length} seeded documents. siteSettings, homepage and navigation were left in place.`);
   process.exit(0);
 }
 
 const docs = buildDocs();
 
 // References must exist before the documents that point at them, so commit in
-// dependency order rather than one big transaction.
-const order = ['siteSettings', 'edition', 'artist', 'exhibitor', 'newsItem', 'page', 'programmeEvent', 'partner', 'pressClip', 'award', 'navigation'];
+// dependency order rather than one big transaction. Sanity tolerates dangling
+// references at write time; the order is for editors opening the Studio
+// mid-seed and for the strong-reference checks on delete.
+const order = [
+  'artist',
+  'edition',
+  'partner',
+  'siteSettings',
+  'exhibitor',
+  'laureate',
+  'award',
+  'person',
+  'programmeEvent',
+  'page',
+  'newsItem',
+  'pressClip',
+  'homepage',
+  'navigation',
+];
 
 for (const type of order) {
   const batch = docs.filter((d) => d._type === type);
