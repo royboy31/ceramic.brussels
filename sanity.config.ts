@@ -3,6 +3,7 @@ import { structureTool } from 'sanity/structure';
 import { schemaTypes } from './src/sanity/schemaTypes';
 import { structure } from './src/sanity/structure';
 import { StudioNavbar } from './src/sanity/components/StudioNavbar';
+import { UsersTool } from './src/sanity/components/UsersTool';
 
 // Singletons must not be creatable or deletable from the Studio.
 const SINGLETONS = new Set(['siteSettings', 'navigation', 'homepage']);
@@ -13,6 +14,23 @@ export default defineConfig({
   projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
   dataset: import.meta.env.PUBLIC_SANITY_DATASET,
   plugins: [structureTool({ structure })],
+
+  /**
+   * Site accounts, managed from inside the Studio.
+   *
+   * They are not Sanity project members: they live in D1 and are administered
+   * over /api/users on this same origin. They cannot be documents, because
+   * this dataset is ACL-public - it answers queries with no credentials, so a
+   * password hash stored in it would be world-readable.
+   */
+  tools: (prev) => [
+    ...prev,
+    {
+      name: 'users',
+      title: 'Users',
+      component: UsersTool,
+    },
+  ],
 
   // Language selector lives in the Studio chrome, so one choice applies to
   // every localised field in every document.

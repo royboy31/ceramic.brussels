@@ -1,0 +1,842 @@
+[
+  {
+    "module": "parisPages",
+    "id": 1,
+    "published": true,
+    "listingTitle": "Manifest Paris",
+    "depth": 0,
+    "title": {
+      "en": "Manifest Paris",
+      "fr": "Manifest Paris",
+      "nl": "Manifest Paris"
+    },
+    "slug": {
+      "en": "manifest-paris",
+      "fr": "manifest-paris",
+      "nl": "manifest-paris"
+    },
+    "description": {
+      "en": "<p></p>",
+      "fr": "",
+      "nl": ""
+    },
+    "attrs": {},
+    "media": [],
+    "blocks": [
+      {
+        "id": 755,
+        "position": 0,
+        "type": "text-1col",
+        "text": {
+          "en": "<p>From <strong>October 20th to 25th 2025</strong>, ceramic brussels will orchestrate a new event - entitled <strong>Manifest Paris</strong> - conceived in the form of an ephemeral, creative and committed capsule in Paris.</p><p>Manifest Paris is a capsule event designed to showcase ceramics at the heart of Paris Art Week, close to the Grand Palais and in the prestigious Quartier Matignon (8th arrondissement).</p><p>The event is conceived as a 6-day artistic and festive manifesto. It will be built around an original scenography established in dialogue with a dozen galleries invited to contribute actively to the effervescence of the City.</p>",
+          "fr": "<p><strong>Du 20 au 25 octobre 2025</strong>, ceramic brussels orchestrera un nouvel événement - intitulé <strong>Manifest Paris</strong> - conçu sous la forme d'une capsule éphémère, créative et engagée à Paris.</p><p>Manifest Paris est un événement capsule conçu pour mettre en valeur la céramique au cœur de la Paris Art Week, à proximité du Grand Palais et dans le prestigieux Quartier Matignon (8ème arrondissement).</p><p>L'événement est conçu comme un manifeste artistique et festif de 6 jours. Il s'articule autour d'une scénographie originale établie en dialogue avec une dizaine de galeries invitées à contribuer activement à l'effervescence de la Ville.</p>",
+          "nl": "<p><strong>Van 20 tot 25 oktober 2025</strong> organiseert ceramic brussels een nieuw evenement - <strong>Manifest Paris</strong> genaamd - in de vorm van een kortstondige, creatieve en geëngageerde capsule in Parijs.</p><p>Manifest Paris is een capsule-evenement dat keramiek presenteert in het hart van de Parijse kunstweek, vlakbij het Grand Palais en in het prestigieuze Quartier Matignon (8e arrondissement).</p><p>Het evenement is opgevat als een 6-daags artistiek en feestelijk manifest. Het wordt opgebouwd rond een originele scenografie die tot stand komt in dialoog met een twaalftal galeries die zijn uitgenodigd om actief bij te dragen aan de bruisendheid van de stad.</p>"
+        },
+        "media": []
+      },
+      {
+        "id": 754,
+        "position": 1,
+        "type": "text-2col",
+        "text": {
+          "en": "<p>Since its inaugural edition in 2024, ceramic brussels has established itself as the leading international fair campaigning for the defence and promotion of ceramics in the field of contemporary art.</p><p>Unanimously acclaimed for the quality of its artistic direction and scenography, the fair is now an international benchmark.</p><p>It enjoys constant media attention, supported by a vast community of collectors and enlightened professionals.</p><p>Thanks to the strength of its dialogue with galleries, partners and institutions, ceramic brussels is committed to developing original, bold and remarkable initiatives to promote ceramics around the world.</p><p></p>",
+          "fr": "<p>Depuis son édition inaugurale en 2024, ceramic brussels s'est imposée comme la principale foire internationale militant pour la défense et la promotion de la céramique dans le champ de l'art contemporain.</p><p>Unanimement saluée pour la qualité de sa direction artistique et de sa scénographie, la foire est aujourd'hui une référence internationale.</p><p>Elle bénéficie d'une attention médiatique constante, soutenue par une vaste communauté de collectionneur·euses et de professionnel·les éclairé·es.</p><p>Grâce à la force de son dialogue avec les galeries, les partenaires et les institutions, ceramic brussels s'engage à développer des initiatives originales, audacieuses et remarquables pour promouvoir la céramique dans le monde.</p>",
+          "nl": "<p>Sinds de eerste editie in 2024 heeft ceramic brussels zich gevestigd als de toonaangevende internationale beurs die zich inzet voor de verdediging en promotie van keramiek in het veld van de hedendaagse kunst.</p><p>De beurs wordt unaniem geprezen voor de kwaliteit van haar artistieke richting en scenografie en is nu een internationale referentie.</p><p>De beurs geniet constante media-aandacht en wordt gesteund door een grote gemeenschap van verzamelaars en verlichte professionals.</p><p>Dankzij de sterke dialoog met galeries, partners en instellingen zet ceramic brussels zich in om originele, gedurfde en opmerkelijke initiatieven te ontwikkelen om keramiek wereldwijd te promoten.</p>"
+        },
+        "media": []
+      }
+    ],
+    "parentId": null
+  },
+  {
+    "module": "parisPages",
+    "id": 2,
+    "published": true,
+    "listingTitle": "Venue",
+    "depth": 1,
+    "title": {
+      "en": "Venue",
+      "fr": "Lieu",
+      "nl": "Locatie"
+    },
+    "slug": {
+      "en": "venue",
+      "fr": "lieu",
+      "nl": "locatie"
+    },
+    "description": {
+      "en": "<p></p>",
+      "fr": "",
+      "nl": ""
+    },
+    "attrs": {},
+    "media": [],
+    "blocks": [
+      {
+        "id": 786,
+        "position": 0,
+        "type": "title",
+        "title": {
+          "en": "Galerie Charpentier"
+        },
+        "media": []
+      },
+      {
+        "id": 752,
+        "position": 1,
+        "type": "text-2col",
+        "text": {
+          "en": "<p>The gallery boasts an exceptional and unique location. A prestigious address, steeped in history and a major art venue for 50 years, also known for having housed Sotheby’s Paris headquarters for almost 25 years.<br><br><br>The space is located next to the Palais de l’Élysée, and boasts 3 windows on rue Faubourg Saint-Honoré.</p><p>Currently closed to the public, the gallery will exceptionally open its doors to welcome Manifest Paris before closing them again for renovations.</p>",
+          "fr": "<p>La galerie bénéficie d'un emplacement exceptionnel et unique. Une adresse prestigieuse, chargée d'histoire et haut lieu de l'art depuis 50 ans, également connue pour avoir abrité le siège parisien de Sotheby's pendant près de 25 ans.</p><p></p><p>L'espace est situé à côté du Palais de l'Élysée et dispose de 3 fenêtres sur la rue Faubourg Saint-Honoré.</p><p>Actuellement fermée au public, la galerie ouvrira exceptionnellement ses portes pour accueillir Manifest Paris avant de les refermer pour des travaux de rénovation.</p>",
+          "nl": "<p>De galerie heeft een uitzonderlijke en unieke locatie. Een prestigieus adres met een rijke geschiedenis, al 50 jaar een belangrijke kunstlocatie en ook bekend omdat het hoofdkantoor van Sotheby's Parijs er al bijna 25 jaar is gevestigd.</p><p></p><p>De ruimte ligt naast het Palais de l'Élysée en heeft 3 ramen aan de rue Faubourg Saint-Honoré.</p><p>Momenteel is de galerie gesloten voor het publiek, maar bij wijze van uitzondering zal ze haar deuren openen om Manifest Paris te verwelkomen voordat ze weer gesloten wordt voor renovatiewerkzaamheden.</p>"
+        },
+        "media": []
+      },
+      {
+        "id": 756,
+        "position": 2,
+        "type": "image",
+        "media": [
+          {
+            "id": 1761,
+            "role": "image",
+            "filename": "14.JPG",
+            "url": "https://ceramic.brussels/img/cb994ead-11ee-411f-8a02-83261f49b34a/14.jpg",
+            "width": 8688,
+            "height": 4887,
+            "tags": [],
+            "alt": {},
+            "caption": {},
+            "crop": {
+              "w": 8688,
+              "h": 4887,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ]
+      },
+      {
+        "id": 757,
+        "position": 3,
+        "type": "title",
+        "title": {
+          "en": "Quartier Matignon / Saint-Honoré",
+          "nl": null,
+          "fr": null
+        },
+        "media": []
+      },
+      {
+        "id": 758,
+        "position": 4,
+        "type": "text-2col",
+        "text": {
+          "en": "<p>Located right next to the Grand Palais, the Matignon district is home to some of the finest luxury brands in Paris (Hermès, Gucci, Chanel, Stella McCartney, etc.), the world’s leading auction houses (Sotheby’s, Christie’s, Artcurial, Piasa, etc), the 5-star Le Bristol hotel and a large number of galleries, most of which have come together under the umbrella of the Association Matignon Saint-Honoré.</p><p>At the initiative of Hélène Bailly, Raphaël Durazzo and Alexis Lartigue, the Association Matignon Saint-Honoré now brings together nearly 40 galleries specialising in antique, modern, contemporary and design art, both in the first and second markets, located at the junction of Avenue Matignon and Rue du Faubourg Saint-Honoré. Its aim is to promote the latest artistic trends and create events in the 8th arrondissement of Paris.</p><p>During Art Week in Paris, the Association Matignon Saint-Honoré organises a wide range of events, including vernissages, performances and VIP visits.</p>",
+          "nl": "<p>De wijk Matignon ligt vlak naast het Grand Palais en herbergt enkele van de beste luxemerken in Parijs (Hermès, Gucci, Chanel, Stella McCartney, enz.), 's werelds toonaangevende veilinghuizen (Sotheby's, Christie's, Artcurial, Piasa, enz.), het 5-sterrenhotel Le Bristol en een groot aantal galerieën, waarvan de meeste zich hebben verenigd onder de paraplu van de Association Matignon Saint-Honoré.</p><p>Op initiatief van Hélène Bailly, Raphaël Durazzo en Alexis Lartigue verenigt de Association Matignon Saint-Honoré nu bijna 40 galeries die gespecialiseerd zijn in antieke, moderne, hedendaagse en designkunst, zowel op de eerste als op de tweede markt, gelegen op de kruising van de Avenue Matignon en de Rue du Faubourg Saint-Honoré. Het doel is om de nieuwste artistieke trends te promoten en evenementen te creëren in het 8e arrondissement van Parijs.</p><p>Tijdens de kunstweek in Parijs organiseert de Association Matignon Saint-Honoré een breed scala aan evenementen, waaronder vernissages, optredens en VIP-bezoeken.</p>",
+          "fr": "<p>Situé à proximité immédiate du Grand Palais, le quartier Matignon abrite les plus grandes marques de luxe parisiennes (Hermès, Gucci, Chanel, Stella McCartney,...), les plus grandes maisons de ventes aux enchères du monde (Sotheby's, Christie's, Artcurial, Piasa,...), l'hôtel 5 étoiles Le Bristol et un grand nombre de galeries, pour la plupart réunies au sein de l'Association Matignon Saint-Honoré.</p><p>A l'initiative d'Hélène Bailly, Raphaël Durazzo et Alexis Lartigue, l'Association Matignon Saint-Honoré regroupe aujourd'hui près de 40 galeries d'art ancien, moderne, contemporain et design, sur le premier et le second marché, situées au croisement de l'avenue Matignon et de la rue du Faubourg Saint-Honoré. Son objectif est de promouvoir les nouvelles tendances artistiques et de créer des événements dans le 8e arrondissement de Paris.</p><p>Pendant la Semaine de l'Art à Paris, l'Association Matignon Saint-Honoré organise de nombreux événements : vernissages, performances et visites VIP.</p>"
+        },
+        "media": []
+      },
+      {
+        "id": 759,
+        "position": 5,
+        "type": "image",
+        "media": [
+          {
+            "id": 1799,
+            "role": "image",
+            "filename": "MP25_Plan quartier_OK.png",
+            "url": "https://ceramic.brussels/img/cd320e24-5f47-4ad9-a908-3a4d341a675c/mp25-plan-quartier-ok.png",
+            "width": 2260,
+            "height": 1910,
+            "tags": [],
+            "alt": {},
+            "caption": {},
+            "crop": {
+              "w": 2260,
+              "h": 1910,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ]
+      }
+    ],
+    "parentId": 1
+  },
+  {
+    "module": "parisPages",
+    "id": 6,
+    "published": true,
+    "listingTitle": "Team",
+    "depth": 1,
+    "title": {
+      "en": "Team",
+      "fr": "Équipe",
+      "nl": "Team"
+    },
+    "slug": {
+      "en": "team",
+      "fr": "equipe",
+      "nl": "team"
+    },
+    "description": {
+      "en": "",
+      "fr": "",
+      "nl": ""
+    },
+    "attrs": {},
+    "media": [],
+    "blocks": [
+      {
+        "id": 760,
+        "position": 0,
+        "type": "person",
+        "title": {
+          "en": "Gilles Parmentier"
+        },
+        "text": {
+          "en": "<p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"mailto:gilles@ceramic.brussels\">gilles@ceramic.brussels</a><br>+32 476 91 07 87</p>"
+        },
+        "subtitle": {
+          "en": "Co-director",
+          "fr": "Co-directeur",
+          "nl": "Co-directeur"
+        },
+        "media": []
+      },
+      {
+        "id": 761,
+        "position": 1,
+        "type": "person",
+        "title": {
+          "en": "Jean-Marc Dimanche"
+        },
+        "text": {
+          "en": "<p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"mailto:jean-marc@ceramic.brussels\"><u>jean-marc@ceramic.brussels</u></a><br>+33 6 16 24 08 28</p>"
+        },
+        "subtitle": {
+          "en": "Co-director",
+          "fr": "Co-directeur",
+          "nl": "Co-directeur"
+        },
+        "media": []
+      },
+      {
+        "id": 762,
+        "position": 2,
+        "type": "person",
+        "text": {
+          "en": "<p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"mailto:tiphaine@ceramic.brussels\"><u>tiphaine@ceramic.brussels</u></a><br>+32 492 57 65 51</p>"
+        },
+        "title": {
+          "en": "Tiphaine Quéguineur"
+        },
+        "subtitle": {
+          "en": "Event coordinator",
+          "fr": "Coordinatrice de la foire",
+          "nl": "beurscoördinator"
+        },
+        "media": []
+      },
+      {
+        "id": 763,
+        "position": 3,
+        "type": "person",
+        "title": {
+          "en": "Coralie Pay"
+        },
+        "subtitle": {
+          "en": "Production coordinator",
+          "fr": "Coordinatrice de production",
+          "nl": "Productie coördinator"
+        },
+        "media": []
+      },
+      {
+        "id": 765,
+        "position": 4,
+        "type": "title",
+        "subtitle": {
+          "en": null,
+          "fr": null
+        },
+        "title": {
+          "en": "Collaborators",
+          "fr": "Collaborateur·rices",
+          "nl": "Medewerkers"
+        },
+        "media": []
+      },
+      {
+        "id": 766,
+        "position": 5,
+        "type": "person",
+        "text": {
+          "en": "<p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"http://www.mariedouel.com\">www.mariedouel.com</a></p>"
+        },
+        "title": {
+          "en": "Marie Douel Studio",
+          "nl": null
+        },
+        "subtitle": {
+          "en": "Exhibition design & scenography studio",
+          "fr": "Studio de conception d'expositions et de scénographie",
+          "nl": "Tentoonstelling ontwerp & scenografie studio"
+        },
+        "media": []
+      },
+      {
+        "id": 767,
+        "position": 6,
+        "type": "person",
+        "title": {
+          "en": "Pam&Jenny"
+        },
+        "text": {
+          "en": "<p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"http://pametjenny.be\"><u>pametjenny.be</u></a></p>"
+        },
+        "subtitle": {
+          "en": "Visual identity",
+          "fr": "Identité visuelle",
+          "nl": "Visuele identiteit"
+        },
+        "media": []
+      },
+      {
+        "id": 768,
+        "position": 7,
+        "type": "person",
+        "text": {
+          "en": "<p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"http://variable.club\"><u>variable.club</u></a></p>"
+        },
+        "title": {
+          "en": "Variable"
+        },
+        "subtitle": {
+          "en": "Web development",
+          "fr": "Développement web",
+          "nl": "Webontwikkeling"
+        },
+        "media": []
+      },
+      {
+        "id": 784,
+        "position": 8,
+        "type": "person",
+        "title": {
+          "en": "Favori Paris"
+        },
+        "text": {
+          "en": "<p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.favoriparis.com\">https://www.favoriparis.com</a></p>"
+        },
+        "subtitle": {
+          "en": "press relations France",
+          "nl": "persrelaties Frankrijk",
+          "fr": "relations presse France"
+        },
+        "media": []
+      },
+      {
+        "id": 785,
+        "position": 9,
+        "type": "person",
+        "title": {
+          "en": "Sophie Carrée"
+        },
+        "subtitle": {
+          "en": "Press relations Belgium",
+          "fr": "Relations presse Belgique",
+          "nl": "persrelaties België"
+        },
+        "media": []
+      }
+    ],
+    "parentId": 1
+  },
+  {
+    "module": "parisPages",
+    "id": 7,
+    "published": true,
+    "listingTitle": "Founders",
+    "depth": 1,
+    "title": {
+      "en": "Founders",
+      "fr": "Fondateurs",
+      "nl": "Oprichters"
+    },
+    "slug": {
+      "en": "founders",
+      "fr": "fondateurs",
+      "nl": "oprichters"
+    },
+    "description": {
+      "en": "<p>The fair is co-managed by a Franco-Belgian duo, Gilles Parmentier and Jean-Marc Dimanche, founders and directors of ceramic brussels.</p><p>They both initiated several major exhibitions, artistic events and/or fairs in Luxembourg, France, Belgium, and share the running of the fair, playing on the strength of their complementary skills.</p>",
+      "fr": "<p>La foire est dirigée conjointement par un duo franco-belge : Jean-Marc Dimanche et Gilles Parmentier.</p><p>Ayant respectivement initié plusieurs expositions, événements artistiques et foires (Luxembourg, France, Belgique,...), ils assurent le développement de ceramic brussels, en jouant sur la complémentarité de leurs profils.</p>",
+      "nl": "<p>De beurs wordt gezamenlijk geleid door een Frans-Belgisch duo: Jean-Marc Dimanche en Gilles Parmentier.</p><p>Nadat ze respectievelijk meerdere gerenommeerde tentoonstellingen, kunstevenementen en beurzen in Luxemburg, Frankrijk en België hebben opgezet, staan ze nu in voor de ontwikkeling en het beheer van ceramic brussels. Hun complementaire vaardigheden zijn daarbij een troef.</p>"
+    },
+    "attrs": {},
+    "media": [],
+    "blocks": [
+      {
+        "id": 769,
+        "position": 0,
+        "type": "person",
+        "title": {
+          "en": "Gilles Parmentier (be)",
+          "fr": null,
+          "nl": null
+        },
+        "text": {
+          "en": "<p>After more than 10 years working in communication and human resources, in 2011, Gilles Parmentier was appointed director of the Reporters agency, a reference in Belgium specialised in photojournalism and video.</p><p>In 2017, he founded Studio Gondo (VO Group), which links the artistic world with businesses and brands. From 2018 to 2024, he was Fair Director of Art on Paper, the international drawing fair in Brussels, which he manages and develops. Brussels Drawing Week, organised in partnership with more than 30 Brussels cultural institutions, was his brainchild.</p><p>Today he works on numerous artistic and creative projects and events.</p>",
+          "nl": "<p>Na meer dan 10 jaar in de communicatiesector en de human resources te hebben gewerkt, werd Gilles Parmentier in 2011 directeur van Reporters, een toonaangevend Belgisch agentschap gespecialiseerd in fotojournalistiek en video.</p><p>In 2017 richtte hij Studio Gondo (VO Group) op, dat een brug slaat tussen de kunstwereld en die van bedrijven en merken. Van 2018 tot 2024, was hij Fair Director van Art on Paper, de internationale tekenbeurs in Brussel, die hij beheert en ontwikkelt. Hij is de drijvende kracht achter de Brussels Drawing Week, georganiseerd in samenwerking met meer dan 30 Brusselse culturele instellingen.</p><p>Hij werkt momenteel aan verschillende artistieke en creatieve projecten en evenementen.&nbsp;</p>",
+          "fr": "<p>Après plus de 10 ans d’activités dans la Communication et les ressources humaines, Gilles Parmentier devient en 2011 directeur de l’agence Reporters, acteur de référence belge spécialisée en photojournalisme et en vidéo.</p><p>En 2017, il fonde le Studio Gondo (groupe VO) qui fait le lien entre le milieu artistique et celui des entreprises et des marques. De 2018 à 2024, il était Fair Director d’Art on Paper, le salon international du dessin à Bruxelles, dont il assure la direction et le développement. Il est à l’initiative de la Brussels Drawing Week, organisée en partenariat avec plus de 30 institutions culturelles bruxelloises.</p><p>Il travaille aujourd’hui sur de nombreux projets et événements artistiques et créatifs.</p>"
+        },
+        "subtitle": {
+          "en": "ceramic brussels Co-director, former Art on Paper and Brussels Drawing Week Director",
+          "fr": "Co-Directeur de ceramic brussels, ex-directeur Art on Paper Brussels et de Brussels Drawing Week",
+          "nl": "Codirecteur van ceramic brussels, ex Directeur van Art on Paper Brussels en van Brussels Drawing Week, Creatieve ondernemer"
+        },
+        "media": [
+          {
+            "id": 1757,
+            "role": "portrait",
+            "filename": "230908_c_geoffreyFritsch_photos_GillesParmentier_76768.jpg",
+            "url": "https://ceramic.brussels/img/95428b02-a8ee-41a5-aa11-6bde353275b4/230908-c-geoffreyfritsch-photos-gillesparmentier-76768.jpg",
+            "width": 6000,
+            "height": 4000,
+            "tags": [],
+            "alt": {},
+            "caption": {},
+            "crop": {
+              "w": 2995,
+              "h": 4000,
+              "x": 1488,
+              "y": 0
+            }
+          }
+        ]
+      },
+      {
+        "id": 770,
+        "position": 1,
+        "type": "person",
+        "title": {
+          "en": "Jean-Marc Dimanche (fr)",
+          "fr": null,
+          "nl": null
+        },
+        "subtitle": {
+          "en": "Artistic advisor, General Commissioner of the Biennale De Mains De Maitres Luxembourg, ceramic brussels Co-director",
+          "nl": "Artistiek adviseur en onafhankelijk curator, Algemeen curator van de biënnale De Mains De Maîtres in Luxemburg, Codirecteur van ceramic brussels",
+          "fr": "Co-directeur de ceramic brussels, Conseiller artistique, Commissaire Général de la biennale De Mains De Maitres Luxembourg"
+        },
+        "text": {
+          "en": "<p>After creating and directing the design agency V.I.T.R.I.O.L. for 20 years, he founded in 2008, with Florence Guillier-Bernard, Maison Parisienne, a traveling gallery dedicated to French crafts, in the framework of which he organised more than fifty exhibitions in various European capitals.</p><p>At the beginning of 2016, he was called as advisor to H.R.H. the Grand Duchess Heiress of Luxembourg, and worked with her on the implementation of the biennial De Mains De Maîtres, of which he is now general commissioner.</p><p>In parallel, he directed, between March 2019, the date of its opening in Brussels, and June 2022, ELEVEN STEENS, a private space dedicated to Art and Matter, open to all areas of creation, be it the plastic arts, design, crafts, architecture or fashion.</p><p>Independent curator, he accompanies numerous exhibitions in the field of crafts and contemporary art, whether in France, Belgium and Luxembourg. For the past five years he has been a contributor to the Revue de la Céramique et du Verre and has contributed to numerous catalogues and artists' books.</p><p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.demainsdemaitres.lu\">@dimanche_lab</a><br><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.demainsdemaitres.lu\">demainsdemaitres.lu</a></p>",
+          "nl": "<p>Nadat hij het ontwerpbureau V.I.T.R.I.O.L. had opgericht en 20 jaar lang had geleid, richtte hij in 2008 samen met Florence Guillier-Bernard, Maison Parisienne op, een rondtrekkende galerie gewijd aan Franse kunstambachten, waarbij hij meer dan vijftig tentoonstellingen organiseerde in verschillende Europese hoofdsteden.</p><p>Begin 2016 werd hij benoemd tot adviseur van H.K.H. de Groothertogin van Luxemburg en werkte hij met haar samen aan het opzetten van de biënnale De Mains De Maîtres, waarvan hij nu algemeen curator is.</p><p>Tegelijkertijd leidde hij tussen maart 2019, bij de opening in Brussel, en juni 2022 ELEVEN STEENS, een privéruimte gewijd aan Kunst en Materie, open voor alle domeinen van creativiteit, of het nu gaat om beeldende kunst, design, kunstambachten, architectuur, mode,&nbsp;...</p><p>Als onafhankelijk curator begeleidt hij tal van tentoonstellingen op het vlak van kunstambachten en hedendaagse kunst in Frankrijk, België en Luxemburg. Momenteel werkt hij aan de lancering van de eerste beurs gewijd aan hedendaagse keramiek, ceramic brussels, die in januari 2024 in Brussel zal plaatsvinden.</p><p>De afgelopen vijf jaar heeft hij bijgedragen aan de Revue de la Céramique et du Verre en heeft hij talrijke catalogi en boeken over kunstenaars geschreven.</p><p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.demainsdemaitres.lu\"><u>@dimanche_lab</u></a><br><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.demainsdemaitres.lu\"><u>demainsdemaitres.lu</u></a></p>",
+          "fr": "<p>Après avoir créé et dirigé pendant 20 ans l’agence de design V.I.T.R.I.O.L., il fonde en 2008, avec Florence Guillier-Bernard, Maison Parisienne, galerie itinérante dédiée aux métiers d’art français, dans le cadre de laquelle il organise plus d’une cinquantaine d’expositions dans diverses capitales européennes.&nbsp;</p><p>Début 2016, appelé comme conseiller auprès de S.A.R. la Grande Duchesse Héritière du Luxembourg, il travaille auprès d’elle à la mise en œuvre de la biennale De Mains De Maîtres dont il est aujourd’hui commissaire général.&nbsp;</p><p>Il dirige en parallèle entre mars 2019, date de son ouverture à Bruxelles, et juin 2022, ELEVEN STEENS, espace privé dédié à l’Art et à la Matière, ouvert à tous les domaines de la création, que ce soit les arts plastiques, le design, les métiers d’art, l’architecture ou la mode…&nbsp;</p><p>Commissaire indépendant, il accompagne de nombreuses expositions dans le domaine des métiers d’art et de l’art contemporain, que ce soit en France, en Belgique et au Luxembourg, et travaille actuellement au lancement de la première foire dédiée à la céramique contemporaine, ceramic brussels, qui se tiendra en janvier 2024 à Bruxelles.</p><p>Il collabore depuis cinq ans à la Revue de la Céramique et du Verre et participe à la rédaction de nombreux catalogues et livres d’artistes.</p><p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.demainsdemaitres.lu\"><u>@dimanche_lab</u></a><br><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.demainsdemaitres.lu\"><u>demainsdemaitres.lu</u></a></p>"
+        },
+        "media": [
+          {
+            "id": 1758,
+            "role": "portrait",
+            "filename": "JM- Portrait 5 Â© Julie Calbert.jpg",
+            "url": "https://ceramic.brussels/img/34be95ce-3a08-45fc-bae1-0335a66e0686/jm-portrait-5-a-julie-calbert.jpg",
+            "width": 5476,
+            "height": 3651,
+            "tags": [],
+            "alt": {},
+            "caption": {},
+            "crop": {
+              "w": 2734,
+              "h": 3651,
+              "x": 1375,
+              "y": 0
+            }
+          }
+        ]
+      }
+    ],
+    "parentId": 1
+  },
+  {
+    "module": "parisPages",
+    "id": 4,
+    "published": true,
+    "listingTitle": "Visitors info &amp; programme",
+    "depth": 0,
+    "title": {
+      "en": "Visitors info & programme",
+      "fr": "Infos pratiques & programme",
+      "nl": "Praktische informatie & programma"
+    },
+    "slug": {
+      "en": "visitors-info-and-programme",
+      "fr": "infos-pratiques-and-programme",
+      "nl": "praktische-informatie-and-programma"
+    },
+    "description": {
+      "en": "",
+      "fr": "",
+      "nl": ""
+    },
+    "attrs": {},
+    "media": [],
+    "blocks": [
+      {
+        "id": 772,
+        "position": 0,
+        "type": "title",
+        "subtitle": {
+          "en": null
+        },
+        "title": {
+          "en": "Monday 20th October",
+          "fr": "Lundi 20 octobre",
+          "nl": "Maandag 20 oktober"
+        },
+        "media": []
+      },
+      {
+        "id": 771,
+        "position": 1,
+        "type": "event",
+        "start_hour": "16:00",
+        "end_hour": "22:00",
+        "text": {
+          "en": "<p></p>"
+        },
+        "title": {
+          "en": "VIP opening",
+          "nl": "VIP Vernissage",
+          "fr": "Vernissage VIP"
+        },
+        "media": []
+      },
+      {
+        "id": 774,
+        "position": 2,
+        "type": "title",
+        "subtitle": {
+          "en": null
+        },
+        "title": {
+          "en": "Tuesday 21st October",
+          "fr": "Mardi 21 octobre",
+          "nl": "Dinsdag 21 oktober"
+        },
+        "media": []
+      },
+      {
+        "id": 775,
+        "position": 3,
+        "type": "event",
+        "start_hour": "11:00",
+        "end_hour": "19:00",
+        "title": {
+          "en": "Public opening",
+          "fr": "Ouverture publique",
+          "nl": "Openbare opening"
+        },
+        "media": []
+      },
+      {
+        "id": 776,
+        "position": 4,
+        "type": "title",
+        "subtitle": {
+          "en": null
+        },
+        "title": {
+          "en": "Wednesday 22nd October",
+          "fr": "Mercredi 22 octobre",
+          "nl": "Woensdag 22 oktober"
+        },
+        "media": []
+      },
+      {
+        "id": 777,
+        "position": 5,
+        "type": "event",
+        "start_hour": "11:00",
+        "end_hour": "21:00",
+        "text": {
+          "en": "<p>Special evening</p>"
+        },
+        "title": {
+          "en": "Public opening",
+          "fr": "Ouverture publique",
+          "nl": "Openbare opening"
+        },
+        "media": []
+      },
+      {
+        "id": 778,
+        "position": 6,
+        "type": "title",
+        "subtitle": {
+          "en": null
+        },
+        "title": {
+          "en": "Thursday 23rd October",
+          "fr": "Jeudi 23 octobre",
+          "nl": "Donderdag 23 oktober"
+        },
+        "media": []
+      },
+      {
+        "id": 779,
+        "position": 7,
+        "type": "event",
+        "start_hour": "11:00",
+        "end_hour": "19:00",
+        "title": {
+          "en": "Public opening",
+          "fr": "Ouverture publique",
+          "nl": "Openbare opening"
+        },
+        "media": []
+      },
+      {
+        "id": 780,
+        "position": 8,
+        "type": "title",
+        "subtitle": {
+          "en": null
+        },
+        "title": {
+          "en": "Friday 24th October",
+          "fr": "Vendredi 24 octobre",
+          "nl": "Vrijdag 24 oktober"
+        },
+        "media": []
+      },
+      {
+        "id": 781,
+        "position": 9,
+        "type": "event",
+        "start_hour": "11:00",
+        "end_hour": "19:00",
+        "title": {
+          "en": "Public opening",
+          "fr": "Ouverture publique",
+          "nl": "Openbare opening"
+        },
+        "media": []
+      },
+      {
+        "id": 782,
+        "position": 10,
+        "type": "title",
+        "subtitle": {
+          "en": null
+        },
+        "title": {
+          "en": "Saturday 25th October",
+          "fr": "Samedi 25 octobre",
+          "nl": "Zaterdag 25 oktober"
+        },
+        "media": []
+      },
+      {
+        "id": 783,
+        "position": 11,
+        "type": "event",
+        "start_hour": "11:00",
+        "end_hour": "18:00",
+        "title": {
+          "en": "Public opening",
+          "fr": "Ouverture publique",
+          "nl": "Openbare opening"
+        },
+        "media": []
+      }
+    ],
+    "parentId": null
+  },
+  {
+    "module": "parisPages",
+    "id": 8,
+    "published": true,
+    "listingTitle": "Access",
+    "depth": 1,
+    "title": {
+      "en": "Access",
+      "fr": "Accès",
+      "nl": "Toegang"
+    },
+    "slug": {
+      "en": "access",
+      "fr": "acces",
+      "nl": "toegang"
+    },
+    "description": {
+      "en": "<p><strong>Address of the fair:</strong> <br>76 rue du Faubourg Saint-Honoré, 75008 Paris</p>",
+      "fr": "<p><strong>Adresse de la foire :</strong> <br>76 rue du Faubourg Saint-Honoré, 75008 Paris</p>",
+      "nl": "<p><strong>Adres van de beurs :</strong> <br>76 rue du Faubourg Saint-Honoré, 75008 Paris</p>"
+    },
+    "attrs": {},
+    "media": [],
+    "blocks": [
+      {
+        "id": 787,
+        "position": 0,
+        "type": "accordion",
+        "title": {
+          "en": "By metro",
+          "fr": "En métro",
+          "nl": "Per metro"
+        },
+        "text": {
+          "en": "<p>Lines 1,8,9,13<br>• 7 min walk from Miromesnil <br>• 9 min walk from Champs-Élysées-Clemenceau<br>• 13 min walk from Concorde</p>",
+          "fr": "<p>Lignes 1,8,9,13<br>• 7 min de marche depuis Miromesnil <br>• 9 min de marche depuis Champs-Élysées-Clemenceau<br>• 13 min de marche depuis Concorde</p>",
+          "nl": "<p>Lijnen 1,8,9,13<br>• 7 min lopen van halte Miromesnil<br>• 9 min lopen van halte Champs-Élysées-Clemenceau<br>• 13 min lopen van halte Concorde</p>"
+        },
+        "media": []
+      },
+      {
+        "id": 788,
+        "position": 1,
+        "type": "accordion",
+        "title": {
+          "en": "From the train station",
+          "fr": "De la gare",
+          "nl": "Vanaf het treinstation"
+        },
+        "text": {
+          "en": "<p>• North Station: RER E and metro 13 (20 minutes)<br>• Saint-Lazare Station: Metro 13 (9 minutes)</p>",
+          "fr": "<p>• Gare du Nord : RER E et métro 13 (20 minutes)<br>• Gare Saint-Lazare : Métro 13 (9 minutes)</p>",
+          "nl": "<p>• North Station: RER E en metro 13 (20 minuten)<br>• Saint-Lazare Station: Metro 13 (9 minuten)</p>"
+        },
+        "media": []
+      },
+      {
+        "id": 789,
+        "position": 2,
+        "type": "accordion",
+        "title": {
+          "en": "From the airport",
+          "fr": "De l'aéroport",
+          "nl": "Vanaf de luchthaven"
+        },
+        "text": {
+          "en": "<p>• Charles de Gaulle Airport: RER B and metro 1 (1 hour)<br>• Orly Airport: Metro 14 (45 minutes)</p>",
+          "fr": "<p>• Aéroport Paris-Charles de Gaulle : RER B et métro 1 (1 hour)<br>• Aéroport d'Orly : Métro 14 (45 minutes)</p>",
+          "nl": "<p>• Charles de Gaulle Airport: RER B en metro 1 (1 uur)<br>• Orly Airport: Metro 14 (45 minuten)</p>"
+        },
+        "media": []
+      },
+      {
+        "id": 790,
+        "position": 3,
+        "type": "accordion",
+        "title": {
+          "en": "By car",
+          "fr": "En voiture",
+          "nl": "Met de auto"
+        },
+        "text": {
+          "en": "<p>Paying parking options near the event:<br>• Zenpark 55 rue La Boétie<br>• Q-Park 35 Boulevard Malesherbes<br>• ...</p>",
+          "fr": "<p>Options de parking payant à proximité :<br>• Zenpark 55 rue La Boétie<br>• Q-Park 35 Boulevard Malesherbes<br>• ...</p>",
+          "nl": "<p>Betaald parkeren in de buurt van het evenement:<br>• Zenpark 55 rue La Boétie<br>• Q-Park 35 Boulevard Malesherbes<br>• ...</p>"
+        },
+        "media": []
+      },
+      {
+        "id": 791,
+        "position": 4,
+        "type": "accordion",
+        "title": {
+          "en": "By bike",
+          "fr": "En vélo",
+          "nl": "Met de fiets"
+        },
+        "text": {
+          "en": "<p>Multiple Vélib' Stations are located near the event.<br><br>For prices and more information:<br><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.velib-metropole.fr/en\">https://www.velib-metropole.fr/en</a></p>",
+          "fr": "<p>Plusieurs stations Vélib' à proximité de la foire.<br><br>Pour les prix et plus d'informations :<br><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.velib-metropole.fr/en\">https://www.velib-metropole.fr/en</a></p>",
+          "nl": "<p>Er zijn meerdere Vélib'-stations in de buurt van het evenement.</p><p><br>Voor prijzen en meer informatie:<br><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://www.velib-metropole.fr/en\">https://www.velib-metropole.fr/en</a></p>"
+        },
+        "media": []
+      }
+    ],
+    "parentId": 4
+  },
+  {
+    "module": "parisPages",
+    "id": 3,
+    "published": true,
+    "listingTitle": "Partners &amp; collabs",
+    "depth": 0,
+    "title": {
+      "en": "Partners & collabs",
+      "fr": "Partenaires & collabs",
+      "nl": ""
+    },
+    "slug": {
+      "en": "partners-and-collabs",
+      "fr": "partenaires-and-collabs",
+      "nl": ""
+    },
+    "description": {
+      "en": "",
+      "fr": "",
+      "nl": ""
+    },
+    "attrs": {},
+    "media": [],
+    "blocks": [],
+    "parentId": null
+  },
+  {
+    "module": "parisPages",
+    "id": 9,
+    "published": true,
+    "listingTitle": "Association Matignon Saint-Honoré",
+    "depth": 1,
+    "title": {
+      "en": "Association Matignon Saint-Honoré",
+      "fr": "Association Matignon Saint-Honoré",
+      "nl": "Association Matignon Saint-Honoré"
+    },
+    "slug": {
+      "en": "association-matignon-saint-honore",
+      "fr": "association-matignon-saint-honore",
+      "nl": "association-matignon-saint-honore"
+    },
+    "description": {
+      "en": "<p>The 8th arrondissement, and more specifically the Matignon Saint-Honoré district, has long been an epicentre of artistic and cultural effervescence in the French capital, nurtured by the proximity of major cultural institutions such as the Grand Palais and Petit Palais, as well as by the hosting of prestigious art fairs.&nbsp;Created to inform and support its members, the Association Matignon Saint-Honoré aims to contribute to the ongoing cultural development of the district and to offer greater visibility to its member galleries.</p><p>Manifest Paris is proud to be a partner of the Association Matignon Saint-Honoré this year. This collaboration is part of a shared desire to promote the contemporary art scene and highlight the richness of ceramics at the heart of Paris Art Week. Together, we are committed to highlighting the district and offering art lovers, collectors and professionals a unique experience, underpinned by the excellence and diversity of the participating galleries.</p><p>Along with Manifest Paris, the partners of the Association Matignon Saint-Honoré are:</p><p>Christie’s,&nbsp;Sotheby’s,&nbsp;Artcurial,&nbsp;Piasa,&nbsp;Bonhams - Pierre Cornette de Saint-Cyr,&nbsp;Barnes Art,&nbsp;Puiforcat,&nbsp;la Banque Safra,&nbsp;Le Bristol.&nbsp;</p>",
+      "fr": "<p>Le 8ème&nbsp;arrondissement, et plus spécifiquement le quartier Matignon Saint-Honoré, est depuis longtemps un épicentre de l'effervescence artistique et culturelle de la capitale française, nourri par la proximité de grandes institutions culturelles comme le Grand Palais et le Petit Palais, ainsi que par la tenue de prestigieuses foires d'art.&nbsp;Créée pour informer et soutenir ses membres, l’Association Matignon Saint-Honoré a pour objectif de contribuer au développement culturel&nbsp;permanent du quartier et d’offrir une visibilité accrue&nbsp;aux galeries adhérentes.</p><p>Manifest Paris est fier d’être partenaire de l’Association Matignon Saint-Honoré cette année. Cette collaboration s’inscrit dans une volonté commune de promouvoir la scène artistique contemporaine et de mettre en lumière la richesse de la céramique au cœur de la Semaine de l’art à Paris. Ensemble, nous avons à cœur de dynamiser le quartier et d’offrir aux amateurs, collectionneurs et professionnels une expérience unique, portée par l’excellence et la diversité des galeries participantes.</p><p>Avec Manifest Paris, les partenaires de l'Association Matignon Saint-Honoré sont :</p><p>Christie’s,&nbsp;Sotheby’s,&nbsp;Artcurial,&nbsp;Piasa,&nbsp;Bonhams - Pierre Cornette de Saint-Cyr,&nbsp;Barnes Art,&nbsp;Puiforcat,&nbsp;la Banque Safra,&nbsp;Le Bristol.&nbsp;</p>",
+      "nl": "<p>Het 8e arrondissement, en meer bepaald de wijk Matignon Saint-Honoré, is sinds lang een epicentrum van artistieke en culturele levendigheid in de Franse hoofdstad, gevoed door de nabijheid van grote culturele instellingen zoals het Grand Palais en het Petit Palais, alsook door de organisatie van prestigieuze kunstbeurzen.&nbsp;De Association Matignon Saint-Honoré werd opgericht om haar leden te informeren en te ondersteunen, met als doel bij te dragen aan de voortdurende culturele ontwikkeling van de wijk en een grotere zichtbaarheid te bieden aan de aangesloten galeries.</p><p>Manifest Paris is trots om dit jaar partner te zijn van de Association Matignon Saint-Honoré. Deze samenwerking maakt deel uit van een gedeelde wens om de hedendaagse kunstscène te promoten en de rijkdom van keramiek te benadrukken in het hart van de Paris Art Week. Samen willen we de wijk nieuw leven inblazen en kunstliefhebbers, verzamelaars en professionals een unieke ervaring bieden, ondersteund door de uitmuntendheid en diversiteit van de deelnemende galeries.</p><p>Met Manifest Paris zijn de partners van de Association Matignon Saint-Honoré :</p><p>Christie’s,&nbsp;Sotheby’s,&nbsp;Artcurial,&nbsp;Piasa,&nbsp;Bonhams - Pierre Cornette de Saint-Cyr,&nbsp;Barnes Art,&nbsp;Puiforcat,&nbsp;la Banque Safra,&nbsp;Le Bristol.&nbsp;</p>"
+    },
+    "attrs": {},
+    "media": [],
+    "blocks": [
+      {
+        "id": 792,
+        "position": 0,
+        "type": "image",
+        "media": [
+          {
+            "id": 1799,
+            "role": "image",
+            "filename": "MP25_Plan quartier_OK.png",
+            "url": "https://ceramic.brussels/img/cd320e24-5f47-4ad9-a908-3a4d341a675c/mp25-plan-quartier-ok.png",
+            "width": 2260,
+            "height": 1910,
+            "tags": [],
+            "alt": {},
+            "caption": {},
+            "crop": {
+              "w": 2260,
+              "h": 1910,
+              "x": 0,
+              "y": 0
+            }
+          }
+        ]
+      }
+    ],
+    "parentId": 3
+  }
+]
