@@ -9,8 +9,20 @@
 
 const enc = new TextEncoder();
 
-/** Raised over time; existing hashes keep verifying at their stored count. */
-export const PBKDF2_ITERATIONS = 210_000;
+/**
+ * 100_000 is not a preference, it is the ceiling: the Workers runtime rejects
+ * PBKDF2 above it. Verified against this project's own D1 - probe accounts
+ * seeded at 1k/10k/50k/100k all authenticate, 150k and 210k do not, and the
+ * failure surfaces as a rejected password rather than an error, which is what
+ * the logging below is for.
+ *
+ * The count is stored inside each hash, so if the runtime ever raises the cap,
+ * bumping this re-hashes people on their next sign-in without invalidating
+ * anyone. OWASP wants more than this for PBKDF2-SHA256; if that matters more
+ * than avoiding a per-seat cost, Cloudflare Access in front of /admin removes
+ * password handling from this codebase entirely.
+ */
+export const PBKDF2_ITERATIONS = 100_000;
 
 const b64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
 const unb64 = (text: string) => Uint8Array.from(atob(text), (c) => c.charCodeAt(0));
@@ -64,7 +76,13 @@ export async function verifyPassword(password: string, stored: string): Promise<
   try {
     const candidate = await derive(password, unb64(salt), count);
     return timingSafeEqual(candidate, unb64(hash));
-  } catch {
+  } catch (error) {
+    // A malformed stored hash is a legitimate false. A runtime failure is not,
+    // and must not disappear silently as "wrong password".
+    console.error('verifyPassword failed', {
+      message: error instanceof Error ? error.message : String(error),
+      iterations: count,
+    });
     return false;
   }
 }

@@ -13,12 +13,19 @@
  * iteration count, salt and hash base64-encoded in one $-separated string.
  */
 import { execFileSync } from 'node:child_process';
-import { writeFileSync, unlinkSync } from 'node:fs';
+import { writeFileSync, unlinkSync, readFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const PBKDF2_ITERATIONS = 210_000;
+// Read from the server module so the two can never drift: a mismatch here
+// produces accounts that look fine and cannot sign in.
+const PBKDF2_ITERATIONS = Number(
+  readFileSync(new URL('../src/server/crypto.ts', import.meta.url), 'utf8')
+    .match(/PBKDF2_ITERATIONS = ([0-9_]+)/)[1]
+    .replace(/_/g, ''),
+);
 const DATABASE = 'ceramic-brussels-admin';
 const ACCOUNT_ID = '68abcbaf4817943a805737802e15679a';
 
@@ -75,12 +82,13 @@ const file = join(tmpdir(), `admin-user-${id}.sql`);
 writeFileSync(file, sql);
 
 try {
-  // No shell: on Windows npx needs its .cmd name, and shell:true would
-  // concatenate rather than escape the arguments.
-  const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+  // Run wrangler's entry point with this same node binary. Going through npx
+  // needs a shell on Windows, and a shell concatenates arguments rather than
+  // escaping them.
+  const wrangler = fileURLToPath(new URL('../node_modules/wrangler/bin/wrangler.js', import.meta.url));
   execFileSync(
-    npx,
-    ['wrangler', 'd1', 'execute', DATABASE, local ? '--local' : '--remote', '--file', file, '-y'],
+    process.execPath,
+    [wrangler, 'd1', 'execute', DATABASE, local ? '--local' : '--remote', '--file', file, '-y'],
     { stdio: 'inherit', env: { ...process.env, CLOUDFLARE_ACCOUNT_ID: ACCOUNT_ID } },
   );
 } finally {
