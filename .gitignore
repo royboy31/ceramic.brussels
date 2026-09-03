@@ -28,3 +28,6 @@ design/
 ceramic-brussels-project.zip
 # raw trial typeface - only the two WOFF2 in public/fonts/ are used
 font/
+
+# Local secrets for `wrangler pages dev`. Never commit.
+.dev.vars
