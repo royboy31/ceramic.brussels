@@ -25,6 +25,19 @@ const MARK_TAGS: Record<string, string> = {
   underline: 'u',
   'strike-through': 's',
   code: 'code',
+  highlight: 'mark',
+  muted: 'span',
+  inverse: 'span',
+};
+
+/**
+ * The editor's styling marks carry a name, never a colour - the class is where
+ * the value lives, so the palette can move without touching content.
+ */
+const MARK_CLASSES: Record<string, string> = {
+  highlight: 't-highlight',
+  muted: 't-muted',
+  inverse: 't-inverse',
 };
 
 /** Turn one block's children into HTML, applying marks and link definitions. */
@@ -38,7 +51,8 @@ function renderSpans(block: any): string {
       for (const mark of span.marks ?? []) {
         const tag = MARK_TAGS[mark];
         if (tag) {
-          html = `<${tag}>${html}</${tag}>`;
+          const cls = MARK_CLASSES[mark];
+          html = `<${tag}${cls ? ` class="${cls}"` : ''}>${html}</${tag}>`;
           continue;
         }
         // Anything else is a mark definition key - most often a link.
@@ -105,6 +119,8 @@ const grouped = Array.isArray(value) ? group(value.filter(Boolean)) : [];
       const html = renderSpans(block);
       const style = block.style ?? 'normal';
 
+      if (style === 'lead') return <p class="lead" set:html={html} />;
+      if (style === 'small') return <p class="small" set:html={html} />;
       if (style === 'h1' || style === 'h2') return <h2 set:html={html} />;
       if (style === 'h3') return <h3 set:html={html} />;
       if (style === 'h4') return <h4 set:html={html} />;
@@ -126,6 +142,35 @@ const grouped = Array.isArray(value) ? group(value.filter(Boolean)) : [];
     padding-left: 1rem;
     border-left: 3px solid var(--accent);
     color: var(--ink-2);
+  }
+  /* Editor-chosen styles. Each is a role the design defines, so text stays on
+     the type scale and inside the palette however the two get combined. */
+  .rich-text :global(p.lead) {
+    font-size: 1.25rem;
+    line-height: 1.45;
+    margin: 0 0 1.1rem;
+  }
+  .rich-text :global(p.small) {
+    font-size: 0.85rem;
+    color: var(--ink-2);
+  }
+  .rich-text :global(.t-highlight) {
+    background: var(--acid);
+    color: var(--ink);
+    padding: 0 0.15em;
+    /* Keeps the marker on every line of a wrapped phrase, not just the first. */
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .rich-text :global(.t-muted) {
+    color: var(--ink-2);
+  }
+  .rich-text :global(.t-inverse) {
+    background: var(--ink);
+    color: var(--ground);
+    padding: 0 0.2em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
   }
   .rich-text :global(figure) {
     margin: 1.75rem 0;

@@ -1,28 +1,13 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
+import { EVENT_KINDS, PROGRAMME_SECTIONS } from '../../../lib/options';
 
 /**
  * One entry in the programme: a talk, a roundtable, the award ceremony, a
  * preview. The talks tab groups them by day; `section` decides which
  * programme tab they belong to.
  */
-export const EVENT_KINDS = [
-  { title: 'Artist talk', value: 'artist-talk' },
-  { title: 'Roundtable', value: 'roundtable' },
-  { title: 'Talk', value: 'talk' },
-  { title: 'Book launch', value: 'book-launch' },
-  { title: 'Guided tour', value: 'tour' },
-  { title: 'Workshop', value: 'workshop' },
-  { title: 'Award ceremony', value: 'ceremony' },
-  { title: 'Preview / vernissage', value: 'opening' },
-  { title: 'Other', value: 'other' },
-] as const;
-
-export const PROGRAMME_SECTIONS = [
-  { title: 'Talks', value: 'talks' },
-  { title: 'Awards', value: 'awards' },
-  { title: 'VIP programme', value: 'vip' },
-  { title: 'Partner project', value: 'project' },
-] as const;
+/** Re-exported so the schemas stay the obvious place to look for them. */
+export { EVENT_KINDS, PROGRAMME_SECTIONS } from '../../../lib/options';
 
 export const programmeEvent = defineType({
   name: 'programmeEvent',

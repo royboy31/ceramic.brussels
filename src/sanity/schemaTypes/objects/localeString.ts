@@ -1,6 +1,7 @@
 import { defineField, defineType } from 'sanity';
 import { LOCALES, DEFAULT_LOCALE } from '../../../lib/locales';
 import { LocaleInput } from '../../components/LocaleInput';
+import { richTextBlock } from './richText';
 
 /**
  * Field-level i18n. One document holds all three languages, which keeps
@@ -68,7 +69,7 @@ export const localeBlock = defineType({
   title: 'Rich text',
   type: 'object',
   components: { input: LocaleInput },
-  fields: localeFields('array', { of: [{ type: 'block' }, { type: 'figure' }] }),
+  fields: localeFields('array', { of: [richTextBlock, { type: 'figure' }] }),
   preview: {
     select: { en: 'en', fr: 'fr', nl: 'nl' },
     prepare: (value: Record<string, any>) => ({
