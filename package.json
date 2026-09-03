@@ -14,8 +14,7 @@
     "content": "node scripts/content-status.mjs",
     "seed": "node scripts/seed.mjs",
     "admin:user": "node scripts/admin-user.mjs",
-    "admin:migrate": "wrangler d1 migrations apply ceramic-brussels-admin --remote",
-    "admin:dev": "wrangler pages dev"
+    "admin:migrate": "wrangler d1 migrations apply ceramic-brussels-admin --remote"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.4",

@@ -77,7 +77,7 @@ export default defineConfig({
         defaultLocale: 'en',
         locales: { en: 'en', fr: 'fr', nl: 'nl' },
       },
-      filter: (page) => !page.includes('/studio') && !page.includes('/admin'),
+      filter: (page) => !page.includes('/studio'),
     }),
   ],
   vite: {
