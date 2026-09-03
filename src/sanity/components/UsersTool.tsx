@@ -17,6 +17,7 @@ import {
 } from '@sanity/ui';
 // @sanity/ui v4 splits its entry points; the toast API is its own subpath.
 import { useToast } from '@sanity/ui/toast';
+import { useClient } from 'sanity';
 
 /**
  * The Users screen, inside the Studio.
@@ -56,12 +57,39 @@ interface User {
   lastLoginAt: string | null;
 }
 
+/**
+ * Every call carries the Studio's own Sanity token when there is one. The
+ * server verifies it against Sanity and, for a project administrator, that is
+ * enough - no second password. It is sent same-origin only, and the server
+ * does not store it.
+ */
+let studioToken: string | undefined;
+
+/**
+ * The Studio keeps its token in localStorage under
+ * `__studio_auth_token_<projectId>`, shape `{ token?: string }`.
+ *
+ * The client usually exposes the same value, but not on a cookie-authenticated
+ * session, and a missing token here is the difference between going straight
+ * in and being asked for a password you should not need.
+ */
+function readStudioToken(projectId?: string): string | undefined {
+  if (!projectId || typeof localStorage === 'undefined') return undefined;
+  try {
+    const raw = localStorage.getItem(`__studio_auth_token_${projectId}`);
+    return raw ? (JSON.parse(raw)?.token as string | undefined) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(path, {
     ...options,
     headers: {
       'content-type': 'application/json',
       'x-admin-request': '1',
+      ...(studioToken ? { 'x-sanity-token': studioToken } : {}),
       ...(options.headers ?? {}),
     },
     credentials: 'same-origin',
@@ -85,6 +113,11 @@ export function UsersTool() {
   const [busy, setBusy] = useState(false);
   const [resetting, setResetting] = useState<User | null>(null);
   const [changing, setChanging] = useState(false);
+
+  // Google or GitHub sign-in leaves the Studio holding a token; handing it to
+  // our API is what removes the second login for administrators.
+  const client = useClient({ apiVersion: '2021-06-07' });
+  studioToken = client.config().token ?? readStudioToken(client.config().projectId);
 
   const load = useCallback(async () => {
     try {
@@ -379,8 +412,8 @@ function SignIn(props: { onDone: () => void; say: (status: 'error' | 'success', 
           <Stack space={4}>
             <Heading size={1}>Sign in to manage users</Heading>
             <Text size={1} muted>
-              A Sanity login says who you are to Sanity. These accounts are separate, so managing
-              them asks for its own credentials.
+              Your Studio session was not recognised as a project administrator, so this asks for a
+              site account instead. Administrators are let straight through.
             </Text>
             <Stack space={2}>
               <Text size={1}>Email</Text>
