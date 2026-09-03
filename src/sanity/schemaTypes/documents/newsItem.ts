@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity';
+import { NEWS_CATEGORIES } from '../../../lib/options';
 
 /** The blog. Announcements, recaps, press releases. */
 export const newsItem = defineType({
@@ -30,15 +31,7 @@ export const newsItem = defineType({
       name: 'category',
       title: 'Category',
       type: 'string',
-      options: {
-        list: [
-          { title: 'Announcement', value: 'announcement' },
-          { title: 'Programme', value: 'programme' },
-          { title: 'Recap', value: 'recap' },
-          { title: 'Press release', value: 'press-release' },
-        ],
-        layout: 'radio',
-      },
+      options: { list: [...NEWS_CATEGORIES], layout: 'radio' },
       initialValue: 'announcement',
     }),
     defineField({

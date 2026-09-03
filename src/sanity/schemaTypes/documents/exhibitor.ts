@@ -1,4 +1,5 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
+import { EXHIBITOR_KINDS } from '../../../lib/options';
 import { countryCodeField } from '../objects/country';
 
 /**
@@ -10,12 +11,8 @@ import { countryCodeField } from '../objects/country';
  * filters in the design (solo show / country focus / publishers / jury prize)
  * all read from `kind` and the two flags below, never from the name.
  */
-export const EXHIBITOR_KINDS = [
-  { title: 'Gallery', value: 'gallery' },
-  { title: 'Publisher', value: 'publisher' },
-  { title: 'Jury prize solo show', value: 'jury-prize' },
-  { title: 'Tribute / special presentation', value: 'tribute' },
-] as const;
+/** Re-exported so the schemas stay the obvious place to look for them. */
+export { EXHIBITOR_KINDS } from '../../../lib/options';
 
 export const exhibitor = defineType({
   name: 'exhibitor',

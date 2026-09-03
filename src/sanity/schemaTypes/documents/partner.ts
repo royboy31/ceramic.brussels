@@ -1,4 +1,5 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
+import { PARTNER_TIERS } from '../../../lib/options';
 
 /**
  * Every organisation the fair works with, including the food & drinks
@@ -8,17 +9,8 @@ import { defineArrayMember, defineField, defineType } from 'sanity';
  *
  * Tiers mirror the tabs in the design and the groupings on the old site.
  */
-export const PARTNER_TIERS = [
-  { title: 'Main partner', value: 'main' },
-  { title: 'Institution', value: 'institutional' },
-  { title: 'Hotel', value: 'hotel' },
-  { title: 'Event partner', value: 'event' },
-  { title: 'Media', value: 'media' },
-  { title: 'Exhibition pass', value: 'exhibition-pass' },
-  { title: 'Art prize partner', value: 'art-prize' },
-  { title: 'Food & drinks', value: 'food-drinks' },
-  { title: 'Supplier', value: 'supplier' },
-] as const;
+/** Re-exported so the schemas stay the obvious place to look for them. */
+export { PARTNER_TIERS } from '../../../lib/options';
 
 export const partner = defineType({
   name: 'partner',

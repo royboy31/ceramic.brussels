@@ -34,3 +34,23 @@ PUBLIC_SANITY_PROJECT_ID = "uia5r1rc"
 PUBLIC_SANITY_DATASET = "production"
 PUBLIC_SITE_URL = "https://dev.ceramic-brussels.pages.dev"
 PUBLIC_SHOW_EDIT_LINKS = "true"
+
+# The admin panel's own database. These are not Sanity accounts: the panel
+# holds one Sanity write token and everyone edits through it, so `audit_log`
+# is the only record of which person made a change.
+#
+# Located in Western Europe - the team is in Brussels, and D1's region is
+# fixed at creation.
+[[d1_databases]]
+binding = "ADMIN_DB"
+database_name = "ceramic-brussels-admin"
+database_id = "5c35303c-7b4e-48f9-9480-d236f7ae4ff5"
+migrations_dir = "migrations"
+
+# Branch previews share the same database, so a preview deploy can be used to
+# test the panel without a second set of accounts.
+[[env.preview.d1_databases]]
+binding = "ADMIN_DB"
+database_name = "ceramic-brussels-admin"
+database_id = "5c35303c-7b4e-48f9-9480-d236f7ae4ff5"
+migrations_dir = "migrations"
