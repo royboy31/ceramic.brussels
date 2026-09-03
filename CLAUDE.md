@@ -262,49 +262,44 @@ without that, a rebuild would never reach anyone holding a cached page.
 `public/_redirects` is where legacy URLs from the old Laravel site go at
 migration time.
 
-## The content admin
+## Site accounts
 
-`/admin` is a second way into the content, for people who need to edit without
-a Sanity account. It is **Kamindu's** side of the project.
+Editors who do not have a Sanity account are managed in the Studio under
+**Users**. This is **Kamindu's** side of the project.
 
-**Why it exists.** Sanity charges per seat. The panel holds one Sanity write
-token server-side and everyone edits through it, so any number of staff can
-change content without a Sanity login.
-
-**What that costs.** Sanity's own document history shows every one of those
-changes under a single token, so `audit_log` in D1 is the only record of which
-person made a change. A write is not complete until its audit row exists.
-
-**Where the pieces are.**
+**Why they are not documents.** The `production` dataset is ACL-public: it
+answers a GROQ query with no credentials at all, so anything stored in it is
+world-readable. A `user` document would publish email addresses and password
+hashes to the open internet. The accounts therefore live in **D1**, which is
+private, and the Studio screen is a custom tool that administers them over
+`/api/users` on the same origin.
 
 | Path | What |
 | :-- | :-- |
-| `functions/` | Cloudflare Pages Functions - the only server code in the project |
-| `src/server/` | Shared modules the Functions import (auth, D1, Sanity, validation) |
-| `src/server/editable.ts` | **The security boundary.** A field not listed here cannot be written, however the request is shaped |
-| `src/pages/admin/index.astro` | The panel itself: one client-rendered page against `/api/*` |
+| `src/sanity/components/UsersTool.tsx` | The Users screen inside the Studio |
+| `functions/` | Pages Functions - auth, sessions, user management, audit |
+| `src/server/` | Shared modules those Functions import |
 | `migrations/` | D1 schema, applied with `npm run admin:migrate` |
 
-**The site is still static.** Nothing above changes that: `/admin` and `/api/*`
-are the only dynamic routes, and the public pages remain plain files. A save
-writes to Sanity but does not change the live site until a build runs, which is
-what the panel's "Update live site" button is for. It is a button rather than
-an automatic trigger because builds take about three minutes and do not merge -
-ten saves would otherwise queue ten builds.
+**Managing users needs its own sign-in.** A Sanity login says who you are to
+Sanity; it says nothing about whether you may administer these accounts, so the
+Users screen asks for D1 credentials of its own.
 
-**Accounts.** `npm run admin:user -- --email x@y.z --name "Name"` creates one and
-prints a temporary password; the account is flagged so the person must choose
-their own on first sign-in. After the first admin exists, everything else is
-done in the panel under Users.
+**Accounts.** `npm run admin:user -- --email x@y.z --name "Name"` creates one
+and prints a temporary password, flagged so the person must choose their own on
+first sign-in. After the first admin exists, everything else happens in the
+Studio.
+
+**Attribution.** Nothing here gives those accounts access to the Studio yet -
+see the note in the handover about proxying the Sanity API, which is what that
+would require. When it exists, every edit will arrive on one Sanity token, so
+`audit_log` in D1 is the only record of the person behind a change.
 
 **Local development does not work on Windows.** `wrangler pages dev` needs
-workerd, which crashes with an access violation on this machine. Test the panel
-on a branch preview instead - previews share the same D1 database.
+workerd, which crashes with an access violation on that machine. Test on a
+branch preview instead - previews share the same D1 database.
 
-**Secrets** live in Pages, never in `wrangler.toml`: `SANITY_API_WRITE_TOKEN`
-and `DEPLOY_HOOK_URL`, set for both the production and preview environments.
-Reads still work without the token because the dataset is ACL-public - only
-saving needs it.
+**Secrets** live in Pages, never in `wrangler.toml`.
 
 ## Gotchas
 
