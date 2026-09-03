@@ -4,6 +4,7 @@ import Figure from '../../../components/Figure.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
 import { getArtists } from '../../../lib/queries';
+import { styleAttrs } from '../../../lib/textStyle';
 
 /**
  * Every artist, A–Z: the letter index filters the card grid in place, the
@@ -80,7 +81,7 @@ const used = new Set(artists.map((a: any) => initial(a.name)));
                   {a.name}
                   {a.birthYear && <sup>°{a.birthYear}</sup>}
                 </h2>
-                {a.nationality && <p class="meta">{a.nationality}</p>}
+                {a.nationality && <p class="meta" {...styleAttrs(a.nationalityStyle)}>{a.nationality}</p>}
               </a>
             </li>
           ))}

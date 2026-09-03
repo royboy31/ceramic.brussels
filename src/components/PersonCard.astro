@@ -5,6 +5,7 @@ import { instagramUrl } from '../lib/links';
 import PortableText from './PortableText.astro';
 import Figure from './Figure.astro';
 import LinkPill from './LinkPill.astro';
+import { styleAttrs } from '../lib/textStyle';
 
 /**
  * One person of the advisory board, the team or the jury, as in the
@@ -42,11 +43,11 @@ const hasLinks = person.instagram || person.website || person.email || person.ph
     </div>
 
     <div class="person-text">
-      {person.role && <p class="role">{person.role}</p>}
+      {person.role && <p class="role" {...styleAttrs(person.roleStyle)}>{person.role}</p>}
       {
         person.bio && (
           <div class="bio">
-            <PortableText value={person.bio} />
+            <PortableText value={person.bio} fieldStyle={person.bioStyle} />
           </div>
         )
       }

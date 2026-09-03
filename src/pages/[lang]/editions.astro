@@ -7,6 +7,7 @@ import PortableText from '../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations, formatDateRange, localePath } from '../../lib/i18n';
 import { getEditions } from '../../lib/queries';
+import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * The archive: every past edition with its cover, dates, country focus and
@@ -73,7 +74,7 @@ const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key]
 
                   {edition.intro && (
                     <div class="body-24 intro">
-                      <PortableText value={edition.intro} />
+                      <PortableText value={edition.intro} fieldStyle={edition.introStyle} />
                     </div>
                   )}
 
@@ -87,7 +88,7 @@ const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key]
                     {edition.countryFocus && (
                       <div>
                         <dt>{t('exhibitors.countryFocus')}</dt>
-                        <dd>{edition.countryFocus}</dd>
+                        <dd {...styleAttrs(edition.countryFocusStyle)}>{edition.countryFocus}</dd>
                       </div>
                     )}
                     {edition.guestOfHonour?.name && (
@@ -128,7 +129,7 @@ const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key]
                     {edition.keyFigures.map((figure: any) => (
                       <div class="stat">
                         <strong>{figure.value}</strong>
-                        <span>{figure.label}</span>
+                        <span {...styleAttrs(figure.labelStyle)}>{figure.label}</span>
                       </div>
                     ))}
                   </div>
