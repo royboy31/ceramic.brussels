@@ -3,7 +3,7 @@ import { structureTool } from 'sanity/structure';
 import { schemaTypes } from './src/sanity/schemaTypes';
 import { structure } from './src/sanity/structure';
 import { StudioNavbar } from './src/sanity/components/StudioNavbar';
-import { UsersTool } from './src/sanity/components/UsersTool';
+import { UsersTool, UsersToolIcon } from './src/sanity/components/UsersTool';
 
 // Singletons must not be creatable or deletable from the Studio.
 const SINGLETONS = new Set(['siteSettings', 'navigation', 'homepage']);
@@ -28,6 +28,9 @@ export default defineConfig({
     {
       name: 'users',
       title: 'Users',
+      // Without an icon the navbar renders the tool as bare text next to
+      // Structure, which is easy to miss entirely.
+      icon: UsersToolIcon,
       component: UsersTool,
     },
   ],
