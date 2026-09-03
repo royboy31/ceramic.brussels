@@ -23,6 +23,16 @@ const localeFields = (type: string, extra: Record<string, unknown> = {}) =>
     }),
   );
 
+/**
+ * The Style tab. Appended to the text-bearing localised types so every field
+ * an editor can write into can also be styled, without a per-type change.
+ *
+ * It is optional and absent from existing documents, which is what makes this
+ * additive: a field with no style renders exactly the markup it always did.
+ * localeSlug is left out on purpose - a URL segment has nothing to style.
+ */
+const styleField = () => defineField({ name: 'style', title: 'Style', type: 'textStyle' });
+
 /** Shows which languages are filled, e.g. "EN · FR" with NL missing. */
 export function translationSummary(value: Record<string, unknown> | undefined): string {
   if (!value) return 'no translations';
@@ -51,7 +61,7 @@ export const localeString = defineType({
   title: 'Text',
   type: 'object',
   components: { input: LocaleInput },
-  fields: localeFields('string'),
+  fields: [...localeFields('string'), styleField()],
   preview: localePreview,
 });
 
@@ -60,7 +70,7 @@ export const localeText = defineType({
   title: 'Text',
   type: 'object',
   components: { input: LocaleInput },
-  fields: localeFields('text', { rows: 4 }),
+  fields: [...localeFields('text', { rows: 4 }), styleField()],
   preview: localePreview,
 });
 
@@ -69,7 +79,7 @@ export const localeBlock = defineType({
   title: 'Rich text',
   type: 'object',
   components: { input: LocaleInput },
-  fields: localeFields('array', { of: [richTextBlock, { type: 'figure' }] }),
+  fields: [...localeFields('array', { of: [richTextBlock, { type: 'figure' }] }), styleField()],
   preview: {
     select: { en: 'en', fr: 'fr', nl: 'nl' },
     prepare: (value: Record<string, any>) => ({
