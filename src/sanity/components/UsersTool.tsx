@@ -15,6 +15,8 @@ import {
   Text,
   TextInput,
 } from '@sanity/ui';
+// @sanity/ui v4 splits its entry points; the toast API is its own subpath.
+import { useToast } from '@sanity/ui/toast';
 
 /**
  * The Users screen, inside the Studio.
@@ -29,6 +31,19 @@ import {
  * one - a Sanity login says who you are to Sanity, and says nothing about
  * whether you may administer these accounts.
  */
+
+/** Navbar glyph. Local rather than from @sanity/icons, whose export surface
+ *  is a transitive dependency this project does not control. */
+export function UsersToolIcon() {
+  return (
+    <svg width="1em" height="1em" viewBox="0 0 25 25" fill="none" stroke="currentColor" strokeWidth="1.2">
+      <circle cx="10" cy="9" r="3.2" />
+      <path d="M4.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" />
+      <circle cx="17" cy="8" r="2.4" />
+      <path d="M15.5 13.6c.5-.2 1-.3 1.5-.3 2.4 0 4 1.6 4 4" />
+    </svg>
+  );
+}
 
 interface User {
   id: string;
@@ -62,7 +77,11 @@ const formatDate = (value: string | null) =>
 export function UsersTool() {
   const [me, setMe] = useState<User | null>(null);
   const [users, setUsers] = useState<User[] | null>(null);
-  const [notice, setNotice] = useState<{ tone: 'critical' | 'positive'; text: string } | null>(null);
+  const toast = useToast();
+  const say = useCallback(
+    (status: 'error' | 'success', title: string) => toast.push({ status, title, duration: 6000 }),
+    [toast],
+  );
   const [busy, setBusy] = useState(false);
   const [resetting, setResetting] = useState<User | null>(null);
   const [changing, setChanging] = useState(false);
@@ -78,9 +97,9 @@ export function UsersTool() {
         setUsers(null);
       }
     } catch (error) {
-      setNotice({ tone: 'critical', text: (error as Error).message });
+      say('error', (error as Error).message);
     }
-  }, []);
+  }, [say]);
 
   useEffect(() => {
     void load();
@@ -91,17 +110,17 @@ export function UsersTool() {
       setBusy(true);
       try {
         await action();
-        setNotice({ tone: 'positive', text: ok });
+        say('success', ok);
         await load();
       } catch (error) {
-        setNotice({ tone: 'critical', text: (error as Error).message });
+        say('error', (error as Error).message);
       }
       setBusy(false);
     },
     [load],
   );
 
-  if (!me) return <SignIn onDone={load} notice={notice} setNotice={setNotice} />;
+  if (!me) return <SignIn onDone={load} say={say} />;
 
   // A forced change blocks every other endpoint, so it has to be dealt with
   // before anything else can load. Accounts are created with the flag set, so
@@ -113,11 +132,10 @@ export function UsersTool() {
         onCancel={() => setChanging(false)}
         onDone={async () => {
           setChanging(false);
-          setNotice({ tone: 'positive', text: 'Password changed.' });
+          say('success', 'Password changed.');
           await load();
         }}
-        onError={(text) => setNotice({ tone: 'critical', text })}
-        notice={notice}
+        onError={(text) => say('error', text)}
       />
     );
   }
@@ -161,12 +179,6 @@ export function UsersTool() {
             seat. Every content change made with one is recorded against the person who made it.
           </Text>
         </Card>
-
-        {notice && (
-          <Card padding={3} radius={2} tone={notice.tone} border>
-            <Text size={1}>{notice.text}</Text>
-          </Card>
-        )}
 
         {!users ? (
           <Flex justify="center" padding={5}>
@@ -282,7 +294,6 @@ function ChangePassword(props: {
   onCancel: () => void;
   onDone: () => void;
   onError: (text: string) => void;
-  notice: { tone: 'critical' | 'positive'; text: string } | null;
 }) {
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
@@ -317,11 +328,6 @@ function ChangePassword(props: {
                 temporary one stops working straight away.
               </Text>
             )}
-            {props.notice && (
-              <Card padding={3} radius={2} tone={props.notice.tone} border>
-                <Text size={1}>{props.notice.text}</Text>
-              </Card>
-            )}
             <Stack space={2}>
               <Text size={1}>Current password</Text>
               <TextInput type="password" value={current} onChange={(e) => setCurrent(e.currentTarget.value)} required />
@@ -349,11 +355,7 @@ function ChangePassword(props: {
   );
 }
 
-function SignIn(props: {
-  onDone: () => void;
-  notice: { tone: 'critical' | 'positive'; text: string } | null;
-  setNotice: (n: { tone: 'critical' | 'positive'; text: string } | null) => void;
-}) {
+function SignIn(props: { onDone: () => void; say: (status: 'error' | 'success', title: string) => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -367,10 +369,9 @@ function SignIn(props: {
             setBusy(true);
             try {
               await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
-              props.setNotice(null);
               props.onDone();
             } catch (error) {
-              props.setNotice({ tone: 'critical', text: (error as Error).message });
+              props.say('error', (error as Error).message);
             }
             setBusy(false);
           }}
@@ -381,11 +382,6 @@ function SignIn(props: {
               A Sanity login says who you are to Sanity. These accounts are separate, so managing
               them asks for its own credentials.
             </Text>
-            {props.notice && (
-              <Card padding={3} radius={2} tone={props.notice.tone} border>
-                <Text size={1}>{props.notice.text}</Text>
-              </Card>
-            )}
             <Stack space={2}>
               <Text size={1}>Email</Text>
               <TextInput type="email" value={email} onChange={(e) => setEmail(e.currentTarget.value)} required />
