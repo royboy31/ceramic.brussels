@@ -5,6 +5,7 @@
  *   node scripts/import-legacy.mjs --dry               plan only, write nothing
  *   node scripts/import-legacy.mjs                     write documents, no images
  *   node scripts/import-legacy.mjs --images            also upload the images
+ *   node scripts/import-legacy.mjs --images --max-width=2000
  *   node scripts/import-legacy.mjs --only=people,partners
  *
  * Source: legacy-export/ (see legacy-export/MAPPING.md). The old CMS stored
@@ -42,6 +43,8 @@ const dry = process.argv.includes('--dry');
 const withImages = process.argv.includes('--images');
 const onlyArg = process.argv.find((a) => a.startsWith('--only='));
 const only = onlyArg ? onlyArg.slice(7).split(',').map((s) => s.trim()) : null;
+const widthArg = process.argv.find((a) => a.startsWith('--max-width='));
+const maxWidth = widthArg ? Number(widthArg.slice(12)) : 0;
 const wants = (name) => !only || only.includes(name);
 
 const projectId = env.PUBLIC_SANITY_PROJECT_ID;
@@ -133,7 +136,11 @@ async function uploadImage(media) {
   if (!media || !media.url) return null;
   if (assetMap[media.id]) return assetMap[media.id];
   if (dry || !withImages) return null;
-  const res = await fetch(media.url);
+  // The old site serves resized derivatives, so a 6700px original need not be
+  // moved in full. Sanity generates its own responsive sizes from whatever we
+  // upload, and legacy-export keeps every original URL for a later re-fetch.
+  const url = maxWidth && media.width > maxWidth ? `${media.url}?w=${maxWidth}` : media.url;
+  const res = await fetch(url);
   if (!res.ok) { bump('image:failed'); console.warn(`\n  ! image ${media.id} HTTP ${res.status}`); return null; }
   const buf = Buffer.from(await res.arrayBuffer());
   const asset = await client.assets.upload('image', buf, { filename: media.filename || `${media.id}.jpg` });
@@ -218,13 +225,19 @@ async function importPeople() {
 }
 
 async function importPartners() {
+  /** Old-site page -> PARTNER_TIERS value (src/lib/options.ts). */
   const tierOf = (page) => {
     const s = String(page).toLowerCase();
     if (s.includes('main partner')) return 'main';
-    if (s.includes('institution')) return 'institutions';
+    if (s.includes('institution')) return 'institutional';
     if (s.includes('hotel')) return 'hotel';
+    if (s.includes('exhibition pass')) return 'exhibition-pass';
     if (s.includes('media')) return 'media';
-    if (s.includes('food') || s.includes('drink') || s.includes('coffee')) return 'event';
+    if (s.includes('food') || s.includes('drink') || s.includes('coffee')) return 'food-drinks';
+    if (s.includes('prize') || s.includes('award')) return 'art-prize';
+    if (s.includes('logistic') || s.includes('insurance') || s.includes('furniture') ||
+        s.includes('apparel') || s.includes('corporate')) return 'supplier';
+    if (s.includes('partner') || s.includes('collab')) return 'event';
     return null;
   };
   const rows = D('partners');
@@ -322,7 +335,7 @@ async function importArtistsAndLaureates() {
       _type: 'artist',
       name,
       slug: { _type: 'slug', current: slugOf(name) },
-      countryCode: countryCode || null,
+      countryCode: countryCode ? countryCode.toUpperCase() : null,
     }));
     if (!wants('laureates') || !year) continue;
     plan.push({
@@ -363,6 +376,14 @@ async function importExhibitors() {
     if (!raw) continue;
     const year = e.attrs.year || 2026;
     const { name, countryCode } = splitCountry(raw);
+    // The old `category` is two things at once: a kind, and whether the gallery
+    // is part of the country focus. EXHIBITOR_KINDS has no "focus" value.
+    const category = String(e.attrs.category || '').toLowerCase();
+    const inCountryFocus = category.startsWith('focus');
+    const kind = category.includes('editor') || category.includes('book') ? 'publisher'
+      : category.includes('jury prize') ? 'jury-prize'
+      : /^>>|tribute/i.test(raw) ? 'tribute'
+      : 'gallery';
     add('exhibitor', `exhibitor-${year}-${slugOf(name)}`, name, {
       _type: 'exhibitor',
       name,
@@ -370,8 +391,9 @@ async function importExhibitors() {
       edition: refEdition(year),
       booth: e.attrs.booth || null,
       city: e.attrs.city || null,
-      country: countryCode || null,
-      kind: e.attrs.category || null,
+      country: countryCode ? countryCode.toUpperCase() : null,
+      kind,
+      inCountryFocus: inCountryFocus || null,
       bio: localeHtmlToBlocks(e.description, `x${year}${slugOf(name)}`),
       images: await figures(e.media),
     }, sameEdition(year));
@@ -450,8 +472,11 @@ async function importEvents() {
   for (let i = 0; i < plan.length; i += 50) {
     const tx = client.transaction();
     for (const p of plan.slice(i, i + 50)) {
+      // `_type` is fixed at creation; including it in the patch would try to
+      // change the type of a document that already exists.
+      const { _type, ...fields } = p.doc;
       tx.createIfNotExists({ _id: p.id, _type: p.type });
-      tx.patch(p.id, (patch) => patch.set(p.doc));
+      tx.patch(p.id, (patch) => patch.set(fields));
       n++;
     }
     await tx.commit({ visibility: 'async' });
