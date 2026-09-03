@@ -3,6 +3,7 @@ import type { LocaleId } from '../lib/locales';
 import PortableText from './PortableText.astro';
 import SanityImage from './SanityImage.astro';
 import LinkPill from './LinkPill.astro';
+import { styleAttrs } from '../lib/textStyle';
 
 /**
  * Renders a list of `contentSection` objects the way the design builds every
@@ -36,10 +37,14 @@ const list = (sections ?? []).filter(Boolean);
         const links = (section.links ?? []).filter(Boolean);
         return (
           <section class="cs" id={section.anchor || undefined}>
-            {section.heading && <h2 class="panel-title">{section.heading}</h2>}
+            {section.heading && (
+              <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+                {section.heading}
+              </h2>
+            )}
             {section.body && (
-              <div class="body-24 cs-body">
-                <PortableText value={section.body} />
+              <div class="body-24 cs-body" {...styleAttrs(section.bodyStyle)}>
+                <PortableText value={section.body} fieldStyle={section.bodyStyle} />
               </div>
             )}
             {images.length > 0 && (

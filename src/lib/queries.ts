@@ -13,6 +13,17 @@ import { DEFAULT_LOCALE } from './locales';
 
 const localised = (field: string) => `coalesce(${field}[$lang], ${field}.${DEFAULT_LOCALE})`;
 
+/**
+ * A localised field together with the Style tab an editor set on it, as two
+ * keys: `name` holds the text as before, `nameStyle` the styling or null.
+ *
+ * Emitting a second key rather than changing the shape of the first is what
+ * keeps this additive - every component that already reads `title` keeps
+ * working untouched, and only the ones that opt in to `titleStyle` render it.
+ */
+const styled = (name: string, field: string = name) =>
+  `"${name}": ${localised(field)}, "${name}Style": ${field}.style`;
+
 /** Image with everything SanityImage.astro needs, plus the caption parts. */
 const IMAGE = `{
   ...,
@@ -26,8 +37,8 @@ const IMAGE = `{
 }`;
 
 const SEO = `{
-  "title": ${localised('seo.title')},
-  "description": ${localised('seo.description')},
+  ${styled('title', 'seo.title')},
+  ${styled('description', 'seo.description')},
   "noIndex": seo.noIndex,
   "ogImage": seo.ogImage ${IMAGE}
 }`;
@@ -37,7 +48,7 @@ const LINK = `{
   kind,
   route,
   anchor,
-  "label": ${localised('label')},
+  ${styled('label')},
   "external": external,
   "internal": internal->{
     _type,
@@ -47,20 +58,20 @@ const LINK = `{
 
 const VIDEO = `{
   url,
-  "title": ${localised('title')},
+  ${styled('title')},
   poster ${IMAGE}
 }`;
 
 const SECTION = `{
   _key,
   anchor,
-  "heading": ${localised('heading')},
-  "body": ${localised('body')},
+  ${styled('heading')},
+  ${styled('body')},
   "images": images[] ${IMAGE},
   "links": links[] ${LINK}
 }`;
 
-const KEY_FIGURES = `keyFigures[]{ _key, value, "label": ${localised('label')} }`;
+const KEY_FIGURES = `keyFigures[]{ _key, value, ${styled('label')} }`;
 
 export type Params = { lang: LocaleId; [key: string]: unknown };
 
@@ -75,7 +86,7 @@ export function getSettings(lang: LocaleId) {
     `*[_type == "siteSettings"][0]{
       siteName,
       copyright,
-      "tagline": ${localised('tagline')},
+      ${styled('tagline')},
       contactEmail,
       newsletterUrl,
       instagramUrl,
@@ -85,18 +96,18 @@ export function getSettings(lang: LocaleId) {
       applicationsUrl,
       pressEmail,
       pressKitUrl,
-      "pressContacts": pressContacts[]{ _key, name, email, url, instagram, "region": ${localised('region')} },
-      "faq": faq[]{ _key, "question": ${localised('question')}, "answer": ${localised('answer')} },
+      "pressContacts": pressContacts[]{ _key, name, email, url, instagram, ${styled('region')} },
+      "faq": faq[]{ _key, ${styled('question')}, ${styled('answer')} },
       "practicalInfo": {
         "venueName": practicalInfo.venueName,
         "address": practicalInfo.address,
         "mapUrl": practicalInfo.mapUrl,
-        "intro": ${localised('practicalInfo.intro')},
+        ${styled('intro', 'practicalInfo.intro')},
         "heroImage": practicalInfo.heroImage ${IMAGE},
-        "access": practicalInfo.access[]{ _key, "mode": ${localised('mode')}, "text": ${localised('text')} },
-        "accessibility": ${localised('practicalInfo.accessibility')},
+        "access": practicalInfo.access[]{ _key, ${styled('mode')}, ${styled('text')} },
+        ${styled('accessibility', 'practicalInfo.accessibility')},
         "hotelDeal": {
-          "text": ${localised('practicalInfo.hotelDeal.text')},
+          ${styled('text', 'practicalInfo.hotelDeal.text')},
           "url": practicalInfo.hotelDeal.url,
           "partner": practicalInfo.hotelDeal.partner->{ _id, name, url, logo ${IMAGE}, "images": images[] ${IMAGE} }
         },
@@ -116,7 +127,7 @@ export function getNavPages(lang: LocaleId) {
   return run<any[]>(
     `*[_type == "page" && !defined(section) && (defined(navLabel[$lang]) || defined(navLabel.${DEFAULT_LOCALE}))]
       | order(order asc){
-      "label": ${localised('navLabel')},
+      ${styled('label', 'navLabel')},
       "slug": coalesce(slug[$lang].current, slug.${DEFAULT_LOCALE}.current)
     }[defined(slug)]`,
     { lang },
@@ -128,7 +139,7 @@ const NAV_TARGET = `
   route,
   anchor,
   url,
-  "label": ${localised('label')},
+  ${styled('label')},
   "pageSlug": coalesce(page->slug[$lang].current, page->slug.${DEFAULT_LOCALE}.current)
 `;
 
@@ -165,18 +176,18 @@ export function getHomepage(lang: LocaleId) {
     `*[_type == "homepage"][0]{
       _id, _type,
       heroImage ${IMAGE},
-      "heroText": ${localised('heroText')},
+      ${styled('heroText')},
       "heroLink": heroLink ${LINK},
       "quickLinks": quickLinks[] ${LINK},
       "spotlights": spotlights[]{
         _key,
-        "kicker": ${localised('kicker')},
-        "headline": ${localised('headline')},
+        ${styled('kicker')},
+        ${styled('headline')},
         "link": link ${LINK},
         image ${IMAGE}
       },
       "banner": {
-        "text": ${localised('banner.text')},
+        ${styled('text', 'banner.text')},
         "link": banner.link ${LINK},
         "image": banner.image ${IMAGE}
       },
@@ -184,7 +195,7 @@ export function getHomepage(lang: LocaleId) {
       figuresImage ${IMAGE},
       "figuresLink": figuresLink ${LINK},
       "closingBanner": {
-        "text": ${localised('closingBanner.text')},
+        ${styled('text', 'closingBanner.text')},
         "link": closingBanner.link ${LINK}
       },
       "seo": ${SEO}
@@ -198,10 +209,10 @@ export function getHomepage(lang: LocaleId) {
 const EDITION_CORE = `
   _id, _type, year, startDate, endDate, venue, isCurrent,
   ticketsUrl, catalogueUrl, overviewUrl, pressClipsUrl,
-  "title": ${localised('title')},
-  "ordinal": ${localised('ordinal')},
-  "countryFocus": ${localised('countryFocus')},
-  "intro": ${localised('intro')},
+  ${styled('title')},
+  ${styled('ordinal')},
+  ${styled('countryFocus')},
+  ${styled('intro')},
   cover ${IMAGE},
   datesMark ${IMAGE},
   "guestOfHonour": guestOfHonour->{ _id, name, "slug": slug.current, portrait ${IMAGE} },
@@ -216,15 +227,15 @@ export function getCurrentEdition(lang: LocaleId) {
   return run<any>(
     `*[_type == "edition" && isCurrent == true][0]{
       ${EDITION_CORE},
-      "lastEntry": ${localised('lastEntry')},
-      "ticketsNote": ${localised('ticketsNote')},
+      ${styled('lastEntry')},
+      ${styled('ticketsNote')},
       "fairMapUrl": fairMap.asset->url,
       "openingHours": openingHours[]{
         _key, date,
-        "label": ${localised('label')},
-        "slots": slots[]{ _key, time, invitationOnly, "label": ${localised('label')} }
+        ${styled('label')},
+        "slots": slots[]{ _key, time, invitationOnly, ${styled('label')} }
       },
-      "tickets": tickets[]{ _key, price, "name": ${localised('name')}, "note": ${localised('note')} },
+      "tickets": tickets[]{ _key, price, ${styled('name')}, ${styled('note')} },
       "film": film ${VIDEO},
       "images": images[] ${IMAGE}
     }`,
@@ -251,10 +262,10 @@ const EXHIBITOR_CARD = `{
   soloShow, inCountryFocus,
   "slug": slug.current,
   "year": edition->year,
-  "countryFocusLabel": ${localised('edition->countryFocus')},
+  ${styled('countryFocusLabel', 'edition->countryFocus')},
   "image": images[0] ${IMAGE},
   "artists": artists[]->{ _id, name, "slug": slug.current },
-  "artistsText": ${localised('artistsText')}
+  ${styled('artistsText')}
 }`;
 
 /** Current-edition participants, alphabetical by `sortName` then `name`. */
@@ -288,10 +299,10 @@ export function getExhibitor(lang: LocaleId, slug: string) {
       soloShow, inCountryFocus,
       "slug": slug.current,
       "year": edition->year,
-      "countryFocusLabel": ${localised('edition->countryFocus')},
-      "bio": ${localised('bio')},
-      "artistsText": ${localised('artistsText')},
-      "artistsNote": ${localised('artistsNote')},
+      ${styled('countryFocusLabel', 'edition->countryFocus')},
+      ${styled('bio')},
+      ${styled('artistsText')},
+      ${styled('artistsNote')},
       "images": images[] ${IMAGE},
       "artists": artists[]->{
         _id, name, countryCode, "slug": slug.current, portrait ${IMAGE}
@@ -306,8 +317,8 @@ export function getExhibitor(lang: LocaleId, slug: string) {
 
 const ARTIST_CARD = `
   _id, name, birthYear, countryCode, website, instagram, gallery,
-  "nationality": ${localised('nationality')},
-  "basedIn": ${localised('basedIn')},
+  ${styled('nationality')},
+  ${styled('basedIn')},
   "slug": slug.current,
   portrait ${IMAGE},
   "isGuestOfHonour": count(*[_type == "edition" && guestOfHonour._ref == ^._id]) > 0
@@ -332,15 +343,15 @@ export function getArtistSlugs() {
 const ARTIST_FULL = `
   ${ARTIST_CARD},
   _type,
-  "bio": ${localised('bio')},
-  "intro": ${localised('intro')},
-  "interview": ${localised('interview')},
+  ${styled('bio')},
+  ${styled('intro')},
+  ${styled('interview')},
   "sections": sections[] ${SECTION},
   "carousel": carousel[] ${IMAGE},
   "video": video ${VIDEO},
   "works": works[]{
     _key, title, year, dimensions,
-    "materials": ${localised('materials')},
+    ${styled('materials')},
     image ${IMAGE}
   },
   "exhibitors": *[_type == "exhibitor" && references(^._id)]{
@@ -363,7 +374,7 @@ export function getArtist(lang: LocaleId, slug: string) {
 export function getGuestOfHonour(lang: LocaleId) {
   return run<any>(
     `{
-      "edition": *[_type == "edition" && isCurrent == true][0]{ year, "title": ${localised('title')} },
+      "edition": *[_type == "edition" && isCurrent == true][0]{ year, ${styled('title')} },
       "artist": *[_type == "edition" && isCurrent == true][0].guestOfHonour->{ ${ARTIST_FULL} },
       "previous": *[_type == "edition" && isCurrent != true && defined(guestOfHonour)] | order(year desc){
         year,
@@ -381,12 +392,12 @@ export function getLaureates(lang: LocaleId) {
   return run<any[]>(
     `*[_type == "edition" && count(*[_type == "laureate" && references(^._id)]) > 0] | order(year desc){
       year, isCurrent,
-      "title": ${localised('title')},
+      ${styled('title')},
       "laureates": *[_type == "laureate" && references(^._id)] | order(order asc){
         _id, order,
-        "statement": ${localised('statement')},
+        ${styled('statement')},
         "images": images[] ${IMAGE},
-        "artist": artist->{ ${ARTIST_CARD}, "bio": ${localised('bio')} }
+        "artist": artist->{ ${ARTIST_CARD}, ${styled('bio')} }
       }
     }`,
     { lang },
@@ -398,11 +409,11 @@ export function getAwards(lang: LocaleId) {
   return run<any[]>(
     `*[_type == "award"] | order(edition->year desc, order asc){
       _id, family, order,
-      "name": ${localised('name')},
+      ${styled('name')},
       "year": edition->year,
-      "outcome": ${localised('outcome')},
-      "description": ${localised('description')},
-      "citation": ${localised('citation')},
+      ${styled('outcome')},
+      ${styled('description')},
+      ${styled('citation')},
       "partner": partner->{ _id, name, url, logo ${IMAGE} },
       "laureates": laureates[]->{ _id, name, "slug": slug.current },
       "artist": laureates[0]->{ name, "slug": slug.current },
@@ -418,8 +429,8 @@ export function getAwards(lang: LocaleId) {
 const PERSON = `{
   _id, name, groups, countryCode, website, instagram, email, phone, order,
   "year": edition->year,
-  "role": ${localised('role')},
-  "bio": ${localised('bio')},
+  ${styled('role')},
+  ${styled('bio')},
   portrait ${IMAGE}
 }`;
 
@@ -443,8 +454,8 @@ export function getNews(lang: LocaleId) {
     `*[_type == "newsItem" && publishedAt <= now()] | order(publishedAt desc){
       _id, publishedAt, category,
       "slug": slug.current,
-      "title": ${localised('title')},
-      "excerpt": ${localised('excerpt')},
+      ${styled('title')},
+      ${styled('excerpt')},
       cover ${IMAGE}
     }`,
     { lang },
@@ -462,9 +473,9 @@ export function getNewsItem(lang: LocaleId, slug: string) {
     `*[_type == "newsItem" && slug.current == $slug][0]{
       _id, _type, publishedAt, category,
       "slug": slug.current,
-      "title": ${localised('title')},
-      "excerpt": ${localised('excerpt')},
-      "body": ${localised('body')},
+      ${styled('title')},
+      ${styled('excerpt')},
+      ${styled('body')},
       cover ${IMAGE},
       "seo": ${SEO}
     }`,
@@ -476,10 +487,10 @@ export function getNewsItem(lang: LocaleId, slug: string) {
 
 const PAGE = `{
   _id, _type, section, order,
-  "title": ${localised('title')},
+  ${styled('title')},
   "tabLabel": coalesce(${localised('tabLabel')}, ${localised('title')}),
-  "intro": ${localised('intro')},
-  "body": ${localised('body')},
+  ${styled('intro')},
+  ${styled('body')},
   "sections": sections[] ${SECTION},
   "images": images[] ${IMAGE},
   cover ${IMAGE},
@@ -517,10 +528,10 @@ export function getProgramme(lang: LocaleId) {
     `*[_type == "programmeEvent" && edition->isCurrent == true] | order(startsAt asc){
       _id, startsAt, endsAt, kind, section, languages, moderator, invitationOnly,
       "slug": slug.current,
-      "title": ${localised('title')},
-      "location": ${localised('location')},
-      "description": ${localised('description')},
-      "speakersText": ${localised('speakersText')},
+      ${styled('title')},
+      ${styled('location')},
+      ${styled('description')},
+      ${styled('speakersText')},
       "speakers": speakers[]->{ _id, _type, name, "slug": slug.current },
       image ${IMAGE}
     }`,
@@ -530,9 +541,9 @@ export function getProgramme(lang: LocaleId) {
 
 const PARTNER = `{
   _id, name, tier, url, instagram, order,
-  "subtitle": ${localised('subtitle')},
-  "description": ${localised('description')},
-  "currentExhibition": ${localised('currentExhibition')},
+  ${styled('subtitle')},
+  ${styled('description')},
+  ${styled('currentExhibition')},
   "editions": editions[]->year,
   logo ${IMAGE},
   "images": images[] ${IMAGE}

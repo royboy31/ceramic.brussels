@@ -9,6 +9,7 @@ import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, formatDay, formatTime, localePath } from '../../../lib/i18n';
 import { getHubPages, getProgramme } from '../../../lib/queries';
 import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
+import { styleAttrs } from '../../../lib/textStyle';
 
 /**
  * The programme hub. Tabs: La Cambre (a rich-text page), talks / awards / VIP
@@ -87,7 +88,7 @@ const path = hubTabPath('programme', tab);
 >
   <HubNav lang={lang} route="programme" active={tab} pages={pages} />
 
-  {page?.intro && <p class="intro-large">{page.intro}</p>}
+  {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
 
   {
     page?.cover?.asset && (
@@ -107,7 +108,7 @@ const path = hubTabPath('programme', tab);
   {
     page?.body && (
       <div class="body-24 page-body">
-        <PortableText value={page.body} />
+        <PortableText value={page.body} fieldStyle={page.bodyStyle} />
       </div>
     )
   }
@@ -154,7 +155,7 @@ const path = hubTabPath('programme', tab);
                         </span>
                       </p>
 
-                      <h3 class="event-title">{e.title}</h3>
+                      <h3 class="event-title" {...styleAttrs(e.titleStyle)}>{e.title}</h3>
 
                       {parts.length > 0 && (
                         <p class="event-meta">
@@ -167,7 +168,7 @@ const path = hubTabPath('programme', tab);
                                   {part.people.map((s: any, n: number) => (
                                     <>
                                       {n > 0 && (n === part.people.length - 1 ? ' & ' : ', ')}
-                                      {speakerHref(s) ? <a href={speakerHref(s)}>{s.name}</a> : s.name}
+                                      {speakerHref(s) ? <a href={speakerHref(s)} {...styleAttrs(s.nameStyle)}>{s.name}</a> : s.name}
                                     </>
                                   ))}
                                 </>
@@ -181,7 +182,7 @@ const path = hubTabPath('programme', tab);
 
                       {e.description && (
                         <div class="event-desc">
-                          <PortableText value={e.description} />
+                          <PortableText value={e.description} fieldStyle={e.descriptionStyle} />
                         </div>
                       )}
                     </div>

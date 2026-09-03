@@ -5,6 +5,7 @@ import PortableText from '../../components/PortableText.astro';
 import Sections from '../../components/Sections.astro';
 import { LOCALE_IDS, DEFAULT_LOCALE, type LocaleId } from '../../lib/locales';
 import { getPage, getPageSlugs } from '../../lib/queries';
+import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * Standalone editor pages - anything that is not a hub tab. Title, the lead
@@ -52,8 +53,8 @@ const closingImages = (page.images ?? []).filter((img: any) => img?.asset);
   editId={page._id}
   editType={page._type}
 >
-  <h1 class="section-title">{page.title}</h1>
-  {page.intro && <p class="intro-large">{page.intro}</p>}
+  <h1 class="section-title" {...styleAttrs(page.titleStyle)}>{page.title}</h1>
+  {page.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
 
   {
     page.cover?.asset && (
@@ -73,7 +74,7 @@ const closingImages = (page.images ?? []).filter((img: any) => img?.asset);
   {
     page.body && (
       <div class="body-24 page-body">
-        <PortableText value={page.body} />
+        <PortableText value={page.body} fieldStyle={page.bodyStyle} />
       </div>
     )
   }

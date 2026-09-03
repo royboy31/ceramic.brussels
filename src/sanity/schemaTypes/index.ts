@@ -3,6 +3,7 @@ import type { SchemaTypeDefinition } from 'sanity';
 import { localeString, localeText, localeBlock, localeSlug } from './objects/localeString';
 import { figure } from './objects/figure';
 import { seo } from './objects/seo';
+import { textStyle } from './objects/textStyle';
 import { link } from './objects/link';
 import { artwork } from './objects/artwork';
 import { navItem, navChild } from './objects/navItem';
@@ -39,6 +40,7 @@ export const objectTypes: SchemaTypeDefinition[] = [
   localeSlug,
   figure,
   seo,
+  textStyle,
   link,
   artwork,
   navChild,

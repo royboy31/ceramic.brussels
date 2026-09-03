@@ -13,6 +13,7 @@ import { HUBS, hubTabParams, hubTabPath } from '../../../lib/hubs';
 import { instagramUrl } from '../../../lib/links';
 import { GUEST_PORTRAIT, placeholder } from '../../../lib/placeholders';
 import { urlFor } from '../../../sanity/image';
+import { styleAttrs } from '../../../lib/textStyle';
 
 /**
  * The current edition's guest of honour, on the frame of the design: the name
@@ -62,7 +63,7 @@ const poster = video?.poster?.asset
     ) : (
       <article class="page-grid guest">
         <header class="title-row">
-          <h2>{artist.name}</h2>
+          <h2 {...styleAttrs(artist.nameStyle)}>{artist.name}</h2>
           {origin && <p class="origin">{origin}</p>}
         </header>
 
@@ -84,7 +85,7 @@ const poster = video?.poster?.asset
           <section class="intro">
             {artist.interview ? (
               <div class="body-copy">
-                <PortableText value={artist.interview} />
+                <PortableText value={artist.interview} fieldStyle={artist.interviewStyle} />
               </div>
             ) : (
               <p class="empty">The interview has not been published yet.</p>
@@ -94,7 +95,7 @@ const poster = video?.poster?.asset
           <section class="intro">
             {artist.intro && (
               <div class="lead">
-                <PortableText value={artist.intro} />
+                <PortableText value={artist.intro} fieldStyle={artist.introStyle} />
               </div>
             )}
             {artist.gallery && <p class="gallery">{artist.gallery}</p>}
@@ -123,7 +124,7 @@ const poster = video?.poster?.asset
                 <>
                   <h3 class="panel-title">{t('artists.biography')}</h3>
                   <div class="body-copy">
-                    <PortableText value={artist.bio} />
+                    <PortableText value={artist.bio} fieldStyle={artist.bioStyle} />
                   </div>
                 </>
               )

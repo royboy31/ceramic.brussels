@@ -7,6 +7,7 @@ import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
 import { getExhibitor, getExhibitorSlugs, getExhibitors } from '../../../lib/queries';
 import { instagramUrl } from '../../../lib/links';
+import { styleAttrs } from '../../../lib/textStyle';
 
 /**
  * One exhibitor, in three columns: the slideshow; name, city (CC), booth,
@@ -85,7 +86,7 @@ const orgSchema = {
     </div>
 
     <div class="identity">
-      <h2>{exhibitor.name}</h2>
+      <h2 {...styleAttrs(exhibitor.nameStyle)}>{exhibitor.name}</h2>
       {place && <p class="place">{place}</p>}
       {exhibitor.booth && <p class="booth">{exhibitor.booth}</p>}
 
@@ -103,7 +104,7 @@ const orgSchema = {
       {
         exhibitor.bio && (
           <div class="bio">
-            <PortableText value={exhibitor.bio} />
+            <PortableText value={exhibitor.bio} fieldStyle={exhibitor.bioStyle} />
           </div>
         )
       }
@@ -119,7 +120,7 @@ const orgSchema = {
                 ? presenting.map((a: any, i: number) => (
                     <>
                       {i > 0 && ', '}
-                      {a.slug ? <a href={localePath(lang, `artists/${a.slug}`)}>{a.name}</a> : a.name}
+                      {a.slug ? <a href={localePath(lang, `artists/${a.slug}`)} {...styleAttrs(a.nameStyle)}>{a.name}</a> : a.name}
                     </>
                   ))
                 : exhibitor.artistsText}
@@ -130,7 +131,7 @@ const orgSchema = {
       {
         exhibitor.artistsNote && (
           <div class="note">
-            <PortableText value={exhibitor.artistsNote} />
+            <PortableText value={exhibitor.artistsNote} fieldStyle={exhibitor.artistsNoteStyle} />
           </div>
         )
       }

@@ -6,6 +6,7 @@ import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations, localePath, formatDateRange } from '../../lib/i18n';
 import { getHomepage, getCurrentEdition, getEditions, getNews } from '../../lib/queries';
 import { resolveLink, type ResolvedLink } from '../../lib/links';
+import { styleAttrs } from '../../lib/textStyle';
 import { urlFor } from '../../sanity/image';
 
 /**
@@ -30,6 +31,9 @@ const [home, edition, editions, news] = await Promise.all([
 ]);
 
 const headline = home?.heroText ?? edition?.title ?? 'ceramic brussels';
+// The hero falls back through three sources; style only applies to the one
+// the editor actually wrote.
+const headlineStyle = home?.heroText ? home?.heroTextStyle : null;
 const heroLink = resolveLink(lang, home?.heroLink);
 
 const quickLinks: ResolvedLink[] = (home?.quickLinks ?? [])
@@ -40,19 +44,31 @@ const quickLinks: ResolvedLink[] = (home?.quickLinks ?? [])
  * Spotlights are editor-picked; when none are set the two most recent news
  * items take the slots, so the block never goes empty on a fresh dataset.
  */
-const spotlights: { key: string; kicker?: string; headline?: string; link: ResolvedLink | null; image?: any }[] =
+const spotlights: {
+  key: string;
+  kicker?: string;
+  kickerStyle?: any;
+  headline?: string;
+  headlineStyle?: any;
+  link: ResolvedLink | null;
+  image?: any;
+}[] =
   home?.spotlights?.length
     ? home.spotlights.map((s: any, i: number) => ({
         key: s._key ?? `spotlight-${i}`,
         kicker: s.kicker,
+        kickerStyle: s.kickerStyle,
         headline: s.headline,
+        headlineStyle: s.headlineStyle,
         link: resolveLink(lang, s.link),
         image: s.image,
       }))
     : news.slice(0, 2).map((item: any) => ({
         key: item.slug ?? item._id,
         kicker: item.category,
+        kickerStyle: null,
         headline: item.title,
+        headlineStyle: item.titleStyle,
         link: { href: localePath(lang, `news/${item.slug}`), label: t('news.readMore'), external: false, arrow: '→' as const },
         image: item.cover,
       }));
@@ -119,7 +135,7 @@ const external = (link: ResolvedLink | null) =>
     </div>
 
     <div class="hero-copy">
-      <h1 class="display">{headline}</h1>
+      <h1 class="display" {...styleAttrs(headlineStyle)}>{headline}</h1>
       {
         edition && (
           <p class="hero-dates">
@@ -158,8 +174,12 @@ const external = (link: ResolvedLink | null) =>
         {spotlights.map((s, i) => (
           <section class:list={['page-grid', 'feature', { flip: i % 2 === 1 }]}>
             <div class="feature-copy">
-              {s.kicker && <p class="eyebrow-lg">{s.kicker}</p>}
-              {s.headline && <h3>{s.headline}</h3>}
+              {s.kicker && (
+                <p class="eyebrow-lg" {...styleAttrs(s.kickerStyle)}>
+                  {s.kicker}
+                </p>
+              )}
+              {s.headline && <h3 {...styleAttrs(s.headlineStyle)}>{s.headline}</h3>}
               {s.link && (
                 <a class="text-link" href={s.link.href} {...external(s.link)}>
                   {s.link.label} {s.link.arrow}
@@ -210,7 +230,7 @@ const external = (link: ResolvedLink | null) =>
           {figuresEdition.keyFigures.map((figure: any) => (
             <div class="stat">
               <strong>{figure.value}</strong>
-              <span>{figure.label}</span>
+              <span {...styleAttrs(figure.labelStyle)}>{figure.label}</span>
             </div>
           ))}
         </div>

@@ -5,6 +5,7 @@ import PortableText from '../../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath, formatDate } from '../../../lib/i18n';
 import { getNewsItem, getNewsSlugs } from '../../../lib/queries';
+import { styleAttrs } from '../../../lib/textStyle';
 
 /**
  * One post: date and category, a big title, the excerpt as the lead, the
@@ -50,8 +51,8 @@ const articleSchema = {
       {item.category && <span class="cat">{item.category}</span>}
     </p>
 
-    <h1 class="title">{item.title}</h1>
-    {item.excerpt && <p class="intro-large">{item.excerpt}</p>}
+    <h1 class="title" {...styleAttrs(item.titleStyle)}>{item.title}</h1>
+    {item.excerpt && <p class="intro-large" {...styleAttrs(item.excerptStyle)}>{item.excerpt}</p>}
 
     {
       item.cover?.asset && (
@@ -69,7 +70,7 @@ const articleSchema = {
     {
       item.body && (
         <div class="body-24 post-body">
-          <PortableText value={item.body} />
+          <PortableText value={item.body} fieldStyle={item.bodyStyle} />
         </div>
       )
     }

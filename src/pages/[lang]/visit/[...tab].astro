@@ -12,6 +12,7 @@ import { useTranslations } from '../../../lib/i18n';
 import { getHubPages, getSettings, getCurrentEdition, getPartners } from '../../../lib/queries';
 import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
 import { instagramUrl } from '../../../lib/links';
+import { styleAttrs } from '../../../lib/textStyle';
 
 /**
  * Visitors info. Practical info is the design's two-column page: photo,
@@ -97,7 +98,7 @@ const path = hubTabPath('visit', tab);
               <dl class="rows body-24">
                 {edition.tickets.map((tk: any) => (
                   <div class="row">
-                    <dt>{tk.name}</dt>
+                    <dt {...styleAttrs(tk.nameStyle)}>{tk.name}</dt>
                     <dd>
                       {tk.price}
                       {tk.note && <span class="note"> ({tk.note})</span>}
@@ -108,7 +109,7 @@ const path = hubTabPath('visit', tab);
             ) : (
               <p class="empty">No ticket prices on the current edition yet.</p>
             )}
-            {edition?.ticketsNote && <p class="note-line">{edition.ticketsNote}</p>}
+            {edition?.ticketsNote && <p class="note-line" {...styleAttrs(edition.ticketsNoteStyle)}>{edition.ticketsNote}</p>}
             {edition?.ticketsUrl && (
               <p class="cta">
                 <LinkPill lang={lang} href={edition.ticketsUrl} label={t('visit.bookTickets')} variant="solid" />
@@ -120,7 +121,7 @@ const path = hubTabPath('visit', tab);
             <section class="panel" id="hotel">
               <h2 class="panel-title">{t('visit.hotelDeal')}</h2>
               <div class="body-24">
-                {hotel?.name && <p class="label">{hotel.name}</p>}
+                {hotel?.name && <p class="label" {...styleAttrs(hotel.nameStyle)}>{hotel.name}</p>}
                 {info.hotelDeal.text && <p class="deal">{info.hotelDeal.text}</p>}
               </div>
               {hotelUrl && (
@@ -141,7 +142,7 @@ const path = hubTabPath('visit', tab);
               <dl class="rows body-24">
                 {edition.openingHours.map((d: any) => (
                   <div class="row">
-                    <dt>{d.label}</dt>
+                    <dt {...styleAttrs(d.labelStyle)}>{d.label}</dt>
                     {(d.slots ?? []).map((s: any) => (
                       <dd>
                         {s.time && <span class="slot-time">{s.time}</span>}
@@ -156,7 +157,7 @@ const path = hubTabPath('visit', tab);
             ) : (
               <p class="empty">No opening hours on the current edition yet.</p>
             )}
-            {edition?.lastEntry && <p class="note-line">{edition.lastEntry}</p>}
+            {edition?.lastEntry && <p class="note-line" {...styleAttrs(edition.lastEntryStyle)}>{edition.lastEntry}</p>}
           </section>
 
           {info.access?.length > 0 && (
@@ -165,12 +166,12 @@ const path = hubTabPath('visit', tab);
               <dl class="rows body-24">
                 {info.access.map((a: any) => (
                   <div class="row">
-                    <dt>{a.mode}</dt>
-                    <dd class="access-text">{a.text}</dd>
+                    <dt {...styleAttrs(a.modeStyle)}>{a.mode}</dt>
+                    <dd class="access-text" {...styleAttrs(a.textStyle)}>{a.text}</dd>
                   </div>
                 ))}
               </dl>
-              {info.accessibility && <p class="body-24 accessibility">{info.accessibility}</p>}
+              {info.accessibility && <p class="body-24 accessibility" {...styleAttrs(info.accessibilityStyle)}>{info.accessibility}</p>}
             </section>
           )}
         </div>
@@ -208,7 +209,7 @@ const path = hubTabPath('visit', tab);
                   v.name
                 )}
               </h2>
-              {v.subtitle && <p class="subtitle">{v.subtitle}</p>}
+              {v.subtitle && <p class="subtitle" {...styleAttrs(v.subtitleStyle)}>{v.subtitle}</p>}
               {v.images?.length > 0 ? (
                 <Slideshow images={v.images} aspect={3 / 2} sizes="(max-width: 800px) 100vw, 670px" class="vendor-slides" />
               ) : (
@@ -216,7 +217,7 @@ const path = hubTabPath('visit', tab);
               )}
               {v.description && (
                 <div class="body-24 text">
-                  <PortableText value={v.description} />
+                  <PortableText value={v.description} fieldStyle={v.descriptionStyle} />
                 </div>
               )}
               {v.instagram && (
@@ -250,13 +251,13 @@ const path = hubTabPath('visit', tab);
           {settings.faq.map((q: any) => (
             <details class="faq">
               <summary>
-                <span class="question">{q.question}</span>
+                <span class="question" {...styleAttrs(q.questionStyle)}>{q.question}</span>
                 <span class="arrow" aria-hidden="true">
                   ↓
                 </span>
               </summary>
               <div class="body-24 answer">
-                <PortableText value={q.answer} />
+                <PortableText value={q.answer} fieldStyle={q.answerStyle} />
               </div>
             </details>
           ))}
@@ -270,7 +271,7 @@ const path = hubTabPath('visit', tab);
   {
     page?.body && (
       <div class="body-24 page-body">
-        <PortableText value={page.body} />
+        <PortableText value={page.body} fieldStyle={page.bodyStyle} />
       </div>
     )
   }
