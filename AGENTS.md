@@ -206,6 +206,14 @@ Also in `i18n.ts`: `localePath(lang, path)` for building links, and
   Use it for every Sanity image; never hand-roll an `<img>`.
 - **`PortableText.astro`** — renders Sanity rich text: blocks, lists, marks and
   inline figures. Hand-rolled rather than pulled from a package.
+  The editor's styling controls are **roles, not values**: the Style dropdown
+  offers Lead / Normal / Small / Heading / Subheading / Minor heading / Quote,
+  and the toolbar adds three swatch marks — Highlight (`.t-highlight`, acid
+  marker), Muted (`.t-muted`) and Inverse (`.t-inverse`, knockout chip). Only
+  the name is stored, so the CSS here decides what each one looks like and
+  restyling never needs a content migration. The list of roles lives in
+  `src/sanity/schemaTypes/objects/richText.ts`; adding one means adding it in
+  both places.
 - **`EditLink.astro`** — deep-links into the Studio for the document being
   viewed. Shows in `astro dev` only, unless `PUBLIC_SHOW_EDIT_LINKS=true`.
 
