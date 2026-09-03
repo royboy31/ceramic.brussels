@@ -4,6 +4,7 @@ import Figure from '../../../components/Figure.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath, formatDate } from '../../../lib/i18n';
 import { getNews } from '../../../lib/queries';
+import { styleAttrs } from '../../../lib/textStyle';
 
 /**
  * The newest post leads on seven columns, the rest follow three to a row.
@@ -45,8 +46,8 @@ const [lead, ...rest] = news;
               <time datetime={lead.publishedAt}>{formatDate(lead.publishedAt, lang)}</time>
               {lead.category && <span class="cat">{lead.category}</span>}
             </p>
-            <h2>{lead.title}</h2>
-            {lead.excerpt && <p class="excerpt">{lead.excerpt}</p>}
+            <h2 {...styleAttrs(lead.titleStyle)}>{lead.title}</h2>
+            {lead.excerpt && <p class="excerpt" {...styleAttrs(lead.excerptStyle)}>{lead.excerpt}</p>}
             <span class="more text-link">{t('news.readMore')} →</span>
           </div>
         </a>
@@ -71,8 +72,8 @@ const [lead, ...rest] = news;
                     <time datetime={item.publishedAt}>{formatDate(item.publishedAt, lang)}</time>
                     {item.category && <span class="cat">{item.category}</span>}
                   </p>
-                  <h3>{item.title}</h3>
-                  {item.excerpt && <p class="excerpt">{item.excerpt}</p>}
+                  <h3 {...styleAttrs(item.titleStyle)}>{item.title}</h3>
+                  {item.excerpt && <p class="excerpt" {...styleAttrs(item.excerptStyle)}>{item.excerpt}</p>}
                 </a>
               </li>
             ))}

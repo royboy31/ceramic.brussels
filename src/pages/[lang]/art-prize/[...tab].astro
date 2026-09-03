@@ -13,6 +13,7 @@ import { useTranslations, localePath } from '../../../lib/i18n';
 import { getHubPages, getLaureates, getAwards, getPeople } from '../../../lib/queries';
 import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
 import { instagramUrl } from '../../../lib/links';
+import { styleAttrs } from '../../../lib/textStyle';
 
 /**
  * The art prize hub, on the acid ground of the design. Tabs: about (a page
@@ -57,7 +58,7 @@ const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ' & ' : '
 >
   <HubNav lang={lang} route="art-prize" active={tab} pages={pages} />
 
-  {page?.intro && <p class="intro-large">{page.intro}</p>}
+  {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
 
   {
     tab === 'laureates' &&
@@ -90,7 +91,7 @@ const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ' & ' : '
                     <div class="title-row">
                       <h3>
                         {artist.slug ? (
-                          <a href={localePath(lang, `artists/${artist.slug}`)}>{artist.name}</a>
+                          <a href={localePath(lang, `artists/${artist.slug}`)} {...styleAttrs(artist.nameStyle)}>{artist.name}</a>
                         ) : (
                           artist.name
                         )}
@@ -144,7 +145,7 @@ const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ' & ' : '
                 .filter((a: any) => a.year === year)
                 .map((a: any) => (
                   <article class="award">
-                    <h3>{a.name}</h3>
+                    <h3 {...styleAttrs(a.nameStyle)}>{a.name}</h3>
 
                     {(a.laureates?.length > 0 || a.outcome) && (
                       <p class="winner">
@@ -152,7 +153,7 @@ const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ' & ' : '
                         {(a.laureates ?? []).map((l: any, i: number) => (
                           <>
                             {joiner(i, a.laureates.length)}
-                            {l.slug ? <a href={localePath(lang, `artists/${l.slug}`)}>{l.name}</a> : l.name}
+                            {l.slug ? <a href={localePath(lang, `artists/${l.slug}`)} {...styleAttrs(l.nameStyle)}>{l.name}</a> : l.name}
                           </>
                         ))}
                         {a.laureates?.length > 0 && a.outcome && ' '}
@@ -162,7 +163,7 @@ const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ' & ' : '
 
                     {a.description && (
                       <div class="citation">
-                        <PortableText value={a.description} />
+                        <PortableText value={a.description} fieldStyle={a.descriptionStyle} />
                       </div>
                     )}
 
@@ -206,7 +207,7 @@ const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ' & ' : '
   {
     page?.body && (
       <div class="body-24 page-body">
-        <PortableText value={page.body} />
+        <PortableText value={page.body} fieldStyle={page.bodyStyle} />
       </div>
     )
   }

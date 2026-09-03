@@ -44,7 +44,7 @@ const list = (sections ?? []).filter(Boolean);
             )}
             {section.body && (
               <div class="body-24 cs-body" {...styleAttrs(section.bodyStyle)}>
-                <PortableText value={section.body} />
+                <PortableText value={section.body} fieldStyle={section.bodyStyle} />
               </div>
             )}
             {images.length > 0 && (

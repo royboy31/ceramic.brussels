@@ -12,6 +12,7 @@ import { useTranslations } from '../../../lib/i18n';
 import { getHubPages, getPartners } from '../../../lib/queries';
 import { HUBS, PARTNER_TABS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
 import { instagramUrl } from '../../../lib/links';
+import { styleAttrs } from '../../../lib/textStyle';
 
 /**
  * Partners by tab. Each tab lists one or more tiers under a full-width rule
@@ -50,12 +51,12 @@ const path = hubTabPath('partners', tab);
 >
   <HubNav lang={lang} route="partners" active={tab} pages={pages} />
 
-  {page?.intro && <p class="intro-large">{page.intro}</p>}
+  {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
   {page && <Sections lang={lang} sections={page.sections} />}
   {
     page?.body && (
       <div class="body-24 page-body">
-        <PortableText value={page.body} />
+        <PortableText value={page.body} fieldStyle={page.bodyStyle} />
       </div>
     )
   }
@@ -72,12 +73,12 @@ const path = hubTabPath('partners', tab);
             <li>
               {p.url ? (
                 <a href={p.url} target="_blank" rel="noopener noreferrer" aria-label={p.name}>
-                  {p.logo?.asset ? <SanityImage image={p.logo} sizes="220px" widths={[220, 440, 660]} class="wall-logo" /> : <span class="logo-name">{p.name}</span>}
+                  {p.logo?.asset ? <SanityImage image={p.logo} sizes="220px" widths={[220, 440, 660]} class="wall-logo" /> : <span class="logo-name" {...styleAttrs(p.nameStyle)}>{p.name}</span>}
                 </a>
               ) : p.logo?.asset ? (
                 <SanityImage image={p.logo} sizes="220px" widths={[220, 440, 660]} class="wall-logo" />
               ) : (
-                <span class="logo-name">{p.name}</span>
+                <span class="logo-name" {...styleAttrs(p.nameStyle)}>{p.name}</span>
               )}
             </li>
           ))}
@@ -93,11 +94,11 @@ const path = hubTabPath('partners', tab);
               )}
             </div>
             <div class="feature-text">
-              <h3 class="name">{p.name}</h3>
-              {p.subtitle && <p class="subtitle">{p.subtitle}</p>}
+              <h3 class="name" {...styleAttrs(p.nameStyle)}>{p.name}</h3>
+              {p.subtitle && <p class="subtitle" {...styleAttrs(p.subtitleStyle)}>{p.subtitle}</p>}
               {p.description && (
                 <div class="body-24 text">
-                  <PortableText value={p.description} />
+                  <PortableText value={p.description} fieldStyle={p.descriptionStyle} />
                 </div>
               )}
               <div class="foot">
@@ -114,13 +115,13 @@ const path = hubTabPath('partners', tab);
         <div class="partners">
           {listed.map((p: any) => (
             <article class="partner">
-              <h3 class="name">{p.name}</h3>
-              {p.subtitle && <p class="subtitle">{p.subtitle}</p>}
-              {p.currentExhibition && <p class="exhibition">{p.currentExhibition}</p>}
+              <h3 class="name" {...styleAttrs(p.nameStyle)}>{p.name}</h3>
+              {p.subtitle && <p class="subtitle" {...styleAttrs(p.subtitleStyle)}>{p.subtitle}</p>}
+              {p.currentExhibition && <p class="exhibition" {...styleAttrs(p.currentExhibitionStyle)}>{p.currentExhibition}</p>}
               {p.images?.length > 0 && <Slideshow images={p.images} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 670px" class="partner-slides" />}
               {p.description && (
                 <div class="body-24 text">
-                  <PortableText value={p.description} />
+                  <PortableText value={p.description} fieldStyle={p.descriptionStyle} />
                 </div>
               )}
               <div class="foot">

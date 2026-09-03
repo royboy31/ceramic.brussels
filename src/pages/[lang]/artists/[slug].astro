@@ -11,6 +11,7 @@ import { instagramUrl } from '../../../lib/links';
 import { getArtist, getArtistSlugs } from '../../../lib/queries';
 import { GUEST_PORTRAIT } from '../../../lib/placeholders';
 import { urlFor } from '../../../sanity/image';
+import { styleAttrs } from '../../../lib/textStyle';
 
 /**
  * One artist: portrait on four columns, name over a rule with origin and
@@ -83,7 +84,7 @@ const personSchema = {
       <header class="detail-head">
         <div>
           {artist.isGuestOfHonour && <p class="guest">{t('artists.guestOfHonour')}</p>}
-          <h2>{artist.name}</h2>
+          <h2 {...styleAttrs(artist.nameStyle)}>{artist.name}</h2>
           {origin && <p class="origin">{origin}</p>}
           {
             artist.basedIn && (
@@ -120,7 +121,7 @@ const personSchema = {
                   ? exhibitors.map((e: any, i: number) => (
                       <>
                         {i > 0 && ', '}
-                        <a href={localePath(lang, `exhibitors/${e.slug}`)}>{e.name}</a>
+                        <a href={localePath(lang, `exhibitors/${e.slug}`)} {...styleAttrs(e.nameStyle)}>{e.name}</a>
                         {showYear && e.year && <span class="year"> {e.year}</span>}
                       </>
                     ))
@@ -134,7 +135,7 @@ const personSchema = {
       {
         artist.intro && (
           <div class="intro-large intro">
-            <PortableText value={artist.intro} />
+            <PortableText value={artist.intro} fieldStyle={artist.introStyle} />
           </div>
         )
       }
@@ -144,7 +145,7 @@ const personSchema = {
           <section class="bio-block">
             <h3 class="panel-title">{t('artists.biography')}</h3>
             <div class="bio">
-              <PortableText value={artist.bio} />
+              <PortableText value={artist.bio} fieldStyle={artist.bioStyle} />
             </div>
           </section>
         )
@@ -190,7 +191,7 @@ const personSchema = {
                   sizes="(max-width: 640px) 50vw, 25vw"
                   widths={[300, 500, 700, 900]}
                 />
-                {work.title && <h4>{work.title}</h4>}
+                {work.title && <h4 {...styleAttrs(work.titleStyle)}>{work.title}</h4>}
                 <p class="meta">
                   {[
                     work.year,

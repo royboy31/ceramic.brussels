@@ -230,7 +230,7 @@ const external = (link: ResolvedLink | null) =>
           {figuresEdition.keyFigures.map((figure: any) => (
             <div class="stat">
               <strong>{figure.value}</strong>
-              <span>{figure.label}</span>
+              <span {...styleAttrs(figure.labelStyle)}>{figure.label}</span>
             </div>
           ))}
         </div>

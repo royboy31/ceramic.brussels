@@ -1,5 +1,6 @@
 ---
 import SanityImage from './SanityImage.astro';
+import { styleAttrs } from '../lib/textStyle';
 
 /**
  * Minimal Portable Text renderer - blocks, lists, marks and inline figures.
@@ -8,8 +9,10 @@ import SanityImage from './SanityImage.astro';
  */
 interface Props {
   value: any[] | undefined;
+  /** The Style tab set on the field this text came from, if any. */
+  fieldStyle?: any;
 }
-const { value } = Astro.props;
+const { value, fieldStyle } = Astro.props;
 
 function escapeHtml(text: string): string {
   return text
@@ -91,7 +94,7 @@ function group(blocks: any[]) {
 const grouped = Array.isArray(value) ? group(value.filter(Boolean)) : [];
 ---
 
-<div class="rich-text">
+<div class="rich-text" {...styleAttrs(fieldStyle)}>
   {
     grouped.map((entry) => {
       if (entry.kind === 'list') {
