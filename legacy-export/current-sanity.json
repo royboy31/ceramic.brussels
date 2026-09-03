@@ -1,0 +1,6012 @@
+[
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-angelika-stefaniak",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "countryCode": "PL",
+    "name": "Angelika Stefaniak",
+    "slug": {
+      "_type": "slug",
+      "current": "angelika-stefaniak"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-barry-wolfryd",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "countryCode": "US",
+    "name": "Barry Wolfryd",
+    "slug": {
+      "_type": "slug",
+      "current": "barry-wolfryd"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-danny-cremers",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "basedIn": {
+      "_type": "localeString",
+      "en": "The Netherlands",
+      "fr": "Pays-Bas",
+      "nl": "Nederland"
+    },
+    "bio": {
+      "en": [
+        {
+          "_key": "khmjhm",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Danny Cremers is an Amsterdam-based Dutch ceramic artist working with handbuilt porcelain. Trained in fashion design at Central Saint Martins, he explores classical forms through subtle imbalance and imperfection. His vases hold a quiet tension between freedom and control, with textured surfaces and loosely constructed forms."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "hsfqwn",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Drawn to the energy of the sketch, open-ended, intuitive, and unconcerned with finality, he seeks to capture that same immediacy in each finished piece."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "birthYear": 1989,
+    "countryCode": "NL",
+    "instagram": "nicevases",
+    "name": "Danny Cremers",
+    "slug": {
+      "_type": "slug",
+      "current": "danny-cremers"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-elizabeth-jaeger",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "mgok7f",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Elizabeth Jaeger’s figures and vessels hover between stillness and threat; her installation AT TWILIGHT opened the 2025 fair."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "birthYear": 1988,
+    "countryCode": "US",
+    "gallery": "Mennour",
+    "name": "Elizabeth Jaeger",
+    "nationality": {
+      "_type": "localeString",
+      "en": "United States",
+      "fr": "États-Unis",
+      "nl": "Verenigde Staten"
+    },
+    "slug": {
+      "_type": "slug",
+      "current": "elizabeth-jaeger"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-elmar-trenkwalder",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "ivsuen",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Elmar Trenkwalder builds monumental glazed architectures whose ornament borrows from the baroque, the gothic and the body."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "birthYear": 1959,
+    "countryCode": "AT",
+    "gallery": "Galerie Bernard Jordan",
+    "name": "Elmar Trenkwalder",
+    "nationality": {
+      "_type": "localeString",
+      "en": "Austria",
+      "fr": "Autriche",
+      "nl": "Oostenrijk"
+    },
+    "slug": {
+      "_type": "slug",
+      "current": "elmar-trenkwalder"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-faye-papargyropoulou",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "countryCode": "GR",
+    "name": "Faye Papargyropoulou",
+    "slug": {
+      "_type": "slug",
+      "current": "faye-papargyropoulou"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-frederique-fleury",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "countryCode": "FR",
+    "name": "Frédérique Fleury",
+    "slug": {
+      "_type": "slug",
+      "current": "frederique-fleury"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-heidi-bj-rgan",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "birthYear": 1970,
+    "countryCode": "NO",
+    "name": "Heidi Bjørgan",
+    "slug": {
+      "_type": "slug",
+      "current": "heidi-bj-rgan"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-janis-lohrer",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "countryCode": "DE",
+    "name": "Janis Löhrer",
+    "slug": {
+      "_type": "slug",
+      "current": "janis-lohrer"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-johan-creten",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "uahea0",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "A pioneer of the return of ceramics to contemporary art, Johan Creten was the guest of honour of the first edition in 2024."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "birthYear": 1963,
+    "countryCode": "BE",
+    "name": "Johan Creten",
+    "nationality": {
+      "_type": "localeString",
+      "en": "Belgium",
+      "fr": "Belgique",
+      "nl": "België"
+    },
+    "slug": {
+      "_type": "slug",
+      "current": "johan-creten"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-kira-frose",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "countryCode": "DE",
+    "name": "Kira Fröse",
+    "slug": {
+      "_type": "slug",
+      "current": "kira-frose"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-leonore-chastagner",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "d9ze5n",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Winner of the 2025 jury prize, Léonore Chastagner presented a solo show at ceramic brussels 2026."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "countryCode": "FR",
+    "name": "Léonore Chastagner",
+    "slug": {
+      "_type": "slug",
+      "current": "leonore-chastagner"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-lorie-ballage",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "basedIn": {
+      "_type": "localeString",
+      "en": "Norway",
+      "fr": "Norvège",
+      "nl": "Noorwegen"
+    },
+    "bio": {
+      "en": [
+        {
+          "_key": "gcgy9i",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Lorie Ballage’s practice emerges from a deep engagement with water — as a transformative element and a metaphor for the fluidity of human experience. She works predominantly with ceramic sculptures, combined with recycled industrial materials, narration, and sound to create environments that blur the line between the familiar and the uncanny."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "ruwqdx",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "These multi-sensory spaces aim to invite slowness and reflection, revealing hidden layers of connection. In a world saturated with ceramics — often invisible in their everyday utility — Ballage seeks to unearth the poetic and political potential of failure, absurdity, and disuse."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "birthYear": 1994,
+    "countryCode": "FR",
+    "instagram": "lorieballage",
+    "name": "Lorie Ballage",
+    "slug": {
+      "_type": "slug",
+      "current": "lorie-ballage"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-marie-pic",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "ho5g9d",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Marie Pic won the 2026 jury prize and will present a solo show at ceramic brussels 2027."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "countryCode": "FR",
+    "instagram": "mariepic",
+    "name": "Marie Pic",
+    "slug": {
+      "_type": "slug",
+      "current": "marie-pic"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-marion-verboom",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "basedIn": {
+      "_type": "localeString",
+      "en": "Paris",
+      "fr": "Paris",
+      "nl": "Paris"
+    },
+    "birthYear": 1983,
+    "countryCode": "FR",
+    "gallery": "Galerie Lelong, Paris",
+    "interview": {
+      "en": [
+        {
+          "_key": "5mxir3",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "How did ceramics enter your practice?"
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "9pjuiw",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Through architecture, really. I was looking for a material that could hold a mould and a gesture at the same time, and clay does both."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "intro": {
+      "en": [
+        {
+          "_key": "2d0uxi",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Based in Paris, Verboom's work unfolds through a precise sculptural language informed by architecture, mythology and systems of writing, where forms evolve through layering and recomposition. A selection of her works will be presented at the entrance of the fair, in collaboration with Galerie Lelong."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ],
+      "fr": [
+        {
+          "_key": "v6akks",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Basée à Paris, Marion Verboom déploie un langage sculptural précis, nourri d'architecture, de mythologie et de systèmes d'écriture, où les formes évoluent par strates et recompositions. Une sélection de ses œuvres sera présentée à l'entrée de la foire, en collaboration avec la Galerie Lelong."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "name": "Marion Verboom",
+    "nationality": {
+      "_type": "localeString",
+      "en": "France",
+      "fr": "France",
+      "nl": "Frankrijk"
+    },
+    "sections": [
+      {
+        "_key": "contentSection0",
+        "_type": "contentSection",
+        "anchor": "biography",
+        "body": {
+          "en": [
+            {
+              "_key": "4nhhpa",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Born in 1983, Marion Verboom lives and works in Paris. She graduated from the École nationale supérieure des Beaux-Arts in Paris in 2009 and continued her training at De Ateliers in Amsterdam between 2009 and 2011."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "jaj3xr",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Since then, she has developed a distinctive body of work that occupies a singular position within contemporary sculpture, at the intersection of architecture, ornament and the history of forms."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "3pvsrh",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Her work has been widely presented in institutional contexts in France and internationally, including solo exhibitions at La Verrière – Fondation d’entreprise Hermès in Brussels, Le Voyage à Nantes and the Frac Île-de-France. It is held in several public collections, including the Centre national des arts plastiques (CNAP), MAC VAL and the Musée d’Arts de Nantes."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ]
+        },
+        "heading": {
+          "_type": "localeString",
+          "en": "biography",
+          "fr": "biographie",
+          "nl": "biografie"
+        }
+      },
+      {
+        "_key": "contentSection1",
+        "_type": "contentSection",
+        "anchor": "practice",
+        "body": {
+          "en": [
+            {
+              "_key": "mc38ep",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Marion Verboom’s work is based on a principle of iteration, assembling fragments into modular structures that can be combined, repeated and reorganised. Since 2015, she has been developing the ongoing series Achronies, a group of totemic sculptures that revisit the traditional architectural column."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "osuje4",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Working across a wide variety of materials — including concrete, wood, plaster, bronze, clay and resin — she develops sculptures that unfold through a process combining technical precision and experimentation."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ]
+        },
+        "heading": {
+          "_type": "localeString",
+          "en": "sculptural practice",
+          "fr": "pratique sculpturale",
+          "nl": "sculpturale praktijk"
+        }
+      }
+    ],
+    "slug": {
+      "_type": "slug",
+      "current": "marion-verboom"
+    },
+    "video": {
+      "_type": "video",
+      "title": {
+        "_type": "localeString",
+        "en": "Marion Verboom in the studio",
+        "fr": "Marion Verboom in the studio",
+        "nl": "Marion Verboom in the studio"
+      },
+      "url": "https://youtu.be/IyklMBqj4L4"
+    },
+    "works": [
+      {
+        "_key": "artwork0",
+        "_type": "artwork",
+        "dimensions": {
+          "depth": 40,
+          "height": 180,
+          "width": 40
+        },
+        "materials": {
+          "_type": "localeString",
+          "en": "Glazed stoneware, plaster",
+          "fr": "Grès émaillé, plâtre",
+          "nl": "Geglazuurd steengoed, gips"
+        },
+        "title": "Achronie XVII",
+        "year": 2025
+      },
+      {
+        "_key": "artwork1",
+        "_type": "artwork",
+        "materials": {
+          "_type": "localeString",
+          "en": "Ceramic, resin, bronze",
+          "fr": "Céramique, résine, bronze",
+          "nl": "Keramiek, hars, brons"
+        },
+        "title": "Chryséléphantine",
+        "year": 2023
+      }
+    ]
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-ninon-hivert",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "1d2i0i",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Ninon Hivert is the laureate of the French Embassy monograph and the Centre Wallonie-Bruxelles | Paris exhibition prize 2026."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "countryCode": "FR",
+    "name": "Ninon Hivert",
+    "slug": {
+      "_type": "slug",
+      "current": "ninon-hivert"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-santiago-insignares-martinez",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "countryCode": "CO",
+    "name": "Santiago Insignares-Martínez",
+    "slug": {
+      "_type": "slug",
+      "current": "santiago-insignares-martinez"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-tong-xindi-shen-ting",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "countryCode": "CN",
+    "name": "Tong Xindi & Shen Ting",
+    "slug": {
+      "_type": "slug",
+      "current": "tong-xindi-shen-ting"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-uriel-caspi",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "basedIn": {
+      "_type": "localeString",
+      "en": "The Netherlands",
+      "fr": "Pays-Bas",
+      "nl": "Nederland"
+    },
+    "bio": {
+      "en": [
+        {
+          "_key": "53huwp",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "From early childhood, ceramic artist Uriel Caspi has been fascinated with clay. He earned a BFA in Ceramics from the Bezalel Academy, Jerusalem (2018), and an MFA from Alfred University, New York (2021). He has worked internationally as an academic fellow and artist-in-residence, including the Archie Bray Foundation, Yingge Ceramics Museum, EKWC and Cercco–HEAD Genève. Born in Haifa, Israel, Caspi is currently based in Tilburg, The Netherlands."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "birthYear": 1993,
+    "countryCode": "IL",
+    "instagram": "caspiceramics",
+    "name": "Uriel Caspi",
+    "slug": {
+      "_type": "slug",
+      "current": "uriel-caspi"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:01Z",
+    "_id": "demo-artist-walter-yu",
+    "_rev": "Jecqg66MuXQGCI1elHC7Sr",
+    "_type": "artist",
+    "_updatedAt": "2026-09-02T05:56:13Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "ddc1ff",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Walter Yu is the laureate of the Keramis residency 2026."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "countryCode": "CN",
+    "name": "Walter Yu",
+    "slug": {
+      "_type": "slug",
+      "current": "walter-yu"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:07Z",
+    "_id": "demo-award-2025-9",
+    "_rev": "KVotKtYYWoyyeFyM5EGKRT",
+    "_type": "award",
+    "_updatedAt": "2026-09-02T05:56:19Z",
+    "edition": {
+      "_ref": "demo-edition-2025",
+      "_type": "reference"
+    },
+    "family": "art-prize",
+    "laureates": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-leonore-chastagner",
+        "_type": "reference"
+      }
+    ],
+    "name": {
+      "_type": "localeString",
+      "en": "jury prize",
+      "fr": "prix du jury",
+      "nl": "juryprijs"
+    },
+    "order": 1,
+    "outcome": {
+      "_type": "localeString",
+      "en": "presented a solo show during ceramic brussels 2026",
+      "fr": "presented a solo show during ceramic brussels 2026",
+      "nl": "presented a solo show during ceramic brussels 2026"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:07Z",
+    "_id": "demo-award-2026-1",
+    "_rev": "KVotKtYYWoyyeFyM5EGKRT",
+    "_type": "award",
+    "_updatedAt": "2026-09-02T05:56:19Z",
+    "description": {
+      "en": [
+        {
+          "_key": "i5h4qn",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "The artist will be given the chance to present their work in a solo show during the 2027 edition of ceramic brussels."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "family": "art-prize",
+    "laureates": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-marie-pic",
+        "_type": "reference"
+      }
+    ],
+    "name": {
+      "_type": "localeString",
+      "en": "jury prize",
+      "fr": "prix du jury",
+      "nl": "juryprijs"
+    },
+    "order": 1,
+    "outcome": {
+      "_type": "localeString",
+      "en": "will present a solo show during ceramic brussels 2027",
+      "fr": "présentera un solo show lors de ceramic brussels 2027",
+      "nl": "presenteert een solotentoonstelling tijdens ceramic brussels 2027"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:07Z",
+    "_id": "demo-award-2026-2",
+    "_rev": "KVotKtYYWoyyeFyM5EGKRT",
+    "_type": "award",
+    "_updatedAt": "2026-09-02T05:56:19Z",
+    "description": {
+      "en": [
+        {
+          "_key": "av643w",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "The artist benefits from the publication of a monograph on their work, supported by the French Embassy in Brussels and produced in partnership with Les Éditions des Ateliers d’Art de France."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "family": "art-prize",
+    "laureates": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-ninon-hivert",
+        "_type": "reference"
+      }
+    ],
+    "name": {
+      "_type": "localeString",
+      "en": "Ambassade de France en Belgique",
+      "fr": "Ambassade de France en Belgique",
+      "nl": "Ambassade de France en Belgique"
+    },
+    "order": 2,
+    "outcome": {
+      "_type": "localeString",
+      "en": "is the laureate of a monograph devoted to her work",
+      "fr": "is the laureate of a monograph devoted to her work",
+      "nl": "is the laureate of a monograph devoted to her work"
+    },
+    "partner": {
+      "_ref": "demo-partner-ambassade-de-france-en-belgique",
+      "_type": "reference"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:07Z",
+    "_id": "demo-award-2026-3",
+    "_rev": "KVotKtYYWoyyeFyM5EGKRT",
+    "_type": "award",
+    "_updatedAt": "2026-09-02T05:56:19Z",
+    "description": {
+      "en": [
+        {
+          "_key": "nyy9c9",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "The artist awarded the Centre Prize will benefit from the presentation of one of their works within a group exhibition produced by the Centre in the 2027 season."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "family": "art-prize",
+    "laureates": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-ninon-hivert",
+        "_type": "reference"
+      }
+    ],
+    "name": {
+      "_type": "localeString",
+      "en": "Centre Wallonie-Bruxelles | Paris",
+      "fr": "Centre Wallonie-Bruxelles | Paris",
+      "nl": "Centre Wallonie-Bruxelles | Paris"
+    },
+    "order": 3,
+    "outcome": {
+      "_type": "localeString",
+      "en": "will take part in an exhibition in 2027 in Paris",
+      "fr": "will take part in an exhibition in 2027 in Paris",
+      "nl": "will take part in an exhibition in 2027 in Paris"
+    },
+    "partner": {
+      "_ref": "demo-partner-centre-wallonie-bruxelles-paris",
+      "_type": "reference"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:07Z",
+    "_id": "demo-award-2026-4",
+    "_rev": "KVotKtYYWoyyeFyM5EGKRT",
+    "_type": "award",
+    "_updatedAt": "2026-09-02T05:56:19Z",
+    "description": {
+      "en": [
+        {
+          "_key": "abqs1x",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "A new artistic residency in France, in the heart of the Orléans forest. The artist will benefit from a 2-month research and creation residency in 2026, including accommodation on site and a fully equipped workshop."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "family": "art-prize",
+    "laureates": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-danny-cremers",
+        "_type": "reference"
+      }
+    ],
+    "name": {
+      "_type": "localeString",
+      "en": "Les Ateliers dans la Forêt",
+      "fr": "Les Ateliers dans la Forêt",
+      "nl": "Les Ateliers dans la Forêt"
+    },
+    "order": 4,
+    "outcome": {
+      "_type": "localeString",
+      "en": "will benefit from a 2-month residency",
+      "fr": "will benefit from a 2-month residency",
+      "nl": "will benefit from a 2-month residency"
+    },
+    "partner": {
+      "_ref": "demo-partner-les-ateliers-dans-la-foret",
+      "_type": "reference"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:07Z",
+    "_id": "demo-award-2026-5",
+    "_rev": "KVotKtYYWoyyeFyM5EGKRT",
+    "_type": "award",
+    "_updatedAt": "2026-09-02T05:56:19Z",
+    "description": {
+      "en": [
+        {
+          "_key": "z6r1bh",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "The artist will benefit from a 30-day residency in July 2026 at the Keramis residence, with a grant of €2,000 and a budget of €500 for kiln hire."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "family": "art-prize",
+    "laureates": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-walter-yu",
+        "_type": "reference"
+      }
+    ],
+    "name": {
+      "_type": "localeString",
+      "en": "Keramis",
+      "fr": "Keramis",
+      "nl": "Keramis"
+    },
+    "order": 5,
+    "outcome": {
+      "_type": "localeString",
+      "en": "will benefit from a residency in July 2026",
+      "fr": "will benefit from a residency in July 2026",
+      "nl": "will benefit from a residency in July 2026"
+    },
+    "partner": {
+      "_ref": "demo-partner-keramis",
+      "_type": "reference"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:07Z",
+    "_id": "demo-award-2026-6",
+    "_rev": "KVotKtYYWoyyeFyM5EGKRT",
+    "_type": "award",
+    "_updatedAt": "2026-09-02T05:56:19Z",
+    "description": {
+      "en": [
+        {
+          "_key": "jwkaru",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "A three-week residency in Latvia, developed in partnership with the Daugavpils Mark Rothko Museum, concluding with an exhibition at the museum."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "family": "art-prize",
+    "laureates": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-danny-cremers",
+        "_type": "reference"
+      }
+    ],
+    "name": {
+      "_type": "localeString",
+      "en": "The Latvian Centre for Contemporary Ceramics",
+      "fr": "The Latvian Centre for Contemporary Ceramics",
+      "nl": "The Latvian Centre for Contemporary Ceramics"
+    },
+    "order": 6,
+    "outcome": {
+      "_type": "localeString",
+      "en": "is the laureate of a 3-week residency in Latvia",
+      "fr": "is the laureate of a 3-week residency in Latvia",
+      "nl": "is the laureate of a 3-week residency in Latvia"
+    },
+    "partner": {
+      "_ref": "demo-partner-the-latvian-centre-for-contemporary-ceramics",
+      "_type": "reference"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:07Z",
+    "_id": "demo-award-2026-7",
+    "_rev": "KVotKtYYWoyyeFyM5EGKRT",
+    "_type": "award",
+    "_updatedAt": "2026-09-02T05:56:19Z",
+    "description": {
+      "en": [
+        {
+          "_key": "sf8uwb",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Two artists are hosted for a 3-month residency in Yixing, the birthplace of Chinese purple clay, with free accommodation, studio access, materials and firings, and a grant of 15,000 RMB."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "family": "art-prize",
+    "laureates": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-marie-pic",
+        "_type": "reference"
+      },
+      {
+        "_key": "r1",
+        "_ref": "demo-artist-ninon-hivert",
+        "_type": "reference"
+      }
+    ],
+    "name": {
+      "_type": "localeString",
+      "en": "YXCCCA",
+      "fr": "YXCCCA",
+      "nl": "YXCCCA"
+    },
+    "order": 7,
+    "outcome": {
+      "_type": "localeString",
+      "en": "are the laureates of a 3-month residency",
+      "fr": "are the laureates of a 3-month residency",
+      "nl": "are the laureates of a 3-month residency"
+    },
+    "partner": {
+      "_ref": "demo-partner-yxccca",
+      "_type": "reference"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:07Z",
+    "_id": "demo-award-2026-8",
+    "_rev": "KVotKtYYWoyyeFyM5EGKRT",
+    "_type": "award",
+    "_updatedAt": "2026-09-02T05:56:19Z",
+    "citation": {
+      "en": [
+        {
+          "_key": "7tz3oq",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "For a booth that let the works breathe and the visitors slow down."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "family": "fair",
+    "laureates": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-janis-lohrer",
+        "_type": "reference"
+      }
+    ],
+    "name": {
+      "_type": "localeString",
+      "en": "best booth",
+      "fr": "meilleur stand",
+      "nl": "beste stand"
+    },
+    "order": 10,
+    "winnerExhibitor": {
+      "_ref": "demo-exhibitor-2027-galerie-bernard-jordan",
+      "_type": "reference"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:02Z",
+    "_id": "demo-edition-2024",
+    "_rev": "KVotKtYYWoyyeFyM5EGJsd",
+    "_type": "edition",
+    "_updatedAt": "2026-09-02T05:56:14Z",
+    "endDate": "2024-01-28",
+    "guestOfHonour": {
+      "_ref": "demo-artist-johan-creten",
+      "_type": "reference"
+    },
+    "isCurrent": false,
+    "keyFigures": [
+      {
+        "_key": "keyFigure0",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "visitors",
+          "fr": "visiteurs",
+          "nl": "bezoekers"
+        },
+        "value": "12,900"
+      },
+      {
+        "_key": "keyFigure1",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "galleries",
+          "fr": "galeries",
+          "nl": "galerieën"
+        },
+        "value": "55"
+      },
+      {
+        "_key": "keyFigure2",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "artists",
+          "fr": "artistes",
+          "nl": "kunstenaars"
+        },
+        "value": "200"
+      },
+      {
+        "_key": "keyFigure3",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "countries",
+          "fr": "pays",
+          "nl": "landen"
+        },
+        "value": "10+"
+      },
+      {
+        "_key": "keyFigure4",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "press clips",
+          "fr": "articles de presse",
+          "nl": "persartikels"
+        },
+        "value": "100+"
+      }
+    ],
+    "ordinal": {
+      "_type": "localeString",
+      "en": "1st edition",
+      "fr": "1re édition",
+      "nl": "1ste editie"
+    },
+    "startDate": "2024-01-24",
+    "title": {
+      "_type": "localeString",
+      "en": "ceramic brussels 2024",
+      "fr": "ceramic brussels 2024",
+      "nl": "ceramic brussels 2024"
+    },
+    "venue": "Tour & Taxis, Brussels",
+    "year": 2024
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:02Z",
+    "_id": "demo-edition-2025",
+    "_rev": "KVotKtYYWoyyeFyM5EGJsd",
+    "_type": "edition",
+    "_updatedAt": "2026-09-02T05:56:14Z",
+    "countryFocus": {
+      "_type": "localeString",
+      "en": "focus Norway",
+      "fr": "focus Norvège",
+      "nl": "focus Noorwegen"
+    },
+    "endDate": "2025-01-26",
+    "guestOfHonour": {
+      "_ref": "demo-artist-elizabeth-jaeger",
+      "_type": "reference"
+    },
+    "isCurrent": false,
+    "keyFigures": [
+      {
+        "_key": "keyFigure0",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "visitors",
+          "fr": "visiteurs",
+          "nl": "bezoekers"
+        },
+        "value": "17,840"
+      },
+      {
+        "_key": "keyFigure1",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "galleries",
+          "fr": "galeries",
+          "nl": "galerieën"
+        },
+        "value": "65"
+      },
+      {
+        "_key": "keyFigure2",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "artists",
+          "fr": "artistes",
+          "nl": "kunstenaars"
+        },
+        "value": "200+"
+      },
+      {
+        "_key": "keyFigure3",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "countries",
+          "fr": "pays",
+          "nl": "landen"
+        },
+        "value": "14"
+      },
+      {
+        "_key": "keyFigure4",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "talks",
+          "fr": "conférences",
+          "nl": "talks"
+        },
+        "value": "13"
+      }
+    ],
+    "ordinal": {
+      "_type": "localeString",
+      "en": "2nd edition",
+      "fr": "2e édition",
+      "nl": "2de editie"
+    },
+    "overviewUrl": "https://online.fliphtml5.com/qogyd/tozg/",
+    "startDate": "2025-01-22",
+    "title": {
+      "_type": "localeString",
+      "en": "ceramic brussels 2025",
+      "fr": "ceramic brussels 2025",
+      "nl": "ceramic brussels 2025"
+    },
+    "venue": "Tour & Taxis, Brussels",
+    "year": 2025
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:02Z",
+    "_id": "demo-edition-2026",
+    "_rev": "ghP6IOTcoqqNTPfCFZgWfD",
+    "_type": "edition",
+    "_updatedAt": "2026-09-02T13:38:52Z",
+    "catalogueUrl": "https://online.fliphtml5.com/qogyd/CB26_CATALOGUE/",
+    "countryFocus": {
+      "_type": "localeString",
+      "en": "focus España",
+      "fr": "focus España",
+      "nl": "focus España"
+    },
+    "endDate": "2026-01-25",
+    "film": {
+      "_type": "video",
+      "title": {
+        "_type": "localeString",
+        "en": "Visions behind ceramic brussels 2026",
+        "fr": "Visions behind ceramic brussels 2026",
+        "nl": "Visions behind ceramic brussels 2026"
+      },
+      "url": "https://youtu.be/IyklMBqj4L4"
+    },
+    "guestOfHonour": {
+      "_ref": "demo-artist-elmar-trenkwalder",
+      "_type": "reference"
+    },
+    "isCurrent": false,
+    "keyFigures": [
+      {
+        "_key": "keyFigure0",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "visitors",
+          "fr": "visiteurs",
+          "nl": "bezoekers"
+        },
+        "value": "19,200"
+      },
+      {
+        "_key": "keyFigure1",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "exhibitors",
+          "fr": "exposants",
+          "nl": "exposanten"
+        },
+        "value": "70"
+      },
+      {
+        "_key": "keyFigure2",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "artists",
+          "fr": "artistes",
+          "nl": "kunstenaars"
+        },
+        "value": "200+"
+      },
+      {
+        "_key": "keyFigure3",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "countries",
+          "fr": "pays",
+          "nl": "landen"
+        },
+        "value": "15"
+      },
+      {
+        "_key": "keyFigure4",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "VIPs",
+          "fr": "VIPs",
+          "nl": "VIPs"
+        },
+        "value": "3,500"
+      },
+      {
+        "_key": "keyFigure5",
+        "_type": "keyFigure",
+        "label": {
+          "_type": "localeString",
+          "en": "press clips",
+          "fr": "articles de presse",
+          "nl": "persartikels"
+        },
+        "value": "230+"
+      }
+    ],
+    "ordinal": {
+      "_type": "localeString",
+      "en": "3rd edition",
+      "fr": "3e édition",
+      "nl": "3de editie"
+    },
+    "overviewUrl": "https://online.fliphtml5.com/qogyd/ohtg/",
+    "pressClipsUrl": "https://online.fliphtml5.com/qogyd/CB26_press_clips/",
+    "startDate": "2026-01-21",
+    "title": {
+      "_type": "localeString",
+      "en": "ceramic brussels 2026",
+      "fr": "ceramic brussels 2026",
+      "nl": "ceramic brussels 2026"
+    },
+    "venue": "Tour & Taxis, Brussels",
+    "year": 2026
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:02Z",
+    "_id": "demo-edition-2027",
+    "_rev": "KVotKtYYWoyyeFyM5EGJsd",
+    "_type": "edition",
+    "_updatedAt": "2026-09-02T05:56:14Z",
+    "endDate": "2027-01-24",
+    "guestOfHonour": {
+      "_ref": "demo-artist-marion-verboom",
+      "_type": "reference"
+    },
+    "intro": {
+      "en": [
+        {
+          "_key": "u8rcwj",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "ceramic brussels' 4th edition will take place from 20 till 24 January 2027 at Tour & Taxis, Brussels."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ],
+      "fr": [
+        {
+          "_key": "sspkot",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "La 4e édition de ceramic brussels se tiendra du 20 au 24 janvier 2027 à Tour & Taxis, Bruxelles."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ],
+      "nl": [
+        {
+          "_key": "18iqkt",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "De 4de editie van ceramic brussels vindt plaats van 20 tot 24 januari 2027 in Tour & Taxis, Brussel."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "isCurrent": true,
+    "lastEntry": {
+      "_type": "localeString",
+      "en": "Last entry 30 minutes before closing.",
+      "fr": "Dernière entrée 30 minutes avant la fermeture.",
+      "nl": "Laatste toegang 30 minuten voor sluitingstijd."
+    },
+    "openingHours": [
+      {
+        "_key": "openingDay0",
+        "_type": "openingDay",
+        "date": "2027-01-20",
+        "label": {
+          "_type": "localeString",
+          "en": "Wednesday 20 January 2027",
+          "fr": "Mercredi 20 janvier 2027",
+          "nl": "Woensdag 20 januari 2027"
+        },
+        "slots": [
+          {
+            "_key": "openingSlot0",
+            "_type": "openingSlot",
+            "invitationOnly": true,
+            "label": {
+              "_type": "localeString",
+              "en": "Preview",
+              "fr": "Preview",
+              "nl": "Preview"
+            },
+            "time": "14—17:00"
+          },
+          {
+            "_key": "openingSlot1",
+            "_type": "openingSlot",
+            "invitationOnly": true,
+            "label": {
+              "_type": "localeString",
+              "en": "Vernissage",
+              "fr": "Vernissage",
+              "nl": "Vernissage"
+            },
+            "time": "17—21:00"
+          }
+        ]
+      },
+      {
+        "_key": "openingDay1",
+        "_type": "openingDay",
+        "date": "2027-01-21",
+        "label": {
+          "_type": "localeString",
+          "en": "Thursday 21 — Saturday 23 January 2027",
+          "fr": "Jeudi 21 — samedi 23 janvier 2027",
+          "nl": "Donderdag 21 — zaterdag 23 januari 2027"
+        },
+        "slots": [
+          {
+            "_key": "openingSlot0",
+            "_type": "openingSlot",
+            "label": {
+              "_type": "localeString",
+              "en": "Public opening",
+              "fr": "Ouverture au public",
+              "nl": "Open voor publiek"
+            },
+            "time": "11—19:00"
+          }
+        ]
+      },
+      {
+        "_key": "openingDay2",
+        "_type": "openingDay",
+        "date": "2027-01-24",
+        "label": {
+          "_type": "localeString",
+          "en": "Sunday 24 January 2027",
+          "fr": "Dimanche 24 janvier 2027",
+          "nl": "Zondag 24 januari 2027"
+        },
+        "slots": [
+          {
+            "_key": "openingSlot0",
+            "_type": "openingSlot",
+            "label": {
+              "_type": "localeString",
+              "en": "Public opening",
+              "fr": "Ouverture au public",
+              "nl": "Open voor publiek"
+            },
+            "time": "11—18:00"
+          }
+        ]
+      }
+    ],
+    "ordinal": {
+      "_type": "localeString",
+      "en": "4th edition",
+      "fr": "4e édition",
+      "nl": "4de editie"
+    },
+    "startDate": "2027-01-20",
+    "tickets": [
+      {
+        "_key": "ticketType0",
+        "_type": "ticketType",
+        "name": {
+          "_type": "localeString",
+          "en": "Day ticket",
+          "fr": "Billet journée",
+          "nl": "Dagticket"
+        },
+        "price": "20€"
+      },
+      {
+        "_key": "ticketType1",
+        "_type": "ticketType",
+        "name": {
+          "_type": "localeString",
+          "en": "4-day pass",
+          "fr": "Pass 4 jours",
+          "nl": "4-dagenpas"
+        },
+        "note": {
+          "_type": "localeText",
+          "en": "valid from 21—24 January 2027",
+          "fr": "valable du 21 au 24 janvier 2027",
+          "nl": "geldig van 21 tot 24 januari 2027"
+        },
+        "price": "38€"
+      },
+      {
+        "_key": "ticketType2",
+        "_type": "ticketType",
+        "name": {
+          "_type": "localeString",
+          "en": "Reduction ticket",
+          "fr": "Tarif réduit",
+          "nl": "Kortingsticket"
+        },
+        "note": {
+          "_type": "localeText",
+          "en": "students under 22, job seekers, EU disability card holders",
+          "fr": "étudiants de moins de 22 ans, demandeurs d’emploi, titulaires de la carte européenne du handicap",
+          "nl": "studenten onder 22, werkzoekenden, houders van de Europese handicapkaart"
+        },
+        "price": "8€"
+      },
+      {
+        "_key": "ticketType3",
+        "_type": "ticketType",
+        "name": {
+          "_type": "localeString",
+          "en": "Article 27",
+          "fr": "Article 27",
+          "nl": "Artikel 27"
+        },
+        "note": {
+          "_type": "localeText",
+          "en": "no advance booking; at the ticket office upon presentation of the Article 27 voucher",
+          "fr": "pas de réservation ; à la billetterie sur présentation du ticket Article 27",
+          "nl": "geen voorverkoop; aan de kassa op vertoon van de Artikel 27-bon"
+        },
+        "price": "1,25€"
+      },
+      {
+        "_key": "ticketType4",
+        "_type": "ticketType",
+        "name": {
+          "_type": "localeString",
+          "en": "Under 12 years old",
+          "fr": "Moins de 12 ans",
+          "nl": "Onder 12 jaar"
+        },
+        "price": "Free"
+      }
+    ],
+    "ticketsNote": {
+      "_type": "localeText",
+      "en": "Tickets are also sold on site, by card or cash. Tickets are non-refundable. Cloakroom 2€.",
+      "fr": "Billets également en vente sur place, par carte ou en espèces. Billets non remboursables. Vestiaire 2€.",
+      "nl": "Tickets ook ter plaatse te koop, met kaart of cash. Tickets worden niet terugbetaald. Vestiaire 2€."
+    },
+    "ticketsUrl": "https://ceramicbrussels27.tickoweb.be/selection",
+    "title": {
+      "_type": "localeString",
+      "en": "ceramic brussels 2027",
+      "fr": "ceramic brussels 2027",
+      "nl": "ceramic brussels 2027"
+    },
+    "venue": "Tour & Taxis, Brussels",
+    "year": 2027
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:09Z",
+    "_id": "demo-event-2027-1",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0sY",
+    "_type": "programmeEvent",
+    "_updatedAt": "2026-09-02T05:56:21Z",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "kind": "artist-talk",
+    "languages": [
+      "EN"
+    ],
+    "location": {
+      "_type": "localeString",
+      "en": "talk area, hall B",
+      "fr": "talk area, hall B",
+      "nl": "talk area, hall B"
+    },
+    "section": "talks",
+    "slug": {
+      "_type": "slug",
+      "current": "exclusive-interview-of-marion-verboom-guest-of-honour-2027"
+    },
+    "speakers": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-marion-verboom",
+        "_type": "reference"
+      }
+    ],
+    "startsAt": "2027-01-21T14:00:00+01:00",
+    "title": {
+      "_type": "localeString",
+      "en": "Exclusive interview of Marion Verboom, guest of honour 2027",
+      "fr": "Exclusive interview of Marion Verboom, guest of honour 2027",
+      "nl": "Exclusive interview of Marion Verboom, guest of honour 2027"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:09Z",
+    "_id": "demo-event-2027-2",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0sY",
+    "_type": "programmeEvent",
+    "_updatedAt": "2026-09-02T05:56:21Z",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "kind": "roundtable",
+    "languages": [
+      "FR"
+    ],
+    "location": {
+      "_type": "localeString",
+      "en": "talk area, hall B",
+      "fr": "talk area, hall B",
+      "nl": "talk area, hall B"
+    },
+    "section": "talks",
+    "slug": {
+      "_type": "slug",
+      "current": "exposer-la-ceramique-dans-les-institutions"
+    },
+    "speakers": [],
+    "speakersText": {
+      "_type": "localeText",
+      "en": "with Christine Germain-Donnat (French Ministry of Culture), Ludovic Recchia (Keramis, BE) & Geertje Jacobs (EKWC, NL)",
+      "fr": "with Christine Germain-Donnat (French Ministry of Culture), Ludovic Recchia (Keramis, BE) & Geertje Jacobs (EKWC, NL)",
+      "nl": "with Christine Germain-Donnat (French Ministry of Culture), Ludovic Recchia (Keramis, BE) & Geertje Jacobs (EKWC, NL)"
+    },
+    "startsAt": "2027-01-21T15:00:00+01:00",
+    "title": {
+      "_type": "localeString",
+      "en": "Exposer la céramique dans les institutions",
+      "fr": "Exposer la céramique dans les institutions",
+      "nl": "Exposer la céramique dans les institutions"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:09Z",
+    "_id": "demo-event-2027-3",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0sY",
+    "_type": "programmeEvent",
+    "_updatedAt": "2026-09-02T05:56:21Z",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "kind": "artist-talk",
+    "languages": [
+      "EN"
+    ],
+    "section": "talks",
+    "slug": {
+      "_type": "slug",
+      "current": "thinking-hands-ways-of-teaching-ceramics-today"
+    },
+    "speakers": [],
+    "speakersText": {
+      "_type": "localeText",
+      "en": "with Magdalena Gerber (CERCCO — HEAD Geneva, CH), Geertje Jacobs (EKWC, NL) & Caroline Andrin (ENSAV La Cambre, BE)",
+      "fr": "with Magdalena Gerber (CERCCO — HEAD Geneva, CH), Geertje Jacobs (EKWC, NL) & Caroline Andrin (ENSAV La Cambre, BE)",
+      "nl": "with Magdalena Gerber (CERCCO — HEAD Geneva, CH), Geertje Jacobs (EKWC, NL) & Caroline Andrin (ENSAV La Cambre, BE)"
+    },
+    "startsAt": "2027-01-22T11:30:00+01:00",
+    "title": {
+      "_type": "localeString",
+      "en": "Thinking Hands: ways of teaching ceramics today",
+      "fr": "Thinking Hands: ways of teaching ceramics today",
+      "nl": "Thinking Hands: ways of teaching ceramics today"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:09Z",
+    "_id": "demo-event-2027-4",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0sY",
+    "_type": "programmeEvent",
+    "_updatedAt": "2026-09-02T05:56:21Z",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "kind": "artist-talk",
+    "languages": [
+      "ES",
+      "FR"
+    ],
+    "section": "talks",
+    "slug": {
+      "_type": "slug",
+      "current": "in-conversation-with-the-2026-laureates"
+    },
+    "speakers": [],
+    "speakersText": {
+      "_type": "localeText",
+      "en": "with Lorie Ballage, Uriel Caspi & Danny Cremers",
+      "fr": "with Lorie Ballage, Uriel Caspi & Danny Cremers",
+      "nl": "with Lorie Ballage, Uriel Caspi & Danny Cremers"
+    },
+    "startsAt": "2027-01-22T13:30:00+01:00",
+    "title": {
+      "_type": "localeString",
+      "en": "In conversation with the 2026 laureates",
+      "fr": "In conversation with the 2026 laureates",
+      "nl": "In conversation with the 2026 laureates"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:09Z",
+    "_id": "demo-event-2027-5",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0sY",
+    "_type": "programmeEvent",
+    "_updatedAt": "2026-09-02T05:56:21Z",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "endsAt": "2027-01-21T13:30:00+01:00",
+    "kind": "ceremony",
+    "location": {
+      "_type": "localeString",
+      "en": "art prize area, entrance",
+      "fr": "art prize area, entrance",
+      "nl": "art prize area, entrance"
+    },
+    "section": "awards",
+    "slug": {
+      "_type": "slug",
+      "current": "art-prize-award-ceremony"
+    },
+    "speakers": [],
+    "startsAt": "2027-01-21T12:00:00+01:00",
+    "title": {
+      "_type": "localeString",
+      "en": "Art prize award ceremony",
+      "fr": "Remise des prix",
+      "nl": "Prijsuitreiking"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:09Z",
+    "_id": "demo-event-2027-6",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0sY",
+    "_type": "programmeEvent",
+    "_updatedAt": "2026-09-02T05:56:21Z",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "endsAt": "2027-01-20T17:00:00+01:00",
+    "invitationOnly": true,
+    "kind": "opening",
+    "section": "vip",
+    "slug": {
+      "_type": "slug",
+      "current": "preview"
+    },
+    "speakers": [],
+    "startsAt": "2027-01-20T14:00:00+01:00",
+    "title": {
+      "_type": "localeString",
+      "en": "Preview",
+      "fr": "Preview",
+      "nl": "Preview"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:09Z",
+    "_id": "demo-event-2027-7",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0sY",
+    "_type": "programmeEvent",
+    "_updatedAt": "2026-09-02T05:56:21Z",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "endsAt": "2027-01-20T21:00:00+01:00",
+    "invitationOnly": true,
+    "kind": "opening",
+    "section": "vip",
+    "slug": {
+      "_type": "slug",
+      "current": "vernissage"
+    },
+    "speakers": [],
+    "startsAt": "2027-01-20T17:00:00+01:00",
+    "title": {
+      "_type": "localeString",
+      "en": "Vernissage",
+      "fr": "Vernissage",
+      "nl": "Vernissage"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-aifa",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [],
+    "booth": "A3",
+    "city": "Geneva",
+    "country": "Switzerland",
+    "countryCode": "CH",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "instagram": "aifa.ch",
+    "kind": "gallery",
+    "name": "AIFA",
+    "slug": {
+      "_type": "slug",
+      "current": "aifa"
+    },
+    "soloShow": true,
+    "website": "https://aifa.ch"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-al-tiba9-gallery",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-barry-wolfryd",
+        "_type": "reference"
+      }
+    ],
+    "bio": {
+      "en": [
+        {
+          "_key": "j83nj0",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Founded in 2013 in Algeria and now based in Barcelona, Al-Tiba9 Gallery works with artists whose practices sit between craft, sculpture and conceptual art."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "booth": "B9",
+    "city": "Barcelona",
+    "country": "Spain",
+    "countryCode": "ES",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": true,
+    "instagram": "altiba9",
+    "kind": "gallery",
+    "name": "Al-Tiba9 Gallery",
+    "slug": {
+      "_type": "slug",
+      "current": "al-tiba9-gallery"
+    },
+    "soloShow": true,
+    "website": "https://altiba9.gallery"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-analora",
+    "_rev": "VW4zeDLxgUGISfWzwNBASd",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T13:38:50Z",
+    "artists": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-frederique-fleury",
+        "_type": "reference"
+      }
+    ],
+    "artistsNote": {
+      "en": [
+        {
+          "_key": "ki59i5",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Anne-Laure Pilet enjoys presenting both emerging and established artists, with works that can sometimes be monumental. Her talent for discovery has been shaped primarily by her life in China and Portugal — two countries, two cultures, and two distinct approaches to contemporary art."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "bio": {
+      "en": [
+        {
+          "_key": "djgz01",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Founded by Anne-Laure Pilet in 2021 in Lisbon, the gallery is now based in Paris. Contemporary ceramics hold a central place in its programme, while the gallery also showcases artists working in other media (painting, drawing, textile, plaster, etc.)."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "j4hlud",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "The selection is built around a genuine commitment from both the gallery and the artists. Its ambition is to work hand in hand with artists whose gestures are always meaningful and who push the boundaries of technique."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ],
+      "fr": [
+        {
+          "_key": "37bv4n",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Fondée par Anne-Laure Pilet en 2021 à Lisbonne, la galerie est aujourd’hui installée à Paris. La céramique contemporaine occupe une place centrale dans sa programmation, aux côtés d’artistes travaillant d’autres m��diums (peinture, dessin, textile, plâtre…)."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "cl94do",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "La sélection repose sur un engagement réel de la galerie comme des artistes, avec l’ambition de travailler main dans la main avec des artistes au geste toujours signifiant, qui repoussent les limites de la technique."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "booth": "B28",
+    "city": "Paris",
+    "country": "France",
+    "countryCode": "FR",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "instagram": "analora_by_annelaurepilet",
+    "kind": "gallery",
+    "name": "ANALORA",
+    "slug": {
+      "_type": "slug",
+      "current": "analora"
+    },
+    "soloShow": true,
+    "website": "https://galerieanalora.com/"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-anna-laudel",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [],
+    "booth": "B25",
+    "city": "Istanbul",
+    "country": "Turkey",
+    "countryCode": "TR",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "instagram": "annalaudel.gallery",
+    "kind": "gallery",
+    "name": "Anna Laudel",
+    "slug": {
+      "_type": "slug",
+      "current": "anna-laudel"
+    },
+    "soloShow": false,
+    "website": "https://annalaudel.gallery"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-arsenic-galerie",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [],
+    "booth": "A14",
+    "city": "Paris",
+    "country": "France",
+    "countryCode": "FR",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "kind": "gallery",
+    "name": "arsenic galerie",
+    "slug": {
+      "_type": "slug",
+      "current": "arsenic-galerie"
+    },
+    "soloShow": false,
+    "website": "https://arsenicgalerie.com"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-barrera-baldan-galeria",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [],
+    "booth": "B11",
+    "city": "Madrid",
+    "country": "Spain",
+    "countryCode": "ES",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": true,
+    "kind": "gallery",
+    "name": "Barrera Baldan Galeria",
+    "slug": {
+      "_type": "slug",
+      "current": "barrera-baldan-galeria"
+    },
+    "soloShow": false
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-brazil-modernist",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [],
+    "booth": "A2",
+    "city": "Paris",
+    "country": "France",
+    "countryCode": "FR",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "kind": "gallery",
+    "name": "Brazil Modernist",
+    "slug": {
+      "_type": "slug",
+      "current": "brazil-modernist"
+    },
+    "soloShow": false
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-chaxartxrtm",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-tong-xindi-shen-ting",
+        "_type": "reference"
+      }
+    ],
+    "artistsNote": {
+      "en": [
+        {
+          "_key": "kjphf1",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "By recontextualizing tea within contemporary cultural discourse, CHAxART offers a distinctive curatorial approach that bridges artistic practice and cultural heritage."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "artistsText": {
+      "_type": "localeString",
+      "en": "Dong Quanbin, Liu Langqing, Tong Xindi & Shen Ting, Xin Yaoyao, Xu Chaoqi and Xu Qun",
+      "fr": "Dong Quanbin, Liu Langqing, Tong Xindi & Shen Ting, Xin Yaoyao, Xu Chaoqi and Xu Qun",
+      "nl": "Dong Quanbin, Liu Langqing, Tong Xindi & Shen Ting, Xin Yaoyao, Xu Chaoqi and Xu Qun"
+    },
+    "bio": {
+      "en": [
+        {
+          "_key": "fqxjqj",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Founded in 2021, CHAxART is an intercultural initiative established by overseas Chinese in the Netherlands. It is dedicated to fostering meaningful exchange and integration between Eastern and Western cultures through the dual lenses of tea and contemporary art."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "d6fyn6",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Positioned at the intersection of traditional tea culture and contemporary artistic practice, CHAxART engages both as powerful instruments for cultural dialogue, critical reflection, and embodied experience."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "booth": "A5",
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "countryCode": "NL",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "kind": "gallery",
+    "name": "CHAxARTxRTM",
+    "slug": {
+      "_type": "slug",
+      "current": "chaxartxrtm"
+    },
+    "soloShow": false
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-deletaille-gallery",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [],
+    "booth": "A9",
+    "city": "Brussels",
+    "country": "Belgium",
+    "countryCode": "BE",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "kind": "gallery",
+    "name": "Deletaille Gallery",
+    "slug": {
+      "_type": "slug",
+      "current": "deletaille-gallery"
+    },
+    "soloShow": true,
+    "website": "https://deletaille.com"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-esther-verhaeghe-art-concepts",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [],
+    "booth": "A21",
+    "city": "Brussels",
+    "country": "Belgium",
+    "countryCode": "BE",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "kind": "gallery",
+    "name": "Esther Verhaeghe — art concepts",
+    "slug": {
+      "_type": "slug",
+      "current": "esther-verhaeghe-art-concepts"
+    },
+    "soloShow": false,
+    "sortName": "Esther Verhaeghe"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-format-oslo",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-heidi-bj-rgan",
+        "_type": "reference"
+      }
+    ],
+    "booth": "B32",
+    "city": "Oslo",
+    "country": "Norway",
+    "countryCode": "NO",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "instagram": "formatoslo",
+    "kind": "gallery",
+    "name": "Format Oslo",
+    "slug": {
+      "_type": "slug",
+      "current": "format-oslo"
+    },
+    "soloShow": false,
+    "website": "https://formatoslo.no"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-galerie-bernard-jordan",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-elmar-trenkwalder",
+        "_type": "reference"
+      }
+    ],
+    "booth": "A19",
+    "city": "Paris",
+    "country": "France",
+    "countryCode": "FR",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "kind": "gallery",
+    "name": "Galerie Bernard Jordan",
+    "slug": {
+      "_type": "slug",
+      "current": "galerie-bernard-jordan"
+    },
+    "soloShow": true,
+    "sortName": "Bernard Jordan",
+    "website": "https://galeriebernardjordan.com"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-marie-pic-jury-prize-2026-solo-show",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [
+      {
+        "_key": "r0",
+        "_ref": "demo-artist-marie-pic",
+        "_type": "reference"
+      }
+    ],
+    "booth": "B16",
+    "city": "Paris",
+    "country": "France",
+    "countryCode": "FR",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "kind": "jury-prize",
+    "name": "Marie Pic — jury prize 2026 solo show",
+    "slug": {
+      "_type": "slug",
+      "current": "marie-pic-jury-prize-2026-solo-show"
+    },
+    "soloShow": false,
+    "sortName": "Pic"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:05Z",
+    "_id": "demo-exhibitor-2027-mercatorfonds",
+    "_rev": "Jecqg66MuXQGCI1elHCAQj",
+    "_type": "exhibitor",
+    "_updatedAt": "2026-09-02T05:56:17Z",
+    "artists": [],
+    "booth": "C3",
+    "city": "Brussels",
+    "country": "Belgium",
+    "countryCode": "BE",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "inCountryFocus": false,
+    "instagram": "mercatorfondsfondsmercator",
+    "kind": "publisher",
+    "name": "Mercatorfonds",
+    "slug": {
+      "_type": "slug",
+      "current": "mercatorfonds"
+    },
+    "soloShow": false,
+    "website": "https://mercatorfonds.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:06Z",
+    "_id": "demo-laureate-2026-angelika-stefaniak",
+    "_rev": "sd0hiYDcFo1yrzGoFHezfa",
+    "_type": "laureate",
+    "_updatedAt": "2026-09-02T05:56:18Z",
+    "artist": {
+      "_ref": "demo-artist-angelika-stefaniak",
+      "_type": "reference"
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "order": 9
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:06Z",
+    "_id": "demo-laureate-2026-danny-cremers",
+    "_rev": "sd0hiYDcFo1yrzGoFHezfa",
+    "_type": "laureate",
+    "_updatedAt": "2026-09-02T05:56:18Z",
+    "artist": {
+      "_ref": "demo-artist-danny-cremers",
+      "_type": "reference"
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "order": 3
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:06Z",
+    "_id": "demo-laureate-2026-faye-papargyropoulou",
+    "_rev": "sd0hiYDcFo1yrzGoFHezfa",
+    "_type": "laureate",
+    "_updatedAt": "2026-09-02T05:56:18Z",
+    "artist": {
+      "_ref": "demo-artist-faye-papargyropoulou",
+      "_type": "reference"
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "order": 7
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:06Z",
+    "_id": "demo-laureate-2026-kira-frose",
+    "_rev": "sd0hiYDcFo1yrzGoFHezfa",
+    "_type": "laureate",
+    "_updatedAt": "2026-09-02T05:56:18Z",
+    "artist": {
+      "_ref": "demo-artist-kira-frose",
+      "_type": "reference"
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "order": 4
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:06Z",
+    "_id": "demo-laureate-2026-lorie-ballage",
+    "_rev": "sd0hiYDcFo1yrzGoFHezfa",
+    "_type": "laureate",
+    "_updatedAt": "2026-09-02T05:56:18Z",
+    "artist": {
+      "_ref": "demo-artist-lorie-ballage",
+      "_type": "reference"
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "order": 1
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:06Z",
+    "_id": "demo-laureate-2026-marie-pic",
+    "_rev": "sd0hiYDcFo1yrzGoFHezfa",
+    "_type": "laureate",
+    "_updatedAt": "2026-09-02T05:56:18Z",
+    "artist": {
+      "_ref": "demo-artist-marie-pic",
+      "_type": "reference"
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "order": 8
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:06Z",
+    "_id": "demo-laureate-2026-ninon-hivert",
+    "_rev": "sd0hiYDcFo1yrzGoFHezfa",
+    "_type": "laureate",
+    "_updatedAt": "2026-09-02T05:56:18Z",
+    "artist": {
+      "_ref": "demo-artist-ninon-hivert",
+      "_type": "reference"
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "order": 5
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:06Z",
+    "_id": "demo-laureate-2026-santiago-insignares-martinez",
+    "_rev": "sd0hiYDcFo1yrzGoFHezfa",
+    "_type": "laureate",
+    "_updatedAt": "2026-09-02T05:56:18Z",
+    "artist": {
+      "_ref": "demo-artist-santiago-insignares-martinez",
+      "_type": "reference"
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "order": 6
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:06Z",
+    "_id": "demo-laureate-2026-uriel-caspi",
+    "_rev": "sd0hiYDcFo1yrzGoFHezfa",
+    "_type": "laureate",
+    "_updatedAt": "2026-09-02T05:56:18Z",
+    "artist": {
+      "_ref": "demo-artist-uriel-caspi",
+      "_type": "reference"
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "order": 2
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:06Z",
+    "_id": "demo-laureate-2026-walter-yu",
+    "_rev": "sd0hiYDcFo1yrzGoFHezfa",
+    "_type": "laureate",
+    "_updatedAt": "2026-09-02T05:56:18Z",
+    "artist": {
+      "_ref": "demo-artist-walter-yu",
+      "_type": "reference"
+    },
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "order": 10
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:11Z",
+    "_id": "demo-news-gallery-applications-2027-open",
+    "_rev": "Jecqg66MuXQGCI1elHCEsX",
+    "_type": "newsItem",
+    "_updatedAt": "2026-09-02T05:56:23Z",
+    "category": "announcement",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "excerpt": {
+      "_type": "localeText",
+      "en": "Galleries can apply for the 4th edition until 30 September 2026.",
+      "fr": "Les galeries peuvent candidater à la 4e édition jusqu’au 30 septembre 2026.",
+      "nl": "Galerieën kunnen zich tot 30 september 2026 aanmelden voor de 4de editie."
+    },
+    "publishedAt": "2026-05-02T09:00:00.000Z",
+    "slug": {
+      "_type": "slug",
+      "current": "gallery-applications-2027-open"
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "Gallery applications are open",
+      "fr": "Les candidatures galeries sont ouvertes",
+      "nl": "Aanmeldingen voor galerieën zijn open"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:11Z",
+    "_id": "demo-news-looking-back-at-2026",
+    "_rev": "Jecqg66MuXQGCI1elHCEsX",
+    "_type": "newsItem",
+    "_updatedAt": "2026-09-02T05:56:23Z",
+    "category": "recap",
+    "edition": {
+      "_ref": "demo-edition-2026",
+      "_type": "reference"
+    },
+    "excerpt": {
+      "_type": "localeText",
+      "en": "19,200 visitors, 70 exhibitors from 15 countries, 3,500 VIPs: the third edition in numbers.",
+      "fr": "19 200 visiteurs, 70 exposants de 15 pays, 3 500 VIP : la troisième édition en chiffres.",
+      "nl": "19.200 bezoekers, 70 exposanten uit 15 landen, 3.500 VIP’s: de derde editie in cijfers."
+    },
+    "publishedAt": "2026-02-03T12:00:00.000Z",
+    "slug": {
+      "_type": "slug",
+      "current": "looking-back-at-2026"
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "Looking back at 2026",
+      "fr": "Retour sur 2026",
+      "nl": "Terugblik op 2026"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:11Z",
+    "_id": "demo-news-marion-verboom-guest-of-honour-2027",
+    "_rev": "Jecqg66MuXQGCI1elHCEsX",
+    "_type": "newsItem",
+    "_updatedAt": "2026-09-02T05:56:23Z",
+    "body": {
+      "en": [
+        {
+          "_key": "2ah0nn",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Every year, ceramic brussels invites an artist whose work marks the field. In 2027 the fair welcomes French sculptor Marion Verboom."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "category": "announcement",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "excerpt": {
+      "_type": "localeText",
+      "en": "A selection of her works will be presented at the entrance of the fair, in collaboration with Galerie Lelong.",
+      "fr": "Une sélection de ses œuvres sera présentée à l’entrée de la foire, en collaboration avec la Galerie Lelong.",
+      "nl": "Een selectie van haar werk wordt aan de ingang van de beurs getoond, in samenwerking met Galerie Lelong."
+    },
+    "publishedAt": "2026-06-10T09:00:00.000Z",
+    "slug": {
+      "_type": "slug",
+      "current": "marion-verboom-guest-of-honour-2027"
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "Marion Verboom is the guest of honour of ceramic brussels 2027",
+      "fr": "Marion Verboom, invitée d’honneur de ceramic brussels 2027",
+      "nl": "Marion Verboom is eregast van ceramic brussels 2027"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-about-advisory-board",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "intro": {
+      "_type": "localeText",
+      "en": "The fair has the support of renowned international experts in the field of ceramics as its advisory board:",
+      "fr": "La foire bénéficie du soutien d’experts internationaux reconnus dans le domaine de la céramique, réunis en comité consultatif :",
+      "nl": "De beurs wordt gesteund door een adviesraad van gerenommeerde internationale experts in keramiek:"
+    },
+    "order": 2,
+    "section": "about",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "advisory-board"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "advisory-board"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "advisory-board"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "advisory board",
+      "fr": "comité consultatif",
+      "nl": "adviesraad"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-about-images",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "order": 5,
+    "section": "about",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "images"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "images"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "images"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "images",
+      "fr": "images",
+      "nl": "beelden"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-about-press",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "intro": {
+      "_type": "localeText",
+      "en": "Press clips, press kit and contacts for the Benelux, France and international press.",
+      "fr": "Revue de presse, dossier de presse et contacts pour le Benelux, la France et la presse internationale.",
+      "nl": "Persoverzicht, persmap en contacten voor de Benelux, Frankrijk en de internationale pers."
+    },
+    "order": 4,
+    "section": "about",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "press"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "press"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "press"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "press",
+      "fr": "presse",
+      "nl": "pers"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-about-team",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "order": 3,
+    "section": "about",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "team"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "team"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "team"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "team",
+      "fr": "équipe",
+      "nl": "team"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:56:22Z",
+    "_id": "demo-page-about-the-fair",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "intro": {
+      "_type": "localeText",
+      "en": "ceramic brussels is the first international contemporary art fair dedicated to ceramics.",
+      "fr": "ceramic brussels est la première foire internationale d’art contemporain dédiée à la céramique.",
+      "nl": "ceramic brussels is de eerste internationale beurs voor hedendaagse kunst gewijd aan keramiek."
+    },
+    "order": 1,
+    "section": "about",
+    "sections": [
+      {
+        "_key": "contentSection0",
+        "_type": "contentSection",
+        "anchor": "the-fair",
+        "body": {
+          "en": [
+            {
+              "_key": "biqjby",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "ceramic brussels develops an international marketplace and exchange platform while offering the encounter of curated content within a unique experience. Founded in January 2024, ceramic brussels is a committed fair, firmly focused on promoting contemporary ceramics and built around an intense programme of visits, exhibitions, and talks."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ]
+        },
+        "heading": {
+          "_type": "localeString",
+          "en": "the fair",
+          "fr": "la foire",
+          "nl": "de beurs"
+        }
+      },
+      {
+        "_key": "contentSection1",
+        "_type": "contentSection",
+        "anchor": "goals",
+        "body": {
+          "en": [
+            {
+              "_key": "wnhb85",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "ceramic brussels aims to showcase the vitality and diversity of contemporary ceramics practice, support contemporary creation and stimulate new exchanges between artists, institutions, galleries and the audience. Its aims are:"
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "8qsso1",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "↘ to showcase the diversity of artistic approaches to ceramics through the selection of international galleries and the involvement of leading global institutions and key players"
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "dy2l7j",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "↘ to offer a unique forum for high-level exchanges, networking, and induce interactions and collaborations"
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "9m7is4",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "↘ to deliver the ceramic brussels art prize, a European call for projects with an international jury, and several additional prizes to be awarded during the fair"
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "cub029",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "↘ to support the production and dissemination of content dedicated to ceramics"
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ]
+        },
+        "heading": {
+          "_type": "localeString",
+          "en": "goals",
+          "fr": "objectifs",
+          "nl": "doelstellingen"
+        }
+      },
+      {
+        "_key": "contentSection2",
+        "_type": "contentSection",
+        "anchor": "development",
+        "body": {
+          "en": [
+            {
+              "_key": "vmio4j",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Since its first edition, the fair has chosen to invite an artist of honour and to highlight their work through a series of initiatives throughout the fair. In 2026, the artist Elmar Trenkwalder was the guest of honour, following American artist Elizabeth Jaeger (2025) and Belgian artist Johan Creten (2024). From its second edition onwards, ceramic brussels broadened its scope by integrating modern ceramics and introducing a country focus (Norway 2025, Spain 2026)."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ]
+        },
+        "heading": {
+          "_type": "localeString",
+          "en": "development",
+          "fr": "développement",
+          "nl": "ontwikkeling"
+        }
+      }
+    ],
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "the-fair"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "the-fair"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "the-fair"
+      }
+    },
+    "tabLabel": {
+      "_type": "localeString",
+      "en": "ceramic brussels",
+      "fr": "ceramic brussels",
+      "nl": "ceramic brussels"
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "ceramic brussels",
+      "fr": "ceramic brussels",
+      "nl": "ceramic brussels"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-art-prize-about",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "intro": {
+      "_type": "localeText",
+      "en": "The art prize aims to highlight the vitality and diversity of contemporary ceramic practice while supporting young contemporary creators.",
+      "fr": "Le prix vise à mettre en lumière la vitalité et la diversité de la céramique contemporaine tout en soutenant les jeunes créateurs.",
+      "nl": "De prijs wil de vitaliteit en diversiteit van hedendaagse keramiek in de kijker zetten en jonge makers ondersteunen."
+    },
+    "order": 1,
+    "section": "art-prize",
+    "sections": [
+      {
+        "_key": "contentSection0",
+        "_type": "contentSection",
+        "anchor": "the-prize",
+        "body": {
+          "en": [
+            {
+              "_key": "v6cszv",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "5 laureates will be presented in a group show at ceramic brussels 2027."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "jctuk9",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "The selection will be made by an international jury and organized by Jean-Marc Dimanche, co-director of the fair. The laureates will also benefit from awards given by institutional partners, such as residencies, exhibitions and monographies."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ]
+        },
+        "heading": {
+          "_type": "localeString",
+          "en": "the prize",
+          "fr": "le prix",
+          "nl": "de prijs"
+        }
+      },
+      {
+        "_key": "contentSection1",
+        "_type": "contentSection",
+        "anchor": "applications",
+        "body": {
+          "en": [
+            {
+              "_key": "gehewu",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "The call is open to art students and/or young artists:"
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "dep2u9",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "→ based in the EU"
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "3s3ep0",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "→ with less than 10 years’ practice & research in the field of ceramics"
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "8nsjem",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "→ not represented by a gallery"
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "2r28xp",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Applications for 2027 are now closed."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ]
+        },
+        "heading": {
+          "_type": "localeString",
+          "en": "applications",
+          "fr": "candidatures",
+          "nl": "kandidaturen"
+        }
+      },
+      {
+        "_key": "contentSection2",
+        "_type": "contentSection",
+        "anchor": "partners",
+        "body": {
+          "en": [
+            {
+              "_key": "d2922j",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "On the occasion of the art prize, MAD Brussels, Action et Service and ceramic brussels launched an open call for a Brussels-based designer or studio to imagine a new scenography for the laureates’ works. The studio selected for the third edition is A S C P Studio."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ]
+        },
+        "heading": {
+          "_type": "localeString",
+          "en": "partners",
+          "fr": "partenaires",
+          "nl": "partners"
+        }
+      }
+    ],
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "about"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "about"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "about"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "about",
+      "fr": "à propos",
+      "nl": "over"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-art-prize-awards",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "intro": {
+      "_type": "localeText",
+      "en": "Expanding opportunities for the laureates, the fair’s institutional partners also grant a prestigious selection of parallel awards, residencies, and exhibition prizes.",
+      "fr": "Les partenaires institutionnels de la foire offrent aux lauréats une sélection de prix parallèles, résidences et expositions.",
+      "nl": "De institutionele partners van de beurs kennen de laureaten bovendien parallelle prijzen, residenties en tentoonstellingen toe."
+    },
+    "order": 3,
+    "section": "art-prize",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "awards"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "awards"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "awards"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "awards",
+      "fr": "prix",
+      "nl": "prijzen"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-art-prize-jury",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "order": 4,
+    "section": "art-prize",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "jury"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "jury"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "jury"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "jury",
+      "fr": "jury",
+      "nl": "jury"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-art-prize-laureates",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "order": 2,
+    "section": "art-prize",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "laureates"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "laureates"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "laureates"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "laureates",
+      "fr": "lauréats",
+      "nl": "laureaten"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-gallery-applications",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "body": {
+      "en": [
+        {
+          "_key": "z7mop6",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Galleries wishing to take part send their application through the form below. Questions go to tiphaine@ceramic.brussels."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ],
+      "fr": [
+        {
+          "_key": "u1gvsj",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Les galeries souhaitant participer envoient leur candidature via le formulaire ci-dessous. Questions : tiphaine@ceramic.brussels."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ],
+      "nl": [
+        {
+          "_key": "bwsirg",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Galerieën die willen deelnemen sturen hun kandidatuur via onderstaand formulier. Vragen: tiphaine@ceramic.brussels."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "intro": {
+      "_type": "localeText",
+      "en": "Applications for the 2027 edition are open until 30 September.",
+      "fr": "Les candidatures pour l’édition 2027 sont ouvertes jusqu’au 30 septembre.",
+      "nl": "Kandidaturen voor de editie 2027 zijn open tot 30 september."
+    },
+    "navLabel": {
+      "_type": "localeString",
+      "en": "Apply",
+      "fr": "Candidater",
+      "nl": "Aanmelden"
+    },
+    "order": 10,
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "gallery-applications"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "candidatures-galeries"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "aanmelding-galerieen"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "gallery applications",
+      "fr": "candidatures galeries",
+      "nl": "aanmelding galerieën"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-programme-awards",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "order": 3,
+    "section": "programme",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "awards"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "awards"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "awards"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "awards",
+      "fr": "prix",
+      "nl": "prijzen"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-programme-la-cambre",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "intro": {
+      "_type": "localeText",
+      "en": "La Cambre celebrates its centenary at the heart of ceramic brussels! For this 4th edition, the prestigious Brussels art school takes over the fair with a unique, cross-disciplinary project. From artistic ceramic furniture designed by its alumni to live printing demonstrations with the Letterrestres project, discover how a new generation of artists is pushing boundaries and reshaping the medium.",
+      "fr": "La Cambre celebrates its centenary at the heart of ceramic brussels! For this 4th edition, the prestigious Brussels art school takes over the fair with a unique, cross-disciplinary project. From artistic ceramic furniture designed by its alumni to live printing demonstrations with the Letterrestres project, discover how a new generation of artists is pushing boundaries and reshaping the medium.",
+      "nl": "La Cambre celebrates its centenary at the heart of ceramic brussels! For this 4th edition, the prestigious Brussels art school takes over the fair with a unique, cross-disciplinary project. From artistic ceramic furniture designed by its alumni to live printing demonstrations with the Letterrestres project, discover how a new generation of artists is pushing boundaries and reshaping the medium."
+    },
+    "order": 1,
+    "section": "programme",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "la-cambre"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "la-cambre"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "la-cambre"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "ceramic brussels x La Cambre",
+      "fr": "ceramic brussels x La Cambre",
+      "nl": "ceramic brussels x La Cambre"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-programme-talks",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "intro": {
+      "_type": "localeText",
+      "en": "Open to the public for four days, the fair features around fifteen talks and conferences, including book launches, roundtables and artist talks.",
+      "fr": "Ouverte au public pendant quatre jours, la foire propose une quinzaine de conférences : lancements de livres, tables rondes et rencontres d’artistes.",
+      "nl": "Vier dagen lang biedt de beurs een vijftiental talks: boekvoorstellingen, rondetafels en artist talks."
+    },
+    "order": 2,
+    "section": "programme",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "talks"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "talks"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "talks"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "talks",
+      "fr": "talks",
+      "nl": "talks"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-programme-vip",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "order": 4,
+    "section": "programme",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "vip"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "vip"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "vip"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "VIP",
+      "fr": "VIP",
+      "nl": "VIP"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-visit-faq",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "order": 4,
+    "section": "visit",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "faq"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "faq"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "faq"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "FAQ",
+      "fr": "FAQ",
+      "nl": "FAQ"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-visit-floor-plan",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "order": 3,
+    "section": "visit",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "floor-plan"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "floor-plan"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "floor-plan"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "floor plan",
+      "fr": "plan",
+      "nl": "plattegrond"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:10Z",
+    "_id": "demo-page-visit-food-drinks",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "intro": {
+      "_type": "localeText",
+      "en": "Each year, ceramic brussels develops collaborations with partners committed to the promotion of Belgian and Brussels know-how. These collaborations make it possible to offer unique, high-quality areas for visitors to discover and take a break, in the heart of the fair.",
+      "fr": "Chaque année, ceramic brussels développe des collaborations avec des partenaires engagés dans la promotion du savoir-faire belge et bruxellois, pour offrir aux visiteurs des espaces de découverte et de pause au cœur de la foire.",
+      "nl": "Elk jaar werkt ceramic brussels samen met partners die de Belgische en Brusselse knowhow promoten, om bezoekers unieke plekken te bieden om te ontdekken en te pauzeren, in het hart van de beurs."
+    },
+    "order": 2,
+    "section": "visit",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "food-drinks"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "food-drinks"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "food-drinks"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "food & drinks",
+      "fr": "food & drinks",
+      "nl": "food & drinks"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:56:22Z",
+    "_id": "demo-page-visit-practical-info",
+    "_rev": "sd0hiYDcFo1yrzGoFHf17u",
+    "_type": "page",
+    "_updatedAt": "2026-09-02T05:56:22Z",
+    "order": 1,
+    "section": "visit",
+    "slug": {
+      "en": {
+        "_type": "slug",
+        "current": "practical-info"
+      },
+      "fr": {
+        "_type": "slug",
+        "current": "practical-info"
+      },
+      "nl": {
+        "_type": "slug",
+        "current": "practical-info"
+      }
+    },
+    "title": {
+      "_type": "localeString",
+      "en": "practical info",
+      "fr": "infos pratiques",
+      "nl": "praktische info"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-ambassade-de-france-en-belgique",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "Ambassade de France en Belgique",
+    "order": 70,
+    "tier": "art-prize",
+    "url": "https://be.ambafrance.org"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-atelier-coperta",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "instagram": "ateliercoperta",
+    "name": "Atelier Coperta",
+    "order": 50,
+    "subtitle": {
+      "_type": "localeString",
+      "en": "corporate",
+      "fr": "corporate",
+      "nl": "corporate"
+    },
+    "tier": "event",
+    "url": "https://atelier-coperta.com"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-bps22",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "amv6ap",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Musée d’art de la Province de Hainaut, Charleroi."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "name": "BPS22",
+    "order": 60,
+    "tier": "exhibition-pass",
+    "url": "https://www.bps22.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-brussels-capital-region",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "Brussels-Capital Region",
+    "order": 43,
+    "tier": "institutional",
+    "url": "https://be.brussels"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-bruzz",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "BRUZZ",
+    "order": 86,
+    "tier": "media"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-centrale-for-contemporary-art",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "Centrale for contemporary art",
+    "order": 61,
+    "tier": "exhibition-pass",
+    "url": "https://centrale.brussels"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-centre-wallonie-bruxelles-paris",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "vki3g7",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "The Centre Wallonie-Bruxelles | Paris, also known as Le Vaisseau, is a catalyst of reference for French-speaking Belgian contemporary creation and its artistic ecosystem."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "instagram": "cwb_paris",
+    "name": "Centre Wallonie-Bruxelles | Paris",
+    "order": 45,
+    "tier": "institutional",
+    "url": "https://cwb.fr"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-ceramics-now",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "Ceramics Now",
+    "order": 83,
+    "tier": "media"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-cid-grand-hornu",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "CID Grand-Hornu",
+    "order": 62,
+    "tier": "exhibition-pass",
+    "url": "https://www.cid-grand-hornu.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-city-of-brussels",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "City of Brussels",
+    "order": 41,
+    "tier": "institutional",
+    "url": "https://www.brussels.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-collect-aaa",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "COLLECT AAA",
+    "order": 84,
+    "tier": "media",
+    "url": "https://collectaaa.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-embelco",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "instagram": "embelco.art.shipping",
+    "name": "Embelco",
+    "order": 30,
+    "subtitle": {
+      "_type": "localeString",
+      "en": "logistics",
+      "fr": "logistique",
+      "nl": "logistiek"
+    },
+    "tier": "event"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-fernand-obb",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "9hlzuh",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Opened in 2018 in the heart of Saint-Gilles, Fernand Obb Delicatessen proposes a popular cuisine made from the best ingredients, in a warm atmosphere. In October 2018 it won Brussels’ best grey shrimp croquette award."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "name": "Fernand Obb",
+    "order": 91,
+    "tier": "food-drinks",
+    "url": "https://www.fernandobb.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-flora",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "jwmt19",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Flora is a craft beer project made with flowers, created in 2024 by Maxime and Thibault. Easy-to-drink beers enhanced with a floral touch and without added sugar."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "name": "Flora",
+    "order": 92,
+    "subtitle": {
+      "_type": "localeString",
+      "en": "Belgian craft beers",
+      "fr": "Bières artisanales belges",
+      "nl": "Belgische craft beers"
+    },
+    "tier": "food-drinks",
+    "url": "https://flora.brussels"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-ideat",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "IDEAT",
+    "order": 85,
+    "tier": "media",
+    "url": "https://ideat.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-keramis",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "yqskhz",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "A museum and space for art and creation dedicated to ceramics, Keramis was built on the site of the old Boch faience factory in La Louvière."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "name": "Keramis",
+    "order": 63,
+    "tier": "exhibition-pass",
+    "url": "https://www.keramis.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-la-revue-de-la-ceramique-et-du-verre",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "La Revue de la Céramique et du Verre",
+    "order": 82,
+    "tier": "media"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-le-quotidien-de-l-art",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "Le Quotidien de l’Art",
+    "order": 81,
+    "tier": "media"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-les-ateliers-dans-la-foret",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "Les Ateliers dans la Forêt",
+    "order": 71,
+    "tier": "art-prize"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-loewe-foundation",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "ui85nm",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "The LOEWE FOUNDATION was established as a private cultural foundation in 1988 by Enrique Loewe Lynch, a fourth-generation member of LOEWE’s founding family."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "xpa5ln",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Today under the direction of his daughter Sheila Loewe, the Foundation’s mission is to promote creativity, educational programs and to safeguard heritage in the fields of poetry, dance, photography, art and craft."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "name": "LOEWE FOUNDATION",
+    "order": 40,
+    "tier": "institutional",
+    "url": "https://loewefoundation.com"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-mad-brussels",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "MAD Brussels",
+    "order": 74,
+    "tier": "art-prize",
+    "url": "https://mad.brussels"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-mok-coffee",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "h7sjox",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "MOK COFFEE offers a complete coffee experience, from bean to cup. Two locations embody this philosophy: one, rustic and welcoming in Leuven, the other, modern and dynamic in Brussels’ Dansaert district."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "name": "MOK COFFEE",
+    "order": 93,
+    "tier": "food-drinks",
+    "url": "https://mokcoffee.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-options",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "Options",
+    "order": 51,
+    "subtitle": {
+      "_type": "localeString",
+      "en": "furniture",
+      "fr": "mobilier",
+      "nl": "meubilair"
+    },
+    "tier": "event",
+    "url": "https://options.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-puilaetco",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "l1flca",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Puilaetco is the main partner of ceramic brussels since its first edition."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "name": "Puilaetco",
+    "order": 10,
+    "tier": "main",
+    "url": "https://www.puilaetco.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-romarin-uniforms",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "instagram": "romarin_uniforms",
+    "name": "romarin uniforms",
+    "order": 52,
+    "subtitle": {
+      "_type": "localeString",
+      "en": "apparel",
+      "fr": "tenues",
+      "nl": "kleding"
+    },
+    "tier": "event",
+    "url": "https://romarinuniforms.com"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-syndicat-des-negociants-en-art",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "apzggi",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "The Syndicat des Négociants en Art is the French professional organization representing dealers and galleries active on the secondary market, from archaeology to modern and contemporary art."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "instagram": "sna_officiel",
+    "name": "Syndicat des négociants en art",
+    "order": 46,
+    "tier": "institutional",
+    "url": "https://sna-france.com"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-the-art-newspaper",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "The Art Newspaper",
+    "order": 80,
+    "tier": "media",
+    "url": "https://www.theartnewspaper.com"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-the-hoxton",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "ry7cel",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Set just above the Botanical Gardens and a short walk from Brussels’ historic centre, The Hoxton offers a vibrant base from which to experience the city during ceramic brussels. Spread across floors 13 to 21, its rooms open onto sweeping views of the Brussels skyline, combining modern comfort with a bold, 70s-inspired design language."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "r40twt",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "More than a place to stay, The Hoxton is also a lively meeting point in the city. Guests can discover Cantina Valentina’s Peruvian-inspired plates, head up to Tope for rooftop tacos and panoramic views, or step outside to explore the surrounding neighbourhood."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "instagram": "thehoxtonhotel",
+    "name": "The Hoxton",
+    "order": 20,
+    "tier": "hotel",
+    "url": "https://thehoxton.com/brussels/"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-the-latvian-centre-for-contemporary-ceramics",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "The Latvian Centre for Contemporary Ceramics",
+    "order": 72,
+    "tier": "art-prize"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-traiteur-benjamin",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "sdwwe9",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Passionate about gastronomy, Benjamin Schijns learned from the best: he began his career at Le Pain et le Vin, a Michelin-starred restaurant in Brussels, before taking up a position as sommelier at the Sea Grill, chef Yves Mattagne’s 2-star restaurant."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "5qf3og",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "In 2009, he launched Traiteur Benjamin, whose quality of service inspires confidence. He likes to surprise and delight, and will propose dishes that will awaken all the senses."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "name": "Traiteur Benjamin",
+    "order": 90,
+    "subtitle": {
+      "_type": "localeString",
+      "en": "Chez Loulou",
+      "fr": "Chez Loulou",
+      "nl": "Chez Loulou"
+    },
+    "tier": "food-drinks",
+    "url": "https://www.traiteurbenjamin.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-visit-brussels",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "5sna0n",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "visit.brussels is the regional organisation contributing to the influence of ceramic brussels and the Brussels visibility in general. visit.brussels is an organism of public interest subsidised by the Brussels-Capital Region."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "name": "visit.brussels",
+    "order": 42,
+    "tier": "institutional",
+    "url": "https://visit.brussels"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-wallonia-brussels-international",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "description": {
+      "en": [
+        {
+          "_key": "3kwx47",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "WBI is the organization responsible for the international relations of Wallonia-Brussels. It is the instrument of the international policy conducted by Wallonia, the Wallonia-Brussels Federation, and the French Community Commission of the Brussels-Capital Region, federated entities of Belgium."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "name": "Wallonia-Brussels International",
+    "order": 44,
+    "tier": "institutional",
+    "url": "https://www.wbi.be"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:03Z",
+    "_id": "demo-partner-yxccca",
+    "_rev": "KVotKtYYWoyyeFyM5EGJxn",
+    "_type": "partner",
+    "_updatedAt": "2026-09-02T05:56:15Z",
+    "name": "YXCCCA",
+    "order": 73,
+    "subtitle": {
+      "_type": "localeString",
+      "en": "Creative & Cultural Ceramic Avenue, Yixing",
+      "fr": "Creative & Cultural Ceramic Avenue, Yixing",
+      "nl": "Creative & Cultural Ceramic Avenue, Yixing"
+    },
+    "tier": "art-prize"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-charles-kaisin-2027",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "countryCode": "BE",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "groups": [
+      "jury"
+    ],
+    "name": "Charles Kaisin",
+    "order": 1,
+    "role": {
+      "_type": "localeString",
+      "en": "Designer & Scenographer",
+      "fr": "Designer & Scenographer",
+      "nl": "Designer & Scenographer"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-christine-germain-donnat",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "35eml1",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Trained as a historian and art historian, Christine Germain-Donnat has directed the Musée de la Chasse et de la Nature in Paris since 2019 and previously the Musée National de la Céramique at Sèvres."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "countryCode": "FR",
+    "groups": [
+      "advisory-board",
+      "jury"
+    ],
+    "name": "Christine Germain-Donnat",
+    "order": 1,
+    "role": {
+      "_type": "localeString",
+      "en": "Patrimony Curator, Ministère de la Culture de France",
+      "fr": "Patrimony Curator, Ministère de la Culture de France",
+      "nl": "Patrimony Curator, Ministère de la Culture de France"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-duan-zhang-de-courreges-2027",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "countryCode": "FR",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "groups": [
+      "jury"
+    ],
+    "name": "Duan Zhang de Courrèges",
+    "order": 2,
+    "role": {
+      "_type": "localeString",
+      "en": "curator & art advisor",
+      "fr": "curator & art advisor",
+      "nl": "curator & art advisor"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-florence-reckinger-taddei",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "cx3byi",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "In 2019 she founded the Regala gallery and residency program in Arles. She serves on the boards of Mudam, the Edward Steichen Award and Les Rencontres d’Arles."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "countryCode": "LU",
+    "groups": [
+      "advisory-board"
+    ],
+    "name": "Florence Reckinger Taddeï",
+    "order": 2,
+    "role": {
+      "_type": "localeString",
+      "en": "President of Les Amis des Musées d’art et d’histoire Luxembourg",
+      "fr": "President of Les Amis des Musées d’art et d’histoire Luxembourg",
+      "nl": "President of Les Amis des Musées d’art et d’histoire Luxembourg"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-galila-2027",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "countryCode": "BE",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "groups": [
+      "jury"
+    ],
+    "name": "Galila",
+    "order": 3,
+    "role": {
+      "_type": "localeString",
+      "en": "Founder of Galila’s P.O.C",
+      "fr": "Founder of Galila’s P.O.C",
+      "nl": "Founder of Galila’s P.O.C"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-geertje-jacobs",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "nxho53",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Director of the European Ceramics Centre (EKWC) in the Netherlands, an international artists’ residency and centre of excellence for ceramics."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "countryCode": "NL",
+    "groups": [
+      "advisory-board"
+    ],
+    "name": "Geertje Jacobs",
+    "order": 4,
+    "role": {
+      "_type": "localeString",
+      "en": "Director of the EKWC",
+      "fr": "Director of the EKWC",
+      "nl": "Director of the EKWC"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-gilles-parmentier",
+    "_rev": "Vn7xuhaf8mXRUG4DStyLN5",
+    "_type": "person",
+    "_updatedAt": "2026-09-03T18:39:30Z",
+    "email": "gilles@ceramic.brussels",
+    "groups": [
+      "team"
+    ],
+    "name": "Gilles Parmentier",
+    "order": 1,
+    "role": {
+      "_type": "localeString",
+      "en": "co-director",
+      "fr": "co-directeur",
+      "nl": "co-directeur"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-henri-jobbe-duval",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "jf780q",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "A pioneering force in the art market, he helped set up the FIAC organizing committee and contributed to the creation of Art Paris Abu Dhabi."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "countryCode": "FR",
+    "groups": [
+      "advisory-board"
+    ],
+    "name": "Henri Jobbé-Duval",
+    "order": 6,
+    "role": {
+      "_type": "localeString",
+      "en": "Co-founder of the Fiac",
+      "fr": "Co-founder of the Fiac",
+      "nl": "Co-founder of the Fiac"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-jean-marc-dimanche",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "countryCode": "FR",
+    "email": "jean-marc@ceramic.brussels",
+    "groups": [
+      "team",
+      "jury"
+    ],
+    "name": "Jean-Marc Dimanche",
+    "order": 2,
+    "role": {
+      "_type": "localeString",
+      "en": "co-director",
+      "fr": "co-directeur",
+      "nl": "co-directeur"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-julie-alluin",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "email": "julie@ceramic.brussels",
+    "groups": [
+      "team"
+    ],
+    "name": "Julie Alluin",
+    "order": 4,
+    "role": {
+      "_type": "localeString",
+      "en": "communication & partners relations",
+      "fr": "communication & relations partenaires",
+      "nl": "communicatie & partnerrelaties"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-leonie-lefere",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "email": "leonie@ceramic.brussels",
+    "groups": [
+      "team"
+    ],
+    "name": "Léonie Lefere",
+    "order": 5,
+    "role": {
+      "_type": "localeString",
+      "en": "graphic designer",
+      "fr": "graphiste",
+      "nl": "grafisch ontwerper"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-ludovic-recchia",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "5yoovs",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Art historian and curator specialising in modern and contemporary ceramics, director and curator of Keramis Museum and Art Center, which he founded in 2015."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "countryCode": "BE",
+    "groups": [
+      "advisory-board"
+    ],
+    "name": "Ludovic Recchia",
+    "order": 3,
+    "role": {
+      "_type": "localeString",
+      "en": "Director of Keramis",
+      "fr": "Director of Keramis",
+      "nl": "Director of Keramis"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-magdalena-gerber",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "bio": {
+      "en": [
+        {
+          "_key": "dhxki9",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "s0",
+              "_type": "span",
+              "marks": [],
+              "text": "Since 2013 director of CERCCO, the Centre for Contemporary Ceramics at HEAD – Geneva."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ]
+    },
+    "countryCode": "CH",
+    "groups": [
+      "advisory-board"
+    ],
+    "name": "Magdalena Gerber",
+    "order": 5,
+    "role": {
+      "_type": "localeString",
+      "en": "Artist, Professor and Head of CERCCO, HEAD-Geneva",
+      "fr": "Artist, Professor and Head of CERCCO, HEAD-Geneva",
+      "nl": "Artist, Professor and Head of CERCCO, HEAD-Geneva"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-shinsuke-kawahara-2027",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "countryCode": "JP",
+    "edition": {
+      "_ref": "demo-edition-2027",
+      "_type": "reference"
+    },
+    "groups": [
+      "jury"
+    ],
+    "name": "Shinsuke Kawahara",
+    "order": 4,
+    "role": {
+      "_type": "localeString",
+      "en": "Pluridisciplinary artist",
+      "fr": "Pluridisciplinary artist",
+      "nl": "Pluridisciplinary artist"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:08Z",
+    "_id": "demo-person-tiphaine-queguineur",
+    "_rev": "sd0hiYDcFo1yrzGoFHf0Xm",
+    "_type": "person",
+    "_updatedAt": "2026-09-02T05:56:20Z",
+    "email": "tiphaine@ceramic.brussels",
+    "groups": [
+      "team"
+    ],
+    "name": "Tiphaine Quéguineur",
+    "order": 3,
+    "role": {
+      "_type": "localeString",
+      "en": "exhibitors relations & fair coordination",
+      "fr": "relations exposants & coordination",
+      "nl": "relaties exposanten & coördinatie"
+    }
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:12Z",
+    "_id": "demo-press-1",
+    "_rev": "KVotKtYYWoyyeFyM5EGKnP",
+    "_type": "pressClip",
+    "_updatedAt": "2026-09-02T05:56:24Z",
+    "language": "en",
+    "outlet": "The Art Newspaper",
+    "publishedAt": "2026-01-22",
+    "title": "Ceramics finally gets its own art fair",
+    "url": "https://www.theartnewspaper.com"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:12Z",
+    "_id": "demo-press-2",
+    "_rev": "KVotKtYYWoyyeFyM5EGKnP",
+    "_type": "pressClip",
+    "_updatedAt": "2026-09-02T05:56:24Z",
+    "language": "fr",
+    "outlet": "Le Soir",
+    "publishedAt": "2026-01-23",
+    "title": "À Bruxelles, la céramique prend toute la place"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:12Z",
+    "_id": "demo-press-3",
+    "_rev": "KVotKtYYWoyyeFyM5EGKnP",
+    "_type": "pressClip",
+    "_updatedAt": "2026-09-02T05:56:24Z",
+    "language": "nl",
+    "outlet": "BRUZZ",
+    "publishedAt": "2026-01-21",
+    "title": "Keramiek verovert Tour & Taxis"
+  },
+  {
+    "_createdAt": "2026-09-02T05:14:12Z",
+    "_id": "demo-press-4",
+    "_rev": "KVotKtYYWoyyeFyM5EGKnP",
+    "_type": "pressClip",
+    "_updatedAt": "2026-09-02T05:56:24Z",
+    "language": "en",
+    "outlet": "Financial Times",
+    "publishedAt": "2025-01-28",
+    "title": "The quiet rise of the ceramic collector"
+  },
+  {
+    "_createdAt": "2026-09-02T05:13:28Z",
+    "_id": "homepage",
+    "_rev": "9FlAOJUjzscTEy39FvIeFI",
+    "_system": {
+      "base": {
+        "id": "homepage",
+        "rev": "j4bbh6SfbPowRM91sfuKEJ"
+      }
+    },
+    "_type": "homepage",
+    "_updatedAt": "2026-09-03T19:15:21Z",
+    "banner": {
+      "link": {
+        "_type": "link",
+        "internal": {
+          "_ref": "demo-page-gallery-applications",
+          "_type": "reference",
+          "_weak": true
+        },
+        "kind": "internal",
+        "label": {
+          "_type": "localeString",
+          "en": "apply",
+          "fr": "candidater",
+          "nl": "aanmelden"
+        }
+      },
+      "text": {
+        "_type": "localeString",
+        "en": "gallery applications are open",
+        "fr": "les candidatures galeries sont ouvertes",
+        "nl": "aanmeldingen voor galerieën zijn open"
+      }
+    },
+    "closingBanner": {
+      "link": {
+        "_type": "link",
+        "anchor": "images",
+        "kind": "route",
+        "label": {
+          "_type": "localeString",
+          "en": "in images",
+          "fr": "en images",
+          "nl": "in beeld"
+        },
+        "route": "about"
+      },
+      "text": {
+        "_type": "localeString",
+        "en": "ceramic brussels 2026 in images",
+        "fr": "ceramic brussels 2026 en images",
+        "nl": "ceramic brussels 2026 in beeld"
+      }
+    },
+    "figuresLink": {
+      "_type": "link",
+      "kind": "route",
+      "label": {
+        "_type": "localeString",
+        "en": "more on the fair",
+        "fr": "en savoir plus sur la foire",
+        "nl": "meer over de beurs"
+      },
+      "route": "about"
+    },
+    "heroLink": {
+      "_type": "link",
+      "kind": "route",
+      "label": {
+        "_type": "localeString",
+        "en": "more on the fair",
+        "fr": "en savoir plus sur la foire",
+        "nl": "meer over de beurs"
+      },
+      "route": "about"
+    },
+    "heroText": {
+      "_type": "localeText",
+      "en": "the first international contemporary art fair dedicated to ceramics10",
+      "fr": "la première foire internationale d’art contemporain dédiée à la céramique",
+      "nl": "de eerste internationale beurs voor hedendaagse kunst gewijd aan keramiek"
+    },
+    "quickLinks": [
+      {
+        "_key": "link0",
+        "_type": "link",
+        "kind": "route",
+        "label": {
+          "_type": "localeString",
+          "en": "galleries",
+          "fr": "galeries",
+          "nl": "galerieën"
+        },
+        "route": "exhibitors"
+      },
+      {
+        "_key": "link1",
+        "_type": "link",
+        "kind": "route",
+        "label": {
+          "_type": "localeString",
+          "en": "art prize",
+          "fr": "prix",
+          "nl": "prijs"
+        },
+        "route": "art-prize"
+      },
+      {
+        "_key": "link2",
+        "_type": "link",
+        "kind": "route",
+        "label": {
+          "_type": "localeString",
+          "en": "visitors info",
+          "fr": "infos pratiques",
+          "nl": "praktische info"
+        },
+        "route": "visit"
+      },
+      {
+        "_key": "link3",
+        "_type": "link",
+        "external": "https://ceramicbrussels27.tickoweb.be/selection",
+        "kind": "external",
+        "label": {
+          "_type": "localeString",
+          "en": "tickets",
+          "fr": "billets",
+          "nl": "tickets"
+        }
+      }
+    ],
+    "spotlights": [
+      {
+        "_key": "spotlight0",
+        "_type": "spotlight",
+        "headline": {
+          "_type": "localeText",
+          "en": "French artist Marion Verboom is the guest of honour of ceramic brussels 2027.",
+          "fr": "L’artiste française Marion Verboom est l’invitée d’honneur de ceramic brussels 2027.",
+          "nl": "De Franse kunstenares Marion Verboom is eregast van ceramic brussels 2027."
+        },
+        "kicker": {
+          "_type": "localeString",
+          "en": "guest of honour",
+          "fr": "invitée d’honneur",
+          "nl": "eregast"
+        },
+        "link": {
+          "_type": "link",
+          "kind": "route",
+          "label": {
+            "_type": "localeString",
+            "en": "discover her work",
+            "fr": "découvrir son travail",
+            "nl": "ontdek haar werk"
+          },
+          "route": "guest-of-honour"
+        }
+      },
+      {
+        "_key": "spotlight1",
+        "_type": "spotlight",
+        "headline": {
+          "_type": "localeText",
+          "en": "The Hoxton joins ceramic brussels as a new partner for 2027.",
+          "fr": "The Hoxton rejoint ceramic brussels comme nouveau partenaire pour 2027.",
+          "nl": "The Hoxton wordt nieuwe partner van ceramic brussels voor 2027."
+        },
+        "kicker": {
+          "_type": "localeString",
+          "en": "partner spotlight",
+          "fr": "partenaire à la une",
+          "nl": "partner in de kijker"
+        },
+        "link": {
+          "_type": "link",
+          "anchor": "hotel",
+          "kind": "route",
+          "label": {
+            "_type": "localeString",
+            "en": "discover The Hoxton",
+            "fr": "découvrir The Hoxton",
+            "nl": "ontdek The Hoxton"
+          },
+          "route": "partners"
+        }
+      }
+    ]
+  },
+  {
+    "_createdAt": "2026-08-27T12:17:58Z",
+    "_id": "image-3703f037c8da4d626f99beb048d649b1340130cd-400x4479-png",
+    "_rev": "YwcM7RMs5d2hbNn5yvOAHk",
+    "_type": "sanity.imageAsset",
+    "_updatedAt": "2026-08-27T12:17:58Z",
+    "assetId": "3703f037c8da4d626f99beb048d649b1340130cd",
+    "extension": "png",
+    "metadata": {
+      "_type": "sanity.imageMetadata",
+      "blurHash": "a2OWg20000~V00",
+      "dimensions": {
+        "_type": "sanity.imageDimensions",
+        "aspectRatio": 0.08930564858227283,
+        "height": 4479,
+        "width": 400
+      },
+      "hasAlpha": true,
+      "isOpaque": true,
+      "lqip": "data:image/png;base64,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",
+      "palette": {
+        "_type": "sanity.imagePalette",
+        "darkMuted": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#5d412e",
+          "foreground": "#fff",
+          "population": 2.6,
+          "title": "#fff"
+        },
+        "darkVibrant": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#5d2b26",
+          "foreground": "#fff",
+          "population": 0,
+          "title": "#fff"
+        },
+        "dominant": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#fcf2ea",
+          "foreground": "#000",
+          "population": 9.87,
+          "title": "#000"
+        },
+        "lightMuted": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#c5bc95",
+          "foreground": "#000",
+          "population": 0.34,
+          "title": "#fff"
+        },
+        "lightVibrant": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#fcf2ea",
+          "foreground": "#000",
+          "population": 9.87,
+          "title": "#000"
+        },
+        "muted": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#908253",
+          "foreground": "#fff",
+          "population": 2.42,
+          "title": "#fff"
+        },
+        "vibrant": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#bc645c",
+          "foreground": "#fff",
+          "population": 0.02,
+          "title": "#fff"
+        }
+      },
+      "thumbHash": "bhgSCQKHhhd3iICIiH+tyPc="
+    },
+    "mimeType": "image/png",
+    "originalFilename": "screencapture-localhost-8080-work-rosalitas-cocina-2026-08-27-12_39_26.png",
+    "path": "images/uia5r1rc/production/3703f037c8da4d626f99beb048d649b1340130cd-400x4479.png",
+    "sha1hash": "3703f037c8da4d626f99beb048d649b1340130cd",
+    "size": 1166810,
+    "uploadId": "126ae89fe7018e32cd7940a64bb6d181a416280f",
+    "url": "https://cdn.sanity.io/images/uia5r1rc/production/3703f037c8da4d626f99beb048d649b1340130cd-400x4479.png"
+  },
+  {
+    "_createdAt": "2026-08-27T12:18:26Z",
+    "_id": "image-6af682fbe4bc754aabd715cb7b8ecf05c824f652-626x626-avif",
+    "_rev": "8YPTtPUL60VF2piGgx4dBt",
+    "_type": "sanity.imageAsset",
+    "_updatedAt": "2026-08-27T12:18:26Z",
+    "assetId": "6af682fbe4bc754aabd715cb7b8ecf05c824f652",
+    "extension": "avif",
+    "metadata": {
+      "_type": "sanity.imageMetadata",
+      "blurHash": "eRR:KNxu^,WEtR%2fPRkfkj[~XWB9Yt7RjI:j[%1f5WCRioeogR*of",
+      "dimensions": {
+        "_type": "sanity.imageDimensions",
+        "aspectRatio": 1,
+        "height": 626,
+        "width": 626
+      },
+      "hasAlpha": false,
+      "isOpaque": true,
+      "lqip": "data:image/jpeg;base64,/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAUABQDASIAAhEBAxEB/8QAGQABAAIDAAAAAAAAAAAAAAAAAAIEBgcI/8QAIBAAAQUAAgIDAAAAAAAAAAAAAQACAwQRBTEGEiFBYf/EABUBAQEAAAAAAAAAAAAAAAAAAAAD/8QAGREBAAMBAQAAAAAAAAAAAAAAAAECEQNx/9oADAMBAAIRAxEAPwDqC5cjquY2TS5/QAVR/N1o3ZIJG/IGlqpeWi62OKTj6psyDR6g5m/awednl1vl6vvxxjqDGyAOGH9TLT4nbpFZzJbZBBAI6KKMQLY2g9gIiiSIiAiIg//Z",
+      "palette": {
+        "_type": "sanity.imagePalette",
+        "darkMuted": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#386b6b",
+          "foreground": "#fff",
+          "population": 0.11,
+          "title": "#fff"
+        },
+        "darkVibrant": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#247c7c",
+          "foreground": "#fff",
+          "population": 0,
+          "title": "#fff"
+        },
+        "dominant": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#dcdccc",
+          "foreground": "#000",
+          "population": 3.14,
+          "title": "#000"
+        },
+        "lightMuted": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#dcdccc",
+          "foreground": "#000",
+          "population": 3.14,
+          "title": "#000"
+        },
+        "lightVibrant": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#e6c88f",
+          "foreground": "#000",
+          "population": 0.08,
+          "title": "#000"
+        },
+        "muted": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#4ca3a4",
+          "foreground": "#fff",
+          "population": 2.1,
+          "title": "#fff"
+        },
+        "vibrant": {
+          "_type": "sanity.imagePaletteSwatch",
+          "background": "#e1af50",
+          "foreground": "#000",
+          "population": 0.39,
+          "title": "#fff"
+        }
+      },
+      "thumbHash": "+vcJBwLYllh5h3h/lEaod4h6pPl4+HwP"
+    },
+    "mimeType": "image/avif",
+    "originalFilename": "placeholder.avif",
+    "path": "images/uia5r1rc/production/6af682fbe4bc754aabd715cb7b8ecf05c824f652-626x626.avif",
+    "sha1hash": "6af682fbe4bc754aabd715cb7b8ecf05c824f652",
+    "size": 2053,
+    "uploadId": "aa686e7b0d5e835555ea3c2e65ea9ed4662443c2",
+    "url": "https://cdn.sanity.io/images/uia5r1rc/production/6af682fbe4bc754aabd715cb7b8ecf05c824f652-626x626.avif"
+  },
+  {
+    "_createdAt": "2026-08-27T17:23:24Z",
+    "_id": "navigation",
+    "_rev": "sd0hiYDcFo1yrzGoFHf1kk",
+    "_type": "navigation",
+    "_updatedAt": "2026-09-02T05:56:26Z",
+    "footerItems": [
+      {
+        "_key": "navItem0",
+        "_type": "navItem",
+        "kind": "external",
+        "label": {
+          "_type": "localeString",
+          "en": "instagram",
+          "fr": "instagram",
+          "nl": "instagram"
+        },
+        "url": "https://www.instagram.com/ceramic.brussels/"
+      },
+      {
+        "_key": "navItem1",
+        "_type": "navItem",
+        "kind": "external",
+        "label": {
+          "_type": "localeString",
+          "en": "newsletter",
+          "fr": "newsletter",
+          "nl": "newsletter"
+        },
+        "url": "https://mailchi.mp/ceramic/ceramic-brussels"
+      },
+      {
+        "_key": "navItem2",
+        "_type": "navItem",
+        "kind": "external",
+        "label": {
+          "_type": "localeString",
+          "en": "linkedin",
+          "fr": "linkedin",
+          "nl": "linkedin"
+        },
+        "url": "https://www.linkedin.com/company/ceramic-brussels/"
+      }
+    ],
+    "items": [
+      {
+        "_key": "navItem0",
+        "_type": "navItem",
+        "children": [
+          {
+            "_key": "navChild0",
+            "_type": "navChild",
+            "anchor": "galleries",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "galleries",
+              "fr": "galeries",
+              "nl": "galerieën"
+            },
+            "route": "exhibitors"
+          },
+          {
+            "_key": "navChild1",
+            "_type": "navChild",
+            "anchor": "focus",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "country focus",
+              "fr": "focus pays",
+              "nl": "landenfocus"
+            },
+            "route": "exhibitors"
+          },
+          {
+            "_key": "navChild2",
+            "_type": "navChild",
+            "anchor": "publishers",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "publishers",
+              "fr": "éditeurs",
+              "nl": "uitgevers"
+            },
+            "route": "exhibitors"
+          },
+          {
+            "_key": "navChild3",
+            "_type": "navChild",
+            "anchor": "jury-prize",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "jury prize 2026",
+              "fr": "prix du jury 2026",
+              "nl": "juryprijs 2026"
+            },
+            "route": "exhibitors"
+          }
+        ],
+        "kind": "route",
+        "label": {
+          "_type": "localeString",
+          "en": "exhibitors",
+          "fr": "exposants",
+          "nl": "exposanten"
+        },
+        "route": "exhibitors"
+      },
+      {
+        "_key": "navItem1",
+        "_type": "navItem",
+        "kind": "route",
+        "label": {
+          "_type": "localeString",
+          "en": "guest of honour",
+          "fr": "invitée d’honneur",
+          "nl": "eregast"
+        },
+        "route": "guest-of-honour"
+      },
+      {
+        "_key": "navItem2",
+        "_type": "navItem",
+        "children": [
+          {
+            "_key": "navChild0",
+            "_type": "navChild",
+            "anchor": "about",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "about",
+              "fr": "à propos",
+              "nl": "over"
+            },
+            "route": "art-prize"
+          },
+          {
+            "_key": "navChild1",
+            "_type": "navChild",
+            "anchor": "laureates",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "laureates",
+              "fr": "lauréats",
+              "nl": "laureaten"
+            },
+            "route": "art-prize"
+          },
+          {
+            "_key": "navChild2",
+            "_type": "navChild",
+            "anchor": "awards",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "awards",
+              "fr": "prix",
+              "nl": "prijzen"
+            },
+            "route": "art-prize"
+          },
+          {
+            "_key": "navChild3",
+            "_type": "navChild",
+            "anchor": "jury",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "jury",
+              "fr": "jury",
+              "nl": "jury"
+            },
+            "route": "art-prize"
+          }
+        ],
+        "kind": "route",
+        "label": {
+          "_type": "localeString",
+          "en": "art prize",
+          "fr": "prix",
+          "nl": "prijs"
+        },
+        "route": "art-prize"
+      },
+      {
+        "_key": "navItem3",
+        "_type": "navItem",
+        "children": [
+          {
+            "_key": "navChild0",
+            "_type": "navChild",
+            "anchor": "la-cambre",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "ceramic brussels x La Cambre",
+              "fr": "ceramic brussels x La Cambre",
+              "nl": "ceramic brussels x La Cambre"
+            },
+            "route": "programme"
+          },
+          {
+            "_key": "navChild1",
+            "_type": "navChild",
+            "anchor": "talks",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "talks",
+              "fr": "talks",
+              "nl": "talks"
+            },
+            "route": "programme"
+          },
+          {
+            "_key": "navChild2",
+            "_type": "navChild",
+            "anchor": "awards",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "awards",
+              "fr": "prix",
+              "nl": "prijzen"
+            },
+            "route": "programme"
+          },
+          {
+            "_key": "navChild3",
+            "_type": "navChild",
+            "anchor": "vip",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "VIP",
+              "fr": "VIP",
+              "nl": "VIP"
+            },
+            "route": "programme"
+          }
+        ],
+        "kind": "route",
+        "label": {
+          "_type": "localeString",
+          "en": "programme",
+          "fr": "programme",
+          "nl": "programma"
+        },
+        "route": "programme"
+      },
+      {
+        "_key": "navItem4",
+        "_type": "navItem",
+        "kind": "route",
+        "label": {
+          "_type": "localeString",
+          "en": "partners",
+          "fr": "partenaires",
+          "nl": "partners"
+        },
+        "route": "partners"
+      },
+      {
+        "_key": "navItem5",
+        "_type": "navItem",
+        "children": [
+          {
+            "_key": "navChild0",
+            "_type": "navChild",
+            "anchor": "opening-hours",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "opening hours",
+              "fr": "horaires",
+              "nl": "openingsuren"
+            },
+            "route": "visit"
+          },
+          {
+            "_key": "navChild1",
+            "_type": "navChild",
+            "anchor": "access",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "access",
+              "fr": "accès",
+              "nl": "bereikbaarheid"
+            },
+            "route": "visit"
+          },
+          {
+            "_key": "navChild2",
+            "_type": "navChild",
+            "anchor": "food-drinks",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "food & drinks",
+              "fr": "food & drinks",
+              "nl": "food & drinks"
+            },
+            "route": "visit"
+          },
+          {
+            "_key": "navChild3",
+            "_type": "navChild",
+            "anchor": "floor-plan",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "floor plan",
+              "fr": "plan",
+              "nl": "plattegrond"
+            },
+            "route": "visit"
+          },
+          {
+            "_key": "navChild4",
+            "_type": "navChild",
+            "anchor": "faq",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "FAQ",
+              "fr": "FAQ",
+              "nl": "FAQ"
+            },
+            "route": "visit"
+          }
+        ],
+        "kind": "route",
+        "label": {
+          "_type": "localeString",
+          "en": "visitors info",
+          "fr": "infos pratiques",
+          "nl": "praktische info"
+        },
+        "route": "visit"
+      },
+      {
+        "_key": "navItem6",
+        "_type": "navItem",
+        "children": [
+          {
+            "_key": "navChild0",
+            "_type": "navChild",
+            "anchor": "the-fair",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "ceramic brussels",
+              "fr": "ceramic brussels",
+              "nl": "ceramic brussels"
+            },
+            "route": "about"
+          },
+          {
+            "_key": "navChild1",
+            "_type": "navChild",
+            "anchor": "advisory-board",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "advisory board",
+              "fr": "comité consultatif",
+              "nl": "adviesraad"
+            },
+            "route": "about"
+          },
+          {
+            "_key": "navChild2",
+            "_type": "navChild",
+            "anchor": "team",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "team",
+              "fr": "équipe",
+              "nl": "team"
+            },
+            "route": "about"
+          },
+          {
+            "_key": "navChild3",
+            "_type": "navChild",
+            "anchor": "press",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "press",
+              "fr": "presse",
+              "nl": "pers"
+            },
+            "route": "about"
+          },
+          {
+            "_key": "navChild4",
+            "_type": "navChild",
+            "anchor": "images",
+            "kind": "route",
+            "label": {
+              "_type": "localeString",
+              "en": "images",
+              "fr": "images",
+              "nl": "beelden"
+            },
+            "route": "about"
+          }
+        ],
+        "kind": "route",
+        "label": {
+          "_type": "localeString",
+          "en": "about",
+          "fr": "à propos",
+          "nl": "over"
+        },
+        "route": "about"
+      }
+    ]
+  },
+  {
+    "_createdAt": "2026-08-26T19:55:30Z",
+    "_id": "piece-test-stoneware-vase",
+    "_rev": "LQ8zEbRNJdJXY5JanfBbiP",
+    "_system": {
+      "base": {
+        "id": "piece-test-stoneware-vase",
+        "rev": "zW1B7RfWaXD4wYPdxyqxqr"
+      }
+    },
+    "_type": "piece",
+    "_updatedAt": "2026-08-27T04:41:14Z",
+    "available": true,
+    "dimensions": {
+      "depth": 12,
+      "height": 24,
+      "width": 12
+    },
+    "price": 190,
+    "publishedAt": "2026-08-27T09:00:00.000Z",
+    "slug": {
+      "_type": "slug",
+      "current": "stoneware-vase-no-1"
+    },
+    "technique": "wheel-thrown",
+    "title": "Stoneware Vase No.2"
+  },
+  {
+    "_createdAt": "2026-08-27T05:39:34Z",
+    "_id": "siteSettings",
+    "_rev": "KVotKtYYWoyyeFyM5EGKL1",
+    "_type": "siteSettings",
+    "_updatedAt": "2026-09-02T05:56:16Z",
+    "applicationsUrl": "https://www.ceramic.brussels/en/gallery-applications",
+    "contactEmail": "info@ceramic.brussels",
+    "copyright": "© ceramic brussels, 2026",
+    "facebookUrl": "https://www.facebook.com/profile.php?id=100094708248221",
+    "faq": [
+      {
+        "_key": "faqItem0",
+        "_type": "faqItem",
+        "answer": {
+          "en": [
+            {
+              "_key": "1y5xew",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "No pets are allowed, assistance animals excepted."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ],
+          "fr": [
+            {
+              "_key": "cz7n11",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Les animaux ne sont pas admis, à l’exception des chiens d’assistance."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ],
+          "nl": [
+            {
+              "_key": "x2sl5e",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Huisdieren zijn niet toegelaten, met uitzondering van assistentiehonden."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ]
+        },
+        "question": {
+          "_type": "localeString",
+          "en": "Can I bring my dog?",
+          "fr": "Puis-je venir avec mon chien ?",
+          "nl": "Mag ik mijn hond meenemen?"
+        }
+      },
+      {
+        "_key": "faqItem1",
+        "_type": "faqItem",
+        "answer": {
+          "en": [
+            {
+              "_key": "bgrizk",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Yes. The sheds are on one level and the entrance at Shed 2bis is step-free."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ],
+          "fr": [
+            {
+              "_key": "hkx5e4",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Oui. Les sheds sont de plain-pied et l’entrée par le Shed 2bis est sans marche."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ],
+          "nl": [
+            {
+              "_key": "806zq4",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Ja. De sheds liggen gelijkvloers en de ingang via Shed 2bis is drempelloos."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ]
+        },
+        "question": {
+          "_type": "localeString",
+          "en": "Is the fair accessible to wheelchair users?",
+          "fr": "La foire est-elle accessible aux personnes à mobilité réduite ?",
+          "nl": "Is de beurs toegankelijk voor rolstoelgebruikers?"
+        }
+      },
+      {
+        "_key": "faqItem2",
+        "_type": "faqItem",
+        "answer": {
+          "en": [
+            {
+              "_key": "2piig0",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "For personal use only."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ],
+          "fr": [
+            {
+              "_key": "jyz58j",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Pour un usage personnel uniquement."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ],
+          "nl": [
+            {
+              "_key": "40whtw",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "s0",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Enkel voor persoonlijk gebruik."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ]
+        },
+        "question": {
+          "_type": "localeString",
+          "en": "Can I take photographs?",
+          "fr": "Puis-je prendre des photos ?",
+          "nl": "Mag ik foto’s nemen?"
+        }
+      }
+    ],
+    "instagramUrl": "https://www.instagram.com/ceramic.brussels/",
+    "linkedinUrl": "https://www.linkedin.com/company/ceramic-brussels/",
+    "newsletterUrl": "https://mailchi.mp/ceramic/ceramic-brussels",
+    "practicalInfo": {
+      "access": [
+        {
+          "_key": "accessMode0",
+          "_type": "accessMode",
+          "mode": {
+            "_type": "localeString",
+            "en": "By public transport",
+            "fr": "En transports en commun",
+            "nl": "Met het openbaar vervoer"
+          },
+          "text": {
+            "_type": "localeText",
+            "en": "Metro lines 2 and 6, stop Ribeaucourt or Yser (10 min walk). Bus 14, 20, 46, 86, stop Suzan Daniel.",
+            "fr": "Métro lignes 2 et 6, arrêt Ribeaucourt ou Yser (10 min à pied). Bus 14, 20, 46, 86, arrêt Suzan Daniel.",
+            "nl": "Metro lijnen 2 en 6, halte Ribeaucourt of IJzer (10 min wandelen). Bus 14, 20, 46, 86, halte Suzan Daniel."
+          }
+        },
+        {
+          "_key": "accessMode1",
+          "_type": "accessMode",
+          "mode": {
+            "_type": "localeString",
+            "en": "By train",
+            "fr": "En train",
+            "nl": "Met de trein"
+          },
+          "text": {
+            "_type": "localeText",
+            "en": "Free shuttle service from Brussels-North station, stop at Tour & Taxis.",
+            "fr": "Navette gratuite depuis la gare de Bruxelles-Nord, arrêt Tour & Taxis.",
+            "nl": "Gratis shuttle vanaf station Brussel-Noord, halte Tour & Taxis."
+          }
+        },
+        {
+          "_key": "accessMode2",
+          "_type": "accessMode",
+          "mode": {
+            "_type": "localeString",
+            "en": "By bike",
+            "fr": "À vélo",
+            "nl": "Met de fiets"
+          },
+          "text": {
+            "_type": "localeText",
+            "en": "Bike racks in front of Maison de la Poste, rue Picard 1—11 or avenue du Port 86C. Villo! station at the Gare Maritime, rue Picard 7.",
+            "fr": "Range-vélos devant la Maison de la Poste, rue Picard 1—11 ou avenue du Port 86C. Station Villo! à la Gare Maritime, rue Picard 7.",
+            "nl": "Fietsenstalling voor het Maison de la Poste, Picardstraat 1—11 of Havenlaan 86C. Villo!-station aan de Gare Maritime, Picardstraat 7."
+          }
+        },
+        {
+          "_key": "accessMode3",
+          "_type": "accessMode",
+          "mode": {
+            "_type": "localeString",
+            "en": "Car park",
+            "fr": "Parking",
+            "nl": "Parking"
+          },
+          "text": {
+            "_type": "localeText",
+            "en": "Park Lane, rue Picard 13. Esplanade Parking, avenue du Port 86C.",
+            "fr": "Park Lane, rue Picard 13. Parking Esplanade, avenue du Port 86C.",
+            "nl": "Park Lane, Picardstraat 13. Esplanade Parking, Havenlaan 86C."
+          }
+        }
+      ],
+      "address": "Rue Picard 3\n1000 Brussels",
+      "hotelDeal": {
+        "partner": {
+          "_ref": "demo-partner-the-hoxton",
+          "_type": "reference",
+          "_weak": true
+        },
+        "text": {
+          "_type": "localeText",
+          "en": "For its fourth edition, ceramic brussels partners with The Hoxton, ideally located above the Botanical Gardens and within easy reach of the fair and Brussels’ historic centre.",
+          "fr": "Pour sa quatrième édition, ceramic brussels s’associe à The Hoxton, idéalement situé au-dessus du Jardin botanique, à deux pas de la foire et du centre historique.",
+          "nl": "Voor zijn vierde editie werkt ceramic brussels samen met The Hoxton, ideaal gelegen boven de Kruidtuin, dicht bij de beurs en het historische centrum."
+        },
+        "url": "https://thehoxton.com/brussels/"
+      },
+      "intro": {
+        "_type": "localeText",
+        "en": "ceramic brussels' 4th edition will take place from 20 till 24 January 2027 at Tour & Taxis, Brussels.",
+        "fr": "La 4e édition de ceramic brussels se tiendra du 20 au 24 janvier 2027 à Tour & Taxis, Bruxelles.",
+        "nl": "De 4de editie van ceramic brussels vindt plaats van 20 tot 24 januari 2027 in Tour & Taxis, Brussel."
+      },
+      "mapUrl": "https://goo.gl/maps/KXxSTzu3L6dfdWDD6",
+      "venueName": "Tour & Taxis — Sheds 1 & 2bis"
+    },
+    "pressContacts": [
+      {
+        "_key": "pressContact0",
+        "_type": "pressContact",
+        "email": "press@sophiecarree.be",
+        "name": "Sophie Carrée PR",
+        "region": {
+          "_type": "localeString",
+          "en": "Benelux",
+          "fr": "Benelux",
+          "nl": "Benelux"
+        },
+        "url": "https://sophiecarree.com"
+      },
+      {
+        "_key": "pressContact1",
+        "_type": "pressContact",
+        "name": "FAVORI",
+        "region": {
+          "_type": "localeString",
+          "en": "France",
+          "fr": "France",
+          "nl": "France"
+        },
+        "url": "https://favoriparis.com"
+      },
+      {
+        "_key": "pressContact2",
+        "_type": "pressContact",
+        "instagram": "a_r_t_communication",
+        "name": "A R T Communication + Brand Consultancy",
+        "region": {
+          "_type": "localeString",
+          "en": "International",
+          "fr": "International",
+          "nl": "International"
+        },
+        "url": "https://annarosathomae.com"
+      }
+    ],
+    "pressEmail": "press@sophiecarree.be",
+    "pressKitUrl": "https://online.fliphtml5.com/qogyd/CB26_press_clips/",
+    "siteName": "ceramic brussels",
+    "tagline": {
+      "_type": "localeString",
+      "en": "the first international contemporary art fair dedicated to ceramics",
+      "fr": "la première foire internationale d’art contemporain dédiée à la céramique",
+      "nl": "de eerste internationale beurs voor hedendaagse kunst gewijd aan keramiek"
+    }
+  }
+]

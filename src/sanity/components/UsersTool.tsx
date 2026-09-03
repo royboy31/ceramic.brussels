@@ -65,6 +65,7 @@ export function UsersTool() {
   const [notice, setNotice] = useState<{ tone: 'critical' | 'positive'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [resetting, setResetting] = useState<User | null>(null);
+  const [changing, setChanging] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -102,6 +103,25 @@ export function UsersTool() {
 
   if (!me) return <SignIn onDone={load} notice={notice} setNotice={setNotice} />;
 
+  // A forced change blocks every other endpoint, so it has to be dealt with
+  // before anything else can load. Accounts are created with the flag set, so
+  // this is the normal first run for everyone but the first admin.
+  if (me.mustChangePassword || changing) {
+    return (
+      <ChangePassword
+        forced={me.mustChangePassword}
+        onCancel={() => setChanging(false)}
+        onDone={async () => {
+          setChanging(false);
+          setNotice({ tone: 'positive', text: 'Password changed.' });
+          await load();
+        }}
+        onError={(text) => setNotice({ tone: 'critical', text })}
+        notice={notice}
+      />
+    );
+  }
+
   if (me.role !== 'admin') {
     return (
       <Box padding={4}>
@@ -123,6 +143,7 @@ export function UsersTool() {
             <Text size={1} muted>
               signed in as {me.name}
             </Text>
+            <Button mode="bleed" text="Change password" fontSize={1} onClick={() => setChanging(true)} />
             <Button
               mode="bleed"
               text="Sign out"
@@ -252,6 +273,78 @@ export function UsersTool() {
           }}
         />
       )}
+    </Box>
+  );
+}
+
+function ChangePassword(props: {
+  forced: boolean;
+  onCancel: () => void;
+  onDone: () => void;
+  onError: (text: string) => void;
+  notice: { tone: 'critical' | 'positive'; text: string } | null;
+}) {
+  const [current, setCurrent] = useState('');
+  const [next, setNext] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <Box padding={4}>
+      <Card padding={4} radius={2} border style={{ maxWidth: 460 }}>
+        <form
+          onSubmit={async (event) => {
+            event.preventDefault();
+            if (next !== confirm) return props.onError('The two new passwords do not match.');
+            setBusy(true);
+            try {
+              await api('/api/auth/password', {
+                method: 'POST',
+                body: JSON.stringify({ currentPassword: current, newPassword: next }),
+              });
+              props.onDone();
+            } catch (error) {
+              props.onError((error as Error).message);
+            }
+            setBusy(false);
+          }}
+        >
+          <Stack space={4}>
+            <Heading size={1}>{props.forced ? 'Choose your password' : 'Change password'}</Heading>
+            {props.forced && (
+              <Text size={1} muted>
+                This account was created with a temporary password. Pick your own to continue - the
+                temporary one stops working straight away.
+              </Text>
+            )}
+            {props.notice && (
+              <Card padding={3} radius={2} tone={props.notice.tone} border>
+                <Text size={1}>{props.notice.text}</Text>
+              </Card>
+            )}
+            <Stack space={2}>
+              <Text size={1}>Current password</Text>
+              <TextInput type="password" value={current} onChange={(e) => setCurrent(e.currentTarget.value)} required />
+            </Stack>
+            <Stack space={2}>
+              <Text size={1}>New password</Text>
+              <TextInput type="password" value={next} onChange={(e) => setNext(e.currentTarget.value)} required />
+            </Stack>
+            <Stack space={2}>
+              <Text size={1}>Repeat new password</Text>
+              <TextInput type="password" value={confirm} onChange={(e) => setConfirm(e.currentTarget.value)} required />
+            </Stack>
+            <Text size={1} muted>
+              At least 12 characters. A passphrase of a few words beats a short password with
+              symbols in it.
+            </Text>
+            <Flex gap={2}>
+              <Button type="submit" text="Save password" tone="primary" disabled={busy} />
+              {!props.forced && <Button mode="bleed" text="Cancel" onClick={props.onCancel} />}
+            </Flex>
+          </Stack>
+        </form>
+      </Card>
     </Box>
   );
 }
