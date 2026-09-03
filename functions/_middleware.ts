@@ -1,5 +1,6 @@
 import { csrfProblem, fail, type Env, type SessionUser } from '../src/server/http';
 import { currentUser } from '../src/server/session';
+import { verifySanityAdmin } from '../src/server/sanityIdentity';
 
 /**
  * Runs before every Function. Three jobs:
@@ -45,6 +46,15 @@ export const onRequest: PagesFunction<Env, string, Data>[] = [
     if (csrf) return fail(403, csrf);
 
     data.user = await currentUser(env, request);
+
+    // Someone already signed in to the Studio as a project administrator does
+    // not have to sign in again to manage site accounts. The token is verified
+    // against Sanity on every request that uses it - see verifySanityAdmin -
+    // and is never stored here.
+    if (!data.user) {
+      const studioToken = request.headers.get('x-sanity-token');
+      if (studioToken) data.user = await verifySanityAdmin(env, studioToken);
+    }
 
     if (!PUBLIC_ROUTES.includes(path) && !data.user) {
       return fail(401, 'Not signed in.');

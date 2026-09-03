@@ -301,6 +301,48 @@ branch preview instead - previews share the same D1 database.
 
 **Secrets** live in Pages, never in `wrangler.toml`.
 
+## Importing the old site
+
+The live site at ceramic.brussels still runs **Twill** (Laravel). Its whole
+content was captured through the admin at `/admintool` and lives in
+`legacy-export/`. This is **Kamindu's** side.
+
+| Path | What |
+| :-- | :-- |
+| `legacy-export/raw/` | The verbatim capture, 6.5 MB. The source of truth - it cannot be regenerated without a session on the old admin |
+| `legacy-export/normalized/` | Per module, locales decoded, blocks assembled, select ids resolved to labels |
+| `legacy-export/derived/` | Candidate people, partners, events, laureates and FAQ entries pulled out of the blocks |
+| `legacy-export/INVENTORY.md` | Page tree, block composition, facet counts |
+| `legacy-export/MAPPING.md` | How each legacy shape maps onto the schemas, and what is still undecided |
+| `scripts/import-legacy.mjs` | The importer. `--dry` plans, `--images` uploads, `--only=` narrows |
+
+**Twill kept everything as a page with an ordered list of blocks.** Twelve block
+types carried all the structure, so the import is mostly *promoting blocks to
+documents*: a `person` block becomes a person, an `event` block becomes a
+programmeEvent, and the page a block sat on supplies what the block does not
+carry - a person's `groups`, a partner's `tier`, an event's date.
+
+**The import merges, it does not replace.** The seeded `demo-*` documents are
+not all disposable: they hold the 2026 laureates and the 2027 exhibitors, which
+the old CMS never had. So when a legacy record matches an existing document by
+name the importer patches *that* one. Ids are deterministic and only known
+fields are set, so a re-run corrects rather than duplicates.
+
+**Match on name *and* edition.** "The jury prize" exists for several years, as
+do "preview" and "vernissage" - matching on name alone silently collapses them
+into one document. The script refuses to run if two records ever target one id.
+
+**The old site has stale translations.** On the 2027 laureates page the English
+bio is the 2027 artist while the French and Dutch are still the 2026 one. The
+importer drops a locale whose text names a different laureate and lists it in
+`legacy-export/stale-translations.json`; an empty translation falls back to
+English, a wrong one does not.
+
+**Images are a separate pass.** `--images` uploads them and caches the result in
+`legacy-export/asset-map.json`, so it is resumable and never uploads twice -
+**keep that file.** The originals reach 6700px; the old CDN resizes on request,
+so `--max-width=2500` moves about 2.2 GB instead of 5.6 GB.
+
 ## Gotchas
 
 - **`fixSanityWindowsAlias` in `astro.config.mjs`** works around a Windows path
