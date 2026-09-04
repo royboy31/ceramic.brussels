@@ -294,15 +294,22 @@ Studio.
 ### How a site account reaches the Studio
 
 The Studio's own login screen only accepts Sanity identities, so it can never
-authenticate one of these accounts. What it *does* accept is a token in the URL
-hash: `consumeHashToken` in `sanity` reads `#token=` at boot, strips it from
-the address bar and stores it under `__studio_auth_token_<projectId>`. `/login`
-uses that.
+authenticate one of these accounts. What it *does* accept is a token in
+`localStorage` under `__studio_auth_token_<projectId>`, holding
+`{token, authenticated}` - the key `createAuthStore` reads on boot, and the same
+one the Users screen looks at. `/login` and `/studio` are the same origin, so
+`/login` can simply write it.
 
 1. `/login` signs the person in against D1, exactly as the Users screen does.
 2. `POST /api/auth/studio-token` returns `SANITY_STUDIO_TOKEN` to any signed-in,
    active account, and writes a `studio.token` row into `audit_log`.
-3. The page navigates to `/studio#token=…`, and the Studio boots signed in.
+3. The page writes that key and navigates to `/studio`, which boots signed in.
+
+**Do not hand the token over as `/studio#token=…`.** `sanity` does support that -
+`consumeHashToken` reads it at boot - but **this Studio is on hash routing**, so
+the hash is also the route. Both read it: you are signed in *and* dropped on
+"Tool not found: token=…" with an empty screen. It was built that way first and
+that is exactly what happened.
 
 `auth.providers` in `sanity.config.ts` puts a **Ceramic Brussels account**
 button on the Studio's login screen pointing at `/login`, so the loop closes
