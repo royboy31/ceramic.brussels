@@ -3,6 +3,12 @@
 export interface Env {
   ADMIN_DB: D1Database;
   SANITY_API_WRITE_TOKEN: string;
+  /**
+   * The token the Studio runs on when a site account signs in at /login.
+   * Optional because a deploy without it should refuse Studio access rather
+   * than fall back to the write token above, whose grants are much wider.
+   */
+  SANITY_STUDIO_TOKEN?: string;
   DEPLOY_HOOK_URL?: string;
   PUBLIC_SANITY_PROJECT_ID: string;
   PUBLIC_SANITY_DATASET: string;

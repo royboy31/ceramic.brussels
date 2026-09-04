@@ -1,0 +1,363 @@
+---
+/**
+ * Sign-in for site accounts, and the way they reach the Studio.
+ *
+ * These accounts live in D1, not in Sanity, so the Studio's own login screen
+ * can never accept one. What it does accept is a token in the URL hash, which
+ * it consumes at boot and stores for the session. So the sequence here is:
+ * authenticate against /api/auth/login, ask /api/auth/studio-token for the
+ * Studio's token, and hand it over by navigating to /studio#token=...
+ *
+ * Deliberately standalone rather than wrapped in Base.astro: this is not a
+ * page of the site, it has no locale, and it should not inherit navigation or
+ * hreflang. The few tokens it needs are copied from the layout's palette.
+ */
+const title = 'Sign in · Ceramic Brussels';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <main class="shell">
+      <h1>Ceramic Brussels</h1>
+
+      <!-- Which panel shows is decided in script once the session is known, so
+           nothing flashes a sign-in form at someone already signed in. -->
+      <p class="state" id="checking">Checking your session…</p>
+
+      <form id="signin" hidden>
+        <h2>Sign in</h2>
+        <p class="hint">
+          Use your Ceramic Brussels account - the one an administrator created for you. A Sanity
+          account signs in from the Studio itself.
+        </p>
+        <label>
+          Email
+          <input type="email" name="email" autocomplete="username" required />
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" autocomplete="current-password" required />
+        </label>
+        <button type="submit">Sign in</button>
+      </form>
+
+      <form id="change" hidden>
+        <h2>Choose your password</h2>
+        <p class="hint">
+          This account was created with a temporary password. Pick your own to continue - the
+          temporary one stops working straight away. At least 12 characters; a passphrase of a few
+          words beats a short password with symbols in it.
+        </p>
+        <label>
+          Current password
+          <input type="password" name="currentPassword" autocomplete="current-password" required />
+        </label>
+        <label>
+          New password
+          <input type="password" name="newPassword" autocomplete="new-password" required />
+        </label>
+        <label>
+          Repeat new password
+          <input type="password" name="confirm" autocomplete="new-password" required />
+        </label>
+        <button type="submit">Save password</button>
+      </form>
+
+      <div id="handoff" hidden>
+        <p class="state" id="handoff-state">Opening the Studio…</p>
+        <p class="hint">
+          Signed in as <strong id="who"></strong>.
+          <button type="button" class="link" id="signout">Sign in as someone else</button>
+        </p>
+      </div>
+
+      <p class="error" id="error" hidden></p>
+    </main>
+
+    <script>
+      const el = (id: string) => document.getElementById(id)!;
+
+      const show = (id: string) => {
+        for (const panel of ['checking', 'signin', 'change', 'handoff']) {
+          el(panel).hidden = panel !== id;
+        }
+      };
+
+      const problem = (text: string) => {
+        const box = el('error');
+        box.textContent = text;
+        box.hidden = !text;
+      };
+
+      /** Every call carries the header the API's CSRF check requires. */
+      async function api<T>(path: string, body?: unknown): Promise<T> {
+        const response = await fetch(path, {
+          method: body === undefined ? 'GET' : 'POST',
+          headers: { 'content-type': 'application/json', 'x-admin-request': '1' },
+          credentials: 'same-origin',
+          ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error ?? `Failed (${response.status})`);
+        return data as T;
+      }
+
+      /**
+       * Where to land afterwards. The Studio's login screen passes the page it
+       * wanted as `?origin=`, so a deep link survives the detour. Anything
+       * pointing off this origin is discarded rather than followed.
+       */
+      function destination(): URL {
+        const origin = new URLSearchParams(location.search).get('origin');
+        if (origin) {
+          try {
+            const url = new URL(origin, location.origin);
+            if (url.origin === location.origin) return url;
+          } catch {
+            /* fall through to the Studio */
+          }
+        }
+        return new URL('/studio', location.origin);
+      }
+
+      /**
+       * The handover. `replace` rather than `assign`, so the token is not left
+       * behind in history; the Studio strips it from the address bar as it
+       * reads it.
+       */
+      async function enterStudio() {
+        const { token } = await api<{ token: string }>('/api/auth/studio-token', {});
+        const url = destination();
+        url.hash = `token=${encodeURIComponent(token)}`;
+        location.replace(url.toString());
+      }
+
+      async function handOff(name: string) {
+        el('who').textContent = name;
+        show('handoff');
+        problem('');
+        try {
+          await enterStudio();
+        } catch (error) {
+          // The sign-in worked and only the hand-off failed, so say that
+          // rather than leaving "Opening the Studio…" under an error.
+          el('handoff-state').textContent = 'Could not open the Studio.';
+          problem((error as Error).message);
+        }
+      }
+
+      el('signin').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        problem('');
+        const form = event.target as HTMLFormElement;
+        const field = (name: string) => (form.elements.namedItem(name) as HTMLInputElement).value;
+        const button = form.querySelector('button')!;
+        button.disabled = true;
+        try {
+          const { user } = await api<{ user: { name: string; mustChangePassword: boolean } }>(
+            '/api/auth/login',
+            { email: field('email'), password: field('password') },
+          );
+          if (user.mustChangePassword) show('change');
+          else await handOff(user.name);
+        } catch (error) {
+          problem((error as Error).message);
+        }
+        button.disabled = false;
+      });
+
+      el('change').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        problem('');
+        const form = event.target as HTMLFormElement;
+        const field = (name: string) => (form.elements.namedItem(name) as HTMLInputElement).value;
+        if (field('newPassword') !== field('confirm')) {
+          problem('The two new passwords do not match.');
+          return;
+        }
+        const button = form.querySelector('button')!;
+        button.disabled = true;
+        try {
+          await api('/api/auth/password', {
+            currentPassword: field('currentPassword'),
+            newPassword: field('newPassword'),
+          });
+          const { user } = await api<{ user: { name: string } }>('/api/auth/session');
+          await handOff(user.name);
+        } catch (error) {
+          problem((error as Error).message);
+        }
+        button.disabled = false;
+      });
+
+      el('signout').addEventListener('click', async () => {
+        try {
+          await api('/api/auth/logout', {});
+        } catch {
+          /* signing out of a session that has already gone is not a failure */
+        }
+        location.replace(location.pathname + location.search);
+      });
+
+      // A session that is already good goes straight through; the form only
+      // appears for someone who actually has to sign in.
+      (async () => {
+        try {
+          const { user } = await api<{
+            user: { name: string; mustChangePassword: boolean } | null;
+          }>('/api/auth/session');
+          if (!user) show('signin');
+          else if (user.mustChangePassword) show('change');
+          else await handOff(user.name);
+        } catch (error) {
+          show('signin');
+          problem((error as Error).message);
+        }
+      })();
+    </script>
+
+    <style>
+      :root {
+        --ground: #ffffff;
+        --surface: #fafaf9;
+        --ink: #050505;
+        --ink-2: #55534f;
+        --ink-3: #8a8781;
+        --rule: #e0dedb;
+        --acid: #fff350;
+        --font: 'Noi Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 2rem 1rem;
+        background: var(--surface);
+        color: var(--ink);
+        font-family: var(--font);
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .shell {
+        width: 100%;
+        max-width: 26rem;
+        padding: 2rem;
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        background: var(--ground);
+      }
+
+      h1 {
+        margin: 0 0 1.5rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+      }
+
+      h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1.375rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .hint {
+        margin: 0 0 1.5rem;
+        font-size: 0.875rem;
+        color: var(--ink-2);
+      }
+
+      .state {
+        margin: 0;
+        font-size: 0.9375rem;
+        color: var(--ink-2);
+      }
+
+      label {
+        display: block;
+        margin-bottom: 1rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--ink-2);
+      }
+
+      input {
+        display: block;
+        width: 100%;
+        margin-top: 0.375rem;
+        padding: 0.625rem 0.75rem;
+        border: 1px solid var(--rule);
+        border-radius: 3px;
+        background: var(--ground);
+        color: var(--ink);
+        font: inherit;
+        font-weight: 400;
+      }
+
+      input:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 1px;
+      }
+
+      button[type='submit'] {
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.6875rem 1rem;
+        border: 1px solid var(--ink);
+        border-radius: 3px;
+        background: var(--ink);
+        color: var(--ground);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button[type='submit']:hover:not(:disabled) {
+        background: var(--acid);
+        color: var(--ink);
+      }
+
+      button[type='submit']:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      .link {
+        padding: 0;
+        border: 0;
+        background: none;
+        color: var(--ink);
+        font: inherit;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      #handoff .hint {
+        margin: 0.75rem 0 0;
+      }
+
+      .error {
+        margin: 1.25rem 0 0;
+        padding: 0.75rem;
+        border-left: 3px solid var(--ink);
+        background: var(--acid);
+        font-size: 0.875rem;
+      }
+    </style>
+  </body>
+</html>

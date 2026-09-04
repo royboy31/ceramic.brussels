@@ -277,6 +277,7 @@ private, and the Studio screen is a custom tool that administers them over
 | Path | What |
 | :-- | :-- |
 | `src/sanity/components/UsersTool.tsx` | The Users screen inside the Studio |
+| `src/pages/login.astro` | Sign-in for site accounts, and the hand-off into the Studio |
 | `functions/` | Pages Functions - auth, sessions, user management, audit |
 | `src/server/` | Shared modules those Functions import |
 | `migrations/` | D1 schema, applied with `npm run admin:migrate` |
@@ -290,10 +291,45 @@ and prints a temporary password, flagged so the person must choose their own on
 first sign-in. After the first admin exists, everything else happens in the
 Studio.
 
-**Attribution.** Nothing here gives those accounts access to the Studio yet -
-see the note in the handover about proxying the Sanity API, which is what that
-would require. When it exists, every edit will arrive on one Sanity token, so
-`audit_log` in D1 is the only record of the person behind a change.
+### How a site account reaches the Studio
+
+The Studio's own login screen only accepts Sanity identities, so it can never
+authenticate one of these accounts. What it *does* accept is a token in the URL
+hash: `consumeHashToken` in `sanity` reads `#token=` at boot, strips it from
+the address bar and stores it under `__studio_auth_token_<projectId>`. `/login`
+uses that.
+
+1. `/login` signs the person in against D1, exactly as the Users screen does.
+2. `POST /api/auth/studio-token` returns `SANITY_STUDIO_TOKEN` to any signed-in,
+   active account, and writes a `studio.token` row into `audit_log`.
+3. The page navigates to `/studio#token=…`, and the Studio boots signed in.
+
+`auth.providers` in `sanity.config.ts` puts a **Ceramic Brussels account**
+button on the Studio's login screen pointing at `/login`, so the loop closes
+from either direction. The Studio passes the page it wanted as `?origin=`, and
+`/login` returns there - after checking it is same-origin - rather than always
+landing on the Studio root.
+
+**`SANITY_STUDIO_TOKEN` is a Pages secret**, a token created in
+sanity.io/manage with the narrowest role that lets an editor work. It is not
+`SANITY_API_WRITE_TOKEN`: that one is for migrations and imports, its grants are
+much wider, and the endpoint refuses to fall back to it - an unset secret
+returns 503 rather than handing out the wrong key.
+
+**What this costs, deliberately.** The token reaches the browser, where its
+holder can read it out of localStorage and use it from anywhere; it is one
+shared credential; Sanity tokens do not expire; and withdrawing it from one
+person means rotating it for everyone and having the others sign in again.
+Deactivating an account in the Users screen stops that person getting a *new*
+token, not one they already hold.
+
+**Attribution.** Edits arrive at Sanity as the token, not as the person, so
+Sanity's history cannot tell the team apart - every change reads as the robot
+the token belongs to. `audit_log` in D1 records who was handed a token and
+when, which is the only trace of the individual. It cannot see the edits
+themselves, because those go straight from the Studio to Sanity rather than
+through `/api`. Closing that gap means proxying the Sanity API so the token
+never leaves the server, which is the larger piece of work this defers.
 
 **Local development does not work on Windows.** `wrangler pages dev` needs
 workerd, which crashes with an access violation on that machine. Test on a
