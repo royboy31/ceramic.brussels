@@ -243,6 +243,23 @@ The content model follows the 2027 Figma design. The shape to keep in mind:
 - **Links are objects.** A `link` is a route + optional anchor, a document
   reference, or an external URL. Internal ones get "→", external ones "↗".
 
+### Creating and duplicating documents
+
+The Create menu offers **starting points** from `src/sanity/templates.ts`: one
+"new tab" per hub (which presets `section`, the field that makes a page a tab
+at all), two standalone page shapes, and one per exhibitor kind. They set
+initial values only - nothing is locked, and editing a template never touches
+documents already made from it, so adding or reworking them is free. Localised
+fields are seeded in English alone: an empty translation falls back to English,
+a pre-filled English one pretending to be French does not.
+
+`src/sanity/components/DuplicateAction.tsx` replaces Sanity's built-in
+Duplicate. The built-in copies the slug as well, leaving two documents claiming
+one URL with nothing to warn you - the copy looks finished and the build picks
+one. Ours clears the slug and appends "(copy)" to the title, so the duplicate is
+visibly unfinished. Everything else carries over, which is the point: a
+duplicated exhibitor keeps its edition, artists and images.
+
 `README.md` has the full table of document types and where each shows.
 `docs/design-inventory.md` and `docs/legacy-site-inventory.md` are the two
 inventories the model was derived from — check them before asking what a

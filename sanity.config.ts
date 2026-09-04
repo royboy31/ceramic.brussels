@@ -4,6 +4,8 @@ import { schemaTypes } from './src/sanity/schemaTypes';
 import { structure } from './src/sanity/structure';
 import { StudioNavbar } from './src/sanity/components/StudioNavbar';
 import { UsersTool, UsersToolIcon } from './src/sanity/components/UsersTool';
+import { duplicateAction } from './src/sanity/components/DuplicateAction';
+import { templates } from './src/sanity/templates';
 
 // Singletons must not be creatable or deletable from the Studio.
 const SINGLETONS = new Set(['siteSettings', 'navigation', 'homepage']);
@@ -56,12 +58,16 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes,
-    templates: (prev) => prev.filter((t) => !SINGLETONS.has(t.schemaType)),
+    // Singletons cannot be created at all; everything else gets the starting
+    // points in templates.ts alongside Sanity's bare "new document".
+    templates: (prev) => [...prev.filter((t) => !SINGLETONS.has(t.schemaType)), ...templates],
   },
   document: {
     actions: (prev, { schemaType }) =>
       SINGLETONS.has(schemaType)
         ? prev.filter(({ action }) => action !== 'unpublish' && action !== 'delete' && action !== 'duplicate')
-        : prev,
+        : // Our duplicate in place of the built-in, which copies the slug too and
+          // leaves two documents claiming one URL. See DuplicateAction.tsx.
+          prev.map((action) => (action.action === 'duplicate' ? duplicateAction : action)),
   },
 });
