@@ -77,7 +77,8 @@ export default defineConfig({
         defaultLocale: 'en',
         locales: { en: 'en', fr: 'fr', nl: 'nl' },
       },
-      filter: (page) => !page.includes('/studio'),
+      // Neither the Studio nor the sign-in page is site content.
+      filter: (page) => !page.includes('/studio') && !page.includes('/login'),
     }),
   ],
   vite: {
