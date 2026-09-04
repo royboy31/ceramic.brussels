@@ -105,3 +105,11 @@ export const duplicateAction: DocumentActionComponent = (props) => {
     },
   };
 };
+
+/**
+ * The stable identifier Sanity uses to recognise this as the duplicate action.
+ * Without it the component is just an anonymous extra entry, and anything that
+ * filters actions by name - the singleton rule in sanity.config.ts does - stops
+ * seeing it.
+ */
+duplicateAction.action = 'duplicate';

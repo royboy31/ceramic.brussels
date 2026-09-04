@@ -127,7 +127,8 @@ export const structure: StructureResolver = (S) =>
                     .title('Art prize pages')
                     .schemaType('page')
                     .filter('_type == "page" && section == "art-prize"')
-                    .defaultOrdering([{ field: 'order', direction: 'asc' }]),
+                    .defaultOrdering([{ field: 'order', direction: 'asc' }])
+                    .initialValueTemplates([S.initialValueTemplateItem('page-hub-art-prize')]),
                 ),
             ]),
         ),
@@ -258,7 +259,8 @@ export const structure: StructureResolver = (S) =>
                     .title('Visitors info tabs')
                     .schemaType('page')
                     .filter('_type == "page" && section == "visit"')
-                    .defaultOrdering([{ field: 'order', direction: 'asc' }]),
+                    .defaultOrdering([{ field: 'order', direction: 'asc' }])
+                    .initialValueTemplates([S.initialValueTemplateItem('page-hub-visit')]),
                 ),
             ]),
         ),
@@ -278,7 +280,8 @@ export const structure: StructureResolver = (S) =>
                     .title('About tabs')
                     .schemaType('page')
                     .filter('_type == "page" && section == "about"')
-                    .defaultOrdering([{ field: 'order', direction: 'asc' }]),
+                    .defaultOrdering([{ field: 'order', direction: 'asc' }])
+                    .initialValueTemplates([S.initialValueTemplateItem('page-hub-about')]),
                 ),
               S.listItem()
                 .title('Advisory board')
@@ -334,7 +337,11 @@ export const structure: StructureResolver = (S) =>
                       .schemaType('page')
                       .filter('_type == "page" && section == $section')
                       .params({ section: s.value })
-                      .defaultOrdering([{ field: 'order', direction: 'asc' }]),
+                      .defaultOrdering([{ field: 'order', direction: 'asc' }])
+                      // Without this the create button in a filtered pane makes a
+                      // page with no section - which promptly vanishes from the
+                      // list that made it, because it no longer matches the filter.
+                      .initialValueTemplates([S.initialValueTemplateItem(`page-hub-${s.value}`)]),
                   ),
               ),
               S.listItem()
@@ -345,7 +352,11 @@ export const structure: StructureResolver = (S) =>
                     .title('Standalone pages')
                     .schemaType('page')
                     .filter('_type == "page" && !defined(section)')
-                    .defaultOrdering([{ field: 'order', direction: 'asc' }]),
+                    .defaultOrdering([{ field: 'order', direction: 'asc' }])
+                    .initialValueTemplates([
+                      S.initialValueTemplateItem('page-text'),
+                      S.initialValueTemplateItem('page-sections'),
+                    ]),
                 ),
               S.divider(),
               S.listItem()
