@@ -3,16 +3,24 @@
  * Sign-in for site accounts, and the way they reach the Studio.
  *
  * These accounts live in D1, not in Sanity, so the Studio's own login screen
- * can never accept one. What it does accept is a token in the URL hash, which
- * it consumes at boot and stores for the session. So the sequence here is:
- * authenticate against /api/auth/login, ask /api/auth/studio-token for the
- * Studio's token, and hand it over by navigating to /studio#token=...
+ * can never accept one. What it does accept is a token in localStorage. So the
+ * sequence here is: authenticate against /api/auth/login, ask
+ * /api/auth/studio-token for the Studio's token, write it where the Studio
+ * looks, and navigate to /studio.
+ *
+ * Not via the '#token=' hash the Studio also understands. This Studio is on
+ * hash routing - one HTML file, every screen after the '#' - so a hash carrying
+ * a token is also a route. The auth store consumes it and the router resolves
+ * it at the same time, which signs you in and then lands you on "Tool not
+ * found: token=..." with an empty screen. Same origin means localStorage is
+ * shared, so the token can simply be put there instead and the URL left clean.
  *
  * Deliberately standalone rather than wrapped in Base.astro: this is not a
  * page of the site, it has no locale, and it should not inherit navigation or
  * hreflang. The few tokens it needs are copied from the layout's palette.
  */
 const title = 'Sign in · Ceramic Brussels';
+const projectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID;
 ---
 
 <html lang="en">
@@ -22,7 +30,7 @@ const title = 'Sign in · Ceramic Brussels';
     <meta name="robots" content="noindex, nofollow" />
     <title>{title}</title>
   </head>
-  <body>
+  <body data-project-id={projectId}>
     <main class="shell">
       <h1>Ceramic Brussels</h1>
 
@@ -127,14 +135,32 @@ const title = 'Sign in · Ceramic Brussels';
       }
 
       /**
-       * The handover. `replace` rather than `assign`, so the token is not left
-       * behind in history; the Studio strips it from the address bar as it
-       * reads it.
+       * The handover.
+       *
+       * `__studio_auth_token_<projectId>` holding `{token, authenticated}` is
+       * where `createAuthStore` looks on boot, and it is the same key the Users
+       * screen reads. Writing it here rather than passing '#token=' keeps the
+       * hash free for the Studio's router, which owns it.
+       *
+       * `replace` rather than `assign`, so Back does not return to this page.
        */
       async function enterStudio() {
         const { token } = await api<{ token: string }>('/api/auth/studio-token', {});
+        const projectId = document.body.dataset.projectId;
+        if (!projectId) throw new Error('This page was built without a Sanity project id.');
+
+        try {
+          localStorage.setItem(
+            `__studio_auth_token_${projectId}`,
+            JSON.stringify({ token, authenticated: true }),
+          );
+        } catch {
+          // Private browsing, or storage denied. Nothing else here can work.
+          throw new Error('Your browser is blocking site storage, which the Studio needs.');
+        }
+
         const url = destination();
-        url.hash = `token=${encodeURIComponent(token)}`;
+        url.hash = '';
         location.replace(url.toString());
       }
 
