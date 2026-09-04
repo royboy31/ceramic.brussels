@@ -207,10 +207,17 @@ export function UsersTool() {
         </Flex>
 
         <Card padding={3} radius={2} tone="primary" border>
-          <Text size={1}>
-            These accounts are for this site only. They are not Sanity logins and cost no Sanity
-            seat. Every content change made with one is recorded against the person who made it.
-          </Text>
+          <Stack space={3}>
+            <Text size={1}>
+              These accounts are for this site only. They are not Sanity logins and cost no Sanity
+              seat. The people who have one sign in at <code>/login</code>, which opens the Studio
+              for them.
+            </Text>
+            <Text size={1}>
+              Everyone works through one shared Sanity token, so Sanity&rsquo;s document history
+              cannot tell them apart. What is recorded here is who was let in and when.
+            </Text>
+          </Stack>
         </Card>
 
         {!users ? (

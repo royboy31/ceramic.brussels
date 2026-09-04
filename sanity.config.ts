@@ -16,6 +16,19 @@ export default defineConfig({
   plugins: [structureTool({ structure })],
 
   /**
+   * Site accounts get their own button on the Studio's login screen, pointing
+   * at /login. The function form adds to the providers Sanity returns rather
+   * than replacing them - a static array would drop Google and GitHub, and
+   * lock out the project's actual members.
+   *
+   * The Studio appends ?origin=<the page that was wanted> to this URL, and
+   * /login sends the person back there once it has a token for them.
+   */
+  auth: {
+    providers: (prev) => [...prev, { name: 'site', title: 'Ceramic Brussels account', url: '/login' }],
+  },
+
+  /**
    * Site accounts, managed from inside the Studio.
    *
    * They are not Sanity project members: they live in D1 and are administered
