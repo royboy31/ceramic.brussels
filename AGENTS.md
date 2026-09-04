@@ -260,6 +260,19 @@ one. Ours clears the slug and appends "(copy)" to the title, so the duplicate is
 visibly unfinished. Everything else carries over, which is the point: a
 duplicated exhibitor keeps its edition, artists and images.
 
+**Where the templates actually appear.** The **`+` in the navbar**, and the
+create button of any pane wired with `initialValueTemplates` in
+`structure.ts`. The New button inside a pane is scoped to that pane's type, so
+Laureates offers `laureate` and nothing else - it will never show page or
+exhibitor templates, and looking for them there is the obvious wrong turn.
+
+A template can also be linked to directly, which makes a usable bookmark:
+
+    /studio/#/intent/create/type=page;template=page-hub-art-prize/
+
+Only `page` and `exhibitor` have templates. `laureate`, `award` and `person`
+do not, so New in those panes gives a bare document.
+
 `README.md` has the full table of document types and where each shows.
 `docs/design-inventory.md` and `docs/legacy-site-inventory.md` are the two
 inventories the model was derived from — check them before asking what a
