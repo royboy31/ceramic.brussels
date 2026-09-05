@@ -125,7 +125,21 @@ export default defineConfig({
       // as "Failed to fetch dynamically imported module .../deps/pane-*.js" and
       // an endless reload loop. Pre-bundling them at server start avoids the
       // mid-session re-optimise entirely.
-      include: ['sanity', 'sanity/structure', '@sanity/client', 'styled-components', 'react-is'],
+      include: [
+        'sanity',
+        'sanity/structure',
+        'sanity/presentation',
+        '@sanity/client',
+        '@sanity/ui',
+        'styled-components',
+        'react-is',
+        // The page builder's icons, one subpath each (@sanity/icons 5 has no
+        // root export for them).
+        ...[
+          'BarChart', 'BlockContent', 'Blockquote', 'CodeBlock', 'Component', 'Dashboard', 'DocumentText',
+          'HelpCircle', 'Image', 'Images', 'Link', 'Play', 'Sparkles', 'StackCompact', 'Text', 'Users',
+        ].map((n) => `@sanity/icons/${n}`),
+      ],
     },
     // `cloudflare:workers` only exists inside the Cloudflare build. The plain
     // build never executes the module that imports it (src/server/cfEnv.ts),

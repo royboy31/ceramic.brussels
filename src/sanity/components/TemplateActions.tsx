@@ -100,7 +100,10 @@ export const applyTemplateAction: DocumentActionComponent = (props) => {
     return () => {
       cancelled = true;
     };
-  }, [open, client, type]);
+    // `client` is deliberately not a dependency: useClient hands back a new
+    // instance per render, and listing it re-runs the fetch on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, type]);
 
   const selected = useMemo(() => templates?.find((t) => t._id === chosen) ?? null, [templates, chosen]);
 
@@ -136,6 +139,7 @@ export const applyTemplateAction: DocumentActionComponent = (props) => {
           header: 'Apply a template',
           onClose: () => setOpen(false),
           content: (
+            <Box padding={4}>
             <Stack space={4}>
               <Text size={1} muted>
                 Copies the template’s sections into this document. The page and the template stay independent
@@ -218,6 +222,7 @@ export const applyTemplateAction: DocumentActionComponent = (props) => {
                 />
               </Flex>
             </Stack>
+            </Box>
           ),
         }
       : undefined,
@@ -290,13 +295,16 @@ export const saveAsTemplateAction: DocumentActionComponent = (props) => {
           header: 'Save as template',
           onClose: close,
           content: done ? (
+            <Box padding={4}>
             <Stack space={4}>
               <Text>Saved. It is now offered under “Apply template…” on every {type === 'page' ? 'page' : type}.</Text>
               <Flex justify="flex-end">
                 <Button tone="primary" text="Close" onClick={close} />
               </Flex>
             </Stack>
+            </Box>
           ) : (
+            <Box padding={4}>
             <Stack space={4}>
               <Text size={1} muted>
                 Copies this document’s {sections.length} section{sections.length === 1 ? '' : 's'} - text, images and all -
@@ -324,6 +332,7 @@ export const saveAsTemplateAction: DocumentActionComponent = (props) => {
                 <Button tone="primary" text={busy ? 'Saving…' : 'Save template'} disabled={busy} onClick={save} />
               </Flex>
             </Stack>
+            </Box>
           ),
         }
       : undefined,

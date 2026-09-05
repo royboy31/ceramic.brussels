@@ -34,3 +34,7 @@ font/
 
 # Preview route wrappers, generated at build time by src/integrations/preview-routes.mjs
 src/preview/
+
+# Written by the Cloudflare adapter on every build (a redirect to dist/server/wrangler.json).
+# Pages CI reads it at deploy time and fails when the target is gone; scripts/pages-worker.mjs removes it.
+.wrangler/

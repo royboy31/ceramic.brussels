@@ -68,6 +68,11 @@ if (fs.existsSync(serverDir) && fs.readdirSync(serverDir).length === 0) fs.rmdir
 const parent = path.dirname(serverDir);
 if (parent !== DIST && fs.existsSync(parent) && fs.readdirSync(parent).length === 0) fs.rmdirSync(parent);
 
+// The adapter also leaves `.wrangler/deploy/config.json` in the project,
+// redirecting wrangler to the wrangler.json this script just removed. Pages
+// CI reads that redirect at deploy time and fails on the missing target.
+fs.rmSync(path.resolve('.wrangler/deploy'), { recursive: true, force: true });
+
 // 3. Route only the on-demand paths through the Worker.
 fs.writeFileSync(
   path.join(DIST, '_routes.json'),
