@@ -1,0 +1,93 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { resolveLink } from '../../lib/links';
+import { urlFor } from '../../sanity/image';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * The full-width call-to-action band from the homepage: one line, one link,
+ * in the acid gradient, solid acid, or an outline. With a background image
+ * the text sits over it in a dark scrim.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { lang, section } = Astro.props;
+const link = resolveLink(lang, section.link);
+const external = link?.external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+const style = ['gradient', 'solid', 'outline'].includes(section.style) ? section.style : 'gradient';
+const bg = section.image?.asset ? urlFor(section.image).width(2000).height(600).fit('crop').auto('format').quality(70).url() : null;
+const Tag = link ? 'a' : 'div';
+---
+
+{
+  section.text && (
+    <Tag
+      class:list={['cta', `cta-${style}`, { 'cta-image': !!bg }]}
+      id={section.anchor || undefined}
+      href={link?.href}
+      style={bg ? `background-image: url(${bg})` : undefined}
+      {...(link ? external : {})}
+    >
+      <span {...styleAttrs(section.textStyle)}>
+        {section.text} {link?.arrow}
+      </span>
+    </Tag>
+  )
+}
+
+<style>
+  .cta {
+    display: grid;
+    place-items: center;
+    min-height: clamp(100px, 10.5vw, 152px);
+    margin: 3.4rem -30px 3rem;
+    padding: 0.6rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    text-transform: lowercase;
+    color: var(--ink);
+    font-size: clamp(1.9rem, 4.2vw, 3.75rem);
+    line-height: 1;
+    background-size: cover;
+    background-position: center;
+  }
+  .cta-gradient {
+    background: linear-gradient(180deg, var(--acid) 0%, var(--ground) 50%, var(--acid) 100%);
+    letter-spacing: -0.05em;
+  }
+  .cta-solid {
+    background: var(--acid);
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  .cta-outline {
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    letter-spacing: -0.04em;
+  }
+  .cta-image {
+    color: #fff;
+    background-color: var(--ink);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+    min-height: clamp(160px, 22vw, 320px);
+  }
+  a.cta:hover span {
+    text-decoration: underline;
+    text-underline-offset: 0.1em;
+    text-decoration-thickness: 2px;
+  }
+
+  @media (max-width: 900px) {
+    .cta {
+      margin-inline: -16px;
+    }
+  }
+  @media (max-width: 640px) {
+    .cta {
+      margin-inline: -10px;
+    }
+  }
+</style>

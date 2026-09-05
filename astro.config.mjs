@@ -3,15 +3,34 @@ import { defineConfig } from 'astro/config';
 import sanity from '@sanity/astro';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
+import cloudflare from '@astrojs/cloudflare';
 import { loadEnv } from 'vite';
 import path from 'node:path';
+import { previewRoutes } from './src/integrations/preview-routes.mjs';
 
 // astro.config runs in Node before Astro loads .env, so pull the vars manually.
-const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET, PUBLIC_SITE_URL } = loadEnv(
+const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET, PUBLIC_SITE_URL, PREVIEW_RUNTIME } = loadEnv(
   process.env.NODE_ENV ?? 'development',
   process.cwd(),
   '',
 );
+
+/**
+ * Two shapes of build, chosen by PREVIEW_RUNTIME (wrangler.toml sets it per
+ * environment; `.env` for a laptop that can run workerd):
+ *
+ *   off  Plain static site. Every page is an HTML file, /api is served by
+ *        the Pages Functions in `functions/`, and there is no preview.
+ *   on   The same static site, plus a Worker that renders /preview/… on
+ *        demand from drafts and serves /api itself. scripts/pages-worker.mjs
+ *        moves that Worker to dist/_worker.js after the build so Cloudflare
+ *        Pages runs it. The Studio gets its Preview tab.
+ *
+ * It is a switch rather than always-on because the adapter's dev server runs
+ * on workerd, which does not start on every machine (see CLAUDE.md); a
+ * laptop without it keeps `astro dev` exactly as before.
+ */
+const previewRuntime = PREVIEW_RUNTIME === '1';
 
 /**
  * Windows fix for @sanity/astro 3.5.1.
@@ -59,6 +78,21 @@ export default defineConfig({
     '/': '/en',
   },
 
+  // `output` stays 'static': every page is prerendered; only the routes the
+  // preview integration injects with `prerender: false` run on the Worker.
+  adapter: previewRuntime
+    ? cloudflare({
+        // The adapter's Vite plugin refuses a Pages configuration, so the
+        // Worker is described separately. Deployment is still Pages.
+        configPath: 'wrangler.worker.toml',
+        // Prerender in Node, as the plain build does: 700 pages of Sanity
+        // fetches, unchanged from today, rather than inside workerd.
+        prerenderEnvironment: 'node',
+        // Images come from Sanity's CDN already sized; nothing to transform.
+        imageService: 'passthrough',
+      })
+    : undefined,
+
   integrations: [
     sanity({
       projectId: PUBLIC_SANITY_PROJECT_ID,
@@ -77,9 +111,10 @@ export default defineConfig({
         defaultLocale: 'en',
         locales: { en: 'en', fr: 'fr', nl: 'nl' },
       },
-      // Neither the Studio nor the sign-in page is site content.
-      filter: (page) => !page.includes('/studio') && !page.includes('/login'),
+      // Neither the Studio, the sign-in page nor the preview is site content.
+      filter: (page) => !page.includes('/studio') && !page.includes('/login') && !page.includes('/preview/'),
     }),
+    ...(previewRuntime ? [previewRoutes()] : []),
   ],
   vite: {
     plugins: [fixSanityWindowsAlias()],
@@ -92,5 +127,14 @@ export default defineConfig({
       // mid-session re-optimise entirely.
       include: ['sanity', 'sanity/structure', '@sanity/client', 'styled-components', 'react-is'],
     },
+    // `cloudflare:workers` only exists inside the Cloudflare build. The plain
+    // build never executes the module that imports it (src/server/cfEnv.ts),
+    // but Rollup still has to be told not to look for it.
+    ...(previewRuntime
+      ? {}
+      : {
+          build: { rollupOptions: { external: ['cloudflare:workers'] } },
+          ssr: { external: ['cloudflare:workers'] },
+        }),
   },
 });

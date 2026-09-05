@@ -2,6 +2,7 @@
 import Base from '../../../layouts/Base.astro';
 import HubNav from '../../../components/HubNav.astro';
 import Sections from '../../../components/Sections.astro';
+import PageSections from '../../../components/PageSections.astro';
 import Figure from '../../../components/Figure.astro';
 import SanityImage from '../../../components/SanityImage.astro';
 import PortableText from '../../../components/PortableText.astro';
@@ -74,8 +75,11 @@ const years = [...new Set(clips.map((c: any) => c.publishedAt?.slice(0, 4)))]
 
 const editions = tab === 'images' ? (await getEditions(lang)).filter((e: any) => e.images?.some((img: any) => img?.asset)) : [];
 
-// The fair: the first section sits beside the hero, the rest share rows of two.
-const [leadSection, ...moreSections] = page?.sections ?? [];
+// The fair: a leading text block sits beside the hero; the rest of the stack
+// follows, text blocks pairing up two a row unless the editor chose otherwise.
+const stack = page?.sections ?? [];
+const leadSection = stack[0]?._type === 'contentSection' ? stack[0] : null;
+const moreSections = leadSection ? stack.slice(1) : stack;
 const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
 const path = hubTabPath('about', tab);
 
@@ -121,7 +125,7 @@ const captionOf = (img: any) =>
               </div>
             )}
           </div>
-          <Sections lang={lang} sections={moreSections} columns={2} />
+          <PageSections lang={lang} sections={moreSections} defaultLayout="half" />
         </>
       ) : (
         <p class="empty">
@@ -289,7 +293,7 @@ const captionOf = (img: any) =>
   }
 
   {/* ------------------------------ page text on the tabs that carry one */}
-  {page && tab !== 'the-fair' && <Sections lang={lang} sections={page.sections} />}
+  {page && tab !== 'the-fair' && <PageSections lang={lang} sections={page.sections} />}
   {
     page?.body && (
       <div class="body-24 page-body">

@@ -1,7 +1,7 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import HubNav from '../../../components/HubNav.astro';
-import Sections from '../../../components/Sections.astro';
+import PageSections from '../../../components/PageSections.astro';
 import Figure from '../../../components/Figure.astro';
 import SanityImage from '../../../components/SanityImage.astro';
 import PortableText from '../../../components/PortableText.astro';
@@ -103,7 +103,7 @@ const path = hubTabPath('programme', tab);
     )
   }
 
-  {page && <Sections lang={lang} sections={page.sections} />}
+  {page && <PageSections lang={lang} sections={page.sections} />}
 
   {
     page?.body && (

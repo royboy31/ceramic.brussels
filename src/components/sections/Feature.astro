@@ -1,0 +1,109 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import Figure from '../Figure.astro';
+import { resolveLink } from '../../lib/links';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * The homepage's feature block: kicker, headline and link on six columns,
+ * picture on the other six. `flip` puts the picture first - PageSections
+ * alternates consecutive features, as the hand-off does.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+  flip?: boolean;
+}
+
+const { lang, section, flip = false } = Astro.props;
+const link = resolveLink(lang, section.link);
+const external = link?.external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+<section class:list={['page-grid', 'feature', { flip }]} id={section.anchor || undefined}>
+  <div class="feature-copy">
+    {
+      section.kicker && (
+        <p class="eyebrow-lg" {...styleAttrs(section.kickerStyle)}>
+          {section.kicker}
+        </p>
+      )
+    }
+    {section.headline && <h3 {...styleAttrs(section.headlineStyle)}>{section.headline}</h3>}
+    {
+      link && (
+        <a class="text-link" href={link.href} {...external}>
+          {link.label} {link.arrow}
+        </a>
+      )
+    }
+  </div>
+
+  <div class="feature-shot">
+    <Figure image={section.image} pool="fair" seed={section._key} sizes="(max-width: 640px) 100vw, 50vw" />
+  </div>
+</section>
+
+<style>
+  .feature {
+    align-items: center;
+    row-gap: 1.25rem;
+    margin-top: 30px;
+    padding-bottom: 2.5rem;
+  }
+  .feature-copy {
+    grid-column: span 6;
+    padding: 1.5rem 0;
+  }
+  .feature-shot {
+    grid-column: span 6;
+  }
+  .feature-shot :global(img) {
+    width: 100%;
+    height: 31vw;
+    min-height: 280px;
+    object-fit: cover;
+  }
+  .feature.flip {
+    align-items: start;
+    padding: 1.5rem 0 0;
+  }
+  .feature.flip .feature-shot {
+    order: -1;
+  }
+
+  .eyebrow-lg {
+    margin: 0;
+    text-transform: lowercase;
+    font-size: clamp(1.25rem, 2.7vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+  }
+  .feature-copy h3 {
+    margin: 0.5rem 0 0;
+    font-size: clamp(2rem, 3.6vw, 3.2rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    font-weight: 400;
+  }
+  .feature-copy a {
+    display: inline-block;
+    margin-top: 2rem;
+    font-size: clamp(1.3rem, 2.6vw, 2.5rem);
+    letter-spacing: -0.05em;
+  }
+
+  @media (max-width: 640px) {
+    .feature-copy,
+    .feature-shot {
+      grid-column: 1 / -1;
+    }
+    .feature-shot {
+      order: -1;
+    }
+    .feature-shot :global(img) {
+      height: 60vw;
+      min-height: 220px;
+    }
+  }
+</style>

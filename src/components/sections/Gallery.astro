@@ -1,0 +1,97 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import SanityImage from '../SanityImage.astro';
+import { styleAttrs } from '../../lib/textStyle';
+
+/** A grid of 3:2 images, two to four across, with the design's caption line. */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { section } = Astro.props;
+const images = (section.images ?? []).filter((img: any) => img?.asset);
+const columns = [2, 3, 4].includes(section.columns) ? section.columns : 3;
+const showCaptions = section.captions === true;
+
+const hasCaption = (img: any) => img.caption || img.workTitle || img.year || img.credit;
+---
+
+{
+  images.length > 0 && (
+    <section class="gallery" id={section.anchor || undefined}>
+      {section.heading && (
+        <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+          {section.heading}
+        </h2>
+      )}
+      <ul class="grid" style={`--cols: ${columns}`}>
+        {images.map((img: any) => (
+          <li>
+            <figure>
+              <SanityImage
+                image={img}
+                aspect={1.5}
+                sizes={`(max-width: 640px) 100vw, (max-width: 900px) 50vw, ${Math.round(100 / columns)}vw`}
+                widths={[400, 600, 900, 1200]}
+              />
+              {showCaptions && hasCaption(img) && (
+                <figcaption>
+                  {img.caption}
+                  {img.workTitle && (
+                    <>
+                      {img.caption ? ', ' : ''}
+                      <em>{img.workTitle}</em>
+                    </>
+                  )}
+                  {img.year && `, ${img.year}`}
+                  {img.credit && <span class="credit"> © {img.credit}</span>}
+                </figcaption>
+              )}
+            </figure>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .gallery {
+    margin: 0 0 3rem;
+  }
+  .grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+    gap: 30px;
+  }
+  figure {
+    margin: 0;
+  }
+  figure :global(img) {
+    width: 100%;
+  }
+  figcaption {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--ink-2);
+  }
+  .credit {
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+  }
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

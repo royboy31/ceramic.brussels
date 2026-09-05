@@ -9,6 +9,8 @@ import EditLink from '../components/EditLink.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MenuOverlay from '../components/MenuOverlay.astro';
+import { VisualEditing } from '@sanity/astro/visual-editing';
+import { isPreview } from '../lib/previewContext';
 
 /**
  * The frame around every page: the design's header (dates mark, wordmark,
@@ -51,6 +53,9 @@ const {
   editType,
 } = Astro.props;
 const acid = theme === 'acid' || tone === 'brand';
+// True inside a /preview/ render: drafts, stega-encoded strings, and the
+// Studio's editing overlay mounted at the end of the body.
+const preview = isPreview();
 const t = useTranslations(lang);
 
 const [settings, navPages, navigation, edition] = await Promise.all([
@@ -137,7 +142,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     <link rel="canonical" href={canonical} />
     {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
     <link rel="alternate" hreflang="x-default" href={alternates[0].href} />
-    {noIndex && <meta name="robots" content="noindex" />}
+    {(noIndex || preview) && <meta name="robots" content="noindex" />}
 
     <meta property="og:site_name" content={siteName} />
     <meta property="og:title" content={fullTitle} />
@@ -181,6 +186,37 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     </main>
 
     <Footer siteName={siteName} links={footerNav} copyright={copyright} />
+
+    {
+      preview && (
+        <>
+          <VisualEditing enabled />
+          {/* Keep navigation inside the preview tree: the pages link to their
+              published addresses, which would drop the reader out of drafts. */}
+          <script is:inline>
+            (function () {
+              var LOCALES = ['en', 'fr', 'nl'];
+              function rewrite(a) {
+                var url;
+                try {
+                  url = new URL(a.getAttribute('href'), location.href);
+                } catch (e) {
+                  return;
+                }
+                if (url.origin !== location.origin) return;
+                if (LOCALES.indexOf(url.pathname.split('/')[1]) === -1) return;
+                a.setAttribute('href', '/preview' + url.pathname + url.search + url.hash);
+              }
+              function all() {
+                document.querySelectorAll('a[href]').forEach(rewrite);
+              }
+              all();
+              new MutationObserver(all).observe(document.body, { childList: true, subtree: true });
+            })();
+          </script>
+        </>
+      )
+    }
   </body>
 </html>
 

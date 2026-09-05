@@ -1,5 +1,5 @@
-import { sanityClient } from 'sanity:client';
 import type { LocaleId } from './locales';
+import { currentClient } from './previewContext';
 import { DEFAULT_LOCALE } from './locales';
 
 /**
@@ -62,21 +62,126 @@ const VIDEO = `{
   poster ${IMAGE}
 }`;
 
-const SECTION = `{
-  _key,
-  anchor,
-  ${styled('heading')},
-  ${styled('body')},
-  "images": images[] ${IMAGE},
-  "links": links[] ${LINK}
+const KEY_FIGURES = `keyFigures[]{ _key, value, ${styled('label')} }`;
+
+const PERSON = `{
+  _id, name, groups, countryCode, website, instagram, email, phone, order,
+  "year": edition->year,
+  ${styled('role')},
+  ${styled('bio')},
+  portrait ${IMAGE}
 }`;
 
-const KEY_FIGURES = `keyFigures[]{ _key, value, ${styled('label')} }`;
+const NEWS_CARD = `{
+  _id, publishedAt, category,
+  "slug": slug.current,
+  ${styled('title')},
+  ${styled('excerpt')},
+  cover ${IMAGE}
+}`;
+
+/**
+ * The page builder: one projection for every block type, keyed on `_type`.
+ * Hidden blocks are dropped here so no page has to remember to. Blocks that
+ * pull from other content (people, key figures, news) are resolved in place,
+ * so a page renders from this one result.
+ *
+ * Adding a block type means adding a branch here, its schema in
+ * src/sanity/schemaTypes/objects/pageBuilder.ts, and its component in
+ * src/components/sections/.
+ */
+const SECTIONS = `sections[hidden != true]{
+  _key, _type, anchor,
+  _type == "contentSection" => {
+    layout,
+    ${styled('heading')},
+    ${styled('body')},
+    "images": images[] ${IMAGE},
+    "links": links[] ${LINK}
+  },
+  _type == "imageTextSection" => {
+    imageSide,
+    image ${IMAGE},
+    ${styled('heading')},
+    ${styled('body')},
+    "links": links[] ${LINK}
+  },
+  _type == "gallerySection" => {
+    columns, captions,
+    ${styled('heading')},
+    "images": images[] ${IMAGE}
+  },
+  _type == "slideshowSection" => {
+    aspect,
+    ${styled('heading')},
+    "images": images[] ${IMAGE}
+  },
+  _type == "videoSection" => {
+    ${styled('heading')},
+    "video": select(
+      defined(video.url) => video ${VIDEO},
+      *[_type == "edition" && isCurrent == true][0].film ${VIDEO}
+    )
+  },
+  _type == "quoteSection" => {
+    ${styled('quote')},
+    ${styled('attribution')}
+  },
+  _type == "spotlight" => {
+    ${styled('kicker')},
+    ${styled('headline')},
+    "link": link ${LINK},
+    image ${IMAGE}
+  },
+  _type == "bannerSection" => {
+    style,
+    ${styled('text')},
+    "link": link ${LINK},
+    image ${IMAGE}
+  },
+  _type == "linksSection" => {
+    variant,
+    "links": links[] ${LINK}
+  },
+  _type == "headingSection" => {
+    ${styled('title')}
+  },
+  _type == "peopleSection" => {
+    group,
+    ${styled('heading')},
+    "people": select(
+      defined(group) => *[_type == "person" && ^.group in groups
+        && (!defined(edition) || edition->year == *[_type == "edition" && isCurrent == true][0].year)]
+        | order(order asc, name asc) ${PERSON},
+      people[]-> ${PERSON}
+    )
+  },
+  _type == "keyFiguresSection" => {
+    image ${IMAGE},
+    "link": link ${LINK},
+    "edition": *[_type == "edition" && count(keyFigures) > 0] | order(year desc)[0]{ year, "keyFigures": ${KEY_FIGURES} }
+  },
+  _type == "newsSection" => {
+    count,
+    ${styled('heading')},
+    "items": *[_type == "newsItem" && publishedAt <= now()] | order(publishedAt desc)[0...6] ${NEWS_CARD}
+  },
+  _type == "faqSection" => {
+    ${styled('heading')},
+    "items": items[]{ _key, ${styled('question')}, ${styled('answer')} }
+  },
+  _type == "embedSection" => {
+    url, height,
+    ${styled('heading')}
+  }
+}`;
 
 export type Params = { lang: LocaleId; [key: string]: unknown };
 
+// `currentClient` is the build-time client, or the drafts-reading one inside a
+// preview request - see src/lib/previewContext.ts.
 function run<T>(query: string, params: Params): Promise<T> {
-  return sanityClient.fetch<T>(query, params);
+  return currentClient().fetch<T>(query, params);
 }
 
 /* ------------------------------------------------------------------ site */
@@ -179,25 +284,7 @@ export function getHomepage(lang: LocaleId) {
       ${styled('heroText')},
       "heroLink": heroLink ${LINK},
       "quickLinks": quickLinks[] ${LINK},
-      "spotlights": spotlights[]{
-        _key,
-        ${styled('kicker')},
-        ${styled('headline')},
-        "link": link ${LINK},
-        image ${IMAGE}
-      },
-      "banner": {
-        ${styled('text', 'banner.text')},
-        "link": banner.link ${LINK},
-        "image": banner.image ${IMAGE}
-      },
-      "video": coalesce(video ${VIDEO}, *[_type == "edition" && isCurrent == true][0].film ${VIDEO}),
-      figuresImage ${IMAGE},
-      "figuresLink": figuresLink ${LINK},
-      "closingBanner": {
-        ${styled('text', 'closingBanner.text')},
-        "link": closingBanner.link ${LINK}
-      },
+      "sections": ${SECTIONS},
       "seo": ${SEO}
     }`,
     { lang },
@@ -287,7 +374,7 @@ export function getExhibitorsByYear(lang: LocaleId, year: number) {
 }
 
 export function getExhibitorSlugs() {
-  return sanityClient.fetch<{ slug: string }[]>(
+  return currentClient().fetch<{ slug: string }[]>(
     `*[_type == "exhibitor" && defined(slug.current)]{ "slug": slug.current }`,
   );
 }
@@ -335,7 +422,7 @@ export function getArtists(lang: LocaleId) {
 }
 
 export function getArtistSlugs() {
-  return sanityClient.fetch<{ slug: string }[]>(
+  return currentClient().fetch<{ slug: string }[]>(
     `*[_type == "artist" && defined(slug.current)]{ "slug": slug.current }`,
   );
 }
@@ -346,7 +433,7 @@ const ARTIST_FULL = `
   ${styled('bio')},
   ${styled('intro')},
   ${styled('interview')},
-  "sections": sections[] ${SECTION},
+  "sections": ${SECTIONS},
   "carousel": carousel[] ${IMAGE},
   "video": video ${VIDEO},
   "works": works[]{
@@ -426,14 +513,6 @@ export function getAwards(lang: LocaleId) {
 
 /* ---------------------------------------------------------------- people */
 
-const PERSON = `{
-  _id, name, groups, countryCode, website, instagram, email, phone, order,
-  "year": edition->year,
-  ${styled('role')},
-  ${styled('bio')},
-  portrait ${IMAGE}
-}`;
-
 /**
  * People in one group. Year-bound groups (jury, team) return the current
  * edition's entries unless `year` is given.
@@ -451,19 +530,13 @@ export function getPeople(lang: LocaleId, group: string, year?: number) {
 
 export function getNews(lang: LocaleId) {
   return run<any[]>(
-    `*[_type == "newsItem" && publishedAt <= now()] | order(publishedAt desc){
-      _id, publishedAt, category,
-      "slug": slug.current,
-      ${styled('title')},
-      ${styled('excerpt')},
-      cover ${IMAGE}
-    }`,
+    `*[_type == "newsItem" && publishedAt <= now()] | order(publishedAt desc) ${NEWS_CARD}`,
     { lang },
   );
 }
 
 export function getNewsSlugs() {
-  return sanityClient.fetch<{ slug: string }[]>(
+  return currentClient().fetch<{ slug: string }[]>(
     `*[_type == "newsItem" && defined(slug.current)]{ "slug": slug.current }`,
   );
 }
@@ -491,7 +564,7 @@ const PAGE = `{
   "tabLabel": coalesce(${localised('tabLabel')}, ${localised('title')}),
   ${styled('intro')},
   ${styled('body')},
-  "sections": sections[] ${SECTION},
+  "sections": ${SECTIONS},
   "images": images[] ${IMAGE},
   cover ${IMAGE},
   "slugs": { "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current },
@@ -500,7 +573,7 @@ const PAGE = `{
 
 /** Standalone pages only - hub tabs are rendered by their hub route. */
 export function getPageSlugs() {
-  return sanityClient.fetch<{ slugs: Record<string, string | undefined> }[]>(
+  return currentClient().fetch<{ slugs: Record<string, string | undefined> }[]>(
     `*[_type == "page" && !defined(section)]{ "slugs": { "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current } }`,
   );
 }
@@ -565,7 +638,7 @@ export function getPartners(lang: LocaleId) {
 }
 
 export function getPressClips() {
-  return sanityClient.fetch<any[]>(
+  return currentClient().fetch<any[]>(
     `*[_type == "pressClip"] | order(publishedAt desc){
       _id, title, outlet, publishedAt, language, url,
       "pdfUrl": pdf.asset->url

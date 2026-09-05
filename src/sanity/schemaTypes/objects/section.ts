@@ -1,23 +1,26 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
+import { BlockContentIcon } from '@sanity/icons/BlockContent';
+import { SparklesIcon } from '@sanity/icons/Sparkles';
+import { CONTENT_LAYOUTS, anchorField, hiddenField, sectionSubtitle } from './pageBuilder';
 
 /**
  * A titled block of rich text with an optional image row - the "heading + rule
  * + text" unit the design repeats on every page ("biography", "the prize",
- * "goals", "hotel deal"). Pages and artist features are built from a list of
- * these in editor-controlled order.
+ * "goals", "hotel deal"). The workhorse of the page builder; the other blocks
+ * live in pageBuilder.ts.
+ *
+ * `layout` is the editor's answer to "one column or two": full width with the
+ * copy flowing in two columns, full width in one, or half width so that two
+ * consecutive half sections sit side by side, as "goals" and "development"
+ * do on the about page.
  */
 export const contentSection = defineType({
   name: 'contentSection',
-  title: 'Section',
+  title: 'Text',
   type: 'object',
+  icon: BlockContentIcon,
   fields: [
     defineField({ name: 'heading', title: 'Heading', type: 'localeString' }),
-    defineField({
-      name: 'anchor',
-      title: 'Anchor',
-      type: 'string',
-      description: 'Optional. Lets the menu link straight to this section, e.g. "team".',
-    }),
     defineField({ name: 'body', title: 'Text', type: 'localeBlock' }),
     defineField({
       name: 'images',
@@ -25,6 +28,7 @@ export const contentSection = defineType({
       type: 'array',
       of: [defineArrayMember({ type: 'figure' })],
       options: { layout: 'grid' },
+      description: 'Optional row of up to three images under the text.',
     }),
     defineField({
       name: 'links',
@@ -33,25 +37,40 @@ export const contentSection = defineType({
       of: [defineArrayMember({ type: 'link' })],
       description: 'Rendered as pill buttons under the text.',
     }),
+    defineField({
+      name: 'layout',
+      title: 'Layout',
+      type: 'string',
+      options: { list: [...CONTENT_LAYOUTS], layout: 'radio' },
+      initialValue: 'full',
+    }),
+    anchorField(),
+    hiddenField(),
   ],
   preview: {
-    select: { heading: 'heading.en', anchor: 'anchor', media: 'images.0' },
-    prepare: ({ heading, anchor, media }) => ({
-      title: heading ?? '(untitled section)',
-      subtitle: anchor ? `#${anchor}` : undefined,
+    select: { heading: 'heading.en', layout: 'layout', anchor: 'anchor', media: 'images.0', hidden: 'hidden' },
+    prepare: ({ heading, layout, anchor, media, hidden }) => ({
+      title: heading ?? '(untitled text)',
+      subtitle: sectionSubtitle(
+        'Text',
+        hidden,
+        [layout && layout !== 'full' ? `· ${layout}` : null, anchor ? `· #${anchor}` : null].filter(Boolean).join(' '),
+      ),
       media,
     }),
   },
 });
 
 /**
- * A curated homepage block: kicker + headline + link + image. The design uses
- * it for "latest news", "partner spotlight" and similar editor-picked items.
+ * A feature block: kicker + headline + link + image, text on one side and
+ * the picture on the other. The homepage uses a run of them for "latest news"
+ * and "partner spotlight"; consecutive ones alternate sides.
  */
 export const spotlight = defineType({
   name: 'spotlight',
-  title: 'Spotlight',
+  title: 'Feature',
   type: 'object',
+  icon: SparklesIcon,
   fields: [
     defineField({
       name: 'kicker',
@@ -67,12 +86,14 @@ export const spotlight = defineType({
     }),
     defineField({ name: 'link', title: 'Link', type: 'link' }),
     defineField({ name: 'image', title: 'Image', type: 'figure' }),
+    anchorField(),
+    hiddenField(),
   ],
   preview: {
-    select: { kicker: 'kicker.en', headline: 'headline.en', media: 'image' },
-    prepare: ({ kicker, headline, media }) => ({
+    select: { kicker: 'kicker.en', headline: 'headline.en', media: 'image', hidden: 'hidden' },
+    prepare: ({ kicker, headline, media, hidden }) => ({
       title: headline ?? '(no headline)',
-      subtitle: kicker,
+      subtitle: sectionSubtitle('Feature', hidden, kicker ? `· ${kicker}` : undefined),
       media,
     }),
   },

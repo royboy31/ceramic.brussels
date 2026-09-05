@@ -1,0 +1,36 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { styleAttrs } from '../../lib/textStyle';
+
+/** A group title over a full-width rule - "institutions", "collaborators". */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { section } = Astro.props;
+---
+
+{
+  section.title && (
+    <h2 class="group-title" id={section.anchor || undefined} {...styleAttrs(section.titleStyle)}>
+      {section.title}
+    </h2>
+  )
+}
+
+<style>
+  .group-title {
+    margin: 3rem 0 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--ink);
+    font-size: clamp(1.75rem, 4vw, 3.75rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    text-transform: lowercase;
+  }
+  .group-title:first-child {
+    margin-top: 0;
+  }
+</style>

@@ -1,0 +1,110 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import SanityImage from '../SanityImage.astro';
+import PortableText from '../PortableText.astro';
+import LinkPill from '../LinkPill.astro';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * Image on eight columns, text on four - the unit at the top of the about
+ * page (hero + "the fair"). `imageSide` flips it.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { lang, section } = Astro.props;
+const links = (section.links ?? []).filter(Boolean);
+const hasImage = !!section.image?.asset;
+---
+
+<section class:list={['page-grid', 'image-text', { flip: section.imageSide === 'right', 'no-image': !hasImage }]} id={section.anchor || undefined}>
+  {
+    hasImage && (
+      <figure class="shot">
+        <SanityImage
+          image={section.image}
+          aspect={1.5}
+          sizes="(max-width: 900px) 100vw, 66vw"
+          widths={[600, 900, 1200, 1600]}
+        />
+      </figure>
+    )
+  }
+  <div class="copy">
+    {
+      section.heading && (
+        <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+          {section.heading}
+        </h2>
+      )
+    }
+    {
+      section.body && (
+        <div class="body-24 body" {...styleAttrs(section.bodyStyle)}>
+          <PortableText value={section.body} fieldStyle={section.bodyStyle} />
+        </div>
+      )
+    }
+    {
+      links.length > 0 && (
+        <p class="links">
+          {links.map((link: any) => (
+            <LinkPill lang={lang} link={link} />
+          ))}
+        </p>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .image-text {
+    align-items: start;
+    margin: 0 0 3rem;
+  }
+  .shot {
+    grid-column: span 8;
+    margin: 0;
+  }
+  .shot :global(img) {
+    width: 100%;
+  }
+  .copy {
+    grid-column: span 4;
+    min-width: 0;
+  }
+  .flip .shot {
+    order: 2;
+  }
+  .no-image .copy {
+    grid-column: 1 / -1;
+  }
+  .body :global(p) {
+    margin: 0 0 1.25rem;
+  }
+  .body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    margin: 1.75rem 0 0;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+  }
+
+  @media (max-width: 900px) {
+    .shot,
+    .copy {
+      grid-column: 1 / -1;
+    }
+    .flip .shot {
+      order: 0;
+    }
+    .copy {
+      margin-top: 1.5rem;
+    }
+  }
+</style>

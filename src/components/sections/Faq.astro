@@ -1,0 +1,85 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import PortableText from '../PortableText.astro';
+import { styleAttrs } from '../../lib/textStyle';
+
+/** Questions that fold open, as on the visitors-info FAQ tab. */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { section } = Astro.props;
+const items = (section.items ?? []).filter((q: any) => q?.question);
+---
+
+{
+  items.length > 0 && (
+    <section class="faq-block" id={section.anchor || undefined}>
+      {section.heading && (
+        <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+          {section.heading}
+        </h2>
+      )}
+      <div class="faq-list">
+        {items.map((q: any) => (
+          <details class="faq">
+            <summary>
+              <span class="question" {...styleAttrs(q.questionStyle)}>
+                {q.question}
+              </span>
+              <span class="arrow" aria-hidden="true">
+                ↓
+              </span>
+            </summary>
+            <div class="body-24 answer">
+              <PortableText value={q.answer} fieldStyle={q.answerStyle} />
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .faq-block {
+    margin: 0 0 3rem;
+  }
+  .faq {
+    border-top: 1px solid var(--ink);
+  }
+  .faq-list .faq:last-of-type {
+    border-bottom: 1px solid var(--ink);
+  }
+  .faq summary {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    cursor: pointer;
+    list-style: none;
+    font-size: clamp(1.25rem, 2.2vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .arrow {
+    font-size: 0.8em;
+    transition: transform 0.2s ease;
+  }
+  .faq[open] .arrow {
+    transform: rotate(180deg);
+  }
+  .answer {
+    padding: 0 0 1.5rem;
+    max-width: 62ch;
+  }
+  .answer :global(p) {
+    margin: 0 0 1rem;
+  }
+</style>

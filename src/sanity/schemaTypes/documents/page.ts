@@ -1,5 +1,6 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { PAGE_SECTIONS } from '../objects/routes';
+import { sectionsField } from '../objects/pageBuilder';
 
 /**
  * Editorial pages. Two roles:
@@ -78,13 +79,7 @@ export const page = defineType({
       description: 'The large text at the top of the page.',
     }),
     defineField({ name: 'cover', title: 'Cover image', type: 'figure', group: 'main' }),
-    defineField({
-      name: 'sections',
-      title: 'Sections',
-      type: 'array',
-      group: 'main',
-      of: [defineArrayMember({ type: 'contentSection' })],
-    }),
+    sectionsField({ group: 'main' }),
     defineField({
       name: 'body',
       title: 'Body',

@@ -110,10 +110,11 @@ document instead of duplicating it per language.
 | `person` | about → advisory board / team, art prize → jury | `groups` says where they appear; `edition` scopes jury and team by year. |
 | `partner` | `/partners`, visitors info, home | `tier` mirrors the partner tabs. Food & drinks vendors are the `food-drinks` tier. |
 | `programmeEvent` | `/programme` | `section` picks the programme tab; grouped by day in the page. |
-| `page` | hub tabs, `/[lang]/[...slug]` | With a `section` it becomes a pill tab of that hub (about, art-prize, programme, visit, partners); without one it is a standalone page with **slug per locale**. Built from a lead paragraph + `contentSection`s + closing images. |
+| `page` | hub tabs, `/[lang]/[...slug]` | With a `section` it becomes a pill tab of that hub (about, art-prize, programme, visit, partners); without one it is a standalone page with **slug per locale**. A lead paragraph, a cover, then a **section stack** the editor composes from pre-designed blocks (see `pageTemplate`), and closing images. |
+| `pageTemplate` | Studio → Page templates | A ready-made section stack. Applied to any page, the homepage or an artist from the document menu ("Apply template…"); made from one with "Save as template". `npm run templates` seeds the starters. |
 | `newsItem` | `/news/[slug]` | The blog. |
 | `pressClip` | about → press | Sortable table. |
-| `homepage` | `/` | Singleton. Hero, quick links, spotlights, banner, video, closing banner. Key figures come from the current edition. |
+| `homepage` | `/` | Singleton. A fixed hero (image, statement, quick links) over a section stack: features, banners, the film, key figures, latest news, in the editor's order. Key figures come from the current edition. |
 | `siteSettings` | header, footer, visitors info | Singleton. Identity, social links, venue and access, hotel deal, FAQ, press contacts. |
 | `navigation` | menu overlay | Singleton. Items with optional `children` sub-items; each targets a route + anchor, a page, or a URL. |
 

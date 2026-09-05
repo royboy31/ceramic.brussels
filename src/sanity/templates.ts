@@ -5,34 +5,32 @@ import { EXHIBITOR_KINDS } from '../lib/options';
 /**
  * Starting points offered in the Studio's Create menu.
  *
- * A `page` is a shape rather than a thing: the same document type is a hub tab,
- * a plain text page, or a sectioned one, and which it is depends on fields
- * buried in the Placement tab. An editor creating one from scratch has to know
- * that. A template sets those fields up front, so the choice happens once, by
- * name, at the moment of creating.
+ * A `page` is a shape rather than a thing: the same document type is a hub
+ * tab, a plain text page, or a sectioned one, and which it is depends on
+ * fields buried in the Placement tab. An editor creating one from scratch has
+ * to know that. A template sets those fields up front, so the choice happens
+ * once, by name, at the moment of creating.
  *
- * These are only *initial* values. Everything stays editable afterwards, and
- * changing a template never touches documents already made from it - so adding,
- * renaming and reworking them is free. Add one by appending to this file.
+ * These only seed the placement and a small starter stack. The layouts
+ * themselves - which blocks, in which order - are `pageTemplate` documents
+ * the team maintains in the Studio and applies from the page's menu, so a
+ * new layout never needs a deploy. See TemplateActions.tsx.
  *
  * Localised fields take the plain `{ en: '…' }` shape; French and Dutch are
  * left empty on purpose, because an empty translation falls back to English
  * and a pre-filled English one masquerading as a translation does not.
  */
 
-/** A titled, empty section. Headings are prompts - editors rename them. */
-const section = (key: string, heading: string) => ({
+/** A titled, empty text block. Headings are prompts - editors rename them. */
+const text = (key: string, heading: string, layout: 'full' | 'single' | 'half' = 'full') => ({
   _key: key,
   _type: 'contentSection',
   heading: { en: heading },
+  layout,
 });
 
 /** The three-part shape most text pages in the design use. */
-const STARTER_SECTIONS = [
-  section('s1', 'Introduction'),
-  section('s2', 'Details'),
-  section('s3', 'Practical information'),
-];
+const STARTER_SECTIONS = [text('s1', 'Introduction'), text('s2', 'Details'), text('s3', 'Practical information')];
 
 /**
  * One per hub, so "new tab of the art prize" is a single click that lands in
@@ -42,7 +40,7 @@ const STARTER_SECTIONS = [
 const hubTabTemplates: Template[] = PAGE_SECTIONS.map((hub) => ({
   id: `page-hub-${hub.value}`,
   title: `${hub.title} — new tab`,
-  description: `A page that appears as a pill tab under ${hub.title}.`,
+  description: `A page that appears as a pill tab under ${hub.title}. Apply a template from its menu to change the layout.`,
   schemaType: 'page',
   value: {
     section: hub.value,
@@ -59,7 +57,7 @@ const pageTemplates: Template[] = [
     schemaType: 'page',
     // No `section`, which is what makes it standalone. `order` only matters if
     // it is later given a navigation label.
-    value: { order: 100 },
+    value: { order: 100, sections: [text('s1', 'Introduction', 'single')] },
   },
   {
     id: 'page-sections',
@@ -92,8 +90,4 @@ const exhibitorTemplates: Template[] = EXHIBITOR_KINDS.map((kind) => ({
   },
 }));
 
-export const templates: Template[] = [
-  ...hubTabTemplates,
-  ...pageTemplates,
-  ...exhibitorTemplates,
-];
+export const templates: Template[] = [...hubTabTemplates, ...pageTemplates, ...exhibitorTemplates];

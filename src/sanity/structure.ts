@@ -378,4 +378,17 @@ export const structure: StructureResolver = (S) =>
             .title('Press clippings')
             .defaultOrdering([{ field: 'publishedAt', direction: 'desc' }]),
         ),
+
+      S.divider(),
+
+      // Ready-made section stacks. Applied from a page's menu ("Apply
+      // template…"), made from one ("Save as template"), and edited here.
+      S.listItem()
+        .title('Page templates')
+        .schemaType('pageTemplate')
+        .child(
+          S.documentTypeList('pageTemplate')
+            .title('Page templates')
+            .defaultOrdering([{ field: 'order', direction: 'asc' }]),
+        ),
     ]);

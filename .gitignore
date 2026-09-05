@@ -31,3 +31,6 @@ font/
 
 # Local secrets for `wrangler pages dev`. Never commit.
 .dev.vars
+
+# Preview route wrappers, generated at build time by src/integrations/preview-routes.mjs
+src/preview/

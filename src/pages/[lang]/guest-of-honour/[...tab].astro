@@ -2,7 +2,7 @@
 import Base from '../../../layouts/Base.astro';
 import HubNav from '../../../components/HubNav.astro';
 import Figure from '../../../components/Figure.astro';
-import Sections from '../../../components/Sections.astro';
+import PageSections from '../../../components/PageSections.astro';
 import Slideshow from '../../../components/Slideshow.astro';
 import VideoEmbed from '../../../components/VideoEmbed.astro';
 import PortableText from '../../../components/PortableText.astro';
@@ -117,7 +117,7 @@ const poster = video?.poster?.asset
 
             {artist.sections?.length > 0 ? (
               <div class="sections">
-                <Sections lang={lang} sections={artist.sections} />
+                <PageSections lang={lang} sections={artist.sections} />
               </div>
             ) : (
               artist.bio && (

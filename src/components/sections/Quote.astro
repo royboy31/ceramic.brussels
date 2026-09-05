@@ -1,0 +1,42 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { styleAttrs } from '../../lib/textStyle';
+
+/** A pulled quote at intro size, with its attribution underneath. */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { section } = Astro.props;
+---
+
+{
+  section.quote && (
+    <figure class="quote" id={section.anchor || undefined}>
+      <blockquote class="intro-large" {...styleAttrs(section.quoteStyle)}>
+        “{section.quote}”
+      </blockquote>
+      {section.attribution && (
+        <figcaption {...styleAttrs(section.attributionStyle)}>— {section.attribution}</figcaption>
+      )}
+    </figure>
+  )
+}
+
+<style>
+  .quote {
+    margin: 0 0 3rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+  }
+  blockquote {
+    margin: 0;
+  }
+  figcaption {
+    margin-top: 1rem;
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    color: var(--ink-2);
+  }
+</style>

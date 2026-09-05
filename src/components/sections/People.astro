@@ -1,0 +1,57 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import PersonCard from '../PersonCard.astro';
+import { styleAttrs } from '../../lib/textStyle';
+
+/** Person cards two across, from a group or a hand-picked list. */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { lang, section } = Astro.props;
+const people = (section.people ?? []).filter((p: any) => p?.name);
+---
+
+{
+  people.length > 0 && (
+    <section class="people-block" id={section.anchor || undefined}>
+      {section.heading && (
+        <h2 class="group-title" {...styleAttrs(section.headingStyle)}>
+          {section.heading}
+        </h2>
+      )}
+      <div class="people">
+        {people.map((p: any) => (
+          <PersonCard lang={lang} person={p} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .people-block {
+    margin: 0 0 3rem;
+  }
+  .group-title {
+    margin: 0 0 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--ink);
+    font-size: clamp(1.75rem, 4vw, 3.75rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    text-transform: lowercase;
+  }
+  .people {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3rem 30px;
+  }
+  @media (max-width: 700px) {
+    .people {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

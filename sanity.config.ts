@@ -6,16 +6,27 @@ import { StudioNavbar } from './src/sanity/components/StudioNavbar';
 import { UsersTool, UsersToolIcon } from './src/sanity/components/UsersTool';
 import { duplicateAction } from './src/sanity/components/DuplicateAction';
 import { templates } from './src/sanity/templates';
+import { applyTemplateAction, saveAsTemplateAction } from './src/sanity/components/TemplateActions';
+import { presentation } from './src/sanity/presentation';
 
 // Singletons must not be creatable or deletable from the Studio.
 const SINGLETONS = new Set(['siteSettings', 'navigation', 'homepage']);
+
+// Types with a section stack, which get "Apply template…" and "Save as template".
+const BUILDER_TYPES = new Set(['page', 'homepage', 'artist']);
 
 export default defineConfig({
   name: 'ceramic-brussels',
   title: 'Ceramic Brussels',
   projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
   dataset: import.meta.env.PUBLIC_SANITY_DATASET,
-  plugins: [structureTool({ structure })],
+  // The Preview tab needs the /preview routes, which only exist on a build
+  // with the Cloudflare adapter (PREVIEW_RUNTIME=1 sets both, see
+  // wrangler.toml). Without it the tab would frame a 404.
+  plugins: [
+    structureTool({ structure }),
+    ...(import.meta.env.PUBLIC_PREVIEW_ENABLED === 'true' ? [presentation] : []),
+  ],
 
   /**
    * Site accounts get their own button on the Studio's login screen, pointing
@@ -63,11 +74,16 @@ export default defineConfig({
     templates: (prev) => [...prev.filter((t) => !SINGLETONS.has(t.schemaType)), ...templates],
   },
   document: {
-    actions: (prev, { schemaType }) =>
-      SINGLETONS.has(schemaType)
+    actions: (prev, { schemaType }) => {
+      const base = SINGLETONS.has(schemaType)
         ? prev.filter(({ action }) => action !== 'unpublish' && action !== 'delete' && action !== 'duplicate')
         : // Our duplicate in place of the built-in, which copies the slug too and
           // leaves two documents claiming one URL. See DuplicateAction.tsx.
-          prev.map((action) => (action.action === 'duplicate' ? duplicateAction : action)),
+          prev.map((action) => (action.action === 'duplicate' ? duplicateAction : action));
+      // The page builder's template actions, on every type that has a
+      // sections stack. The components return null elsewhere, so listing
+      // them broadly is harmless; the set keeps the menu short.
+      return BUILDER_TYPES.has(schemaType) ? [...base, applyTemplateAction, saveAsTemplateAction] : base;
+    },
   },
 });

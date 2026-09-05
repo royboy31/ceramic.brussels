@@ -16,6 +16,9 @@
 name = "ceramic-brussels"
 pages_build_output_dir = "./dist"
 compatibility_date = "2026-08-01"
+# The preview Worker (dist/_worker.js, see below) uses AsyncLocalStorage and
+# the rest of the Node surface Astro's server runtime expects.
+compatibility_flags = ["nodejs_compat"]
 
 # Build-time environment. Because this file exists, Pages CI ignores the
 # environment variables set in the dashboard ("Build environment variables:
@@ -34,6 +37,16 @@ PUBLIC_SANITY_PROJECT_ID = "uia5r1rc"
 PUBLIC_SANITY_DATASET = "production"
 PUBLIC_SITE_URL = "https://dev.ceramic-brussels.pages.dev"
 PUBLIC_SHOW_EDIT_LINKS = "true"
+# The preview runtime. PREVIEW_RUNTIME=1 makes `astro build` add the Cloudflare
+# adapter and the on-demand /preview and /api routes, and scripts/pages-worker.mjs
+# then moves the Worker to dist/_worker.js so Pages runs it (functions/ is
+# ignored once that file exists - the Worker serves /api through the same
+# modules). PUBLIC_PREVIEW_ENABLED gives the Studio its Preview tab. Both must
+# be set together. The Worker also needs the SANITY_VIEWER_TOKEN secret,
+# which lives in the dashboard, never here. Turned on for previews first;
+# copy both lines into [vars] to enable it on production.
+PREVIEW_RUNTIME = "1"
+PUBLIC_PREVIEW_ENABLED = "true"
 
 # The admin panel's own database. These are not Sanity accounts: the panel
 # holds one Sanity write token and everyone edits through it, so `audit_log`

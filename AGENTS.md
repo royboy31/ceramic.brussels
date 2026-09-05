@@ -119,6 +119,22 @@ into the HTML, which has two consequences worth internalising:
 2. **A publish does not change the live site until a rebuild runs.** In
    production a Sanity webhook triggers that rebuild.
 
+**The one exception is `/preview/`.** On a build with `PREVIEW_RUNTIME=1`
+(branch previews, per `wrangler.toml`) the Cloudflare adapter is added and
+every page under `src/pages/[lang]/` is mounted a second time at
+`/preview/[lang]/…`, rendered on request from **drafts** by a small Worker
+that `scripts/pages-worker.mjs` moves to `dist/_worker.js` after the build.
+`dist/_routes.json` sends only `/preview/*` and `/api/*` to that Worker, so
+the published pages stay plain files. The Studio's **Preview** tab
+(`src/sanity/presentation.ts`) frames those pages, refreshes them as you
+type, and can make a share link for a partner. How it works: `src/middleware.ts`
+lets a request in on the cookie `/api/preview/enable` issues, then renders the
+page inside `runWithPreview` (`src/lib/previewContext.ts`), which swaps the
+client every query in `queries.ts` uses for a drafts-reading, stega-encoding
+one. Same page files, same components, different client. The Worker needs the
+`SANITY_VIEWER_TOKEN` secret (a read-only Sanity token) in the Pages
+dashboard; without it `/preview/` answers 503 and says so.
+
 The Studio at `/studio` is a client-side React app on **hash routing** — one
 HTML file, with every screen after the `#`. That is why it works as a static
 asset and needs no server-side catch-all rule.
@@ -216,6 +232,15 @@ Also in `i18n.ts`: `localePath(lang, path)` for building links, and
   both places.
 - **`EditLink.astro`** — deep-links into the Studio for the document being
   viewed. Shows in `astro dev` only, unless `PUBLIC_SHOW_EDIT_LINKS=true`.
+- **`PageSections.astro`** — renders a page-builder stack (`sections` on a
+  page, the homepage or an artist) in editor order, one component per block
+  type from `src/components/sections/`. Text blocks are grouped by their
+  `layout` (full width in two columns, one column, or half width pairing with
+  the next half); everything else is one block, one component. `Sections.astro`
+  is the text-block renderer it delegates to. **Adding a block type means three
+  places**: its schema in `src/sanity/schemaTypes/objects/pageBuilder.ts`, a
+  branch in the `SECTIONS` projection in `queries.ts`, and a component here —
+  plus a thumbnail from `npm run previews`.
 
 ### Data
 
@@ -242,6 +267,16 @@ The content model follows the 2027 Figma design. The shape to keep in mind:
   design's "Artist, *Title*, 2024" line is assembled from those.
 - **Links are objects.** A `link` is a route + optional anchor, a document
   reference, or an external URL. Internal ones get "→", external ones "↗".
+- **Pages are section stacks.** `page.sections`, `homepage.sections` and
+  `artist.sections` are page-builder arrays: an editor adds, deletes, drags
+  and hides pre-designed blocks (text, image + text, image grid, slideshow,
+  video, quote, feature, banner, buttons, section title, people, key figures,
+  latest news, FAQ, embed). The look of each block is fixed in code; its
+  content and its place are the editor's. Every block has `hidden` (kept, not
+  shown — the query drops it) and `anchor`. The homepage keeps a fixed hero
+  above its stack. Blocks that draw on other content (people, key figures,
+  news) are resolved inside the `SECTIONS` projection, so a page renders from
+  one query.
 
 ### Creating and duplicating documents
 
@@ -273,6 +308,19 @@ A template can also be linked to directly, which makes a usable bookmark:
 Only `page` and `exhibitor` have templates. `laureate`, `award` and `person`
 do not, so New in those panes gives a bare document.
 
+**Page templates are content, not code.** The starting points above only
+preset placement and a small starter stack; the layouts themselves are
+`pageTemplate` documents (Studio → **Page templates**), each a ready-made
+section stack with a name and a description. On any page, the homepage or an
+artist, the document menu (⋯) has **Apply template…**, which copies a
+template's sections in (replacing or appending), and **Save as template**,
+which turns the current stack into a new template. Both copy, with fresh
+keys, so a page and a template never stay linked. `npm run templates` seeds
+eleven starters (`scripts/seed-templates.mjs`, deterministic ids, safe to
+re-run — it never touches templates the team made). Making a new layout is
+therefore: build a page you like, save it as a template, done — no deploy.
+The actions live in `src/sanity/components/TemplateActions.tsx`.
+
 `README.md` has the full table of document types and where each shows.
 `docs/design-inventory.md` and `docs/legacy-site-inventory.md` are the two
 inventories the model was derived from — check them before asking what a
@@ -291,6 +339,26 @@ the dashboard ones when `wrangler.toml` exists and reads `[vars]` /
 without that, a rebuild would never reach anyone holding a cached page.
 `public/_redirects` is where legacy URLs from the old Laravel site go at
 migration time.
+
+**Two shapes of build, one command.** `PREVIEW_RUNTIME` decides (set per
+environment in `wrangler.toml`; `npm run build:preview` sets it locally):
+
+| | off | on |
+| :-- | :-- | :-- |
+| Pages | static HTML | static HTML, unchanged |
+| `/api/*` | Pages Functions in `functions/` | the Worker, through the **same** modules (`src/server/pagesShim.ts`) |
+| `/preview/*` | does not exist | the Worker, rendered from drafts |
+| Studio | as is | gains the Preview tab (`PUBLIC_PREVIEW_ENABLED`) |
+
+When on, `astro build` uses `@astrojs/cloudflare` (its Vite plugin refuses a
+Pages config, hence the separate `wrangler.worker.toml` it reads — keep its
+bindings in step with `wrangler.toml`), and `scripts/pages-worker.mjs`
+rearranges the output into what Pages expects: static files at the root,
+`_worker.js/`, `_routes.json`. Pages ignores `functions/` once `_worker.js`
+exists, which is why the API is shimmed rather than duplicated. The adapter's
+dev server runs on workerd, which does not start on every machine — a laptop
+leaves `PREVIEW_RUNTIME` unset and `astro dev` is exactly as before. The
+adapter needs Astro ≥ 7.3; keep the two in step when upgrading either.
 
 ## Site accounts
 
@@ -426,6 +494,14 @@ so `--max-width=2500` moves about 2.2 GB instead of 5.6 GB.
   dynamically imported module".
 - The build is roughly 487 files / 9.2 MB, most of it the Studio bundle, which
   only downloads when someone actually opens `/studio`.
+- **`@sanity/icons` 5 has no root exports for icons.** `import { ImageIcon }
+  from '@sanity/icons'` builds to "not exported"; each icon is its own
+  subpath: `import { ImageIcon } from '@sanity/icons/Image'`.
+- **Preview renders read the page to the end inside the store.** Astro
+  streams responses, so the frontmatter (and its queries) runs when the body
+  is pulled. `src/middleware.ts` awaits `response.text()` inside
+  `runWithPreview` for that reason; "the preview shows published content"
+  is what it looks like when that is lost.
 
 ## Documentation
 

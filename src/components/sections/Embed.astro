@@ -1,0 +1,50 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * A map, a form, a ticket widget: an https address in a frame. The schema
+ * only accepts an address, never markup, so nothing here is injected HTML.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { section } = Astro.props;
+const url = typeof section.url === 'string' && /^https:\/\//i.test(section.url) ? section.url : null;
+const height = Math.min(Math.max(Number(section.height) || 600, 100), 3000);
+---
+
+{
+  url && (
+    <section class="embed" id={section.anchor || undefined}>
+      {section.heading && (
+        <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+          {section.heading}
+        </h2>
+      )}
+      <iframe
+        src={url}
+        title={section.heading ?? url}
+        style={`height: ${height}px`}
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="fullscreen; geolocation; payment"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+      />
+    </section>
+  )
+}
+
+<style>
+  .embed {
+    margin: 0 0 3rem;
+  }
+  iframe {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: var(--surface);
+  }
+</style>

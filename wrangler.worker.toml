@@ -1,0 +1,20 @@
+# Read by the Cloudflare adapter's Vite plugin at build time, and by nothing
+# else. It describes the Worker the preview and the admin API run in, in the
+# Workers format that plugin insists on - it refuses a Pages configuration
+# outright, which is why this is not simply wrangler.toml.
+#
+# Deployment still goes through Cloudflare Pages and wrangler.toml: the built
+# Worker is moved to dist/_worker.js by scripts/pages-worker.mjs, and Pages
+# runs it with the bindings and flags declared there. Keep the two in step -
+# a binding used by the code must be in both.
+
+name = "ceramic-brussels"
+compatibility_date = "2026-08-01"
+# AsyncLocalStorage (src/lib/previewContext.ts) and the rest of the Node
+# surface Astro's server runtime expects.
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "ADMIN_DB"
+database_name = "ceramic-brussels-admin"
+database_id = "5c35303c-7b4e-48f9-9480-d236f7ae4ff5"
