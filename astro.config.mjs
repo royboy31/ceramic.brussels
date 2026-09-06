@@ -97,9 +97,13 @@ export default defineConfig({
     sanity({
       projectId: PUBLIC_SANITY_PROJECT_ID,
       dataset: PUBLIC_SANITY_DATASET,
-      // false = always hit the live API. Switch to true once content is stable
-      // and you want the cached CDN edge (faster, ~60s staleness).
-      useCdn: false,
+      // true = read through Sanity's CDN. The metered "API requests" quota
+      // only counts the live endpoint; CDN reads have their own, far larger
+      // one. A build of ~700 pages against the live endpoint burned the free
+      // plan's monthly allowance in four days (2026-09-05). The CDN lags a
+      // publish by a few seconds, which a multi-minute build never notices.
+      // Draft preview keeps its own live client - see src/lib/previewContext.ts.
+      useCdn: true,
       // Studio is served from this route.
       studioBasePath: '/studio',
       // Log every server-side Sanity request during `astro dev`.

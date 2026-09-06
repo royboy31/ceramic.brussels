@@ -479,10 +479,26 @@ importer drops a locale whose text names a different laureate and lists it in
 `legacy-export/stale-translations.json`; an empty translation falls back to
 English, a wrong one does not.
 
-**Images are a separate pass.** `--images` uploads them and caches the result in
-`legacy-export/asset-map.json`, so it is resumable and never uploads twice -
-**keep that file.** The originals reach 6700px; the old CDN resizes on request,
-so `--max-width=2500` moves about 2.2 GB instead of 5.6 GB.
+**Images are a separate pass, and it has run.** `--images` uploads them and
+caches the result in `legacy-export/asset-map.json`, so it is resumable and
+never uploads twice - **keep that file.** The pass ran on 2026-09-05 with
+`--max-width=2500`: 1,066 of the 1,089 referenced figures are in Sanity
+(about 1.2 GB), attached to 288 documents. A re-run is a no-op for those.
+
+**The old site's resizer cannot handle its own largest files.** `/img/...`
+decodes the whole file on every request, and answers 500 for `?w=2500` on
+some 350 files and for *any* size above roughly 50 megapixels. The importer
+therefore falls back to the original when the resized fetch fails. Thirteen
+images fail at every size and are listed, with the gallery each belongs to,
+in `legacy-export/unrecoverable-images.json`; they need the galleries or the
+old server's storage. The 2027 exhibitors and 2026 laureates have no images
+at all, because the old CMS never had them - those are editor uploads.
+
+**What the import has not touched yet:** the edition documents (2024-2027
+still hold seeded dates, hours, ticket prices and venue - the real values are
+in the export) and the `page` documents, where the 47 legacy pages do not map
+one-to-one onto the hubs. `legacy-export/MAPPING.md` lists the open
+questions.
 
 ## Gotchas
 
@@ -497,6 +513,19 @@ so `--max-width=2500` moves about 2.2 GB instead of 5.6 GB.
 - **`@sanity/icons` 5 has no root exports for icons.** `import { ImageIcon }
   from '@sanity/icons'` builds to "not exported"; each icon is its own
   subpath: `import { ImageIcon } from '@sanity/icons/Image'`.
+- **A build must not query the live Sanity endpoint per page.** The free
+  plan meters `api.sanity.io` at 250k requests a month; `apicdn.sanity.io` is
+  a separate, far larger quota. `Base.astro` queries four things on every
+  page and a build renders ~700 pages, so on 2026-09-05 four days of branch
+  previews (79 builds, each 3,500-4,500 uncached requests) used the whole
+  month and every build, and the dev site, got `402 plan_limit_reached`.
+  Two things now stop that: `useCdn: true` in `astro.config.mjs`, and
+  `run()` in `src/lib/queries.ts` memoising each query for the life of a
+  build (not in `astro dev`, not in a preview render). Route new queries
+  through `run()`. Token clients that need drafts (the preview Worker, the
+  import scripts) cannot use the CDN and stay blocked until the quota
+  resets; the Studio itself is not affected. Usage is only visible at
+  sanity.io/manage - the management API has no usage endpoint.
 - **Preview renders read the page to the end inside the store.** Astro
   streams responses, so the frontmatter (and its queries) runs when the body
   is pulled. `src/middleware.ts` awaits `response.text()` inside

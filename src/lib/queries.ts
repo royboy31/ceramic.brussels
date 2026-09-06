@@ -1,5 +1,5 @@
 import type { LocaleId } from './locales';
-import { currentClient } from './previewContext';
+import { currentClient, isPreview } from './previewContext';
 import { DEFAULT_LOCALE } from './locales';
 
 /**
@@ -178,10 +178,35 @@ const SECTIONS = `sections[hidden != true]{
 
 export type Params = { lang: LocaleId; [key: string]: unknown };
 
+/**
+ * One request per distinct query for the life of a build.
+ *
+ * Base.astro asks for the settings, the navigation and the current edition
+ * on every page, and a build renders ~700 pages, so without this a build
+ * sent the same handful of queries nearly three thousand times - enough,
+ * across the branch previews of a working week, to use up the free plan's
+ * monthly request quota (2026-09-05). The content cannot change under a
+ * build, so the first answer is the right answer for every page.
+ *
+ * Not in `astro dev`, where the process lives for hours and an edit in the
+ * Studio should show on the next reload. Not in a preview render either: it
+ * reads drafts through a different client and must see every keystroke.
+ */
+const memo = new Map<string, Promise<unknown>>();
+
 // `currentClient` is the build-time client, or the drafts-reading one inside a
 // preview request - see src/lib/previewContext.ts.
-function run<T>(query: string, params: Params): Promise<T> {
-  return currentClient().fetch<T>(query, params);
+function run<T>(query: string, params: Record<string, unknown> = {}): Promise<T> {
+  if (!import.meta.env.PROD || isPreview()) return currentClient().fetch<T>(query, params);
+  const key = `${query}\u0000${JSON.stringify(params)}`;
+  let pending = memo.get(key) as Promise<T> | undefined;
+  if (!pending) {
+    pending = currentClient().fetch<T>(query, params);
+    // A failed request is not an answer; let the next caller try again.
+    pending.catch(() => memo.delete(key));
+    memo.set(key, pending);
+  }
+  return pending;
 }
 
 /* ------------------------------------------------------------------ site */
@@ -374,7 +399,7 @@ export function getExhibitorsByYear(lang: LocaleId, year: number) {
 }
 
 export function getExhibitorSlugs() {
-  return currentClient().fetch<{ slug: string }[]>(
+  return run<{ slug: string }[]>(
     `*[_type == "exhibitor" && defined(slug.current)]{ "slug": slug.current }`,
   );
 }
@@ -422,7 +447,7 @@ export function getArtists(lang: LocaleId) {
 }
 
 export function getArtistSlugs() {
-  return currentClient().fetch<{ slug: string }[]>(
+  return run<{ slug: string }[]>(
     `*[_type == "artist" && defined(slug.current)]{ "slug": slug.current }`,
   );
 }
@@ -536,7 +561,7 @@ export function getNews(lang: LocaleId) {
 }
 
 export function getNewsSlugs() {
-  return currentClient().fetch<{ slug: string }[]>(
+  return run<{ slug: string }[]>(
     `*[_type == "newsItem" && defined(slug.current)]{ "slug": slug.current }`,
   );
 }
@@ -573,7 +598,7 @@ const PAGE = `{
 
 /** Standalone pages only - hub tabs are rendered by their hub route. */
 export function getPageSlugs() {
-  return currentClient().fetch<{ slugs: Record<string, string | undefined> }[]>(
+  return run<{ slugs: Record<string, string | undefined> }[]>(
     `*[_type == "page" && !defined(section)]{ "slugs": { "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current } }`,
   );
 }
@@ -638,7 +663,7 @@ export function getPartners(lang: LocaleId) {
 }
 
 export function getPressClips() {
-  return currentClient().fetch<any[]>(
+  return run<any[]>(
     `*[_type == "pressClip"] | order(publishedAt desc){
       _id, title, outlet, publishedAt, language, url,
       "pdfUrl": pdf.asset->url
