@@ -8,6 +8,7 @@ import { link } from './objects/link';
 import { artwork } from './objects/artwork';
 import { navItem, navChild } from './objects/navItem';
 import { contentSection, spotlight, video } from './objects/section';
+import { pageBuilderTypes } from './objects/pageBuilder';
 import {
   keyFigure,
   openingSlot,
@@ -26,6 +27,7 @@ import { award } from './documents/award';
 import { person } from './documents/person';
 import { newsItem } from './documents/newsItem';
 import { page } from './documents/page';
+import { pageTemplate } from './documents/pageTemplate';
 import { programmeEvent } from './documents/programmeEvent';
 import { partner } from './documents/partner';
 import { pressClip } from './documents/pressClip';
@@ -48,6 +50,7 @@ export const objectTypes: SchemaTypeDefinition[] = [
   contentSection,
   spotlight,
   video,
+  ...pageBuilderTypes,
   keyFigure,
   openingSlot,
   openingDay,
@@ -66,6 +69,7 @@ export const documentTypes: SchemaTypeDefinition[] = [
   person,
   newsItem,
   page,
+  pageTemplate,
   programmeEvent,
   partner,
   pressClip,

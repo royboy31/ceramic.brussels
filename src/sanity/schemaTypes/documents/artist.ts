@@ -1,5 +1,6 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { countryCodeField } from '../objects/country';
+import { sectionsField, ARTICLE_SECTION_TYPES } from '../objects/pageBuilder';
 
 /**
  * Anyone who makes work: artists shown at booths, art-prize laureates, and
@@ -85,13 +86,10 @@ export const artist = defineType({
       group: 'feature',
       description: 'The large opening text next to the portrait.',
     }),
-    defineField({
-      name: 'sections',
-      title: 'Sections',
-      type: 'array',
+    sectionsField({
       group: 'feature',
-      of: [defineArrayMember({ type: 'contentSection' })],
-      description: 'e.g. "biography", "sculptural practice". Each gets a heading and a rule.',
+      types: ARTICLE_SECTION_TYPES,
+      description: 'e.g. "biography", "sculptural practice", a slideshow, the film. Each block gets a heading and a rule.',
     }),
     defineField({
       name: 'carousel',

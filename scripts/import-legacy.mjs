@@ -139,8 +139,15 @@ async function uploadImage(media) {
   // The old site serves resized derivatives, so a 6700px original need not be
   // moved in full. Sanity generates its own responsive sizes from whatever we
   // upload, and legacy-export keeps every original URL for a later re-fetch.
-  const url = maxWidth && media.width > maxWidth ? `${media.url}?w=${maxWidth}` : media.url;
-  const res = await fetch(url);
+  const resized = maxWidth && media.width > maxWidth ? `${media.url}?w=${maxWidth}` : null;
+  let res = resized ? await fetch(resized) : null;
+  // The old resizer answers 500 for a handful of files (1152 and 1344 in the
+  // 2025 exhibitor galleries). The original still downloads, so take that
+  // rather than leave the figure empty.
+  if (!res || !res.ok) {
+    if (res) console.warn(`\n  ! image ${media.id} resized HTTP ${res.status}, fetching original`);
+    res = await fetch(media.url);
+  }
   if (!res.ok) { bump('image:failed'); console.warn(`\n  ! image ${media.id} HTTP ${res.status}`); return null; }
   const buf = Buffer.from(await res.arrayBuffer());
   const asset = await client.assets.upload('image', buf, { filename: media.filename || `${media.id}.jpg` });

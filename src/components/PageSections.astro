@@ -1,0 +1,117 @@
+---
+import type { LocaleId } from '../lib/locales';
+import Sections from './Sections.astro';
+import ImageText from './sections/ImageText.astro';
+import Gallery from './sections/Gallery.astro';
+import SlideshowSection from './sections/SlideshowSection.astro';
+import VideoSection from './sections/VideoSection.astro';
+import Quote from './sections/Quote.astro';
+import Feature from './sections/Feature.astro';
+import Banner from './sections/Banner.astro';
+import Links from './sections/Links.astro';
+import Heading from './sections/Heading.astro';
+import People from './sections/People.astro';
+import KeyFigures from './sections/KeyFigures.astro';
+import News from './sections/News.astro';
+import Faq from './sections/Faq.astro';
+import Embed from './sections/Embed.astro';
+
+/**
+ * Renders a page-builder stack - the `sections` array of a page, the
+ * homepage or an artist - in editor order, one component per block type.
+ *
+ * Text blocks are the one type with a layout choice, so consecutive ones are
+ * grouped here: half-width blocks share a two-column row, full-width ones
+ * run their copy in two columns, single-column ones in one. `defaultLayout`
+ * is what a text block gets when the editor has not chosen - the about page
+ * passes 'half' to keep its side-by-side "goals / development".
+ *
+ * Feature blocks alternate sides automatically, as the homepage's do.
+ *
+ * Hidden blocks never reach here; the query drops them.
+ */
+interface Props {
+  lang: LocaleId;
+  sections: any[] | undefined;
+  defaultLayout?: 'full' | 'single' | 'half';
+  class?: string;
+}
+
+const { lang, sections = [], defaultLayout = 'full', class: className } = Astro.props;
+
+type Layout = 'full' | 'single' | 'half';
+type Group = { kind: 'text'; layout: Layout; items: any[] } | { kind: 'block'; section: any; flip: boolean };
+
+const groups: Group[] = [];
+let features = 0;
+
+for (const section of (sections ?? []).filter(Boolean)) {
+  if (section._type === 'contentSection') {
+    const layout: Layout = ['full', 'single', 'half'].includes(section.layout) ? section.layout : defaultLayout;
+    const last = groups[groups.length - 1];
+    if (last && last.kind === 'text' && last.layout === layout && layout === 'half') {
+      last.items.push(section);
+    } else {
+      groups.push({ kind: 'text', layout, items: [section] });
+    }
+    continue;
+  }
+  const flip = section._type === 'spotlight' ? features++ % 2 === 1 : false;
+  groups.push({ kind: 'block', section, flip });
+}
+---
+
+{
+  groups.length > 0 && (
+    <div class:list={['page-sections', className]}>
+      {groups.map((g) => {
+        if (g.kind === 'text') {
+          return g.layout === 'half' ? (
+            <Sections lang={lang} sections={g.items} columns={2} />
+          ) : (
+            <Sections lang={lang} sections={g.items} textColumns={g.layout === 'single' ? 1 : 2} />
+          );
+        }
+        const s = g.section;
+        switch (s._type) {
+          case 'imageTextSection':
+            return <ImageText lang={lang} section={s} />;
+          case 'gallerySection':
+            return <Gallery lang={lang} section={s} />;
+          case 'slideshowSection':
+            return <SlideshowSection lang={lang} section={s} />;
+          case 'videoSection':
+            return <VideoSection lang={lang} section={s} />;
+          case 'quoteSection':
+            return <Quote lang={lang} section={s} />;
+          case 'spotlight':
+            return <Feature lang={lang} section={s} flip={g.flip} />;
+          case 'bannerSection':
+            return <Banner lang={lang} section={s} />;
+          case 'linksSection':
+            return <Links lang={lang} section={s} />;
+          case 'headingSection':
+            return <Heading lang={lang} section={s} />;
+          case 'peopleSection':
+            return <People lang={lang} section={s} />;
+          case 'keyFiguresSection':
+            return <KeyFigures lang={lang} section={s} />;
+          case 'newsSection':
+            return <News lang={lang} section={s} />;
+          case 'faqSection':
+            return <Faq lang={lang} section={s} />;
+          case 'embedSection':
+            return <Embed lang={lang} section={s} />;
+          default:
+            return null;
+        }
+      })}
+    </div>
+  )
+}
+
+<style>
+  .page-sections {
+    display: block;
+  }
+</style>

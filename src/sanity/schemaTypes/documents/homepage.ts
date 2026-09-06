@@ -1,9 +1,15 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
+import { sectionsField } from '../objects/pageBuilder';
 
 /**
- * Singleton. The homepage is entirely curated in the design - nothing on it
- * is a list pulled from elsewhere - so every block is a field here. The key
- * figures come from the current edition and are not repeated.
+ * Singleton. The hero is fixed - the big picture, the statement, the row of
+ * yellow quick links - because the design gives the homepage exactly one
+ * opening. Everything under it is a section stack like any other page, so
+ * editors can put the film before the news, drop the banner for a month, or
+ * add a feature block, without asking for a new template.
+ *
+ * The key figures come from the current edition and are not repeated here;
+ * a "Key figures" section pulls them in.
  */
 export const homepage = defineType({
   name: 'homepage',
@@ -11,7 +17,7 @@ export const homepage = defineType({
   type: 'document',
   groups: [
     { name: 'hero', title: 'Hero', default: true },
-    { name: 'blocks', title: 'Blocks' },
+    { name: 'blocks', title: 'Sections' },
     { name: 'meta', title: 'SEO' },
   ],
   fields: [
@@ -39,51 +45,12 @@ export const homepage = defineType({
       description: 'The row of yellow buttons under the hero. The last one is styled as the call to action.',
     }),
 
-    defineField({
-      name: 'spotlights',
-      title: 'Spotlights',
-      type: 'array',
+    sectionsField({
       group: 'blocks',
-      of: [defineArrayMember({ type: 'spotlight' })],
-      description: 'The "latest news" and "partner spotlight" items, in order.',
+      description:
+        'Everything under the hero, in order: features, banners, the film, key figures, latest news. Drag to reorder; hide a block to take it off the site without losing it.',
     }),
-    defineField({
-      name: 'banner',
-      title: 'Announcement banner',
-      type: 'object',
-      group: 'blocks',
-      options: { collapsible: true, collapsed: false },
-      fields: [
-        defineField({ name: 'text', title: 'Text', type: 'localeString' }),
-        defineField({ name: 'link', title: 'Link', type: 'link' }),
-        defineField({ name: 'image', title: 'Background image', type: 'figure' }),
-      ],
-    }),
-    defineField({
-      name: 'video',
-      title: 'Video',
-      type: 'video',
-      group: 'blocks',
-      description: 'Leave empty to use the current edition’s film.',
-    }),
-    defineField({
-      name: 'figuresImage',
-      title: 'Image next to the key figures',
-      type: 'figure',
-      group: 'blocks',
-    }),
-    defineField({ name: 'figuresLink', title: 'Link under the key figures', type: 'link', group: 'blocks' }),
-    defineField({
-      name: 'closingBanner',
-      title: 'Closing banner',
-      type: 'object',
-      group: 'blocks',
-      options: { collapsible: true, collapsed: false },
-      fields: [
-        defineField({ name: 'text', title: 'Text', type: 'localeString' }),
-        defineField({ name: 'link', title: 'Link', type: 'link' }),
-      ],
-    }),
+
     defineField({ name: 'seo', title: 'SEO', type: 'seo', group: 'meta' }),
   ],
   preview: {

@@ -38,7 +38,7 @@ cp .env.example .env
 Then fill `.env` with:
 
 ```
-PUBLIC_SANITY_PROJECT_ID=uia5r1rc
+PUBLIC_SANITY_PROJECT_ID=5hqzhin7
 PUBLIC_SANITY_DATASET=production
 PUBLIC_SITE_URL=https://www.ceramic.brussels
 ```
@@ -118,6 +118,22 @@ into the HTML, which has two consequences worth internalising:
    press Publish.
 2. **A publish does not change the live site until a rebuild runs.** In
    production a Sanity webhook triggers that rebuild.
+
+**The one exception is `/preview/`.** On a build with `PREVIEW_RUNTIME=1`
+(branch previews, per `wrangler.toml`) the Cloudflare adapter is added and
+every page under `src/pages/[lang]/` is mounted a second time at
+`/preview/[lang]/…`, rendered on request from **drafts** by a small Worker
+that `scripts/pages-worker.mjs` moves to `dist/_worker.js` after the build.
+`dist/_routes.json` sends only `/preview/*` and `/api/*` to that Worker, so
+the published pages stay plain files. The Studio's **Preview** tab
+(`src/sanity/presentation.ts`) frames those pages, refreshes them as you
+type, and can make a share link for a partner. How it works: `src/middleware.ts`
+lets a request in on the cookie `/api/preview/enable` issues, then renders the
+page inside `runWithPreview` (`src/lib/previewContext.ts`), which swaps the
+client every query in `queries.ts` uses for a drafts-reading, stega-encoding
+one. Same page files, same components, different client. The Worker needs the
+`SANITY_VIEWER_TOKEN` secret (a read-only Sanity token) in the Pages
+dashboard; without it `/preview/` answers 503 and says so.
 
 The Studio at `/studio` is a client-side React app on **hash routing** — one
 HTML file, with every screen after the `#`. That is why it works as a static
@@ -216,6 +232,15 @@ Also in `i18n.ts`: `localePath(lang, path)` for building links, and
   both places.
 - **`EditLink.astro`** — deep-links into the Studio for the document being
   viewed. Shows in `astro dev` only, unless `PUBLIC_SHOW_EDIT_LINKS=true`.
+- **`PageSections.astro`** — renders a page-builder stack (`sections` on a
+  page, the homepage or an artist) in editor order, one component per block
+  type from `src/components/sections/`. Text blocks are grouped by their
+  `layout` (full width in two columns, one column, or half width pairing with
+  the next half); everything else is one block, one component. `Sections.astro`
+  is the text-block renderer it delegates to. **Adding a block type means three
+  places**: its schema in `src/sanity/schemaTypes/objects/pageBuilder.ts`, a
+  branch in the `SECTIONS` projection in `queries.ts`, and a component here —
+  plus a thumbnail from `npm run previews`.
 
 ### Data
 
@@ -242,6 +267,59 @@ The content model follows the 2027 Figma design. The shape to keep in mind:
   design's "Artist, *Title*, 2024" line is assembled from those.
 - **Links are objects.** A `link` is a route + optional anchor, a document
   reference, or an external URL. Internal ones get "→", external ones "↗".
+- **Pages are section stacks.** `page.sections`, `homepage.sections` and
+  `artist.sections` are page-builder arrays: an editor adds, deletes, drags
+  and hides pre-designed blocks (text, image + text, image grid, slideshow,
+  video, quote, feature, banner, buttons, section title, people, key figures,
+  latest news, FAQ, embed). The look of each block is fixed in code; its
+  content and its place are the editor's. Every block has `hidden` (kept, not
+  shown — the query drops it) and `anchor`. The homepage keeps a fixed hero
+  above its stack. Blocks that draw on other content (people, key figures,
+  news) are resolved inside the `SECTIONS` projection, so a page renders from
+  one query.
+
+### Creating and duplicating documents
+
+The Create menu offers **starting points** from `src/sanity/templates.ts`: one
+"new tab" per hub (which presets `section`, the field that makes a page a tab
+at all), two standalone page shapes, and one per exhibitor kind. They set
+initial values only - nothing is locked, and editing a template never touches
+documents already made from it, so adding or reworking them is free. Localised
+fields are seeded in English alone: an empty translation falls back to English,
+a pre-filled English one pretending to be French does not.
+
+`src/sanity/components/DuplicateAction.tsx` replaces Sanity's built-in
+Duplicate. The built-in copies the slug as well, leaving two documents claiming
+one URL with nothing to warn you - the copy looks finished and the build picks
+one. Ours clears the slug and appends "(copy)" to the title, so the duplicate is
+visibly unfinished. Everything else carries over, which is the point: a
+duplicated exhibitor keeps its edition, artists and images.
+
+**Where the templates actually appear.** The **`+` in the navbar**, and the
+create button of any pane wired with `initialValueTemplates` in
+`structure.ts`. The New button inside a pane is scoped to that pane's type, so
+Laureates offers `laureate` and nothing else - it will never show page or
+exhibitor templates, and looking for them there is the obvious wrong turn.
+
+A template can also be linked to directly, which makes a usable bookmark:
+
+    /studio/#/intent/create/type=page;template=page-hub-art-prize/
+
+Only `page` and `exhibitor` have templates. `laureate`, `award` and `person`
+do not, so New in those panes gives a bare document.
+
+**Page templates are content, not code.** The starting points above only
+preset placement and a small starter stack; the layouts themselves are
+`pageTemplate` documents (Studio → **Page templates**), each a ready-made
+section stack with a name and a description. On any page, the homepage or an
+artist, the document menu (⋯) has **Apply template…**, which copies a
+template's sections in (replacing or appending), and **Save as template**,
+which turns the current stack into a new template. Both copy, with fresh
+keys, so a page and a template never stay linked. `npm run templates` seeds
+eleven starters (`scripts/seed-templates.mjs`, deterministic ids, safe to
+re-run — it never touches templates the team made). Making a new layout is
+therefore: build a page you like, save it as a template, done — no deploy.
+The actions live in `src/sanity/components/TemplateActions.tsx`.
 
 `README.md` has the full table of document types and where each shows.
 `docs/design-inventory.md` and `docs/legacy-site-inventory.md` are the two
@@ -261,6 +339,26 @@ the dashboard ones when `wrangler.toml` exists and reads `[vars]` /
 without that, a rebuild would never reach anyone holding a cached page.
 `public/_redirects` is where legacy URLs from the old Laravel site go at
 migration time.
+
+**Two shapes of build, one command.** `PREVIEW_RUNTIME` decides (set per
+environment in `wrangler.toml`; `npm run build:preview` sets it locally):
+
+| | off | on |
+| :-- | :-- | :-- |
+| Pages | static HTML | static HTML, unchanged |
+| `/api/*` | Pages Functions in `functions/` | the Worker, through the **same** modules (`src/server/pagesShim.ts`) |
+| `/preview/*` | does not exist | the Worker, rendered from drafts |
+| Studio | as is | gains the Preview tab (`PUBLIC_PREVIEW_ENABLED`) |
+
+When on, `astro build` uses `@astrojs/cloudflare` (its Vite plugin refuses a
+Pages config, hence the separate `wrangler.worker.toml` it reads — keep its
+bindings in step with `wrangler.toml`), and `scripts/pages-worker.mjs`
+rearranges the output into what Pages expects: static files at the root,
+`_worker.js/`, `_routes.json`. Pages ignores `functions/` once `_worker.js`
+exists, which is why the API is shimmed rather than duplicated. The adapter's
+dev server runs on workerd, which does not start on every machine — a laptop
+leaves `PREVIEW_RUNTIME` unset and `astro dev` is exactly as before. The
+adapter needs Astro ≥ 7.3; keep the two in step when upgrading either.
 
 ## Site accounts
 
@@ -381,10 +479,26 @@ importer drops a locale whose text names a different laureate and lists it in
 `legacy-export/stale-translations.json`; an empty translation falls back to
 English, a wrong one does not.
 
-**Images are a separate pass.** `--images` uploads them and caches the result in
-`legacy-export/asset-map.json`, so it is resumable and never uploads twice -
-**keep that file.** The originals reach 6700px; the old CDN resizes on request,
-so `--max-width=2500` moves about 2.2 GB instead of 5.6 GB.
+**Images are a separate pass, and it has run.** `--images` uploads them and
+caches the result in `legacy-export/asset-map.json`, so it is resumable and
+never uploads twice - **keep that file.** The pass ran on 2026-09-05 with
+`--max-width=2500`: 1,066 of the 1,089 referenced figures are in Sanity
+(about 1.2 GB), attached to 288 documents. A re-run is a no-op for those.
+
+**The old site's resizer cannot handle its own largest files.** `/img/...`
+decodes the whole file on every request, and answers 500 for `?w=2500` on
+some 350 files and for *any* size above roughly 50 megapixels. The importer
+therefore falls back to the original when the resized fetch fails. Thirteen
+images fail at every size and are listed, with the gallery each belongs to,
+in `legacy-export/unrecoverable-images.json`; they need the galleries or the
+old server's storage. The 2027 exhibitors and 2026 laureates have no images
+at all, because the old CMS never had them - those are editor uploads.
+
+**What the import has not touched yet:** the edition documents (2024-2027
+still hold seeded dates, hours, ticket prices and venue - the real values are
+in the export) and the `page` documents, where the 47 legacy pages do not map
+one-to-one onto the hubs. `legacy-export/MAPPING.md` lists the open
+questions.
 
 ## Gotchas
 
@@ -396,6 +510,30 @@ so `--max-width=2500` moves about 2.2 GB instead of 5.6 GB.
   dynamically imported module".
 - The build is roughly 487 files / 9.2 MB, most of it the Studio bundle, which
   only downloads when someone actually opens `/studio`.
+- **`@sanity/icons` 5 has no root exports for icons.** `import { ImageIcon }
+  from '@sanity/icons'` builds to "not exported"; each icon is its own
+  subpath: `import { ImageIcon } from '@sanity/icons/Image'`.
+- **A build must not query the live Sanity endpoint per page.** The free
+  plan meters `api.sanity.io` at 250k requests a month; `apicdn.sanity.io` is
+  a separate, far larger quota. `Base.astro` queries four things on every
+  page and a build renders ~700 pages, so on 2026-09-05 four days of branch
+  previews (79 builds, each 3,500-4,500 uncached requests) used the whole
+  month and every build, and the dev site, got `402 plan_limit_reached`.
+  Two things now stop that: `useCdn: true` in `astro.config.mjs`, and
+  `run()` in `src/lib/queries.ts` memoising each query for the life of a
+  build (not in `astro dev`, not in a preview render). Route new queries
+  through `run()`. Token clients that need drafts (the preview Worker, the
+  import scripts) cannot use the CDN and stay blocked until the quota
+  resets; the Studio itself is not affected. Usage is only visible at
+  sanity.io/manage - the management API has no usage endpoint.
+  The site moved to project `5hqzhin7` on 2026-09-06 after the first
+  project (`uia5r1rc`) ran dry; `run()` now also fails a build that makes
+  more than 2,500 requests, and prints the total at exit.
+- **Preview renders read the page to the end inside the store.** Astro
+  streams responses, so the frontmatter (and its queries) runs when the body
+  is pulled. `src/middleware.ts` awaits `response.text()` inside
+  `runWithPreview` for that reason; "the preview shows published content"
+  is what it looks like when that is lost.
 
 ## Documentation
 
