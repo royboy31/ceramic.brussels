@@ -194,6 +194,26 @@ export type Params = { lang: LocaleId; [key: string]: unknown };
  */
 const memo = new Map<string, Promise<unknown>>();
 
+/**
+ * How many requests a build may make before it is stopped.
+ *
+ * Shared queries run once thanks to the memo, but every exhibitor and artist
+ * page asks for its own document by slug, in each language, so a build makes
+ * about a thousand distinct requests (2026-09-06: 216 exhibitors and 44
+ * artists). The per-page regression this exists to catch made 3,500-4,500,
+ * which is what emptied the first project's monthly quota in four days. The
+ * ceiling sits between the two with room for the 2027 exhibitor list; raise
+ * it when the content grows past it, not when a query is added to Base.astro.
+ * The total is printed when the build exits.
+ */
+const BUILD_REQUEST_CEILING = 2500;
+let buildRequests = 0;
+if (import.meta.env.PROD && typeof process !== 'undefined' && typeof process.on === 'function') {
+  process.on('exit', () => {
+    if (buildRequests) console.log(`[sanity] ${buildRequests} request(s) made during this build`);
+  });
+}
+
 // `currentClient` is the build-time client, or the drafts-reading one inside a
 // preview request - see src/lib/previewContext.ts.
 function run<T>(query: string, params: Record<string, unknown> = {}): Promise<T> {
@@ -201,6 +221,12 @@ function run<T>(query: string, params: Record<string, unknown> = {}): Promise<T>
   const key = `${query}\u0000${JSON.stringify(params)}`;
   let pending = memo.get(key) as Promise<T> | undefined;
   if (!pending) {
+    if (++buildRequests > BUILD_REQUEST_CEILING) {
+      throw new Error(
+        `[sanity] this build has made more than ${BUILD_REQUEST_CEILING} requests; ` +
+          'a query is being run per page instead of once - route it through run() with stable params',
+      );
+    }
     pending = currentClient().fetch<T>(query, params);
     // A failed request is not an answer; let the next caller try again.
     pending.catch(() => memo.delete(key));

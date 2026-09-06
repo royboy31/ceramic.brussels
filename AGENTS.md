@@ -38,7 +38,7 @@ cp .env.example .env
 Then fill `.env` with:
 
 ```
-PUBLIC_SANITY_PROJECT_ID=uia5r1rc
+PUBLIC_SANITY_PROJECT_ID=5hqzhin7
 PUBLIC_SANITY_DATASET=production
 PUBLIC_SITE_URL=https://www.ceramic.brussels
 ```
@@ -526,6 +526,9 @@ questions.
   import scripts) cannot use the CDN and stay blocked until the quota
   resets; the Studio itself is not affected. Usage is only visible at
   sanity.io/manage - the management API has no usage endpoint.
+  The site moved to project `5hqzhin7` on 2026-09-06 after the first
+  project (`uia5r1rc`) ran dry; `run()` now also fails a build that makes
+  more than 2,500 requests, and prints the total at exit.
 - **Preview renders read the page to the end inside the store.** Astro
   streams responses, so the frontmatter (and its queries) runs when the body
   is pulled. `src/middleware.ts` awaits `response.text()` inside

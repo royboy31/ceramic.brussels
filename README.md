@@ -44,7 +44,7 @@ Feel free to check [our documentation](https://docs.astro.build) or jump into ou
 
 ## Content & deployment
 
-Content lives in Sanity (project `uia5r1rc`, dataset `production`). The embedded
+Content lives in Sanity (project `5hqzhin7`, dataset `production`). The embedded
 Studio is served at `/studio`.
 
 ### How content reaches the site
@@ -84,7 +84,7 @@ Sanity's internal `system.*` documents.
 The production build needs only the two public vars:
 
 ```
-PUBLIC_SANITY_PROJECT_ID=uia5r1rc
+PUBLIC_SANITY_PROJECT_ID=5hqzhin7
 PUBLIC_SANITY_DATASET=production
 ```
 
@@ -241,7 +241,7 @@ coordinates and the Node version; they differ in the canonical origin.
 Production:
 
 ```
-PUBLIC_SANITY_PROJECT_ID=uia5r1rc
+PUBLIC_SANITY_PROJECT_ID=5hqzhin7
 PUBLIC_SANITY_DATASET=production
 PUBLIC_SITE_URL=https://www.ceramic.brussels
 NODE_VERSION=22.12.0
@@ -252,7 +252,7 @@ canonical tags, hreflang and a sitemap claiming to be the live domain and invite
 Google to index staging as the real thing:
 
 ```
-PUBLIC_SANITY_PROJECT_ID=uia5r1rc
+PUBLIC_SANITY_PROJECT_ID=5hqzhin7
 PUBLIC_SANITY_DATASET=production
 PUBLIC_SITE_URL=https://dev.ceramic-brussels.pages.dev
 PUBLIC_SHOW_EDIT_LINKS=true
