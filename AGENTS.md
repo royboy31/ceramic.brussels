@@ -120,7 +120,7 @@ into the HTML, which has two consequences worth internalising:
    production a Sanity webhook triggers that rebuild.
 
 **The one exception is `/preview/`.** On a build with `PREVIEW_RUNTIME=1`
-(branch previews, per `wrangler.toml`) the Cloudflare adapter is added and
+(every environment since 2026-09-06, per `wrangler.toml`) the Cloudflare adapter is added and
 every page under `src/pages/[lang]/` is mounted a second time at
 `/preview/[lang]/…`, rendered on request from **drafts** by a small Worker
 that `scripts/pages-worker.mjs` moves to `dist/_worker.js` after the build.
