@@ -1,0 +1,54 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import Slideshow from '../Slideshow.astro';
+import { styleAttrs } from '../../lib/textStyle';
+
+/** The carousel block, full width, in the frame the editor picked. */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { section } = Astro.props;
+const images = (section.images ?? []).filter((img: any) => img?.asset);
+
+const ASPECTS: Record<string, number> = { '3:2': 3 / 2, '16:9': 16 / 9, '4:5': 4 / 5, '1:1': 1 };
+const aspect = ASPECTS[section.aspect] ?? 3 / 2;
+// Portrait frames would tower at full width; give them the middle half.
+const narrow = aspect < 1.2;
+---
+
+{
+  images.length > 0 && (
+    <section class:list={['slideshow-block', { narrow }]} id={section.anchor || undefined}>
+      {section.heading && (
+        <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+          {section.heading}
+        </h2>
+      )}
+      <Slideshow
+        images={images}
+        aspect={aspect}
+        sizes={narrow ? '(max-width: 900px) 100vw, 50vw' : '(max-width: 900px) 100vw, 1140px'}
+        widths={[600, 900, 1200, 1600, 2000]}
+        id={`slideshow-${section._key}`}
+        label={section.heading}
+      />
+    </section>
+  )
+}
+
+<style>
+  .slideshow-block {
+    margin: 0 0 3rem;
+  }
+  .narrow :global(.slideshow) {
+    max-width: 50%;
+    margin-inline: auto;
+  }
+  @media (max-width: 900px) {
+    .narrow :global(.slideshow) {
+      max-width: none;
+    }
+  }
+</style>

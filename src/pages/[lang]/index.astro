@@ -1,20 +1,22 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Figure from '../../components/Figure.astro';
-import VideoEmbed from '../../components/VideoEmbed.astro';
+import PageSections from '../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { useTranslations, localePath, formatDateRange } from '../../lib/i18n';
+import { useTranslations, formatDateRange } from '../../lib/i18n';
 import { getHomepage, getCurrentEdition, getEditions, getNews } from '../../lib/queries';
 import { resolveLink, type ResolvedLink } from '../../lib/links';
 import { styleAttrs } from '../../lib/textStyle';
-import { urlFor } from '../../sanity/image';
 
 /**
- * The homepage is curated block by block on the `homepage` document. Key
- * figures come from the most recent edition that has them, the film from the
- * current edition unless the homepage overrides it. The look is Lilanga's
- * port of the Figma hand-off; every slot in it reads from Sanity and only
- * falls back to the hand-off photography when an editor has left it empty.
+ * The homepage. The hero - picture, statement, dates, quick links - is fixed,
+ * as the design gives the page exactly one opening. Everything under it is
+ * the `homepage` document's section stack, so the film, the features, the
+ * banners and the key figures come in whatever order the editor set.
+ *
+ * The look is Lilanga's port of the Figma hand-off; every slot reads from
+ * Sanity and only falls back to the hand-off photography when an editor has
+ * left it empty.
  */
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
@@ -23,12 +25,7 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 
-const [home, edition, editions, news] = await Promise.all([
-  getHomepage(lang),
-  getCurrentEdition(lang),
-  getEditions(lang),
-  getNews(lang),
-]);
+const [home, edition] = await Promise.all([getHomepage(lang), getCurrentEdition(lang)]);
 
 const headline = home?.heroText ?? edition?.title ?? 'ceramic brussels';
 // The hero falls back through three sources; style only applies to the one
@@ -41,50 +38,21 @@ const quickLinks: ResolvedLink[] = (home?.quickLinks ?? [])
   .filter(Boolean);
 
 /**
- * Spotlights are editor-picked; when none are set the two most recent news
- * items take the slots, so the block never goes empty on a fresh dataset.
+ * A homepage with no sections yet - a fresh dataset, or an editor who
+ * cleared the stack - still shows the hand-off's shape: latest news, the
+ * film, the key figures. Built here from the same data the blocks would
+ * have been given, so it renders through the same components.
  */
-const spotlights: {
-  key: string;
-  kicker?: string;
-  kickerStyle?: any;
-  headline?: string;
-  headlineStyle?: any;
-  link: ResolvedLink | null;
-  image?: any;
-}[] =
-  home?.spotlights?.length
-    ? home.spotlights.map((s: any, i: number) => ({
-        key: s._key ?? `spotlight-${i}`,
-        kicker: s.kicker,
-        kickerStyle: s.kickerStyle,
-        headline: s.headline,
-        headlineStyle: s.headlineStyle,
-        link: resolveLink(lang, s.link),
-        image: s.image,
-      }))
-    : news.slice(0, 2).map((item: any) => ({
-        key: item.slug ?? item._id,
-        kicker: item.category,
-        kickerStyle: null,
-        headline: item.title,
-        headlineStyle: item.titleStyle,
-        link: { href: localePath(lang, `news/${item.slug}`), label: t('news.readMore'), external: false, arrow: '→' as const },
-        image: item.cover,
-      }));
-
-const banner = resolveLink(lang, home?.banner?.link);
-const closing = resolveLink(lang, home?.closingBanner?.link);
-
-// getHomepage already coalesces `video` with the current edition's film; the
-// second fallback only matters if the homepage document does not exist yet.
-const video = home?.video?.url ? home.video : edition?.film;
-const videoPoster = video?.poster?.asset
-  ? urlFor(video.poster).width(1600).height(1066).fit('crop').auto('format').quality(78).url()
-  : '/assets/video-still.webp';
-
-const figuresEdition = editions.find((e: any) => e.keyFigures?.length) ?? null;
-const figuresLink = resolveLink(lang, home?.figuresLink);
+let sections: any[] = home?.sections ?? [];
+if (sections.length === 0) {
+  const [editions, news] = await Promise.all([getEditions(lang), getNews(lang)]);
+  const figuresEdition = editions.find((e: any) => e.keyFigures?.length) ?? null;
+  sections = [
+    { _key: 'fallback-news', _type: 'newsSection', count: 2, items: news },
+    { _key: 'fallback-video', _type: 'videoSection', video: edition?.film },
+    { _key: 'fallback-figures', _type: 'keyFiguresSection', edition: figuresEdition },
+  ];
+}
 
 const eventSchema = edition
   ? {
@@ -166,107 +134,10 @@ const external = (link: ResolvedLink | null) =>
     )
   }
 
-  {
-    spotlights.length > 0 && (
-      <>
-        <h2 class="latest">{t('home.latestNews')}</h2>
-
-        {spotlights.map((s, i) => (
-          <section class:list={['page-grid', 'feature', { flip: i % 2 === 1 }]}>
-            <div class="feature-copy">
-              {s.kicker && (
-                <p class="eyebrow-lg" {...styleAttrs(s.kickerStyle)}>
-                  {s.kicker}
-                </p>
-              )}
-              {s.headline && <h3 {...styleAttrs(s.headlineStyle)}>{s.headline}</h3>}
-              {s.link && (
-                <a class="text-link" href={s.link.href} {...external(s.link)}>
-                  {s.link.label} {s.link.arrow}
-                </a>
-              )}
-            </div>
-
-            <div class="feature-shot">
-              <Figure
-                image={s.image}
-                pool="fair"
-                seed={s.key}
-                fallback={
-                  i === 0
-                    ? {
-                        src: '/assets/guest-1200.webp',
-                        srcset: '/assets/guest-700.webp 700w, /assets/guest-1200.webp 1200w',
-                        width: 1200,
-                        height: 800,
-                      }
-                    : undefined
-                }
-                sizes="(max-width: 640px) 100vw, 50vw"
-              />
-            </div>
-          </section>
-        ))}
-      </>
-    )
-  }
-
-  {
-    home?.banner?.text && (
-      <a class="cta cta-gradient" href={banner?.href ?? localePath(lang, 'editions')} {...external(banner)}>
-        {home.banner.text} {banner?.arrow ?? '→'}
-      </a>
-    )
-  }
-
-  {video?.url && <VideoEmbed class="film" url={video.url} poster={videoPoster} label={video.title ?? t('home.watch')} />}
-
-  {
-    figuresEdition && (
-      <section class="stats">
-        <p class="stats-title">{t('home.keyFigures', { year: figuresEdition.year })}</p>
-
-        <div class="stats-table">
-          {figuresEdition.keyFigures.map((figure: any) => (
-            <div class="stat">
-              <strong>{figure.value}</strong>
-              <span {...styleAttrs(figure.labelStyle)}>{figure.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {
-          figuresLink && (
-            <p class="stats-link">
-              <a class="text-link" href={figuresLink.href} {...external(figuresLink)}>
-                {figuresLink.label} {figuresLink.arrow}
-              </a>
-            </p>
-          )
-        }
-      </section>
-    )
-  }
-
-  {
-    home?.closingBanner?.text && (
-      <a class="cta cta-solid" href={closing?.href ?? localePath(lang, 'about/images')} {...external(closing)}>
-        {home.closingBanner.text} {closing?.arrow ?? '→'}
-      </a>
-    )
-  }
+  <PageSections lang={lang} sections={sections} class="home-sections" />
 </Base>
 
 <style>
-  /* Hero, quicklinks and the feature blocks sit inside the page gutter, as
-     they do in the hand-off. Only the video, the figures table and the call
-     to action run edge to edge. */
-  .film,
-  .stats,
-  .cta {
-    margin-inline: -30px;
-  }
-
   .hero {
     align-items: stretch;
     row-gap: 1.5rem;
@@ -335,160 +206,8 @@ const external = (link: ResolvedLink | null) =>
     color: var(--ground);
   }
 
-  .latest {
-    margin: 2.5rem 0 0;
-    text-align: center;
-    text-transform: lowercase;
-    font-size: clamp(2.4rem, 4.85vw, 4.4rem);
-    line-height: 1;
-    letter-spacing: -0.03em;
-    font-weight: 600;
-  }
-
-  .feature {
-    align-items: center;
-    row-gap: 1.25rem;
-    margin-top: 30px;
-    padding-bottom: 2.5rem;
-  }
-  .feature-copy {
-    grid-column: span 6;
-    padding: 1.5rem 0;
-  }
-  .feature-shot {
-    grid-column: span 6;
-  }
-  .feature-shot :global(img) {
-    width: 100%;
-    height: 31vw;
-    min-height: 280px;
-    object-fit: cover;
-  }
-  /* Spotlights alternate: the first leads with copy, the next with its
-     picture, as the news feature and the partner block do in the hand-off. */
-  .feature.flip {
-    align-items: start;
-    padding: 1.5rem 0 0;
-  }
-  .feature.flip .feature-shot {
-    order: -1;
-  }
-
-  .eyebrow-lg {
-    margin: 0;
-    text-transform: lowercase;
-    font-size: clamp(1.25rem, 2.7vw, 2.5rem);
-    line-height: 1.05;
-    letter-spacing: -0.05em;
-  }
-  .feature-copy h3 {
-    margin: 0.5rem 0 0;
-    font-size: clamp(2rem, 3.6vw, 3.2rem);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
-    font-weight: 400;
-  }
-  .feature-copy a {
-    display: inline-block;
-    margin-top: 2rem;
-    font-size: clamp(1.3rem, 2.6vw, 2.5rem);
-    letter-spacing: -0.05em;
-  }
-
-  .stats {
-    margin-top: 3.4rem;
-  }
-  .stats-title {
-    margin: 0;
-    padding: 0 30px;
-    text-transform: lowercase;
-    font-size: clamp(1.25rem, 2.75vw, 2.5rem);
-    line-height: 2;
-    letter-spacing: -0.05em;
-  }
-  .stats-table {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: clamp(105px, 10vw, 145px);
-    border-top: 1px solid var(--ink);
-  }
-  .stat {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    border-bottom: 1px solid var(--ink);
-  }
-
-  /* Two figures a row: the left one ruled off from the right, the outer
-     ones sitting on the page gutter. */
-  .stat:nth-child(odd) {
-    padding-left: 30px;
-    border-right: 1px solid var(--ink);
-  }
-  .stat:nth-child(even) {
-    justify-content: flex-end;
-    padding-right: 30px;
-  }
-  /* The hand-off's five: visitors / exhibitors, artists / VIPs, press clips. */
-  .stat:nth-child(2) {
-    justify-content: flex-start;
-    padding-left: 40px;
-    padding-right: 0;
-  }
-  .stat:nth-child(3) {
-    justify-content: center;
-    padding-left: 0;
-  }
-  /* An odd trailing figure takes the whole row, centred, closing the table. */
-  .stat:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-    justify-content: center;
-    gap: 10px;
-    padding-left: 0;
-    border-right: 0;
-    border-bottom: 0;
-    min-height: clamp(120px, 11.25vw, 162px);
-  }
-
-  .stat strong {
-    font-size: clamp(3.5rem, 8vw, 7.5rem);
-    line-height: 0.7;
-    letter-spacing: -0.05em;
-    font-weight: 400;
-  }
-  .stat span {
-    font-size: clamp(1.5rem, 3.4vw, 3.1rem);
-    line-height: 1;
-    letter-spacing: -0.04em;
-  }
-  .stats-link {
-    margin: 1.5rem 0 0;
-    padding: 0 30px;
-    font-size: clamp(1.25rem, 2.7vw, 2.5rem);
-    letter-spacing: -0.05em;
-  }
-
-  .cta {
-    display: grid;
-    place-items: center;
-    min-height: clamp(100px, 10.5vw, 152px);
-    padding: 0.6rem 1rem;
-    text-align: center;
-    text-decoration: none;
-    text-transform: lowercase;
-    font-size: clamp(1.9rem, 4.2vw, 3.75rem);
-    line-height: 1;
-  }
-  .cta-gradient {
-    margin-top: 3.4rem;
-    background: linear-gradient(180deg, var(--acid) 0%, var(--ground) 50%, var(--acid) 100%);
-    letter-spacing: -0.05em;
-  }
-  .cta-solid {
-    margin-top: 5rem;
-    background: var(--acid);
-    letter-spacing: -0.02em;
-    font-weight: 600;
+  .home-sections {
+    margin-top: 1rem;
   }
 
   @media (max-width: 900px) {
@@ -502,13 +221,8 @@ const external = (link: ResolvedLink | null) =>
      the picture leads, as max-sm:col-span-full does in the hand-off. */
   @media (max-width: 640px) {
     .hero-shot,
-    .hero-copy,
-    .feature-copy,
-    .feature-shot {
+    .hero-copy {
       grid-column: 1 / -1;
-    }
-    .feature-shot {
-      order: -1;
     }
     .hero-copy {
       padding: 1.4rem 0 0.9rem;
@@ -516,29 +230,6 @@ const external = (link: ResolvedLink | null) =>
     .hero-shot :global(img) {
       height: 67vw;
       min-height: 260px;
-    }
-    .feature-shot :global(img) {
-      height: auto;
-      min-height: 0;
-      aspect-ratio: 1.5;
-    }
-    .film,
-    .stats,
-    .cta {
-      margin-inline: -10px;
-    }
-    .stats-title,
-    .stats-link,
-    .stat {
-      padding-inline: 10px;
-    }
-    .stats-table {
-      display: block;
-      border-bottom: 0;
-    }
-    .stat {
-      justify-content: space-between;
-      border-right: 0 !important;
     }
   }
 </style>

@@ -2,7 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import SanityImage from '../../components/SanityImage.astro';
 import PortableText from '../../components/PortableText.astro';
-import Sections from '../../components/Sections.astro';
+import PageSections from '../../components/PageSections.astro';
 import { LOCALE_IDS, DEFAULT_LOCALE, type LocaleId } from '../../lib/locales';
 import { getPage, getPageSlugs } from '../../lib/queries';
 import { styleAttrs } from '../../lib/textStyle';
@@ -29,10 +29,12 @@ export async function getStaticPaths() {
 
 const lang = Astro.params.lang as LocaleId;
 const slug = Astro.params.slug as string;
-const { slugs } = Astro.props as { slugs: Record<string, string | undefined> };
-
 const page = await getPage(lang, slug);
 if (!page) return Astro.rewrite('/404');
+
+// getStaticPaths supplies the slugs at build time; a preview render of the same
+// file has no static paths, so they come from the page itself.
+const slugs: Record<string, string | undefined> = (Astro.props as any).slugs ?? page.slugs ?? {};
 
 // Each language links to its own slug, so the language switcher never 404s.
 const altPaths = Object.fromEntries(
@@ -69,7 +71,7 @@ const closingImages = (page.images ?? []).filter((img: any) => img?.asset);
     )
   }
 
-  <Sections lang={lang} sections={page.sections} />
+  <PageSections lang={lang} sections={page.sections} />
 
   {
     page.body && (

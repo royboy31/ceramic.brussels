@@ -1,0 +1,147 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import { resolveLink } from '../../lib/links';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * The key figures table from the homepage: two figures a row, ruled, edge
+ * to edge, from the most recent edition that has any.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { lang, section } = Astro.props;
+const t = useTranslations(lang);
+const edition = section.edition;
+const figures = edition?.keyFigures ?? [];
+const link = resolveLink(lang, section.link);
+const external = link?.external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+{
+  figures.length > 0 && (
+    <section class="stats" id={section.anchor || undefined}>
+      <p class="stats-title">{t('home.keyFigures', { year: edition.year })}</p>
+
+      <div class="stats-table">
+        {figures.map((figure: any) => (
+          <div class="stat">
+            <strong>{figure.value}</strong>
+            <span {...styleAttrs(figure.labelStyle)}>{figure.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {link && (
+        <p class="stats-link">
+          <a class="text-link" href={link.href} {...external}>
+            {link.label} {link.arrow}
+          </a>
+        </p>
+      )}
+    </section>
+  )
+}
+
+<style>
+  .stats {
+    margin: 3.4rem -30px 3rem;
+  }
+  .stats-title {
+    margin: 0;
+    padding: 0 30px;
+    text-transform: lowercase;
+    font-size: clamp(1.25rem, 2.75vw, 2.5rem);
+    line-height: 2;
+    letter-spacing: -0.05em;
+  }
+  .stats-table {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: clamp(105px, 10vw, 145px);
+    border-top: 1px solid var(--ink);
+  }
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-bottom: 1px solid var(--ink);
+  }
+  .stat:nth-child(odd) {
+    padding-left: 30px;
+    border-right: 1px solid var(--ink);
+  }
+  .stat:nth-child(even) {
+    justify-content: flex-end;
+    padding-right: 30px;
+  }
+  .stat:nth-child(2) {
+    justify-content: flex-start;
+    padding-left: 40px;
+    padding-right: 0;
+  }
+  .stat:nth-child(3) {
+    justify-content: center;
+    padding-left: 0;
+  }
+  .stat:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-content: center;
+    gap: 10px;
+    padding-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    min-height: clamp(120px, 11.25vw, 162px);
+  }
+  .stat strong {
+    font-size: clamp(3.5rem, 8vw, 7.5rem);
+    line-height: 0.7;
+    letter-spacing: -0.05em;
+    font-weight: 400;
+  }
+  .stat span {
+    font-size: clamp(1.5rem, 3.4vw, 3.1rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .stats-link {
+    margin: 1.5rem 0 0;
+    padding: 0 30px;
+    font-size: clamp(1.25rem, 2.7vw, 2.5rem);
+    letter-spacing: -0.05em;
+  }
+
+  @media (max-width: 900px) {
+    .stats {
+      margin-inline: -16px;
+    }
+    .stats-title,
+    .stats-link {
+      padding-inline: 16px;
+    }
+    .stat:nth-child(odd) {
+      padding-left: 16px;
+    }
+    .stat:nth-child(even) {
+      padding-right: 16px;
+    }
+  }
+  @media (max-width: 640px) {
+    .stats {
+      margin-inline: -10px;
+    }
+    .stats-title,
+    .stats-link {
+      padding-inline: 10px;
+    }
+    .stat:nth-child(odd) {
+      padding-left: 10px;
+    }
+    .stat:nth-child(even) {
+      padding-right: 10px;
+    }
+  }
+</style>

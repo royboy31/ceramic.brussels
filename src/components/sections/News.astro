@@ -1,0 +1,59 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations, localePath } from '../../lib/i18n';
+import Feature from './Feature.astro';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * The latest news as feature blocks under a centred title. Each item becomes
+ * a synthetic `spotlight` so it renders exactly like a hand-picked feature.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { lang, section } = Astro.props;
+const t = useTranslations(lang);
+const count = Math.min(Math.max(Number(section.count) || 2, 1), 6);
+const items = (section.items ?? []).slice(0, count);
+const heading = section.heading ?? t('home.latestNews');
+
+const asFeature = (item: any) => ({
+  _key: item.slug ?? item._id,
+  kicker: item.category,
+  headline: item.title,
+  headlineStyle: item.titleStyle,
+  image: item.cover,
+  // A route link into the news item, resolved like any editor link.
+  link: { kind: 'route', route: `news/${item.slug}`, label: t('news.readMore') },
+});
+---
+
+{
+  items.length > 0 && (
+    <section class="news-block" id={section.anchor || undefined}>
+      <h2 class="latest" {...styleAttrs(section.headingStyle)}>
+        {heading}
+      </h2>
+      {items.map((item: any, i: number) => (
+        <Feature lang={lang} section={asFeature(item)} flip={i % 2 === 1} />
+      ))}
+    </section>
+  )
+}
+
+<style>
+  .news-block {
+    margin: 0 0 1rem;
+  }
+  .latest {
+    margin: 2.5rem 0 0;
+    text-align: center;
+    text-transform: lowercase;
+    font-size: clamp(2.4rem, 4.85vw, 4.4rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+  }
+</style>

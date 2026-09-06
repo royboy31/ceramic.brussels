@@ -2,7 +2,7 @@
 import Base from '../../../layouts/Base.astro';
 import Figure from '../../../components/Figure.astro';
 import PortableText from '../../../components/PortableText.astro';
-import Sections from '../../../components/Sections.astro';
+import PageSections from '../../../components/PageSections.astro';
 import Slideshow from '../../../components/Slideshow.astro';
 import VideoEmbed from '../../../components/VideoEmbed.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
@@ -155,7 +155,7 @@ const personSchema = {
     {
       artist.sections?.length > 0 && (
         <div class="wide">
-          <Sections lang={lang} sections={artist.sections} />
+          <PageSections lang={lang} sections={artist.sections} />
         </div>
       )
     }

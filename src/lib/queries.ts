@@ -1,5 +1,5 @@
-import { sanityClient } from 'sanity:client';
 import type { LocaleId } from './locales';
+import { currentClient, isPreview } from './previewContext';
 import { DEFAULT_LOCALE } from './locales';
 
 /**
@@ -62,21 +62,177 @@ const VIDEO = `{
   poster ${IMAGE}
 }`;
 
-const SECTION = `{
-  _key,
-  anchor,
-  ${styled('heading')},
-  ${styled('body')},
-  "images": images[] ${IMAGE},
-  "links": links[] ${LINK}
+const KEY_FIGURES = `keyFigures[]{ _key, value, ${styled('label')} }`;
+
+const PERSON = `{
+  _id, name, groups, countryCode, website, instagram, email, phone, order,
+  "year": edition->year,
+  ${styled('role')},
+  ${styled('bio')},
+  portrait ${IMAGE}
 }`;
 
-const KEY_FIGURES = `keyFigures[]{ _key, value, ${styled('label')} }`;
+const NEWS_CARD = `{
+  _id, publishedAt, category,
+  "slug": slug.current,
+  ${styled('title')},
+  ${styled('excerpt')},
+  cover ${IMAGE}
+}`;
+
+/**
+ * The page builder: one projection for every block type, keyed on `_type`.
+ * Hidden blocks are dropped here so no page has to remember to. Blocks that
+ * pull from other content (people, key figures, news) are resolved in place,
+ * so a page renders from this one result.
+ *
+ * Adding a block type means adding a branch here, its schema in
+ * src/sanity/schemaTypes/objects/pageBuilder.ts, and its component in
+ * src/components/sections/.
+ */
+const SECTIONS = `sections[hidden != true]{
+  _key, _type, anchor,
+  _type == "contentSection" => {
+    layout,
+    ${styled('heading')},
+    ${styled('body')},
+    "images": images[] ${IMAGE},
+    "links": links[] ${LINK}
+  },
+  _type == "imageTextSection" => {
+    imageSide,
+    image ${IMAGE},
+    ${styled('heading')},
+    ${styled('body')},
+    "links": links[] ${LINK}
+  },
+  _type == "gallerySection" => {
+    columns, captions,
+    ${styled('heading')},
+    "images": images[] ${IMAGE}
+  },
+  _type == "slideshowSection" => {
+    aspect,
+    ${styled('heading')},
+    "images": images[] ${IMAGE}
+  },
+  _type == "videoSection" => {
+    ${styled('heading')},
+    "video": select(
+      defined(video.url) => video ${VIDEO},
+      *[_type == "edition" && isCurrent == true][0].film ${VIDEO}
+    )
+  },
+  _type == "quoteSection" => {
+    ${styled('quote')},
+    ${styled('attribution')}
+  },
+  _type == "spotlight" => {
+    ${styled('kicker')},
+    ${styled('headline')},
+    "link": link ${LINK},
+    image ${IMAGE}
+  },
+  _type == "bannerSection" => {
+    style,
+    ${styled('text')},
+    "link": link ${LINK},
+    image ${IMAGE}
+  },
+  _type == "linksSection" => {
+    variant,
+    "links": links[] ${LINK}
+  },
+  _type == "headingSection" => {
+    ${styled('title')}
+  },
+  _type == "peopleSection" => {
+    group,
+    ${styled('heading')},
+    "people": select(
+      defined(group) => *[_type == "person" && ^.group in groups
+        && (!defined(edition) || edition->year == *[_type == "edition" && isCurrent == true][0].year)]
+        | order(order asc, name asc) ${PERSON},
+      people[]-> ${PERSON}
+    )
+  },
+  _type == "keyFiguresSection" => {
+    image ${IMAGE},
+    "link": link ${LINK},
+    "edition": *[_type == "edition" && count(keyFigures) > 0] | order(year desc)[0]{ year, "keyFigures": ${KEY_FIGURES} }
+  },
+  _type == "newsSection" => {
+    count,
+    ${styled('heading')},
+    "items": *[_type == "newsItem" && publishedAt <= now()] | order(publishedAt desc)[0...6] ${NEWS_CARD}
+  },
+  _type == "faqSection" => {
+    ${styled('heading')},
+    "items": items[]{ _key, ${styled('question')}, ${styled('answer')} }
+  },
+  _type == "embedSection" => {
+    url, height,
+    ${styled('heading')}
+  }
+}`;
 
 export type Params = { lang: LocaleId; [key: string]: unknown };
 
-function run<T>(query: string, params: Params): Promise<T> {
-  return sanityClient.fetch<T>(query, params);
+/**
+ * One request per distinct query for the life of a build.
+ *
+ * Base.astro asks for the settings, the navigation and the current edition
+ * on every page, and a build renders ~700 pages, so without this a build
+ * sent the same handful of queries nearly three thousand times - enough,
+ * across the branch previews of a working week, to use up the free plan's
+ * monthly request quota (2026-09-05). The content cannot change under a
+ * build, so the first answer is the right answer for every page.
+ *
+ * Not in `astro dev`, where the process lives for hours and an edit in the
+ * Studio should show on the next reload. Not in a preview render either: it
+ * reads drafts through a different client and must see every keystroke.
+ */
+const memo = new Map<string, Promise<unknown>>();
+
+/**
+ * How many requests a build may make before it is stopped.
+ *
+ * Shared queries run once thanks to the memo, but every exhibitor and artist
+ * page asks for its own document by slug, in each language, so a build makes
+ * about a thousand distinct requests (2026-09-06: 216 exhibitors and 44
+ * artists). The per-page regression this exists to catch made 3,500-4,500,
+ * which is what emptied the first project's monthly quota in four days. The
+ * ceiling sits between the two with room for the 2027 exhibitor list; raise
+ * it when the content grows past it, not when a query is added to Base.astro.
+ * The total is printed when the build exits.
+ */
+const BUILD_REQUEST_CEILING = 2500;
+let buildRequests = 0;
+if (import.meta.env.PROD && typeof process !== 'undefined' && typeof process.on === 'function') {
+  process.on('exit', () => {
+    if (buildRequests) console.log(`[sanity] ${buildRequests} request(s) made during this build`);
+  });
+}
+
+// `currentClient` is the build-time client, or the drafts-reading one inside a
+// preview request - see src/lib/previewContext.ts.
+function run<T>(query: string, params: Record<string, unknown> = {}): Promise<T> {
+  if (!import.meta.env.PROD || isPreview()) return currentClient().fetch<T>(query, params);
+  const key = `${query}\u0000${JSON.stringify(params)}`;
+  let pending = memo.get(key) as Promise<T> | undefined;
+  if (!pending) {
+    if (++buildRequests > BUILD_REQUEST_CEILING) {
+      throw new Error(
+        `[sanity] this build has made more than ${BUILD_REQUEST_CEILING} requests; ` +
+          'a query is being run per page instead of once - route it through run() with stable params',
+      );
+    }
+    pending = currentClient().fetch<T>(query, params);
+    // A failed request is not an answer; let the next caller try again.
+    pending.catch(() => memo.delete(key));
+    memo.set(key, pending);
+  }
+  return pending;
 }
 
 /* ------------------------------------------------------------------ site */
@@ -179,25 +335,7 @@ export function getHomepage(lang: LocaleId) {
       ${styled('heroText')},
       "heroLink": heroLink ${LINK},
       "quickLinks": quickLinks[] ${LINK},
-      "spotlights": spotlights[]{
-        _key,
-        ${styled('kicker')},
-        ${styled('headline')},
-        "link": link ${LINK},
-        image ${IMAGE}
-      },
-      "banner": {
-        ${styled('text', 'banner.text')},
-        "link": banner.link ${LINK},
-        "image": banner.image ${IMAGE}
-      },
-      "video": coalesce(video ${VIDEO}, *[_type == "edition" && isCurrent == true][0].film ${VIDEO}),
-      figuresImage ${IMAGE},
-      "figuresLink": figuresLink ${LINK},
-      "closingBanner": {
-        ${styled('text', 'closingBanner.text')},
-        "link": closingBanner.link ${LINK}
-      },
+      "sections": ${SECTIONS},
       "seo": ${SEO}
     }`,
     { lang },
@@ -287,7 +425,7 @@ export function getExhibitorsByYear(lang: LocaleId, year: number) {
 }
 
 export function getExhibitorSlugs() {
-  return sanityClient.fetch<{ slug: string }[]>(
+  return run<{ slug: string }[]>(
     `*[_type == "exhibitor" && defined(slug.current)]{ "slug": slug.current }`,
   );
 }
@@ -335,7 +473,7 @@ export function getArtists(lang: LocaleId) {
 }
 
 export function getArtistSlugs() {
-  return sanityClient.fetch<{ slug: string }[]>(
+  return run<{ slug: string }[]>(
     `*[_type == "artist" && defined(slug.current)]{ "slug": slug.current }`,
   );
 }
@@ -346,7 +484,7 @@ const ARTIST_FULL = `
   ${styled('bio')},
   ${styled('intro')},
   ${styled('interview')},
-  "sections": sections[] ${SECTION},
+  "sections": ${SECTIONS},
   "carousel": carousel[] ${IMAGE},
   "video": video ${VIDEO},
   "works": works[]{
@@ -426,14 +564,6 @@ export function getAwards(lang: LocaleId) {
 
 /* ---------------------------------------------------------------- people */
 
-const PERSON = `{
-  _id, name, groups, countryCode, website, instagram, email, phone, order,
-  "year": edition->year,
-  ${styled('role')},
-  ${styled('bio')},
-  portrait ${IMAGE}
-}`;
-
 /**
  * People in one group. Year-bound groups (jury, team) return the current
  * edition's entries unless `year` is given.
@@ -451,19 +581,13 @@ export function getPeople(lang: LocaleId, group: string, year?: number) {
 
 export function getNews(lang: LocaleId) {
   return run<any[]>(
-    `*[_type == "newsItem" && publishedAt <= now()] | order(publishedAt desc){
-      _id, publishedAt, category,
-      "slug": slug.current,
-      ${styled('title')},
-      ${styled('excerpt')},
-      cover ${IMAGE}
-    }`,
+    `*[_type == "newsItem" && publishedAt <= now()] | order(publishedAt desc) ${NEWS_CARD}`,
     { lang },
   );
 }
 
 export function getNewsSlugs() {
-  return sanityClient.fetch<{ slug: string }[]>(
+  return run<{ slug: string }[]>(
     `*[_type == "newsItem" && defined(slug.current)]{ "slug": slug.current }`,
   );
 }
@@ -491,7 +615,7 @@ const PAGE = `{
   "tabLabel": coalesce(${localised('tabLabel')}, ${localised('title')}),
   ${styled('intro')},
   ${styled('body')},
-  "sections": sections[] ${SECTION},
+  "sections": ${SECTIONS},
   "images": images[] ${IMAGE},
   cover ${IMAGE},
   "slugs": { "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current },
@@ -500,7 +624,7 @@ const PAGE = `{
 
 /** Standalone pages only - hub tabs are rendered by their hub route. */
 export function getPageSlugs() {
-  return sanityClient.fetch<{ slugs: Record<string, string | undefined> }[]>(
+  return run<{ slugs: Record<string, string | undefined> }[]>(
     `*[_type == "page" && !defined(section)]{ "slugs": { "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current } }`,
   );
 }
@@ -565,7 +689,7 @@ export function getPartners(lang: LocaleId) {
 }
 
 export function getPressClips() {
-  return sanityClient.fetch<any[]>(
+  return run<any[]>(
     `*[_type == "pressClip"] | order(publishedAt desc){
       _id, title, outlet, publishedAt, language, url,
       "pdfUrl": pdf.asset->url

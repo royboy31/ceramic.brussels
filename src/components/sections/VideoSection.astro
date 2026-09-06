@@ -1,0 +1,57 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import VideoEmbed from '../VideoEmbed.astro';
+import { urlFor } from '../../sanity/image';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * The film, edge to edge. The query already falls back to the current
+ * edition's film when the block's own video is empty.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { lang, section } = Astro.props;
+const t = useTranslations(lang);
+const video = section.video;
+const poster = video?.poster?.asset
+  ? urlFor(video.poster).width(1600).height(1066).fit('crop').auto('format').quality(78).url()
+  : '/assets/video-still.webp';
+---
+
+{
+  video?.url && (
+    <section class="video-block" id={section.anchor || undefined}>
+      {section.heading && (
+        <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+          {section.heading}
+        </h2>
+      )}
+      <VideoEmbed class="film" url={video.url} poster={poster} label={video.title ?? t('home.watch')} />
+    </section>
+  )
+}
+
+<style>
+  .video-block {
+    margin: 0 0 3rem;
+  }
+  /* The player runs edge to edge, past the page gutter main carries. */
+  .film {
+    margin-inline: -30px;
+    margin-top: 0;
+  }
+  @media (max-width: 900px) {
+    .film {
+      margin-inline: -16px;
+    }
+  }
+  @media (max-width: 640px) {
+    .film {
+      margin-inline: -10px;
+    }
+  }
+</style>
