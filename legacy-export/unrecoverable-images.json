@@ -1,0 +1,144 @@
+{
+  "note": "The old site answers 500 for these at every size; its image service cannot decode files this large. Originals must come from the galleries or the old server storage.",
+  "images": [
+    {
+      "id": 1175,
+      "filename": "CB25_QB_GALLERY_NELLIE_JONSSON_2025_4.jpg",
+      "size": "9504x6336",
+      "megapixels": 60.2,
+      "url": "https://ceramic.brussels/img/6c545826-aecb-48df-9ef3-774860d71257/cb25-qb-gallery-nellie-jonsson-2025-4.jpg",
+      "usedBy": [
+        "exhibitor: QB Gallery (no) ___ focus Norway 2025",
+        "past edition: art prize"
+      ]
+    },
+    {
+      "id": 1174,
+      "filename": "CB25_QB_GALLERY_NELLIE_JONSSON_2025_8.jpg",
+      "size": "9244x6162",
+      "megapixels": 57,
+      "url": "https://ceramic.brussels/img/fa6b76c8-63aa-4c74-9a83-ccdcdb2cf1f6/cb25-qb-gallery-nellie-jonsson-2025-8.jpg",
+      "usedBy": [
+        "exhibitor: QB Gallery (no) ___ focus Norway 2025",
+        "past edition: art prize"
+      ]
+    },
+    {
+      "id": 1129,
+      "filename": "CB25_HOSTLER_BURROWS_SAKARI_KANNOSTO_AQUARIUS_2024_COURTESY_ARTIST_AND_GALLERY_2.jpg",
+      "size": "7064x8688",
+      "megapixels": 61.4,
+      "url": "https://ceramic.brussels/img/284d0c40-280f-485d-ae38-4bb978137580/cb25-hostler-burrows-sakari-kannosto-aquarius-2024-courtesy-artist-and-gallery-2.jpg",
+      "usedBy": [
+        "exhibitor: Hostler Burrows x HB381 (us) 2025"
+      ]
+    },
+    {
+      "id": 1367,
+      "filename": "CB25_HAN_COLLECTION_KIM_HYUN_JONG_PINE_TREE_VASE_2023_PORCELAIN_WITH_COBALT_DECORATION_49X19.2X19.2CM_IMAGE_COURTESY_OF_YE_STUDIO_1.jpg",
+      "size": "9259x6946",
+      "megapixels": 64.3,
+      "url": "https://ceramic.brussels/img/f8b60e89-d2b9-4541-aede-0d2e44caca5a/cb25-han-collection-kim-hyun-jong-pine-tree-vase-2023-porcelain-with-cobalt-decoration-49x192x192cm-image-courtesy-of-ye-studio-1.jpg",
+      "usedBy": [
+        "exhibitor: Han Collection (uk) 2025"
+      ]
+    },
+    {
+      "id": 1436,
+      "filename": "CB25_GALERIE_AURELIEN_GENDRAS_CLEMENTINE_DUPRE_MEDUSEE_4.jpg",
+      "size": "5792x8688",
+      "megapixels": 50.3,
+      "url": "https://ceramic.brussels/img/6dfe6284-51d1-4102-ae4b-9c00d1fae8b5/cb25-galerie-aurelien-gendras-clementine-dupre-medusee-4.jpg",
+      "usedBy": [
+        "exhibitor: Galerie Aurélien Gendras (fr) 2025"
+      ]
+    },
+    {
+      "id": 1435,
+      "filename": "CB25_GALERIE_AURELIEN_GENDRAS_CLEMENTINE_DUPRE_MEDUSEE_2.jpg",
+      "size": "5792x8688",
+      "megapixels": 50.3,
+      "url": "https://ceramic.brussels/img/6dfe6284-51d1-4102-ae4b-9c00d1fae8b5/cb25-galerie-aurelien-gendras-clementine-dupre-medusee-2.jpg",
+      "usedBy": [
+        "exhibitor: Galerie Aurélien Gendras (fr) 2025"
+      ]
+    },
+    {
+      "id": 1192,
+      "filename": "CB25_YOD_GALLERY_KUNIHIRO_AKINAGA.jpg",
+      "size": "6200x8272",
+      "megapixels": 51.3,
+      "url": "https://ceramic.brussels/img/46e28005-4a64-41b9-acce-ab4584f23709/cb25-yod-gallery-kunihiro-akinaga.jpg",
+      "usedBy": [
+        "exhibitor: YOD Gallery (jp) 2025",
+        "past edition: art prize"
+      ]
+    },
+    {
+      "id": 1089,
+      "filename": "CB25_GALERIE_DU_PASSAGE_CLEMENTINE_DE_CHABANEIX_OCT_20243173.jpg",
+      "size": "6429x8071",
+      "megapixels": 51.9,
+      "url": "https://ceramic.brussels/img/871dae2e-9c64-4ada-ba21-9e53003833dc/cb25-galerie-du-passage-clementine-de-chabaneix-oct-20243173.jpg",
+      "usedBy": [
+        "exhibitor: Galerie du Passage (fr) 2025",
+        "page: programme"
+      ]
+    },
+    {
+      "id": 516,
+      "filename": "BERMAN CONTEMPORARY_Amogelang Maepa_This process is lengthy and indirect_2022_Image Courtesy of Berman Contemporary_2.jpg",
+      "size": "6000x4000",
+      "megapixels": 24,
+      "url": "https://ceramic.brussels/img/32b0744d-4cfd-4ded-bfc9-b5fe1c2db456/berman-contemporary-amogelang-maepa-this-process-is-lengthy-and-indirect-2022-image-courtesy-of-berman-contemporary-2.jpg",
+      "usedBy": [
+        "exhibitor: Berman Contemporary (za) 2024",
+        "past edition: team"
+      ]
+    },
+    {
+      "id": 187,
+      "filename": "CERAMICA-SURO_Renata Petersen, 2023.jpg",
+      "size": "6719x4334",
+      "megapixels": 29.1,
+      "url": "https://ceramic.brussels/img/4d060ab4-65c4-4f64-b088-e599165e26f6/ceramica-suro-renata-petersen-2023.jpg",
+      "usedBy": [
+        "exhibitor: The Delville Collection (be)(th) 2026",
+        "exhibitor: Cerámica Suro (mx) 2024",
+        "page: team"
+      ]
+    },
+    {
+      "id": 186,
+      "filename": "CERAMICA-SURO_Renata Petersen, 2023.1.jpg",
+      "size": "6964x4643",
+      "megapixels": 32.3,
+      "url": "https://ceramic.brussels/img/4d060ab4-65c4-4f64-b088-e599165e26f6/ceramica-suro-renata-petersen-20231.jpg",
+      "usedBy": [
+        "exhibitor: Cerámica Suro (mx) 2024"
+      ]
+    },
+    {
+      "id": 185,
+      "filename": "CERAMICA-SURO_Alejandro Garcia, 2023.jpeg",
+      "size": "1716x2573",
+      "megapixels": 4.4,
+      "url": "https://ceramic.brussels/img/4d060ab4-65c4-4f64-b088-e599165e26f6/ceramica-suro-alejandro-garcia-2023.jpeg",
+      "usedBy": [
+        "exhibitor: Sorry We're Closed (be) 2026",
+        "exhibitor: Cerámica Suro (mx) 2024"
+      ]
+    },
+    {
+      "id": 184,
+      "filename": "CERAMICA-SURO_LEVY-LUCERO-Grant_Avant-Art-2022.jpg",
+      "size": "1080x1440",
+      "megapixels": 1.6,
+      "url": "https://ceramic.brussels/img/4d060ab4-65c4-4f64-b088-e599165e26f6/ceramica-suro-levy-lucero-grant-avant-art-2022.jpg",
+      "usedBy": [
+        "exhibitor: Skog Art Space (no) 2026",
+        "exhibitor: Cerámica Suro (mx) 2024"
+      ]
+    }
+  ]
+}

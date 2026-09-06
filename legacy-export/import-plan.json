@@ -58504,6 +58504,15 @@
           },
           "caption": "Sarai Delfendhal",
           "_key": "img1459"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-28eb08594b7bf143af6db8c6045f8137245d6f89-4000x6000-jpg"
+          },
+          "caption": "Silver Sentimenti",
+          "_key": "img1460"
         }
       ]
     }
@@ -58747,6 +58756,24 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-ad3c5954b7d6a95e484aa45349e53cf097e50cd3-4123x5154-jpg"
+          },
+          "caption": "Takumi Morozumi",
+          "_key": "img1181"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-da5ab1a296376e72e2d5421a522dd52eb2f9000b-3024x4032-jpg"
+          },
+          "caption": "Mingshu Li, The Strawflowers Journey, 2024",
+          "_key": "img1180"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-290ce46b5becfd5cdbfdf87ae7121548b9fe934b-2500x3333-jpg"
           },
           "caption": "Lydia SooJin Park, Universe Found In The Forest, 2024",
@@ -58760,6 +58787,15 @@
           },
           "caption": "Sam Chatto",
           "_key": "img1228"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-668e3f7976c9daa05c5f7151bf20ef4b3ec10799-4134x3308-jpg"
+          },
+          "caption": "Takumi Morozumi",
+          "_key": "img1230"
         },
         {
           "_type": "figure",
@@ -59164,6 +59200,15 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-02707c6ac40749ffa8976fc9c6a575ca4f9e1e3e-3000x2400-jpg"
+          },
+          "caption": "Nellie Jonsson, Still Life, 2024",
+          "_key": "img1173"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-23bfadb1fc22204ca89deaf06e72a861fe82b8b0-2245x1174-png"
           },
           "_key": "img1509"
@@ -59447,7 +59492,36 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-1840bf468d88bf6535eed72ad6ffd0007362d5d6-3875x3875-jpg"
+          },
+          "caption": "Brigitte Marionneau",
+          "_key": "img1346"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-0883e3da5173d9fcafd008de33ecd387318a1575-5792x5792-jpg"
+          },
+          "caption": "Lucien Petit",
+          "_key": "img1348"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-321b5c541487dd7a96b6372be8dfe3ff2faf3fdf-3764x3764-jpg"
+          },
+          "caption": "Toru Kurokawa",
+          "_key": "img1347"
+        }
+      ]
     }
   },
   {
@@ -60049,6 +60123,15 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-c7fb26217cc2168aaf1b84a6965e6b11385ef8ab-5504x8256-jpg"
+          },
+          "caption": "Fabienne Loyens, Carabus",
+          "_key": "img1481"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-72ab053ca3ee4ff2e556c2d5cb5f7ec83cfe786d-2480x3189-jpg"
           },
           "caption": "Joana Vasconcelos, Color Mix",
@@ -60633,7 +60716,72 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-f0ab3044c92ad8498b86170563b73aaba7df1835-3853x5394-jpg"
+          },
+          "caption": "Arthur Craco, Grand Vase Decor Fleur Et Flamme, circa 1896 Credits Vincent Everarts",
+          "_key": "img1421"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-1b0a8a79c72b246098992628d18dcdab64b1f07f-4140x5796-jpg"
+          },
+          "caption": "Arthur Craco, Vase Piriforme, circa 1898 Credits Vincent Everarts",
+          "_key": "img1422"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-090fca6acda7efc313dca475adac8451918c2080-4169x5837-jpg"
+          },
+          "caption": "Arthur Craco, Vase Poisson, circa 1920 Credits Vincent Everarts",
+          "_key": "img1423"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-128537ec8af50d16554145598a2c87e1ddf6841d-4332x6498-jpg"
+          },
+          "caption": "Jan Cobbaert, Coq Terre Cuite, circa 1955",
+          "_key": "img1425"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-6ccfe5575354179ec0b5d405c9e48fcef8745c06-5274x3724-jpg"
+          },
+          "caption": "Jan Cobbaert, Plat Terre Cuite, circa 1960",
+          "_key": "img1426"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-ed845e2520b58bffe7ad80a27092970a07703282-4480x6720-jpg"
+          },
+          "caption": "Jan Cobbaert, Bouteille Terre Cuite, circa 1958",
+          "_key": "img1424"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-dd816e012557e0af28e9e5b0c5ce34461962c7d8-4257x5126-png"
+          },
+          "caption": "Omer Coppens, Vase, circa 1895",
+          "_key": "img1427"
+        }
+      ]
     }
   },
   {
@@ -60918,6 +61066,15 @@
           },
           "caption": "Eirik Falckner, Hks",
           "_key": "img1143"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b8fd482e702a5424d7503a690235db1fee49e398-3840x2560-jpg"
+          },
+          "caption": "Eirik Falckner, Hks",
+          "_key": "img1145"
         },
         {
           "_type": "figure",
@@ -61263,6 +61420,15 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-4156f38797f915fd8cde0a2f725b1d0a33a10d3c-4000x3000-png"
+          },
+          "caption": "Caroline Slotte, Series Tracing, 2019 Courtesy Artist and Gallery",
+          "_key": "img1124"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-dd93fe69faee606df371ba7faa358d6a1baa7430-1500x1125-jpg"
           },
           "caption": "Marianne Nielsen, Leaf Crown And Bending Dock, 2022 Courtesy Artist and Gallery",
@@ -61276,6 +61442,15 @@
           },
           "caption": "Marit Tingleff, Blue Wall Sculpture, 2024 Courtesy Artist and Gallery",
           "_key": "img1128"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-91ca22e4fea7bcb35df47defc2e3997c0f1c45ae-5464x8192-jpg"
+          },
+          "caption": "Marianne Huotari, The Baroque Bouquet, 2024 ©photo Anne Autio",
+          "_key": "img1126"
         },
         {
           "_type": "figure",
@@ -61652,10 +61827,145 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-3a9291bf86ae311ebd7891ab852a0d15204581d1-4480x6720-jpg"
+          },
+          "caption": "Huh Sang Wook, 2023 Image courtesy of Ye Studio",
+          "_key": "img1363"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-bf484d61835e0cfa710ae1cbfbaf816748eb956f-4480x6720-jpg"
+          },
+          "caption": "Huh Sang Wook, Pebble Jar With Silver Decoration, 2023 Image courtesy of Ye Studio",
+          "_key": "img1362"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d1c1b9720d2b1d4bd21e5a58d267f8a1951d3b82-6720x4480-jpg"
+          },
+          "caption": "Huh Sang Wook, Pebble Jar With Silver Decoration, 2023 Image courtesy of Ye Studio",
+          "_key": "img1365"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-a0b41655d2a36a8e4af1b41da1a2cf240c31ab5c-2424x1816-jpg"
           },
           "caption": "Kim Hyun Jong, Pine Tree Vase, 2023 Image Courtesy of Ye Studio",
           "_key": "img1366"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b6e5fc631e373b98c4dbca1b3629a0a965c9df69-4480x6720-jpg"
+          },
+          "caption": "Lee Chang Su, Vase, 2023 Image courtesy of Ye Studio",
+          "_key": "img1368"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d2df755f18ed89c7c9d7eee174e17db1a645243d-4480x6720-jpg"
+          },
+          "caption": "Lee Chang Su, Vase, 2023 Image courtesy of Ye Studio",
+          "_key": "img1370"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-f74f7b677967280a0ea8161219943a9a37e1a88c-6720x4480-jpg"
+          },
+          "caption": "Lee Chang Su, Vase, 2023 Image courtesy of Ye Studio",
+          "_key": "img1369"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-2abc43919e8ea9e948acfe918da9bd7448760d22-4480x6720-jpg"
+          },
+          "caption": "Lee Song Am, Silence lI, 2023 Image courtesy of Ye Studio",
+          "_key": "img1371"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-ccb2b7932ae21d8fb56b7dddf8350efa10258f27-4480x6720-jpg"
+          },
+          "caption": "Lee Song Am, Silence lI, 2023 Image courtesy of Ye Studio",
+          "_key": "img1372"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-0cdca3748c7a565c7d19061fa7585645f0d3995b-6720x4480-jpg"
+          },
+          "alt": "Lee Song Am, Silence lI, 2023 Image courtesy of Ye Studio",
+          "_key": "img1373"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-4dab918d1e743735f11a51452f4841d07be9c60f-4222x6332-jpg"
+          },
+          "caption": "Shin Chul Moon, Jar, 2023 Image courtesy of Ye Studio",
+          "_key": "img1375"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-824990bc6ce79a84155980e6614a019cd4ad3581-4480x6720-jpg"
+          },
+          "caption": "Shin Chul Moon, Jar, 2023 Image courtesy of Ye Studio",
+          "_key": "img1376"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-9521b4d91b80f238bdf6b2c395e7c65c7d941d30-6133x4089-jpg"
+          },
+          "caption": "Shin Chul Moon, Jar, 2023 Image courtesy of Ye Studio",
+          "_key": "img1374"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-4836857989b87fe52ee974eba9ffbd880e78eb44-4480x6720-jpg"
+          },
+          "caption": "Shin Sang Ho, Jar Dream Series, 1992 Image courtesy of Ye Studio",
+          "_key": "img1377"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-5905cc9cf62ceb8c71504150fa99e10e0ee03561-4430x6645-jpg"
+          },
+          "caption": "Shin Sang Ho, Jar Dream Series, 1992 Image courtesy of Ye Studio",
+          "_key": "img1378"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-87c9e44f44024a86da4d4fa6a335e049f06316b3-6720x4480-jpg"
+          },
+          "caption": "Shin Sang Ho, Jar Dream Series, 1992 Image courtesy of Ye Studio",
+          "_key": "img1379"
         }
       ]
     }
@@ -61938,6 +62248,24 @@
         ]
       },
       "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-2c8af90b51e0664fab52c7c2d942fc43378f37ce-5300x7949-jpg"
+          },
+          "caption": "Espace Gnomonique 2, 2024 ©Paul Tahon Courtesy Artist and Gallery",
+          "_key": "img1189"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-cd3211cee2153c790baa4bd8c0ec359e72f45470-5291x7937-jpg"
+          },
+          "caption": "Espace Gnomonique 2, 2024 ©Paul Tahon Courtesy Artist and Gallery",
+          "_key": "img1188"
+        },
         {
           "_type": "figure",
           "asset": {
@@ -63274,6 +63602,60 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-94a069b15fe057cd52d0352dccbdf8a34e38334a-4400x6600-jpg"
+          },
+          "caption": "Pierre Martinon, Effloraison",
+          "_key": "img1414"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-853d45c7a3602c15727dde61a05049bef48ec20d-4400x6600-jpg"
+          },
+          "caption": "Pierre Martinon, La Citadelle",
+          "_key": "img1415"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-ad4b04881df3553873f99d8801e0a618b993f933-4400x6600-jpg"
+          },
+          "caption": "Pierre Martinon, Le Temple Des Secrets",
+          "_key": "img1416"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-515c591c354de1816cce6aa21778b56e6fb2cfee-4400x6600-jpg"
+          },
+          "caption": "Pierre Martinon, Porter Aux Nues",
+          "_key": "img1418"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-62905f99f58719e18ab2f9eafaad8231ae46c971-4400x6600-jpg"
+          },
+          "caption": "Pierre Martinon, Rondeurs Et Tâches De Rousseur",
+          "_key": "img1419"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-1e940d04bdd59ae204ea9c57aeb932cdc4a95113-4400x6600-jpg"
+          },
+          "caption": "Pierre Martinon, Broyeurs Des Coeurs",
+          "_key": "img1420"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-a0a4acdec1bb4a0447255849b199ee2282df9086-854x1280-jpg"
           },
           "caption": "Clémentine Dupré, Médusée",
@@ -63529,6 +63911,51 @@
           },
           "caption": "Jacques Monneraud, Pichet 2024 ©Arsenicgalerie",
           "_key": "img1516"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-bfc3b61bc50210cb6e6a9ddee6d4ffb96b2b53d6-4865x6486-jpg"
+          },
+          "caption": "Jacques Monneraud, Vase 2024 ©Arsenicgalerie",
+          "_key": "img1517"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-228be084c5fd4de015d99b790463d433e5a1cda4-5152x6869-jpg"
+          },
+          "caption": "Jules Bouteleux, Echaffaudage Lourd 2023 ©Arsenicgalerie",
+          "_key": "img1519"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-de34a4796f00ec01626dd98087e31001138f8a2b-5304x7426-jpg"
+          },
+          "caption": "Michel Gouery, Planète Fantôme Métamorphose 2024 ©Arsenicgalerie",
+          "_key": "img1521"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e577479aadfff826cd99f7603689a26edef3e490-5020x6275-jpg"
+          },
+          "caption": "Michel Gouery, Planète Fantôme 2024 ©Arsenicgalerie",
+          "_key": "img1520"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-012791630ecdf1dfd396e30fdaba749b242f7f1d-5759x3839-jpg"
+          },
+          "caption": "Jules Bouteleux, Cabanon Aux Pierres 2020 ©Juliette Duchange",
+          "_key": "img1518"
         }
       ]
     }
@@ -63773,10 +64200,28 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-5196073287c333af392d2b56c779883563c5a7e4-6448x4299-jpg"
+          },
+          "caption": "Vassil Ivanoff, Objets 0124, 2024 ©photo Romain Forquy",
+          "_key": "img1069"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-a1a540718bd641c51129d872a9a274ee6129037b-2500x1667-jpg"
           },
           "caption": "Vassil Ivanoff, Objets 0157, 2024 ©photo Romain Forquy",
           "_key": "img1070"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-762ea146cc07e2d99c16a42805bf2f457329a2af-6570x4380-jpg"
+          },
+          "caption": "Vassil Ivanoff, Objets 0184, 2024 ©photo Romain Forquy",
+          "_key": "img1071"
         }
       ]
     }
@@ -64138,7 +64583,36 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-8b9300553c04a393fc3377e3c04d2e4dfec91e61-3840x5760-jpg"
+          },
+          "caption": "Yuki Nara, Bone Flower 21, 2020 ©Ohimuseum",
+          "_key": "img1060"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-a9d93427c9492ce3027ccf84547760c50623e74d-3840x5760-jpg"
+          },
+          "caption": "Yuki Nara, Bone Flower 28, 2024",
+          "_key": "img1059"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7145436086ff59b351dd16b1e957f1bf73a80331-3840x5760-jpg"
+          },
+          "caption": "Yuki Nara, Bone Flower 18, 2020 ©Ohimuseum",
+          "_key": "img1061"
+        }
+      ]
     }
   },
   {
@@ -64370,6 +64844,33 @@
           },
           "caption": "Toshiya Masuda",
           "_key": "img1195"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-435c49a9e8a482ed7130d0f493ef3d59125e01f2-4752x3168-jpg"
+          },
+          "caption": "Manami Okayasu",
+          "_key": "img1194"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-9d310ab00f34a29926a2c1d721ec901d82732b91-3168x4752-jpg"
+          },
+          "caption": "Manami Okayasu",
+          "_key": "img1193"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-34fdcc608fa52f9e434569c9c450a07fd6be79d6-5257x6008-jpg"
+          },
+          "caption": "Kouzo Takeuchi",
+          "_key": "img1191"
         },
         {
           "_type": "figure",
@@ -64674,6 +65175,24 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-1b02090faccf3b48b588587c729d8cce84d4bf38-2946x2946-jpg"
+          },
+          "caption": "Daphne De Gheldere Courtesy of the Artist",
+          "_key": "img1392"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-62403fdacdc2af2863cc1b39afdf978007fdc72b-3393x3615-jpg"
+          },
+          "caption": "Soojin Choi Courtesy of the Artist",
+          "_key": "img1398"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-1a927289b8da6eb51ada2cedbf84d5c4e8b1b08b-2400x2400-jpg"
           },
           "caption": "Sachi Moskowitz, Divine Freedom, 2023 Courtesy of the Artist",
@@ -64683,10 +65202,37 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-b71cd46c6b7ff901e25ab6f8e592e51e04e3709a-3024x4032-jpg"
+          },
+          "caption": "Nathalie Campion, Tour De Babel Tower, 2024 Courtesy of the Artist",
+          "_key": "img1396"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-efb0eca2ab8fadcd19dc5ea02083da09226831da-1335x2000-jpg"
           },
           "caption": "Michael Dickey Courtesy of the Artist",
           "_key": "img1395"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7a2e9885c67d808d7b7132e1950a5a94d6f85eb0-4362x3974-jpg"
+          },
+          "caption": "Meegan Barnes, Pinks Courtesy of the Artist",
+          "_key": "img1394"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d2a733cc214e5215f8e533afd25a5e5061193308-4982x6228-jpg"
+          },
+          "caption": "Martine Feipel Et Jean Bechameil, Shelter, 2024 Courtesy of the Artist",
+          "_key": "img1393"
         },
         {
           "_type": "figure",
@@ -65348,7 +65894,18 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-28917f6c1198f46b3e90815f439f701d56063dd5-4503x6747-jpg"
+          },
+          "caption": "Bachelot Et Caron, Vase Visceres ©photo Audrey Falet - Sèvres, Manufacture et musée nationaux",
+          "_key": "img1182"
+        }
+      ]
     }
   },
   {
@@ -65702,10 +66259,28 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-c951883aee52c2e29efb5ff01bd96f644b280065-3237x4855-jpg"
+          },
+          "caption": "Marion Flament",
+          "_key": "img1387"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-aaf176589d5ab9f1fe6867c1bdebab1f37e5b5e1-2500x3750-jpg"
           },
           "caption": "Marion Flament",
           "_key": "img1388"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-07b5ca56b0e5f3932a28b4b0f3db3dfc0afee2c1-3024x4032-jpg"
+          },
+          "caption": "Marion Flament, Chapelet",
+          "_key": "img1386"
         }
       ]
     }
@@ -66076,6 +66651,24 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-2db84931e18601015659d1336e2d74934e11a992-7296x5464-jpg"
+          },
+          "caption": "Sisse Lee, Slow Feeder ©Ole Akhoj",
+          "_key": "img1171"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-734b89a268de610e308decf0f498cbe01d211827-6894x4962-jpg"
+          },
+          "caption": "Petra Dalstrom, The Reservoir ©Ole Akhoj",
+          "_key": "img1170"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-ba8ad86fc80e20c6bb6c6ab034dba376e3d6c782-1600x1600-jpg"
           },
           "caption": "Martin Bodilsen, Kaldahl Bototo ©Ole Akhoj",
@@ -66089,6 +66682,15 @@
           },
           "caption": "Martin Bodilsen, Kaldahl Boal ©Jeppe Gudmundsen Holmgreen",
           "_key": "img1172"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-3cc3698d5d7a593c3930d5c8b795d5833a465740-8192x5464-jpg"
+          },
+          "caption": "Hilda Piazzolla, Differential Growth Series ©Ole Akhoj",
+          "_key": "img1168"
         }
       ]
     }
@@ -66501,6 +67103,15 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-07af0e90c241bea4e6d9710db7bc077f50a8b988-3667x5500-jpg"
+          },
+          "caption": "Natasja Alers, Jamat, 2024 ©Lndw Studio",
+          "_key": "img1166"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-9952ea3dbf787e3af25e1944da158c222d66fff5-1000x1500-jpg"
           },
           "caption": "Natasja Alers, One Of The First ©Lndw Studio",
@@ -66514,6 +67125,105 @@
           },
           "caption": "Natasja Alers, Closed Nipplevase, 2024 ©Lndw Studio",
           "_key": "img1164"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-711168285127c4dc678b3262388ba2f23a1bd17b-2756x4134-jpg"
+          },
+          "caption": "Johannes Nagel, Movement Tree, 2024 ©Tom Dachs",
+          "_key": "img1163"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-0efefe9ad02c61c8e4f69471cb58d5269bb65b62-2756x4134-jpg"
+          },
+          "caption": "Johannes Nagel, Movement Cut, 2024 ©Tom Dachs",
+          "_key": "img1162"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d74f4f5ab6c1c3a2f9e7c4b597ec5b23dafc6d15-2756x4134-jpg"
+          },
+          "caption": "Johannes Nagel, Cuts, 2024 ©Tom Dachs",
+          "_key": "img1161"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-0fd33521a1cc99a2c4148cde9aa4ada48e6fd517-3755x3054-jpg"
+          },
+          "caption": "Nick Ervinck, Petoemba, 2016 2018",
+          "_key": "img1462"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-93ef068ba9724e6ab62f3515fa04b1f2fa6174d5-4000x6000-jpg"
+          },
+          "caption": "Samuel Sarmiento, Preparation Of Mud Walls And Bricks, 2023 Credits Rafael Barragan",
+          "_key": "img1469"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-8db00684750b38c4f8bb2101e45958544e86cb22-6000x4000-jpg"
+          },
+          "caption": "Samuel Sarmiento, Collection Of Minerals And Precious Metals, 2023 Credits Rafael Barragan",
+          "_key": "img1468"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-06e5dcec483ac14c1dd9097f7bba199b5d8fd3f7-6000x4000-jpg"
+          },
+          "caption": "Samuel Sarmiento, Untitles Artisanal Making Of Roof Tiles, 2023 Credits Rafael Barragan",
+          "_key": "img1467"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b7af874b85af69d27e3c4255749a208c3398f3d4-5664x3776-jpg"
+          },
+          "caption": "Samuel Sarmiento, Preparation Of Mud Walls And Bricks, 2023 Credits Rafael Barragan",
+          "_key": "img1466"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-8d27117b3ac78416506e856f75e51fcf58a5c5e9-4896x3264-jpg"
+          },
+          "caption": "Nick Ervinck, Etunap, 2017",
+          "_key": "img1465"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-3f10940c8b20cfbb2f3b95bfdd0c50713d46f81b-3837x3070-jpg"
+          },
+          "caption": "Nick Ervinck, Etunap, 2017",
+          "_key": "img1464"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-1e4e8b3768b35e10d489081cc74b171a9623a578-3480x4236-jpg"
+          },
+          "caption": "Nick Ervinck, Bruntusario, 2022",
+          "_key": "img1463"
         }
       ]
     }
@@ -66836,7 +67546,45 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-5d14b1d9c7d9d746e139c35c4eb1917f5be87a01-6000x4000-jpg"
+          },
+          "caption": "Damien Fragnon, Hydrothermal Experience, 2022 ©Damien Fragnon",
+          "_key": "img1160"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-a385f9b72880d0150dc9527b1a337626bb12023b-5223x7830-jpg"
+          },
+          "caption": "Pauline Bonner, Calcinee, 2022 ©Maurane Andrianaivo",
+          "_key": "img1159"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-6b56b7c95cc117a916b9a0d82633a90d0125427d-7087x3988-jpg"
+          },
+          "caption": "Laurin Schaub, Landscapes Vases, 2020 ©Hansruedit Rohrer",
+          "_key": "img1158"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7fd75a6e4a4164f83b18e06d2113a1974d37f89b-5472x3648-jpg"
+          },
+          "caption": "Enzo Bosse, Untitled, 2024 ©Enzo Bosse",
+          "_key": "img1157"
+        }
+      ]
     }
   },
   {
@@ -67218,6 +67966,33 @@
           },
           "caption": "Benoit Pouplard, Terra Incognita Ring 13, 2022",
           "_key": "img1156"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7c2573f446f0dfd696bae524d3aee93f2926c255-3888x4044-jpg"
+          },
+          "caption": "Benoit Pouplard, Creuset 29, 2022",
+          "_key": "img1155"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-f293e7ed20693bed1c5aad8e498f6a714e87f6d8-3474x2898-jpg"
+          },
+          "caption": "Jennifer Ramsay",
+          "_key": "img1153"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7751ccdaeeef6ef9c1a12e0e64e4ebcb8e995b2b-4000x3000-jpg"
+          },
+          "caption": "Jennifer Ramsay",
+          "_key": "img1152"
         }
       ]
     }
@@ -67550,6 +68325,15 @@
           },
           "caption": "Ryoji Koie, 12 bols",
           "_key": "img1345"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-24c97d478571ea2b22dfdb96528a162263217b55-2296x4080-jpg"
+          },
+          "caption": "Ryoji Koie, Paire De Plats",
+          "_key": "img1344"
         },
         {
           "_type": "figure",
@@ -68908,10 +69692,55 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-16e77ba7d6e77e656e073b12618005e1912e1a0f-5504x8256-jpg"
+          },
+          "caption": "Carolein Smit, Heilge Graal, 2024",
+          "_key": "img1506"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-1d4613fedb06d1d41dbe9edfda97c8848f59eaf7-3391x5161-jpg"
+          },
+          "caption": "James B. Webster, Angel, 2024",
+          "_key": "img1380"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-67248965b855ca88b2b64176ad3ee66732bc81b0-4000x5647-jpg"
+          },
+          "caption": "James B. Webster, Angel, 2024",
+          "_key": "img1382"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-b9cdbd129ee1c477a27fc23143313a9374c85ca1-1240x1748-png"
           },
           "caption": "James B. Webster, Angel, 2024",
           "_key": "img1381"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-952044bca50e147db4f124ac6c2e1482e57619aa-3632x5245-jpg"
+          },
+          "caption": "Onno Theelen, Crocodile Eating Oil, 2024",
+          "_key": "img1504"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-fa740c5728fcd89ae936a463b168733dbf013c42-4117x5490-jpg"
+          },
+          "caption": "Kartini Thomas, Spacemonkey",
+          "_key": "img1505"
         }
       ]
     }
@@ -69194,6 +70023,24 @@
         ]
       },
       "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-684fa1dc843a1d5a0ca15b5f6369ceff7f9b578f-2892x4560-jpg"
+          },
+          "caption": "Helena Hafemann, O T Fadenschein Numero 10, 2024",
+          "_key": "img1135"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-694cb476752800f469f8d70c8be67d6bcde833f0-2846x4189-jpg"
+          },
+          "caption": "Helena Hafemann, O T Fadenschein Numero 3, 2024",
+          "_key": "img1134"
+        },
         {
           "_type": "figure",
           "asset": {
@@ -69896,6 +70743,23 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-369bc8e3812985ec886f551c977e7fbe893bf164-4252x2178-jpg"
+          },
+          "_key": "img1276"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-015ea369b2b15e14d6ca991287f17bdacd453e21-3024x4032-jpg"
+          },
+          "caption": "Jonas Deelstra Oester",
+          "_key": "img1277"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-d843bc859c456960aee19d2b9a70120de05c0379-2100x3150-jpg"
           },
           "caption": "Nap Gomulan",
@@ -70232,6 +71096,15 @@
           },
           "caption": "Andres Anza, Slow Moving, 2023 ©Galleria Anna Marra",
           "_key": "img1120"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-39ba9e2f96d0b16bb48f60273c653ea498bffa1b-2606x1738-jpg"
+          },
+          "caption": "Andres Anza, We Are All Curious, 2023 ©Galleria Anna Marra",
+          "_key": "img1118"
         },
         {
           "_type": "figure",
@@ -70620,7 +71493,36 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-93481efefaf2ee61cf994e55e6ec45d6fdf414d6-3096x4128-jpg"
+          },
+          "caption": "Mark Brusse, Mask 2022",
+          "_key": "img1309"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-33d147e7ea1a3bd75ddb9aca38d53a64c3261023-4128x3096-jpg"
+          },
+          "caption": "Yuri Kuper, Tasse Grise, 2013",
+          "_key": "img1308"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-af7def0c42fb55b191cc48673f36663416406818-3096x4128-jpg"
+          },
+          "caption": "Euloge Glèlè, Masque 2023",
+          "_key": "img1307"
+        }
+      ]
     }
   },
   {
@@ -70943,6 +71845,15 @@
         ]
       },
       "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7fb0998bc7e598184e059a7b4fae8e223582f4f9-2880x1920-jpg"
+          },
+          "caption": "Peter Aerts © Yannick Milpas",
+          "_key": "img1110"
+        },
         {
           "_type": "figure",
           "asset": {
@@ -71739,6 +72650,33 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-00a2ac46bc1b4ce1d0bd3d116a187badd07de542-4042x2696-jpg"
+          },
+          "caption": "Charlotte Eta, Mumms",
+          "_key": "img1106"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-5a2b1d86b62180499beb8e98fcaeccce1570b8e1-3900x3358-jpg"
+          },
+          "caption": "Sherman Tabet",
+          "_key": "img1107"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-f982926b5828626815454848dbab927bda0e7d3d-2935x3024-jpg"
+          },
+          "caption": "Zena Assi, Column",
+          "_key": "img1108"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-a47ff3ee394c410681025e3cbe491e88c4de89bb-1200x1600-jpg"
           },
           "caption": "Nevine Bouez, Asfour",
@@ -72080,10 +73018,28 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-48d7d894c6f9b2120416cb4fda9e52eceb9ba594-3189x2126-jpg"
+          },
+          "caption": "Clemence Van Lunen, Curtain M, 2023 ©Juliette Agnel",
+          "_key": "img1209"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-885edb7b205a16e9f19a3fd0b58f425a6148f665-2126x3189-jpg"
           },
           "caption": "Clemence Van Lunen, Curtain A, 2023 ©Juliette Agnel",
           "_key": "img1208"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d2fe623b99e2415a9706402c025b3c3629c78b5e-3287x2935-jpg"
+          },
+          "caption": "Clemence Van Lunen, Curtain Y, 2024 ©Juliette Agnel",
+          "_key": "img1210"
         }
       ]
     }
@@ -72412,6 +73368,15 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-dc3bb6b9ad5ac7bb0e0a8165e07eded6389a86f5-3456x5184-jpg"
+          },
+          "caption": "Bachelot Et Caron, BC 2355 Gateau Crepes, 2023 ©Bachelot Et Caron",
+          "_key": "img1399"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-46630b5b17eb8b1a57ddf293a6c2949ce7746aba-2000x2667-jpg"
           },
           "caption": "Kartini Thomas, Atomic Teru, 2023 ©Kartini Thomas",
@@ -72425,6 +73390,24 @@
           },
           "caption": "Matthieu Faury, Boot, 2024 ©Matthieu Fairy",
           "_key": "img1401"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-87895e51d1265d1eb4ec35367be245d24e6aa139-3831x5745-jpg"
+          },
+          "caption": "Muriel Persil, Miroir Azuréen, 2023 ©Muriel Persil",
+          "_key": "img1402"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-1768d6991735de4d3bc8e6de1e6a8a1721b8e011-3024x4032-jpg"
+          },
+          "caption": "Onno Theelen, Fontaine Flamboyante, 2023, ©Onno Theelen",
+          "_key": "img1403"
         }
       ]
     }
@@ -72795,10 +73778,28 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-7c32fec329e823a352607dd8398c29ecee42173a-3150x4724-jpg"
+          },
+          "caption": "Miguel Chevalier, Cabinet Curiosite 1 © Thomas Granovsky",
+          "_key": "img1105"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-19f2b4a6955d5707e1c560029e249315482b3eb9-1500x1000-jpg"
           },
           "caption": "Michel Paysant, La Grande Vague",
           "_key": "img1104"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-a63058f371748e298b89f11085780cf4a56eafc1-4307x2423-jpg"
+          },
+          "caption": "Jonathan Keep, Think",
+          "_key": "img1103"
         },
         {
           "_type": "figure",
@@ -73182,6 +74183,24 @@
           },
           "caption": "Manuel Sanchez Algora",
           "_key": "img1097"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-cf2e4b3ac662ef8e990311f161c7d6d064d216fe-3024x4032-jpg"
+          },
+          "caption": "Manuel Sanchez Algora",
+          "_key": "img1306"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-f717043c103822f5f3f07a1cc736565889435da3-3024x3024-jpg"
+          },
+          "caption": "Manuel Sanchez Algora",
+          "_key": "img1099"
         }
       ]
     }
@@ -73468,6 +74487,33 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-065432b23b946ade6f2aaefb36932761824d38cf-3000x4000-jpg"
+          },
+          "caption": "Boris Van Berkum, Kabra Blauw Lidded Vase Decoration Diamond, 2022",
+          "_key": "img1261"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-6c93c02f726a1646c5950d8d95801d8081e2a563-3000x4000-jpg"
+          },
+          "caption": "Boris Van Berkum, Kabra Blauw Lidded Vase Parsley, 2022",
+          "_key": "img1263"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-ea02ffbd6e554b4bb4bfdad4d44ccfd7cf18df2a-3000x4000-jpg"
+          },
+          "caption": "Boris Van Berkum, Kabra Blauw Lidded Vase Decoration Diamond, 2022",
+          "_key": "img1262"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-b5aeec6429f7b81a9bd6c726523ef0f2e05c83a8-1260x1920-jpg"
           },
           "caption": "Carolein Smit, Vulture With Pearl Necklace, 2024",
@@ -73508,6 +74554,15 @@
           },
           "caption": "Inez De Brauw, Innocent Endowment, 2023",
           "_key": "img1268"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-62192dfbc068e83236b6b4cb6aea4e59dfd8c758-2649x3032-jpg"
+          },
+          "caption": "Inez De Brauw, Initial Avowal, 2023",
+          "_key": "img1269"
         }
       ]
     }
@@ -73794,6 +74849,24 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-ef290f4b3f839ee3dd1b963d67fb8a0a5365e656-3543x5315-jpg"
+          },
+          "caption": "Delphine Courtillot, Souviens Toi ©foto Aatjan Renders",
+          "_key": "img1096"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-afbb7b21b4a013989a53a68cdaa7e6739c0d47c3-3543x5315-jpg"
+          },
+          "caption": "Delphine Courtillot, Ancetres ©foto Aatjan Renders",
+          "_key": "img1095"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-f0443da0ab54a66f52153c4cf3ccb994868c453f-2240x1494-jpg"
           },
           "caption": "Delphine Courtillot, Overview ©foto Aatjan Renders",
@@ -74046,6 +75119,15 @@
           },
           "caption": "Clementine De Chabaneix",
           "_key": "img1093"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-731acc9090bd0dd359f186d4b3346b839c85df29-5208x7152-jpg"
+          },
+          "caption": "Clementine De Chabaneix",
+          "_key": "img1090"
         }
       ]
     }
@@ -74336,6 +75418,24 @@
           },
           "caption": "Aneta Regel © Sylvain Deleu",
           "_key": "img1085"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-9fa00eb4c49d12200e08c739a8342245d3835496-3543x2656-jpg"
+          },
+          "caption": "Luke Fuller © Michael Harvey",
+          "_key": "img1086"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-a6ef7857a2378af887a8e00c53bc39a67e41b819-2896x4344-jpg"
+          },
+          "caption": "Pekka Paikkari",
+          "_key": "img1088"
         }
       ]
     }
@@ -74618,6 +75718,24 @@
         ]
       },
       "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-c3afa75159f27ae33a2b5162bc9a3844a49aec6a-4912x3264-jpg"
+          },
+          "caption": "Monika Patuszynska, From The Series Genealogy, 2019",
+          "_key": "img1084"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-c3412f63b98d99cdff8bca242b4623c39b1d1d77-3900x3648-jpg"
+          },
+          "caption": "Jane Norbury, Migrations 1",
+          "_key": "img1079"
+        },
         {
           "_type": "figure",
           "asset": {
@@ -74996,6 +76114,24 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-f1d44f73c3ea1262c94de9285b16cb636dae43e6-4480x3733-jpg"
+          },
+          "caption": "Claude Champy, Grand Triptyque © Denis Durand",
+          "_key": "img1083"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-1fb5a5f33dcbbca0849f0b159fc4a97ed0f404fd-5016x2150-jpg"
+          },
+          "caption": "Claude Champy, Mural © Denis Durand",
+          "_key": "img1082"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-6fdccd12ee0a6b3c26f70dcfefa0b1daa1e1eb54-2406x3206-jpg"
           },
           "caption": "Claude Champy, Bols © Denis Durand",
@@ -75256,6 +76392,15 @@
           },
           "caption": "Paulina Pollanen, 2024 ©photo Carsten Aniksdal",
           "_key": "img1066"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-f5fb1959feb3f7d910410776e0b9b031ade2756c-2912x4368-jpg"
+          },
+          "caption": "Torbjorn Kvasbo, Green Stack, 2012 ©photo Torbjorn Kvasbo",
+          "_key": "img1067"
         },
         {
           "_type": "figure",
@@ -75819,7 +76964,36 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-90e2e4993cfb1edcf9860bfc075ea611ac2e4b32-2953x3543-jpg"
+          },
+          "caption": "Abel Jallais, Bonbonne Sur Base 1, 2024 ©photo Abel Jallais",
+          "_key": "img1062"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d9f5b1ee0466962e4ac4eb3ed6de7ebe0ac057a0-2953x3543-jpg"
+          },
+          "caption": "Abel Jallais, Bonbonne Sur Base 2, 2024 ©photo Abel Jallais",
+          "_key": "img1063"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-39f0b6d6f353793da604394c9d0aa8f6afc55989-2953x3543-jpg"
+          },
+          "caption": "Abel Jallais, Bonbonne Sur Base 3, 2024 ©photo Abel Jallais",
+          "_key": "img1064"
+        }
+      ]
     }
   },
   {
@@ -76535,6 +77709,26 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-6f1fdee53027a9cfbce1b36e6bf71a15bf68ac0c-4480x6720-jpg"
+          },
+          "alt": "Bodil Manz ©Køppe Contemporary",
+          "caption": "Bodil Manz ©Køppe Contemporary",
+          "_key": "img631"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-895447f7285941dfe890d4c4aa543023ab2b80ae-8643x3787-jpg"
+          },
+          "alt": "Michael Geertsen ©Kasper Agergaard",
+          "caption": "Michael Geertsen ©Kasper Agergaard",
+          "_key": "img630"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-d2073433fc45d163eb52c3c7f67d82b8d4c60c20-1397x1397-jpg"
           },
           "alt": "Michael Geertsen ©Kasper Agergaard",
@@ -76550,6 +77744,36 @@
           "alt": "Michael Geertsen ©Kasper Agergaard",
           "caption": "Michael Geertsen ©Kasper Agergaard",
           "_key": "img627"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b552dc6d45e82beca6063a337bd88fc6bde07a92-8334x5556-jpg"
+          },
+          "alt": "Lone Skov Madsen ©Kasper Agergaard",
+          "caption": "Lone Skov Madsen ©Kasper Agergaard",
+          "_key": "img628"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-f68fae4e913c4421b6ade5af8de3e01f8026b0fa-8334x5556-jpg"
+          },
+          "alt": "Lone Skov Madsen ©Kasper Agergaard",
+          "caption": "Lone Skov Madsen ©Kasper Agergaard",
+          "_key": "img622"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-5d48864705979a752935e050e240d3703f75c995-5330x5330-jpg"
+          },
+          "alt": "Malene Müllertz ©Kasper Agergaard",
+          "caption": "Malene Müllertz © Kasper Agergaard",
+          "_key": "img632"
         }
       ]
     }
@@ -76872,7 +78096,39 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-5496302f58e27b642f842831c283c2f69575e049-6654x4945-jpg"
+          },
+          "alt": "Kim Simonsson, Moss Twins with cauliflower hoodie, 2022",
+          "caption": "Kim Simonsson, Moss Twins with cauliflower hoodie, 2022",
+          "_key": "img576"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e2a29efc5c1ae73175c9d492e111d30f7dc9ad85-5000x5000-jpg"
+          },
+          "alt": "Kim Simonsson, Kneeling Biologist, 2023",
+          "caption": "Kim Simonsson, Kneeling Biologist, 2023",
+          "_key": "img574"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-196de967d06ddb689623a2783330387a1733addd-6000x6000-jpg"
+          },
+          "alt": "Kim Simonsson, 2023",
+          "caption": "Kim Simonsson, 2023",
+          "_key": "img577"
+        }
+      ]
     }
   },
   {
@@ -77207,7 +78463,39 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-c3ee30aea051cf97cc4d264714dde52ee590cd6c-3350x3705-jpg"
+          },
+          "alt": "Anni Mertens, Fourfold, 2023 © Anni Mertens",
+          "caption": "Anni Mertens, Fourfold, 2023 © Anni Mertens",
+          "_key": "img571"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-087e28ea664bd8ad9b2417718788e526be4b82f4-2736x3319-jpg"
+          },
+          "alt": "Anni Mertens, Mercury, 2023 © Anni Mertens",
+          "caption": "Anni Mertens, Mercury, 2023 © Anni Mertens",
+          "_key": "img570"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7834d9fe83b81c08e2dc22fecc3630fbc3682c4a-3449x4652-jpg"
+          },
+          "alt": "Anni Mertens, Floatie, 2023 © Anni Mertens",
+          "caption": "Anni Mertens, Floatie, 2023 © Anni Mertens",
+          "_key": "img572"
+        }
+      ]
     }
   },
   {
@@ -77492,6 +78780,24 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-6f4569c959862d5b0e39a9deca42dcf01893d111-4912x7360-jpg"
+          },
+          "alt": "Antonio Recalcati, Vase N°587 1990",
+          "caption": "Antonio Recalcati, Vase N°587 1990",
+          "_key": "img589"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-64d600c1c378edc39b7e0e14308a0e3b89cfd8e3-7360x4912-jpg"
+          },
+          "_key": "img588"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-831bbed9c349ab2cd5113d008b9191a7c85b0816-2367x3189-jpg"
           },
           "alt": "Émile Decœur, Vase Coloquinte Rose et Mauve Circa 1907-1908",
@@ -77566,6 +78872,26 @@
           },
           "alt": "Jules Agard, L’Envol, Circa 1940",
           "_key": "img687"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-412e81cac1ce288ebbf895b3926b4b343599b8aa-8072x3259-jpg"
+          },
+          "alt": "Delphine Grenier, Allongé XII, 2022",
+          "caption": "Delphine Grenier, Allongé XII, 2022",
+          "_key": "img684"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-cf527a0eca6e258487557e0d897b5b5c76c23aed-8141x3252-jpg"
+          },
+          "alt": "Delphine Grenier, Allongée XX, 2023",
+          "caption": "Delphine Grenier, Allongée XX, 2023",
+          "_key": "img685"
         }
       ]
     }
@@ -78014,7 +79340,49 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-357e79efd675d35f5688ce82b3facc9b7fd07f0a-1000x1500-jpg"
+          },
+          "alt": "Translocation 3 ©Kathy LeVavasseur",
+          "caption": "Kathy Le Vavasseur, Translocation 3 ©Kathy LeVavasseur",
+          "_key": "img456"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-20799dca8be9ecfee873aac2936a69ae57c363b7-1125x1500-jpg"
+          },
+          "alt": "moyenne neurone ©Thomas Deschamps",
+          "caption": "Kathy Le Vavasseur, moyenne neurone ©Thomas Deschamps",
+          "_key": "img458"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-176ae0f317487426847bd02c5df410dfcc6f9c5b-1000x1500-jpg"
+          },
+          "alt": "moyenne neurone ©Thomas Deschamps",
+          "caption": "Kathy Le Vavasseur, moyenne neurone ©Thomas Deschamps",
+          "_key": "img465"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-a9b09760b54da1fe42bec5faa32a0bf1c47fa09f-1000x1500-jpg"
+          },
+          "alt": "sculpture circum colonne ©Thomas Deschamps",
+          "caption": "Kathy Le Vavasseur, sculpture circum colonne ©Thomas Deschamps",
+          "_key": "img466"
+        }
+      ]
     }
   },
   {
@@ -78390,7 +79758,69 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-91a965bb3b32f06766d07d44cdc712936f7303da-2500x1667-jpg"
+          },
+          "alt": "The Void, 2021 ©Yoshiki SHIGEMATSU (重松善樹)",
+          "caption": "The Void, 2021 ©Yoshiki SHIGEMATSU (重松善樹)",
+          "_key": "img406"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-ce9ab986c94715bd657a04d468430dbddefa48d9-1000x1500-jpg"
+          },
+          "alt": "Profile 5, 2022 ©Chisato Yasui",
+          "caption": "Profile 5, 2022 ©Chisato Yasui",
+          "_key": "img405"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d2841e5c87c7e0c609ce1ed7b749ae6ffa557701-2500x1667-jpg"
+          },
+          "alt": "Profile 8, 2022 ©Chisato Yasui",
+          "caption": "Profile 8, 2022 ©Chisato Yasui",
+          "_key": "img407"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-97a268054ebb37d10aa904628a33210e70336883-1000x1500-jpg"
+          },
+          "alt": "Sai do ki 1, 2022 ©Kenji Gomi",
+          "caption": "Sai do ki 1, 2022 ©Kenji Gomi",
+          "_key": "img452"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-39363d088566ae7a725e9bee57b2d4e3adba165c-1000x1500-jpg"
+          },
+          "alt": "Shi-tou, 2023 ©Kenji Gomi",
+          "caption": "Shi-tou, 2023 ©Kenji Gomi",
+          "_key": "img453"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-2361556c45357cc1f00a3cfd04e2328a3dade475-1000x1500-jpg"
+          },
+          "alt": "Sai do ki 2, 2022 ©Kenji Gomi",
+          "caption": "Sai do ki 2, 2022 ©Kenji Gomi",
+          "_key": "img454"
+        }
+      ]
     }
   },
   {
@@ -78727,11 +80157,41 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-eef493ce3504526837aa29739bdcc393cb0de64a-2500x1667-jpg"
+          },
+          "alt": "Anne Marie Laureys, MANDRA KANTRA lady slowly approaching, 2018 ©Peter Claeys",
+          "caption": "Anne Marie Laureys, MANDRA KANTRA lady slowly approaching, 2018 ©Peter Claeys",
+          "_key": "img491"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b56bbfbf38a5888bad71533d60e9ca6f7c8d5377-2500x1667-jpg"
+          },
+          "alt": "Anne Marie Laureys, Je suis swing, 2020 ©Peter Claeys",
+          "caption": "Anne Marie Laureys, Je suis swing, 2020 ©Peter Claeys",
+          "_key": "img490"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-529aa4e5a8845b471b5f781edfb5c3050863a478-1125x1500-jpg"
           },
           "alt": "Kevin McNamee, Tweed_Lemon Tree, 2023",
           "caption": "Kevin McNamee, Tweed_Lemon Tree, 2023",
           "_key": "img497"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-5fa93c71a7a90cf52cd4f2af24c90130201c8d45-2500x1875-jpg"
+          },
+          "alt": "Kevin McNamee, Tweed_Room (Accumulation Narrative), 2023",
+          "caption": "Kevin McNamee, Tweed_Room (Accumulation Narrative), 2023",
+          "_key": "img501"
         },
         {
           "_type": "figure",
@@ -79117,6 +80577,26 @@
           "alt": "Pierrick Naud, Rappel des nébuleuses, 2023 @Modulab",
           "caption": "Pierrick Naud, Rappel des nébuleuses, 2023 @Modulab",
           "_key": "img530"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-acef878f43c4d08853736ca3aef410cf8c94cdba-3151x4724-jpg"
+          },
+          "alt": "Pierrick Naud, Lueur d'ébène n°06, 2021 @Modulab",
+          "caption": "Pierrick Naud, Lueur d'ébène n°06, 2021 @Modulab",
+          "_key": "img531"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d070615fe9a73d39c4f108c7f5f6e033515fa624-4629x6943-jpg"
+          },
+          "alt": "Pierrick Naud, Lueur d'ébène n°29, 2021 @Modulab",
+          "caption": "Pierrick Naud, Lueur d'ébène n°29, 2021 @Modulab",
+          "_key": "img532"
         }
       ]
     }
@@ -79397,7 +80877,59 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b1ab69805bc69fd0475f5a9e3fd53a6fdc74e9de-2500x1995-jpg"
+          },
+          "alt": "Processione di Primavera, 2022, Yves Malfiet",
+          "caption": "Yves Malfliet, Processione di Primavera, 2022",
+          "_key": "img428"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b1a7f0e7997a98774a4f4ffbf190732879c2a134-1099x1500-jpg"
+          },
+          "alt": "Kalt Im Walt, 2022 Yves Malfiet",
+          "caption": "Yves Malfliet, Kalt Im Walt, 2022",
+          "_key": "img427"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-33212c36e2973291369a8e9224754d6e5bdd835f-2500x1632-jpg"
+          },
+          "alt": "EISTRAUM, 2022 Yves Malfiet",
+          "caption": "Yves Malfliet, EISTRAUM, 2022",
+          "_key": "img426"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-805cac0b3d774f232bf640300b9d15bfd1ed50ea-2500x1667-jpg"
+          },
+          "alt": "Au Bord de la Falaise, 2022 Yves Malfiet",
+          "caption": "Yves Malfliet, Au Bord de la Falaise, 2022",
+          "_key": "img425"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-2a67cfe2a11573c397c59abb7bc75e1980a5ed89-2500x1664-jpg"
+          },
+          "alt": "Arcade, 2022 Yves Malfiet",
+          "caption": "Yves Malfliet, Arcade, 2022",
+          "_key": "img424"
+        }
+      ]
     }
   },
   {
@@ -79751,11 +81283,61 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-aa0130b695fba0ca5c18110c3f15b126ce4b8ad6-2500x1875-jpg"
+          },
+          "alt": "Triboutelicia Givré, 2021, King HOUNDEKPINKOU",
+          "caption": "King Houndekpinkou, Triboutelicia Givré, 2021",
+          "_key": "img418"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-fc6f32ccc919459fec7702b28a4120c5c2dbeb03-2500x1875-jpg"
+          },
+          "alt": "Gold Outer Space Ritual Vessel, 2022, King HOUNDEKPINKOU",
+          "caption": "King Houndekpinkou, Gold Outer Space Ritual Vessel, 2022",
+          "_key": "img413"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-ea5834d756ec0d4f63203962d993c78d9aad1cf1-480x360-jpg"
           },
           "alt": "Silver-Red Totem, 2020, King HOUNDEKPINKOU",
           "caption": "King Houndekpinkou, Silver-Red Totem, 2020",
           "_key": "img415"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-8158c536681dcee02a1ac8f680f3fc67f45fb1a3-1125x1500-jpg"
+          },
+          "alt": "Squid, 2018, Tania ANTOSHINA",
+          "caption": "Tania Antoshina, Squid, 2018",
+          "_key": "img471"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-9947ed76c86a1edd7378c397390f7b501d734bc6-1125x1500-jpg"
+          },
+          "alt": "Heron, 2018, Tania ANTOSHINA",
+          "caption": "Tania Antoshina, Heron, 2018",
+          "_key": "img473"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-0b250e3af7cd92c804b964ef0f07d785b0b59fb6-3096x4128-jpg"
+          },
+          "alt": "Tania Antoshina, Great Lizards, 2018 ©Studio Louis Delbaere",
+          "caption": "Tania Antoshina, Great Lizards, 2018",
+          "_key": "img524"
         }
       ]
     }
@@ -80139,6 +81721,26 @@
           "alt": "Mellaney Roberts, What resides within, 2023",
           "caption": "Mellaney Roberts, What resides within, 2023",
           "_key": "img519"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-0783a40941578fd0cde58faff695a4f3a159bbc5-6000x4000-jpg"
+          },
+          "alt": "Amogelang Maepa, This process is lengthy and indirect, 2022",
+          "caption": "Amogelang Maepa, This process is lengthy and indirect, 2022",
+          "_key": "img517"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-74d849afd816410701da336f700e86f7f3bd3160-6000x4000-jpg"
+          },
+          "alt": "Amogelang Maepa, This body is violence, 2022",
+          "caption": "Amogelang Maepa, This body is violence, 2022",
+          "_key": "img518"
         }
       ]
     }
@@ -80461,7 +82063,39 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-2bfb0f7f8459f702555bb65363bfd116dd98c0d4-1000x1500-jpg"
+          },
+          "alt": "Untitled 95, Untitled 8, Untitled 80, 2023 Laura Pasquino",
+          "caption": "Laura Pasquino, Untitled 95, Untitled 8, Untitled 80, 2023",
+          "_key": "img423"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-2107e64d93ebc4a2be4d6157c358417b288db0f4-1000x1500-jpg"
+          },
+          "alt": "Untitled 27, 2023 Laura Pasquino",
+          "caption": "Laura Pasquino, Untitled 27, 2023",
+          "_key": "img421"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-4d6873f6d8e372fa116bcd42da3e9c6a0414f228-1000x1500-jpg"
+          },
+          "alt": "Untitled 92, 2023 Laura Pasquino",
+          "caption": "Laura Pasquino, Untitled 27, 2023",
+          "_key": "img422"
+        }
+      ]
     }
   },
   {
@@ -80835,6 +82469,26 @@
           "alt": "manuel sanchez-algora, ceramique 2023",
           "caption": "Manuel Sanchez-Algora, 2023",
           "_key": "img324"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7506933e41c05ba236aa2ddb7e36e1ef0f718dba-1125x1500-jpg"
+          },
+          "alt": "manuel sanchez-algora, ceramique 2023",
+          "caption": "Manuel Sanchez-Algora, 2023",
+          "_key": "img325"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-3b7c1fb216c3c242a999ec3bc3d82205da9a9271-1875x2500-jpg"
+          },
+          "alt": "manuel sanchez-algora, ceramique 2023",
+          "caption": "Manuel Sanchez-Algora, 2023",
+          "_key": "img326"
         }
       ]
     }
@@ -81188,6 +82842,26 @@
           "alt": "Hélène Loussier, Grand Esprit 1, 2024",
           "caption": "Hélène Loussier, Grand Esprit 1, 2024",
           "_key": "img681"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-944bff6225d5ac860e1b20e2a18e4aa714dac2a0-4844x6055-jpg"
+          },
+          "alt": "Capsule 3d n°4, Christine Coste, ©Atelier findart, 2022",
+          "caption": "Capsule 3d n°4, Christine Coste, ©Atelier findart, 2022",
+          "_key": "img678"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-dd337a77f2020f65d2a6d173a86d0f5215c17480-5359x6699-jpg"
+          },
+          "alt": "Capsule 3d n°5, Christine Coste, ©Atelier findart, 2022",
+          "caption": "Capsule 3d n°5, Christine Coste, ©Atelier findart, 2022",
+          "_key": "img679"
         }
       ]
     }
@@ -81488,6 +83162,16 @@
           "alt": "Elmar Trenkwalder, WVZ 365 S, 2023",
           "caption": "Elmar Trenkwalder, WVZ 365 S, 2023",
           "_key": "img320"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-bf743b8203f48d09b96473c6cddf653945530b54-1022x1500-jpg"
+          },
+          "alt": "Elmar Trenkwalder, WVZ 137 B TRE 23, 2023",
+          "caption": "Elmar Trenkwalder, WVZ 137 B TRE 23, 2023",
+          "_key": "img322"
         }
       ]
     }
@@ -81810,7 +83494,39 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-6ef3d077f8384621b9b609f49e3db250c8721028-1000x1500-jpg"
+          },
+          "alt": "Maximilien Pellet, Les trois yeux, 2023 © Romain Darnaud",
+          "caption": "Maximilien Pellet, Les trois yeux, 2023 © Romain Darnaud",
+          "_key": "img189"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b57904a6e33ff635c488529849f3045bff5d2fdc-1500x1500-jpg"
+          },
+          "alt": "Maximilien Pellet, Tête au long nez, 2022 © Jean-Christophe Lett",
+          "caption": "Maximilien Pellet, Tête au long nez, 2022 © Jean-Christophe Lett",
+          "_key": "img194"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7e9518d5ad66c057440c284c69fa6639f1a664e2-1500x1500-jpg"
+          },
+          "alt": "Maximilien Pellet, La pierre aux grenouilles, 2023 © Jean-Christophe Lett",
+          "caption": "Maximilien Pellet, La pierre aux grenouilles, 2023 © Jean-Christophe Lett",
+          "_key": "img193"
+        }
+      ]
     }
   },
   {
@@ -82094,6 +83810,16 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-e3bc0d6d5d2f99bef5bb405973fc7154e276ba0e-4016x6016-jpg"
+          },
+          "alt": "Ruan Hoffmann © Matteo Losurdo",
+          "caption": "Ruan Hoffmann © Matteo Losurdo",
+          "_key": "img601"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-43c475ba459010559cba6ef34f126c3673175af2-1426x1414-png"
           },
           "alt": "Ruan Hoffmann, Sorry Honey 2020, courtesy of the Spaceless Gallery",
@@ -82169,6 +83895,36 @@
           "alt": "Olga Sabko, studio views ©Gabrielle Connole",
           "caption": "Olga Sabko, studio views ©Gabrielle Connole",
           "_key": "img593"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-66520ac62a33deb3f90d936910d035eda4a6f295-3246x4328-jpg"
+          },
+          "alt": "Lucian mMoriyama, Tiger lekythos",
+          "caption": "Lucian mMoriyama, Tiger lekythos",
+          "_key": "img592"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-396cce96abdad313d82a6666f579c123e6f48822-4544x3408-jpg"
+          },
+          "alt": "Lucian Moriyama, Self-portrait",
+          "caption": "Lucian Moriyama, Self-portrait",
+          "_key": "img591"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-269a20900489ae2b7ca4dd7ad191c8822b26de02-3198x4264-jpg"
+          },
+          "alt": "Lucian Moriyama, Corethe ©spaceless gallery",
+          "caption": "Lucian Moriyama, Corethe ©spaceless gallery",
+          "_key": "img602"
         }
       ]
     }
@@ -82502,6 +84258,26 @@
           "alt": "Seventeen Piece Service Jamie Holman",
           "caption": "Jamie Holman, Seventeen Piece Service",
           "_key": "img336"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-4ea5e2e420b1ea487742622d5ceab98f3c4b97aa-2500x1667-jpg"
+          },
+          "alt": "Salient Passent Jamie Holman 2023",
+          "caption": "Jamie Holman, Salient Passent, 2023",
+          "_key": "img340"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-3cc48e9b4cbf1302db1af7f8ba0ba16694fefdfe-1397x1500-jpg"
+          },
+          "alt": "Jamie Holman, 24 Hands, 2023",
+          "caption": "Jamie Holman, 24 Hands, 2023",
+          "_key": "img339"
         },
         {
           "_type": "figure",
@@ -82843,7 +84619,39 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-9bbe14e744fa71ccccf3f8109703b64deb1db3df-2682x2576-jpg"
+          },
+          "alt": "Felix Stöckle, Madame Helvetia 2023, courtesy artist",
+          "caption": "Felix Stöckle, Madame Helvetia 2023, courtesy artist",
+          "_key": "img636"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b8e1364919ac4ffe151de390d692402ba2963c2e-3024x4032-jpg"
+          },
+          "alt": "Felix Stöckle, Medusa und Freunde 2023, courtesy artist",
+          "caption": "Felix Stöckle, Medusa und Freunde 2023, courtesy artist",
+          "_key": "img638"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-f434311d990af2dc84d9362da89ca88b058ae894-3024x4032-jpg"
+          },
+          "alt": "Felix Stöckle, Johannes der Täufer, dann dachte ich an Meeresfrüchte 2023, courtesy artist",
+          "caption": "Felix Stöckle, Johannes der Täufer, dann dachte ich an Meeresfrüchte 2023, courtesy artist",
+          "_key": "img637"
+        }
+      ]
     }
   },
   {
@@ -83086,6 +84894,96 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-a2b9f510f5406d46dcc3d203b0ec425bdb369897-1009x1500-jpg"
+          },
+          "alt": "Structuring Chaos 2023, Kiki van Eijk",
+          "caption": "Structuring Chaos 2023, Kiki van Eijk",
+          "_key": "img401"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7210efc5c234ffb349ea61dfe5f60f7422fdd5e2-1000x1500-jpg"
+          },
+          "alt": "Structuring Chaos 2023, Kiki van Eijk",
+          "caption": "Structuring Chaos 2023, Kiki van Eijk",
+          "_key": "img400"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-3362d2c797a6330a62d4a4694d36dd8852cb118a-1000x1500-jpg"
+          },
+          "alt": "Sans début sans fin #1 2022, Marie Corbin",
+          "caption": "Sans début sans fin #1 2022, Marie Corbin",
+          "_key": "img398"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b577ed745e735b0ffdebf8eefcffd629a7368ae7-1000x1500-jpg"
+          },
+          "alt": "Sunday Morning 2022, Foyer Brisé, In collaboration with EKWC",
+          "caption": "Sunday Morning 2022, Foyer Brisé, In collaboration with EKWC",
+          "_key": "img397"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-f4b90a1bde840b9a7e86ee5dd35860b83a2dbfb9-1000x1500-jpg"
+          },
+          "alt": "Embodied#1 2022, Lisa Hellrup",
+          "caption": "Embodied#1 2022, Lisa Hellrup",
+          "_key": "img396"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-35b5cd91ad04254452f3d65d35fbc9972f88dedc-1001x1500-jpg"
+          },
+          "alt": "Le Charme 2023, Bela Silva",
+          "caption": "Le Charme 2023, Bela Silva",
+          "_key": "img395"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-62694fec5aed8465d114df88b5bf75c63ef28599-1001x1500-jpg"
+          },
+          "alt": "Erizos de Mar, Bela Silva 2023",
+          "caption": "Erizos de Mar, Bela Silva 2023",
+          "_key": "img394"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-bad22613933bbe422e4c9c8317d0c227d56af1ff-1000x1500-jpg"
+          },
+          "alt": "Echo 7/20 2022, Foyer Brisé, In collaboration with EKWC",
+          "caption": "Echo 7/20 2022, Foyer Brisé, In collaboration with EKWC",
+          "_key": "img393"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-6ae530a40d99aac46cd273e0c639ccc7a2ed4f94-1000x1500-jpg"
+          },
+          "alt": "Echo 9/20 2022, Foyer Brisé In collaboration with EKWC",
+          "caption": "Echo 9/20 2022, Foyer Brisé In collaboration with EKWC",
+          "_key": "img392"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-9c792c84a714497dde8b06f6e79b99bc1d26eaac-1125x1500-jpg"
           },
           "alt": "Vases with blue flaps #1,2,3 2019, Piet Stockmans, PAD Paris",
@@ -83096,11 +84994,71 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-9d95de017fac6e01aefd78564e395eac6aeb0508-1000x1500-jpg"
+          },
+          "alt": "Spring Rush 2022, Kiki van Eijk",
+          "caption": "Spring Rush 2022, Kiki van Eijk",
+          "_key": "img390"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-9151e62676b8e5a6290764de2fbfaad4106db2c1-1000x1500-jpg"
+          },
+          "alt": "Story Flavour 2023, Kiki van Eijk",
+          "caption": "Story Flavour 2023, Kiki van Eijk",
+          "_key": "img389"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-2776e807e680d7d12a8b6a64e4fdbbd1c528656c-2500x2051-jpg"
           },
           "alt": "Calix 2021, Païvi Rintaniemi",
           "caption": "Calix 2021, Païvi Rintaniemi",
           "_key": "img388"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-37c090ac15fbd114fa0e74e5347513959b7f34dd-880x1500-jpg"
+          },
+          "alt": "Wilde Stripen XL 2017, Piet Stockmans",
+          "caption": "Wilde Stripen XL 2017, Piet Stockmans",
+          "_key": "img387"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-a33f6825e46e629e6b9dfc79d1472242b675b5aa-2500x1667-jpg"
+          },
+          "alt": "Ara 2010, Païvi Rintaniemi ©Sofia Rinatniemi",
+          "caption": "Ara 2010, Païvi Rintaniemi ©Sofia Rinatniemi",
+          "_key": "img404"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-5a5dff753459151f367e6d3b8900c40a0af2c51b-1000x1500-jpg"
+          },
+          "alt": "North 2020, Ann Beate Tempelhaug ©Margaux Nieto",
+          "caption": "North 2020, Ann Beate Tempelhaug ©Margaux Nieto",
+          "_key": "img403"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7e8130939b38da3d907a0a3d53a47fd87c75b856-1125x1500-jpg"
+          },
+          "alt": "Vase pierre 2023, Marie Corbin In collaboration with CRAFT Limoges",
+          "caption": "Vase pierre 2023, Marie Corbin In collaboration with CRAFT Limoges",
+          "_key": "img402"
         }
       ]
     }
@@ -83828,7 +85786,99 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-6ec4a59616ee6d839731ec366e1423b1ad7a39e5-1500x1500-jpg"
+          },
+          "alt": "Jeppe Søndergaard, No title, Red, 2023 © Ole Akhøj",
+          "caption": "Jeppe Søndergaard, No title, Red, 2023 © Ole Akhøj",
+          "_key": "img327"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e924b2839069bfca4b6ed144779b8240dd1d8038-1500x1500-jpg"
+          },
+          "alt": "Jeppe Søndergaard, No title, Blue, 2023 © Ole Akhøj",
+          "caption": "Jeppe Søndergaard, No title, Blue, 2023 © Ole Akhøj",
+          "_key": "img328"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-af575bbb5397c269c9fcbc68f90eb6056318c12f-2500x1790-jpg"
+          },
+          "alt": "Esben Kaldahl, Um & Tyn, 2022 © Ole Akhøj",
+          "caption": "Esben Kaldahl, Um & Tyn, 2022 © Ole Akhøj",
+          "_key": "img329"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-637dca3829d42c486440e981006c53d63d81b85d-2500x1667-jpg"
+          },
+          "alt": "Esben Kaldahl, Nymphs of Vingerling, 2022 © Ole Akhøj",
+          "caption": "Esben Kaldahl, Nymphs of Vingerling, 2022 © Ole Akhøj",
+          "_key": "img330"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e2d81984adb450b921f1b70a4c08233579aa0d6a-898x1500-jpg"
+          },
+          "alt": "Petra Dalström, Egg Circuit, 2023 © Ole Akhøj",
+          "caption": "Petra Dalström, Egg Circuit, 2023 © Ole Akhøj",
+          "_key": "img331"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-0157549b399e49a05045897f7e521f44bae3f75d-2500x1667-jpg"
+          },
+          "alt": "Petra Dalström, Shishi-odoshi form home, 2023 © Ole Akhøj",
+          "caption": "Petra Dalström, Shishi-odoshi form home, 2023 © Ole Akhøj",
+          "_key": "img332"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-6dbbc86723c7d4894f0a09d9dc72008ca3369c54-1000x1500-jpg"
+          },
+          "alt": "Annelie Grimwade Olofsson, A Spot In The Sun - Chain Flower, 2023 © Ole Akhøj",
+          "caption": "Annelie Grimwade Olofsson, A Spot In The Sun - Chain Flower, 2023 © Ole Akhøj",
+          "_key": "img333"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b9ffcfbf104f44c6014958abe5f3b90bd8326ac4-2500x1901-jpg"
+          },
+          "alt": "Hilda Piazzolla, Differential Growth, 2023 © Ole Akhøj",
+          "caption": "Hilda Piazzolla, Differential Growth, 2023 © Ole Akhøj",
+          "_key": "img334"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-9bf5d0090bc9aa837741804edce079e5ac581322-1000x1500-jpg"
+          },
+          "alt": "Hilda Piazzolla, Differential Growth, 2023 © Ole Akhøj",
+          "caption": "Hilda Piazzolla, Differential Growth, 2023 © Ole Akhøj",
+          "_key": "img335"
+        }
+      ]
     }
   },
   {
@@ -84151,6 +86201,56 @@
         ]
       },
       "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-96d48b6e0b3039f93f66933605975c20a5f0686a-1068x1500-jpg"
+          },
+          "alt": "Bachelot&Caron, applique écorce (arc en ciel) 2020",
+          "caption": "Bachelot&Caron, applique écorce (arc en ciel) 2020",
+          "_key": "img384"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e2a41b6d7a7d4b73a3a0db6354c888fc38a6ae10-1000x1500-jpg"
+          },
+          "alt": "Bachelot&Caron, Le boeuf écorché, 2022",
+          "caption": "Bachelot&Caron, Le boeuf écorché, 2022",
+          "_key": "img386"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-80d3640e3757cb4b67e094b2be5f99a12d4e8a9f-1000x1500-jpg"
+          },
+          "alt": "Bachelot&Caron, Vase tournesol vermillon, 2019",
+          "caption": "Bachelot&Caron, Vase tournesol vermillon, 2019",
+          "_key": "img383"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-9d7019f42c3c5670f78355e45d1d37286082301f-1000x1500-jpg"
+          },
+          "alt": "Miroir azuréen, 2023, Muriel Persil",
+          "caption": "Muriel Persil, Miroir azuréen, 2023",
+          "_key": "img382"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-6cd7c78b3b59250b52987523ec7319071d635219-2500x1875-jpg"
+          },
+          "alt": "La forêt, 2017, Muriel Persil",
+          "caption": "Muriel Persil, La forêt, 2017",
+          "_key": "img381"
+        },
         {
           "_type": "figure",
           "asset": {
@@ -84529,11 +86629,81 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-8751047426dec6fa5c20d7118f10d9086f79d33f-3644x3430-jpg"
+          },
+          "alt": "Haoyu Wu, Encounters No.6, 2010",
+          "caption": "Haoyu Wu, Encounters No.6, 2010",
+          "_key": "img633"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-762b1b1b83c47e90cbc643e20561cef9dd88b1bf-6588x4392-jpg"
+          },
+          "alt": "Haoyu Wu, New Stoneware No 2, 2018",
+          "caption": "Haoyu Wu, New Stoneware No 2, 2018",
+          "_key": "img535"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-39653f474e23f08eedc956b71185299015f9a15f-2832x4240-jpg"
+          },
+          "alt": "Geng Xue",
+          "caption": "Geng Xue",
+          "_key": "img538"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-1815458e46519d9688cc7f0e96d925fd75e519b2-1000x667-jpg"
           },
           "alt": "Qi Zhuo, 2023",
           "caption": "Qi Zhuo, 2023",
           "_key": "img539"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-9f61a22d397156de0cc9aa666ad5fec75717ff06-3508x2367-jpg"
+          },
+          "alt": "Haoyu Wu, Encounters No. 1, 2008",
+          "caption": "Haoyu Wu, Encounters No. 1, 2008",
+          "_key": "img534"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-fb904da97fcc6ef6695fb3476eb5729a63872402-4256x2848-jpg"
+          },
+          "alt": "Haoyu Wu, Encounters No 2, 2008",
+          "caption": "Haoyu Wu, Encounters No 2, 2008",
+          "_key": "img536"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7086d94604b41e7bb18fa1d56ccaf93f7ba55455-6720x4480-jpg"
+          },
+          "alt": "Haoyu Wu, New Stoneware No 4, 2018",
+          "caption": "Haoyu Wu, New Stoneware No 4, 2018",
+          "_key": "img635"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-a0424faf12dd2657afbaf1681a8fcde68154e42a-4288x4326-jpg"
+          },
+          "alt": "Haoyu Wu, Encounters No 5, 2010",
+          "caption": "Haoyu Wu, Encounters No 5, 2010",
+          "_key": "img634"
         }
       ]
     }
@@ -84773,6 +86943,36 @@
         ]
       },
       "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7d76f6154f8b5875837b5aaf3bdae2da1f9f450c-5600x4480-jpg"
+          },
+          "alt": "Anne-Marie Schneider Untitled (à coeur ouvert), 2022 Courtesy of the artist and Michel Rein",
+          "caption": "Anne-Marie Schneider Untitled (à coeur ouvert), 2022 Courtesy of the artist and Michel Rein",
+          "_key": "img551"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-8ccfddc7828af45dbad660aa40914f4365444444-3637x4546-jpg"
+          },
+          "alt": "Anne-Marie Schneider Unititled, 2022 Courtesy of the artist and Michel Rein",
+          "caption": "Anne-Marie Schneider Unititled, 2022 Courtesy of the artist and Michel Rein",
+          "_key": "img548"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-88a3a7765171879303ff8dfea7bbf84f793f7c85-3178x3972-jpg"
+          },
+          "alt": "Anne-Marie Schneider Untitled (couple), 2022 Courtesy of the artist and Michel Rein",
+          "caption": "Anne-Marie Schneider Untitled (couple), 2022 Courtesy of the artist and Michel Rein",
+          "_key": "img544"
+        },
         {
           "_type": "figure",
           "asset": {
@@ -85166,7 +87366,39 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-21b0a90d2100d0edd3f146b37c78d225cd74118b-2500x1667-jpg"
+          },
+          "alt": "Bernard Dejonghe, 2022",
+          "caption": "Bernard Dejonghe, 2022",
+          "_key": "img315"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-51dc21eda0da6476b95b949d05ed4b6706909745-1002x1500-jpg"
+          },
+          "alt": "Cinq Areshimas, 2022 © Bernard Dejonghe",
+          "caption": "Bernard Dejonghe, Cinq Areshimas, 2022 © Bernard Dejonghe",
+          "_key": "img429"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-8fe06fffef2a4342b845b9abf289dfb7dd04d2ee-2500x2302-jpg"
+          },
+          "alt": "Bernard Dejonghe © Denis Durand",
+          "caption": "Bernard Dejonghe © Denis Durand",
+          "_key": "img314"
+        }
+      ]
     }
   },
   {
@@ -85714,7 +87946,49 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d882d5477b76e8358644a631d4fa1f6d23772008-2640x5064-jpg"
+          },
+          "alt": "Eric Colonel Thomas Spit, 2023 ©M.Gillard",
+          "caption": "Eric Colonel Thomas Spit, 2023 ©M.Gillard",
+          "_key": "img506"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e37e02c7c1edfaffa7099ffb98ec9a2cb9bbce13-2895x4957-jpg"
+          },
+          "alt": "Eric Colonel Thomas Spit, 2023 ©M.Gillard",
+          "caption": "Eric Colonel Thomas Spit, 2023 ©M.Gillard",
+          "_key": "img505"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-06fa3129d3b19d2acb8c7f106750599d98120628-3035x5371-jpg"
+          },
+          "alt": "Eric Colonel Thomas Spit, 2023 ©M.Gillard",
+          "caption": "Eric Colonel Thomas Spit, 2023 ©M.Gillard",
+          "_key": "img503"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-2691a623ebcd9cd751c5224694c0f57014b8f123-3234x4247-jpg"
+          },
+          "alt": "Eric Colonel Thomas Spit, 2023 ©M.Gillard",
+          "caption": "Eric Colonel Thomas Spit, 2023 ©M.Gillard",
+          "_key": "img504"
+        }
+      ]
     }
   },
   {
@@ -85995,6 +88269,36 @@
         ]
       },
       "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-33833a664b2e475867295467be5ec143b2fafab1-1167x1500-jpg"
+          },
+          "alt": "Robin Vermeersch Milsani 2023",
+          "caption": "Robin Vermeersch, Milsani,2023",
+          "_key": "img312"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e468b30083256d20a76b58830486d06acec5199b-1000x1500-jpg"
+          },
+          "alt": "Robin Vermeersch Hang In There 35 2021©David Samyn",
+          "caption": "Robin Vermeersch, Hang In There #35, 2021 ©David Samyn",
+          "_key": "img311"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-6b64773b1dfc35e9bb7ab2d983b18c91a785760f-1000x1500-jpg"
+          },
+          "alt": "Robin Vermeersch Haut Levee 2022 2023 ©David Samyn",
+          "caption": "Robin Vermeersch, Haut Levee, 2022-2023 ©David Samyn",
+          "_key": "img310"
+        },
         {
           "_type": "figure",
           "asset": {
@@ -86342,6 +88646,46 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-6a92bcba2cda334ad0daabb7cce34fdfd20136be-2500x1975-jpg"
+          },
+          "alt": "Soojin Choi, Don't Forget About Me, 2023",
+          "caption": "Soojin Choi, Don't Forget About Me, 2023",
+          "_key": "img48"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-94bd4545846be89a443b6d5df4838bad072269ac-1000x1500-jpg"
+          },
+          "alt": "Stan Edmondson Untitled Gigantor 2021",
+          "caption": "Stan Edmondson, Untitled (Gigantor), 2021",
+          "_key": "img300"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-08bd785fa6839ff673ef84a2555627aa94e97a8d-2500x1702-jpg"
+          },
+          "alt": "Feipel & Bechameil, Shelters, 2021-2023 ©Peter Tijhuis",
+          "caption": "Feipel & Bechameil, Shelters, 2021-2023 ©Peter Tijhuis",
+          "_key": "img303"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-ea37f4e85308bff0ef7c86073d6d8de0fcb6b4e9-1000x1500-jpg"
+          },
+          "alt": "Alejandro Garcia Contreras Silverhawk/Ofrenda De Horus 2023",
+          "caption": "Alejandro Garcia Contreras, Silverhawk/Ofrenda De Horus, 2023",
+          "_key": "img298"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-cdd580ab8e7f17c17f7256163eb1f692e6f19b68-1080x1080-jpg"
           },
           "alt": "Gregory Georgescu, R03, 2022 ©Courtesy of the artist",
@@ -86357,6 +88701,16 @@
           "alt": "Sydnie Jimenez, Gargoyle Figures, 2023 ©Courtesy of the artist and Mindy Solomon Gallery",
           "caption": "Sydnie Jimenez, Gargoyle Figures, 2023 ©Courtesy of the artist and Mindy Solomon Gallery",
           "_key": "img526"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e66658b797813eb65a9c92ea8fb7ce5dfec00029-6255x4691-jpg"
+          },
+          "alt": "Krzysztof Strzelecki, Wild West, 2023 ©Courtesy of the artist and Anat Ebgi Gallery, Los Angeles",
+          "caption": "Krzysztof Strzelecki, Wild West, 2023 ©Courtesy of the artist and Anat Ebgi Gallery, Los Angeles",
+          "_key": "img529"
         },
         {
           "_type": "figure",
@@ -86709,7 +89063,59 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-c2dcc91d0f2b4104f82fa546d1454d7af975a53d-1000x1500-jpg"
+          },
+          "alt": "Natsuko Uchino, Adobe Fern, 2023 © Hugard & Vanoverschelde",
+          "caption": "Natsuko Uchino, Adobe Fern, 2023 © Hugard & Vanoverschelde",
+          "_key": "img469"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-4a6bdd6d38ebfbb51396aad0489dbffb971db7a8-988x1500-jpg"
+          },
+          "alt": "Natsuko Uchino, Adobe Lychen, 2023 © Hugard & Vanoverschelde",
+          "caption": "Natsuko Uchino, Adobe Lychen, 2023 © Hugard & Vanoverschelde",
+          "_key": "img470"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-4e4a782bc9a21d0b8d768be0e46ec40286dc6d1b-1006x1500-jpg"
+          },
+          "alt": "Roger Herman, Orange/Black Cylinder, 2021",
+          "caption": "Roger Herman, Orange/Black Cylinder, 2021",
+          "_key": "img293"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-ce2be670725358a5e5709ae4648aea0e1a8ee54e-1000x1500-jpg"
+          },
+          "alt": "Perrine Boudy Le Cheval A Carreau 2023",
+          "caption": "Perrine Boudy, Le cheval à carreau, 2023",
+          "_key": "img292"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-f6943b5be75b250245d28a149cf0b8dd69d0aff1-1000x1500-jpg"
+          },
+          "alt": "Perrine Boudy, Flacon de parfum géant, 2023",
+          "caption": "Perrine Boudy, Flacon de parfum géant, 2023",
+          "_key": "img291"
+        }
+      ]
     }
   },
   {
@@ -86988,7 +89394,39 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-bf7d3c425f4a9c7f906bbd533ce9eb7dd9b9730d-2500x1667-jpg"
+          },
+          "alt": "Leo Luccioni, credit photo Allison Borgo",
+          "caption": "Leo Luccioni, ©Allison Borgo",
+          "_key": "img288"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-a1ac1005e0bd52c776e25a4fa5ef575f7b8c3ac3-2500x1667-jpg"
+          },
+          "alt": "Leo Luccioni, credit photo Allison Borgo",
+          "caption": "Leo Luccioni, © Allison Borgo",
+          "_key": "img290"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-58e5c3a0be92720c338a206c8b115ece05b7b68f-2500x1667-jpg"
+          },
+          "alt": "Leo Luccioni, credit photo Allison Borgo",
+          "caption": "Leo Luccioni, © Allison Borgo",
+          "_key": "img289"
+        }
+      ]
     }
   },
   {
@@ -87267,7 +89705,59 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e8c5221eecb3f923f132595b5e4e33bd833124ad-2500x1666-jpg"
+          },
+          "alt": "Kino Satoshi, Diminished frost, 2022 © Kino Satoshi",
+          "caption": "Kino Satoshi, Diminished frost, 2022 © Kino Satoshi",
+          "_key": "img279"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-8b0254d53fca0749a57151178f2f2fc5216d25e1-1000x1500-jpg"
+          },
+          "alt": "Shozo Michikawa, Sculptural Form, 2022 © Paul Louis",
+          "caption": "Shozo Michikawa, Sculptural Form, 2022 © Paul Louis",
+          "_key": "img287"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-090140bf55592dbb37970cf2da758c29853c54f5-1000x1500-jpg"
+          },
+          "alt": "Sakai Hiroshi, Vessel, 2020 © Paul Louis",
+          "caption": "Sakai Hiroshi, Vessel, 2020 © Paul Louis",
+          "_key": "img286"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-cf2eb630547718a2e840c5b07a9cb577f147c8a3-2500x1667-jpg"
+          },
+          "alt": "Kaneta Masanao, 2022 © Paul Louis",
+          "caption": "Kaneta Masanao, 2022 © Paul Louis",
+          "_key": "img285"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-0f187c83b224de7774128eea4ef320c9c628ad24-1000x1500-jpg"
+          },
+          "alt": "Kimura Moriyasu, Tenmoku glaze, 2023 © Paul Louis",
+          "caption": "Kimura Moriyasu, Tenmoku glaze, 2023 © Paul Louis",
+          "_key": "img284"
+        }
+      ]
     }
   },
   {
@@ -87604,6 +90094,26 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-d93c3b12394f1820ee52d1c4580fc3d9ba759406-2500x2040-jpg"
+          },
+          "alt": "Nick Ervinck, Winoceraos, 2020-2021",
+          "caption": "Nick Ervinck, Winoceraos, 2020-2021",
+          "_key": "img278"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-613b967fdf565176f7c488c5a8328013c07acb73-948x1500-jpg"
+          },
+          "alt": "Nick Ervinck, Elctanet, 2017",
+          "caption": "Nick Ervinck, Elctanet, 2017",
+          "_key": "img277"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-e27c19300f202dec991516e401b0633b73f1e2f4-1000x1500-jpg"
           },
           "alt": "Natasja Alers, Toevase, 2023 © Lndwstudio",
@@ -87619,6 +90129,46 @@
           "alt": "Natasja Alers, Orbit I © Lndwstudio",
           "caption": "Natasja Alers, Orbit I © Lndwstudio",
           "_key": "img275"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-a018dd10b1ada79769246987e1eee4d23f42a8e0-2500x2000-jpg"
+          },
+          "alt": "Nick Ervinck, Entunap, 2017",
+          "caption": "Nick Ervinck, Entunap, 2017",
+          "_key": "img274"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d66fd257704d77a351baefa123d2536a2f60f80c-1000x1500-jpg"
+          },
+          "alt": "Johannes Nagel, cuts #56 ©Tom Dachs",
+          "caption": "Johannes Nagel, cuts #56 ©Tom Dachs",
+          "_key": "img273"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-377e66a8c8fe6128225e9fbe6f78a392caff3c42-2756x4134-jpg"
+          },
+          "alt": "Johannes Nagel, cuts #63 /crack ©Tom Dachs",
+          "caption": "Johannes Nagel, cuts #63 /crack ©Tom Dachs",
+          "_key": "img520"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-a6545a03f9fe43af4a8c9ee52e76271af1b0e74a-2756x4134-jpg"
+          },
+          "alt": "Johannes Nagel, Silhouette #51/ colours ©Tom Dachs",
+          "caption": "Johannes Nagel, Silhouette #51/ colours ©Tom Dachs",
+          "_key": "img521"
         }
       ]
     }
@@ -87941,7 +90491,59 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7cd5369840b6a12c0f5d949ea0b3077f04c339e2-2500x1875-jpg"
+          },
+          "alt": "Christiane Filliatreau, Prêle, 2023",
+          "caption": "Christiane Filliatreau, Prêle, 2023",
+          "_key": "img266"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-144852fc5eb546cb70d557942c9c70e3da788cd9-2500x1667-jpg"
+          },
+          "alt": "Yasuhisa Kohyama, Danpen #12, 1996 ©jean-christophe Lett",
+          "caption": "Yasuhisa Kohyama, Danpen #12, 1996 ©jean-christophe Lett",
+          "_key": "img270"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e7b3b3ef52709b1cc480f6c77c766840a11def2e-1000x1500-jpg"
+          },
+          "alt": "Enzo Bosse, untitled, 2023",
+          "caption": "Enzo Bosse, untitled, 2023",
+          "_key": "img269"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-17709e89b665f521c56a1aee628c52b8680e0f5a-2500x1875-jpg"
+          },
+          "alt": "Daniel Pontoreau, Première pierre, 2020 © Iliès Sarkantyu",
+          "caption": "Daniel Pontoreau, Première pierre, 2020 © Iliès Sarkantyu",
+          "_key": "img268"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-115eaf1ddf5671b717b3f638ec0221e846818fe1-2500x2000-jpg"
+          },
+          "alt": "Dan Kim, A Giddy Kick, 2022",
+          "caption": "Dan Kim, A Giddy Kick, 2022",
+          "_key": "img267"
+        }
+      ]
     }
   },
   {
@@ -88220,7 +90822,39 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-9fb1e13b624ddce657cb284d38ac656ed6aea87e-2500x1923-jpg"
+          },
+          "alt": "Enric Mestre, ceramic & engobe, circa 1990",
+          "caption": "Enric Mestre, ceramic & engobe, circa 1990",
+          "_key": "img265"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-43ac70a4c8cb517c7fb0ea9379dcc3ce40dc8444-2500x1895-jpg"
+          },
+          "alt": "Enric Mestre, ceramic & engobe, circa 1990",
+          "caption": "Enric Mestre, ceramic & engobe, circa 1990",
+          "_key": "img264"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-228f998af6f15a4f75e2082761f9113164c53dc0-1000x1500-jpg"
+          },
+          "alt": "Enric Mestre, ceramic & engobe, circa 1990",
+          "caption": "Enric Mestre, ceramic & engobe, circa 1990",
+          "_key": "img263"
+        }
+      ]
     }
   },
   {
@@ -88636,6 +91270,26 @@
           "alt": "Sans Titre, Laurent Dufour 2023",
           "caption": "Sans Titre, Laurent Dufour 2023",
           "_key": "img447"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-61983f697e9c9b0028fa4b4d5d2ba7b87381c580-1000x1500-jpg"
+          },
+          "alt": "Sans Titre, Laurent Dufour 2023",
+          "caption": "Sans Titre, Laurent Dufour 2023",
+          "_key": "img448"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7a7ab0589419a7635bc095216a38269f112a29f7-1000x1500-jpg"
+          },
+          "alt": "Sans Titre, Laurent Dufour 2023",
+          "caption": "Sans Titre, Laurent Dufour 2023",
+          "_key": "img479"
         }
       ]
     }
@@ -89011,6 +91665,56 @@
           "alt": "Meekyoung Shin ,Translation Ghost Series, 2022",
           "caption": "Meekyoung Shin ,Translation - Ghost Series, 2022",
           "_key": "img255"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-4b5df97e98907c3cf4df3214e455f8f7ae46ed78-2500x1667-jpg"
+          },
+          "alt": "Nathalie Campion, Atelier de l'artiste, 2023 © Sebastian Schutyser",
+          "caption": "Nathalie Campion, Atelier de l'artiste, 2023 © Sebastian Schutyser",
+          "_key": "img261"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-1fc53e3dfcdc730d48c243bca309cee40fc51d64-1228x1500-jpg"
+          },
+          "alt": "Sunghong Min, Play With Everyone, 2022",
+          "caption": "Sunghong Min, Play With Everyone, 2022",
+          "_key": "img260"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-4c0bec646a40b3a35813ccb6199851da265ffdce-1000x1500-jpg"
+          },
+          "alt": "Nathalie Campion, Atelier de l'artiste, 2023 © Sebastian Schutyser",
+          "caption": "Nathalie Campion, Atelier de l'artiste, 2023 © Sebastian Schutyser",
+          "_key": "img259"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-f809df7770e0d01c64091c940a25cdb028e13c88-2500x1697-jpg"
+          },
+          "alt": "Sunghong Min, Overlapped Sensibility, 2022",
+          "caption": "Sunghong Min, Overlapped Sensibility, 2022",
+          "_key": "img258"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b461b9e006e24422e2941bb9c7ba32c2bc3de89f-2500x1667-jpg"
+          },
+          "alt": "Jiana Kim, Iceberg Blue Inside Skyblue 22-93, 2022 © Sebastian Schutyser",
+          "caption": "Jiana Kim, Iceberg Blue Inside Skyblue 22-93, 2022 © Sebastian Schutyser",
+          "_key": "img257"
         },
         {
           "_type": "figure",
@@ -89393,6 +92097,16 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-ef0b31f49d426bb9f12ac4804b03c546ba51c920-844x1500-jpg"
+          },
+          "alt": "Rémy Pommeret, Actias Luna, 2023 © La peau de l'ours",
+          "caption": "Rémy Pommeret, Actias Luna, 2023 © La peau de l'ours",
+          "_key": "img251"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-9531d083d16027dc02b7bbb6871274dc7330d3be-1144x1500-jpg"
           },
           "alt": "Safia Hijos, Stalaktos lava 1, Dans les chambres l'herbe pousse, 2023 © La peau de l'ours",
@@ -89408,6 +92122,26 @@
           "alt": "Safia Hijos, Salto Angel, Dans les chambres l'herbe pousse, 2023 © La peau de l'ours",
           "caption": "Safia Hijos, Salto Angel, Dans les chambres l'herbe pousse, 2023 © La peau de l'ours",
           "_key": "img248"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-6723a145f4922b7136142bd76e7fb961894f7047-844x1500-jpg"
+          },
+          "alt": "Rémy Pommeret, Nuit d'été, Les Nouveaux Sauvages, 2023 © La peau de l'ours",
+          "caption": "Rémy Pommeret, Nuit d'été, Les Nouveaux Sauvages, 2023 © La peau de l'ours",
+          "_key": "img245"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-b813b06fdf8f52dd5b0c0aa935f307a4a320f12b-844x1500-jpg"
+          },
+          "alt": "Rémy Pommeret, Nuit d'été, Les Nouveaux Sauvages, 2023 © La peau de l'ours",
+          "caption": "Rémy Pommeret, Nuit d'été, Les Nouveaux Sauvages, 2023 © La peau de l'ours",
+          "_key": "img244"
         },
         {
           "_type": "figure",
@@ -89704,6 +92438,36 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-91ff20fc75f6afd159d73a31268f84ab125dbd67-1000x1500-jpg"
+          },
+          "alt": "Carolein Smit, Cane Corso 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "caption": "Carolein Smit, Cane Corso, 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "_key": "img238"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-2ea4962b43c4e3540f2ab3bb06defe247256ac74-8256x5504-jpg"
+          },
+          "alt": "Carolein Smit, Juwelenkist 2023 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "caption": "Carolein Smit, Juwelenkist 2023 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "_key": "img612"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-34f57e08a263e1a58b5ee1132f00abbb4e6c9246-5504x8256-jpg"
+          },
+          "alt": "Carolein Smit, Bloedhond de zieligste van al 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "caption": "Carolein Smit, Bloedhond de zieligste van al 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "_key": "img611"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-e97713ef7a832ed76d3722bf0cd9331347267a34-2480x3508-jpg"
           },
           "alt": "Atoll © VVB courtesy of Fontana & J.F. Kugel",
@@ -89719,6 +92483,16 @@
           "alt": "Haussmann's Island © VVB courtesy of Fontana & J.F. Kugel",
           "caption": "Haussmann's Island © VVB courtesy of Fontana & J.F. Kugel",
           "_key": "img608"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-15b2dd94fcfa320610e179bb8389b0caa417882d-6000x4000-jpg"
+          },
+          "alt": "Victory © VVB courtesy of Fontana & J.F. Kugel",
+          "caption": "Victory © VVB courtesy of Fontana & J.F. Kugel",
+          "_key": "img610"
         }
       ]
     }
@@ -90013,7 +92787,39 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e58ee7d49215fd3dd38a94c1255952d7cc6bfd00-2500x1874-jpg"
+          },
+          "alt": "Michael Sailstorfer MCS 38 2022 Ceramic, glaze",
+          "caption": "Michael Sailstorfer, MCS 38, 2022",
+          "_key": "img307"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-4b8026348efeb416945d6dba11a9c73ee0bc7792-999x1500-jpg"
+          },
+          "alt": "Paysage Niçois I, Johan Creten 1993, © Bert de Leenheer",
+          "caption": "Johan Creten, Paysage Niçois I, 1993, © Bert de Leenheer",
+          "_key": "img306"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-bf90e5b97259076628481afc47207a6e8d917abd-1298x1500-jpg"
+          },
+          "alt": "Mehdi-Georges Lahlou, ‘Casablanca, March 26, 2016’, 2022, © Bert de Leenheer",
+          "caption": "Mehdi-Georges Lahlou, ‘Casablanca, March 26, 2016’, 2022, © Bert de Leenheer",
+          "_key": "img305"
+        }
+      ]
     }
   },
   {
@@ -90345,6 +93151,26 @@
           "alt": "Christian Gonzenbach, Retipuj Ua Nabrut, 2013",
           "caption": "Christian Gonzenbach, Retipuj Ua Nabrut, 2013",
           "_key": "img235"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-5311dd9c045ed2cac9d079b90dcd381c318cd5f0-1125x1500-jpg"
+          },
+          "alt": "Gonzenbach Hanabi, 2019",
+          "caption": "Christian Gonzenbach, Hanabi, 2019",
+          "_key": "img237"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7c7ce2f34efa2058607e21f733868e597b906a82-1125x1500-jpg"
+          },
+          "alt": "Gonzenbach Hanabi, 2019",
+          "caption": "Christian Gonzenbach, Hanabi, 2019",
+          "_key": "img236"
         }
       ]
     }
@@ -90673,6 +93499,46 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-8238b740cd526ff5e3fd7d6880581296d0b2bae5-2500x1667-jpg"
+          },
+          "alt": "JC Ruggirello, Feux Follets 2, 2022 © Florian Kleinefenn",
+          "caption": "JC Ruggirello, Feux Follets 2, 2022 © Florian Kleinefenn",
+          "_key": "img475"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-06fba7e174e191e1c1a0e9314397df3926af9c3a-1280x1500-jpg"
+          },
+          "alt": "Elsa Sahal Les Aretes Translucides 2023 ©David Bordes",
+          "caption": "Elsa Sahal Les Aretes Translucides 2023 ©David Bordes",
+          "_key": "img477"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-0cdd633e0062bec59ce8ffb1ce7604a47cf79e45-1278x1500-jpg"
+          },
+          "alt": "Elsa Sahal Les Soleils Verts 2023 ©David Bordes",
+          "caption": "Elsa Sahal Les Soleils Verts 2023 ©David Bordes",
+          "_key": "img476"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-0d37fa2062e8aa4db0f0054115d8b293af5ce5bb-1000x1500-jpg"
+          },
+          "alt": "JC Ruggirello Memorial For Body Art 2, 2021 © Florian Kleinefenn",
+          "caption": "JC Ruggirello Memorial For Body Art 2, 2021 © Florian Kleinefenn",
+          "_key": "img474"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-f07e986185acfd17c9b2a4cec3cca864b3531238-1521x2281-jpg"
           },
           "alt": "Mehdi Georges Lahlou, Petit Rameau, 2022",
@@ -90979,6 +93845,56 @@
           "alt": "Fee Kleiss, Barracetta, 2023",
           "caption": "Fee Kleiss, Barracetta, 2023",
           "_key": "img223"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-41e27408e2369af662a2dcb53e6ea223d3b39eba-1000x1500-jpg"
+          },
+          "alt": "Bente Skjøttgaard, Family Tree #2326, 2023 ©Ole Akhøj",
+          "caption": "Bente Skjøttgaard, Family Tree #2326, 2023 ©Ole Akhøj",
+          "_key": "img230"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-64b1fcba8be92252939efdcc3f4af48ce4887b05-1000x1500-jpg"
+          },
+          "alt": "Bente Skjøttgaard, Family Tree #2320, 2023 ©Ole Akhøj",
+          "caption": "Bente Skjøttgaard, Family Tree #2320, 2023 ©Ole Akhøj",
+          "_key": "img229"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-1a7cbfd82bb90e4296930d59bd62ace1f5c26fd5-1001x1500-jpg"
+          },
+          "alt": "Pernille Pontoppidan Pedersen, Knots Knots Knots, 2023 ©Jacob Friis Holm Nielsen",
+          "caption": "Pernille Pontoppidan Pedersen, Knots Knots Knots, 2023 ©Jacob Friis Holm Nielsen",
+          "_key": "img227"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-3baf7516d27f17a2790fae04620b5b86eb50a887-1001x1500-jpg"
+          },
+          "alt": "Pernille Pontoppidan Pedersen, Her In A Sphere, 2023 ©Jacob Friis Holm Nielsen",
+          "caption": "Pernille Pontoppidan Pedersen, Her In A Sphere, 2023 ©Jacob Friis Holm Nielsen",
+          "_key": "img226"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d6a47f9dec39024e2d93e3f6db5a5ccc18392502-1000x1500-jpg"
+          },
+          "alt": "Bente Skjøttgaard, Family Tree #2326 ©Ole Akhøj",
+          "caption": "Bente Skjøttgaard, Family Tree #2326 ©Ole Akhøj",
+          "_key": "img225"
         }
       ]
     }
@@ -91307,6 +94223,16 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-6db5875c0087c001b9b2dec7e18b6f951120d0e3-1201x1500-jpg"
+          },
+          "alt": "Meriem Bouderbala, A Little Theatre Of Cruelty (5), 2023",
+          "caption": "Meriem Bouderbala, A Little Theatre Of Cruelty (5), 2023",
+          "_key": "img219"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-e384a76b17f1d84440e9b14f14f2b7510f9f54ec-821x1500-jpg"
           },
           "alt": "Meriem Bouderbala, Grotesque (5), 2021",
@@ -91322,6 +94248,36 @@
           "alt": "Meriem Bouderbala Grotesque1, 2023",
           "caption": "Meriem Bouderbala, Grotesque 1, 2023",
           "_key": "img217"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-694ec69f9a348481a2d96c2163dcc9d21f305b1a-3648x5472-jpg"
+          },
+          "alt": "Mesut Öztürk 4, de la Knot 2023",
+          "caption": "Mesut Öztürk 4, de la Knot 2023",
+          "_key": "img543"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-1c5cf97a5f06bcdabab872fcf1888922fa20499c-4000x6000-jpg"
+          },
+          "alt": "Mesut Öztürk 3,de la série CURBES AND LINES 2023",
+          "caption": "Mesut Öztürk 3,de la série CURBES AND LINES 2023",
+          "_key": "img540"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-280b4d584e7967589e91ba4af632d701569ef57f-3456x5184-jpg"
+          },
+          "alt": "Mesut Öztürk 37, 2022",
+          "caption": "Mesut Öztürk 37, 2022",
+          "_key": "img542"
         }
       ]
     }
@@ -91692,6 +94648,36 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-55f17cf3085d4042ce8618486956f90f3e62facd-5504x8256-jpg"
+          },
+          "alt": "Carolein Smit, Uilenkan 2023 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "caption": "Carolein Smit, Uilenkan 2023 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "_key": "img615"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-9a9a12348d04ffe495ddc50d7613b03ea7acc347-8256x5504-jpg"
+          },
+          "alt": "Carolein Smit, Pickles 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "caption": "Carolein Smit, Pickles 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "_key": "img616"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-c67b7c4207cec503fde9d52137a4ea0250d7dc27-5504x8256-jpg"
+          },
+          "alt": "Carolein Smit, Annunciatie 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "caption": "Carolein Smit, Annunciatie 2022 © Smit-Limburg courtesy of Fontana & J.F. Kugel",
+          "_key": "img614"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-227c24e260a401c182a230856596e193fe91197a-2480x3508-jpg"
           },
           "alt": "The Time Machine © VVB courtesy of Fontana & J.F. Kugel",
@@ -92045,6 +95031,16 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-fdecd819f1d975124ab6902989ccae9a3469746c-1146x1500-jpg"
+          },
+          "alt": "Etienne Pottier, Victory, 2023",
+          "caption": "Etienne Pottier, Victory, 2023",
+          "_key": "img216"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-52968562fe6b7d09a9a6ff94859e8eb5074b1941-1004x1500-jpg"
           },
           "alt": "Etienne Pottier, Perroquet et Serpents, 2022",
@@ -92388,11 +95384,51 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-73294d55daa5397d50e7aad6afe2e46204953d51-2500x1668-jpg"
+          },
+          "alt": "Alexandre Mussard, Le dîner, 2022 © Francisco Nogueira",
+          "caption": "Alexandre Mussard, Le dîner, 2022 © Francisco Nogueira",
+          "_key": "img213"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-99364f15755b898e1dd1303afddcddccbd87903d-1000x1500-jpg"
+          },
+          "alt": "Agathe Brahami Ferron, Suzanne 2021 ©Agathe Brahami-Ferron",
+          "caption": "Agathe Brahami Ferron, Suzanne, 2021 ©Agathe Brahami-Ferron",
+          "_key": "img212"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-6d9466b033a169e20db87b09911883dc95a5e7b9-2500x1667-jpg"
+          },
+          "alt": "Giuseppe Ducrot, Don Quichotte, 2013 © Maxime Champion",
+          "caption": "Giuseppe Ducrot, Don Quichotte, 2013 © Maxime Champion",
+          "_key": "img211"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-c349cf955f112fb8562857a9cbfe3c79d1cb4be6-1000x1400-jpg"
           },
           "alt": "Marina Le Gall, Dancing Bears, 2022 © Julien de Gasquet",
           "caption": "Marina Le Gall, Dancing Bears, 2022 © Julien de Gasquet",
           "_key": "img210"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-2335090392b799649d03ebc5ff6dcfed6bd8cf5c-1133x1500-jpg"
+          },
+          "alt": "Clementine De Chabaneix, Soda Fauvette, 2023 ©Juan Cruz Ibañez",
+          "caption": "Clementine De Chabaneix, Soda Fauvette, 2023 ©Juan Cruz Ibañez",
+          "_key": "img209"
         }
       ]
     }
@@ -92779,6 +95815,36 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-27fff53d02d3f853593e6dbd74bf749cfd9c943c-4560x6080-png"
+          },
+          "alt": "Jack Fillery, Earth Flutes",
+          "caption": "Jack Fillery, Earth Flutes",
+          "_key": "img604"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-190c5010c40a4e585a29e143f2015b32e6c29da8-2736x3648-png"
+          },
+          "alt": "Jack Fillery, Earth Flutes",
+          "caption": "Jack Fillery, Earth Flutes",
+          "_key": "img606"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-4e7385215491946d3d5941428f4078f9db1e708c-2500x2372-jpg"
+          },
+          "alt": "Ian Garett, Alternate, 2023 ©Dillon Marsh",
+          "caption": "Ian Garett, Alternate, 2023 ©Dillon Marsh",
+          "_key": "img318"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-0adf6e57e7020ed49825be221b3258f73383efb9-960x960-jpg"
           },
           "alt": "Guy van Leemput, Big Mind Circles, 2020",
@@ -93074,7 +96140,39 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-c0c24b5327e0a45ab2680e647bf3e648671b13bf-1000x1500-jpg"
+          },
+          "alt": "Daphné Corregan, Nature Morte Au Carré, 2023 ©Gilles Suffren",
+          "caption": "Daphné Corregan, Nature Morte Au Carré, 2023 ©Gilles Suffren",
+          "_key": "img206"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e516980c2cd55291706db02d64ea4024004eec88-1000x1500-jpg"
+          },
+          "alt": "Daphné Corregan, Carriers, 2023 ©Gilles Suffren",
+          "caption": "Daphné Corregan, Carriers, 2023 ©Gilles Suffren",
+          "_key": "img208"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-7bbdaf6d355f00d8f34461d73ddf56f6a88e1e24-1000x1500-jpg"
+          },
+          "alt": "Daphné Corregan, Black Vase With White Lemon, 2023 ©Gilles Suffren",
+          "caption": "Daphné Corregan, Black Vase With White Lemon, 2023 ©Gilles Suffren",
+          "_key": "img207"
+        }
+      ]
     }
   },
   {
@@ -93418,6 +96516,16 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-7c1259a8dde140dbce036ea2fd0e7efd2912bc03-1000x1500-jpg"
+          },
+          "alt": "Sarah Pschorn Sirène 3, 2020 ©Jakob_Adolphi",
+          "caption": "Sarah Pschorn Sirène 3, 2020 ©Jakob_Adolphi",
+          "_key": "img200"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-b8e204733e9194a7dcd1999e8e8bfaba69785f61-1500x1500-jpg"
           },
           "alt": "Marianne Abergel Bloc Animal 3 © Marianne Abergel",
@@ -93428,11 +96536,51 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-b1cc0479ac730628f7b0f87fde85ff2a0170e35d-1003x1500-jpg"
+          },
+          "alt": "Anton Reijnders (à gauche) Status 1, (à droite) Status 3, 1997-2003 ©FRACAS gallery",
+          "caption": "Anton Reijnders (à gauche) Status 1, (à droite) Status 3, 1997-2003 ©FRACAS gallery",
+          "_key": "img197"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e3ead5221de8952ae279408db4f4f0b6791206c5-1000x1500-jpg"
+          },
+          "alt": "Romain les Bains, Victoire 3, 2023 © FRACASgallery",
+          "caption": "Romain les Bains, Victoire 3, 2023 © FRACASgallery",
+          "_key": "img205"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-a04ab8a5fd07c6bed4d8d28ede08fe9c76aaf1fc-1000x1500-jpg"
+          },
+          "alt": "Sarah Pschorn Sirène 3, 2020 ©Jakob_Adolphi",
+          "caption": "Sarah Pschorn Sirène 3, 2020 ©Jakob_Adolphi",
+          "_key": "img203"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-2ade4e0b800dbc673adf80603149e192e85c82be-1148x1500-jpg"
           },
           "alt": "Anton Reijnders, Nomen Nescio 6, 1988 ©Anton Reijnders",
           "caption": "Anton Reijnders, Nomen Nescio 6, 1988 ©Anton Reijnders",
           "_key": "img202"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-59789f2789f2c27d793b1ccd13a5cb74afc40c8c-5862x3908-jpg"
+          },
+          "alt": "Coline Rosoux, 2023, Flamby Face ©Lionel Jusseret",
+          "caption": "Coline Rosoux, 2023, Flamby Face ©Lionel Jusseret",
+          "_key": "img537"
         }
       ]
     }
@@ -94129,7 +97277,89 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e313ed26ac6253b1b1f8bed972e147042a72d9ff-1125x1500-jpg"
+          },
+          "alt": "Léna Babinet, Série Anamnèse, 2020 © Amélie Hetier",
+          "caption": "Léna Babinet, Série Anamnèse, 2020 © Amélie Hetier",
+          "_key": "img175"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-e47b5e3323c97ac217d774a3369a4e5780b273ec-1667x2500-jpg"
+          },
+          "alt": "Caroline Andrin, Rhyton Serpent, 2022 © Caroline Andrin",
+          "caption": "Caroline Andrin, Rhyton Serpent, 2022 © Caroline Andrin",
+          "_key": "img182"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-d406d22c82c4d47d088cbbe2f876ca25f137471a-1000x1500-jpg"
+          },
+          "alt": "Caroline Andrin, Rhyton Lionne, 2022 © Caroline Andrin",
+          "caption": "Caroline Andrin, Rhyton Lionne, 2022 © Caroline Andrin",
+          "_key": "img181"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-450845af670745d5e296b3f79325875b33dbb750-1000x1500-jpg"
+          },
+          "alt": "Caroline Andrin, Rhytons Carafes, 2023 © Caroline Andrin",
+          "caption": "Caroline Andrin, Rhytons Carafes, 2023 © Caroline Andrin",
+          "_key": "img180"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-0c964e0b298abc40dd8c938276835de6a22b8ff2-1000x1500-jpg"
+          },
+          "alt": "Caroline Andrin, Rhytons Carafes, 2023 © Caroline Andrin",
+          "caption": "Caroline Andrin, Rhytons Carafes, 2023 © Caroline Andrin",
+          "_key": "img179"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-afa99c509c04ed93f4c8871925c981fe6f72815e-2500x1679-jpg"
+          },
+          "alt": "Léna Babinet, Série Anamnèse, 2020 © Lena Babinet",
+          "caption": "Léna Babinet, Série Anamnèse, 2020 © Lena Babinet",
+          "_key": "img176"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-ca2f488a93c9302c450fa65693e8994fe66225eb-1000x1500-jpg"
+          },
+          "alt": "Léna Babinet, Tinctura, 2023",
+          "caption": "Léna Babinet, Tinctura, 2023",
+          "_key": "img178"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-c48ff066d3cf8ce0ff286d73648d7558c2c25555-1667x2500-jpg"
+          },
+          "alt": "Léna Babinet, Ce Qui Reste - Voile, 2021",
+          "caption": "Léna Babinet, Ce Qui Reste - Voile, 2021",
+          "_key": "img177"
+        }
+      ]
     }
   },
   {
@@ -94450,7 +97680,39 @@
             ]
           }
         ]
-      }
+      },
+      "images": [
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-71c7bb0f298b282c897bd24146250d9a29e4c779-1173x1500-jpg"
+          },
+          "alt": "Odonchimeg Davaadorj, Sing Me A Song, 2023",
+          "caption": "Odonchimeg Davaadorj, Sing Me A Song, 2023",
+          "_key": "img166"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-81c717459d55d6a6113005f417cb4038cc91b648-1111x1500-jpg"
+          },
+          "alt": "Odonchimeg Davaadorj, Mothering 2, 2023",
+          "caption": "Odonchimeg Davaadorj, Mothering 2, 2023",
+          "_key": "img168"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-147eec0869053240a58004f82ae64ed8593d1372-1099x1500-jpg"
+          },
+          "alt": "Odonchimeg Davaadorj, 32SA 4, 2023",
+          "caption": "Odonchimeg Davaadorj, 32SA 4, 2023",
+          "_key": "img167"
+        }
+      ]
     }
   },
   {
@@ -94861,6 +98123,16 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-b7cebc22d748beeccee191ed0f4764a3b61d0e54-1000x1500-jpg"
+          },
+          "alt": "Jojo Corväiá, ceramic sculpture, 2021 @Tijs Vervecken",
+          "caption": "Jojo Corväiá, ceramic sculpture, 2021 @Tijs Vervecken",
+          "_key": "img172"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-1e3963d01466d85bef1f3fa93984a9d268d43d51-1500x1500-jpg"
           },
           "alt": "Jojo Corvi Ceramic Sculpture V 1241, 2022",
@@ -95204,6 +98476,15 @@
           "_type": "figure",
           "asset": {
             "_type": "reference",
+            "_ref": "image-3e1cfc34f25126f35d062eb83f3ab85d12dac8c3-3869x2997-jpg"
+          },
+          "caption": "Roger Coll, 2022, ©RC",
+          "_key": "img569"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
             "_ref": "image-77c09c0a5d1a706fd58bcef178b81c703c092066-1200x1500-png"
           },
           "alt": "Kazuma Koike, 2023, © KK",
@@ -95236,6 +98517,15 @@
           },
           "caption": "Anders Børgesen, 2023, ©AB",
           "_key": "img568"
+        },
+        {
+          "_type": "figure",
+          "asset": {
+            "_type": "reference",
+            "_ref": "image-ee1845afc4688f0f5dbc67a88a15f8e86df77d2f-2624x3936-jpg"
+          },
+          "caption": "Barbara Leclercq, 2023, © BL",
+          "_key": "img562"
         },
         {
           "_type": "figure",
