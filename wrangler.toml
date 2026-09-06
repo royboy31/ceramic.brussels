@@ -29,6 +29,12 @@ compatibility_flags = ["nodejs_compat"]
 PUBLIC_SANITY_PROJECT_ID = "5hqzhin7"
 PUBLIC_SANITY_DATASET = "production"
 PUBLIC_SITE_URL = "https://ceramic-brussels.pages.dev"
+# The preview runtime on production too (2026-09-06): editors use the live
+# Studio's Preview tab and share draft links from the real domain. See the
+# explanation under [env.preview.vars]; production needs the same
+# SANITY_VIEWER_TOKEN secret in the dashboard.
+PREVIEW_RUNTIME = "1"
+PUBLIC_PREVIEW_ENABLED = "true"
 
 # Branch previews: canonical tags and the sitemap must point at the preview
 # host, and editors get an Edit button on every page.
@@ -43,8 +49,7 @@ PUBLIC_SHOW_EDIT_LINKS = "true"
 # ignored once that file exists - the Worker serves /api through the same
 # modules). PUBLIC_PREVIEW_ENABLED gives the Studio its Preview tab. Both must
 # be set together. The Worker also needs the SANITY_VIEWER_TOKEN secret,
-# which lives in the dashboard, never here. Turned on for previews first;
-# copy both lines into [vars] to enable it on production.
+# which lives in the dashboard, never here. On for previews and production.
 PREVIEW_RUNTIME = "1"
 PUBLIC_PREVIEW_ENABLED = "true"
 
