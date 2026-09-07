@@ -1,5 +1,6 @@
 import { presentationTool, defineDocuments, defineLocations } from 'sanity/presentation';
 import { HUBS } from '../lib/hubs';
+import { PREVIEWABLE_TYPES, PREVIEW_ROOT, PREVIEW_SELECT, previewLocations, type PreviewFields } from './previewPaths';
 
 /**
  * The Preview tab in the Studio.
@@ -15,7 +16,7 @@ import { HUBS } from '../lib/hubs';
  * routes under src/pages/[lang]/.
  */
 
-const P = '/preview';
+const P = PREVIEW_ROOT;
 const LANG = '(en|fr|nl)';
 
 /** URL pattern → the document that page is made from. */
@@ -48,58 +49,20 @@ const mainDocuments = defineDocuments([
   },
 ]);
 
-/** Document → the preview URLs that show it. */
-const locations = {
-  homepage: defineLocations({
-    locations: [{ title: 'Homepage', href: `${P}/en` }],
-  }),
-  page: defineLocations({
-    select: { title: 'title.en', section: 'section', en: 'slug.en.current', fr: 'slug.fr.current', nl: 'slug.nl.current' },
-    resolve: (doc) => {
-      if (!doc) return null;
-      const title = doc.title ?? 'Page';
-      if (doc.section) {
-        const hub = HUBS[doc.section];
-        const first = hub?.tabs[0]?.slug;
-        const path = !doc.en || doc.en === first ? doc.section : `${doc.section}/${doc.en}`;
-        return { locations: [{ title, href: `${P}/en/${path}` }] };
-      }
-      return {
-        locations: (['en', 'fr', 'nl'] as const)
-          .filter((l) => doc[l])
-          .map((l) => ({ title: `${title} (${l.toUpperCase()})`, href: `${P}/${l}/${doc[l]}` })),
-      };
-    },
-  }),
-  artist: defineLocations({
-    select: { name: 'name', slug: 'slug.current' },
-    resolve: (doc) =>
-      doc?.slug
-        ? { locations: [{ title: doc.name ?? 'Artist', href: `${P}/en/artists/${doc.slug}` }, { title: 'Guest of honour page', href: `${P}/en/guest-of-honour` }] }
-        : null,
-  }),
-  exhibitor: defineLocations({
-    select: { name: 'name', slug: 'slug.current' },
-    resolve: (doc) => (doc?.slug ? { locations: [{ title: doc.name ?? 'Exhibitor', href: `${P}/en/exhibitors/${doc.slug}` }] } : null),
-  }),
-  newsItem: defineLocations({
-    select: { title: 'title.en', slug: 'slug.current' },
-    resolve: (doc) => (doc?.slug ? { locations: [{ title: doc.title ?? 'News', href: `${P}/en/news/${doc.slug}` }, { title: 'News list', href: `${P}/en/news` }] } : null),
-  }),
-  edition: defineLocations({
-    locations: [
-      { title: 'Homepage', href: `${P}/en` },
-      { title: 'Visitors info', href: `${P}/en/visit` },
-      { title: 'Past editions', href: `${P}/en/editions` },
-    ],
-  }),
-  siteSettings: defineLocations({ locations: [{ title: 'Homepage', href: `${P}/en` }, { title: 'Visitors info', href: `${P}/en/visit` }] }),
-  navigation: defineLocations({ locations: [{ title: 'Homepage', href: `${P}/en` }] }),
-  person: defineLocations({ locations: [{ title: 'About – team', href: `${P}/en/about/team` }, { title: 'Art prize – jury', href: `${P}/en/art-prize/jury` }] }),
-  partner: defineLocations({ locations: [{ title: 'Partners', href: `${P}/en/partners` }] }),
-  programmeEvent: defineLocations({ locations: [{ title: 'Programme', href: `${P}/en/programme` }] }),
-  laureate: defineLocations({ locations: [{ title: 'Art prize – laureates', href: `${P}/en/art-prize/laureates` }] }),
-};
+/** Document → the preview URLs that show it. The mapping itself lives in
+ *  previewPaths.ts, shared with the "Open preview" document action. */
+const locations = Object.fromEntries(
+  [...PREVIEWABLE_TYPES].map((type) => [
+    type,
+    defineLocations({
+      select: PREVIEW_SELECT,
+      resolve: (doc) => {
+        const found = previewLocations(type, doc as PreviewFields | null);
+        return found.length ? { locations: found } : null;
+      },
+    }),
+  ]),
+);
 
 export const presentation = presentationTool({
   name: 'preview',
