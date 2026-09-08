@@ -60,24 +60,27 @@ const hasCaption = (img: any) => img.caption || img.workTitle || img.year || img
   .gallery {
     margin: 0 0 3rem;
   }
+  /* The design's photo strip (`.strip`, `.photo-row`): 3:2 pictures, 40px apart. */
   .grid {
     list-style: none;
     padding: 0;
     margin: 0;
     display: grid;
     grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
-    gap: 30px;
+    gap: 40px;
   }
   figure {
     margin: 0;
   }
   figure :global(img) {
+    aspect-ratio: 1.5;
+    object-fit: cover;
     width: 100%;
   }
   figcaption {
-    margin-top: 0.4rem;
-    font-size: 0.8rem;
-    color: var(--ink-2);
+    margin-top: 8px;
+    font-size: 18px;
+    letter-spacing: -0.02em;
   }
   .credit {
     color: var(--ink-3);

@@ -1,50 +1,150 @@
 ---
 import type { LocaleId } from '../../lib/locales';
 import Figure from '../Figure.astro';
+import SanityImage from '../SanityImage.astro';
 import { resolveLink } from '../../lib/links';
 import { styleAttrs } from '../../lib/textStyle';
 
 /**
- * The homepage's feature block: kicker, headline and link on six columns,
- * picture on the other six. `flip` puts the picture first - PageSections
- * alternates consecutive features, as the hand-off does.
+ * The feature block: kicker, headline and link on six columns, picture on
+ * the other six. `flip` puts the picture first - PageSections alternates
+ * consecutive features, as the design's homepage does (guest of honour,
+ * then the partner spotlight). The "home" variant is the design's markup
+ * verbatim; the default keeps the hub treatment.
  */
 interface Props {
   lang: LocaleId;
   section: any;
   flip?: boolean;
+  variant?: 'default' | 'home';
 }
 
-const { lang, section, flip = false } = Astro.props;
+const { lang, section, flip = false, variant = 'default' } = Astro.props;
 const link = resolveLink(lang, section.link);
 const external = link?.external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+/** Headlines are written with line breaks in the Studio; keep them. */
+const lines: string[] = String(section.headline ?? '').split(/\r?\n/);
+const image = section.image?.asset ? section.image : null;
 ---
 
-<section class:list={['page-grid', 'feature', { flip }]} id={section.anchor || undefined}>
-  <div class="feature-copy">
-    {
-      section.kicker && (
-        <p class="eyebrow-lg" {...styleAttrs(section.kickerStyle)}>
-          {section.kicker}
-        </p>
-      )
-    }
-    {section.headline && <h3 {...styleAttrs(section.headlineStyle)}>{section.headline}</h3>}
-    {
-      link && (
-        <a class="text-link" href={link.href} {...external}>
-          {link.label} {link.arrow}
-        </a>
-      )
-    }
-  </div>
-
-  <div class="feature-shot">
-    <Figure image={section.image} pool="fair" seed={section._key} sizes="(max-width: 640px) 100vw, 50vw" />
-  </div>
-</section>
+{
+  variant === 'home' ? (
+    flip ? (
+      <section class="page-grid items-start py-6" id={section.anchor || undefined}>
+        {image ? (
+          <SanityImage
+            image={image}
+            widths={[600, 900, 1200, 1600]}
+            sizes="(max-width: 640px) 100vw, 50vw"
+            class="col-span-6 h-[31vw] min-h-[300px] w-full object-cover max-sm:col-span-full"
+          />
+        ) : (
+          <div class="col-span-6 h-[31vw] min-h-[300px] w-full bg-neutral-100 max-sm:col-span-full" />
+        )}
+        <div class="col-span-6 max-sm:col-span-full max-sm:pt-5">
+          {section.kicker && (
+            <p class="eyebrow" {...styleAttrs(section.kickerStyle)}>
+              {section.kicker}
+            </p>
+          )}
+          {section.headline && (
+            <h3 class="mt-2 text-[clamp(2rem,3.6vw,3.2rem)] leading-[1.02] tracking-[-.04em]" {...styleAttrs(section.headlineStyle)}>
+              {lines.map((line, i) => (
+                <>
+                  {i > 0 && <br />}
+                  {line}
+                </>
+              ))}
+            </h3>
+          )}
+          {link && (
+            <a class="text-link mt-8 inline-block text-[clamp(1.3rem,2.6vw,2.5rem)]" href={link.href} {...external}>
+              {link.label} {link.arrow}
+            </a>
+          )}
+        </div>
+      </section>
+    ) : (
+      <section class="page-grid pb-10" id={section.anchor || undefined}>
+        <div class="col-span-6 py-6 max-sm:col-span-full">
+          {section.kicker && (
+            <p class="eyebrow home-news-eyebrow" {...styleAttrs(section.kickerStyle)}>
+              {section.kicker}
+            </p>
+          )}
+          {section.headline && (
+            <h3 class="mt-2 text-[clamp(2rem,3.6vw,3.2rem)] leading-[1.02] tracking-[-.04em]" {...styleAttrs(section.headlineStyle)}>
+              {lines.map((line, i) => (
+                <>
+                  {i > 0 && <br />}
+                  {line}
+                </>
+              ))}
+            </h3>
+          )}
+          {link && (
+            <a class="text-link mt-8 inline-block text-[clamp(1.3rem,2.6vw,2.5rem)]" href={link.href} {...external}>
+              {link.label} {link.arrow}
+            </a>
+          )}
+        </div>
+        {image ? (
+          <SanityImage
+            image={image}
+            widths={[600, 900, 1200, 1600]}
+            sizes="(max-width: 640px) 100vw, 50vw"
+            class="col-span-6 h-[31vw] min-h-[280px] w-full object-cover max-sm:col-span-full"
+          />
+        ) : (
+          <div class="col-span-6 h-[31vw] min-h-[280px] w-full bg-neutral-100 max-sm:col-span-full" />
+        )}
+      </section>
+    )
+  ) : (
+    <section class:list={['page-grid', 'feature', { flip }]} id={section.anchor || undefined}>
+      <div class="feature-copy">
+        {section.kicker && (
+          <p class="eyebrow-lg" {...styleAttrs(section.kickerStyle)}>
+            {section.kicker}
+          </p>
+        )}
+        {section.headline && <h3 {...styleAttrs(section.headlineStyle)}>{section.headline}</h3>}
+        {link && (
+          <a class="text-link" href={link.href} {...external}>
+            {link.label} {link.arrow}
+          </a>
+        )}
+      </div>
+      <div class="feature-shot">
+        <Figure image={section.image} pool="fair" seed={section._key} sizes="(max-width: 640px) 100vw, 50vw" />
+      </div>
+    </section>
+  )
+}
 
 <style>
+  /* From the design's index.css: the guest-of-honour kicker. */
+  .home-news-eyebrow {
+    letter-spacing: -2px;
+    font-size: 40px;
+    line-height: 42px;
+  }
+  @media (width>=701px) and (width<=1439px) {
+    .home-news-eyebrow {
+      letter-spacing: -0.1389vw;
+      font-size: 2.7778vw;
+      line-height: 2.9167vw;
+    }
+  }
+  @media (width<=700px) {
+    .home-news-eyebrow {
+      letter-spacing: -1px;
+      font-size: 20px;
+      line-height: 1.1;
+    }
+  }
+
+  /* The hub treatment. */
   .feature {
     align-items: center;
     row-gap: 1.25rem;
@@ -71,7 +171,6 @@ const external = link?.external ? { target: '_blank', rel: 'noopener noreferrer'
   .feature.flip .feature-shot {
     order: -1;
   }
-
   .eyebrow-lg {
     margin: 0;
     text-transform: lowercase;
@@ -92,7 +191,6 @@ const external = link?.external ? { target: '_blank', rel: 'noopener noreferrer'
     font-size: clamp(1.3rem, 2.6vw, 2.5rem);
     letter-spacing: -0.05em;
   }
-
   @media (max-width: 640px) {
     .feature-copy,
     .feature-shot {

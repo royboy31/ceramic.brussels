@@ -19,6 +19,27 @@ components, binding each element to the field named below.
 `html pages/` is not committed (165 MB of PNGs); Lilanga has the source
 project. It is gitignored.
 
+## Status, 2026-09-08 night — the frontend is ported too
+
+Kamindu ported the sixteen pages into the routes the same night (see
+"How the design is wired" in `docs/frontend-handbook.md`): the shell with
+the accordion menu, the homepage and its block variants, and every hub
+page, each with the design's markup and its page CSS. Checked page by page
+against the design in Chrome at 1440px and with the text parity script.
+What still differs from the design, all of it content or deliberate:
+
+- The 2027 laureates have no bio, birth year or base line yet (the design
+  shows the 2026 laureates); the talks tab shows the seeded 2027 events.
+- The art prize "about" hero is one cover image where the design has a
+  three-slide show; the counter reads 1/1.
+- Anna Laudel is filed under Istanbul, so its code reads TR, not the
+  design's DE; the "art shippers" paragraph under two Brussels institutions
+  is a design placeholder and was not copied.
+- The A–Z strip greys out letters that have no exhibitor; the design's
+  static strip does not.
+- Mobile: the design has no mobile frames; the ported CSS carries the
+  build's own breakpoints, untested below 700px.
+
 ## Status, 2026-09-08 evening — the CMS side is done
 
 Everything below the line that was marked **schema** or **content** has

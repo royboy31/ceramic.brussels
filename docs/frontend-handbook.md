@@ -39,6 +39,31 @@ Not yours, even when it looks like a one-line change:
 table. Run it before every commit; it is also what Kamindu will run on your
 PR.
 
+## How the design is wired (since 2026-09-08)
+
+The sixteen design pages were ported into the routes on 2026-09-08, so every
+page now renders the design's own markup and CSS. The pieces:
+
+- **`src/styles/design.css`** is the design build's shared stylesheet,
+  imported by `Base.astro`: the Tailwind preflight and the utility classes
+  the markup uses (`page-grid`, `col-span-6`, `h-[31vw]`, …), plus the
+  header, menu overlay, footer, pill and grid rules. It is copied verbatim
+  from the build; do not hand-edit utilities, add page rules to the page.
+- **Page-scoped rules** live in each route's `<style>`, copied from the
+  design page's own `<style>` with the build's scope attributes stripped.
+- **The shell** (`Header`, `MenuOverlay` with the `+` accordion, `Footer`)
+  and **`HubNav`** (the `.section-head` title band; `dark` on acid pages)
+  carry the design markup; the acid pages get `body.acid-page`.
+- **Blocks have a `variant`**: `PageSections variant="home"` renders the
+  homepage's blocks the way the homepage draws them (`Heading` as
+  "latest news", `Feature` rows, `Links` as the image bands, `VideoSection`
+  as the looping frame, `KeyFigures` as the counting table); the default is
+  the hub treatment.
+- **`Base.astro`** carries the design's page script: link arrows that slide
+  on hover, key figures that count up, sections and images that fade in.
+- Pages the design does not cover yet (news, artists, editions, standalone
+  pages, 404) are wrapped in `.legacy-page` and keep the older look.
+
 ## Page → route → data → Figma
 
 Every page's frontmatter calls helpers from `src/lib/queries.ts`. Each takes

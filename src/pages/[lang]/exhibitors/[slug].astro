@@ -1,8 +1,7 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import Slideshow from '../../../components/Slideshow.astro';
+import SanityImage from '../../../components/SanityImage.astro';
 import PortableText from '../../../components/PortableText.astro';
-import LinkPill from '../../../components/LinkPill.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
 import { getExhibitor, getExhibitorSlugs, getExhibitors } from '../../../lib/queries';
@@ -10,10 +9,12 @@ import { instagramUrl } from '../../../lib/links';
 import { styleAttrs } from '../../../lib/textStyle';
 
 /**
- * One exhibitor, in three columns: the slideshow; name, city (CC), booth,
- * instagram / website pills and the description; then "presenting" with the
- * artists shown and the note about them. Previous / next walk the same
- * alphabetical list as the index.
+ * One exhibitor, as the design's exhibitors/chaxartxrtm/index.html draws
+ * it: the artwork with its dots and "1/6 · Artist, Title, year" caption on
+ * the left; on the right a ruled header with the name, "City (CC) ● booth",
+ * the instagram / website pills and "presenting" with the artists, then the
+ * description in two columns; previous / next along the bottom, walking
+ * the same alphabetical list as the index.
  */
 export async function getStaticPaths() {
   const slugs = await getExhibitorSlugs();
@@ -27,23 +28,44 @@ const t = useTranslations(lang);
 const [exhibitor, all] = await Promise.all([getExhibitor(lang, slug), getExhibitors(lang)]);
 if (!exhibitor) return Astro.rewrite('/404');
 
-const images = exhibitor.images ?? [];
+/** The design shows a two-letter code after the city; `country` holds the full name. */
+const ISO: Record<string, string> = {
+  france: 'FR', spain: 'ES', belgium: 'BE', netherlands: 'NL', 'the netherlands': 'NL', norway: 'NO',
+  switzerland: 'CH', turkey: 'TR', germany: 'DE', italy: 'IT', 'united kingdom': 'GB', 'united states': 'US',
+  portugal: 'PT', denmark: 'DK', sweden: 'SE', austria: 'AT', luxembourg: 'LU', japan: 'JP', china: 'CN',
+  korea: 'KR', 'south korea': 'KR',
+};
+const countryCode = (value?: string) => {
+  if (!value) return undefined;
+  if (/^[A-Za-z]{2}$/.test(value)) return value.toUpperCase();
+  return ISO[value.trim().toLowerCase()] ?? value;
+};
+
+const images: any[] = (exhibitor.images ?? []).filter((i: any) => i?.asset);
+const artwork = images[0];
 
 const index = all.findIndex((ex: any) => ex.slug === slug);
 const previous = index > 0 ? all[index - 1] : null;
 const next = index >= 0 && index < all.length - 1 ? all[index + 1] : null;
 
-const place = [exhibitor.city, exhibitor.countryCode && `(${exhibitor.countryCode})`].filter(Boolean).join(' ');
-const presenting = exhibitor.artists?.length ? exhibitor.artists : null;
-const hasBadges = exhibitor.soloShow || exhibitor.inCountryFocus || exhibitor.kind === 'jury-prize';
+const code = countryCode(exhibitor.countryCode ?? exhibitor.country);
+const place = [exhibitor.city, code && `(${code})`].filter(Boolean).join(' ');
+/** The written list wins over the references: the design names every artist, not only the ones with a page. */
+const presenting = !exhibitor.artistsText && exhibitor.artists?.length ? exhibitor.artists : null;
+
+/** The description runs in two columns: the first half of its paragraphs left, the rest right. */
+const bio: any[] = exhibitor.bio ?? [];
+const split = Math.ceil(bio.length / 2);
+const bioLeft = bio.slice(0, split);
+const bioRight = bio.slice(split);
 
 const orgSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: exhibitor.name,
   ...(exhibitor.website ? { url: exhibitor.website } : {}),
-  ...(exhibitor.countryCode
-    ? { address: { '@type': 'PostalAddress', addressLocality: exhibitor.city, addressCountry: exhibitor.countryCode } }
+  ...(code && code.length === 2
+    ? { address: { '@type': 'PostalAddress', addressLocality: exhibitor.city, addressCountry: code } }
     : {}),
 };
 ---
@@ -60,78 +82,112 @@ const orgSchema = {
 >
   <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} slot="head" />
 
-  <h1 class="section-title">{t('nav.exhibitors')}</h1>
-
-  <article class="page-grid exhibitor">
-    <div class="gallery">
-      <Slideshow
-        images={images}
-        aspect={0.8}
-        pool="exhibitor"
-        seed={slug}
-        label={exhibitor.name}
-        sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw"
-      />
+  <article class="page-grid exhibitor-detail">
+    <figure class="artwork">
+      <div class="relative">
+        {
+          artwork ? (
+            <SanityImage image={artwork} widths={[433, 866, 1300]} sizes="(max-width: 1000px) 100vw, 433px" loading="eager" />
+          ) : (
+            <div class="artwork-empty" />
+          )
+        }
+        {
+          (exhibitor.soloShow || exhibitor.kind === 'jury-prize') && (
+            <span class="absolute right-3 top-3 grid h-16 w-16 place-items-center rounded-full bg-black text-center text-sm leading-[.9] text-white">
+              {exhibitor.kind === 'jury-prize' ? t('exhibitors.juryPrize') : t('exhibitors.soloShow')}
+            </span>
+          )
+        }
+      </div>
       {
-        hasBadges && (
-          <span class="badges">
-            {exhibitor.soloShow && <span class="badge">{t('exhibitors.soloShow')}</span>}
-            {exhibitor.inCountryFocus && (
-              <span class="badge focus">{exhibitor.countryFocusLabel ?? t('exhibitors.countryFocus')}</span>
-            )}
-            {exhibitor.kind === 'jury-prize' && <span class="badge">{t('exhibitors.juryPrize')}</span>}
-          </span>
-        )
-      }
-    </div>
-
-    <div class="identity">
-      <h2 {...styleAttrs(exhibitor.nameStyle)}>{exhibitor.name}</h2>
-      {place && <p class="place">{place}</p>}
-      {exhibitor.booth && <p class="booth">{exhibitor.booth}</p>}
-
-      {
-        (exhibitor.instagram || exhibitor.website) && (
-          <p class="links">
-            {exhibitor.instagram && (
-              <LinkPill lang={lang} href={instagramUrl(exhibitor.instagram)} label={t('common.instagram')} />
-            )}
-            {exhibitor.website && <LinkPill lang={lang} href={exhibitor.website} label={t('common.website')} />}
-          </p>
-        )
-      }
-
-      {
-        exhibitor.bio && (
-          <div class="bio">
-            <PortableText value={exhibitor.bio} fieldStyle={exhibitor.bioStyle} />
+        images.length > 1 && (
+          <div class="dots" aria-hidden="true">
+            {images.map(() => (
+              <i />
+            ))}
           </div>
         )
       }
-    </div>
-
-    <div class="presenting">
       {
-        (presenting || exhibitor.artistsText) && (
-          <>
-            <p class="eyebrow-plain">{t('exhibitors.presenting')}</p>
-            <h3 class="names">
-              {presenting
-                ? presenting.map((a: any, i: number) => (
-                    <>
-                      {i > 0 && ', '}
-                      {a.slug ? <a href={localePath(lang, `artists/${a.slug}`)} {...styleAttrs(a.nameStyle)}>{a.name}</a> : a.name}
-                    </>
-                  ))
-                : exhibitor.artistsText}
-            </h3>
-          </>
+        artwork && (artwork.caption || artwork.workTitle || images.length > 1) && (
+          <figcaption>
+            <span>1/{images.length}</span>
+            <span>
+              {artwork.caption}
+              {artwork.workTitle && (
+                <>
+                  {artwork.caption && ', '}
+                  <em>{artwork.workTitle}</em>
+                </>
+              )}
+              {artwork.year && `, ${artwork.year}`}
+            </span>
+          </figcaption>
         )
       }
+    </figure>
+
+    <div class="profile">
+      <header>
+        <div>
+          <h2 {...styleAttrs(exhibitor.nameStyle)}>{exhibitor.name}</h2>
+          {
+            (place || exhibitor.booth) && (
+              <p>
+                {place}
+                {place && exhibitor.booth && <br />}
+                {exhibitor.booth && <>● {exhibitor.booth}</>}
+              </p>
+            )
+          }
+          {
+            (exhibitor.instagram || exhibitor.website) && (
+              <nav>
+                {exhibitor.instagram && (
+                  <a href={instagramUrl(exhibitor.instagram)} target="_blank" rel="noopener noreferrer">
+                    {t('common.instagram')} ↗
+                  </a>
+                )}
+                {exhibitor.website && (
+                  <a href={exhibitor.website} target="_blank" rel="noopener noreferrer">
+                    {t('common.website')} ↗
+                  </a>
+                )}
+              </nav>
+            )
+          }
+        </div>
+        {
+          (presenting || exhibitor.artistsText) && (
+            <div>
+              <small>{t('exhibitors.presenting')}</small>
+              <h3>
+                {presenting
+                  ? presenting.map((a: any, i: number) => (
+                      <>
+                        {i > 0 && ', '}
+                        {a.slug ? <a href={localePath(lang, `artists/${a.slug}`)}>{a.name}</a> : a.name}
+                      </>
+                    ))
+                  : exhibitor.artistsText}
+              </h3>
+            </div>
+          )
+        }
+      </header>
+
       {
-        exhibitor.artistsNote && (
-          <div class="note">
-            <PortableText value={exhibitor.artistsNote} fieldStyle={exhibitor.artistsNoteStyle} />
+        bio.length > 0 && (
+          <div class="copy">
+            <div>
+              <PortableText value={bioLeft} fieldStyle={exhibitor.bioStyle} />
+            </div>
+            {bioRight.length > 0 && (
+              <div>
+                <PortableText value={bioRight} fieldStyle={exhibitor.bioStyle} />
+              </div>
+            )}
           </div>
         )
       }
@@ -140,25 +196,24 @@ const orgSchema = {
     <nav class="pager" aria-label={t('nav.exhibitors')}>
       {
         previous ? (
-          <a class="pager-prev" href={localePath(lang, `exhibitors/${previous.slug}`)}>
-            ← {t('exhibitors.previous')}
+          <a href={localePath(lang, `exhibitors/${previous.slug}`)}>
+            ← <span>{t('exhibitors.previous')}</span>
           </a>
         ) : (
-          <span />
+          <a href={localePath(lang, 'exhibitors')}>
+            ← <span>{t('exhibitors.backToAll')}</span>
+          </a>
         )
       }
-
-      <a class="back-all text-link" href={localePath(lang, 'exhibitors')}>
-        {t('exhibitors.backToAll')} →
-      </a>
-
       {
         next ? (
-          <a class="pager-next" href={localePath(lang, `exhibitors/${next.slug}`)}>
-            {t('exhibitors.next')} →
+          <a href={localePath(lang, `exhibitors/${next.slug}`)}>
+            <span>{t('exhibitors.next')}</span> →
           </a>
         ) : (
-          <span />
+          <a href={localePath(lang, 'exhibitors')}>
+            <span>{t('exhibitors.backToAll')}</span> →
+          </a>
         )
       }
     </nav>
@@ -166,171 +221,153 @@ const orgSchema = {
 </Base>
 
 <style>
-  .exhibitor {
-    row-gap: 2.5rem;
-    margin-top: 0.25rem;
-  }
-
-  /* ---- left: slideshow ---- */
-  .gallery {
-    grid-column: span 4;
+  /* From the design's exhibitors/chaxartxrtm/index.html. */
+  .exhibitor-detail {
+    grid-template-columns: 433px minmax(0, 907px);
+    gap: 40px;
+    min-height: 1009px;
+    padding-top: 14px;
     position: relative;
   }
-  .badges {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 1;
+  .artwork {
+    grid-column: 1;
+    margin: 0;
+  }
+  .artwork :global(img),
+  .artwork-empty {
+    object-fit: cover;
+    width: 433px;
+    height: 541px;
+  }
+  .artwork-empty {
+    background: #f5f5f5;
+  }
+  .dots {
+    justify-content: center;
+    gap: 18px;
+    margin-top: -26px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    position: relative;
   }
-  .badge {
-    display: inline-block;
-    padding: 0.2rem 0.75rem;
-    border-radius: 999px;
-    background: var(--ink);
-    color: var(--ground);
-    font-size: clamp(0.75rem, 1vw, 0.95rem);
-    line-height: 1.3;
-    text-transform: lowercase;
-    white-space: nowrap;
+  .dots i {
+    background: #ddd;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
   }
-  .badge.focus {
-    background: var(--acid);
-    color: var(--ink);
+  .dots i:first-child {
+    background: #fff;
   }
-
-  /* ---- middle: identity ---- */
-  .identity {
-    grid-column: span 4;
-    border-top: 1px solid var(--ink);
-    padding-top: 0.75rem;
-  }
-  .identity h2 {
-    font-size: clamp(2rem, 4vw, 3.75rem);
-    line-height: 1;
-    letter-spacing: -0.05em;
-    font-weight: 400;
-    margin: 0;
-  }
-  .place,
-  .booth {
-    font-size: clamp(1.35rem, 2.7vw, 2.5rem);
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-    margin: 0;
-  }
-  .place {
-    margin-top: 1.5rem;
-  }
-  .booth::before {
-    content: '● ';
-    font-size: 0.7em;
-    vertical-align: 0.15em;
-  }
-
-  .links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin: 1.5rem 0 0;
-  }
-
-  .bio {
-    margin-top: 3rem;
-    font-size: clamp(1.05rem, 1.7vw, 1.5rem);
-    line-height: 1.25;
-    letter-spacing: -0.02em;
-  }
-  .bio :global(p) {
-    margin: 0 0 1.5rem;
-  }
-  .bio :global(p:last-child) {
-    margin-bottom: 0;
-  }
-
-  /* ---- right: presenting ---- */
-  .presenting {
-    grid-column: span 4;
-    border-top: 1px solid var(--ink);
-    padding-top: 0.75rem;
-  }
-  .eyebrow-plain {
-    font-size: 1.125rem;
-    margin: 0;
-  }
-  .names {
-    font-size: clamp(2rem, 3.5vw, 3.2rem);
-    line-height: 1;
-    letter-spacing: -0.04em;
-    font-weight: 400;
-    margin: 0;
-  }
-  .names a {
-    text-decoration: none;
-  }
-  .names a:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.08em;
-  }
-  .note {
-    margin-top: 1.5rem;
-    font-size: clamp(1.05rem, 1.7vw, 1.5rem);
-    line-height: 1.25;
-    letter-spacing: -0.02em;
-  }
-  .note :global(p) {
-    margin: 0 0 1.5rem;
-  }
-  .note :global(p:last-child) {
-    margin-bottom: 0;
-  }
-
-  /* ---- previous / back to all / next ---- */
-  .pager {
-    grid-column: 5 / -1;
-    display: flex;
-    align-items: center;
+  .artwork figcaption {
     justify-content: space-between;
-    gap: 1rem;
-    margin-top: 2.5rem;
-    font-size: clamp(1.1rem, 2vw, 1.6rem);
+    margin-top: 18px;
+    font-size: 16px;
+    display: flex;
   }
-  .pager a {
-    text-decoration: none;
+  .profile {
+    grid-column: 2;
   }
-  .pager a:hover {
-    background: var(--acid);
+  .profile header {
+    border-top: 2px solid;
+    grid-template-columns: 434px 433px;
+    gap: 40px;
+    padding-top: 12px;
+    display: grid;
   }
-  .back-all {
-    font-size: clamp(1.6rem, 3vw, 2.5rem);
+  .profile h2 {
+    letter-spacing: -0.05em;
+    font-size: 60px;
+    line-height: 1;
+  }
+  .profile header p,
+  .profile h3 {
     letter-spacing: -0.04em;
-    text-decoration: underline;
+    font-size: 40px;
+    line-height: 42px;
   }
-
-  @media (max-width: 900px) {
-    .gallery,
-    .identity {
-      grid-column: span 6;
-    }
-    .presenting,
-    .pager {
-      grid-column: 7 / -1;
-    }
+  .profile header p {
+    margin-top: 12px;
   }
-
-  @media (max-width: 640px) {
-    .gallery,
-    .identity,
-    .presenting,
-    .pager {
-      grid-column: 1 / -1;
+  .profile small {
+    font-size: 24px;
+  }
+  .profile nav {
+    gap: 40px;
+    margin-top: 26px;
+    display: flex;
+  }
+  .profile nav a {
+    border: 1px solid;
+    border-radius: 999px;
+    padding: 3px 18px;
+    font-size: 28px;
+    line-height: 36px;
+  }
+  .copy {
+    letter-spacing: -0.03em;
+    grid-template-columns: 434px 433px;
+    gap: 40px;
+    margin-top: 37px;
+    font-size: 24px;
+    line-height: 30px;
+    display: grid;
+  }
+  .copy :global(p + p) {
+    margin-top: 28px;
+  }
+  .pager {
+    justify-content: space-between;
+    font-size: 50px;
+    display: flex;
+    position: absolute;
+    bottom: 20px;
+    left: 30px;
+    right: 30px;
+  }
+  .pager span {
+    font-size: 40px;
+  }
+  @media (width<=1000px) {
+    .exhibitor-detail {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+      min-height: 0;
+    }
+    .artwork,
+    .profile {
+      grid-column: 1;
+    }
+    .artwork :global(img),
+    .artwork-empty {
+      aspect-ratio: 433 / 541;
+      width: 100%;
+      height: auto;
+    }
+    .profile {
+      margin-top: 32px;
+    }
+    .profile header,
+    .copy {
+      grid-template-columns: 1fr;
+    }
+    .profile h2 {
+      font-size: 42px;
+    }
+    .profile header p,
+    .profile h3 {
+      font-size: 28px;
+      line-height: 1.05;
+    }
+    .copy {
+      font-size: 18px;
+      line-height: 1.3;
     }
     .pager {
-      flex-wrap: wrap;
-      justify-content: center;
-      row-gap: 1.5rem;
+      margin-top: 60px;
+      position: static;
+    }
+    .pager span {
+      font-size: 28px;
     }
   }
 </style>

@@ -6,9 +6,11 @@ import PortableText from '../PortableText.astro';
 import SanityImage from '../SanityImage.astro';
 
 /**
- * Partners from a tier or a hand-picked list: a row of logos (the art prize
- * page's "partners", the main partner) or a list of names with their text
- * and website (the institutions tab). Each partner links to its website.
+ * Partners from a tier or a hand-picked list. "logos" is the design's
+ * `section.partners` on the art prize about page: a `.panel-title`, then the
+ * paragraph and the logo row side by side in `.two-col`. "list" is the names
+ * with their text and website, as the institutions tab draws them. Each
+ * partner links to its website.
  */
 interface Props {
   lang: LocaleId;
@@ -23,114 +25,122 @@ const display = section.display === 'list' ? 'list' : 'logos';
 
 {
   partners.length > 0 && (
-    <section class="partners-block" id={section.anchor || undefined}>
+    <section class="partners" id={section.anchor || undefined}>
       {section.heading && (
-        <h2 class="group-title" {...styleAttrs(section.headingStyle)}>
+        <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
           {section.heading}
         </h2>
       )}
-      {section.body && (
-        <div class="partners-body">
-          <PortableText value={section.body} fieldStyle={section.bodyStyle} />
-        </div>
-      )}
       {display === 'logos' ? (
-        <ul class="logos">
-          {partners.map((p: any) => (
-            <li>
-              {p.url ? (
+        <div class="two-col">
+          {section.body && (
+            <div class="body-24">
+              <PortableText value={section.body} fieldStyle={section.bodyStyle} />
+            </div>
+          )}
+          <div class="logos">
+            {partners.map((p: any) =>
+              p.url ? (
                 <a href={p.url} rel="noopener noreferrer" target="_blank" aria-label={p.name}>
-                  {p.logo?.asset ? (
-                    <SanityImage image={p.logo} widths={[240, 480]} sizes="240px" loading="lazy" class="logo" />
-                  ) : (
-                    <span class="logo-name">{p.name}</span>
-                  )}
+                  {p.logo?.asset ? <SanityImage image={p.logo} widths={[240, 480]} sizes="190px" loading="lazy" /> : <span>{p.name}</span>}
                 </a>
               ) : p.logo?.asset ? (
-                <SanityImage image={p.logo} widths={[240, 480]} sizes="240px" loading="lazy" class="logo" />
+                <SanityImage image={p.logo} widths={[240, 480]} sizes="190px" loading="lazy" />
               ) : (
-                <span class="logo-name">{p.name}</span>
-              )}
-            </li>
-          ))}
-        </ul>
+                <span>{p.name}</span>
+              ),
+            )}
+          </div>
+        </div>
       ) : (
-        <ul class="list">
-          {partners.map((p: any) => (
-            <li class="partner">
-              <h3 class="partner-name" {...styleAttrs(p.subtitleStyle)}>
-                {p.name}
-              </h3>
-              {p.description && <PortableText value={p.description} fieldStyle={p.descriptionStyle} />}
-              {p.url && (
-                <a class="partner-link" href={p.url} rel="noopener noreferrer" target="_blank">
-                  {t('common.website')} ↗
-                </a>
-              )}
-            </li>
-          ))}
-        </ul>
+        <>
+          {section.body && (
+            <div class="body-24 partners-body">
+              <PortableText value={section.body} fieldStyle={section.bodyStyle} />
+            </div>
+          )}
+          <div class="institutions">
+            {partners.map((p: any) => (
+              <article>
+                <h3>{p.name}</h3>
+                {p.description && <PortableText value={p.description} fieldStyle={p.descriptionStyle} />}
+                {p.url && (
+                  <a class="pill" href={p.url} rel="noopener noreferrer" target="_blank">
+                    {t('common.website')} ↗
+                  </a>
+                )}
+              </article>
+            ))}
+          </div>
+        </>
       )}
     </section>
   )
 }
 
 <style>
-  .partners-block {
-    margin: 0 0 3rem;
-  }
-  .group-title {
-    margin: 0 0 1.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid var(--ink);
-    font-size: clamp(1.5rem, 2.6vw, 2.4rem);
-    letter-spacing: -0.04em;
-    line-height: 1;
-  }
-  .partners-body {
-    max-width: var(--measure);
-    margin: 0 0 2rem;
+  /* From the design's art prize about page. */
+  .partners {
+    margin-top: 65px;
   }
   .logos {
-    display: flex;
-    flex-wrap: wrap;
+    justify-content: space-around;
     align-items: center;
-    gap: 2rem 3rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    display: flex;
   }
-  .logos :global(.logo) {
-    display: block;
-    width: auto;
-    max-width: 200px;
-    max-height: 90px;
+  .logos :global(img) {
     object-fit: contain;
+    width: auto;
+    max-width: 190px;
+    max-height: 100px;
   }
-  .logo-name {
-    font-size: 1.25rem;
+  .logos span {
+    font-size: 24px;
     letter-spacing: -0.03em;
   }
-  .list {
+
+  /* From the design's institutions page. */
+  .partners-body {
+    margin-bottom: 40px;
+  }
+  .institutions {
+    grid-template-columns: 1fr 1fr;
+    gap: 80px 40px;
+    margin-top: 55px;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2rem 30px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
   }
-  .partner-name {
-    margin: 0 0 0.5rem;
-    font-size: clamp(1.25rem, 2vw, 1.75rem);
-    letter-spacing: -0.03em;
+  .institutions h3 {
+    border-bottom: 1px solid;
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    padding-bottom: 6px;
   }
-  .partner-link {
-    display: inline-block;
-    margin-top: 0.5rem;
+  .institutions article :global(p) {
+    font-size: 24px;
+    line-height: 1.22;
+    letter-spacing: -0.025em;
+    margin-top: 20px;
+    white-space: pre-line;
   }
-  @media (max-width: 700px) {
-    .list {
+  .institutions .pill {
+    margin-top: 24px;
+  }
+  @media (width<=700px) {
+    .institutions {
       grid-template-columns: 1fr;
+      gap: 48px;
+    }
+    .institutions h3 {
+      font-size: 28px;
+    }
+    .institutions article :global(p) {
+      font-size: 18px;
+    }
+    .logos {
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: flex-start;
     }
   }
 </style>

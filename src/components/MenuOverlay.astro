@@ -3,162 +3,153 @@ import { useTranslations } from '../lib/i18n';
 import type { LocaleId } from '../lib/locales';
 
 /**
- * Full-height slide-in menu. Items come from the same resolved Sanity
- * navigation that Base.astro builds, so the editor menu drives both this and
- * the fallback.
- *
- * The descriptive line under an entry comes from STRINGS, keyed by the
- * built-in section it points at - it names sub-sections rather than content,
- * which is what STRINGS is for. Editor pages and outside links have none.
+ * The menu overlay of the design: a panel sliding in from the right, one
+ * acid "sheet" per menu row, and a `+` on the rows that have sub-items,
+ * which open as an accordion (on hover with a mouse, on the button
+ * otherwise). Markup, classes and behaviour are Lilanga's build of the
+ * Figma menu frame (the index.html files under html pages); the rules for the
+ * classes live in src/styles/design.css. Items come from the resolved Sanity navigation
+ * that Base.astro builds, children included.
  */
-interface Item {
+interface Child {
   label: string;
   href: string;
-  /** Built-in section, used to look up a descriptive line. */
-  route?: string;
-  /** Already-resolved descriptive line, when the caller has one. */
-  sub?: string;
   external?: boolean;
+}
+interface Item extends Child {
+  children?: Child[];
 }
 
 interface Props {
   lang: LocaleId;
   items: Item[];
+  siteName?: string;
   newsletterUrl?: string;
 }
 
-const { lang, items, newsletterUrl } = Astro.props;
+const { lang, items, siteName = 'ceramic brussels' } = Astro.props;
 const t = useTranslations(lang);
-
-/** Only some sections have a descriptive line; t() returns the key if absent. */
-function subtitle(route?: string): string | null {
-  if (!route) return null;
-  const key = `nav.sub.${route}` as Parameters<typeof t>[0];
-  const value = t(key);
-  return value === key ? null : value;
-}
+const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } : {});
 ---
 
-<dialog id="site-menu" class="menu" data-menu aria-label={t('nav.menu')}>
-  <button type="button" class="menu-close" data-menu-close aria-label={t('nav.closeMenu')}>
-    <img src="/assets/close.svg" alt="" width="28" height="28" />
-  </button>
-
-  <nav aria-label={t('nav.menu')}>
-    {
-      items.map((item) => {
-        const sub = item.sub ?? subtitle(item.route);
-        return (
-          <section class="menu-row">
-            <a href={item.href} {...(item.external ? { rel: 'noopener noreferrer' } : {})}>
-              {item.label}
-            </a>
-            {sub && <p class="menu-sub">{sub}</p>}
-          </section>
-        );
-      })
-    }
-
-    {
-      newsletterUrl && (
-        <a class="menu-row menu-newsletter" href={newsletterUrl}>
-          → {t('nav.newsletter')}
-        </a>
-      )
-    }
-  </nav>
+<dialog id="site-menu" data-menu aria-label={t('nav.menu')}>
+  <div class="menu-panel">
+    <div class="menu-top">
+      <span>{siteName}</span>
+      <button data-menu-close autofocus>{t('nav.close').toLowerCase()} <span aria-hidden="true">×</span></button>
+    </div>
+    <nav aria-label={t('nav.menu')} class="menu-stack">
+      {
+        items.map((item, i) => {
+          const children = item.children ?? [];
+          return (
+            <section class="menu-row" style={`--row:${i}`}>
+              <div class="menu-sheet">
+                <div class="menu-heading">
+                  <a href={item.href} {...rel(item.external)}>
+                    {item.label}
+                  </a>
+                  {children.length > 0 && (
+                    <button
+                      class="submenu-toggle"
+                      aria-label={`${t('nav.expand')} ${item.label}`}
+                      aria-expanded="false"
+                      aria-controls={`submenu-${i}`}
+                    >
+                      <span aria-hidden="true">+</span>
+                    </button>
+                  )}
+                </div>
+                {children.length > 0 && (
+                  <div class="submenu" id={`submenu-${i}`} inert>
+                    <div>
+                      {children.map((c) => (
+                        <a href={c.href} {...rel(c.external)}>
+                          {c.label}
+                          <span aria-hidden="true"> ↗</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+          );
+        })
+      }
+    </nav>
+  </div>
 </dialog>
 
-<style>
-  .menu {
-    margin: 0 0 0 auto;
-    height: 100dvh;
-    max-height: none;
-    width: 100%;
-    max-width: 548px;
-    border: 0;
-    padding: 0;
-    background: var(--ground);
-    color: var(--ink);
-    overflow-y: auto;
-  }
-  .menu::backdrop {
-    background: rgb(0 0 0 / 0.15);
-  }
-
-  .menu-close {
-    position: absolute;
-    left: 28px;
-    top: 20px;
-    z-index: 1;
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    border: 0;
-    background: none;
-    cursor: pointer;
-  }
-
-  .menu-row {
-    display: block;
-    background: linear-gradient(180deg, var(--acid) 0%, var(--ground) 74%);
-    min-height: clamp(90px, 15.5vh, 159px);
-    padding: 0.75rem 2rem;
-    text-align: right;
-  }
-  .menu-row > a,
-  .menu-newsletter {
-    display: block;
-    /* The identity sets the menu lowercase; some labels come from shared
-       strings that are title-case elsewhere, so it is settled here. */
-    text-transform: lowercase;
-    font-size: clamp(2rem, 4vw, 2.75rem);
-    line-height: 1;
-    letter-spacing: -0.05em;
-    text-decoration: none;
-  }
-  .menu-row > a:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.08em;
-  }
-
-  .menu-sub {
-    margin: 0.5rem 0 0 auto;
-    max-width: 490px;
-    font-size: clamp(1rem, 2.25vw, 1.875rem);
-    line-height: 1.05;
-    letter-spacing: -0.05em;
-    color: var(--ink-3);
-  }
-
-  .menu-newsletter {
-    padding: 1rem 2rem;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .menu {
-      animation: none;
-    }
-  }
-</style>
-
 <script>
+  // The design's menu behaviour, as built: open as a modal, slide in on the
+  // next frame, expand a row on mouse hover or on its + button, close on the
+  // button, on Escape, or on a click outside the panel.
   const dialog = document.querySelector<HTMLDialogElement>('[data-menu]');
-  const opener = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+  const openers = document.querySelectorAll<HTMLButtonElement>('[data-menu-open]');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  let lastOpener: HTMLElement | null = null;
+  let closing = false;
+  let savedOverflow = '';
 
-  const setExpanded = (value: boolean) => opener?.setAttribute('aria-expanded', String(value));
+  const expand = (row: Element, open: boolean) => {
+    row.classList.toggle('expanded', open);
+    row.querySelector('button')?.setAttribute('aria-expanded', String(open));
+    const sub = row.querySelector<HTMLElement>('.submenu');
+    if (sub) sub.inert = !open;
+  };
 
-  opener?.addEventListener('click', () => {
-    dialog?.showModal();
-    setExpanded(true);
+  const close = () => {
+    if (!dialog?.open || closing) return;
+    closing = true;
+    dialog.classList.remove('is-open');
+    window.setTimeout(() => dialog.close(), reduced.matches ? 0 : 680);
+  };
+
+  openers.forEach((btn) =>
+    btn.addEventListener('click', () => {
+      if (!dialog || dialog.open) return;
+      lastOpener = btn;
+      savedOverflow = document.documentElement.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
+      dialog.showModal();
+      openers.forEach((b) => b.setAttribute('aria-expanded', 'true'));
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          if (!closing && dialog.open) dialog.classList.add('is-open');
+        }),
+      );
+    }),
+  );
+
+  dialog?.querySelector('[data-menu-close]')?.addEventListener('click', close);
+  dialog?.addEventListener('cancel', (e) => {
+    e.preventDefault();
+    close();
+  });
+  dialog?.addEventListener('click', (e) => {
+    if (e.target === dialog) close();
+  });
+  dialog?.addEventListener('close', () => {
+    closing = false;
+    dialog.classList.remove('is-open');
+    document.documentElement.style.overflow = savedOverflow;
+    openers.forEach((b) => b.setAttribute('aria-expanded', 'false'));
+    dialog.querySelectorAll('.menu-row').forEach((row) => expand(row, false));
+    lastOpener?.focus({ preventScroll: true });
   });
 
-  document.querySelector('[data-menu-close]')?.addEventListener('click', () => dialog?.close());
-
-  // Clicking the backdrop closes; clicking a panel inside must not.
-  dialog?.addEventListener('click', (event) => {
-    if (event.target === dialog) dialog.close();
+  dialog?.querySelectorAll('.menu-row').forEach((row) => {
+    row.addEventListener('pointerenter', (e) => {
+      if ((e as PointerEvent).pointerType === 'mouse' && !closing) expand(row, true);
+    });
+    row.addEventListener('pointerleave', () => {
+      if (!row.contains(document.activeElement)) expand(row, false);
+    });
+    row.addEventListener('focusout', (e) => {
+      const to = (e as FocusEvent).relatedTarget as Node | null;
+      if (!row.contains(to) && !row.matches(':hover')) expand(row, false);
+    });
+    row.querySelector('button')?.addEventListener('click', () => expand(row, !row.classList.contains('expanded')));
   });
-
-  dialog?.addEventListener('close', () => setExpanded(false));
 </script>

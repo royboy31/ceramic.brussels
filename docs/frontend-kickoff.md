@@ -97,12 +97,22 @@ Published content shows on localhost after a refresh, no rebuild. Drafts
 never show on localhost; for drafts, use the Studio's Preview tab or the
 "Open preview" document action on `https://dev.ceramic-brussels.pages.dev/studio/`.
 
-## Step 4 — first work: the section blocks
+## Step 4 — first work: check the ported pages against your build
 
-Do this before any page. Editors compose pages from the fifteen section
-blocks in `src/components/sections/` and `src/components/Sections.astro`,
-and the eleven page templates in the Studio are stacks of those blocks.
-Styling a block styles every template and every editor-built page.
+On 2026-09-08 Kamindu ported your sixteen static pages into the routes
+(read "How the design is wired" in `docs/frontend-handbook.md`): the
+shell with the accordion menu, the homepage, every hub page, with your
+markup and CSS. Start by opening each page on localhost next to your
+static build at 1440px and fixing what differs; then the breakpoints below
+1440px, which the port carries from your build but nobody has checked;
+then the pages the design does not cover yet (news, artists, editions,
+standalone pages, 404 — wrapped in `.legacy-page`), from the same patterns.
+
+The section blocks remain the templates: editors compose pages from the
+sixteen section blocks in `src/components/sections/` and
+`src/components/Sections.astro`, and the page templates in the Studio are
+stacks of those blocks. Styling a block styles every template and every
+editor-built page.
 
 - The handbook's block table says which fields each block receives. Render
   every one of them; never assume a field that is not in the projection.

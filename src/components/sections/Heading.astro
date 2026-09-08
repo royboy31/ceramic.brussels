@@ -2,21 +2,31 @@
 import type { LocaleId } from '../../lib/locales';
 import { styleAttrs } from '../../lib/textStyle';
 
-/** A group title over a full-width rule - "institutions", "collaborators". */
+/**
+ * A group title. On a hub page it sits over a full-width rule
+ * ("institutions", "collaborators"); on the homepage it is the centred
+ * "latest news" title of the design.
+ */
 interface Props {
   lang: LocaleId;
   section: any;
+  variant?: 'default' | 'home';
 }
 
-const { section } = Astro.props;
+const { section, variant = 'default' } = Astro.props;
 ---
 
 {
-  section.title && (
-    <h2 class="group-title" id={section.anchor || undefined} {...styleAttrs(section.titleStyle)}>
-      {section.title}
-    </h2>
-  )
+  section.title &&
+    (variant === 'home' ? (
+      <h2 class="home-latest" id={section.anchor || undefined} {...styleAttrs(section.titleStyle)}>
+        {section.title}
+      </h2>
+    ) : (
+      <h2 class="group-title" id={section.anchor || undefined} {...styleAttrs(section.titleStyle)}>
+        {section.title}
+      </h2>
+    ))
 }
 
 <style>
@@ -32,5 +42,32 @@ const { section } = Astro.props;
   }
   .group-title:first-child {
     margin-top: 0;
+  }
+
+  /* From the design's index.css. */
+  .home-latest {
+    text-align: center;
+    letter-spacing: -0.03em;
+    height: 66px;
+    margin: 32px 0 0;
+    font-size: 70px;
+    font-weight: 600;
+    line-height: 65px;
+  }
+  @media (width>=701px) and (width<=1439px) {
+    .home-latest {
+      height: 4.5833vw;
+      margin-top: 2.2222vw;
+      font-size: 4.8611vw;
+      line-height: 4.5139vw;
+    }
+  }
+  @media (width<=700px) {
+    .home-latest {
+      height: auto;
+      margin-top: 28px;
+      font-size: 44px;
+      line-height: 1;
+    }
   }
 </style>

@@ -6,52 +6,115 @@ import { urlFor } from '../../sanity/image';
 import { styleAttrs } from '../../lib/textStyle';
 
 /**
- * The film, edge to edge. The query already falls back to the current
- * edition's film when the block's own video is empty.
+ * The film. The query already falls back to the latest edition's film when
+ * the block's own video is empty. On the homepage it is the design's
+ * edge-to-edge frame with the film playing silently on a loop; elsewhere the
+ * poster-and-play embed.
  */
 interface Props {
   lang: LocaleId;
   section: any;
+  variant?: 'default' | 'home';
 }
 
-const { lang, section } = Astro.props;
+const { lang, section, variant = 'default' } = Astro.props;
 const t = useTranslations(lang);
 const video = section.video;
 const poster = video?.poster?.asset
   ? urlFor(video.poster).width(1600).height(1066).fit('crop').auto('format').quality(78).url()
   : '/assets/video-still.webp';
+
+function youtubeId(value: string): string | null {
+  const m = String(value ?? '').match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{6,})/);
+  return m ? m[1] : null;
+}
+const id = video?.url ? youtubeId(video.url) : null;
+const loop = id
+  ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&playsinline=1&controls=0&rel=0&modestbranding=1`
+  : null;
 ---
 
 {
-  video?.url && (
-    <section class="video-block" id={section.anchor || undefined}>
-      {section.heading && (
-        <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
-          {section.heading}
-        </h2>
-      )}
-      <VideoEmbed class="film" url={video.url} poster={poster} label={video.title ?? t('home.watch')} />
-    </section>
-  )
+  video?.url &&
+    (variant === 'home' && loop ? (
+      <section class="home-video" id={section.anchor || undefined}>
+        <div class="home-video__frame">
+          <iframe
+            src={loop}
+            title={video.title ?? t('home.watch')}
+            allow="autoplay; encrypted-media; picture-in-picture"
+            referrerpolicy="strict-origin-when-cross-origin"
+            loading="eager"
+            tabindex="-1"
+          />
+        </div>
+      </section>
+    ) : (
+      <section class="video-block" id={section.anchor || undefined}>
+        {section.heading && (
+          <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+            {section.heading}
+          </h2>
+        )}
+        <VideoEmbed class="film" url={video.url} poster={poster} label={video.title ?? t('home.watch')} />
+      </section>
+    ))
 }
 
 <style>
+  /* From the design's index.css. */
+  .home-video {
+    height: 726px;
+    margin-top: 47px;
+    padding: 20px 0;
+    overflow: hidden;
+  }
+  .home-video__frame {
+    background: #000;
+    height: 686px;
+    position: relative;
+    overflow: hidden;
+  }
+  .home-video iframe {
+    aspect-ratio: 16 / 9;
+    border: 0;
+    width: 100%;
+    height: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  @media (width>=701px) and (width<=1439px) {
+    .home-video {
+      height: 50.4167vw;
+      margin-top: 3.2639vw;
+      padding: 1.3889vw 0;
+    }
+    .home-video__frame {
+      height: 47.6389vw;
+    }
+  }
+  @media (width<=700px) {
+    .home-video {
+      height: auto;
+      margin-top: 24px;
+      padding: 0;
+    }
+    .home-video__frame {
+      height: 68vw;
+      min-height: 300px;
+    }
+    .home-video iframe {
+      width: max(121%, 534px);
+    }
+  }
+
+  /* The hub treatment. */
   .video-block {
     margin: 0 0 3rem;
   }
-  /* The player runs edge to edge, past the page gutter main carries. */
   .film {
-    margin-inline: -30px;
     margin-top: 0;
-  }
-  @media (max-width: 900px) {
-    .film {
-      margin-inline: -16px;
-    }
-  }
-  @media (max-width: 640px) {
-    .film {
-      margin-inline: -10px;
-    }
   }
 </style>

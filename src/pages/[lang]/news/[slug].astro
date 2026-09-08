@@ -43,6 +43,7 @@ const articleSchema = {
   editId={item._id}
   editType={item._type}
 >
+  <div class="legacy-page">
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} slot="head" />
 
   <article class="post">
@@ -79,6 +80,7 @@ const articleSchema = {
       <a class="text-link" href={localePath(lang, 'news')}>← {t('common.backTo')} {t('nav.news')}</a>
     </p>
   </article>
+  </div>
 </Base>
 
 <style>

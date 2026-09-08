@@ -35,10 +35,17 @@ interface Props {
   lang: LocaleId;
   sections: any[] | undefined;
   defaultLayout?: 'full' | 'single' | 'half';
+  /**
+   * 'home' renders the blocks the way the design's homepage draws them
+   * (centred "latest news", the feature rows, the acid image bands, the
+   * edge-to-edge film, the key figures table); the default is the hub page
+   * treatment.
+   */
+  variant?: 'default' | 'home';
   class?: string;
 }
 
-const { lang, sections = [], defaultLayout = 'full', class: className } = Astro.props;
+const { lang, sections = [], defaultLayout = 'full', variant = 'default', class: className } = Astro.props;
 
 type Layout = 'full' | 'single' | 'half';
 type Group = { kind: 'text'; layout: Layout; items: any[] } | { kind: 'block'; section: any; flip: boolean };
@@ -82,23 +89,23 @@ for (const section of (sections ?? []).filter(Boolean)) {
           case 'slideshowSection':
             return <SlideshowSection lang={lang} section={s} />;
           case 'videoSection':
-            return <VideoSection lang={lang} section={s} />;
+            return <VideoSection lang={lang} section={s} variant={variant} />;
           case 'quoteSection':
             return <Quote lang={lang} section={s} />;
           case 'spotlight':
-            return <Feature lang={lang} section={s} flip={g.flip} />;
+            return <Feature lang={lang} section={s} flip={g.flip} variant={variant} />;
           case 'bannerSection':
             return <Banner lang={lang} section={s} />;
           case 'linksSection':
-            return <Links lang={lang} section={s} />;
+            return <Links lang={lang} section={s} variant={variant} />;
           case 'headingSection':
-            return <Heading lang={lang} section={s} />;
+            return <Heading lang={lang} section={s} variant={variant} />;
           case 'peopleSection':
             return <People lang={lang} section={s} />;
           case 'partnersSection':
             return <Partners lang={lang} section={s} />;
           case 'keyFiguresSection':
-            return <KeyFigures lang={lang} section={s} />;
+            return <KeyFigures lang={lang} section={s} variant={variant} />;
           case 'newsSection':
             return <News lang={lang} section={s} />;
           case 'faqSection':

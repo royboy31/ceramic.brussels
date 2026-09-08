@@ -5,11 +5,25 @@ import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations } from '../../../lib/i18n';
 import { getExhibitors, getCurrentEdition } from '../../../lib/queries';
 
+/** The design shows a two-letter code after the name; `country` holds the full name. */
+const ISO: Record<string, string> = {
+  france: 'FR', spain: 'ES', belgium: 'BE', netherlands: 'NL', 'the netherlands': 'NL', norway: 'NO',
+  switzerland: 'CH', turkey: 'TR', germany: 'DE', italy: 'IT', 'united kingdom': 'GB', 'united states': 'US',
+  portugal: 'PT', denmark: 'DK', sweden: 'SE', austria: 'AT', luxembourg: 'LU', japan: 'JP', china: 'CN',
+  korea: 'KR', 'south korea': 'KR',
+};
+const countryCode = (value?: string) => {
+  if (!value) return undefined;
+  if (/^[A-Za-z]{2}$/.test(value)) return value.toUpperCase();
+  return ISO[value.trim().toLowerCase()] ?? value;
+};
+
 /**
- * Current-edition exhibitors: the A–Z row, the FILTERS pills (solo show,
- * country focus, publishers, jury prize) and the three-column card grid.
- * Letters are anchors to the first card of that initial and filters work on
- * the rendered list, so the page is complete without JavaScript.
+ * Current-edition exhibitors, as the design's exhibitors/index.html draws
+ * it: the "a - b - c …" row, the FILTERS pills (solo show, country focus,
+ * publishers, jury prize) and the three-column card grid. Letters are
+ * anchors to the first card of that initial and the filters work on the
+ * rendered list, so the page is complete without JavaScript.
  */
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
@@ -45,46 +59,53 @@ const filters = [
 ---
 
 <Base lang={lang} title={t('nav.exhibitors')} path="exhibitors">
-  <h1 class="section-title">{t('nav.exhibitors')}</h1>
-
+  <div class="page-grid py-2 md:py-4">
+    <h1 class="col-span-full text-[clamp(2rem,4.8vw,4.4rem)] font-semibold leading-none tracking-[-.04em]">
+      {t('nav.exhibitors').toLowerCase()}
+    </h1>
+  </div>
   {
     exhibitors.length ? (
       <>
-        <nav class="alphabet" aria-label={t('exhibitors.byLetter')}>
-          {LETTERS.map((letter, i) => (
-            <>
-              {i > 0 && (
-                <span class="dash" aria-hidden="true">
-                  –
-                </span>
-              )}
-              {present.has(letter) ? <a href={`#letter-${letter}`}>{letter}</a> : <span class="letter-off">{letter}</span>}
-            </>
-          ))}
-        </nav>
-
-        {filters.length > 0 && (
-          <div class="filters" id="exhibitor-filters">
-            <span class="filters-label">{t('exhibitors.filters')}</span>
-            {filters.map((f) => (
-              <button type="button" class="pill" data-filter={f.id} aria-pressed="false">
-                {f.label}
-              </button>
+        <div class="page-grid pt-4">
+          <p class="alphabet col-span-full text-[clamp(1.25rem,3.2vw,2.6rem)] tracking-[-.04em]" aria-label={t('exhibitors.byLetter')}>
+            {LETTERS.map((letter, i) => (
+              <>
+                {i > 0 && ' - '}
+                {present.has(letter) ? <a href={`#letter-${letter}`}>{letter}</a> : <span class="letter-off">{letter}</span>}
+              </>
             ))}
-          </div>
-        )}
+          </p>
+          {filters.length > 0 && (
+            <div class="col-span-full my-6 flex flex-wrap items-center gap-3 text-[clamp(1rem,2vw,1.75rem)]" id="exhibitor-filters">
+              <span class="uppercase">{t('exhibitors.filters')}</span>
+              {filters.map((f) => (
+                <button type="button" class="rounded-full border border-black px-4 py-1" data-filter={f.id} aria-pressed="false">
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <p class="empty" id="no-match" hidden>
           {t('exhibitors.noneMatch')}
         </p>
 
-        <ul class="page-grid cards" id="exhibitor-list">
+        <div class="page-grid gap-y-7 pb-24" id="exhibitor-list" data-exhibitor-grid>
           {exhibitors.map((ex: any, i: number) => {
             const letter = initial(ex);
             const first = i === 0 || initial(exhibitors[i - 1]) !== letter;
-            return <ExhibitorCard lang={lang} exhibitor={ex} id={first ? `letter-${letter}` : undefined} />;
+            return (
+              <ExhibitorCard
+                lang={lang}
+                exhibitor={ex}
+                code={countryCode(ex.countryCode ?? ex.country)}
+                id={first ? `letter-${letter}` : undefined}
+              />
+            );
           })}
-        </ul>
+        </div>
       </>
     ) : (
       <p class="empty">{t('exhibitors.empty')}</p>
@@ -93,62 +114,23 @@ const filters = [
 </Base>
 
 <style>
-  .alphabet {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0 0.35em;
-    font-size: clamp(1.25rem, 3.2vw, 2.6rem);
-    letter-spacing: -0.04em;
-    line-height: 1.2;
-  }
+  /* The design's row is plain text; only the letters that exist are links. */
   .alphabet a {
-    color: inherit;
     text-decoration: none;
   }
-  .alphabet a:hover,
   .alphabet a[aria-current] {
-    background: var(--acid);
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
   }
-  .letter-off,
-  .dash {
-    color: var(--ink-3);
+  /* The design's row is one colour; a letter without an exhibitor is simply not a link. */
+  .letter-off {
+    opacity: 1;
   }
-
-  .filters {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 1.5rem 0 0;
-    font-size: clamp(1rem, 2vw, 1.75rem);
+  button[aria-pressed='true'] {
+    background: #fff350;
   }
-  .filters-label {
-    text-transform: uppercase;
-  }
-  .filters .pill {
-    padding: 0.15rem 1rem;
-    font-size: inherit;
-    text-transform: lowercase;
-    background: none;
-    color: inherit;
-    font-family: inherit;
-    cursor: pointer;
-  }
-  .filters .pill:hover,
-  .filters .pill[aria-pressed='true'] {
-    background: var(--acid);
-  }
-
-  .cards {
-    list-style: none;
-    margin: 2rem 0 0;
-    row-gap: 1.75rem;
-    padding-inline: 0;
-  }
-
-  #no-match {
-    margin-top: 2rem;
+  .empty {
+    margin: 0 30px 2rem;
   }
 </style>
 
@@ -161,7 +143,7 @@ const filters = [
 
   if (bar && list && noMatch) {
     const buttons = Array.from(bar.querySelectorAll<HTMLButtonElement>('button[data-filter]'));
-    const cards = Array.from(list.querySelectorAll<HTMLLIElement>('li[data-filters]'));
+    const cards = Array.from(list.querySelectorAll<HTMLElement>('[data-filters]'));
 
     const apply = () => {
       const active = buttons.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.filter!);

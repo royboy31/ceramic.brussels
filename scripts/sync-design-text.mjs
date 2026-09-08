@@ -177,6 +177,13 @@ const report = (id, fields) => console.log(`  ${id}: ${Object.keys(fields).join(
   set('demo-exhibitor-2027-chaxartxrtm', { 'bio.en': blocks(ps), 'images[0].caption': 'Tong Xindi & Shen Ting' });
 }
 
+/* ---------- exhibitor · ANALORA ---------- */
+{
+  const m = page('exhibitors/analora');
+  const ps = m.querySelectorAll('article p').filter((p) => text(p).length > 100);
+  set('demo-exhibitor-2027-analora', { 'bio.en': blocks(ps) });
+}
+
 /* ---------- programme · talks intro ---------- */
 {
   const m = page('programme/talks');

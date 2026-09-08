@@ -96,9 +96,10 @@ export const HUBS: Record<string, Hub> = {
 /** Partner tab → partner tier(s) it lists. */
 export const PARTNER_TABS: Record<string, string[]> = {
   main: ['main'],
-  institutions: ['institutional', 'exhibition-pass', 'art-prize'],
+  // The design's institutions tab lists the institutional tier alone.
+  institutions: ['institutional'],
   hotel: ['hotel'],
-  event: ['event', 'supplier'],
+  event: ['event', 'supplier', 'exhibition-pass'],
   media: ['media'],
 };
 

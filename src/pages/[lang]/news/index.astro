@@ -22,6 +22,7 @@ const [lead, ...rest] = news;
 ---
 
 <Base lang={lang} title={t('nav.news')} path="news">
+  <div class="legacy-page">
   <h1 class="section-title">{t('nav.news')}</h1>
 
   {
@@ -86,6 +87,7 @@ const [lead, ...rest] = news;
       </p>
     )
   }
+  </div>
 </Base>
 
 <style>

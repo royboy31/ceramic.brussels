@@ -33,6 +33,7 @@ const used = new Set(artists.map((a: any) => initial(a.name)));
 ---
 
 <Base lang={lang} title={t('nav.artists')} path="artists">
+  <div class="legacy-page">
   <h1 class="section-title">{t('nav.artists')}</h1>
 
   {
@@ -93,6 +94,7 @@ const used = new Set(artists.map((a: any) => initial(a.name)));
       </p>
     )
   }
+  </div>
 </Base>
 
 <style>

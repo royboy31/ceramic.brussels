@@ -1,47 +1,52 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import HubNav from '../../../components/HubNav.astro';
-import Figure from '../../../components/Figure.astro';
-import PageSections from '../../../components/PageSections.astro';
-import Slideshow from '../../../components/Slideshow.astro';
-import VideoEmbed from '../../../components/VideoEmbed.astro';
+import SanityImage from '../../../components/SanityImage.astro';
 import PortableText from '../../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
 import { getGuestOfHonour, getHubPages } from '../../../lib/queries';
-import { HUBS, hubTabParams, hubTabPath } from '../../../lib/hubs';
-import { instagramUrl } from '../../../lib/links';
-import { GUEST_PORTRAIT, placeholder } from '../../../lib/placeholders';
+import { HUBS, hubTabParams, hubTabPath, hubTabHref } from '../../../lib/hubs';
 import { urlFor } from '../../../sanity/image';
 import { styleAttrs } from '../../../lib/textStyle';
 
 /**
- * The current edition's guest of honour, on the frame of the design: the name
- * and "°1983, France" on a rule, the portrait on the left with the lead
- * paragraph, the biography / practice sections, the image carousel, the film
- * and the strip of previous guests. Tabs: about and interview. Everything
- * comes from the artist document the edition points at.
+ * The current edition's guest of honour, as the design's guest-of-honour
+ * page draws it: the `.subnav` band (title, about / interview), the portrait
+ * on four columns beside the intro (name and "°1983, France" on a rule, the
+ * lead, the biography in two columns), two works with their captions, the
+ * "sculptural practice" section on the right eight columns, and the film
+ * still with its play button. The interview tab shows the interview text in
+ * the intro column instead of the biography. Everything comes from the artist
+ * document the edition points at: `intro`, the `sections` stack (biography,
+ * sculptural practice), `works`, `video`, `interview`.
  */
 export function getStaticPaths() {
   return hubTabParams('guest-of-honour', LOCALE_IDS);
 }
 
 const lang = Astro.params.lang as LocaleId;
-const tab = (Astro.params.tab as string | undefined) ?? HUBS['guest-of-honour'].tabs[0].slug;
+const hub = HUBS['guest-of-honour'];
+const tab = (Astro.params.tab as string | undefined) ?? hub.tabs[0].slug;
 const t = useTranslations(lang);
 
 const [data, pages] = await Promise.all([getGuestOfHonour(lang), getHubPages(lang, 'guest-of-honour')]);
 const artist = data?.artist;
 const path = hubTabPath('guest-of-honour', tab);
-const seed = artist?.slug ?? artist?.name ?? 'guest';
 
 const origin = [artist?.birthYear && `°${artist.birthYear}`, artist?.nationality].filter(Boolean).join(', ');
-
-// The film's still: the editor's poster, or a fair picture while there is none.
+const sections: any[] = (artist?.sections ?? []).filter((s: any) => s?._type === 'contentSection' && s.body);
+const [biography, ...rest] = sections;
+const works: any[] = (artist?.works ?? []).filter((w: any) => w?.image?.asset);
 const video = artist?.video?.url ? artist.video : null;
-const poster = video?.poster?.asset
-  ? urlFor(video.poster).width(1600).height(1066).fit('crop').auto('format').quality(80).url()
-  : placeholder('fair', seed).src;
+const poster = video?.poster?.asset ? video.poster : null;
+const posterSrc = poster ? urlFor(poster).width(1814).height(1208).fit('crop').auto('format').quality(80).url() : null;
+
+const tabs = hub.tabs.map((x) => {
+  const page = pages.find((p: any) => p?.slugs?.en === x.slug);
+  return { slug: x.slug, label: page?.tabLabel ?? t(x.label), href: localePath(lang, hubTabHref('guest-of-honour', x)) };
+});
+/** "Artist, *Title*, year" under a work. */
+const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workTitle ?? work.title, img.year ?? work.year].filter(Boolean);
 ---
 
 <Base
@@ -53,286 +58,321 @@ const poster = video?.poster?.asset
   editId={artist?._id}
   editType={artist?._type}
 >
-  <HubNav lang={lang} route="guest-of-honour" active={tab} pages={pages} />
+  <header class="subnav page-grid">
+    <h1>{t(hub.title)}</h1>
+    <nav>
+      {
+        tabs.map((x) => (
+          <a class:list={[{ active: x.slug === tab }]} href={x.href} aria-current={x.slug === tab ? 'page' : undefined}>
+            {x.label}
+          </a>
+        ))
+      }
+    </nav>
+  </header>
 
   {
     !artist ? (
-      <p class="empty">
-        {t('artists.empty')} Set the guest of honour on the current edition in <a href="/studio">the Studio</a>.
-      </p>
+      <p class="empty content-wrap">{t('artists.empty')}</p>
     ) : (
-      <article class="page-grid guest">
-        <header class="title-row">
-          <h2 {...styleAttrs(artist.nameStyle)}>{artist.name}</h2>
-          {origin && <p class="origin">{origin}</p>}
-        </header>
-
-        <figure class="portrait">
-          <Figure
+      <div id={tab} class="guest-page page-grid">
+        {artist.portrait?.asset ? (
+          <SanityImage
             image={artist.portrait}
-            pool="portrait"
-            seed={seed}
-            fallback={GUEST_PORTRAIT}
-            aspect={0.72}
+            class="portrait"
             loading="eager"
-            priority
-            sizes="(max-width: 900px) 100vw, 33vw"
-            widths={[400, 600, 900, 1200]}
+            sizes="(max-width: 700px) 100vw, 33vw"
+            widths={[500, 800, 1000, 1400]}
           />
-        </figure>
+        ) : (
+          <div class="portrait bg-neutral-100" />
+        )}
 
-        {tab === 'interview' ? (
-          <section class="intro">
-            {artist.interview ? (
-              <div class="body-copy">
+        <section class="intro">
+          <div class="title-row">
+            <h2 {...styleAttrs(artist.nameStyle)}>{artist.name}</h2>
+            {origin && <p>{origin}</p>}
+          </div>
+
+          {tab === 'interview' ? (
+            artist.interview ? (
+              <div class="lead interview">
                 <PortableText value={artist.interview} fieldStyle={artist.interviewStyle} />
               </div>
             ) : (
-              <p class="empty">The interview has not been published yet.</p>
-            )}
-          </section>
-        ) : (
-          <section class="intro">
-            {artist.intro && (
-              <div class="lead">
-                <PortableText value={artist.intro} fieldStyle={artist.introStyle} />
-              </div>
-            )}
-            {artist.gallery && <p class="gallery">{artist.gallery}</p>}
-
-            {(artist.instagram || artist.website) && (
-              <p class="links">
-                {artist.instagram && (
-                  <a class="pill" href={instagramUrl(artist.instagram)} target="_blank" rel="noopener noreferrer">
-                    {t('common.instagram')} ↗
-                  </a>
-                )}
-                {artist.website && (
-                  <a class="pill" href={artist.website} target="_blank" rel="noopener noreferrer">
-                    {t('common.website')} ↗
-                  </a>
-                )}
-              </p>
-            )}
-
-            {artist.sections?.length > 0 ? (
-              <div class="sections">
-                <PageSections lang={lang} sections={artist.sections} />
-              </div>
-            ) : (
-              artist.bio && (
+              <p class="lead">{t('artists.interviewSoon')}</p>
+            )
+          ) : (
+            <>
+              {artist.intro && (
+                <div class="lead">
+                  <PortableText value={artist.intro} fieldStyle={artist.introStyle} />
+                </div>
+              )}
+              {biography ? (
                 <>
-                  <h3 class="panel-title">{t('artists.biography')}</h3>
-                  <div class="body-copy">
-                    <PortableText value={artist.bio} fieldStyle={artist.bioStyle} />
+                  <h3 {...styleAttrs(biography.headingStyle)}>{biography.heading ?? t('artists.biography')}</h3>
+                  <div class="columns body-copy">
+                    <PortableText value={biography.body} fieldStyle={biography.bodyStyle} />
                   </div>
                 </>
-              )
-            )}
+              ) : (
+                artist.bio && (
+                  <>
+                    <h3>{t('artists.biography')}</h3>
+                    <div class="columns body-copy">
+                      <PortableText value={artist.bio} fieldStyle={artist.bioStyle} />
+                    </div>
+                  </>
+                )
+              )}
+            </>
+          )}
+        </section>
+
+        {tab !== 'interview' && works.length > 0 && (
+          <section class="gallery col-span-full">
+            {works.slice(0, 2).map((w: any) => (
+              <figure>
+                <SanityImage image={w.image} widths={[670, 1000, 1340]} sizes="(max-width: 700px) 100vw, 670px" />
+                <figcaption>{caption(w.image, w).join(', ')}</figcaption>
+              </figure>
+            ))}
           </section>
         )}
 
-        {tab !== 'interview' && artist.carousel?.length > 0 && (
-          <div class="carousel">
-            <Slideshow images={artist.carousel} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 1140px" />
-          </div>
-        )}
-
-        {tab !== 'interview' && video && (
-          <div class="film">
-            <VideoEmbed url={video.url} poster={poster} label={video.title ?? t('common.video')} />
-          </div>
-        )}
-      </article>
-    )
-  }
-
-  {
-    data?.previous?.length > 0 && (
-      <section class="previous">
-        <h3 class="panel-title">{t('artists.previousGuests')}</h3>
-        <ul class="previous-grid">
-          {data.previous.map((p: any) => (
-            <li>
-              <a class="previous-card" href={localePath(lang, `artists/${p.artist?.slug}`)}>
-                <Figure
-                  image={p.artist?.portrait}
-                  pool="portrait"
-                  seed={p.artist?.slug ?? String(p.year)}
-                  aspect={0.8}
-                  sizes="(max-width: 640px) 50vw, 25vw"
-                  widths={[300, 500, 700]}
-                />
-                <span class="previous-name">
-                  {p.artist?.name}
-                  {p.artist?.countryCode && <sup class="country">{p.artist.countryCode}</sup>}
-                </span>
-                <span class="previous-year">{p.year}</span>
-              </a>
-            </li>
+        {tab !== 'interview' &&
+          rest.map((s: any) => (
+            <section class="practice col-start-5 col-span-8" id={s.anchor || undefined}>
+              <h3 {...styleAttrs(s.headingStyle)}>{s.heading}</h3>
+              <div class="columns body-copy">
+                <PortableText value={s.body} fieldStyle={s.bodyStyle} />
+              </div>
+            </section>
           ))}
-        </ul>
-      </section>
+
+        {video && (
+          <a id="interview-film" class="video col-span-8" href={video.url} target="_blank" rel="noreferrer">
+            {posterSrc ? (
+              <img src={posterSrc} alt={poster.alt ?? video.title ?? `${artist.name} — ${t('common.video')}`} width="1814" height="1208" />
+            ) : (
+              <img src="/assets/video-still.webp" alt={video.title ?? t('common.video')} width="1600" height="1066" />
+            )}
+            <span aria-hidden="true">▶</span>
+          </a>
+        )}
+      </div>
     )
   }
 </Base>
 
 <style>
-  .guest {
-    row-gap: 2.5rem;
+  /* From the design's guest-of-honour.css. */
+  .subnav {
+    align-items: center;
+    height: 115px;
   }
-
-  /* Name on the left, "°1983, France" on the right, on one rule across the page. */
-  .title-row {
-    grid-column: 1 / -1;
+  .subnav h1 {
+    letter-spacing: -0.03em;
+    grid-column: span 7;
+    font-size: 70px;
+    font-weight: 600;
+    line-height: 65px;
+  }
+  .subnav nav {
+    grid-column: span 5;
+    justify-content: flex-end;
+    gap: 20px;
     display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    border-top: 2px solid var(--ink);
-    padding-top: 0.4rem;
   }
-  .title-row h2 {
-    margin: 0;
-    font-size: clamp(2rem, 4.2vw, 3.75rem);
-    line-height: 1;
-    letter-spacing: -0.05em;
-    font-weight: 400;
+  .subnav a {
+    border: 1px solid;
+    padding: 4px 20px;
+    font-size: 28px;
   }
-  .origin {
-    margin: 0;
-    font-size: clamp(1.25rem, 2.8vw, 2.5rem);
-    line-height: 1.05;
-    letter-spacing: -0.04em;
+  .subnav a.active {
+    background: #fff350;
   }
-
+  .guest-page {
+    padding-top: 22px;
+    padding-bottom: 100px;
+  }
   .portrait {
+    object-fit: cover;
     grid-column: span 4;
-    margin: 0;
+    width: 100%;
+    height: 607px;
   }
-
   .intro {
     grid-column: span 8;
   }
-
-  .lead {
-    font-size: clamp(1.5rem, 3vw, 2.5rem);
-    line-height: 1.25;
-    letter-spacing: -0.035em;
-  }
-  .lead :global(p) {
-    margin: 0 0 1.5rem;
-  }
-
-  .gallery {
-    margin: 0;
-    font-size: clamp(1rem, 1.5vw, 1.5rem);
-    letter-spacing: -0.025em;
-    color: var(--ink-2);
-  }
-
-  .links {
+  .title-row {
+    border-top: 2px solid;
+    justify-content: space-between;
+    padding-top: 6px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin: 1.5rem 0 0;
-    font-size: clamp(1rem, 1.6vw, 1.4rem);
   }
-  .links .pill {
-    text-transform: lowercase;
-    text-decoration: none;
-    padding: 0.15rem 1.1rem;
-    font-size: inherit;
+  .title-row h2 {
+    letter-spacing: -0.05em;
+    font-size: 60px;
+    line-height: 60px;
   }
-  .links .pill:hover {
-    background: var(--acid);
+  .title-row p {
+    letter-spacing: -0.04em;
+    font-size: 40px;
+    line-height: 42px;
   }
-
-  .sections {
-    margin-top: 3.5rem;
+  .lead {
+    letter-spacing: -0.04em;
+    margin-top: 28px;
+    font-size: 40px;
+    line-height: 50px;
   }
-
-  .panel-title {
-    margin: 3.5rem 0 1.5rem;
+  .lead :global(p + p) {
+    margin-top: 28px;
   }
-
-  /* One rich-text field in Sanity, two columns in the design. */
-  .body-copy {
+  .intro h3,
+  .practice h3 {
+    letter-spacing: -0.04em;
+    border-bottom: 2px solid;
+    margin-top: 82px;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 48px;
+  }
+  .columns {
     columns: 2;
-    column-gap: 2.5rem;
-    font-size: clamp(1rem, 1.5vw, 1.5rem);
-    line-height: 1.25;
-    letter-spacing: -0.02em;
+    column-gap: 40px;
+  }
+  .body-copy {
+    letter-spacing: -0.03em;
+    padding-top: 28px;
+    font-size: 24px;
+    line-height: 30px;
   }
   .body-copy :global(p) {
-    margin: 0 0 1.5rem;
     break-inside: avoid;
   }
-
-  .carousel,
-  .film {
-    grid-column: 1 / -1;
+  .body-copy :global(p + p) {
+    margin-top: 30px;
   }
-  .film :global(.video) {
-    margin-top: 0;
-  }
-
-  .previous {
-    margin-top: 4rem;
-  }
-  .previous .panel-title {
-    margin-top: 0;
-  }
-  .previous-grid {
+  .gallery {
+    grid-template-columns: 670px 670px;
+    gap: 40px;
+    margin-top: 109px;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 2rem 30px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
+    overflow: hidden;
   }
-  .previous-card {
-    display: block;
-    text-decoration: none;
+  .gallery :global(img) {
+    object-fit: cover;
+    width: 670px;
+    height: 447px;
   }
-  .previous-name {
-    display: block;
-    margin-top: 0.6rem;
-    font-size: clamp(1rem, 1.5vw, 1.5rem);
-    line-height: 1.15;
-    letter-spacing: -0.025em;
+  .gallery figcaption {
+    text-align: center;
+    font-size: 16px;
+    line-height: 30px;
   }
-  .previous-card:hover .previous-name {
-    text-decoration: underline;
-    text-underline-offset: 0.12em;
+  .practice {
+    margin-top: 50px;
   }
-  .country {
-    font-size: 0.6em;
-    margin-left: 0.3em;
+  .practice h3 {
+    margin-top: 0;
   }
-  .previous-year {
-    display: block;
-    color: var(--ink-3);
-    font-size: 0.95rem;
+  .video {
+    margin-top: 56px;
+    position: relative;
   }
-
+  .video img {
+    aspect-ratio: 907 / 604;
+    object-fit: cover;
+    width: 100%;
+  }
+  .video span {
+    background: #fff;
+    border-radius: 33px;
+    place-items: center;
+    width: 187px;
+    height: 162px;
+    padding-left: 12px;
+    font-size: 90px;
+    display: grid;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
   .empty {
-    background: transparent;
-    border-color: var(--ink);
+    padding-top: 40px;
   }
-
-  @media (max-width: 900px) {
+  @media (width<=700px) {
+    .subnav {
+      height: auto;
+      padding-block: 16px;
+    }
+    .subnav h1 {
+      grid-column: 1 / -1;
+      font-size: 42px;
+      line-height: 1;
+    }
+    .subnav nav {
+      grid-column: 1 / -1;
+      justify-content: flex-start;
+      margin-top: 15px;
+    }
+    .subnav a {
+      font-size: 20px;
+    }
     .portrait,
-    .intro {
+    .intro,
+    .practice,
+    .video {
       grid-column: 1 / -1;
     }
-    .body-copy {
+    .portrait {
+      height: auto;
+    }
+    .intro {
+      padding-top: 20px;
+    }
+    .title-row h2 {
+      font-size: 38px;
+      line-height: 1;
+    }
+    .title-row p {
+      font-size: 22px;
+      line-height: 1;
+    }
+    .lead {
+      font-size: 27px;
+      line-height: 1.1;
+    }
+    .intro h3,
+    .practice h3 {
+      margin-top: 48px;
+      font-size: 30px;
+    }
+    .columns {
       columns: 1;
     }
-    .previous-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.5rem 16px;
+    .body-copy {
+      font-size: 18px;
+      line-height: 1.3;
+    }
+    .gallery {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-top: 60px;
+    }
+    .gallery :global(img) {
+      width: 100%;
+      height: auto;
+    }
+    .video span {
+      border-radius: 18px;
+      width: 90px;
+      height: 78px;
+      font-size: 40px;
     }
   }
 </style>

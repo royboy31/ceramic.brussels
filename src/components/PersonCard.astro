@@ -3,14 +3,14 @@ import type { LocaleId } from '../lib/locales';
 import { useTranslations } from '../lib/i18n';
 import { instagramUrl } from '../lib/links';
 import PortableText from './PortableText.astro';
-import Figure from './Figure.astro';
-import LinkPill from './LinkPill.astro';
+import SanityImage from './SanityImage.astro';
 import { styleAttrs } from '../lib/textStyle';
 
 /**
- * One person of the advisory board, the team or the jury, as in the
- * advisory-board frame: name over a rule, a small portrait on the left, the
- * role in bold italic, the biography, then instagram / website pills.
+ * One person of the advisory board, the team or the jury, as the design's
+ * advisory-board page draws it: the name over a rule, the portrait on the
+ * left, the role in bold, the biography, then the instagram / website
+ * pills. Lives inside a `.people` grid (the page or People.astro).
  */
 interface Props {
   lang: LocaleId;
@@ -20,122 +20,98 @@ interface Props {
 
 const { lang, person, class: className } = Astro.props;
 const t = useTranslations(lang);
-
 const hasLinks = person.instagram || person.website || person.email || person.phone;
 ---
 
-<article class:list={['person', className]}>
-  <h3 class="person-name">
-    {person.name}
-    {person.countryCode && <sup>{person.countryCode}</sup>}
-  </h3>
-
-  <div class="person-body">
-    <div class="portrait">
-      <Figure
-        image={person.portrait}
-        pool="portrait"
-        seed={person._id ?? person.name ?? ''}
-        aspect={130 / 170}
-        sizes="130px"
-        widths={[130, 260, 390]}
-      />
-    </div>
-
-    <div class="person-text">
-      {person.role && <p class="role" {...styleAttrs(person.roleStyle)}>{person.role}</p>}
-      {
-        person.bio && (
-          <div class="bio">
-            <PortableText value={person.bio} fieldStyle={person.bioStyle} />
-          </div>
-        )
-      }
+<article class={className}>
+  <h2>{person.name}</h2>
+  <div>
+    {
+      person.portrait?.asset ? (
+        <SanityImage image={person.portrait} widths={[200, 400]} sizes="197px" />
+      ) : (
+        <div class="no-portrait" aria-hidden="true" />
+      )
+    }
+    <section>
+      {person.role && <strong {...styleAttrs(person.roleStyle)}>{person.role}</strong>}
+      {person.bio && <PortableText value={person.bio} fieldStyle={person.bioStyle} />}
       {
         hasLinks && (
           <p class="links">
             {person.instagram && (
-              <LinkPill lang={lang} href={instagramUrl(person.instagram)} label={t('common.instagram')} external />
+              <a class="pill" href={instagramUrl(person.instagram)} target="_blank" rel="noopener noreferrer">
+                {t('common.instagram')} ↗
+              </a>
             )}
-            {person.website && <LinkPill lang={lang} href={person.website} label={t('common.website')} external />}
+            {person.website && (
+              <a class="pill" href={person.website} target="_blank" rel="noopener noreferrer">
+                {t('common.website')} ↗
+              </a>
+            )}
             {person.email && (
-              <a class="text-link" href={`mailto:${person.email}`}>
+              <a class="pill" href={`mailto:${person.email}`}>
                 {person.email}
               </a>
             )}
             {person.phone && (
-              <a class="text-link" href={`tel:${person.phone.replace(/[\s.]+/g, '')}`}>
+              <a class="pill" href={`tel:${person.phone.replace(/[\s.]+/g, '')}`}>
                 {person.phone}
               </a>
             )}
           </p>
         )
       }
-    </div>
+    </section>
   </div>
 </article>
 
 <style>
-  .person-name {
-    margin: 0;
-    padding-bottom: 0.3rem;
-    border-bottom: 1px solid var(--ink);
-    font-size: clamp(1.4rem, 2.8vw, 2.5rem);
-    line-height: 1.1;
+  /* From the design's advisory-board page (`.people article`). */
+  h2 {
     letter-spacing: -0.04em;
+    border-bottom: 1px solid;
+    font-size: 36px;
     font-weight: 600;
-    text-wrap: balance;
   }
-  .person-name sup {
-    margin-left: 0.35em;
-    font-size: 0.45em;
-    font-weight: 400;
-    letter-spacing: normal;
-    text-transform: uppercase;
-    vertical-align: top;
-  }
-
-  .person-body {
+  article > div {
+    grid-template-columns: 197px 1fr;
+    gap: 40px;
+    margin-top: 28px;
     display: grid;
-    grid-template-columns: 130px minmax(0, 1fr);
-    gap: 1.25rem 1.5rem;
-    padding-top: 1.25rem;
   }
-  .portrait :global(img) {
-    width: 100%;
+  article :global(img),
+  .no-portrait {
+    object-fit: cover;
+    width: 197px;
+    max-height: 270px;
   }
-
-  .role {
-    margin: 0 0 0.75rem;
-    font-weight: 600;
-    font-style: italic;
-    font-size: 0.875rem;
-    line-height: 1.3;
+  .no-portrait {
+    height: 270px;
+    background: #f0efed;
   }
-  .bio {
-    font-size: 0.875rem;
-    line-height: 1.4;
+  section {
+    font-size: 24px;
+    line-height: 1.22;
   }
-  .bio :global(p) {
-    margin: 0 0 0.75rem;
+  section :global(p) {
+    margin-top: 16px;
   }
-  .bio :global(p:last-child) {
-    margin-bottom: 0;
-  }
-
   .links {
+    gap: 14px;
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.6rem 0.8rem;
-    margin: 1rem 0 0;
-    font-size: 0.9rem;
   }
-
-  @media (max-width: 480px) {
-    .person-body {
-      grid-template-columns: 100px minmax(0, 1fr);
-      gap: 1rem;
+  @media (width<=800px) {
+    article > div {
+      grid-template-columns: 120px 1fr;
+      gap: 18px;
+    }
+    article :global(img),
+    .no-portrait {
+      width: 120px;
+    }
+    h2 {
+      font-size: 28px;
     }
   }
 </style>
