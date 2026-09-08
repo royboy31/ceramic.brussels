@@ -17,7 +17,8 @@
     "admin:migrate": "wrangler d1 migrations apply ceramic-brussels-admin --remote",
     "templates": "node scripts/seed-templates.mjs",
     "previews": "node scripts/section-previews.mjs",
-    "build:preview": "node scripts/with-preview-runtime.mjs"
+    "build:preview": "node scripts/with-preview-runtime.mjs",
+    "boundary": "node scripts/boundary.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.0",
