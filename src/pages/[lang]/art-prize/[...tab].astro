@@ -320,7 +320,8 @@ const captionOf = (img: any, fallback?: string) => ({
     font-size: 50px;
     line-height: 1.1;
   }
-  .blocks {
+  /* `blocks` is passed to Sections, whose markup carries no scope attribute. */
+  :global(.blocks) {
     margin-top: 55px;
   }
   .gallery {

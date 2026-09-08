@@ -131,7 +131,7 @@ const path = hubTabPath('programme', tab);
       days.length > 0 && (
         <div class="days">
           {days.map((day, i) => (
-            <details open={i === 0}>
+            <details>
               <summary>
                 {formatDay(day, lang)} <span aria-hidden="true">↓</span>
               </summary>
@@ -204,7 +204,8 @@ const path = hubTabPath('programme', tab);
 
 <style>
   /* From the design's programme pages (html pages/programme/*). */
-  .cover {
+  /* `cover` is passed to SanityImage, whose <img> carries no scope attribute. */
+  :global(.cover) {
     width: 100%;
     margin: 40px 0;
   }

@@ -82,6 +82,11 @@ const orgSchema = {
 >
   <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} slot="head" />
 
+  <div class="page-grid py-2 md:py-4">
+    <h1 class="col-span-full text-[clamp(2rem,4.8vw,4.4rem)] font-semibold leading-none tracking-[-.04em]">
+      {t('nav.exhibitors').toLowerCase()}
+    </h1>
+  </div>
   <article class="page-grid exhibitor-detail">
     <figure class="artwork">
       <div class="relative">

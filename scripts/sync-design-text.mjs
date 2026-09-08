@@ -177,6 +177,32 @@ const report = (id, fields) => console.log(`  ${id}: ${Object.keys(fields).join(
   set('demo-exhibitor-2027-chaxartxrtm', { 'bio.en': blocks(ps), 'images[0].caption': 'Tong Xindi & Shen Ting' });
 }
 
+/* ---------- about · advisory board ---------- */
+{
+  const m = page('about/advisory-board');
+  const people = await client.fetch(`*[_type == "person" && "advisory-board" in groups]{ _id, name }`);
+  const fold = (s) => String(s).normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z]+/g, ' ').trim();
+  for (const a of m.querySelectorAll('article')) {
+    const name = text(a.querySelector('h2'));
+    const doc = people.find((p) => fold(p.name) === fold(name));
+    if (!doc) { console.warn(`  no person for ${name}`); continue; }
+    const role = a.querySelector('section strong, strong');
+    const ps = a.querySelectorAll('section p').filter((p) => text(p).length > 60 && !/instagram|website/i.test(text(p)));
+    const f = {};
+    if (role) f['role.en'] = text(role);
+    if (ps.length) f['bio.en'] = blocks(ps);
+    if (Object.keys(f).length) set(doc._id, f);
+  }
+}
+
+/* ---------- partners · hotel ---------- */
+{
+  const m = page('partners/hotel');
+  const ps = m.querySelectorAll('section p, article p, .hotel p').filter((p) => text(p).length > 60 && !/^\d\/\d/.test(text(p)));
+  const uniq = [...new Map(ps.map((p) => [text(p), p])).values()];
+  if (uniq.length) set('demo-partner-the-hoxton', { 'description.en': blocks(uniq) });
+}
+
 /* ---------- exhibitor · ANALORA ---------- */
 {
   const m = page('exhibitors/analora');

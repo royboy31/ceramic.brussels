@@ -173,6 +173,7 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     height: 115px;
   }
   .subnav h1 {
+    text-transform: lowercase;
     letter-spacing: -0.03em;
     grid-column: span 7;
     font-size: 70px;
@@ -197,7 +198,8 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     padding-top: 22px;
     padding-bottom: 100px;
   }
-  .portrait {
+  /* The portrait is a SanityImage, whose <img> carries no scope attribute. */
+  :global(.portrait) {
     object-fit: cover;
     grid-column: span 4;
     width: 100%;
@@ -323,13 +325,13 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     .subnav a {
       font-size: 20px;
     }
-    .portrait,
+    :global(.portrait),
     .intro,
     .practice,
     .video {
       grid-column: 1 / -1;
     }
-    .portrait {
+    :global(.portrait) {
       height: auto;
     }
     .intro {

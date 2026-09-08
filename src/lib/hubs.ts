@@ -86,7 +86,7 @@ export const HUBS: Record<string, Hub> = {
       { slug: 'the-fair', label: 'tabs.theFair' },
       { slug: 'advisory-board', label: 'tabs.advisoryBoard' },
       { slug: 'team', label: 'tabs.team' },
-      { slug: 'partners', label: 'nav.partners', link: { route: 'partners' } },
+      { slug: 'partners', label: 'tabs.partners', link: { route: 'partners' } },
       { slug: 'press', label: 'tabs.press' },
       { slug: 'images', label: 'tabs.images' },
     ],

@@ -19,6 +19,19 @@ components, binding each element to the field named below.
 `html pages/` is not committed (165 MB of PNGs); Lilanga has the source
 project. It is gitignored.
 
+## Status, 2026-09-08 late — side-by-side pass done
+
+Every page was opened next to its design page in Chrome at 1440px, the
+text parity script re-run, and the production build passed (705 pages).
+Fixed in that pass: the guest portrait and two other rules that targeted a
+class on a child component (scoped styles never reach a child's markup —
+use `:global(.class)` for those); the "exhibitors" title band on the list
+and detail pages; lowercase hub and tab titles; the 2026 awards in the
+design's column order; the talks accordion closed by default; the
+institutions tab down to the institutional tier; the design's text for the
+hotel, the advisory board and ANALORA. What remains is the content list
+below, unchanged.
+
 ## Status, 2026-09-08 night — the frontend is ported too
 
 Kamindu ported the sixteen pages into the routes the same night (see
