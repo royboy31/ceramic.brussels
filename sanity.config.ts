@@ -8,6 +8,8 @@ import { duplicateAction } from './src/sanity/components/DuplicateAction';
 import { templates } from './src/sanity/templates';
 import { applyTemplateAction, saveAsTemplateAction } from './src/sanity/components/TemplateActions';
 import { presentation } from './src/sanity/presentation';
+import { openPreviewAction } from './src/sanity/components/OpenPreviewAction';
+import { PREVIEWABLE_TYPES } from './src/sanity/previewPaths';
 
 // Singletons must not be creatable or deletable from the Studio.
 const SINGLETONS = new Set(['siteSettings', 'navigation', 'homepage']);
@@ -15,18 +17,17 @@ const SINGLETONS = new Set(['siteSettings', 'navigation', 'homepage']);
 // Types with a section stack, which get "Apply template…" and "Save as template".
 const BUILDER_TYPES = new Set(['page', 'homepage', 'artist']);
 
+// The drafts preview only exists on a build with the Cloudflare adapter
+// (PREVIEW_RUNTIME=1 sets both, see wrangler.toml). Without it the Preview
+// tab would frame a 404, and "Open preview" would open one.
+const PREVIEW = import.meta.env.PUBLIC_PREVIEW_ENABLED === 'true';
+
 export default defineConfig({
   name: 'ceramic-brussels',
   title: 'Ceramic Brussels',
   projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
   dataset: import.meta.env.PUBLIC_SANITY_DATASET,
-  // The Preview tab needs the /preview routes, which only exist on a build
-  // with the Cloudflare adapter (PREVIEW_RUNTIME=1 sets both, see
-  // wrangler.toml). Without it the tab would frame a 404.
-  plugins: [
-    structureTool({ structure }),
-    ...(import.meta.env.PUBLIC_PREVIEW_ENABLED === 'true' ? [presentation] : []),
-  ],
+  plugins: [structureTool({ structure }), ...(PREVIEW ? [presentation] : [])],
 
   /**
    * Site accounts get their own button on the Studio's login screen, pointing
@@ -83,7 +84,10 @@ export default defineConfig({
       // The page builder's template actions, on every type that has a
       // sections stack. The components return null elsewhere, so listing
       // them broadly is harmless; the set keeps the menu short.
-      return BUILDER_TYPES.has(schemaType) ? [...base, applyTemplateAction, saveAsTemplateAction] : base;
+      const withTemplates = BUILDER_TYPES.has(schemaType) ? [...base, applyTemplateAction, saveAsTemplateAction] : base;
+      // "Open preview" - the page this document makes, from its draft, in a
+      // new tab. Same routes as the Preview tab; see OpenPreviewAction.tsx.
+      return PREVIEW && PREVIEWABLE_TYPES.has(schemaType) ? [...withTemplates, openPreviewAction] : withTemplates;
     },
   },
 });
