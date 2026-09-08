@@ -12,9 +12,11 @@ import { ImagesIcon } from '@sanity/icons/Images';
 import { LinkIcon } from '@sanity/icons/Link';
 import { PlayIcon } from '@sanity/icons/Play';
 import { StackCompactIcon } from '@sanity/icons/StackCompact';
+import { StarIcon } from '@sanity/icons/Star';
 import { TextIcon } from '@sanity/icons/Text';
 import { UsersIcon } from '@sanity/icons/Users';
 import { PERSON_GROUPS } from '../documents/person';
+import { PARTNER_TIERS } from '../../../lib/options';
 
 /**
  * The page builder.
@@ -480,6 +482,67 @@ export const linksSection = defineType({
   },
 });
 
+/**
+ * Partners, from a tier or hand-picked: the logo row under "partners" on the
+ * art prize page, the main partner and media lists on the partners hub. The
+ * partner documents carry the logos, names and links, so nothing here goes
+ * stale when a partner is renamed.
+ */
+export const partnersSection = defineType({
+  name: 'partnersSection',
+  title: 'Partners',
+  type: 'object',
+  icon: StarIcon,
+  fields: [
+    headingField('Optional. Shown over a full-width rule, like "partners".'),
+    defineField({
+      name: 'body',
+      title: 'Text',
+      type: 'localeBlock',
+      description: 'Optional paragraph above the partners.',
+    }),
+    defineField({
+      name: 'tier',
+      title: 'Tier',
+      type: 'string',
+      options: { list: [...PARTNER_TIERS] },
+      description: 'Every partner of this tier, in their order. Leave empty to pick partners by hand below.',
+    }),
+    defineField({
+      name: 'partners',
+      title: 'Partners',
+      type: 'array',
+      of: [defineArrayMember({ type: 'reference', to: [{ type: 'partner' }] })],
+      hidden: ({ parent }) => !!parent?.tier,
+    }),
+    defineField({
+      name: 'display',
+      title: 'Show as',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Logos', value: 'logos' },
+          { title: 'Names and text', value: 'list' },
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
+      initialValue: 'logos',
+    }),
+    anchorField(),
+    hiddenField(),
+  ],
+  preview: {
+    select: { heading: 'heading.en', tier: 'tier', partners: 'partners', hidden: 'hidden' },
+    prepare: ({ heading, tier, partners, hidden }) => {
+      const label = tier
+        ? (PARTNER_TIERS.find((t) => t.value === tier)?.title ?? tier)
+        : `${partners?.length ?? 0} picked`;
+      return { title: heading ?? label, subtitle: sectionSubtitle('Partners', hidden, `· ${label}`) };
+    },
+  },
+});
+
 /** An embedded page - a map, a form, a ticket widget - in a frame. */
 export const embedSection = defineType({
   name: 'embedSection',
@@ -526,6 +589,7 @@ export const PAGE_SECTION_TYPES = [
   'linksSection',
   'headingSection',
   'peopleSection',
+  'partnersSection',
   'keyFiguresSection',
   'newsSection',
   'faqSection',
@@ -567,7 +631,7 @@ export function sectionsField(
     { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection'] },
     { name: 'media', title: 'Images & video', of: ['gallerySection', 'slideshowSection', 'videoSection', 'spotlight'] },
     { name: 'action', title: 'Links & banners', of: ['bannerSection', 'linksSection', 'embedSection'] },
-    { name: 'lists', title: 'From other content', of: ['peopleSection', 'keyFiguresSection', 'newsSection'] },
+    { name: 'lists', title: 'From other content', of: ['peopleSection', 'partnersSection', 'keyFiguresSection', 'newsSection'] },
   ]
     .map((g) => ({ ...g, of: g.of.filter(has) }))
     .filter((g) => g.of.length > 0);
@@ -602,6 +666,7 @@ export const pageBuilderTypes = [
   quoteSection,
   bannerSection,
   peopleSection,
+  partnersSection,
   keyFiguresSection,
   headingSection,
   faqSection,

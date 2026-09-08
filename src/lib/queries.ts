@@ -72,6 +72,19 @@ const PERSON = `{
   portrait ${IMAGE}
 }`;
 
+const PARTNER = `{
+  _id, name, tier, url, instagram, order,
+  ${styled('subtitle')},
+  ${styled('description')},
+  ${styled('currentExhibition')},
+  "editions": editions[]->year,
+  logo ${IMAGE},
+  "images": images[] ${IMAGE}
+}`;
+
+/** Partners that are not scoped to an edition, or are scoped to the current one. */
+const PARTNER_IS_LISTED = `(!defined(editions) || count(editions) == 0 || count(editions[@->isCurrent == true]) > 0)`;
+
 const NEWS_CARD = `{
   _id, publishedAt, category,
   "slug": slug.current,
@@ -120,7 +133,7 @@ const SECTIONS = `sections[hidden != true]{
     ${styled('heading')},
     "video": select(
       defined(video.url) => video ${VIDEO},
-      *[_type == "edition" && isCurrent == true][0].film ${VIDEO}
+      *[_type == "edition" && defined(film.url)] | order(year desc)[0].film ${VIDEO}
     )
   },
   _type == "quoteSection" => {
@@ -154,6 +167,16 @@ const SECTIONS = `sections[hidden != true]{
         && (!defined(edition) || edition->year == *[_type == "edition" && isCurrent == true][0].year)]
         | order(order asc, name asc) ${PERSON},
       people[]-> ${PERSON}
+    )
+  },
+  _type == "partnersSection" => {
+    display, tier,
+    ${styled('heading')},
+    ${styled('body')},
+    "partners": select(
+      defined(tier) => *[_type == "partner" && tier == ^.tier && ${PARTNER_IS_LISTED}]
+        | order(order asc, name asc) ${PARTNER},
+      partners[]-> ${PARTNER}
     )
   },
   _type == "keyFiguresSection" => {
@@ -663,16 +686,6 @@ export function getProgramme(lang: LocaleId) {
   );
 }
 
-const PARTNER = `{
-  _id, name, tier, url, instagram, order,
-  ${styled('subtitle')},
-  ${styled('description')},
-  ${styled('currentExhibition')},
-  "editions": editions[]->year,
-  logo ${IMAGE},
-  "images": images[] ${IMAGE}
-}`;
-
 /**
  * Every partner, ordered. Filter on `tier` in the page; food & drinks vendors
  * are the `food-drinks` tier. Partners scoped to editions only appear when
@@ -680,9 +693,7 @@ const PARTNER = `{
  */
 export function getPartners(lang: LocaleId) {
   return run<any[]>(
-    `*[_type == "partner"
-        && (!defined(editions) || count(editions) == 0
-            || count(editions[@->isCurrent == true]) > 0)]
+    `*[_type == "partner" && ${PARTNER_IS_LISTED}]
       | order(order asc, name asc) ${PARTNER}`,
     { lang },
   );

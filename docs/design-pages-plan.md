@@ -19,6 +19,54 @@ components, binding each element to the field named below.
 `html pages/` is not committed (165 MB of PNGs); Lilanga has the source
 project. It is gitignored.
 
+## Status, 2026-09-08 evening — the CMS side is done
+
+Everything below the line that was marked **schema** or **content** has
+been applied, and checked page by page against the design with a script
+that looks for every visible line of each design page on the matching
+localhost page (`npm run dev` against the live dataset):
+
+- **Code**: `partnersSection` block (schema, projection, `sections/Partners.astro`,
+  thumbnail); hub tabs that link to another hub (`HubTab.link`, `hubTabHref`,
+  `HubNav`), wired for programme → awards and about → partners; the film
+  falls back to the latest edition that has one; four new page templates
+  (`npm run templates`).
+- **Data** (`scripts/apply-design-content.mjs`, re-runnable, images cached in
+  `legacy-export/design-asset-map.json`): the Navigation document as the
+  design draws the menu; the 50 design images on the documents that show
+  them (dates mark, hero, features, guest portrait and works, 2027
+  exhibitors, 2026 laureates, awards, partners, page covers and closing
+  rows, practical-info photos, four Thursday talks); the homepage stack in
+  the design's order; the art prize partners block with MAD, A+S and ASCP;
+  duplicate partners merged, award families fixed, 2027 country focus,
+  practical info (venue, address, access, hotel deal).
+- **Text** (`scripts/sync-design-text.mjs`): where the design's copy is newer
+  than the legacy import, the design wins — guest of honour intro, biography
+  and practice, art prize texts, 2026 laureate bios, seven award
+  descriptions, five institution and four food-vendor descriptions, the
+  about page, the CHAxART bio, ticket notes, captions.
+- **Programme** (`scripts/fix-programme-2026.mjs`): the events the import had
+  filed under 2027 without dates are the **2026** programme (the captured
+  page's day headings are the 2026 dates); they now carry their 2026 day,
+  time, section, kind, speakers and language. The 2027 talks tab therefore
+  shows the seeded 2027 placeholders, not the 2026 talks the design used as
+  sample content. That is the one place the CMS deliberately does not match
+  the design; editors add the real 2027 talks.
+
+What the parity check still lists is **frontend** — the same data rendered
+differently by today's routes, which Lilanga's port replaces: country codes
+on exhibitor cards, "°1994" before the base line, "● A5" after the city,
+the "presenting" line from `artistsText`, "→ Name and Name" joins on awards,
+slideshow counters and captions ("1/5 · Artist, *Title*, year"), work
+captions on the guest page, the La Cambre intro on the programme hub, the
+opening-hours / tickets / access typography, the day accordions on talks,
+and the `+` sub-menus of the menu overlay (the children are already in the
+data: today's overlay prints them as a subtitle line).
+
+Two design placeholders were not copied: the "art shippers" paragraph
+pasted under City of Brussels and Brussels-Capital Region, and Anna
+Laudel's "DE" (the gallery is filed under Istanbul).
+
 ## Reading the tables
 
 - **Design** — what the HTML page shows, in order.

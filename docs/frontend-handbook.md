@@ -73,6 +73,10 @@ and the design tokens, and list them in the PR so Léonie knows what to draw.
 `art-prize`, `programme`, `partners`, `visit`, `about` and `guest-of-honour`
 are hubs: one `[...tab].astro` route, pill tabs from `HUBS` in
 `src/lib/hubs.ts`, first tab on the hub root. `HubNav` renders the pills.
+A tab with a `link` is a pill that leads to another hub (programme →
+awards goes to the art prize awards, about → partners to the partners hub);
+it has no route of its own and is never the active pill. `hubTabHref` gives
+a pill's path either way.
 
 - **Text tabs** come from a `page` document with a matching `section` and
   English slug, found with `pageForTab(pages, slug)`. A `page` gives you:
@@ -107,6 +111,7 @@ half-width blocks side by side); everything else is one block, one component.
 | Buttons | `linksSection` | `sections/Links.astro` | `variant`, `links[]` |
 | Section title | `headingSection` | `sections/Heading.astro` | `title` |
 | People | `peopleSection` | `sections/People.astro` | `group`, `heading`, `people[]` (resolved) |
+| Partners | `partnersSection` | `sections/Partners.astro` | `display` (`logos` / `list`), `tier`, `heading`, `body`, `partners[]` (resolved: `name`, `logo`, `url`, `description`) |
 | Key figures | `keyFiguresSection` | `sections/KeyFigures.astro` | `image`, `link`, `edition.keyFigures` (resolved) |
 | Latest news | `newsSection` | `sections/News.astro` | `count`, `heading`, `items[]` (resolved) |
 | FAQ | `faqSection` | `sections/Faq.astro` | `heading`, `items[]{question, answer}` |

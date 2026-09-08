@@ -14,6 +14,13 @@ import type { StringKey } from './i18n';
 export interface HubTab {
   slug: string;
   label: StringKey;
+  /**
+   * A pill that leads to another hub instead of to a page of this one: the
+   * programme's "awards" goes to the art prize awards, the about hub's
+   * "partners" to the partners hub, as the design draws them. No route is
+   * generated for a link tab and it is never the active one.
+   */
+  link?: { route: string; tab?: string };
 }
 
 export interface Hub {
@@ -47,7 +54,7 @@ export const HUBS: Record<string, Hub> = {
     tabs: [
       { slug: 'la-cambre', label: 'tabs.laCambre' },
       { slug: 'talks', label: 'tabs.talks' },
-      { slug: 'awards', label: 'tabs.awards' },
+      { slug: 'awards', label: 'tabs.awards', link: { route: 'art-prize', tab: 'awards' } },
       { slug: 'vip', label: 'tabs.vip' },
     ],
   },
@@ -79,6 +86,7 @@ export const HUBS: Record<string, Hub> = {
       { slug: 'the-fair', label: 'tabs.theFair' },
       { slug: 'advisory-board', label: 'tabs.advisoryBoard' },
       { slug: 'team', label: 'tabs.team' },
+      { slug: 'partners', label: 'nav.partners', link: { route: 'partners' } },
       { slug: 'press', label: 'tabs.press' },
       { slug: 'images', label: 'tabs.images' },
     ],
@@ -101,11 +109,17 @@ export function hubTabPath(route: string, tab?: string): string {
   return `${route}/${tab}`;
 }
 
-/** Static paths for a hub's `[...tab]` route: one per locale per tab. */
+/** Where a tab's pill points: its own page, or, for a link tab, the other hub. */
+export function hubTabHref(route: string, tab: HubTab): string {
+  return tab.link ? hubTabPath(tab.link.route, tab.link.tab) : hubTabPath(route, tab.slug);
+}
+
+/** Static paths for a hub's `[...tab]` route: one per locale per tab. Link tabs have none. */
 export function hubTabParams(route: string, locales: readonly string[]) {
   const hub = HUBS[route];
+  const own = hub.tabs.filter((tab) => !tab.link);
   return locales.flatMap((lang) =>
-    hub.tabs.map((tab, i) => ({ params: { lang, tab: i === 0 ? undefined : tab.slug } })),
+    own.map((tab, i) => ({ params: { lang, tab: i === 0 ? undefined : tab.slug } })),
   );
 }
 

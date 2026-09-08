@@ -1,7 +1,7 @@
 ---
 import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
-import { HUBS, hubTabPath } from '../lib/hubs';
+import { HUBS, hubTabHref, type HubTab } from '../lib/hubs';
 
 /**
  * The title band of a hub page: the hub name on the left and its pill tabs on
@@ -29,12 +29,15 @@ const hub = HUBS[route];
 const known = new Set(hub.tabs.map((tab) => tab.slug));
 const tabs = [
   ...hub.tabs.map((tab) => {
-    const page = pages.find((p) => p?.slugs?.en === tab.slug);
-    return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label) };
+    const page = tab.link ? null : pages.find((p) => p?.slugs?.en === tab.slug);
+    return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label), href: hubTabHref(route, tab), link: !!tab.link };
   }),
   ...pages
     .filter((p) => p?.slugs?.en && !known.has(p.slugs.en))
-    .map((p) => ({ slug: p.slugs.en as string, label: p.tabLabel ?? p.title })),
+    .map((p) => {
+      const tab: HubTab = { slug: p.slugs.en as string, label: 'tabs.about' };
+      return { slug: tab.slug, label: p.tabLabel ?? p.title, href: hubTabHref(route, tab), link: false };
+    }),
 ];
 ---
 
@@ -47,8 +50,8 @@ const tabs = [
         {tabs.map((tab) => (
           <a
             class="pill"
-            href={localePath(lang, hubTabPath(route, tab.slug))}
-            aria-current={tab.slug === active ? 'page' : undefined}
+            href={localePath(lang, tab.href)}
+            aria-current={!tab.link && tab.slug === active ? 'page' : undefined}
           >
             {tab.label}
           </a>

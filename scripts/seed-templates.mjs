@@ -82,6 +82,21 @@ const links = (labels, variant = 'pill') => ({
   links: labels.map((label) => ({ _type: 'link', _key: key(), kind: 'route', route: '', label: en(label) })),
 });
 const people = (group) => ({ _type: 'peopleSection', _key: key(), group });
+const partners = (tier, heading, body, display = 'logos') => ({
+  _type: 'partnersSection',
+  _key: key(),
+  tier,
+  display,
+  ...(heading ? { heading: en(heading) } : {}),
+  ...(body ? { body: rich(...[].concat(body)) } : {}),
+});
+const spotlight = (kicker, headline, label) => ({
+  _type: 'spotlight',
+  _key: key(),
+  kicker: en(kicker),
+  headline: en(headline),
+  link: { _type: 'link', kind: 'route', route: '', label: en(label) },
+});
 const figures = () => ({ _type: 'keyFiguresSection', _key: key() });
 const news = (count = 2) => ({ _type: 'newsSection', _key: key(), count });
 const faq = () => ({
@@ -208,6 +223,58 @@ const TEMPLATES = [
     appliesTo: ['homepage'],
     order: 110,
     sections: [video(), news(2), figures(), banner('see the images', 'solid')],
+  },
+
+  /* ---------- the 2027 design, page by page (docs/design-pages-plan.md) ---------- */
+  {
+    _id: 'template-homepage-2027',
+    title: 'Homepage 2027',
+    description:
+      'The design’s homepage under the hero: "latest news", a feature, a text link, the film, a second feature, the key figures, a closing link.',
+    appliesTo: ['homepage'],
+    order: 120,
+    sections: [
+      heading('latest news'),
+      spotlight('guest of honour', 'The artist is the guest of honour of ceramic brussels 2027.', 'discover the work'),
+      links(['ceramic brussels 2026 in images'], 'text'),
+      video(),
+      spotlight('partner spotlight', 'A partner joins ceramic brussels for 2027.', 'discover the partner'),
+      figures(),
+      links(['ceramic brussels 2026 in images'], 'text'),
+    ],
+  },
+  {
+    _id: 'template-hub-text-page',
+    title: 'Hub text page',
+    description:
+      'A hub tab as the design draws "about" and "the prize": lead and cover image (page fields), then three titled text sections one column wide, then the closing images (page field).',
+    appliesTo: ['page'],
+    order: 130,
+    sections: [
+      text('the fair', 'A first section.', 'single'),
+      text('goals', 'A second section.', 'single'),
+      text('development', 'A third section.', 'single'),
+    ],
+  },
+  {
+    _id: 'template-hub-page-with-partners',
+    title: 'Hub page with partners',
+    description: 'The art prize "about" tab: two titled text sections, then the partners of a tier with a paragraph and their logos.',
+    appliesTo: ['page'],
+    order: 140,
+    sections: [
+      text('the prize', 'What the prize is.', 'single'),
+      text('applications', 'Who can apply and how.', 'single'),
+      partners('art-prize', 'partners', 'On the occasion of the art prize, the partners launched a joint initiative.'),
+    ],
+  },
+  {
+    _id: 'template-project-page',
+    title: 'Project page',
+    description: 'A partner project such as ceramic brussels x La Cambre: one text section, a photo grid and a film.',
+    appliesTo: ['page'],
+    order: 150,
+    sections: [text('the project', 'What the project is.', 'single'), gallery(3, true), video()],
   },
 ];
 

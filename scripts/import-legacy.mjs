@@ -195,7 +195,13 @@ function buildEditionIndex() {
 function yearOf(rec) {
   if (rec.fromModule === 'pastEditions') return peYear.get(rec.pageId) || null;
   const m = String(rec.fromPage || '').match(/20\d\d/);
-  return m ? +m[0] : 2027;
+  if (m) return +m[0];
+  // The old site's "programme" page was the 2026 programme when it was
+  // captured: its day headings run "wed 21 jan" to "sun 25 jan", which are
+  // the 2026 dates (in 2027 the fair opens on Wednesday the 20th). Everything
+  // else without a year in its page is the 2027 edition being prepared.
+  // scripts/fix-programme-2026.mjs repairs the documents the first run made.
+  return rec.fromPage === 'programme' ? 2026 : 2027;
 }
 
 /* ------------------------------------------------------------- the mapping */

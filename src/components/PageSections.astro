@@ -11,6 +11,7 @@ import Banner from './sections/Banner.astro';
 import Links from './sections/Links.astro';
 import Heading from './sections/Heading.astro';
 import People from './sections/People.astro';
+import Partners from './sections/Partners.astro';
 import KeyFigures from './sections/KeyFigures.astro';
 import News from './sections/News.astro';
 import Faq from './sections/Faq.astro';
@@ -94,6 +95,8 @@ for (const section of (sections ?? []).filter(Boolean)) {
             return <Heading lang={lang} section={s} />;
           case 'peopleSection':
             return <People lang={lang} section={s} />;
+          case 'partnersSection':
+            return <Partners lang={lang} section={s} />;
           case 'keyFiguresSection':
             return <KeyFigures lang={lang} section={s} />;
           case 'newsSection':
