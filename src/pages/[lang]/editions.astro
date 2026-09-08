@@ -38,6 +38,7 @@ const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key]
 ---
 
 <Base lang={lang} title={t('nav.editions')} path="editions">
+  <div class="legacy-page">
   <h1 class="section-title">{t('nav.editions')}</h1>
 
   {
@@ -151,6 +152,7 @@ const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key]
       </p>
     )
   }
+  </div>
 </Base>
 
 <style>

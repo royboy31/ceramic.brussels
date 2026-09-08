@@ -52,15 +52,16 @@ const items = (section.items ?? []).filter((q: any) => q?.question);
   .faq-list .faq:last-of-type {
     border-bottom: 1px solid var(--ink);
   }
+  /* The design's accordion rows (talks page): 28px question, arrow right. */
   .faq summary {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 0.9rem 0;
+    gap: 20px;
+    padding: 18px 0;
     cursor: pointer;
     list-style: none;
-    font-size: clamp(1.25rem, 2.2vw, 2rem);
+    font-size: 28px;
     line-height: 1.15;
     letter-spacing: -0.03em;
     font-weight: 600;

@@ -55,6 +55,7 @@ const closingImages = (page.images ?? []).filter((img: any) => img?.asset);
   editId={page._id}
   editType={page._type}
 >
+  <div class="legacy-page">
   <h1 class="section-title" {...styleAttrs(page.titleStyle)}>{page.title}</h1>
   {page.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
 
@@ -97,6 +98,7 @@ const closingImages = (page.images ?? []).filter((img: any) => img?.asset);
       </ul>
     )
   }
+  </div>
 </Base>
 
 <style>

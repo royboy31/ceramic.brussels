@@ -12,11 +12,13 @@ import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
 import { styleAttrs } from '../../../lib/textStyle';
 
 /**
- * The programme hub. Tabs: La Cambre (a rich-text page), talks / awards / VIP
- * (events of the current edition filtered on `section`, grouped by day into
- * the design's accordion: day heading + arrow, then one row per event with
- * "{ category }" left and the time right over a rule, the title, a
- * languages / speakers line and a thumbnail that alternates sides).
+ * The programme hub, as the design's programme pages draw it. La Cambre is
+ * the tab's `page` (its lead paragraph, then whatever stack the editor
+ * builds). Talks and VIP are the current edition's events of that section,
+ * grouped by day into the design's accordion: a ruled day heading with an
+ * arrow, then one row per event - "{ category }" and the time over a rule,
+ * the title, the "FR / with A, B & C" line - with the picture alternating
+ * sides. Markup and rules are Lilanga's build of the Figma programme frames.
  */
 export function getStaticPaths() {
   return hubTabParams('programme', LOCALE_IDS);
@@ -33,8 +35,7 @@ const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
 
 /**
  * The category shown in braces above each event, "{ Artist Talk }". Mirrors
- * EVENT_KINDS in the schema. There is no UI string for these yet, so the
- * Studio's English titles are used in every locale.
+ * EVENT_KINDS in the schema; the Studio's English titles serve every locale.
  */
 const KIND_LABEL: Record<string, string> = {
   'artist-talk': 'Artist Talk',
@@ -57,9 +58,9 @@ const onDay = (day: string) => listed.filter((e: any) => e.startsAt.startsWith(d
 const speakerHref = (s: any) => (s?._type === 'artist' && s.slug ? localePath(lang, `artists/${s.slug}`) : undefined);
 
 /**
- * The small line under the title: "FR / with A, B & C". A free-text
- * speakers line is shown verbatim (editors write the "with" themselves);
- * structured speakers get the translated prefix and links.
+ * The line under the title, "FR / with A, B & C": the languages, then the
+ * free-text speakers line verbatim (editors write the "with" themselves) or
+ * the structured speakers with the translated prefix and links.
  */
 type MetaPart = { text: string } | { prefix: string; people: any[] };
 function metaParts(e: any): MetaPart[] {
@@ -67,13 +68,13 @@ function metaParts(e: any): MetaPart[] {
   if (e.languages?.length) parts.push({ text: e.languages.join(', ') });
   if (e.speakersText) parts.push({ text: e.speakersText });
   else if (e.speakers?.length) parts.push({ prefix: t('programme.speakers'), people: e.speakers });
-  if (e.moderator) parts.push({ text: e.moderator });
-  if (e.location) parts.push({ text: e.location });
-  if (e.invitationOnly) parts.push({ text: t('visit.invitation') });
   return parts;
 }
+/** Titles are written with line breaks in the Studio; keep them. */
+const lines = (s: string) => String(s ?? '').split(/\r?\n/);
 
-const showEmpty = days.length === 0 && (tab !== 'la-cambre' || !page);
+const isPage = tab === 'la-cambre';
+const showEmpty = days.length === 0 && (!isPage || !page);
 const path = hubTabPath('programme', tab);
 ---
 
@@ -88,87 +89,79 @@ const path = hubTabPath('programme', tab);
 >
   <HubNav lang={lang} route="programme" active={tab} pages={pages} />
 
-  {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
+  <div class:list={['content-wrap', { talks: !isPage }]}>
+    {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
 
-  {
-    page?.cover?.asset && (
-      <SanityImage
-        image={page.cover}
-        loading="eager"
-        aspect={16 / 9}
-        widths={[600, 900, 1200, 1600]}
-        sizes="(max-width: 1440px) 100vw, 1380px"
-        class="cover"
-      />
-    )
-  }
+    {
+      page?.cover?.asset && (
+        <SanityImage
+          image={page.cover}
+          loading="eager"
+          aspect={16 / 9}
+          widths={[600, 900, 1200, 1600]}
+          sizes="(max-width: 1440px) 100vw, 1380px"
+          class="cover"
+        />
+      )
+    }
 
-  {page && <PageSections lang={lang} sections={page.sections} />}
+    {page && <PageSections lang={lang} sections={page.sections} />}
 
-  {
-    page?.body && (
-      <div class="body-24 page-body">
-        <PortableText value={page.body} fieldStyle={page.bodyStyle} />
-      </div>
-    )
-  }
+    {
+      page?.body && (
+        <div class="body-24 page-body">
+          <PortableText value={page.body} fieldStyle={page.bodyStyle} />
+        </div>
+      )
+    }
 
-  {
-    page?.images?.length > 0 && (
-      <ul class="image-row">
-        {page.images.map((img: any) => (
-          <li>
-            <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 640px) 100vw, 440px" widths={[440, 880]} />
-          </li>
-        ))}
-      </ul>
-    )
-  }
+    {
+      page?.images?.length > 0 && (
+        <ul class="image-row">
+          {page.images.map((img: any) => (
+            <li>
+              <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 640px) 100vw, 440px" widths={[440, 880]} />
+            </li>
+          ))}
+        </ul>
+      )
+    }
 
-  {
-    days.length > 0 && (
-      <div class="days">
-        {days.map((day, i) => (
-          <details class="day" open={i === 0}>
-            <summary>
-              <span class="day-name">{formatDay(day, lang)}</span>
-              <span class="arrow" aria-hidden="true">
-                ↓
-              </span>
-            </summary>
-
-            <ul class="schedule">
-              {onDay(day).map((e: any, j: number) => {
-                const parts = metaParts(e);
-                return (
-                  <li class:list={['event', { flip: j % 2 === 1 }]}>
-                    <div class="event-text">
-                      <p class="event-head">
-                        <span class="kind">{e.kind ? `{ ${KIND_LABEL[e.kind] ?? e.kind} }` : ''}</span>
-                        <span class="time">
-                          <time datetime={e.startsAt}>{formatTime(e.startsAt, lang)}</time>
-                          {e.endsAt && (
-                            <>
-                              –<time datetime={e.endsAt}>{formatTime(e.endsAt, lang)}</time>
-                            </>
-                          )}
-                        </span>
-                      </p>
-
-                      <h3 class="event-title" {...styleAttrs(e.titleStyle)}>{e.title}</h3>
-
+    {
+      days.length > 0 && (
+        <div class="days">
+          {days.map((day, i) => (
+            <details>
+              <summary>
+                {formatDay(day, lang)} <span aria-hidden="true">↓</span>
+              </summary>
+              <div class="events">
+                {onDay(day).map((e: any, j: number) => {
+                  const parts = metaParts(e);
+                  const copy = (
+                    <div>
+                      <b>{e.kind ? `{ ${KIND_LABEL[e.kind] ?? e.kind} }` : ''}</b>
+                      <time datetime={e.startsAt}>{formatTime(e.startsAt, lang)}</time>
+                      <h2 {...styleAttrs(e.titleStyle)}>
+                        {lines(e.title).map((line, k) => (
+                          <>
+                            {k > 0 && <br />}
+                            {line}
+                          </>
+                        ))}
+                      </h2>
                       {parts.length > 0 && (
-                        <p class="event-meta">
+                        <p>
                           {parts.map((part, k) => (
                             <>
-                              {k > 0 && <span class="sep"> / </span>}
+                              {k > 0 && ' / '}
                               {'people' in part ? (
                                 <>
-                                  <span class="with">{part.prefix}</span>{' '}
+                                  {part.prefix}{' '}
                                   {part.people.map((s: any, n: number) => (
                                     <>
                                       {n > 0 && (n === part.people.length - 1 ? ' & ' : ', ')}
-                                      {speakerHref(s) ? <a href={speakerHref(s)} {...styleAttrs(s.nameStyle)}>{s.name}</a> : s.name}
+                                      {speakerHref(s) ? <a href={speakerHref(s)}>{s.name}</a> : s.name}
                                     </>
                                   ))}
                                 </>
@@ -179,222 +172,156 @@ const path = hubTabPath('programme', tab);
                           ))}
                         </p>
                       )}
-
-                      {e.description && (
-                        <div class="event-desc">
-                          <PortableText value={e.description} fieldStyle={e.descriptionStyle} />
-                        </div>
-                      )}
                     </div>
-
+                  );
+                  const picture = (
                     <Figure
                       image={e.image}
                       pool="fair"
                       seed={e.slug ?? e._id}
-                      aspect={18 / 11}
-                      sizes="180px"
-                      widths={[180, 360, 540]}
-                      class="thumb"
+                      aspect={460 / 289}
+                      sizes="(max-width: 700px) 100vw, 460px"
+                      widths={[460, 920, 1380]}
                     />
-                  </li>
-                );
-              })}
-            </ul>
-          </details>
-        ))}
-      </div>
-    )
-  }
+                  );
+                  return (
+                    <article>
+                      {j % 2 === 0 ? copy : picture}
+                      {j % 2 === 0 ? picture : copy}
+                    </article>
+                  );
+                })}
+              </div>
+            </details>
+          ))}
+        </div>
+      )
+    }
 
-  {showEmpty && <p class="empty">{t('programme.empty')}</p>}
+    {showEmpty && <p class="empty">{t('programme.empty')}</p>}
+  </div>
 </Base>
 
 <style>
-  .cover {
-    margin: 0 0 2.5rem;
+  /* From the design's programme pages (html pages/programme/*). */
+  /* `cover` is passed to SanityImage, whose <img> carries no scope attribute. */
+  :global(.cover) {
     width: 100%;
+    margin: 40px 0;
   }
-
-  /* Editors write panel headings as h2s inside the body, so they pick up the
-     heading + rule treatment from the design here. */
-  .page-body :global(h2) {
-    text-transform: lowercase;
-    border-bottom: 2px solid var(--ink);
-    margin: 3rem 0 1.25rem;
-    padding-bottom: 0.2rem;
-    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
-    line-height: 1.15;
-    letter-spacing: -0.04em;
-    font-weight: 600;
+  .page-body {
+    max-width: 1160px;
+    margin-top: 40px;
   }
-  .page-body :global(h2:first-child) {
-    margin-top: 0;
-  }
-  .page-body :global(h3) {
-    font-size: clamp(1.15rem, 1.8vw, 1.5rem);
-    letter-spacing: -0.02em;
-    margin: 2rem 0 0.5rem;
-  }
-  .page-body :global(p) {
-    margin: 0 0 1.5rem;
-    max-width: 62ch;
-  }
-  .page-body :global(ul),
-  .page-body :global(ol) {
-    max-width: 62ch;
-  }
-
   .image-row {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 30px;
-    list-style: none;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin: 90px 0 0;
     padding: 0;
-    margin: 2.5rem 0;
-  }
-
-  /* The accordion by day. */
-  .days {
-    margin-top: 1rem;
-  }
-  .day {
-    border-top: 1px solid var(--ink);
-  }
-  .days .day:last-of-type {
-    border-bottom: 1px solid var(--ink);
-  }
-  .day summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.9rem 0;
-    cursor: pointer;
     list-style: none;
-    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
-    line-height: 1.1;
-    letter-spacing: -0.04em;
   }
-  .day summary::-webkit-details-marker {
+  .days {
+    margin-top: 52px;
+  }
+  .days details {
+    border-top: 2px solid;
+  }
+  .days summary {
+    cursor: pointer;
+    letter-spacing: -0.04em;
+    justify-content: space-between;
+    padding: 12px 0 30px;
+    font-size: 60px;
+    list-style: none;
+    display: flex;
+  }
+  .days summary::-webkit-details-marker {
     display: none;
   }
-  .arrow {
-    font-size: 0.8em;
-    transition: transform 0.2s ease;
+  .days summary span {
+    font-size: 70px;
   }
-  .day[open] .arrow {
+  .days details[open] summary span {
     transform: rotate(180deg);
   }
-
-  .schedule {
-    list-style: none;
-    padding: 0;
-    margin: 0.5rem 0 2.5rem;
+  .events {
+    gap: 36px;
+    padding-bottom: 50px;
     display: grid;
-    gap: 1.5rem;
   }
-
-  /* One event: text column plus a ~180px thumbnail that alternates sides. */
-  .event {
+  .events article {
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 180px;
-    gap: 30px;
-    align-items: start;
   }
-  .event.flip {
-    grid-template-columns: 180px minmax(0, 1fr);
+  .events article:nth-child(2n) {
+    grid-template-columns: 1fr 2fr;
   }
-  .event.flip .event-text {
-    order: 2;
-  }
-  .event.flip :global(.thumb) {
-    order: 1;
-  }
-  .event :global(.thumb) {
+  .events :global(img) {
+    object-fit: cover;
     width: 100%;
-    margin: 0;
+    height: 289px;
   }
-
-  .event-head {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin: 0;
-    padding-bottom: 0.3rem;
-    border-bottom: 1px solid var(--ink);
-    font-weight: 600;
-    font-size: clamp(1rem, 1.5vw, 1.5rem);
-    line-height: 1.25;
-    letter-spacing: -0.025em;
+  .events article > div {
+    grid-template-columns: 1fr auto;
+    align-content: start;
+    display: grid;
   }
-  .time {
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
+  .events b,
+  .events time {
+    font-size: 40px;
+    line-height: 42px;
   }
-  .event-title {
-    margin: 0.5rem 0 0.3rem;
+  .events h2 {
+    border-top: 1px solid;
+    grid-column: 1 / -1;
+    margin-top: 4px;
+    padding-top: 10px;
+    font-size: 40px;
     font-weight: 400;
-    font-size: clamp(1rem, 1.5vw, 1.5rem);
-    line-height: 1.25;
-    letter-spacing: -0.025em;
+    line-height: 50px;
   }
-  .event-meta {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.35;
-    letter-spacing: -0.01em;
+  .events p {
+    grid-column: 1 / -1;
+    margin-top: 20px;
+    font-size: 24px;
+    line-height: 30px;
   }
-  .event-meta a {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.12em;
+  .empty {
+    margin-top: 40px;
+    font-size: 24px;
   }
-  .with {
-    text-transform: lowercase;
-  }
-  .event-desc {
-    margin-top: 0.75rem;
-    max-width: 62ch;
-    font-size: 1rem;
-    line-height: 1.4;
-  }
-  .event-desc :global(p) {
-    margin: 0 0 0.75rem;
-  }
-  .event-desc :global(p:last-child) {
-    margin-bottom: 0;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .arrow {
-      transition: none;
+  @media (width<=700px) {
+    .days summary {
+      font-size: 34px;
     }
-  }
-
-  @media (max-width: 900px) {
-    .image-row {
-      gap: 16px;
+    .days summary span {
+      font-size: 42px;
     }
-  }
-
-  @media (max-width: 640px) {
-    .image-row {
+    .events article,
+    .events article:nth-child(2n) {
       grid-template-columns: 1fr;
-      gap: 10px;
     }
-    .event,
-    .event.flip {
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
-    }
-    .event.flip .event-text {
-      order: 1;
-    }
-    .event.flip :global(.thumb) {
+    .events article:nth-child(2n) :global(img) {
       order: 2;
     }
-    .event :global(.thumb) {
-      max-width: 180px;
+    .events b,
+    .events time {
+      font-size: 24px;
+    }
+    .events h2 {
+      font-size: 28px;
+      line-height: 1.1;
+    }
+    .events p {
+      font-size: 18px;
+      line-height: 1.3;
+    }
+    .image-row {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-top: 40px;
     }
   }
 </style>

@@ -6,37 +6,40 @@ import LinkPill from './LinkPill.astro';
 import { styleAttrs } from '../lib/textStyle';
 
 /**
- * Renders a list of `contentSection` objects the way the design builds every
- * text page: a lowercase heading over a rule, body copy at 24px, an optional
- * row of images and a row of pill links.
+ * Renders a list of `contentSection` objects the way the design draws a hub
+ * text block (art prize "the prize", about "the fair"): a lowercase
+ * `.panel-title` over a 2px rule, then `.body-24` copy, an optional row of
+ * images and a row of pill links. Classes and sizes are the design's
+ * (`.panel-title`, `.body-24` and `.two-col` live in design.css).
  *
- * `columns` is how many sections share a row - the about page puts "goals"
- * and "development" side by side. `textColumns` is how the body copy flows
- * inside one section: a full-width section runs its text in two columns like
- * the guest-of-honour biography, a section already sitting in a narrow column
- * keeps one.
+ * `columns` is how many sections share a row - the design's `.two-col`
+ * ("the prize" beside "applications"). `textColumns` is how the copy flows
+ * inside one section: 2 runs it in two CSS columns, 1 keeps a single one.
+ * `statementFirst` renders the first paragraph at the design's 40px
+ * `.statement` size, as the art prize about page does.
  */
 interface Props {
   lang: LocaleId;
   sections: any[] | undefined;
   columns?: 1 | 2;
   textColumns?: 1 | 2;
+  statementFirst?: boolean;
   class?: string;
 }
 
-const { lang, sections = [], columns = 1, class: className } = Astro.props;
-const textColumns = Astro.props.textColumns ?? (columns === 1 ? 2 : 1);
+const { lang, sections = [], columns = 1, statementFirst = false, class: className } = Astro.props;
+const textColumns = Astro.props.textColumns ?? 1;
 const list = (sections ?? []).filter(Boolean);
 ---
 
 {
   list.length > 0 && (
-    <div class:list={['sections', `cols-${columns}`, `text-${textColumns}`, className]}>
+    <div class:list={['sections', { 'two-col': columns === 2, 'text-2': textColumns === 2, statement: statementFirst }, className]}>
       {list.map((section: any) => {
         const images = (section.images ?? []).filter((img: any) => img?.asset);
         const links = (section.links ?? []).filter(Boolean);
         return (
-          <section class="cs" id={section.anchor || undefined}>
+          <section id={section.anchor || undefined}>
             {section.heading && (
               <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
                 {section.heading}
@@ -51,12 +54,7 @@ const list = (sections ?? []).filter(Boolean);
               <ul class="cs-images" data-count={Math.min(images.length, 3)}>
                 {images.map((img: any) => (
                   <li>
-                    <SanityImage
-                      image={img}
-                      aspect={1.5}
-                      sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw"
-                      widths={[400, 600, 900, 1200]}
-                    />
+                    <SanityImage image={img} aspect={1.5} sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw" widths={[400, 600, 900, 1200]} />
                   </li>
                 ))}
               </ul>
@@ -78,32 +76,24 @@ const list = (sections ?? []).filter(Boolean);
 <style>
   .sections {
     display: grid;
-    gap: 3rem 30px;
-    margin: 0 0 3rem;
+    gap: 55px 40px;
   }
-  .cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
-  .cs {
+  .sections section {
     min-width: 0;
   }
-  .cs .panel-title {
-    margin-bottom: 1.25rem;
-  }
-
-  /* Body copy: 24px, paragraphs spaced by one line, two columns when the
-     section has the whole width to itself. */
   .text-2 .cs-body {
     columns: 2;
-    column-gap: 30px;
+    column-gap: 40px;
   }
   .cs-body :global(p) {
-    margin: 0 0 1.25rem;
     break-inside: avoid;
   }
-  .cs-body :global(p:last-child) {
-    margin-bottom: 0;
+  /* The design's .statement: the opening line at 40px. */
+  .statement .cs-body :global(.rich-text > p:first-child) {
+    font-size: 40px;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin-bottom: 28px;
   }
   .cs-body :global(h2),
   .cs-body :global(h3),
@@ -114,15 +104,15 @@ const list = (sections ?? []).filter(Boolean);
     letter-spacing: -0.02em;
   }
   .cs-body :global(a) {
+    text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.12em;
   }
-
   /* Bulleted lines carry the design's "↘" instead of a disc. */
   .cs-body :global(ul) {
     list-style: none;
     padding: 0;
-    margin: 0 0 1.25rem;
+    margin: 0 0 28px;
   }
   .cs-body :global(ul li) {
     padding-left: 1.5em;
@@ -137,17 +127,15 @@ const list = (sections ?? []).filter(Boolean);
   }
   .cs-body :global(ol) {
     padding-left: 1.5em;
-    margin: 0 0 1.25rem;
+    margin: 0 0 28px;
   }
-
-  /* Image row: three 3:2 images across, fewer when there are fewer. */
   .cs-images {
     list-style: none;
     padding: 0;
-    margin: 1.75rem 0 0;
+    margin: 28px 0 0;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 30px;
+    gap: 40px;
   }
   .cs-images[data-count='1'] {
     grid-template-columns: 1fr;
@@ -158,19 +146,13 @@ const list = (sections ?? []).filter(Boolean);
   .cs-images :global(img) {
     width: 100%;
   }
-
   .cs-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem 1rem;
-    margin: 1.75rem 0 0;
-    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    gap: 14px;
+    margin: 28px 0 0;
   }
-
-  @media (max-width: 900px) {
-    .cols-2 {
-      grid-template-columns: 1fr;
-    }
+  @media (width<=900px) {
     .text-2 .cs-body {
       columns: 1;
     }
@@ -180,8 +162,13 @@ const list = (sections ?? []).filter(Boolean);
       gap: 16px;
     }
   }
-
-  @media (max-width: 640px) {
+  @media (width<=700px) {
+    .sections {
+      gap: 40px 28px;
+    }
+    .statement .cs-body :global(.rich-text > p:first-child) {
+      font-size: 28px;
+    }
     .cs-images,
     .cs-images[data-count='2'] {
       grid-template-columns: 1fr;

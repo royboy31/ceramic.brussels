@@ -24,6 +24,15 @@ the schema or the query.** Changing a schema without a matching content
 migration silently blanks published content, and the Studio is already live for
 editors.
 
+**Frontend working guide:** `docs/frontend-handbook.md` maps every page to its
+route, its data helpers and its Figma frame, and lists the section blocks. The
+`frontend-page` skill in `.claude/skills/` walks one page from frame to PR.
+Anything the design needs that the data does not carry goes in
+`docs/backend-requests.md` as a numbered request rather than into the schema;
+`npm run boundary` lists files a branch changes outside the frontend half.
+`docs/frontend-kickoff.md` is the first-session script for his Claude Code
+("read docs/frontend-kickoff.md and follow it").
+
 ## Getting set up
 
 Node **22.12.0 or newer** (enforced by `engines` in package.json).

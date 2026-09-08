@@ -1,22 +1,22 @@
 ---
 import Base from '../../layouts/Base.astro';
-import Figure from '../../components/Figure.astro';
+import SanityImage from '../../components/SanityImage.astro';
 import PageSections from '../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { useTranslations, formatDateRange } from '../../lib/i18n';
+import { useTranslations } from '../../lib/i18n';
 import { getHomepage, getCurrentEdition, getEditions, getNews } from '../../lib/queries';
 import { resolveLink, type ResolvedLink } from '../../lib/links';
 import { styleAttrs } from '../../lib/textStyle';
 
 /**
- * The homepage. The hero - picture, statement, dates, quick links - is fixed,
- * as the design gives the page exactly one opening. Everything under it is
- * the `homepage` document's section stack, so the film, the features, the
- * banners and the key figures come in whatever order the editor set.
+ * The homepage, as the design's index.html draws it: the hero (picture on
+ * eight columns, statement and link on four), the four acid quick links,
+ * then the `homepage` document's section stack rendered in its "home"
+ * variant - "latest news", the features, the image link bands, the film,
+ * the key figures - in the order the editor set.
  *
- * The look is Lilanga's port of the Figma hand-off; every slot reads from
- * Sanity and only falls back to the hand-off photography when an editor has
- * left it empty.
+ * Markup and classes are Lilanga's build of the Figma homepage; every slot
+ * reads from Sanity.
  */
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
@@ -27,11 +27,11 @@ const t = useTranslations(lang);
 
 const [home, edition] = await Promise.all([getHomepage(lang), getCurrentEdition(lang)]);
 
-const headline = home?.heroText ?? edition?.title ?? 'ceramic brussels';
-// The hero falls back through three sources; style only applies to the one
-// the editor actually wrote.
+const headline: string = home?.heroText ?? edition?.title ?? 'ceramic brussels';
 const headlineStyle = home?.heroText ? home?.heroTextStyle : null;
 const heroLink = resolveLink(lang, home?.heroLink);
+/** The statement is written with line breaks in the Studio; keep them. */
+const lines = headline.split(/\r?\n/);
 
 const quickLinks: ResolvedLink[] = (home?.quickLinks ?? [])
   .map((link: any) => resolveLink(lang, link))
@@ -39,9 +39,8 @@ const quickLinks: ResolvedLink[] = (home?.quickLinks ?? [])
 
 /**
  * A homepage with no sections yet - a fresh dataset, or an editor who
- * cleared the stack - still shows the hand-off's shape: latest news, the
- * film, the key figures. Built here from the same data the blocks would
- * have been given, so it renders through the same components.
+ * cleared the stack - still shows the design's shape: latest news, the
+ * film, the key figures, built from the same data the blocks would get.
  */
 let sections: any[] = home?.sections ?? [];
 if (sections.length === 0) {
@@ -83,38 +82,38 @@ const external = (link: ResolvedLink | null) =>
 >
   {eventSchema && <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} slot="head" />}
 
-  <section class="page-grid hero">
-    <div class="hero-shot">
-      <Figure
-        image={home?.heroImage}
-        pool="fair"
-        seed="hero"
-        fallback={{
-          src: '/assets/home-hero-1600.webp',
-          srcset: '/assets/home-hero-900.webp 900w, /assets/home-hero-1600.webp 1600w',
-          width: 1600,
-          height: 1067,
-        }}
-        loading="eager"
-        priority
-        sizes="(max-width: 640px) 100vw, 66vw"
-        widths={[600, 900, 1200, 1600, 2000]}
-      />
-    </div>
-
-    <div class="hero-copy">
-      <h1 class="display" {...styleAttrs(headlineStyle)}>{headline}</h1>
-      {
-        edition && (
-          <p class="hero-dates">
-            {formatDateRange(edition.startDate, edition.endDate, lang)}
-            {edition.venue && <> · {edition.venue}</>}
-          </p>
-        )
-      }
+  <section class="page-grid items-stretch">
+    {
+      home?.heroImage?.asset ? (
+        <SanityImage
+          image={home.heroImage}
+          widths={[800, 1200, 1600, 2000]}
+          sizes="(max-width: 640px) 100vw, 66vw"
+          loading="eager"
+          class="col-span-8 h-[43vw] max-h-[625px] min-h-[320px] w-full object-cover max-sm:col-span-full"
+        />
+      ) : (
+        <img
+          src="/assets/home-hero-1600.webp"
+          alt=""
+          width="1600"
+          height="1067"
+          class="col-span-8 h-[43vw] max-h-[625px] min-h-[320px] w-full object-cover max-sm:col-span-full"
+        />
+      )
+    }
+    <div class="col-span-4 flex flex-col justify-center py-8 max-sm:col-span-full">
+      <h1 class="display text-[clamp(3rem,5vw,4.5rem)]" {...styleAttrs(headlineStyle)}>
+        {lines.map((line, i) => (
+          <>
+            {i > 0 && <br />}
+            {line}
+          </>
+        ))}
+      </h1>
       {
         heroLink && (
-          <a class="text-link" href={heroLink.href} {...external(heroLink)}>
+          <a class="text-link mt-8 text-[clamp(1.25rem,2.7vw,2.5rem)]" href={heroLink.href} {...external(heroLink)}>
             {heroLink.label} {heroLink.arrow}
           </a>
         )
@@ -124,9 +123,9 @@ const external = (link: ResolvedLink | null) =>
 
   {
     quickLinks.length > 0 && (
-      <nav class="quicklinks" aria-label={t('nav.menu')}>
-        {quickLinks.map((link, i) => (
-          <a href={link.href} class:list={{ outline: i === quickLinks.length - 1 }} {...external(link)}>
+      <nav class="home-quicklinks" aria-label={t('nav.menu')}>
+        {quickLinks.map((link) => (
+          <a href={link.href} {...external(link)}>
             {link.label}
           </a>
         ))}
@@ -134,102 +133,49 @@ const external = (link: ResolvedLink | null) =>
     )
   }
 
-  <PageSections lang={lang} sections={sections} class="home-sections" />
+  <PageSections lang={lang} sections={sections} variant="home" />
 </Base>
 
 <style>
-  .hero {
-    align-items: stretch;
-    row-gap: 1.5rem;
-  }
-  .hero-shot {
-    grid-column: span 8;
-  }
-  .hero-shot :global(img) {
-    width: 100%;
-    height: 47vw;
-    max-height: 690px;
-    min-height: 340px;
-    object-fit: cover;
-  }
-  .hero-copy {
-    grid-column: span 4;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding: 0;
-  }
-  .hero-copy h1 {
-    /* Pulled up by the leading above the caps, so the first line sits level
-       with the top edge of the picture rather than a line-height below it. */
-    margin: -0.11em 0 0;
-    font-size: clamp(3rem, 5vw, 4.5rem);
-    font-weight: 400;
-  }
-  .hero-dates {
-    margin: 1.25rem 0 0;
-    font-size: clamp(0.95rem, 1.4vw, 1.3rem);
-  }
-  .hero-copy a {
-    display: inline-block;
-    margin-top: 2rem;
-    font-size: clamp(1.25rem, 2.7vw, 2.5rem);
-    letter-spacing: -0.05em;
-  }
-
-  .quicklinks {
-    display: grid;
+  /* From the design's index.css (html pages/_astro/index.*.css). */
+  .home-quicklinks {
     grid-template-columns: repeat(4, 1fr);
     gap: 21px;
-    margin-top: 27px;
-  }
-  .quicklinks a {
+    height: 69px;
+    margin: 27px 30px 0;
     display: grid;
-    place-items: center;
-    min-height: clamp(52px, 4.8vw, 69px);
-    background: var(--acid);
-    text-align: center;
-    text-decoration: none;
-    text-transform: lowercase;
-    padding: 0.4rem 0.6rem;
-    font-size: clamp(1.1rem, 2.75vw, 2.5rem);
-    line-height: 1;
+  }
+  .home-quicklinks a {
     letter-spacing: -0.05em;
+    background: #fff350;
+    place-items: center;
+    font-size: 40px;
+    line-height: 1;
+    display: grid;
   }
-  /* The last quick link is the call to action: the same acid block, with a
-     rule around it. */
-  .quicklinks a.outline {
-    border: 1px solid var(--ink);
+  .home-quicklinks a:last-child {
+    border: 1px solid #000;
   }
-  .quicklinks a:hover {
-    background: var(--ink);
-    color: var(--ground);
+  @media (width>=701px) and (width<=1439px) {
+    .home-quicklinks {
+      gap: 1.4583vw;
+      height: 4.7917vw;
+      margin: 1.875vw 2.0833vw 0;
+    }
+    .home-quicklinks a {
+      font-size: 2.7778vw;
+    }
   }
-
-  .home-sections {
-    margin-top: 1rem;
-  }
-
-  @media (max-width: 900px) {
-    .quicklinks {
+  @media (width<=700px) {
+    .home-quicklinks {
       grid-template-columns: repeat(2, 1fr);
       gap: 8px;
+      height: auto;
+      margin: 14px 10px 0;
     }
-  }
-
-  /* Below 640 the grid is 4 columns, so both halves take the full width and
-     the picture leads, as max-sm:col-span-full does in the hand-off. */
-  @media (max-width: 640px) {
-    .hero-shot,
-    .hero-copy {
-      grid-column: 1 / -1;
-    }
-    .hero-copy {
-      padding: 1.4rem 0 0.9rem;
-    }
-    .hero-shot :global(img) {
-      height: 67vw;
-      min-height: 260px;
+    .home-quicklinks a {
+      min-height: 52px;
+      font-size: 24px;
     }
   }
 </style>

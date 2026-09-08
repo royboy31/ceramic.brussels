@@ -1,0 +1,146 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import { styleAttrs } from '../../lib/textStyle';
+import PortableText from '../PortableText.astro';
+import SanityImage from '../SanityImage.astro';
+
+/**
+ * Partners from a tier or a hand-picked list. "logos" is the design's
+ * `section.partners` on the art prize about page: a `.panel-title`, then the
+ * paragraph and the logo row side by side in `.two-col`. "list" is the names
+ * with their text and website, as the institutions tab draws them. Each
+ * partner links to its website.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { lang, section } = Astro.props;
+const t = useTranslations(lang);
+const partners = (section.partners ?? []).filter((p: any) => p?.name);
+const display = section.display === 'list' ? 'list' : 'logos';
+---
+
+{
+  partners.length > 0 && (
+    <section class="partners" id={section.anchor || undefined}>
+      {section.heading && (
+        <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+          {section.heading}
+        </h2>
+      )}
+      {display === 'logos' ? (
+        <div class="two-col">
+          {section.body && (
+            <div class="body-24">
+              <PortableText value={section.body} fieldStyle={section.bodyStyle} />
+            </div>
+          )}
+          <div class="logos">
+            {partners.map((p: any) =>
+              p.url ? (
+                <a href={p.url} rel="noopener noreferrer" target="_blank" aria-label={p.name}>
+                  {p.logo?.asset ? <SanityImage image={p.logo} widths={[240, 480]} sizes="190px" loading="lazy" /> : <span>{p.name}</span>}
+                </a>
+              ) : p.logo?.asset ? (
+                <SanityImage image={p.logo} widths={[240, 480]} sizes="190px" loading="lazy" />
+              ) : (
+                <span>{p.name}</span>
+              ),
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          {section.body && (
+            <div class="body-24 partners-body">
+              <PortableText value={section.body} fieldStyle={section.bodyStyle} />
+            </div>
+          )}
+          <div class="institutions">
+            {partners.map((p: any) => (
+              <article>
+                <h3>{p.name}</h3>
+                {p.description && <PortableText value={p.description} fieldStyle={p.descriptionStyle} />}
+                {p.url && (
+                  <a class="pill" href={p.url} rel="noopener noreferrer" target="_blank">
+                    {t('common.website')} ↗
+                  </a>
+                )}
+              </article>
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  )
+}
+
+<style>
+  /* From the design's art prize about page. */
+  .partners {
+    margin-top: 65px;
+  }
+  .logos {
+    justify-content: space-around;
+    align-items: center;
+    display: flex;
+  }
+  .logos :global(img) {
+    object-fit: contain;
+    width: auto;
+    max-width: 190px;
+    max-height: 100px;
+  }
+  .logos span {
+    font-size: 24px;
+    letter-spacing: -0.03em;
+  }
+
+  /* From the design's institutions page. */
+  .partners-body {
+    margin-bottom: 40px;
+  }
+  .institutions {
+    grid-template-columns: 1fr 1fr;
+    gap: 80px 40px;
+    margin-top: 55px;
+    display: grid;
+  }
+  .institutions h3 {
+    border-bottom: 1px solid;
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    padding-bottom: 6px;
+  }
+  .institutions article :global(p) {
+    font-size: 24px;
+    line-height: 1.22;
+    letter-spacing: -0.025em;
+    margin-top: 20px;
+    white-space: pre-line;
+  }
+  .institutions .pill {
+    margin-top: 24px;
+  }
+  @media (width<=700px) {
+    .institutions {
+      grid-template-columns: 1fr;
+      gap: 48px;
+    }
+    .institutions h3 {
+      font-size: 28px;
+    }
+    .institutions article :global(p) {
+      font-size: 18px;
+    }
+    .logos {
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: flex-start;
+    }
+  }
+</style>

@@ -38,3 +38,6 @@ src/preview/
 # Written by the Cloudflare adapter on every build (a redirect to dist/server/wrangler.json).
 # Pages CI reads it at deploy time and fails when the target is gone; scripts/pages-worker.mjs removes it.
 .wrangler/
+
+# Lilanga's static build of the Figma pages (165 MB of PNGs); see docs/design-pages-plan.md
+html pages/

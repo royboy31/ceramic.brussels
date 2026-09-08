@@ -1,25 +1,45 @@
 ---
 import type { LocaleId } from '../../lib/locales';
 import LinkPill from '../LinkPill.astro';
+import { resolveLink } from '../../lib/links';
 
-/** A row of links on their own: outline pills, solid pills or text links. */
+/**
+ * A row of links on their own: outline pills, solid pills or text links.
+ * On the homepage the design turns a single link into a full-width band:
+ * the "text" style is the gradient band ("ceramic brussels 2026 in images →")
+ * under the first feature, the "solid" style the acid band that closes the
+ * page.
+ */
 interface Props {
   lang: LocaleId;
   section: any;
+  variant?: 'default' | 'home';
 }
 
-const { lang, section } = Astro.props;
+const { lang, section, variant = 'default' } = Astro.props;
 const links = (section.links ?? []).filter(Boolean);
-const variant = ['pill', 'solid', 'text'].includes(section.variant) ? section.variant : 'pill';
+const style = ['pill', 'solid', 'text'].includes(section.variant) ? section.variant : 'pill';
+const band = variant === 'home' && style !== 'pill' && links.length > 0 ? resolveLink(lang, links[0]) : null;
 ---
 
 {
-  links.length > 0 && (
-    <p class:list={['links-row', `links-${variant}`]} id={section.anchor || undefined}>
-      {links.map((link: any) => (
-        <LinkPill lang={lang} link={link} variant={variant} />
-      ))}
-    </p>
+  band ? (
+    <a
+      href={band.href}
+      class={style === 'solid' ? 'home-final-cta' : 'home-image-cta'}
+      id={section.anchor || undefined}
+      {...(band.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+    >
+      {band.label} {band.arrow}
+    </a>
+  ) : (
+    links.length > 0 && (
+      <p class:list={['links-row', `links-${style}`]} id={section.anchor || undefined}>
+        {links.map((link: any) => (
+          <LinkPill lang={lang} link={link} variant={style} />
+        ))}
+      </p>
+    )
   )
 }
 
@@ -35,5 +55,57 @@ const variant = ['pill', 'solid', 'text'].includes(section.variant) ? section.va
     gap: 0.5rem 2rem;
     font-size: clamp(1.25rem, 2.2vw, 2rem);
     letter-spacing: -0.04em;
+  }
+
+  /* From the design's index.css. */
+  .home-image-cta {
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+    background: linear-gradient(#fff350 0%, #fff 50%, #fff350 100%);
+    justify-content: center;
+    align-items: center;
+    gap: 0.15em;
+    height: 152px;
+    margin-top: 54px;
+    font-size: 60px;
+    line-height: 1;
+    display: flex;
+  }
+  .home-final-cta {
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    background: #fff350;
+    justify-content: center;
+    align-items: center;
+    gap: 0.15em;
+    height: 152px;
+    margin-top: 81px;
+    font-size: 60px;
+    font-weight: 600;
+    line-height: 1;
+    display: flex;
+  }
+  @media (width>=701px) and (width<=1439px) {
+    .home-image-cta {
+      height: 10.5556vw;
+      margin-top: 3.75vw;
+      font-size: 4.1667vw;
+    }
+  }
+  @media (width<=700px) {
+    .home-image-cta {
+      text-align: center;
+      height: 100px;
+      margin-top: 36px;
+      padding: 10px;
+      font-size: 30px;
+    }
+    .home-final-cta {
+      text-align: center;
+      height: 110px;
+      margin-top: 36px;
+      padding: 10px;
+      font-size: 32px;
+    }
   }
 </style>

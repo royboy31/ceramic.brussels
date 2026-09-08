@@ -7,6 +7,7 @@ const t = useTranslations(DEFAULT_LOCALE);
 ---
 
 <Base lang={DEFAULT_LOCALE} title={t('notFound.title')} noIndex>
+  <div class="legacy-page">
   <div class="not-found">
     <p class="code">404</p>
     <h1 class="section-title">{t('notFound.title')}</h1>
@@ -17,6 +18,7 @@ const t = useTranslations(DEFAULT_LOCALE);
       <a class="pill" href={localePath(DEFAULT_LOCALE, 'exhibitors')}>{t('nav.exhibitors')} →</a>
       <a class="pill" href={localePath(DEFAULT_LOCALE, 'programme')}>{t('nav.programme')} →</a>
     </p>
+  </div>
   </div>
 </Base>
 

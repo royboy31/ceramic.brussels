@@ -11,6 +11,7 @@ import Footer from '../components/Footer.astro';
 import MenuOverlay from '../components/MenuOverlay.astro';
 import { VisualEditing } from '@sanity/astro/visual-editing';
 import { isPreview } from '../lib/previewContext';
+import '../styles/design.css';
 
 /**
  * The frame around every page: the design's header (dates mark, wordmark,
@@ -174,7 +175,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     <a class="skip" href="#main">Skip to content</a>
 
     <Header lang={lang} siteName={siteName} path={path} altPaths={altPaths} datesMark={edition?.datesMark} />
-    <MenuOverlay lang={lang} items={nav} newsletterUrl={settings?.newsletterUrl} />
+    <MenuOverlay lang={lang} items={nav} siteName={siteName} newsletterUrl={settings?.newsletterUrl} />
 
     <div class="edit-bar">
       <EditLink id="navigation" type="navigation" label="Edit menu" />
@@ -186,6 +187,113 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     </main>
 
     <Footer siteName={siteName} links={footerNav} copyright={copyright} />
+
+    <script>
+      // The design's page behaviours, as built (html pages): the trailing
+      // arrow of a link becomes a span that slides on hover; key figures
+      // count up when they scroll into view; sections and images below the
+      // fold fade in. All of it steps aside for prefers-reduced-motion.
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
+      const ARROWS = new Set(['→', '↗', '←']);
+      document.querySelectorAll('a').forEach((a) => {
+        if (a.querySelector('.link-arrow')) return;
+        const walker = document.createTreeWalker(a, NodeFilter.SHOW_TEXT);
+        let last: Text | null = null;
+        let node: Node | null;
+        while ((node = walker.nextNode())) {
+          const text = node.nodeValue?.trimEnd();
+          if (text && ARROWS.has(text.at(-1) ?? '')) last = node as Text;
+        }
+        if (!last?.nodeValue) return;
+        const m = last.nodeValue.match(/([→↗←])\s*$/);
+        if (!m || m.index === undefined) return;
+        const span = document.createElement('span');
+        span.className = 'link-arrow';
+        span.dataset.arrow = m[1];
+        span.setAttribute('aria-hidden', 'true');
+        span.textContent = m[1];
+        last.nodeValue = last.nodeValue.slice(0, m.index).trimEnd();
+        last.after(span);
+      });
+
+      const counters = document.querySelectorAll<HTMLElement>('[data-count]');
+      if (!reduced.matches && 'IntersectionObserver' in window && counters.length) {
+        const fmt = new Intl.NumberFormat('en-US');
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              const el = entry.target as HTMLElement;
+              io.unobserve(el);
+              const target = Number(el.dataset.count ?? 0);
+              const suffix = el.dataset.countSuffix ?? '';
+              const start = performance.now();
+              const finish = () => (el.textContent = `${fmt.format(target)}${suffix}`);
+              const tick = (now: number) => {
+                if (reduced.matches) return finish();
+                const p = Math.min((now - start) / 1350, 1);
+                const eased = 1 - (1 - p) ** 3;
+                el.textContent = `${fmt.format(Math.round(target * eased))}${suffix}`;
+                if (p < 1) requestAnimationFrame(tick);
+              };
+              el.textContent = `0${suffix}`;
+              requestAnimationFrame(tick);
+            });
+          },
+          { threshold: 0.35 },
+        );
+        counters.forEach((el) => io.observe(el));
+        reduced.addEventListener('change', (e) => {
+          if (!e.matches) return;
+          io.disconnect();
+          counters.forEach((el) => {
+            el.textContent = `${fmt.format(Number(el.dataset.count ?? 0))}${el.dataset.countSuffix ?? ''}`;
+          });
+        });
+      }
+
+      if (!reduced.matches && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.removeAttribute('data-reveal-pending');
+              io.unobserve(entry.target);
+            });
+          },
+          { threshold: 0, rootMargin: '0px 0px -24px 0px' },
+        );
+        document.querySelectorAll('main > section, main .content-wrap > div, main .content-wrap > section').forEach((el) => {
+          if (el.getBoundingClientRect().top >= innerHeight) {
+            el.classList.add('motion-reveal');
+            el.setAttribute('data-reveal-pending', '');
+            io.observe(el);
+          }
+        });
+        document.querySelectorAll<HTMLImageElement>('main img').forEach((img) => {
+          if (img.complete) return;
+          img.classList.add('motion-image');
+          img.setAttribute('data-image-pending', '');
+          const done = () => img.removeAttribute('data-image-pending');
+          img.addEventListener('load', done, { once: true });
+          img.addEventListener('error', done, { once: true });
+          window.setTimeout(done, 4000);
+        });
+        const settle = () => {
+          io.disconnect();
+          document.querySelectorAll('[data-reveal-pending], [data-image-pending]').forEach((el) => {
+            el.removeAttribute('data-reveal-pending');
+            el.removeAttribute('data-image-pending');
+          });
+        };
+        reduced.addEventListener('change', () => reduced.matches && settle());
+        addEventListener('beforeprint', settle);
+        document.addEventListener('focusin', (e) => {
+          (e.target as Element | null)?.closest('[data-reveal-pending]')?.removeAttribute('data-reveal-pending');
+        });
+      }
+    </script>
 
     {
       preview && (
@@ -238,6 +346,10 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     font-display: swap;
   }
 
+  /* The design's look is in src/styles/design.css (Lilanga's build of the
+     sixteen design pages: preflight, utilities, header, menu, footer, grid).
+     What is left here: the tokens the older components still read, the
+     page frame, and the site's own furniture (skip link, edit bar). */
   :root {
     --acid: #fff350;
     --ground: #ffffff;
@@ -251,186 +363,45 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     --measure: 68ch;
     --shell: 1140px;
     --font: 'Noi Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    /* aliases used by the hub components */
     --brand: var(--acid);
     --paper: #f6f5ec;
   }
-
   /* The Figma is a light, acid-on-white identity with no dark counterpart, so
-     the palette deliberately does not invert. Reinstating dark mode means
-     designing it first - see the note in the handover. */
-
-  * {
-    box-sizing: border-box;
-  }
-
+     the palette deliberately does not invert. */
   html {
     scroll-behavior: smooth;
   }
-
   body {
-    margin: 0;
     min-width: 320px;
-    /* Short pages still push the footer to the bottom, so the page background
-       never shows underneath it. */
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
     background: var(--ground);
     color: var(--ink);
-    font-family: var(--font);
-    font-size: 16px;
-    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
-
-  a {
-    color: inherit;
+  main {
+    flex: 1;
   }
   a:focus-visible,
   button:focus-visible {
     outline: 2px solid var(--ink);
     outline-offset: 2px;
   }
-
-  button {
-    font: inherit;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-  }
-
   ::selection {
     background: var(--acid);
     color: var(--ink);
   }
-
-  /* Whole-page acid, used by the art prize section. */
-  body.acid-page {
+  /* Whole-page acid, used by the art prize section: the design wraps those
+     pages in `.yellow-page`, which also flattens the header wash and turns
+     the footer band into an acid-to-white gradient. */
+  body.acid-page,
+  body.acid-page .site-header.acid-wash {
     background: var(--acid);
   }
-
-  /* 12-column grid, 30px gutters - the spine of every page in the design. */
-  .page-grid {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 0 30px;
-    padding-inline: 30px;
+  body.acid-page footer.acid-wash {
+    background: linear-gradient(#fff350 0%, #fff 55%);
   }
-
-  @media (max-width: 900px) {
-    .page-grid {
-      gap: 0 16px;
-      padding-inline: 16px;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .page-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0 10px;
-      padding-inline: 10px;
-    }
-  }
-
-  /* Shared page furniture from the frames: a lowercase section title, panel
-     headings with a rule, the large intro paragraph and the body size. */
-  .section-title {
-    text-transform: lowercase;
-    font-size: clamp(2rem, 4.8vw, 4.4rem);
-    line-height: 1;
-    letter-spacing: -0.04em;
-    font-weight: 600;
-    margin: 0 0 1.5rem;
-  }
-
-  .section-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    border: 0;
-    margin: 0;
-    padding: 0 0 1.75rem;
-  }
-  .section-head .section-title {
-    margin: 0;
-  }
-
-  .panel-title {
-    text-transform: lowercase;
-    border-bottom: 2px solid var(--ink);
-    margin: 0 0 1.25rem;
-    padding-bottom: 0.2rem;
-    font-size: clamp(1.5rem, 2.8vw, 2.5rem);
-    line-height: 1.15;
-    letter-spacing: -0.04em;
-    font-weight: 600;
-  }
-
-  .intro-large {
-    max-width: 1160px;
-    margin: 0 0 2.5rem;
-    font-size: clamp(1.5rem, 3vw, 2.5rem);
-    line-height: 1.25;
-    letter-spacing: -0.035em;
-  }
-
-  .body-24 {
-    font-size: clamp(1rem, 1.5vw, 1.5rem);
-    line-height: 1.25;
-    letter-spacing: -0.025em;
-  }
-
-  .tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
-  .tabs .pill {
-    border-radius: 0;
-    padding: 0.35rem 1.1rem;
-    font-family: inherit;
-    font-size: clamp(1rem, 1.8vw, 1.75rem);
-    background: none;
-    color: inherit;
-    cursor: pointer;
-    white-space: nowrap;
-    text-decoration: none;
-  }
-  .tabs .pill[aria-pressed='true'],
-  .tabs .pill[aria-current] {
-    background: var(--acid);
-  }
-
-  /* Type helpers from the design system. */
-  .display {
-    letter-spacing: -0.052em;
-    line-height: 0.92;
-  }
-  .eyebrow {
-    font-size: clamp(0.72rem, 1vw, 1rem);
-    text-transform: uppercase;
-  }
-  .text-link {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.12em;
-  }
-  .rule {
-    border-top: 1px solid currentColor;
-  }
-
-  .shell {
-    max-width: var(--shell);
-    margin: 0 auto;
-    padding: 0 1.25rem;
-  }
-
   .skip {
     position: absolute;
     left: -9999px;
@@ -443,60 +414,48 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     color: var(--ground);
     padding: 0.5rem 0.9rem;
   }
-
+  /* Dev-only edit links, floated over the page so the layout under them
+     stays exactly the design's. */
   .edit-bar {
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    z-index: 30;
     display: flex;
-    justify-content: flex-end;
-    padding-inline: 30px;
     gap: 0.5rem;
-    padding-top: 0.5rem;
   }
   .edit-bar:empty {
     display: none;
   }
 
-  /* content primitives - still used by the pages that are not ported yet */
-  main {
-    flex: 1;
+  /* Primitives the pages not yet ported to the design still use (news,
+     artists, editions, standalone pages, 404). */
+  .shell {
+    max-width: var(--shell);
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
+  .legacy-page {
     padding: 0 30px 4rem;
   }
-
-  @media (max-width: 900px) {
-    main {
-      padding-inline: 16px;
-    }
-  }
-
-  @media (max-width: 640px) {
-    main {
-      padding-inline: 10px;
-    }
-  }
-
-  /* main already carries the gutter, so a grid inside it must not add another. */
-  main .page-grid {
-    padding-inline: 0;
-  }
-  h1 {
+  .legacy-page h1 {
     font-size: clamp(1.8rem, 4vw, 2.6rem);
     line-height: 1.1;
     letter-spacing: -0.04em;
     margin: 0 0 0.5rem;
-    text-wrap: balance;
   }
-  h2 {
+  .legacy-page h2 {
     font-size: 1.3rem;
     letter-spacing: -0.02em;
     margin: 2.5rem 0 0.8rem;
   }
-  h3 {
+  .legacy-page h3 {
     font-size: 1.05rem;
     margin: 1.6rem 0 0.4rem;
   }
-  p {
+  .legacy-page p {
     margin: 0 0 1rem;
   }
-
   .lede {
     color: var(--ink-2);
     font-size: 1.05rem;
@@ -515,8 +474,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     padding: 1.5rem;
     color: var(--ink-2);
   }
-
-  .grid {
+  .legacy-page .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
     gap: 1.6rem 1.4rem;
@@ -524,7 +482,6 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     padding: 0;
     margin: 1.5rem 0 0;
   }
-
   .card a.card-link {
     color: inherit;
     text-decoration: none;
@@ -536,19 +493,9 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   .card a.card-link:hover h3 {
     text-decoration: underline;
   }
-
-  .pill {
-    display: inline-block;
-    border: 1px solid currentColor;
-    border-radius: 999px;
-    padding: 0.15rem 0.9rem;
-    font-size: 0.9rem;
-  }
-
   .back {
     display: inline-block;
     margin-bottom: 1.5rem;
     font-size: 0.88rem;
   }
-
 </style>
