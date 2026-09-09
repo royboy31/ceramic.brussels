@@ -171,6 +171,22 @@ objects into hrefs, so a menu anchor like `art-prize` + `laureates` lands on
 the right tab. The shared pieces are `HubNav`, `Sections`, `Slideshow`,
 `PersonCard`, `ExhibitorCard` and `LinkPill` in `src/components/`.
 
+**Main pages in the Studio.** The sidebar lists every top-level page next
+to Homepage — Exhibitors, Artists, Guest of honour, Art prize, Programme,
+Partners, Visitors info, About, News — each opening the document that page
+is made from, the way Homepage does (`src/sanity/mainPages.ts`, wired in
+`structure.ts`). For a hub that is the first tab's page: the hub URL *is*
+the first tab, so `/en/about` and the "the fair" document are one page and
+there is no separate parent to edit. For a listing route (exhibitors,
+artists, news) it is the one `page` in that section, whose lead paragraph,
+SEO and section stack wrap the list the route generates (`getMainPage` in
+`queries.ts`); the list itself stays code. The entries look the document
+up when the sidebar loads; a section with none yet opens a fresh document
+with a fixed id (`main-<section>`) and the parameterised `page-main`
+template, so the first click creates it in the right place. Layouts never
+link: applying a template copies blocks in, so editing one main page cannot
+change another.
+
 `page` slugs are per-language, which produces genuinely translated URLs
 (`/en/about`, `/fr/a-propos`, `/nl/over`). hreflang is generated from those same
 slugs via the `altPaths` prop on the layout, so the language switcher and the

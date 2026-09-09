@@ -1,5 +1,6 @@
 import { presentationTool, defineDocuments, defineLocations } from 'sanity/presentation';
 import { HUBS } from '../lib/hubs';
+import { LISTING_SECTIONS } from './schemaTypes/objects/routes';
 import { PREVIEWABLE_TYPES, PREVIEW_ROOT, PREVIEW_SELECT, previewLocations, type PreviewFields } from './previewPaths';
 
 /**
@@ -36,6 +37,13 @@ const mainDocuments = defineDocuments([
       params: { section: hub.route, tab: hub.tabs[0].slug },
     },
   ]),
+
+  // Listings: the page in that section is the main page wrapping the list.
+  ...LISTING_SECTIONS.map((section) => ({
+    route: `${P}/:lang${LANG}/${section}`,
+    filter: `_type == "page" && section == $section`,
+    params: { section },
+  })),
 
   { route: `${P}/:lang${LANG}/artists/:slug`, filter: `_type == "artist" && slug.current == $slug` },
   { route: `${P}/:lang${LANG}/exhibitors/:slug`, filter: `_type == "exhibitor" && slug.current == $slug` },

@@ -1,22 +1,71 @@
-import type { StructureResolver } from 'sanity/structure';
+import type { StructureBuilder, StructureResolver, StructureResolverContext } from 'sanity/structure';
 import { PARTNER_TIERS } from './schemaTypes/documents/partner';
 import { PERSON_GROUPS } from './schemaTypes/documents/person';
 import { PAGE_SECTIONS } from './schemaTypes/objects/routes';
+import { MAIN_PAGES, isListingSection, type MainPage } from './mainPages';
+
+/**
+ * Which document is each main page today, by section: a hub's root is the
+ * page carrying its first tab's slug (else the lowest `order` in the
+ * section), a listing's is the one page in its section. Read once, when the
+ * sidebar is built. A section with no page maps to nothing and its entry
+ * creates one on first open. Nothing here may blank the Studio, so a failed
+ * read degrades to "nothing found" and every entry falls back to creating.
+ */
+async function currentMainPageIds(context: StructureResolverContext): Promise<Record<string, string>> {
+  try {
+    const rows: { _id: string; section: string; slug?: string }[] = await context
+      .getClient({ apiVersion: '2024-01-01' })
+      .fetch(
+        `*[_type == "page" && defined(section)] | order(order asc){ _id, section, "slug": slug.en.current }`,
+        {},
+        { perspective: 'drafts' },
+      );
+    const ids: Record<string, string> = {};
+    for (const main of MAIN_PAGES) {
+      const own = rows.filter((r) => r.section === main.section);
+      const hit = own.find((r) => r.slug === main.slug) ?? own[0];
+      if (hit) ids[main.section] = hit._id.replace(/^drafts\./, '');
+    }
+    return ids;
+  } catch {
+    return {};
+  }
+}
+
+/** One sidebar entry per main page, opening its document the way Homepage opens its singleton. */
+function mainPageItem(S: StructureBuilder, main: MainPage, id: string | undefined) {
+  const doc = id
+    ? S.document().schemaType('page').documentId(id)
+    : S.document()
+        .schemaType('page')
+        .documentId(main.fallbackId)
+        .initialValueTemplate('page-main', { section: main.section, slug: main.slug, title: main.title });
+  return S.listItem().title(main.title).id(`main-${main.section}`).schemaType('page').child(doc);
+}
 
 /**
  * Groups the Studio the way the site is organised rather than listing document
- * types alphabetically. The team lives in here for the weeks before a fair, so
+ * types alphabetically. The main pages come first, one document each, next
+ * to the homepage. The team lives in here for the weeks before a fair, so
  * the current edition's exhibitors, laureates and programme are one click away,
  * and the hub pages (about, art prize, visitors info…) show their tabs together.
  */
-export const structure: StructureResolver = (S) =>
-  S.list()
+export const structure: StructureResolver = async (S, context) => {
+  const mainIds = await currentMainPageIds(context);
+
+  return S.list()
     .title('ceramic brussels')
     .items([
       S.listItem()
         .title('Homepage')
         .id('homepage')
         .child(S.document().schemaType('homepage').documentId('homepage')),
+
+      // The main pages, one document each. See mainPages.ts.
+      ...MAIN_PAGES.map((main) => mainPageItem(S, main, mainIds[main.section])),
+
+      S.divider(),
 
       S.listItem()
         .title('Site settings')
@@ -222,7 +271,7 @@ export const structure: StructureResolver = (S) =>
       // The two hubs whose content is spread across several types, gathered
       // under the names the menu uses.
       S.listItem()
-        .title('Visitors info')
+        .title('Visitors info — tabs')
         .id('visitors-info')
         .child(
           S.list()
@@ -266,7 +315,7 @@ export const structure: StructureResolver = (S) =>
         ),
 
       S.listItem()
-        .title('About')
+        .title('About — tabs')
         .id('about')
         .child(
           S.list()
@@ -327,13 +376,16 @@ export const structure: StructureResolver = (S) =>
           S.list()
             .title('Pages')
             .items([
-              ...PAGE_SECTIONS.map((s) =>
-                S.listItem()
-                  .title(`${s.title} tabs`)
+              ...PAGE_SECTIONS.map((s) => {
+                const listing = isListingSection(s.value);
+                const title = listing ? `${s.title} page` : `${s.title} tabs`;
+                const main = MAIN_PAGES.find((mp) => mp.section === s.value)!;
+                return S.listItem()
+                  .title(title)
                   .id(`pages-${s.value}`)
                   .child(
                     S.documentList()
-                      .title(`${s.title} tabs`)
+                      .title(title)
                       .schemaType('page')
                       .filter('_type == "page" && section == $section')
                       .params({ section: s.value })
@@ -341,9 +393,14 @@ export const structure: StructureResolver = (S) =>
                       // Without this the create button in a filtered pane makes a
                       // page with no section - which promptly vanishes from the
                       // list that made it, because it no longer matches the filter.
-                      .initialValueTemplates([S.initialValueTemplateItem(`page-hub-${s.value}`)]),
-                  ),
-              ),
+                      // A listing has no tabs, so its pane offers the main page.
+                      .initialValueTemplates([
+                        listing
+                          ? S.initialValueTemplateItem('page-main', { section: main.section, slug: main.slug, title: main.title })
+                          : S.initialValueTemplateItem(`page-hub-${s.value}`),
+                      ]),
+                  );
+              }),
               S.listItem()
                 .title('Standalone pages')
                 .id('pages-standalone')
@@ -392,3 +449,4 @@ export const structure: StructureResolver = (S) =>
             .defaultOrdering([{ field: 'order', direction: 'asc' }]),
         ),
     ]);
+};
