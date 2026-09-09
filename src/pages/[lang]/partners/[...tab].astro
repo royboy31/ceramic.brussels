@@ -115,7 +115,9 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
                     {t('common.website')} ↗
                   </a>
                 )}
-                {p.logo?.asset && <SanityImage image={p.logo} widths={[250, 500]} sizes="250px" class="logo" />}
+                {p.logo?.asset && (
+                  <SanityImage image={p.logo} widths={[250, 500]} sizes="250px" class="logo" placeholder={false} />
+                )}
               </div>
             </article>
           ))}
@@ -187,11 +189,29 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
     min-height: 78px;
     display: flex;
   }
+  /*
+   * The design's logo slot is a 250px-wide block against the right edge of the
+   * card, and its two examples are set text of about the same size. The real
+   * logos are files of wildly different proportions - 4:1 wordmarks next to
+   * near-square marks, several with transparent padding baked in - so the slot
+   * is fixed and the file is fitted into it, right-aligned. Sizing each file to
+   * its own bounds instead is what left one logo stranded mid-card and the next
+   * twice its size. `margin-left: auto` keeps the logo right when the partner
+   * has no website and it is the only thing in the row.
+   */
+  .institution-foot .pill {
+    flex: none;
+  }
   .institution-foot :global(.logo) {
-    width: auto;
-    max-width: 250px;
-    max-height: 60px;
     object-fit: contain;
+    object-position: right center;
+    width: 250px;
+    /* A replaced element will not shrink past its own width without this, so
+       in a narrow column the pill is what gives, and it collapses into a
+       three-line oval. The logo gives instead, and stays right-aligned. */
+    min-width: 0;
+    height: 78px;
+    margin-left: auto;
   }
 
   /* hotel */
