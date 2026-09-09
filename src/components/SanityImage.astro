@@ -12,6 +12,13 @@ interface Props {
   aspect?: number;
   loading?: 'lazy' | 'eager';
   class?: string;
+  /**
+   * Paint the blurred LQIP behind the image while it loads. Turn it off for
+   * anything with transparency - a logo shows the blur through its own
+   * see-through pixels, which reads as a grey smudge around it and never
+   * goes away, because the background stays behind the loaded PNG.
+   */
+  placeholder?: boolean;
 }
 
 const {
@@ -21,6 +28,7 @@ const {
   aspect,
   loading = 'lazy',
   class: className,
+  placeholder = true,
 } = Astro.props;
 
 const hasAsset = !!image?.asset;
@@ -40,7 +48,7 @@ const height = aspect
     : undefined;
 
 const srcset = hasAsset ? widths.map((w) => `${build(w)} ${w}w`).join(', ') : '';
-const lqip = image?.lqip;
+const lqip = placeholder ? image?.lqip : undefined;
 ---
 
 {
