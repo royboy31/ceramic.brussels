@@ -26,8 +26,13 @@ pnpm-debug.log*
 # design reference project (Figma exports + unoptimised PNGs) - not shipped
 design/
 ceramic-brussels-project.zip
-# raw trial typeface - only the two WOFF2 in public/fonts/ are used
+ceramic-brussels-html.zip
+# raw typeface packages. Only the two WOFF2 web cuts in public/fonts/ belong in
+# the repo; the desktop TTFs the client licensed must not be committed.
 font/
+*.ttf
+*.otf
+Noi Grotesk font package.zip
 
 # Local secrets for `wrangler pages dev`. Never commit.
 .dev.vars
