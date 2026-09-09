@@ -1,9 +1,10 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import Figure from '../../../components/Figure.astro';
+import PageSections from '../../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
-import { getArtists } from '../../../lib/queries';
+import { getArtists, getMainPage } from '../../../lib/queries';
 import { styleAttrs } from '../../../lib/textStyle';
 
 /**
@@ -16,7 +17,9 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
-const artists = await getArtists(lang);
+// The main page document (Studio → Main pages → Artists): lead, SEO and
+// blocks around the list. The list itself never comes from it.
+const [artists, page] = await Promise.all([getArtists(lang), getMainPage(lang, 'artists')]);
 
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
@@ -32,9 +35,19 @@ const initial = (name: string) =>
 const used = new Set(artists.map((a: any) => initial(a.name)));
 ---
 
-<Base lang={lang} title={t('nav.artists')} path="artists">
+<Base
+  lang={lang}
+  title={page?.seo?.title ?? page?.title ?? t('nav.artists')}
+  description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
+  image={page?.seo?.ogImage ?? page?.cover}
+  path="artists"
+  editId={page?._id}
+  editType={page?._type}
+>
   <div class="legacy-page">
   <h1 class="section-title">{t('nav.artists')}</h1>
+  {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
 
   {
     artists.length ? (
@@ -94,6 +107,8 @@ const used = new Set(artists.map((a: any) => initial(a.name)));
       </p>
     )
   }
+  {/* The main page's own blocks, under the list. */}
+  {(page?.sections?.length ?? 0) > 0 && <PageSections lang={lang} sections={page.sections} />}
   </div>
 </Base>
 

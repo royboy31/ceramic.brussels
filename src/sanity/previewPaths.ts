@@ -1,5 +1,6 @@
 import { HUBS } from '../lib/hubs';
 import type { LocaleId } from '../lib/locales';
+import { isListingSection } from './mainPages';
 
 /**
  * Which `/preview/…` pages show a given document.
@@ -98,6 +99,8 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
     case 'page': {
       const title = doc.title ?? 'Page';
       if (doc.section) {
+        // A listing's main page is the listing itself.
+        if (isListingSection(doc.section)) return [{ title, href: at(`/${doc.section}`) }];
         // Hub tabs: the first tab is the hub root, the others carry their
         // English slug whatever the language of the page.
         const hub = HUBS[doc.section];

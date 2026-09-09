@@ -1,9 +1,11 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import ExhibitorCard from '../../../components/ExhibitorCard.astro';
+import PageSections from '../../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations } from '../../../lib/i18n';
-import { getExhibitors, getCurrentEdition } from '../../../lib/queries';
+import { getExhibitors, getCurrentEdition, getMainPage } from '../../../lib/queries';
+import { styleAttrs } from '../../../lib/textStyle';
 
 /** The design shows a two-letter code after the name; `country` holds the full name. */
 const ISO: Record<string, string> = {
@@ -31,7 +33,13 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
-const [exhibitors, edition] = await Promise.all([getExhibitors(lang), getCurrentEdition(lang)]);
+// The main page document (Studio → Main pages → Exhibitors): lead, SEO and
+// blocks around the list. The list itself never comes from it.
+const [exhibitors, edition, page] = await Promise.all([
+  getExhibitors(lang),
+  getCurrentEdition(lang),
+  getMainPage(lang, 'exhibitors'),
+]);
 
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
@@ -58,11 +66,27 @@ const filters = [
 ].filter((f) => exhibitors.some(f.has));
 ---
 
-<Base lang={lang} title={t('nav.exhibitors')} path="exhibitors">
+<Base
+  lang={lang}
+  title={page?.seo?.title ?? page?.title ?? t('nav.exhibitors')}
+  description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
+  image={page?.seo?.ogImage ?? page?.cover}
+  path="exhibitors"
+  editId={page?._id}
+  editType={page?._type}
+>
   <div class="page-grid py-2 md:py-4">
     <h1 class="col-span-full text-[clamp(2rem,4.8vw,4.4rem)] font-semibold leading-none tracking-[-.04em]">
       {t('nav.exhibitors').toLowerCase()}
     </h1>
+    {
+      page?.intro && (
+        <p class="intro-large col-span-full" {...styleAttrs(page.introStyle)}>
+          {page.intro}
+        </p>
+      )
+    }
   </div>
   {
     exhibitors.length ? (
@@ -109,6 +133,14 @@ const filters = [
       </>
     ) : (
       <p class="empty">{t('exhibitors.empty')}</p>
+    )
+  }
+  {/* The main page's own blocks, under the list. */}
+  {
+    (page?.sections?.length ?? 0) > 0 && (
+      <div class="content-wrap">
+        <PageSections lang={lang} sections={page.sections} />
+      </div>
     )
   }
 </Base>

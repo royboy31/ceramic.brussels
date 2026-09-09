@@ -667,6 +667,16 @@ export function getHubPages(lang: LocaleId, section: string) {
   });
 }
 
+/**
+ * The main page behind a listing route (exhibitors, artists, news): its lead
+ * paragraph, SEO and section stack wrap the list the route generates. One
+ * page per section; the Studio's "Main pages" entry opens it. Null until an
+ * editor has made one, and the page renders without it.
+ */
+export function getMainPage(lang: LocaleId, section: string) {
+  return run<any>(`*[_type == "page" && section == $section] | order(order asc)[0] ${PAGE}`, { lang, section });
+}
+
 /* ------------------------------------------------- programme / partners / press */
 
 /** Current-edition events, ordered. Group by day and `section` in the page. */

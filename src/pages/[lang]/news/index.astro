@@ -1,9 +1,10 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import Figure from '../../../components/Figure.astro';
+import PageSections from '../../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath, formatDate } from '../../../lib/i18n';
-import { getNews } from '../../../lib/queries';
+import { getNews, getMainPage } from '../../../lib/queries';
 import { styleAttrs } from '../../../lib/textStyle';
 
 /**
@@ -16,14 +17,26 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
-const news = await getNews(lang);
+// The main page document (Studio → Main pages → News): lead, SEO and blocks
+// around the list. The posts themselves never come from it.
+const [news, page] = await Promise.all([getNews(lang), getMainPage(lang, 'news')]);
 
 const [lead, ...rest] = news;
 ---
 
-<Base lang={lang} title={t('nav.news')} path="news">
+<Base
+  lang={lang}
+  title={page?.seo?.title ?? page?.title ?? t('nav.news')}
+  description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
+  image={page?.seo?.ogImage ?? page?.cover}
+  path="news"
+  editId={page?._id}
+  editType={page?._type}
+>
   <div class="legacy-page">
   <h1 class="section-title">{t('nav.news')}</h1>
+  {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
 
   {
     news.length ? (
@@ -87,6 +100,8 @@ const [lead, ...rest] = news;
       </p>
     )
   }
+  {/* The main page's own blocks, under the list. */}
+  {(page?.sections?.length ?? 0) > 0 && <PageSections lang={lang} sections={page.sections} />}
   </div>
 </Base>
 
