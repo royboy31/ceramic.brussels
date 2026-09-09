@@ -164,8 +164,9 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
 
     <link rel="preload" href="/fonts/noi-grotesk-400.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://cdn.sanity.io" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <slot name="head" />
