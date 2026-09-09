@@ -46,8 +46,8 @@ function mainPageItem(S: StructureBuilder, main: MainPage, id: string | undefine
 
 /**
  * Groups the Studio the way the site is organised rather than listing document
- * types alphabetically. The main pages come first, one document each, next
- * to the homepage. The team lives in here for the weeks before a fair, so
+ * types alphabetically. The main pages come first, one document each, in a
+ * folder of their own. The team lives in here for the weeks before a fair, so
  * the current edition's exhibitors, laureates and programme are one click away,
  * and the hub pages (about, art prize, visitors info…) show their tabs together.
  */
@@ -57,13 +57,24 @@ export const structure: StructureResolver = async (S, context) => {
   return S.list()
     .title('ceramic brussels')
     .items([
+      // The main pages, one document each, under one heading so the sidebar
+      // never shows "Exhibitors" twice - the page here, the list of exhibitor
+      // documents further down. See mainPages.ts.
       S.listItem()
-        .title('Homepage')
-        .id('homepage')
-        .child(S.document().schemaType('homepage').documentId('homepage')),
-
-      // The main pages, one document each. See mainPages.ts.
-      ...MAIN_PAGES.map((main) => mainPageItem(S, main, mainIds[main.section])),
+        .title('Main pages')
+        .id('main-pages')
+        .child(
+          S.list()
+            .title('Main pages')
+            .items([
+              S.listItem()
+                .title('Homepage')
+                .id('homepage')
+                .schemaType('homepage')
+                .child(S.document().schemaType('homepage').documentId('homepage')),
+              ...MAIN_PAGES.map((main) => mainPageItem(S, main, mainIds[main.section])),
+            ]),
+        ),
 
       S.divider(),
 
