@@ -19,6 +19,38 @@ components, binding each element to the field named below.
 `html pages/` is not committed (165 MB of PNGs); Lilanga has the source
 project. It is gitignored.
 
+## Status, 2026-09-09 — live on production; main pages editable
+
+The ported design went to `main` in the morning (`8c20e75`) and has been
+on ceramic-brussels.pages.dev since. Three more things landed on `main`
+over the day, each cherry-picked straight from its branch:
+
+- **The favicon.** It had been Astro's scaffold logo since the first
+  commit. The old Twill site's own set replaced it — the acid dot as a real
+  16 + 32 ICO, an SVG and a 180px apple-touch-icon (`8ccb8fb`). Not taken:
+  the old `site.webmanifest`, which has an empty name.
+- **Lilanga's fixes** from `lilanga`: the licensed Noi Grotesk cut (the
+  trial carried no accents, curly quotes or dashes, so French and Dutch
+  had been falling back to Helvetica), the partner-logo halo and collisions,
+  and the exhibitor detail page filling the window.
+- **Main pages in the Studio** (`2309090`, then `a2a0ee3`). Editors could
+  not find where `/en/about` or `/en/exhibitors` are edited: a hub's URL is
+  its first tab, so the about page was the document called "ceramic
+  brussels" under About → Tab pages, and the listings had no document at
+  all. The sidebar now opens with a **Main pages** folder — Homepage,
+  Exhibitors, Artists, Guest of honour, Art prize, Programme, Partners,
+  Visitors info, About, News — each opening the document that page is made
+  from. The listings became editable the same way: a page in the
+  `exhibitors`, `artists` or `news` section supplies the lead paragraph,
+  SEO and a section stack rendered under the list; the list stays code.
+  Details in CLAUDE.md, "Main pages in the Studio". The dead
+  "Exhibitors — new tab" template is gone.
+
+What remains is unchanged from the list below, plus two housekeeping
+items: `dev` and `lilanga` trail `main` and want syncing before Lilanga's
+next push, and the exhibitors page's lead paragraph is an empty draft
+waiting for an editor (the old site never had one).
+
 ## Status, 2026-09-08 late — side-by-side pass done
 
 Every page was opened next to its design page in Chrome at 1440px, the
