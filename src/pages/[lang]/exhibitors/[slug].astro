@@ -92,7 +92,13 @@ const orgSchema = {
       <div class="relative">
         {
           artwork ? (
-            <SanityImage image={artwork} widths={[433, 866, 1300]} sizes="(max-width: 1000px) 100vw, 433px" loading="eager" />
+            <SanityImage
+              image={artwork}
+              widths={[440, 660, 880, 1320, 1760]}
+              sizes="(max-width: 1000px) 100vw, calc((100vw - 390px) / 3 + 90px)"
+              aspect={433 / 541}
+              loading="eager"
+            />
           ) : (
             <div class="artwork-empty" />
           )
@@ -226,23 +232,32 @@ const orgSchema = {
 </Base>
 
 <style>
-  /* From the design's exhibitors/chaxartxrtm/index.html. */
+  /*
+   * From the design's exhibitors pages. The frame measures the two columns as
+   * 433px and 907px, which is columns 1-4 and 5-12 of the 12-column page-grid
+   * at the 1440px frame width; analora/index.html draws the same two columns
+   * as `col-span-4` and `col-span-8`. Taking them from the grid rather than
+   * pinning the pixels is what lets the page fill a wider window, and the type
+   * is clamped so it grows with it (the clamps are analora's, capped at the
+   * pixel sizes the chaxartxrtm frame measures).
+   */
   .exhibitor-detail {
-    grid-template-columns: 433px minmax(0, 907px);
-    gap: 40px;
     min-height: 1009px;
     padding-top: 14px;
+    /* Room for the pager, which is pinned to the bottom of the frame. */
+    padding-bottom: 100px;
     position: relative;
   }
   .artwork {
-    grid-column: 1;
+    grid-column: span 4;
     margin: 0;
   }
   .artwork :global(img),
   .artwork-empty {
+    aspect-ratio: 433 / 541;
     object-fit: cover;
-    width: 433px;
-    height: 541px;
+    width: 100%;
+    height: auto;
   }
   .artwork-empty {
     background: #f5f5f5;
@@ -265,38 +280,41 @@ const orgSchema = {
   }
   .artwork figcaption {
     justify-content: space-between;
+    gap: 12px;
     margin-top: 18px;
     font-size: 16px;
     display: flex;
   }
   .profile {
-    grid-column: 2;
+    grid-column: span 8;
   }
+  /* 434px + 40px + 433px inside the frame's 907px: two equal columns. */
   .profile header {
     border-top: 2px solid;
-    grid-template-columns: 434px 433px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 40px;
     padding-top: 12px;
     display: grid;
   }
   .profile h2 {
     letter-spacing: -0.05em;
-    font-size: 60px;
+    font-size: clamp(2rem, 4vw, 3.75rem);
     line-height: 1;
   }
   .profile header p,
   .profile h3 {
     letter-spacing: -0.04em;
-    font-size: 40px;
-    line-height: 42px;
+    font-size: clamp(1.35rem, 2.7vw, 2.5rem);
+    line-height: 1.05;
   }
   .profile header p {
     margin-top: 12px;
   }
   .profile small {
-    font-size: 24px;
+    font-size: clamp(1rem, 1.7vw, 1.5rem);
   }
   .profile nav {
+    flex-wrap: wrap;
     gap: 40px;
     margin-top: 26px;
     display: flex;
@@ -305,16 +323,16 @@ const orgSchema = {
     border: 1px solid;
     border-radius: 999px;
     padding: 3px 18px;
-    font-size: 28px;
-    line-height: 36px;
+    font-size: clamp(1.1rem, 2vw, 1.75rem);
+    line-height: 1.28;
   }
   .copy {
     letter-spacing: -0.03em;
-    grid-template-columns: 434px 433px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 40px;
     margin-top: 37px;
-    font-size: 24px;
-    line-height: 30px;
+    font-size: clamp(1.05rem, 1.7vw, 1.5rem);
+    line-height: 1.25;
     display: grid;
   }
   .copy :global(p + p) {
@@ -322,7 +340,7 @@ const orgSchema = {
   }
   .pager {
     justify-content: space-between;
-    font-size: 50px;
+    font-size: clamp(1.75rem, 3.5vw, 3.125rem);
     display: flex;
     position: absolute;
     bottom: 20px;
@@ -330,49 +348,44 @@ const orgSchema = {
     right: 30px;
   }
   .pager span {
-    font-size: 40px;
+    font-size: clamp(1.4rem, 2.8vw, 2.5rem);
   }
+  /* Below the frame the two columns stack, whether the grid has 12 or 4. */
   @media (width<=1000px) {
     .exhibitor-detail {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0;
       min-height: 0;
+      padding-bottom: 0;
     }
     .artwork,
-    .profile {
-      grid-column: 1;
-    }
-    .artwork :global(img),
-    .artwork-empty {
-      aspect-ratio: 433 / 541;
-      width: 100%;
-      height: auto;
+    .profile,
+    .pager {
+      grid-column: 1 / -1;
     }
     .profile {
       margin-top: 32px;
     }
     .profile header,
     .copy {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
     .profile h2 {
-      font-size: 42px;
+      font-size: clamp(2rem, 6vw, 2.625rem);
     }
     .profile header p,
     .profile h3 {
-      font-size: 28px;
-      line-height: 1.05;
+      font-size: clamp(1.35rem, 4vw, 1.75rem);
     }
     .copy {
-      font-size: 18px;
+      font-size: clamp(1.05rem, 2.4vw, 1.125rem);
       line-height: 1.3;
     }
     .pager {
       margin-top: 60px;
       position: static;
     }
+    .pager,
     .pager span {
-      font-size: 28px;
+      font-size: clamp(1.4rem, 4vw, 1.75rem);
     }
   }
 </style>
