@@ -44,12 +44,13 @@ const { section, variant = 'default' } = Astro.props;
     margin-top: 0;
   }
 
-  /* From the design's index.css. */
+  /* From the design's index.css; the margins from the Figma frame (quick
+     links to title 49px, title to the first feature 30px). */
   .home-latest {
     text-align: center;
     letter-spacing: -0.03em;
     height: 66px;
-    margin: 32px 0 0;
+    margin: 49px 0 30px;
     font-size: 70px;
     font-weight: 600;
     line-height: 65px;
@@ -57,7 +58,8 @@ const { section, variant = 'default' } = Astro.props;
   @media (width>=701px) and (width<=1439px) {
     .home-latest {
       height: 4.5833vw;
-      margin-top: 2.2222vw;
+      margin-top: 3.4028vw;
+      margin-bottom: 2.0833vw;
       font-size: 4.8611vw;
       line-height: 4.5139vw;
     }
