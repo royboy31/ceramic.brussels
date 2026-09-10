@@ -65,9 +65,13 @@ there:
 - Canonical and hreflang tags point at slashless URLs, which Pages answers
   with a 308 (frontend, `Base.astro`).
 
-Housekeeping: `kamindu` and `main` hold the same changes under different
-hashes (cherry-picks), `kamindu` lacks `e135cf7`, and `dev` and `lilanga`
-still trail `main`.
+Housekeeping: `kamindu` carries today's three changes under their original
+hashes (`0126daa`, `dad68e4`, `174fa3d`; `main` has them as cherry-picks).
+But it lacks Lilanga's three 09-09 fixes (licensed font, partner logos,
+exhibitor page), which went to `main` straight from `lilanga`. The status
+entries in this file exist only on `kamindu`. `dev` and `lilanga` still trail
+`main`. `git rebase origin/main` on `kamindu` lines it up: git skips the
+commits `main` already has as cherry-picks and replays only the docs.
 
 ## Status, 2026-09-09 — live on production; main pages editable
 
