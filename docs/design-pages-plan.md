@@ -19,6 +19,56 @@ components, binding each element to the field named below.
 `html pages/` is not committed (165 MB of PNGs); Lilanga has the source
 project. It is gitignored.
 
+## Status, 2026-09-11 — old URLs redirected; pages.dev out of search
+
+`main` is `6417b67`, live on ceramic-brussels.pages.dev (deployment
+`5a70eb9f`). Three things landed since the entry below, each cherry-picked
+onto `main`:
+
+- **The production alias is noindexed** (`a11ade3`, 09-10). Cloudflare adds
+  `x-robots-tag: noindex` to branch previews by itself but not to
+  ceramic-brussels.pages.dev, so all 702 pages were crawlable before launch.
+  A rule at the end of `public/_headers` names that host only, so
+  www.ceramic.brussels will never get it. Before and after the deploy, 15 URLs
+  were compared: the header was the only change.
+- **The homepage "latest news" spacing** matches frame 4:4 (`e135cf7`, from
+  another session).
+- **Every old site URL redirects** (`6417b67`). `public/_redirects` held only
+  a comment pointing at a `legacyPath` field that never existed, so every old
+  URL would have 404ed at cutover. `scripts/legacy-redirects.mjs` now runs at
+  the end of `npm run build` and appends 474 rules to `dist/_redirects`. It
+  maps each old page, by its English slug, to the new English path. The old
+  FR/NL slugs come from `legacy-export/normalized`: the old site accepted any
+  slug under any language prefix, and every section of a long page was its
+  own URL, so each old slug gets a rule under /en, /fr and /nl. The FR/NL
+  targets come from each built page's hreflang, so the pending FR/NL slug
+  translation needs no second map. A target that was not built fails the
+  build. Verified on production: every URL in
+  `docs/legacy-site-inventory.md` has a rule (254), and all 475 answer 301 in
+  one hop onto a 200. The root now goes straight to `/en/`; it was two hops.
+  Judgement calls, each one line of the map: an old URL that is also a new
+  page keeps its new meaning (`/en/programme` was food & drinks, now the
+  programme hub). Past exhibitor years go to `/editions/`. `/contact` goes to
+  about → team, and the exhibition pass to partners → event.
+
+**At cutover:** run `node scripts/legacy-redirects.mjs --check
+https://www.ceramic.brussels` (and `curl -I` to confirm no noindex there),
+then remove the pages.dev noindex rule, or keep it: it never matches the real
+domain, and it keeps pages.dev from being indexed as a duplicate. Still open
+there:
+- The bare `ceramic.brussels` domain needs to redirect to www, and old links
+  on it take two hops unless the bare domain is also attached to Pages.
+- Old `/img/…` and `/storage/uploads/…` links, including the PDFs, are not
+  redirected; about 1,000 rules could be built from `asset-map.json`.
+- `#section` anchors land at the top of the right page, not on its tab; that
+  needs a small script in the page (frontend).
+- Canonical and hreflang tags point at slashless URLs, which Pages answers
+  with a 308 (frontend, `Base.astro`).
+
+Housekeeping: `kamindu` and `main` hold the same changes under different
+hashes (cherry-picks), `kamindu` lacks `e135cf7`, and `dev` and `lilanga`
+still trail `main`.
+
 ## Status, 2026-09-09 — live on production; main pages editable
 
 The ported design went to `main` in the morning (`8c20e75`) and has been
