@@ -66,14 +66,15 @@ const image = section.image?.asset ? section.image : null;
       </section>
     ) : (
       <section class="page-grid pb-10" id={section.anchor || undefined}>
-        <div class="col-span-6 py-6 max-sm:col-span-full">
+        {/* No top padding: in the Figma frame the kicker starts level with the picture. */}
+        <div class="home-news-copy col-span-6 max-sm:col-span-full">
           {section.kicker && (
             <p class="eyebrow home-news-eyebrow" {...styleAttrs(section.kickerStyle)}>
               {section.kicker}
             </p>
           )}
           {section.headline && (
-            <h3 class="mt-2 text-[clamp(2rem,3.6vw,3.2rem)] leading-[1.02] tracking-[-.04em]" {...styleAttrs(section.headlineStyle)}>
+            <h3 class="home-news-headline text-[clamp(2rem,3.6vw,3.2rem)] leading-[1.02] tracking-[-.04em]" {...styleAttrs(section.headlineStyle)}>
               {lines.map((line, i) => (
                 <>
                   {i > 0 && <br />}
@@ -141,6 +142,26 @@ const image = section.image?.asset ? section.image : null;
       letter-spacing: -1px;
       font-size: 20px;
       line-height: 1.1;
+    }
+  }
+  /* The copy column keeps py-6's bottom 24px but not its top (the kicker is
+     level with the picture). design.css is compiled and has no pb-6. */
+  .home-news-copy {
+    padding-bottom: 24px;
+  }
+  /* Kicker to headline, from the Figma frame: 42px kicker line + 16px. A
+     scoped rule because design.css is compiled and has no mt-4. */
+  .home-news-headline {
+    margin-top: 16px;
+  }
+  @media (width>=701px) and (width<=1439px) {
+    .home-news-headline {
+      margin-top: 1.1111vw;
+    }
+  }
+  @media (width<=700px) {
+    .home-news-headline {
+      margin-top: 8px;
     }
   }
 
