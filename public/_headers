@@ -23,3 +23,12 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+
+# Keep the production pages.dev alias out of search engines. Cloudflare adds
+# this header to branch previews (dev., kamindu., ...) by itself, but not to
+# the production alias, which would otherwise be crawlable before launch. The
+# rule names the host, so it matches only requests to ceramic-brussels.pages.dev
+# and never those to www.ceramic.brussels, which serves the same files.
+# Planned to go once the real domain is live.
+https://ceramic-brussels.pages.dev/*
+  X-Robots-Tag: noindex

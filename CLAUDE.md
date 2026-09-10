@@ -363,6 +363,10 @@ the dashboard ones when `wrangler.toml` exists and reads `[vars]` /
 
 `public/_headers` marks `/_astro/*` immutable and forces HTML to revalidate —
 without that, a rebuild would never reach anyone holding a cached page.
+It also sends `X-Robots-Tag: noindex` on `https://ceramic-brussels.pages.dev/*`
+only: Cloudflare noindexes branch previews by itself but not the production
+alias, which was crawlable before launch. The rule is scoped to that host, so
+`www.ceramic.brussels` never gets it; remove it at cutover as planned.
 `public/_redirects` is where legacy URLs from the old Laravel site go at
 migration time.
 
