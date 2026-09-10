@@ -367,8 +367,14 @@ It also sends `X-Robots-Tag: noindex` on `https://ceramic-brussels.pages.dev/*`
 only: Cloudflare noindexes branch previews by itself but not the production
 alias, which was crawlable before launch. The rule is scoped to that host, so
 `www.ceramic.brussels` never gets it; remove it at cutover as planned.
-`public/_redirects` is where legacy URLs from the old Laravel site go at
-migration time.
+The old site's URLs are not typed into `public/_redirects`:
+`scripts/legacy-redirects.mjs` runs after every build and appends some 470 rules
+to `dist/_redirects` from a map of old page → new English path, taking the
+old FR/NL slugs from `legacy-export/normalized` and the new FR/NL targets
+from each built page's hreflang, so a slug change needs no edit. A target
+that was not built fails the build. `--doc` checks every URL in
+`docs/legacy-site-inventory.md` has a rule; `--check <url>` tests them live
+(301, one hop, onto a 200) — run it against the real domain at cutover.
 
 **Two shapes of build, one command.** `PREVIEW_RUNTIME` decides (set per
 environment in `wrangler.toml`; `npm run build:preview` sets it locally):
