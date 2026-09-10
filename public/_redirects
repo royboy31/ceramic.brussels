@@ -1,9 +1,10 @@
-# Cloudflare Pages redirect rules. Astro emits /index.html as a redirect to /en,
-# so the root is already handled by the build.
+# Cloudflare Pages redirect rules. Astro's `redirects` config sends / to /en/,
+# so the root is handled by the build.
 #
-# Old Laravel URLs go here at migration time, e.g.:
-#   /en/partners-3            /en/partners            301
-#   /en/food-and-drinks-2     /en/food-and-drinks     301
-#   /fr/invitee-d-honneur     /fr/invite-d-honneur    301
+# The old site's URLs are not typed here. scripts/legacy-redirects.mjs appends
+# them to dist/_redirects after every build, from a map of old page to new page
+# plus the old slugs in legacy-export/normalized, and fails the build if any of
+# them would point at a page that does not exist. Edit the map there.
 #
-# Generate these from the `legacyPath` field rather than typing them by hand.
+# Hand-written rules can still go above this line; the generated block is
+# appended after them.

@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/pages-worker.mjs",
+    "build": "astro build && node scripts/pages-worker.mjs && node scripts/legacy-redirects.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "webhook": "node scripts/create-deploy-webhook.mjs",

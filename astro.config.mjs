@@ -74,8 +74,10 @@ export default defineConfig({
   // build still emits it, so the breakage only shows up in dev). Locale routing
   // is handled by the [lang] segment plus src/lib/locales.ts instead, which is
   // all this site needed from it.
+  // '/en/' with the slash: '/en' is itself a redirect (Pages adds the slash),
+  // so the root would take two hops to reach a page.
   redirects: {
-    '/': '/en',
+    '/': '/en/',
   },
 
   // `output` stays 'static': every page is prerendered; only the routes the
