@@ -425,6 +425,46 @@ export function getEditions(lang: LocaleId) {
   );
 }
 
+/** The past editions' years, newest first, for their archive pages. */
+export function getPastEditionYears() {
+  return run<number[]>(`*[_type == "edition" && isCurrent != true && defined(year)] | order(year desc).year`);
+}
+
+/**
+ * One past edition with everything its year page shows, as the old site's
+ * past-editions pages had it: the facts, the art prize (laureates, awards,
+ * jury), the programme, the team and the photos - all read from the records
+ * that point at the edition.
+ */
+export function getEditionArchive(lang: LocaleId, year: number) {
+  return run<any>(
+    `*[_type == "edition" && year == $year][0]{
+      ${EDITION_CORE},
+      "fairMapUrl": fairMap.asset->url,
+      "film": film ${VIDEO},
+      "images": images[] ${IMAGE},
+      "exhibitorCount": count(*[_type == "exhibitor" && references(^._id)]),
+      "laureates": *[_type == "laureate" && references(^._id)] | order(order asc){
+        _id, "artist": artist->{ name, "slug": slug.current, ${styled('nationality')} }
+      },
+      "awards": *[_type == "award" && family == "art-prize" && references(^._id)] | order(order asc){
+        _id, ${styled('name')}, ${styled('outcome')},
+        "laureates": laureates[]->{ _id, name, "slug": slug.current }
+      },
+      "jury": *[_type == "person" && "jury" in groups && references(^._id)] | order(order asc, name asc){
+        _id, name, ${styled('role')}
+      },
+      "people": *[_type == "person" && references(^._id) && count(groups[@ in ["team", "collaborator", "advisory-board"]]) > 0]
+        | order(order asc, name asc){ _id, name, ${styled('role')} },
+      "events": *[_type == "programmeEvent" && references(^._id) && defined(startsAt)] | order(startsAt asc){
+        _id, startsAt, ${styled('title')}, ${styled('speakersText')},
+        "speakers": speakers[]->{ _id, _type, name, "slug": slug.current }
+      }
+    }`,
+    { lang, year },
+  );
+}
+
 /* ------------------------------------------------------------ exhibitors */
 
 const EXHIBITOR_CARD = `{
@@ -722,10 +762,21 @@ export function getMainPage(lang: LocaleId, section: string) {
 
 /* ------------------------------------------------- programme / partners / press */
 
-/** Current-edition events, ordered. Group by day and `section` in the page. */
+/**
+ * The programme: the current edition's events, and until it has any dated
+ * ones, the newest edition's that does - the old site kept showing its last
+ * programme until the next was out, and the design's talks are 2026's.
+ * Group by day and `section` in the page.
+ */
 export function getProgramme(lang: LocaleId) {
   return run<any[]>(
-    `*[_type == "programmeEvent" && edition->isCurrent == true] | order(startsAt asc){
+    `*[_type == "programmeEvent" && edition._ref == coalesce(
+        *[_type == "edition" && isCurrent == true
+          && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt)]) > 0][0]._id,
+        *[_type == "edition"
+          && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt) && section in ["talks", "vip", "project"]]) > 0]
+          | order(year desc)[0]._id
+      )] | order(startsAt asc){
       _id, startsAt, endsAt, kind, section, languages, moderator, invitationOnly,
       "slug": slug.current,
       ${styled('title')},

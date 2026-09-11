@@ -154,6 +154,7 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
       return d.isCurrent
         ? [loc('Homepage', ''), loc('Visitors info', '/visit'), loc('Floor plan', '/visit/floor-plan'), loc('Exhibitors', '/exhibitors')]
         : [
+            ...(d.ownYear ? [loc(`Edition ${d.ownYear}`, `/editions/${d.ownYear}`)] : []),
             loc('Past editions', '/editions'),
             loc('About – images', '/about/images'),
             ...(d.ownYear ? [loc(`Exhibitors ${d.ownYear}`, `/exhibitors/${d.ownYear}`)] : []),
@@ -173,8 +174,10 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
       return page ? [loc(page.title, page.href)] : [];
     }
     case 'programmeEvent': {
+      // Any year: until the current edition has a programme, the tabs show
+      // the newest edition's (getProgramme), so a past event can be the one shown.
       const tab = d.section ? EVENT_TABS[d.section] : undefined;
-      return tab && !past && d.startsAt ? [loc(tab.title, tab.href)] : [];
+      return tab && d.startsAt ? [loc(tab.title, tab.href)] : [];
     }
     case 'laureate':
       return past ? [] : [loc('Art prize – laureates', '/art-prize/laureates')];

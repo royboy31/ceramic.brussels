@@ -96,9 +96,9 @@ const PAGES = {
   'hotel-deal': 'visit',
   'exhibition-pass': 'partners/event',
   faq: 'visit/faq',
-  // earlier editions' one-offs
-  'focus-espana': 'editions',
-  'ideat-special-prize': 'editions',
+  // earlier editions' one-offs, on their year's archive page
+  'focus-espana': 'editions/2026',
+  'ideat-special-prize': 'editions/2025',
 };
 
 /** Old URLs under /{lang}/ that the export does not carry: routes and aliases from the inventory. */
@@ -121,10 +121,10 @@ const ALIASES = {
   press: 'about/press',
   pasteditions: 'editions',
   // Linked from the old sitemap and a 2024 programme entry; only the /pasteditions/ form ever worked.
-  awards: 'editions',
-  collaborations: 'editions',
-  magazine: 'editions',
-  '1st-edition': 'editions',
+  awards: 'editions/2025',
+  collaborations: 'editions/2024',
+  magazine: 'editions/2024',
+  '1st-edition': 'editions/2024',
 };
 
 /** Language-less URLs the old sitemap listed. */
@@ -134,8 +134,8 @@ const UNPREFIXED = {
   'guest-of-honour': 'guest-of-honour',
   programme: 'programme',
   'art-prize': 'art-prize',
-  collaborations: 'editions',
-  awards: 'editions',
+  collaborations: 'editions/2024',
+  awards: 'editions/2025',
   'visitors-info': 'visit',
   contact: 'contact',
   press: 'about/press',
@@ -176,8 +176,20 @@ function generate() {
       if (to === undefined) fail(`old page "${page.slug.en}" (id ${page.id}) has no entry in PAGES`);
       for (const slug of slugsOf(page)) add(`/${lang}/${slug}`, target(lang, to));
     }
-    for (const page of legacy('pastEditions.json')) {
-      for (const slug of slugsOf(page)) add(`/${lang}/pasteditions/${slug}`, target(lang, 'editions'));
+    // Each past-edition page lands on its year's archive page: the old
+    // records hang under a root record whose slug is the year. A French or
+    // Dutch slug can repeat another year's English one ("programme-2" is
+    // 2024's programme in English), so the page that owns a slug in English
+    // claims it first and the others only take slugs still free.
+    const past = legacy('pastEditions.json');
+    for (const page of past) {
+      if (page.slug?.en) add(`/${lang}/pasteditions/${page.slug.en}`, target(lang, pastEditionPath(page)));
+    }
+    for (const page of past) {
+      for (const slug of slugsOf(page)) {
+        const from = `/${lang}/pasteditions/${slug}`;
+        if (!rules.has(from)) add(from, target(lang, pastEditionPath(page)));
+      }
     }
     for (const [from, to] of Object.entries(ALIASES)) add(`/${lang}${from ? '/' + from : ''}`, target(lang, to));
   }
@@ -199,6 +211,15 @@ function generate() {
     `[legacy-redirects] ${rules.size} rules appended to dist/_redirects` +
       (live.length ? `; ${live.length} old URLs are new pages too and keep their new meaning` : ''),
   );
+}
+
+/** The year archive a past-edition record belongs to: its root record's slug is the year. */
+function pastEditionPath(page) {
+  const raw = JSON.parse(fs.readFileSync(path.resolve('legacy-export/normalized/pastEditions.json'), 'utf8'));
+  const list = Array.isArray(raw) ? raw : Object.values(raw);
+  const root = page.parentId ? list.find((r) => r.id === page.parentId) : page;
+  const year = String(root?.slug?.en ?? root?.slug ?? '');
+  return /^\d{4}$/.test(year) ? `editions/${year}` : 'editions';
 }
 
 function slugsOf(page) {

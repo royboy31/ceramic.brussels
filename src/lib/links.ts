@@ -1,6 +1,6 @@
 import type { LocaleId } from './locales';
 import { localePath } from './i18n';
-import { hubTabPath } from './hubs';
+import { HUBS, hubTabPath } from './hubs';
 
 /**
  * Turns a `link` object from Sanity (see src/sanity/schemaTypes/objects/link.ts)
@@ -69,9 +69,16 @@ export function resolveLink(lang: LocaleId, link: any): ResolvedLink | null {
   }
 
   // 'route', and anything unset, points at a built-in section.
-  const route = link.route ?? '';
-  const path = link.anchor ? hubTabPath(route, link.anchor) : route;
-  return { href: localePath(lang, path), label, external: false, arrow: '→' };
+  return { href: localePath(lang, routePath(link.route ?? '', link.anchor)), label, external: false, arrow: '→' };
+}
+
+/**
+ * A built-in route with its "tab or anchor": a hub's tab, or on a route
+ * without tabs a sub-page - "exhibitors" + "2026" is the 2026 exhibitor list.
+ */
+function routePath(route: string, anchor?: string): string {
+  if (!anchor) return route;
+  return HUBS[route] ? hubTabPath(route, anchor) : `${route}/${anchor}`;
 }
 
 /** Same for navigation items, which use `page`/`url` rather than `internal`/`external`. */
@@ -85,9 +92,7 @@ export function resolveNavItem(lang: LocaleId, item: any): ResolvedLink | null {
     const path = pagePath({ section: item.pageSection, tab: item.pageTab, slug: item.pageSlug });
     return { href: localePath(lang, path), label: item.label, external: false, arrow: '→' };
   }
-  const route = item.route ?? '';
-  const path = item.anchor ? hubTabPath(route, item.anchor) : route;
-  return { href: localePath(lang, path), label: item.label, external: false, arrow: '→' };
+  return { href: localePath(lang, routePath(item.route ?? '', item.anchor)), label: item.label, external: false, arrow: '→' };
 }
 
 /** "Artist, *Title*, 2024" from a figure's caption parts, as plain strings. */

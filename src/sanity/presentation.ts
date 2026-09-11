@@ -63,6 +63,7 @@ const mainDocuments = defineDocuments([
   },
   { route: `${P}/:lang${LANG}/news/:slug`, filter: `_type == "newsItem" && slug.current == $slug` },
   { route: `${P}/:lang${LANG}/editions`, filter: `_type == "edition" && isCurrent == true` },
+  { route: `${P}/:lang${LANG}/editions/:year(\\d{4})`, filter: `_type == "edition" && string(year) == $year` },
 
   // Standalone pages, with a slug in whichever language the URL is in.
   {

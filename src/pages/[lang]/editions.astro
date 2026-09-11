@@ -64,7 +64,11 @@ const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key]
                 <div class="about">
                   <p class="year">{[edition.year, edition.ordinal].filter(Boolean).join(' · ')}</p>
                   <h2>
-                    {edition.title ?? `ceramic brussels ${edition.year}`}
+                    {edition.isCurrent ? (
+                      (edition.title ?? `ceramic brussels ${edition.year}`)
+                    ) : (
+                      <a href={localePath(lang, `editions/${edition.year}`)}>{edition.title ?? `ceramic brussels ${edition.year}`} →</a>
+                    )}
                     {edition.isCurrent && <span class="pill current">{t('home.currentEdition')}</span>}
                   </h2>
 
