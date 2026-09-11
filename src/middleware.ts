@@ -106,8 +106,10 @@ const PLAIN_KEYS = new Set([
   // Style tab (objects/textStyle.ts), stored under each field's `style`
   'style', 'size', 'weight', 'transform', 'colour', 'background', 'align', 'marginTop', 'marginBottom',
   'lineHeight', 'letterSpacing', 'customSize', 'customColour', 'customBackground',
-  // built into ids, codes and links
-  'anchor', 'countryCode', 'instagram',
+  // built into ids, codes and links. `slug` covers the per-language page
+  // slugs (slug.en.current), which the client's own rule misses: encoded,
+  // no hub tab found its page and preview dropped every tab's own text.
+  'anchor', 'countryCode', 'instagram', 'phone', 'slug',
 ]);
 
 const stegaFilter: FilterDefault = (props) =>
