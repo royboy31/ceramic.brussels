@@ -49,11 +49,15 @@ async function preview(context: Ctx, next: Next): Promise<Response> {
     });
   }
 
+  // `studioUrl` becomes the "Open in Studio" link on every encoded string:
+  // the client appends `/intent/edit/…` to it. The Studio runs on hash
+  // routing, so it has to be `/studio/#` - with `/studio` the link was a path
+  // no file answers, and every one of them was a 404.
   const client = sanityClient.withConfig({
     token,
     useCdn: false,
     perspective: 'drafts',
-    stega: { enabled: true, studioUrl: '/studio', filter: stegaFilter },
+    stega: { enabled: true, studioUrl: '/studio/#', filter: stegaFilter },
   });
 
   // The page is read to the end *inside* the store: Astro streams a
