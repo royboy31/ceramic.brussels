@@ -19,6 +19,43 @@ components, binding each element to the field named below.
 `html pages/` is not committed (165 MB of PNGs); Lilanga has the source
 project. It is gitignored.
 
+## Status, 2026-09-11 night — `main` brought up to `kamindu`
+
+`main` was fast-forwarded from `04f77df` to `kamindu` (`84a85ed` plus the
+commit that adds this note): no merge, `main` was already contained in
+`kamindu`. That brings everything below, and the 2026-09-11 Studio work
+(sidebar by menu section, per-page fields, exhibitors per year, year
+archives, programme fallback), to production. `dev` and `lilanga` were
+left as they were.
+
+**Rolling back.** The last production deployment before this is
+`da1b5ef6` (Cloudflare Pages, 2026-09-11 10:49 UTC, built from `04f77df`).
+1. Cloudflare → Workers & Pages → ceramic-brussels → Deployments →
+   `da1b5ef6` → ⋯ → Rollback to this deployment. Instant, site and Studio
+   together, no rebuild.
+2. That holds only until the next publish rebuilds `main`, so revert in git
+   as well: `git revert --no-edit 04f77df..<the commit that adds this note>`
+   on `main`, then push. No force-push.
+3. Content: the older code ignores the key figures block's "Figures from"
+   field. If `scripts/move-artist-bio.mjs` has run, restore Marion Verboom
+   from `legacy-export/backups/move-artist-bio-2026-09-11.json` first; the
+   older guest-of-honour page expects her biography as the first text block.
+
+**What changes on the site.** Every production page (705) was compared with
+a build of this version on the same content: head tags, text, and element
+counts, with the build address and Astro's class hashes set aside. The
+exhibitor and laureates pages were also compared side by side in a browser.
+- Past-edition exhibitors move from `/exhibitors/<slug>` to
+  `/exhibitors/<year>/<slug>`, as on the old site: 432 addresses, each one
+  present under its year (pages.dev is noindex, so nothing indexed breaks).
+  With `/exhibitors/<year>` and `/editions/<year>` the site has 894 pages.
+- Event times are Brussels time (14:00, not 13:00).
+- Slideshows show every image: exhibitors, laureates, hotel, food & drinks.
+- `/editions` links each year to its own page.
+- The skip link is translated on the French and Dutch pages.
+- Nothing else differs: titles, descriptions, share images, text and
+  layout of every other page are the same.
+
 ## Status, 2026-09-11 afternoon — Studio cleaned up, SEO filled, preview links
 
 Content only; the code for it is on `kamindu` (not `main`).
