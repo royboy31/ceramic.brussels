@@ -258,6 +258,17 @@ Also in `i18n.ts`: `localePath(lang, path)` for building links, and
   both places.
 - **`EditLink.astro`** — deep-links into the Studio for the document being
   viewed. Shows in `astro dev` only, unless `PUBLIC_SHOW_EDIT_LINKS=true`.
+- **`CookieConsent.astro`** — the cookie banner, mounted by `Base.astro`
+  (never in a preview render), with a "cookie settings" pill in the footer
+  to reopen it. The trackers and their ids live in `src/lib/tracking.ts`.
+  GA4 is the old site's own property (`G-XVTPYEC66H`), so the numbers carry
+  on across the move; it loads only after the visitor accepts statistics
+  (Consent Mode v2, basic mode) and only on `www.ceramic.brussels` -
+  pages.dev, previews and localhost show the banner but send nothing
+  (`localStorage['cb-tracking-test'] = '1'` lifts that in one browser).
+  Adding a tracker: its id there, its loader in the banner's script, its
+  text in `consent.*` in all three locales, and a `CONSENT_VERSION` bump so
+  everyone is asked again.
 - **`PageSections.astro`** — renders a page-builder stack (`sections` on a
   page, the homepage or an artist) in editor order, one component per block
   type from `src/components/sections/`. Text blocks are grouped by their
