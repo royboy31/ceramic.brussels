@@ -116,7 +116,7 @@ const ALIASES = {
   'programme-3': 'partners/event',
   'awards-2': 'art-prize/awards',
   'jury-2': 'art-prize/jury',
-  contact: 'about/team',
+  contact: 'contact',
   press: 'about/press',
   pasteditions: 'editions',
   // Linked from the old sitemap and a 2024 programme entry; only the /pasteditions/ form ever worked.
@@ -136,7 +136,7 @@ const UNPREFIXED = {
   collaborations: 'editions',
   awards: 'editions',
   'visitors-info': 'visit',
-  contact: 'about/team',
+  contact: 'contact',
   press: 'about/press',
 };
 

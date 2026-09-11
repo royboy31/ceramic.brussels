@@ -88,6 +88,7 @@ exactly which fields you have; the projection is the contract.
 | Artists index and detail (no frame) | `src/pages/[lang]/artists/index.astro`, `artists/[slug].astro` | `getArtists`, `getArtist` | `artist` |
 | News list and article (no frame) | `src/pages/[lang]/news/index.astro`, `news/[slug].astro` | `getNews`, `getNewsItem` | `newsItem` |
 | Past editions (no frame) | `src/pages/[lang]/editions.astro` | `getEditions` | `edition` |
+| Contact (no frame) | `src/pages/[lang]/contact.astro` | `getMainPage('contact')`, `getSettings`, `getPeople('team')` | `page` (section `contact`), `siteSettings` (address, social, newsletter), `person` (team members with an email) |
 | Standalone page (no frame) | `src/pages/[lang]/[...slug].astro` | `getPage` | `page` without a `section`, slug per locale |
 
 Frames marked "no frame" have no Figma yet. Build them from the closest frame
