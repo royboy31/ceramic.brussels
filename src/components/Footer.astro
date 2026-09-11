@@ -10,22 +10,29 @@ interface Props {
   links: { label: string; href: string; external?: boolean }[];
   /** From Site settings; Base falls back to "© siteName, year". */
   copyright?: string;
+  /** Label of the pill that reopens the cookie banner; absent when no tracker is in use. */
+  consentLabel?: string;
 }
 
-const { siteName, links, copyright } = Astro.props;
+const { siteName, links, copyright, consentLabel } = Astro.props;
 const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
 ---
 
 <footer class="acid-wash flex min-h-20 flex-wrap items-center justify-between gap-4 px-[clamp(16px,2vw,30px)] py-5 text-sm md:text-lg">
   <p>{line}</p>
   {
-    links.length > 0 && (
-      <nav class="flex gap-3" aria-label={siteName}>
+    (links.length > 0 || consentLabel) && (
+      <nav class="flex flex-wrap gap-3" aria-label={siteName}>
         {links.map((link) => (
           <a class="rounded-full border border-black px-5 py-1" href={link.href} {...(link.external ? { rel: 'noopener noreferrer' } : {})}>
             {link.label}
           </a>
         ))}
+        {consentLabel && (
+          <button type="button" class="rounded-full border border-black px-5 py-1" data-consent-open>
+            {consentLabel}
+          </button>
+        )}
       </nav>
     )
   }

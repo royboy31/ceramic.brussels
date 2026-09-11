@@ -9,6 +9,8 @@ import EditLink from '../components/EditLink.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MenuOverlay from '../components/MenuOverlay.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+import { categoriesInUse } from '../lib/tracking';
 import { VisualEditing } from '@sanity/astro/visual-editing';
 import { isPreview } from '../lib/previewContext';
 import '../styles/design.css';
@@ -187,7 +189,14 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
       <slot />
     </main>
 
-    <Footer siteName={siteName} links={footerNav} copyright={copyright} />
+    {/* The cookie banner stays out of Studio previews: editors are not visitors. */}
+    <Footer
+      siteName={siteName}
+      links={footerNav}
+      copyright={copyright}
+      consentLabel={!preview && categoriesInUse().length > 0 ? t('consent.settings') : undefined}
+    />
+    {!preview && <CookieConsent lang={lang} />}
 
     <script>
       // The design's page behaviours, as built (html pages): the trailing

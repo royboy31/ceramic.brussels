@@ -1,0 +1,325 @@
+---
+import type { LocaleId } from '../lib/locales';
+import { useTranslations } from '../lib/i18n';
+import { CONSENT_VERSION, TRACKERS, TRACKING_HOSTS, categoriesInUse } from '../lib/tracking';
+
+/**
+ * The cookie banner. Nothing that measures anyone loads until the visitor
+ * says yes to its category; "refuse" sits beside "accept all" at the same
+ * weight, as Belgian guidance asks, and "cookie settings" in the footer
+ * reopens it, because consent has to be as easy to withdraw as to give.
+ *
+ * The categories are the trackers configured in src/lib/tracking.ts - an
+ * unused category is never offered. The choice is kept in localStorage
+ * (`cb-consent`) with the consent version, so adding a tracker asks again.
+ */
+interface Props {
+  lang: LocaleId;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const categories = categoriesInUse();
+---
+
+{
+  categories.length > 0 && (
+    <section
+      id="cookie-consent"
+      class="consent acid-wash"
+      role="dialog"
+      aria-labelledby="consent-title"
+      aria-describedby="consent-body"
+      hidden
+      data-version={CONSENT_VERSION}
+      data-hosts={TRACKING_HOSTS.join(',')}
+      data-ga4={TRACKERS.ga4}
+      data-meta-pixel={TRACKERS.metaPixel}
+    >
+      <div class="consent-text">
+        <h2 id="consent-title">{t('consent.title')}</h2>
+        <p id="consent-body">{t('consent.body')}</p>
+      </div>
+      <div class="consent-choices" data-consent-choices hidden>
+        <label>
+          <input type="checkbox" checked disabled />
+          <span>
+            <strong>{t('consent.necessary')}</strong> {t('consent.necessaryText')}
+          </span>
+        </label>
+        {categories.includes('analytics') && (
+          <label>
+            <input type="checkbox" name="analytics" />
+            <span>
+              <strong>{t('consent.analytics')}</strong> {t('consent.analyticsText')}
+            </span>
+          </label>
+        )}
+        {categories.includes('marketing') && (
+          <label>
+            <input type="checkbox" name="marketing" />
+            <span>
+              <strong>{t('consent.marketing')}</strong> {t('consent.marketingText')}
+            </span>
+          </label>
+        )}
+      </div>
+      <div class="consent-actions">
+        <button type="button" data-consent="reject">{t('consent.reject')}</button>
+        <button type="button" data-consent="customise">{t('consent.customise')}</button>
+        <button type="button" data-consent="save" hidden>{t('consent.save')}</button>
+        <button type="button" data-consent="accept">{t('consent.accept')}</button>
+      </div>
+    </section>
+  )
+}
+
+<script>
+  // Consent first, trackers second. Google's Consent Mode starts every signal
+  // at "denied", and a tracker's script is only fetched once its category is
+  // granted ("basic" consent mode: nothing reaches Google before a yes).
+  type Choice = { v: number; analytics: boolean; marketing: boolean; at: string };
+  type Categories = { analytics: boolean; marketing: boolean };
+
+  const KEY = 'cb-consent';
+  const root = document.getElementById('cookie-consent');
+
+  const storage = {
+    get(key: string) {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    },
+    set(key: string, value: string) {
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        /* private mode: the banner simply asks again next time */
+      }
+    },
+  };
+
+  if (root) {
+    const w = window as any;
+    const version = Number(root.dataset.version);
+    const ga4 = root.dataset.ga4 ?? '';
+    const metaPixel = root.dataset.metaPixel ?? '';
+    const live =
+      (root.dataset.hosts ?? '').split(',').includes(location.hostname) || storage.get('cb-tracking-test') === '1';
+
+    w.dataLayer = w.dataLayer || [];
+    w.gtag =
+      w.gtag ||
+      function () {
+        // gtag queues the arguments object itself, as Google's snippet does.
+        // eslint-disable-next-line prefer-rest-params
+        w.dataLayer.push(arguments);
+      };
+    w.gtag('consent', 'default', {
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+    });
+
+    const read = (): Choice | null => {
+      try {
+        const choice = JSON.parse(storage.get(KEY) ?? 'null');
+        return choice && choice.v === version ? choice : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const load = (src: string) => {
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = src;
+      document.head.append(s);
+    };
+    const loaded = { ga4: false, metaPixel: false };
+
+    const apply = (choice: Choice) => {
+      const state = (on: boolean) => (on ? 'granted' : 'denied');
+      w.gtag('consent', 'update', {
+        analytics_storage: state(choice.analytics),
+        ad_storage: state(choice.marketing),
+        ad_user_data: state(choice.marketing),
+        ad_personalization: state(choice.marketing),
+      });
+      if (!live) return;
+
+      if (choice.analytics && ga4 && !loaded.ga4) {
+        loaded.ga4 = true;
+        load(`https://www.googletagmanager.com/gtag/js?id=${ga4}`);
+        w.gtag('js', new Date());
+        w.gtag('config', ga4);
+      }
+
+      if (choice.marketing && metaPixel && !loaded.metaPixel) {
+        loaded.metaPixel = true;
+        if (!w.fbq) {
+          // Meta's loader, as its snippet defines it: queue calls until fbevents.js arrives.
+          const fbq: any = function () {
+            // eslint-disable-next-line prefer-rest-params
+            fbq.callMethod ? fbq.callMethod.apply(fbq, arguments) : fbq.queue.push(arguments);
+          };
+          fbq.push = fbq;
+          fbq.loaded = true;
+          fbq.version = '2.0';
+          fbq.queue = [];
+          w.fbq = w._fbq = fbq;
+          load('https://connect.facebook.net/en_US/fbevents.js');
+        }
+        w.fbq('init', metaPixel);
+        w.fbq('track', 'PageView');
+      }
+    };
+
+    /** Consent withdrawn: remove what the trackers stored, on every domain they may have used. */
+    const forget = () => {
+      const names = document.cookie
+        .split(';')
+        .map((c) => c.split('=')[0].trim())
+        .filter((name) => /^(_ga|_gid|_gat|_fbp|_fbc)/.test(name));
+      const host = location.hostname;
+      const domains = ['', host, `.${host}`, `.${host.split('.').slice(-2).join('.')}`];
+      for (const name of names) {
+        for (const domain of domains) {
+          document.cookie = `${name}=; Max-Age=0; path=/${domain ? `; domain=${domain}` : ''}`;
+        }
+      }
+    };
+
+    const save = (categories: Categories) => {
+      const before = read();
+      const choice: Choice = { v: version, ...categories, at: new Date().toISOString() };
+      storage.set(KEY, JSON.stringify(choice));
+      root.hidden = true;
+      // A script that already runs cannot be unloaded: clear its cookies and
+      // start the page again without it.
+      if ((before?.analytics && !choice.analytics) || (before?.marketing && !choice.marketing)) {
+        forget();
+        location.reload();
+        return;
+      }
+      apply(choice);
+    };
+
+    const choices = root.querySelector<HTMLElement>('[data-consent-choices]')!;
+    const box = (name: keyof Categories) => root.querySelector<HTMLInputElement>(`input[name="${name}"]`);
+    const button = (name: string) => root.querySelector<HTMLButtonElement>(`[data-consent="${name}"]`)!;
+
+    const open = (detailed: boolean) => {
+      const current = read();
+      for (const name of ['analytics', 'marketing'] as const) {
+        const input = box(name);
+        if (input) input.checked = !!current?.[name];
+      }
+      choices.hidden = !detailed;
+      button('customise').hidden = detailed;
+      button('save').hidden = !detailed;
+      root.hidden = false;
+      if (detailed) (box('analytics') ?? box('marketing'))?.focus();
+    };
+
+    button('accept').addEventListener('click', () => save({ analytics: !!box('analytics'), marketing: !!box('marketing') }));
+    button('reject').addEventListener('click', () => save({ analytics: false, marketing: false }));
+    button('customise').addEventListener('click', () => open(true));
+    button('save').addEventListener('click', () =>
+      save({ analytics: !!box('analytics')?.checked, marketing: !!box('marketing')?.checked }),
+    );
+    document.querySelectorAll('[data-consent-open]').forEach((el) => el.addEventListener('click', () => open(true)));
+
+    const current = read();
+    if (current) apply(current);
+    else open(false);
+  }
+</script>
+
+<style>
+  .consent {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px 40px;
+    padding: 24px clamp(16px, 2vw, 30px);
+    border-top: 1px solid var(--ink);
+    color: var(--ink);
+  }
+  .consent[hidden],
+  .consent [hidden] {
+    display: none;
+  }
+  .consent-text {
+    flex: 1 1 420px;
+  }
+  .consent h2 {
+    margin-bottom: 8px;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .consent p {
+    max-width: 70ch;
+    font-size: 18px;
+    line-height: 1.35;
+  }
+  .consent-choices {
+    display: grid;
+    flex: 1 1 100%;
+    gap: 10px;
+    max-width: 90ch;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+  .consent-choices label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .consent-choices input {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--ink);
+  }
+  .consent-choices strong {
+    margin-right: 6px;
+  }
+  .consent-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-left: auto;
+  }
+  .consent-actions button {
+    padding: 4px 20px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: var(--ground);
+    font-size: 18px;
+    line-height: 26px;
+    white-space: nowrap;
+  }
+  .consent-actions button:hover {
+    background: var(--acid);
+  }
+  @media (width<=700px) {
+    .consent-actions {
+      margin-left: 0;
+    }
+    .consent p {
+      font-size: 16px;
+    }
+  }
+</style>
