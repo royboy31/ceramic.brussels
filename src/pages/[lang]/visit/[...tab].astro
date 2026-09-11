@@ -3,6 +3,7 @@ import Base from '../../../layouts/Base.astro';
 import HubNav from '../../../components/HubNav.astro';
 import PageSections from '../../../components/PageSections.astro';
 import SanityImage from '../../../components/SanityImage.astro';
+import Slideshow from '../../../components/Slideshow.astro';
 import PortableText from '../../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, formatDate, localePath } from '../../../lib/i18n';
@@ -74,8 +75,9 @@ const path = hubTabPath('visit', tab);
 
 <Base
   lang={lang}
-  title={`${t('nav.visit')} — ${tabLabel}`}
+  title={page?.seo?.title ?? `${t('nav.visit')} — ${tabLabel}`}
   description={page?.seo?.description ?? intro}
+  noIndex={page?.seo?.noIndex}
   image={page?.seo?.ogImage ?? page?.cover ?? (practical ? info.heroImage : undefined)}
   path={path}
   editId={practical ? 'siteSettings' : page?._id}
@@ -228,7 +230,7 @@ const path = hubTabPath('visit', tab);
         )}
         {vendors.length ? (
           <div class="food">
-            {vendors.map((v: any) => {
+            {vendors.map((v: any, i: number) => {
               const shots = (v.images ?? []).filter((img: any) => img?.asset);
               return (
                 <article>
@@ -242,17 +244,16 @@ const path = hubTabPath('visit', tab);
                     )}
                   </h2>
                   {shots.length > 0 && (
-                    <>
-                      <figure>
-                        <SanityImage image={shots[0]} aspect={1.5} widths={[660, 1000, 1340]} sizes="(max-width: 700px) 100vw, 50vw" />
-                        <span class="dots" aria-hidden="true">
-                          {shots.map(() => (
-                            <i />
-                          ))}
-                        </span>
-                      </figure>
-                      <p class="counter">1/{shots.length}</p>
-                    </>
+                    <figure>
+                      <Slideshow
+                        images={shots}
+                        aspect={1.5}
+                        widths={[660, 1000, 1340]}
+                        sizes="(max-width: 700px) 100vw, 50vw"
+                        label={v.name}
+                        id={`vendor-${i + 1}`}
+                      />
+                    </figure>
                   )}
                   {v.description && (
                     <div class="body-24">

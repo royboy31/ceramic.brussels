@@ -3,6 +3,7 @@ import Base from '../../../layouts/Base.astro';
 import HubNav from '../../../components/HubNav.astro';
 import PageSections from '../../../components/PageSections.astro';
 import SanityImage from '../../../components/SanityImage.astro';
+import Slideshow from '../../../components/Slideshow.astro';
 import PortableText from '../../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations } from '../../../lib/i18n';
@@ -41,8 +42,9 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
 
 <Base
   lang={lang}
-  title={`${t('nav.partners')} — ${tabLabel}`}
+  title={page?.seo?.title ?? `${t('nav.partners')} — ${tabLabel}`}
   description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
   image={page?.seo?.ogImage ?? page?.cover}
   path={path}
   editId={page?._id}
@@ -67,22 +69,20 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
       listed.length === 0 ? (
         <p class="empty">{t('partners.empty')}</p>
       ) : featured ? (
-        listed.map((p: any) => (
+        listed.map((p: any, i: number) => (
           <div class="hotel">
             <figure>
-              {p.images?.[0]?.asset ? (
-                <SanityImage image={p.images[0]} widths={[670, 1000, 1340]} sizes="(max-width: 700px) 100vw, 670px" />
+              {p.images?.some((img: any) => img?.asset) ? (
+                <Slideshow
+                  images={p.images}
+                  widths={[670, 1000, 1340]}
+                  sizes="(max-width: 700px) 100vw, 670px"
+                  label={p.name}
+                  id={`hotel-${i + 1}`}
+                />
               ) : (
                 <div class="hotel-placeholder" />
               )}
-              {p.images?.length > 1 && (
-                <span class="dots" aria-hidden="true">
-                  {p.images.map(() => (
-                    <i />
-                  ))}
-                </span>
-              )}
-              {p.images?.length > 1 && <figcaption>1/{p.images.length}</figcaption>}
             </figure>
             <section>
               <h2 class="panel-title" {...styleAttrs(p.nameStyle)}>

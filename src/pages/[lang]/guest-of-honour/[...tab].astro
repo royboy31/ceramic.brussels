@@ -51,8 +51,9 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
 
 <Base
   lang={lang}
-  title={artist?.name ? `${t('nav.guestOfHonour')} — ${artist.name}` : t('nav.guestOfHonour')}
+  title={artist?.seo?.title ?? (artist?.name ? `${t('nav.guestOfHonour')} — ${artist.name}` : t('nav.guestOfHonour'))}
   description={artist?.seo?.description}
+  noIndex={artist?.seo?.noIndex}
   path={path}
   image={artist?.seo?.ogImage ?? artist?.portrait}
   editId={artist?._id}

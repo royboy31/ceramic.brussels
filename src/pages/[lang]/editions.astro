@@ -83,7 +83,11 @@ const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key]
                     {edition.exhibitorCount > 0 && (
                       <div>
                         <dt>{t('editions.exhibitorCount')}</dt>
-                        <dd>{edition.exhibitorCount}</dd>
+                        <dd>
+                          <a href={localePath(lang, edition.isCurrent ? 'exhibitors' : `exhibitors/${edition.year}`)}>
+                            {edition.exhibitorCount} →
+                          </a>
+                        </dd>
                       </div>
                     )}
                     {edition.countryFocus && (
@@ -148,7 +152,7 @@ const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key]
       </ul>
     ) : (
       <p class="empty">
-        {s('empty')} <a href="/studio">Studio</a>
+        {s('empty')}
       </p>
     )
   }

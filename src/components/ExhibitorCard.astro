@@ -2,6 +2,7 @@
 import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
 import SanityImage from './SanityImage.astro';
+import { exhibitorPath } from '../lib/links';
 
 /**
  * A card in the exhibitor grid, as the design's exhibitors/index.html draws
@@ -56,7 +57,7 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
   data-filters={filters}
   data-tags={filters}
 >
-  <a href={localePath(lang, `exhibitors/${ex.slug}`)} class="group block">
+  <a href={localePath(lang, exhibitorPath(ex))} class="group block">
     <div class="relative aspect-[1.5] overflow-hidden bg-neutral-100">
       {
         ex.image?.asset && (

@@ -106,9 +106,10 @@ const ALIASES = {
   '': '',
   exhibitors: 'exhibitors',
   'exhibitors/2027': 'exhibitors',
-  'exhibitors/2026': 'editions',
-  'exhibitors/2025': 'editions',
-  'exhibitors/2024': 'editions',
+  // The past years' exhibitor lists exist again, at the same addresses.
+  'exhibitors/2026': 'exhibitors/2026',
+  'exhibitors/2025': 'exhibitors/2025',
+  'exhibitors/2024': 'exhibitors/2024',
   'exhibitors/2023': 'editions',
   'news-and-collab': 'visit/food-drinks',
   programme: 'programme',

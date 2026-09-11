@@ -4,6 +4,7 @@ import HubNav from '../../../components/HubNav.astro';
 import Sections from '../../../components/Sections.astro';
 import PageSections from '../../../components/PageSections.astro';
 import SanityImage from '../../../components/SanityImage.astro';
+import Slideshow from '../../../components/Slideshow.astro';
 import PortableText from '../../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
@@ -48,8 +49,15 @@ const path = hubTabPath('art-prize', tab);
 const tabKey = hub.tabs.find((x) => x.slug === tab)?.label;
 const tabLabel = page?.tabLabel ?? (tabKey ? t(tabKey) : tab);
 
-const textSections: any[] = (page?.sections ?? []).filter((s: any) => s?._type === 'contentSection');
-const otherSections: any[] = (page?.sections ?? []).filter((s: any) => s?._type !== 'contentSection');
+/** The stack in the editor's order, runs of text blocks drawn two across as the design does. */
+const runs: { text: boolean; items: any[] }[] = [];
+for (const s of page?.sections ?? []) {
+  const text = s?._type === 'contentSection';
+  const last = runs[runs.length - 1];
+  if (last && last.text === text) last.items.push(s);
+  else runs.push({ text, items: [s] });
+}
+const firstText = runs.findIndex((r) => r.text);
 const closing: any[] = (page?.images ?? []).filter((img: any) => img?.asset);
 
 /** "A and B", "A, B and C" - the design writes "and". */
@@ -64,8 +72,9 @@ const captionOf = (img: any, fallback?: string) => ({
 
 <Base
   lang={lang}
-  title={`${t('nav.artPrize')} — ${tabLabel}`}
+  title={page?.seo?.title ?? `${t('nav.artPrize')} — ${tabLabel}`}
   description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
   path={path}
   theme="acid"
   image={page?.seo?.ogImage ?? page?.cover}
@@ -106,15 +115,19 @@ const captionOf = (img: any, fallback?: string) => ({
           {page?.intro && <p {...styleAttrs(page.introStyle)}>{page.intro}</p>}
         </div>
 
-        {textSections.length > 0 && <Sections lang={lang} sections={textSections} columns={2} statementFirst class="blocks" />}
+        {runs.map((run, i) =>
+          run.text ? (
+            <Sections lang={lang} sections={run.items} columns={2} statementFirst={i === firstText} class="blocks" />
+          ) : (
+            <PageSections lang={lang} sections={run.items} />
+          ),
+        )}
 
         {page?.body && (
           <div class="body-24 blocks">
             <PortableText value={page.body} fieldStyle={page.bodyStyle} />
           </div>
         )}
-
-        {otherSections.length > 0 && <PageSections lang={lang} sections={otherSections} />}
 
         {closing.length > 0 && (
           <div class="gallery">
@@ -140,28 +153,31 @@ const captionOf = (img: any, fallback?: string) => ({
             return (
               <article class:list={[{ reverse: i % 2 === 1 }]}>
                 <figure>
-                  {first ? (
-                    <SanityImage image={first} sizes="(max-width: 700px) 100vw, 433px" widths={[433, 866, 1300]} />
+                  {images.length > 0 ? (
+                    <Slideshow
+                      images={images.map((img: any) => ({ ...img, caption: img.caption ?? artist.name }))}
+                      sizes="(max-width: 700px) 100vw, 433px"
+                      widths={[433, 866, 1300]}
+                      label={artist.name}
+                      id={`laureate-${i + 1}`}
+                    />
+                  ) : first ? (
+                    <>
+                      <SanityImage image={first} sizes="(max-width: 700px) 100vw, 433px" widths={[433, 866, 1300]} />
+                      <figcaption>
+                        <b>1/1</b>
+                        {(cap.who || cap.title) && (
+                          <span>
+                            {cap.who}
+                            {cap.title && `, ${cap.title}`}
+                            {cap.year && `, ${cap.year}`}
+                          </span>
+                        )}
+                      </figcaption>
+                    </>
                   ) : (
                     <div class="placeholder" />
                   )}
-                  {images.length > 0 && (
-                    <span class="dots" aria-hidden="true">
-                      {images.map(() => (
-                        <i />
-                      ))}
-                    </span>
-                  )}
-                  <figcaption>
-                    <b>1/{Math.max(images.length, 1)}</b>
-                    {(cap.who || cap.title) && (
-                      <span>
-                        {cap.who}
-                        {cap.title && `, ${cap.title}`}
-                        {cap.year && `, ${cap.year}`}
-                      </span>
-                    )}
-                  </figcaption>
                 </figure>
                 <section>
                   <div class="name">

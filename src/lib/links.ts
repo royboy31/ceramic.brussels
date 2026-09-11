@@ -22,6 +22,27 @@ const DOC_ROUTES: Record<string, string> = {
   partner: 'partners',
 };
 
+const LISTINGS = ['exhibitors', 'artists', 'news', 'contact'];
+
+/**
+ * Where an exhibitor's page is: the current edition's at /exhibitors/<slug>,
+ * a past edition's under its year, as the old site's year lists had them.
+ */
+export function exhibitorPath(ex: { slug?: string; year?: number; current?: boolean }): string {
+  return ex.current || !ex.year ? `exhibitors/${ex.slug}` : `exhibitors/${ex.year}/${ex.slug}`;
+}
+
+/**
+ * Where a `page` document is shown: a hub tab at its hub's path, a listing's
+ * main page at the listing, a standalone page at its own slug. Linking to a
+ * tab's page by its slug alone gave /en/the-fair, which no route builds.
+ */
+export function pagePath(doc: { section?: string; tab?: string; slug?: string }): string {
+  if (!doc.section) return doc.slug ?? '';
+  if (LISTINGS.includes(doc.section)) return doc.section;
+  return hubTabPath(doc.section, doc.tab);
+}
+
 export function resolveLink(lang: LocaleId, link: any): ResolvedLink | null {
   if (!link) return null;
   const label = link.label ?? '';
@@ -36,7 +57,14 @@ export function resolveLink(lang: LocaleId, link: any): ResolvedLink | null {
     if (!doc) return null;
     const base = DOC_ROUTES[doc._type];
     if (base === undefined) return null;
-    const path = doc._type === 'partner' ? base : [base, doc.slug].filter(Boolean).join('/');
+    const path =
+      doc._type === 'partner'
+        ? base
+        : doc._type === 'exhibitor'
+          ? exhibitorPath(doc)
+          : doc._type === 'page'
+            ? pagePath(doc)
+            : [base, doc.slug].filter(Boolean).join('/');
     return { href: localePath(lang, path), label, external: false, arrow: '→' };
   }
 
@@ -53,9 +81,9 @@ export function resolveNavItem(lang: LocaleId, item: any): ResolvedLink | null {
     return item.url ? { href: item.url, label: item.label, external: true, arrow: '↗' } : null;
   }
   if (item.kind === 'page') {
-    return item.pageSlug
-      ? { href: localePath(lang, item.pageSlug), label: item.label, external: false, arrow: '→' }
-      : null;
+    if (!item.pageSlug && !item.pageSection) return null;
+    const path = pagePath({ section: item.pageSection, tab: item.pageTab, slug: item.pageSlug });
+    return { href: localePath(lang, path), label: item.label, external: false, arrow: '→' };
   }
   const route = item.route ?? '';
   const path = item.anchor ? hubTabPath(route, item.anchor) : route;

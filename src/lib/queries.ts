@@ -52,7 +52,13 @@ const LINK = `{
   "external": external,
   "internal": internal->{
     _type,
-    "slug": coalesce(slug.current, slug[$lang].current, slug.${DEFAULT_LOCALE}.current)
+    "slug": coalesce(slug.current, slug[$lang].current, slug.${DEFAULT_LOCALE}.current),
+    // A hub tab or listing page lives at its hub's path, not at its slug;
+    // a past exhibitor under its year. links.ts works out which.
+    section,
+    "tab": slug.${DEFAULT_LOCALE}.current,
+    "year": edition->year,
+    "current": edition->isCurrent == true
   }
 }`;
 
@@ -319,7 +325,9 @@ const NAV_TARGET = `
   anchor,
   url,
   ${styled('label')},
-  "pageSlug": coalesce(page->slug[$lang].current, page->slug.${DEFAULT_LOCALE}.current)
+  "pageSlug": coalesce(page->slug[$lang].current, page->slug.${DEFAULT_LOCALE}.current),
+  "pageSection": page->section,
+  "pageTab": page->slug.${DEFAULT_LOCALE}.current
 `;
 
 const NAV_ITEMS = `{
@@ -423,6 +431,7 @@ const EXHIBITOR_CARD = `{
   soloShow, inCountryFocus,
   "slug": slug.current,
   "year": edition->year,
+  "current": edition->isCurrent == true,
   ${styled('countryFocusLabel', 'edition->countryFocus')},
   "image": images[0] ${IMAGE},
   "artists": artists[]->{ _id, name, "slug": slug.current },
@@ -447,30 +456,58 @@ export function getExhibitorsByYear(lang: LocaleId, year: number) {
   );
 }
 
-export function getExhibitorSlugs() {
-  return run<{ slug: string }[]>(
-    `*[_type == "exhibitor" && defined(slug.current)]{ "slug": slug.current }`,
+/**
+ * Every exhibitor page to build. The old site kept one list per year
+ * (/exhibitors, /exhibitors/2025, /exhibitors/2024), and a gallery that comes
+ * back has one record per year, often on the same slug - so the current
+ * edition's records live at /exhibitors/<slug> and a past edition's at
+ * /exhibitors/<year>/<slug>, and no record hides behind another.
+ */
+export function getExhibitorPaths() {
+  return run<{ current: string[]; past: { year: number; slug: string }[] }>(
+    `{
+      "current": *[_type == "exhibitor" && edition->isCurrent == true && defined(slug.current)].slug.current,
+      "past": *[_type == "exhibitor" && edition->isCurrent != true && defined(slug.current) && defined(edition->year)]{
+        "year": edition->year, "slug": slug.current
+      }
+    }`,
   );
 }
 
-export function getExhibitor(lang: LocaleId, slug: string) {
+const EXHIBITOR_FULL = `{
+  _id, _type, name, sortName, kind, booth, country, countryCode, city, website, instagram,
+  soloShow, inCountryFocus,
+  "slug": slug.current,
+  "year": edition->year,
+  "current": edition->isCurrent == true,
+  ${styled('countryFocusLabel', 'edition->countryFocus')},
+  ${styled('bio')},
+  ${styled('artistsText')},
+  "images": images[] ${IMAGE},
+  "artists": artists[]->{
+    _id, name, countryCode, "slug": slug.current, portrait ${IMAGE}
+  },
+  "seo": ${SEO}
+}`;
+
+/** True while statically building: every page of a type is rendered, so fetch the type once. */
+const building = () => import.meta.env.PROD && !isPreview();
+
+/**
+ * One exhibitor: the current edition's with this slug, or with `year`, that
+ * year's. A build fetches every exhibitor once per language and picks from
+ * that, rather than one request per page (216 records, three languages).
+ */
+export async function getExhibitor(lang: LocaleId, slug: string, year?: number) {
+  const matches = (e: any) => e.slug === slug && (year ? e.year === year : e.current);
+  if (building()) {
+    const all = await run<any[]>(`*[_type == "exhibitor" && defined(slug.current)] ${EXHIBITOR_FULL}`, { lang });
+    return all.find(matches) ?? null;
+  }
   return run<any>(
-    `*[_type == "exhibitor" && slug.current == $slug][0]{
-      _id, _type, name, sortName, kind, booth, country, countryCode, city, website, instagram,
-      soloShow, inCountryFocus,
-      "slug": slug.current,
-      "year": edition->year,
-      ${styled('countryFocusLabel', 'edition->countryFocus')},
-      ${styled('bio')},
-      ${styled('artistsText')},
-      ${styled('artistsNote')},
-      "images": images[] ${IMAGE},
-      "artists": artists[]->{
-        _id, name, countryCode, "slug": slug.current, portrait ${IMAGE}
-      },
-      "seo": ${SEO}
-    }`,
-    { lang, slug },
+    `*[_type == "exhibitor" && slug.current == $slug
+        && (($year == null && edition->isCurrent == true) || edition->year == $year)][0] ${EXHIBITOR_FULL}`,
+    { lang, slug, year: year ?? null },
   );
 }
 
@@ -515,13 +552,18 @@ const ARTIST_FULL = `
     ${styled('materials')},
     image ${IMAGE}
   },
-  "exhibitors": *[_type == "exhibitor" && references(^._id)]{
-    name, booth, "slug": slug.current, "year": edition->year
+  "exhibitors": *[_type == "exhibitor" && references(^._id)] | order(edition->year desc){
+    name, booth, "slug": slug.current, "year": edition->year, "current": edition->isCurrent == true
   },
   "seo": ${SEO}
 `;
 
-export function getArtist(lang: LocaleId, slug: string) {
+/** One artist. A build fetches them all once per language, as for exhibitors. */
+export async function getArtist(lang: LocaleId, slug: string) {
+  if (building()) {
+    const all = await run<any[]>(`*[_type == "artist" && defined(slug.current)]{ ${ARTIST_FULL} }`, { lang });
+    return all.find((a) => a.slug === slug) ?? null;
+  }
   return run<any>(`*[_type == "artist" && slug.current == $slug][0]{ ${ARTIST_FULL} }`, {
     lang,
     slug,

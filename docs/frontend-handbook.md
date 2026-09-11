@@ -64,6 +64,33 @@ page now renders the design's own markup and CSS. The pieces:
 - Pages the design does not cover yet (news, artists, editions, standalone
   pages, 404) are wrapped in `.legacy-page` and keep the older look.
 
+## Changed in your files on 2026-09-11 (kamindu branch) - please review
+
+Kamindu asked for these alongside a Studio clean-up, so the site, the
+Studio and the preview agree. Small on purpose; each is worth a look when
+you merge.
+
+- **Exhibitors per year, as on the old site.** `/exhibitors/<year>` lists a
+  past edition and `/exhibitors/<year>/<slug>` is its gallery; the current
+  edition is unchanged at `/exhibitors` and `/exhibitors/<slug>`. The list
+  and the detail moved into `components/ExhibitorsListing.astro` and
+  `components/ExhibitorDetail.astro` (same markup and CSS), and
+  `exhibitors/[slug].astro` renders a year list when the segment is four
+  digits. Links go through `exhibitorPath()` (`ExhibitorCard`, the artist
+  page, the pager). `/editions` links each year's exhibitor count to its list.
+- **Slideshows are real.** The exhibitor artwork, laureates, the hotel and
+  food & drinks use `Slideshow.astro` for every image, captions included,
+  instead of the first image with decorative dots.
+- **Text blocks with no text are skipped** (`Sections.astro`): a heading
+  with nothing under it no longer renders as a bare title over a rule.
+- **Editor order kept** on about/the fair and art prize/about: text blocks
+  stay where the editor put them, in runs drawn two across as before.
+- **HubNav** draws only the tabs in `hubs.ts`; extra pills led to 404s.
+- **Hub routes** pass the page's meta title and "hide from search engines"
+  to `Base` (art prize, programme, partners, visit, guest of honour).
+- **"Skip to content"** is `common.skip` in all three languages; the public
+  empty states no longer say "Add them in the Studio".
+
 ## Page → route → data → Figma
 
 Every page's frontmatter calls helpers from `src/lib/queries.ts`. Each takes

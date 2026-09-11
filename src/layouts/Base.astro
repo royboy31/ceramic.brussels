@@ -175,7 +175,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   </head>
 
   <body class={acid ? 'acid-page' : undefined}>
-    <a class="skip" href="#main">Skip to content</a>
+    <a class="skip" href="#main">{t('common.skip')}</a>
 
     <Header lang={lang} siteName={siteName} path={path} altPaths={altPaths} datesMark={edition?.datesMark} />
     <MenuOverlay lang={lang} items={nav} siteName={siteName} newsletterUrl={settings?.newsletterUrl} />

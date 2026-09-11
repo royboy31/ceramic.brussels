@@ -80,8 +80,9 @@ const path = hubTabPath('programme', tab);
 
 <Base
   lang={lang}
-  title={`${t('nav.programme')} — ${tabLabel}`}
+  title={page?.seo?.title ?? `${t('nav.programme')} — ${tabLabel}`}
   description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
   image={page?.seo?.ogImage ?? page?.cover}
   path={path}
   editId={page?._id}

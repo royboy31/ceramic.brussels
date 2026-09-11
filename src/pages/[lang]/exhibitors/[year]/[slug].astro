@@ -1,0 +1,42 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import ExhibitorDetail from '../../../../components/ExhibitorDetail.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../../lib/locales';
+import { getExhibitor, getExhibitorPaths, getExhibitorsByYear } from '../../../../lib/queries';
+
+/**
+ * A past edition's exhibitor: /exhibitors/<year>/<slug>. A gallery that came
+ * back has one record per year, often on the same slug, so each year's record
+ * gets its own address under that year's list and none hides behind another.
+ */
+export async function getStaticPaths() {
+  const { past } = await getExhibitorPaths();
+  const keys = [...new Set(past.map((p) => `${p.year}/${p.slug}`))];
+  return LOCALE_IDS.flatMap((lang) =>
+    keys.map((key) => {
+      const [year, slug] = key.split('/');
+      return { params: { lang, year, slug } };
+    }),
+  );
+}
+
+const lang = Astro.params.lang as LocaleId;
+const year = Number(Astro.params.year);
+const slug = Astro.params.slug as string;
+
+const [exhibitor, list] = await Promise.all([getExhibitor(lang, slug, year), getExhibitorsByYear(lang, year)]);
+if (!exhibitor) return Astro.rewrite('/404');
+---
+
+<Base
+  lang={lang}
+  title={exhibitor.seo?.title ?? `${exhibitor.name} ${year}`}
+  description={exhibitor.seo?.description}
+  noIndex={exhibitor.seo?.noIndex}
+  image={exhibitor.seo?.ogImage ?? exhibitor.images?.[0]}
+  path={`exhibitors/${year}/${slug}`}
+  editId={exhibitor._id}
+  editType={exhibitor._type}
+>
+  <ExhibitorDetail lang={lang} exhibitor={exhibitor} list={list} listPath={`exhibitors/${year}`} year={year} />
+</Base>

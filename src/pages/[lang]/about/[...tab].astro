@@ -79,8 +79,14 @@ const editions = tab === 'images' ? (await getEditions(lang)).filter((e: any) =>
 const stack: any[] = page?.sections ?? [];
 const leadSection = stack[0]?._type === 'contentSection' ? stack[0] : null;
 const rest = leadSection ? stack.slice(1) : stack;
-const textRest = rest.filter((x: any) => x._type === 'contentSection');
-const otherRest = rest.filter((x: any) => x._type !== 'contentSection');
+/** The rest in the editor's order: runs of text blocks two a row, other blocks where they were put. */
+const runs: { text: boolean; items: any[] }[] = [];
+for (const section of rest) {
+  const text = section?._type === 'contentSection';
+  const last = runs[runs.length - 1];
+  if (last && last.text === text) last.items.push(section);
+  else runs.push({ text, items: [section] });
+}
 const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
 const path = hubTabPath('about', tab);
 const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'advisory', press: 'press', images: 'images' }[tab] ?? '';
@@ -90,7 +96,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
 
 <Base
   lang={lang}
-  title={`${t('nav.about')} — ${tabLabel}`}
+  title={page?.seo?.title ?? `${t('nav.about')} — ${tabLabel}`}
   description={page?.seo?.description ?? page?.intro}
   noIndex={page?.seo?.noIndex}
   image={page?.seo?.ogImage ?? page?.cover}
@@ -129,14 +135,17 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
               </figure>
               {leadSection && <Sections lang={lang} sections={[leadSection]} columns={1} textColumns={1} />}
             </div>
-            {textRest.length > 0 && (
-              <div class="two-col copy">
-                {textRest.map((section: any) => (
-                  <Sections lang={lang} sections={[section]} columns={1} textColumns={1} />
-                ))}
-              </div>
+            {runs.map((run) =>
+              run.text ? (
+                <div class="two-col copy">
+                  {run.items.map((section: any) => (
+                    <Sections lang={lang} sections={[section]} columns={1} textColumns={1} />
+                  ))}
+                </div>
+              ) : (
+                <PageSections lang={lang} sections={run.items} />
+              ),
             )}
-            {otherRest.length > 0 && <PageSections lang={lang} sections={otherRest} />}
             {closingImages.length > 0 && (
               <div class="strip">
                 {closingImages.map((img: any) => (
@@ -147,7 +156,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
           </>
         ) : (
           <p class="empty">
-            {s('pageEmpty')} <a href="/studio">Studio</a>
+            {s('pageEmpty')}
           </p>
         ))
     }
