@@ -59,7 +59,11 @@ Content only; the code for it is on `kamindu` (not `main`).
   every field; the client builds it as `studioUrl` + `/intent/edit/…`, and
   `studioUrl` was `/studio`, a path no file answers on a hash-routed Studio.
   It is `/studio/#` now (`src/middleware.ts`), which lands in the Preview
-  tool on that document and field, with the same page beside it.
+  tool on that document and field. The link also names the page it came
+  from (`preview=`), but on a hash-routed Studio the overlay puts that inside
+  the hash, where the Preview tool does not look, so it framed the site root;
+  `sanity.config.ts` moves it into the query string as the Studio boots, and
+  the same page now opens beside the field.
 - **Event times were an hour early on the site.** The date and time
   formatters in `src/lib/i18n.ts` had no time zone, so they used the
   machine's: Cloudflare builds in UTC and printed the 14:00 preview as 13:00;

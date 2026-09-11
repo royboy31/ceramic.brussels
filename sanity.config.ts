@@ -22,6 +22,32 @@ const BUILDER_TYPES = new Set(['page', 'homepage', 'artist']);
 // tab would frame a 404, and "Open preview" would open one.
 const PREVIEW = import.meta.env.PUBLIC_PREVIEW_ENABLED === 'true';
 
+/**
+ * "Open in Studio" on a preview page opened in its own tab carries the page
+ * it came from as `preview=`. On a hash-routed Studio like this one,
+ * @sanity/visual-editing puts it into the query *inside* the hash
+ * (`/studio/#/intent/edit/…?preview=…`), but the Preview tool reads it only
+ * from the real query string, so it opened the right field beside the site
+ * root instead of that page. Move it out before the Studio's router reads the
+ * URL - as a same-origin path, which is what the tool frames.
+ */
+if (typeof window !== 'undefined') {
+  const [route, query] = window.location.hash.split('?');
+  const wanted = route.startsWith('#/intent/') && query ? new URLSearchParams(query).get('preview') : null;
+  const search = new URLSearchParams(window.location.search);
+  if (wanted && !search.has('preview')) {
+    try {
+      const url = new URL(wanted, window.location.origin);
+      if (url.origin === window.location.origin) {
+        search.set('preview', url.pathname + url.search);
+        window.history.replaceState(window.history.state, '', `${window.location.pathname}?${search}${window.location.hash}`);
+      }
+    } catch {
+      // Not a URL: leave it to the tool's own fallback.
+    }
+  }
+}
+
 export default defineConfig({
   name: 'ceramic-brussels',
   title: 'Ceramic Brussels',
