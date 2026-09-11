@@ -17,6 +17,7 @@ import { TextIcon } from '@sanity/icons/Text';
 import { UsersIcon } from '@sanity/icons/Users';
 import { PERSON_GROUPS } from '../documents/person';
 import { PARTNER_TIERS } from '../../../lib/options';
+import { KeyFiguresInput } from '../../components/KeyFiguresInput';
 
 /**
  * The page builder.
@@ -346,13 +347,27 @@ export const peopleSection = defineType({
   },
 });
 
-/** The key figures table from the current edition, with an image and a link. */
+/**
+ * The key figures table, with a link under it. The figures are an edition's
+ * own (Setup → Editions → a year → Key figures), shared by every page that
+ * shows them; the block's form lists the ones it will show and links to them
+ * (KeyFiguresInput.tsx), so it no longer looks empty.
+ */
 export const keyFiguresSection = defineType({
   name: 'keyFiguresSection',
   title: 'Key figures',
   type: 'object',
   icon: BarChartIcon,
+  components: { input: KeyFiguresInput },
   fields: [
+    defineField({
+      name: 'edition',
+      title: 'Figures from',
+      type: 'reference',
+      to: [{ type: 'edition' }],
+      description:
+        'Which edition’s figures to show. Leave empty for the newest edition that has figures. The numbers themselves are edited on the edition: Setup → Editions → that year → Key figures.',
+    }),
     // Kept for existing blocks, hidden: the key figures table has no image slot.
     defineField({ name: 'image', title: 'Image next to the figures', type: 'figure', hidden: true }),
     defineField({ name: 'link', title: 'Link under the figures', type: 'link' }),
@@ -360,10 +375,10 @@ export const keyFiguresSection = defineType({
     hiddenField(),
   ],
   preview: {
-    select: { media: 'image', hidden: 'hidden' },
-    prepare: ({ media, hidden }) => ({
-      title: 'Key figures',
-      subtitle: sectionSubtitle('From the current edition', hidden),
+    select: { media: 'image', hidden: 'hidden', year: 'edition.year' },
+    prepare: ({ media, hidden, year }) => ({
+      title: year ? `Key figures ${year}` : 'Key figures',
+      subtitle: sectionSubtitle(year ? `From the ${year} edition` : 'From the newest edition with figures', hidden),
       media,
     }),
   },

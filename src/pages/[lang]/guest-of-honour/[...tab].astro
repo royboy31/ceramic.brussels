@@ -35,7 +35,11 @@ const path = hubTabPath('guest-of-honour', tab);
 
 const origin = [artist?.birthYear && `°${artist.birthYear}`, artist?.nationality].filter(Boolean).join(', ');
 const sections: any[] = (artist?.sections ?? []).filter((s: any) => s?._type === 'contentSection' && s.body);
-const [biography, ...rest] = sections;
+// The Biography field first, where an editor looks for it. A guest whose
+// biography is still the first text block of the stack (how the 2027 one was
+// seeded) keeps it from there.
+const biography = artist?.bio ? null : sections[0];
+const rest = artist?.bio ? sections : sections.slice(1);
 const works: any[] = (artist?.works ?? []).filter((w: any) => w?.image?.asset);
 const video = artist?.video?.url ? artist.video : null;
 const poster = video?.poster?.asset ? video.poster : null;

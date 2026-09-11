@@ -72,6 +72,19 @@ Content only; the code for it is on `kamindu` (not `main`).
   machine's: Cloudflare builds in UTC and printed the 14:00 preview as 13:00;
   a local build here printed 18:30; the preview Worker disagreed with both.
   They format in `Europe/Brussels` now.
+- **Editor feedback (Sanity.pdf).** "Stats not showing": the homepage's
+  key figures block held only its link, the numbers being the newest
+  edition's with figures (2026). The block now lists the figures it will
+  show, names the edition and links to it (`KeyFiguresInput.tsx`), and a
+  "Figures from" field picks the edition (empty: the newest with figures).
+  "Guest of honour biography not loading": Marion Verboom's biography was
+  seeded as the first text block of her sections, so her Biography field was
+  empty; the guest-of-honour page now reads Biography first, and
+  `scripts/move-artist-bio.mjs` moves the text there - to run once this code
+  is live on production, where the older page would put the next block in
+  its place. "Link text can't change": the Feature block's Link → Label is
+  there and editable (checked on the kamindu Studio); a change shows on the
+  site only after Publish and the rebuild that follows.
 - A preview page matches its built page otherwise: 132 pages compared
   (every page that is not a record, and two of each record type, in three
   languages), same text and structure, apart from the cookie banner, which

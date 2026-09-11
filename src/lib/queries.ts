@@ -188,7 +188,11 @@ const SECTIONS = `sections[hidden != true]{
   _type == "keyFiguresSection" => {
     image ${IMAGE},
     "link": link ${LINK},
-    "edition": *[_type == "edition" && count(keyFigures) > 0] | order(year desc)[0]{ year, "keyFigures": ${KEY_FIGURES} }
+    // The edition the editor picked, or the newest one that has figures.
+    "edition": select(
+      defined(edition) => edition->{ year, "keyFigures": ${KEY_FIGURES} },
+      *[_type == "edition" && count(keyFigures) > 0] | order(year desc)[0]{ year, "keyFigures": ${KEY_FIGURES} }
+    )
   },
   _type == "newsSection" => {
     count,
