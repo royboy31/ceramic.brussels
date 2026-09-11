@@ -43,7 +43,7 @@ export const PROGRAMME_SECTIONS = [
   { title: 'Talks', value: 'talks' },
   { title: 'Awards', value: 'awards' },
   { title: 'VIP programme', value: 'vip' },
-  { title: 'Partner project', value: 'project' },
+  { title: 'La Cambre (partner project)', value: 'project' },
 ] as const;
 
 export const NEWS_CATEGORIES = [

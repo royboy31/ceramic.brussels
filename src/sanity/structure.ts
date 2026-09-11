@@ -100,17 +100,26 @@ export const structure: StructureResolver = async (S, context) => {
           .defaultOrdering(ordering),
       );
 
-  /** A folder with one list per past edition. */
-  const pastYearsOf = (id: string, type: string, filter = 'true', ordering: { field: string; direction: 'asc' | 'desc' }[] = []) =>
-    S.listItem()
+  /** A folder with one list per edition: the past ones, or with `all`, this year's first. */
+  const byYear = (
+    id: string,
+    title: string,
+    type: string,
+    filter = 'true',
+    ordering: { field: string; direction: 'asc' | 'desc' }[] = [],
+    all = false,
+  ) => {
+    const years = all && current ? [current.year, ...pastYears] : pastYears;
+    return S.listItem()
       .id(id)
-      .title('Past years')
+      .title(title)
       .child(
         S.list()
           .id(id)
-          .title('Past years')
-          .items(pastYears.map((year) => list(`${id}-${year}`, String(year), type, `edition->year == $year && (${filter})`, { year }, ordering))),
+          .title(title)
+          .items(years.map((year) => list(`${id}-${year}`, String(year), type, `edition->year == $year && (${filter})`, { year }, ordering))),
       );
+  };
 
   /** A hub's other tab pages - the intros above its lists. Made with the hub; never created here. */
   const tabIntros = (section: string, rootSlug: string, title: string) =>
@@ -129,10 +138,10 @@ export const structure: StructureResolver = async (S, context) => {
           .initialValueTemplates([]),
       );
 
-  const currentEdition = (title: string) =>
+  const currentEdition = (id: string, title: string) =>
     current
       ? S.listItem()
-          .id(`edition-${title}`)
+          .id(id)
           .title(title)
           .schemaType('edition')
           .child(S.document().schemaType('edition').documentId(current.id))
@@ -162,7 +171,7 @@ export const structure: StructureResolver = async (S, context) => {
       folder('exhibitors', 'Exhibitors', [
         mainPage('exhibitors', 'Exhibitors page'),
         list('exhibitors-current', `Exhibitors ${thisYear}`, 'exhibitor', CURRENT, {}, byName),
-        pastYearsOf('exhibitors-past', 'exhibitor', 'true', byName),
+        byYear('exhibitors-past', 'Exhibitors, past years', 'exhibitor', 'true', byName),
       ]),
 
       folder('artists', 'Artists', [mainPage('artists', 'Artists page'), list('artists-all', 'All artists', 'artist', 'true', {}, byName)]),
@@ -174,18 +183,18 @@ export const structure: StructureResolver = async (S, context) => {
           'artist',
           '_id in *[_type == "edition" && isCurrent == true].guestOfHonour._ref',
         ),
-        currentEdition(`Choose the guest (edition ${thisYear})`),
+        currentEdition('guest-edition', `Choose the guest (edition ${thisYear})`),
       ]),
 
       folder('art-prize', 'Art prize', [
         mainPage('art-prize', 'Art prize page'),
         tabIntros('art-prize', 'about', 'Tab intros (laureates, awards, jury)'),
         list('laureates-current', `Laureates ${thisYear}`, 'laureate', CURRENT, {}, byOrder),
-        pastYearsOf('laureates-past', 'laureate', 'true', byOrder),
-        list('awards-current', `Awards ${thisYear}`, 'award', `family == "art-prize" && ${CURRENT}`, {}, byOrder),
-        pastYearsOf('awards-past', 'award', 'family == "art-prize"', byOrder),
+        byYear('laureates-past', 'Laureates, past years', 'laureate', 'true', byOrder),
+        // The awards tab shows the newest year that has any, which is often last year's.
+        byYear('awards', 'Awards by year (the site shows the newest)', 'award', 'family == "art-prize"', byOrder, true),
         list('jury-current', `Jury ${thisYear}`, 'person', `"jury" in groups && ${CURRENT}`, {}, byOrder),
-        pastYearsOf('jury-past', 'person', '"jury" in groups', byOrder),
+        byYear('jury-past', 'Jury, past years', 'person', '"jury" in groups', byOrder),
         list('partners-art-prize', 'Art prize partners', 'partner', 'tier == "art-prize"', {}, byOrder),
       ]),
 
@@ -207,7 +216,7 @@ export const structure: StructureResolver = async (S, context) => {
           'programmeEvent',
           `${CURRENT} && (!defined(startsAt) || !(section in ["talks", "vip", "project"]))`,
         ),
-        pastYearsOf('events-past', 'programmeEvent', 'true', [{ field: 'startsAt', direction: 'asc' }]),
+        byYear('events-past', 'Programme, past years', 'programmeEvent', 'true', [{ field: 'startsAt', direction: 'asc' }]),
       ]),
 
       folder('partners', 'Partners', [
@@ -229,7 +238,7 @@ export const structure: StructureResolver = async (S, context) => {
         mainPage('visit', 'Visitors info page (practical info)'),
         tabIntros('visit', 'practical-info', 'Tab intros (food & drinks, floor plan, FAQ)'),
         siteSettings('Venue, access, hotel deal, FAQ (Site settings)', 'visit-settings'),
-        currentEdition(`Opening hours, tickets, floor plan (edition ${thisYear})`),
+        currentEdition('visit-edition', `Opening hours, tickets, floor plan (edition ${thisYear})`),
         list('partners-food', 'Food & drinks', 'partner', 'tier == "food-drinks"', {}, byOrder),
       ]),
 
