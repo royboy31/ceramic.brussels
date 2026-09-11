@@ -56,6 +56,34 @@ exhibitor and laureates pages were also compared side by side in a browser.
 - Nothing else differs: titles, descriptions, share images, text and
   layout of every other page are the same.
 
+**Live and checked.** Pushed at 23:23 (`04f77df..0a13c6e`); production
+deployment `ebba4aec` served it about 5½ minutes later. All 894 live pages
+were then compared with the build tested before the push: 890 identical,
+none missing or extra; the other four (the English `/editions` pages) differ
+only in the spacing of a date range ("24–28 January" on Cloudflare,
+"24 – 28 January" in the local build), which comes from the build machine's
+date library and is what production showed before. The production Studio
+loads with the new top bar and sidebar, and the homepage's key figures
+block shows the 2026 figures with its "Edit the 2026 figures" button.
+
+**Open after this:**
+- Two content steps now unblocked, waiting for a go: the biography move
+  (`scripts/move-artist-bio.mjs`, one document) and the old-site fill
+  (`scripts/legacy-fill.mjs`: 167 images still to upload, scenography,
+  five homepage cards, the seven placeholder 2027 events removed - the
+  programme now falls back to 2026, so nothing empties).
+- Feedback item "link text can't change": the field is there and editable;
+  ask the tester how they tried (a change needs Publish, then the rebuild).
+- Share links went with the Presentation tool; add a "Copy share link"
+  action if partners still need draft approval links.
+- `dev` and `lilanga` are behind `main`; Lilanga resets onto `main` before
+  his next PR. Tell him what changed in his files today: `i18n.ts` (Brussels
+  time zone), the guest-of-honour page (Biography first), the exhibitor
+  pages and slideshows from earlier today.
+- Small ones: the Users screen still uses `Stack space`, which this
+  `@sanity/ui` ignores (no spacing); `tabs.partners` has no Dutch string;
+  fifteen addresses have no document to hold SEO.
+
 ## Status, 2026-09-11 afternoon — Studio cleaned up, SEO filled, preview links
 
 Content only; the code for it is on `kamindu` (not `main`).
