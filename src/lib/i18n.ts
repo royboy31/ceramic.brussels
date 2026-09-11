@@ -535,6 +535,14 @@ export function localePath(lang: LocaleId, path = ''): string {
   return clean ? `/${lang}/${clean}` : `/${lang}`;
 }
 
+/**
+ * The fair's own clock. Without it, Intl formats in the time zone of whatever
+ * machine renders the page: Cloudflare builds in UTC, so a 14:00 preview
+ * printed as 13:00 on the site, a laptop in Colombo printed 18:30, and the
+ * preview Worker (UTC again) disagreed with a local build.
+ */
+const TIME_ZONE = 'Europe/Brussels';
+
 export function formatDate(value: string | undefined, lang: LocaleId): string {
   if (!value) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
@@ -542,6 +550,7 @@ export function formatDate(value: string | undefined, lang: LocaleId): string {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+    timeZone: TIME_ZONE,
   }).format(new Date(value));
 }
 
@@ -552,13 +561,14 @@ export function formatDateRange(start: string, end: string, lang: LocaleId): str
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+    timeZone: TIME_ZONE,
   }).formatRange(new Date(start), new Date(end));
 }
 
 export function formatTime(value: string | undefined, lang: LocaleId): string {
   if (!value) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
-  return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(
+  return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone: TIME_ZONE }).format(
     new Date(value),
   );
 }
@@ -567,7 +577,7 @@ export function formatTime(value: string | undefined, lang: LocaleId): string {
 export function formatDay(value: string | undefined, lang: LocaleId): string {
   if (!value) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
-  return new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long' }).format(
+  return new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', timeZone: TIME_ZONE }).format(
     new Date(value),
   );
 }
