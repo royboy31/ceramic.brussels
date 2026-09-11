@@ -20,6 +20,7 @@ export const BUILT_IN_ROUTES = [
   { title: 'Awards', value: 'awards' },
   { title: 'Press', value: 'press' },
   { title: 'Past editions', value: 'editions' },
+  { title: 'Contact', value: 'contact' },
 ] as const;
 
 export type RouteValue = (typeof BUILT_IN_ROUTES)[number]['value'];
@@ -42,7 +43,11 @@ export const PAGE_SECTIONS = [
   { title: 'Exhibitors', value: 'exhibitors' },
   { title: 'Artists', value: 'artists' },
   { title: 'News', value: 'news' },
+  { title: 'Contact', value: 'contact' },
 ] as const;
 
-/** The listing routes: no tabs, one page per section, the list itself is code. */
-export const LISTING_SECTIONS = ['exhibitors', 'artists', 'news'] as const;
+/**
+ * The listing routes: no tabs, one page per section, the list itself is code.
+ * Contact's "list" is the addresses: Site settings and the team's emails.
+ */
+export const LISTING_SECTIONS = ['exhibitors', 'artists', 'news', 'contact'] as const;

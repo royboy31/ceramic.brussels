@@ -173,13 +173,13 @@ the right tab. The shared pieces are `HubNav`, `Sections`, `Slideshow`,
 
 **Main pages in the Studio.** The sidebar's first entry, **Main pages**,
 holds every top-level page — Homepage, Exhibitors, Artists, Guest of honour,
-Art prize, Programme, Partners, Visitors info, About, News — each opening the
+Art prize, Programme, Partners, Visitors info, About, News, Contact — each opening the
 document that page is made from, the way Homepage does; the folder keeps
 "Exhibitors" from appearing twice in one list next to the exhibitor documents (`src/sanity/mainPages.ts`, wired in
 `structure.ts`). For a hub that is the first tab's page: the hub URL *is*
 the first tab, so `/en/about` and the "the fair" document are one page and
 there is no separate parent to edit. For a listing route (exhibitors,
-artists, news) it is the one `page` in that section, whose lead paragraph,
+artists, news, contact) it is the one `page` in that section, whose lead paragraph,
 SEO and section stack wrap the list the route generates (`getMainPage` in
 `queries.ts`); the list itself stays code. The entries look the document
 up when the sidebar loads; a section with none yet opens a fresh document

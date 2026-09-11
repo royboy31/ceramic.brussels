@@ -48,8 +48,9 @@ onto `main`:
   one hop onto a 200. The root now goes straight to `/en/`; it was two hops.
   Judgement calls, each one line of the map: an old URL that is also a new
   page keeps its new meaning (`/en/programme` was food & drinks, now the
-  programme hub). Past exhibitor years go to `/editions/`. `/contact` goes to
-  about → team, and the exhibition pass to partners → event.
+  programme hub). Past exhibitor years go to `/editions/`. `/contact` is a page
+  of its own again (`src/pages/[lang]/contact.astro`, 2026-09-11; it went to
+  about → team before), and the exhibition pass goes to partners → event.
 
 **At cutover:** run `node scripts/legacy-redirects.mjs --check
 https://www.ceramic.brussels` (and `curl -I` to confirm no noindex there),
