@@ -19,6 +19,57 @@ components, binding each element to the field named below.
 `html pages/` is not committed (165 MB of PNGs); Lilanga has the source
 project. It is gitignored.
 
+## Status, 2026-09-11 afternoon — Studio cleaned up, SEO filled, preview links
+
+Content only; the code for it is on `kamindu` (not `main`).
+
+- **Studio clean-up applied** (`scripts/studio-cleanup.mjs`, one
+  transaction at 15:31). 38 documents deleted: the four invented press
+  clippings, the two "[SAMPLE]" drafts, a test document, the programme
+  "awards" tab page, the "public opening" events (opening hours, not
+  events) and the second copy of each 2024 event. 7 patched: Modern Shapes
+  2025 merged into one record ("B17 and B26"), the three 2027 laureates lose
+  the images copied from the 2026 ones, the Exhibitors page loses its three
+  empty blocks, gallery applications gets its text as a block, the JotForm
+  form and a button, and the 2026 edition gets the 2026 floor plan PDF.
+  Backup: `legacy-export/backups/studio-cleanup-2026-09-11.json`. Live on
+  production after one rebuild.
+- **The old-site fill (`scripts/legacy-fill.mjs`) did not run.** The session
+  running it dropped during the uploads (14 of 181 images uploaded and
+  cached, nothing written), which also left the rebuild webhook switched
+  off until it was noticed and switched back on. It is held on purpose:
+  it deletes the seven placeholder 2027 events, and `main`'s programme
+  query only reads the current edition, so production's talks/VIP/awards
+  tabs would go empty. Order: `kamindu`'s code onto `main` first (the
+  programme falls back to 2026 there), then the fill, then one rebuild.
+- **Every SEO block is filled** (`scripts/fill-seo.mjs`, transaction
+  `xLhu35w7OxU85WRZ5kT7au`): meta title, description and share image on 281
+  documents (18 pages, 44 artists, 215 exhibitors, 3 news, the homepage and
+  its draft) plus Site settings' default description, each taken from what
+  the built page renders, per language. Before, not one document had any.
+  A rebuild afterwards rendered all 896 pages with identical titles,
+  descriptions and share images. Left empty on purpose: Marion Verboom's
+  title (her artist page and the guest-of-honour hub title her
+  differently). Fifteen addresses have no document to hold SEO: the artists,
+  news and contact index pages (no main page yet), the five partner tabs,
+  `/editions` and its years, `/exhibitors/<year>`. On production only, until
+  `kamindu` reaches `main`, past-year exhibitors' titles carry the year.
+- **"Open in Studio" from a preview tab 404ed.** A preview opened in its own
+  tab (the Preview tab's "open in new tab") shows an Open in Studio link on
+  every field; the client builds it as `studioUrl` + `/intent/edit/…`, and
+  `studioUrl` was `/studio`, a path no file answers on a hash-routed Studio.
+  It is `/studio/#` now (`src/middleware.ts`), which lands in the Preview
+  tool on that document and field, with the same page beside it.
+- **Event times were an hour early on the site.** The date and time
+  formatters in `src/lib/i18n.ts` had no time zone, so they used the
+  machine's: Cloudflare builds in UTC and printed the 14:00 preview as 13:00;
+  a local build here printed 18:30; the preview Worker disagreed with both.
+  They format in `Europe/Brussels` now.
+- A preview page matches its built page otherwise: 132 pages compared
+  (every page that is not a record, and two of each record type, in three
+  languages), same text and structure, apart from the cookie banner, which
+  a preview leaves out on purpose.
+
 ## Status, 2026-09-11 — old URLs redirected; pages.dev out of search
 
 `main` is `6417b67`, live on ceramic-brussels.pages.dev (deployment
