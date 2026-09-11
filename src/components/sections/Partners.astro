@@ -42,10 +42,14 @@ const display = section.display === 'list' ? 'list' : 'logos';
             {partners.map((p: any) =>
               p.url ? (
                 <a href={p.url} rel="noopener noreferrer" target="_blank" aria-label={p.name}>
-                  {p.logo?.asset ? <SanityImage image={p.logo} widths={[240, 480]} sizes="190px" loading="lazy" /> : <span>{p.name}</span>}
+                  {p.logo?.asset ? (
+                    <SanityImage image={p.logo} widths={[240, 480]} sizes="190px" loading="lazy" placeholder={false} />
+                  ) : (
+                    <span>{p.name}</span>
+                  )}
                 </a>
               ) : p.logo?.asset ? (
-                <SanityImage image={p.logo} widths={[240, 480]} sizes="190px" loading="lazy" />
+                <SanityImage image={p.logo} widths={[240, 480]} sizes="190px" loading="lazy" placeholder={false} />
               ) : (
                 <span>{p.name}</span>
               ),
@@ -83,8 +87,20 @@ const display = section.display === 'list' ? 'list' : 'logos';
   .partners {
     margin-top: 65px;
   }
+  /*
+   * The design's row is three logos spread with `space-around`. It says
+   * nothing about a partner with no logo file, and the CMS has several: their
+   * names fall back to text, so the row wraps and keeps a gap rather than
+   * letting two long names overlap where `space-around` runs out of room.
+   */
   .logos {
+    flex-wrap: wrap;
     justify-content: space-around;
+    align-items: center;
+    gap: 30px 40px;
+    display: flex;
+  }
+  .logos a {
     align-items: center;
     display: flex;
   }
@@ -95,7 +111,10 @@ const display = section.display === 'list' ? 'list' : 'logos';
     max-height: 100px;
   }
   .logos span {
+    max-width: 190px;
+    text-align: center;
     font-size: 24px;
+    line-height: 1.1;
     letter-spacing: -0.03em;
   }
 

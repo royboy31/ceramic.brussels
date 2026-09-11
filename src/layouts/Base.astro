@@ -339,8 +339,13 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
 </html>
 
 <style is:global>
-  /* Noi Grotesk - the two weights the design uses. Swap these two files when
-     the licensed (non-trial) cut arrives; nothing else needs to change. */
+  /* Noi Grotesk - the two weights the design uses. These are the licensed cut
+     the client supplied (Noi Grotesk Fix, version 2.000), converted to WOFF2
+     from the desktop TTFs; the raw package stays out of the repo. It replaced
+     the trial cut on 2026-09-09. Same em, ascender, descender and cap height,
+     so nothing needed re-measuring - but the advances differ by 1-2%, and the
+     trial carried no accents, curly quotes, dashes or arrows at all, so
+     everything outside plain ASCII used to fall back to Helvetica. */
   @font-face {
     font-family: 'Noi Grotesk';
     src: url('/fonts/noi-grotesk-400.woff2') format('woff2');
