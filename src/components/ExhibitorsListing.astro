@@ -55,6 +55,13 @@ const filters = [
     has: (ex: any) => ex.kind === 'jury-prize',
   },
 ].filter((f) => exhibitors.some(f.has));
+
+/** The edition's catalogue, overview and floor plan, as the old site's year pages linked them. */
+const links = [
+  edition?.catalogueUrl && { href: edition.catalogueUrl, label: t('home.catalogue').toLowerCase() },
+  edition?.overviewUrl && { href: edition.overviewUrl, label: t('editions.overview') },
+  edition?.fairMapUrl && { href: edition.fairMapUrl, label: t('tabs.floorPlan') },
+].filter(Boolean) as { href: string; label: string }[];
 ---
 
 <div class="page-grid py-2 md:py-4">
@@ -69,11 +76,18 @@ const filters = [
     )
   }
   {
-    year && currentYear && (
-      <p class="col-span-full current-link">
-        <a href={localePath(lang, 'exhibitors')}>
-          {t('nav.exhibitors').toLowerCase()} {currentYear} →
-        </a>
+    (links.length > 0 || (year && currentYear)) && (
+      <p class="col-span-full edition-links">
+        {year && currentYear && (
+          <a href={localePath(lang, 'exhibitors')}>
+            {t('nav.exhibitors').toLowerCase()} {currentYear} →
+          </a>
+        )}
+        {links.map((l) => (
+          <a href={l.href} target="_blank" rel="noopener noreferrer">
+            {l.label} ↗
+          </a>
+        ))}
       </p>
     )
   }
@@ -153,11 +167,14 @@ const filters = [
   .empty {
     margin: 0 30px 2rem;
   }
-  .current-link {
+  .edition-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
     margin-top: 18px;
     font-size: clamp(1rem, 2vw, 1.75rem);
   }
-  .current-link a {
+  .edition-links a {
     border: 1px solid;
     border-radius: 999px;
     padding: 3px 18px;

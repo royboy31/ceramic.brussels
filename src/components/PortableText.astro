@@ -1,6 +1,7 @@
 ---
 import SanityImage from './SanityImage.astro';
 import { styleAttrs } from '../lib/textStyle';
+import { normalizeHref } from '../lib/links';
 
 /**
  * Minimal Portable Text renderer - blocks, lists, marks and inline figures.
@@ -60,7 +61,7 @@ function renderSpans(block: any): string {
         }
         // Anything else is a mark definition key - most often a link.
         const def = defs.find((d) => d._key === mark);
-        const href = def?.href ?? def?.external;
+        const href = normalizeHref(def?.href ?? def?.external);
         if (href) {
           const external = /^https?:\/\//.test(href);
           const attrs = external ? ' target="_blank" rel="noopener noreferrer"' : '';

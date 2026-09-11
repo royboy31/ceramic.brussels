@@ -98,6 +98,25 @@ export function captionParts(image: any): { caption?: string; workTitle?: string
 
 export function instagramUrl(handle: string | undefined): string | undefined {
   if (!handle) return undefined;
-  if (/^https?:\/\//.test(handle)) return handle;
-  return `https://www.instagram.com/${handle.replace(/^@/, '')}/`;
+  const h = handle.trim();
+  if (/^https?:\/\//.test(h)) return h;
+  // "instagram.com/name" and "www.instagram.com/name/" as well as "@name" and "name".
+  const name = h.replace(/^(www\.)?instagram\.com\//i, '').replace(/^@/, '').replace(/\/+$/, '');
+  return `https://www.instagram.com/${name}/`;
+}
+
+/**
+ * A link typed into rich text as it would be typed into a browser:
+ * "www.art-sc.com", "instagram.com/jules_bouteleux/", "vip@ceramic.brussels",
+ * with stray spaces. Without a scheme the browser reads such an href as a
+ * path on this site and lands on a 404 (the laureates page did), so bare
+ * domains get https:// and bare addresses mailto:. Anything else is kept.
+ */
+export function normalizeHref(href: string | undefined): string | undefined {
+  const h = href?.trim();
+  if (!h) return undefined;
+  if (/^(https?:|mailto:|tel:|\/|#)/i.test(h)) return h;
+  if (/^[^\s@/]+@[^\s@/]+\.[a-z]{2,}$/i.test(h)) return `mailto:${h}`;
+  if (/^[\w-]+(\.[\w-]+)+(\/|$|\?)/.test(h)) return `https://${h}`;
+  return h;
 }

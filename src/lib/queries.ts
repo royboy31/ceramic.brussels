@@ -416,6 +416,7 @@ export function getEditions(lang: LocaleId) {
   return run<any[]>(
     `*[_type == "edition"] | order(year desc){
       ${EDITION_CORE},
+      "fairMapUrl": fairMap.asset->url,
       "film": film ${VIDEO},
       "images": images[] ${IMAGE},
       "exhibitorCount": count(*[_type == "exhibitor" && references(^._id)])

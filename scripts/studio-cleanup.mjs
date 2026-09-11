@@ -28,6 +28,15 @@
  * - Clears the three empty starter blocks from the Exhibitors page, which
  *   showed as bare headings under the exhibitor list.
  *
+ * And two gaps from the 2026-09-10 audit against the old site:
+ * - Gallery applications said "through the form below" with no form. The
+ *   old site's form is JotForm; the page gets its text as a block, the form
+ *   embedded under it, and a button to the form - all editable blocks.
+ *   (A standalone page draws its blocks before its body, so the text moves
+ *   into a block to stay above the form.)
+ * - The 2026 floor plan PDF from the old site's scenography page goes onto
+ *   the 2026 edition, so /exhibitors/2026 links it as the old year page did.
+ *
  *   node scripts/studio-cleanup.mjs           plan and back up, write nothing
  *   node scripts/studio-cleanup.mjs --apply   write, in one transaction
  *
@@ -91,8 +100,13 @@ const MODERN_DROP = 'exhibitor-2025-modern-shapes';
 const LAUREATES = ['laureate-2027-daria-kowalewska', 'laureate-2027-jules-bouteleux', 'laureate-2027-sojeong-you'];
 const MAIN_EXHIBITORS = 'main-exhibitors';
 
+const APPLICATIONS = 'demo-page-gallery-applications';
+const APPLICATION_FORM = 'https://pci.jotform.com/form/260703051074042';
+const EDITION_2026 = 'demo-edition-2026';
+const PLAN_2026 = 'https://ceramic.brussels/storage/uploads/b522b177-3e60-4e3d-bd89-64c96a100226/CB26_PLAN_Site-web_A4.pdf';
+
 const withDrafts = (ids) => ids.flatMap((id) => [id, `drafts.${id}`]);
-const touched = [...DELETE, MODERN_KEEP, ...LAUREATES, MAIN_EXHIBITORS];
+const touched = [...DELETE, MODERN_KEEP, ...LAUREATES, MAIN_EXHIBITORS, APPLICATIONS, EDITION_2026];
 
 const docs = await client.fetch(`*[_id in $ids]`, { ids: withDrafts(touched) });
 const byId = Object.fromEntries(docs.map((d) => [d._id, d]));
@@ -143,9 +157,50 @@ for (const id of withDrafts([MAIN_EXHIBITORS]).filter((id) => byId[id]?.sections
   console.log(`patch ${id}: remove ${byId[id].sections.length} empty blocks`);
 }
 
+// Gallery applications: text, then the form, then a button to it.
+for (const id of withDrafts([APPLICATIONS]).filter((id) => byId[id])) {
+  const doc = byId[id];
+  if ((doc.sections ?? []).some((s) => s._type === 'embedSection')) {
+    console.log(`skip ${id}: already has an embedded form`);
+    continue;
+  }
+  const blocks = [
+    ...(doc.body ? [{ _key: 'applytext', _type: 'contentSection', layout: 'single', body: doc.body }] : []),
+    { _key: 'applyform', _type: 'embedSection', url: APPLICATION_FORM, height: 1600 },
+    {
+      _key: 'applybutton',
+      _type: 'linksSection',
+      variant: 'solid',
+      links: [
+        {
+          _key: 'form',
+          _type: 'link',
+          kind: 'external',
+          external: APPLICATION_FORM,
+          label: { _type: 'localeString', en: 'application form', fr: 'formulaire de candidature', nl: 'aanmeldingsformulier' },
+        },
+      ],
+    },
+  ];
+  tx.patch(id, (p) => p.setIfMissing({ sections: [] }).append('sections', blocks).unset(['body']));
+  console.log(`patch ${id}: text into a block, then the JotForm embed and a button; body cleared`);
+}
+
+// 2026 floor plan, uploaded only when writing.
+const edition2026 = byId[EDITION_2026];
+const needsPlan = edition2026 && !edition2026.fairMap;
+console.log(needsPlan ? `patch ${EDITION_2026}: floor plan PDF from the old site` : `skip ${EDITION_2026}: has a floor plan`);
+
 if (!APPLY) {
   console.log('\ndry run - nothing written. Add --apply to write.');
   process.exit(0);
+}
+
+if (needsPlan) {
+  const pdf = Buffer.from(await (await fetch(PLAN_2026)).arrayBuffer());
+  const asset = await client.assets.upload('file', pdf, { filename: 'ceramic-brussels-2026-floor-plan.pdf', contentType: 'application/pdf' });
+  tx.patch(EDITION_2026, (p) => p.setIfMissing({ fairMap: { _type: 'file', asset: { _type: 'reference', _ref: asset._id } } }));
+  console.log(`uploaded ${asset._id} (${pdf.length} bytes)`);
 }
 const result = await tx.commit({ visibility: 'sync' });
 console.log(`\nwritten: transaction ${result.transactionId}, ${result.results.length} mutations`);
