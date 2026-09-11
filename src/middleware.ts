@@ -1,4 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
+import type { FilterDefault } from '@sanity/client';
 import { sanityClient } from 'sanity:client';
 import { runWithPreview } from './lib/previewContext';
 import { previewToken, workerEnv } from './server/runtime';
@@ -52,7 +53,7 @@ async function preview(context: Ctx, next: Next): Promise<Response> {
     token,
     useCdn: false,
     perspective: 'drafts',
-    stega: { enabled: true, studioUrl: '/studio' },
+    stega: { enabled: true, studioUrl: '/studio', filter: stegaFilter },
   });
 
   // The page is read to the end *inside* the store: Astro streams a
@@ -85,6 +86,34 @@ async function api(context: Ctx, next: Next): Promise<Response> {
     },
   });
 }
+
+/**
+ * Which strings a preview render may stega-encode.
+ *
+ * The encoding appends invisible characters to a string so the Studio can
+ * map it back to its field. That is right for text an editor reads on the
+ * page and wrong for a value the page code compares: an encoded "talks" is
+ * not "talks", so the Talks tab rendered empty in preview, the partner tabs
+ * lost their partners, and every Style setting was ignored. The client's own
+ * filter already leaves dates, URLs, slugs and ids alone; this adds every
+ * value picked from a fixed list in the schemas, every Style setting, and the
+ * few strings that are built into links or ids.
+ */
+const PLAIN_KEYS = new Set([
+  // fixed lists (schemaTypes: options.list)
+  'section', 'tier', 'kind', 'family', 'category', 'groups', 'group', 'languages', 'route', 'appliesTo',
+  'imageSide', 'aspect', 'display', 'variant', 'layout',
+  // Style tab (objects/textStyle.ts), stored under each field's `style`
+  'style', 'size', 'weight', 'transform', 'colour', 'background', 'align', 'marginTop', 'marginBottom',
+  'lineHeight', 'letterSpacing', 'customSize', 'customColour', 'customBackground',
+  // built into ids, codes and links
+  'anchor', 'countryCode', 'instagram',
+]);
+
+const stegaFilter: FilterDefault = (props) =>
+  props.sourcePath.some((segment) => typeof segment === 'string' && PLAIN_KEYS.has(segment))
+    ? false
+    : props.filterDefault(props);
 
 function deniedPage(): string {
   return `<!doctype html>

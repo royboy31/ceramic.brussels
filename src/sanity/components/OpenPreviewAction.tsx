@@ -46,7 +46,9 @@ export const openPreviewAction: DocumentActionComponent = (props) => {
   const lang = useEditingLocale();
   const [busy, setBusy] = useState(false);
 
-  const doc = (draft ?? published) as Record<string, unknown> | null;
+  const doc = (draft ?? published) as Record<string, any> | null;
+  // Before the edition is looked up an edition-scoped document counts as
+  // current, so the action stays enabled; the click works out the real page.
   const target = doc ? previewLocations(type, previewFields(doc), lang)[0] : undefined;
 
   if (!doc) return null;
@@ -54,10 +56,10 @@ export const openPreviewAction: DocumentActionComponent = (props) => {
   return {
     label: busy ? 'Opening preview…' : 'Open preview',
     icon: EyeIcon,
-    // A page with no slug has no address yet; say so rather than hide the
-    // action and leave the editor hunting for it.
+    // No address - a page with no slug yet, or a document no page shows -
+    // says so rather than hiding the action and leaving the editor hunting.
     disabled: !target || busy,
-    title: target ? `Opens ${target.title} in a new tab` : 'Give the document a slug first',
+    title: target ? `Opens ${target.title} in a new tab` : 'No page shows this document yet',
     onHandle: async () => {
       if (!target) return;
       // Opened synchronously, inside the click, so the browser treats it as
@@ -66,11 +68,27 @@ export const openPreviewAction: DocumentActionComponent = (props) => {
       const tab = window.open('about:blank', '_blank');
       setBusy(true);
       try {
+        // A past edition's exhibitor lives under its year, and last year's
+        // jury or events are on no page: the edition decides.
+        let href = target.href;
+        const ref = doc.edition?._ref;
+        if (ref) {
+          const edition = await client.fetch<{ year?: number; isCurrent?: boolean } | null>(
+            `*[_id == $ref][0]{ year, isCurrent }`,
+            { ref },
+          );
+          const exact = previewLocations(type, { ...previewFields(doc), year: edition?.year, current: edition?.isCurrent }, lang)[0];
+          if (!exact) {
+            tab?.close();
+            return;
+          }
+          href = exact.href;
+        }
         const { secret } = await createPreviewSecret(client, SOURCE, window.location.href, user?.id);
         const url = new URL('/api/preview/enable', window.location.origin);
         url.searchParams.set(urlSearchParamPreviewSecret, secret);
         url.searchParams.set(urlSearchParamPreviewPerspective, 'drafts');
-        url.searchParams.set(urlSearchParamPreviewPathname, target.href);
+        url.searchParams.set(urlSearchParamPreviewPathname, href);
         if (tab) tab.location.href = url.toString();
         else window.open(url.toString(), '_blank');
       } catch (error) {

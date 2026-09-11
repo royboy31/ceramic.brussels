@@ -24,8 +24,14 @@ const LANG = '(en|fr|nl)';
 const mainDocuments = defineDocuments([
   { route: `${P}/:lang${LANG}`, filter: `_type == "homepage"` },
 
+  // The guest of honour's page is the artist the current edition names.
+  {
+    route: [`${P}/:lang${LANG}/guest-of-honour`, `${P}/:lang${LANG}/guest-of-honour/:tab`],
+    filter: `_type == "artist" && _id == *[_type == "edition" && isCurrent == true][0].guestOfHonour._ref`,
+  },
+
   // Hub tabs: the first tab is the hub root, the others carry their slug.
-  ...Object.values(HUBS).flatMap((hub) => [
+  ...Object.values(HUBS).filter((hub) => hub.route !== 'guest-of-honour').flatMap((hub) => [
     {
       route: `${P}/:lang${LANG}/${hub.route}/:tab`,
       filter: `_type == "page" && section == $section && slug.en.current == $tab`,
@@ -46,7 +52,15 @@ const mainDocuments = defineDocuments([
   })),
 
   { route: `${P}/:lang${LANG}/artists/:slug`, filter: `_type == "artist" && slug.current == $slug` },
-  { route: `${P}/:lang${LANG}/exhibitors/:slug`, filter: `_type == "exhibitor" && slug.current == $slug` },
+  // A past edition's exhibitor under its year; the current edition's at its slug.
+  {
+    route: `${P}/:lang${LANG}/exhibitors/:year(\\d{4})/:slug`,
+    filter: `_type == "exhibitor" && slug.current == $slug && string(edition->year) == $year`,
+  },
+  {
+    route: `${P}/:lang${LANG}/exhibitors/:slug`,
+    filter: `_type == "exhibitor" && slug.current == $slug && edition->isCurrent == true`,
+  },
   { route: `${P}/:lang${LANG}/news/:slug`, filter: `_type == "newsItem" && slug.current == $slug` },
   { route: `${P}/:lang${LANG}/editions`, filter: `_type == "edition" && isCurrent == true` },
 
