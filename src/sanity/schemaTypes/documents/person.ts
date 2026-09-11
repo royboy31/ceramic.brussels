@@ -48,7 +48,8 @@ export const person = defineType({
       type: 'localeString',
       description: 'The bold line under the name: "Director of Keramis", "co-director".',
     }),
-    countryCodeField(),
+    // Kept for existing values, hidden: no people card shows a country.
+    countryCodeField({ hidden: true }),
     defineField({ name: 'bio', title: 'Biography', type: 'localeBlock' }),
     defineField({ name: 'portrait', title: 'Portrait', type: 'figure' }),
     defineField({ name: 'website', title: 'Website', type: 'url' }),

@@ -2,9 +2,9 @@ import { HUBS } from '../lib/hubs';
 import { LISTING_SECTIONS, PAGE_SECTIONS } from './schemaTypes/objects/routes';
 
 /**
- * The main pages of the site, as the Studio's sidebar lists them next to
- * Homepage: one entry per top-level route, opening the document that page is
- * made from - the way Homepage opens its singleton.
+ * The main pages of the site: one per top-level route, the document that page
+ * is made from. Each section's folder in the sidebar opens with it, the way
+ * Homepage opens its singleton (structure.ts).
  *
  * For a hub (about, art prize…) that document is the first tab's page: the
  * hub URL is the first tab, so /en/about and "the fair" are one page and

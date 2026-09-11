@@ -56,7 +56,7 @@ export const anchorField = () =>
     name: 'anchor',
     title: 'Anchor',
     type: 'string',
-    description: 'Optional. Lets the menu link straight to this section, e.g. "team".',
+    description: 'Optional. Gives the section an address on its page, e.g. "team" makes …/about#team land on it.',
   });
 
 const headingField = (description?: string) =>
@@ -229,7 +229,8 @@ export const videoSection = defineType({
       name: 'video',
       title: 'Video',
       type: 'video',
-      description: 'YouTube or Vimeo. Leave the URL empty to show the current edition’s film.',
+      description:
+        'A YouTube link plays in the page; any other link shows the poster and opens the film in a new tab. Leave the URL empty to show the latest edition’s film.',
     }),
     anchorField(),
     hiddenField(),
@@ -352,7 +353,8 @@ export const keyFiguresSection = defineType({
   type: 'object',
   icon: BarChartIcon,
   fields: [
-    defineField({ name: 'image', title: 'Image next to the figures', type: 'figure' }),
+    // Kept for existing blocks, hidden: the key figures table has no image slot.
+    defineField({ name: 'image', title: 'Image next to the figures', type: 'figure', hidden: true }),
     defineField({ name: 'link', title: 'Link under the figures', type: 'link' }),
     anchorField(),
     hiddenField(),
@@ -623,9 +625,10 @@ export function sectionsField(
     group?: string;
     description?: string;
     types?: readonly string[];
+    hidden?: (context: { document?: Record<string, any> }) => boolean;
   } = {},
 ) {
-  const { name = 'sections', title = 'Sections', group, description, types = PAGE_SECTION_TYPES } = overrides;
+  const { name = 'sections', title = 'Sections', group, description, hidden, types = PAGE_SECTION_TYPES } = overrides;
   const has = (t: string) => types.includes(t);
   const groups = [
     { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection'] },
@@ -641,6 +644,7 @@ export function sectionsField(
     title,
     type: 'array',
     group,
+    hidden,
     description:
       description ??
       'The page, block by block. Add, remove and drag to reorder; hide a block to take it off the site without losing it.',

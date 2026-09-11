@@ -1,7 +1,5 @@
 import type { Template } from 'sanity';
-import { PAGE_SECTIONS } from './schemaTypes/objects/routes';
 import { EXHIBITOR_KINDS } from '../lib/options';
-import { isListingSection } from './mainPages';
 
 /**
  * Starting points offered in the Studio's Create menu.
@@ -33,22 +31,12 @@ const text = (key: string, heading: string, layout: 'full' | 'single' | 'half' =
 /** The three-part shape most text pages in the design use. */
 const STARTER_SECTIONS = [text('s1', 'Introduction'), text('s2', 'Details'), text('s3', 'Practical information')];
 
-/**
- * One per hub, so "new tab of the art prize" is a single click that lands in
- * the right place. Without it an editor has to know that `section` is what
- * makes a page a tab, and pick the right value from a list of seven.
+/*
+ * There are no "new tab" templates. A hub's tabs are fixed in code
+ * (src/lib/hubs.ts) and only those get a route, so a page made as an extra
+ * tab showed a pill that led to a 404. Every built-in tab already has its
+ * page, reached from its hub's folder in the sidebar.
  */
-const hubTabTemplates: Template[] = PAGE_SECTIONS.filter((hub) => !isListingSection(hub.value)).map((hub) => ({
-  id: `page-hub-${hub.value}`,
-  title: `${hub.title} — new tab`,
-  description: `A page that appears as a pill tab under ${hub.title}. Apply a template from its menu to change the layout.`,
-  schemaType: 'page',
-  value: {
-    section: hub.value,
-    order: 100,
-    sections: STARTER_SECTIONS,
-  },
-}));
 
 const pageTemplates: Template[] = [
   {
@@ -92,10 +80,14 @@ const exhibitorTemplates: Template[] = EXHIBITOR_KINDS.map((kind) => ({
 }));
 
 /**
- * The document behind a main page, made by the sidebar's "Main pages" entry
+ * The document behind a main page, made by its section folder in the sidebar
  * the first time a section has none: structure.ts passes the section and the
  * slug that makes the page the hub root, or the listing page. Parameterised,
  * so it never shows in the Create menu.
+ *
+ * It starts with no blocks. Starter blocks ("Introduction", "Details"…) were
+ * headings with no text, and publishing the page as it opened put three empty
+ * headings on the live exhibitors page (2026-09-11).
  */
 const mainPageTemplate: Template = {
   id: 'page-main',
@@ -111,8 +103,7 @@ const mainPageTemplate: Template = {
     order: 0,
     title: { en: title },
     slug: { en: { _type: 'slug', current: slug } },
-    sections: STARTER_SECTIONS,
   }),
 };
 
-export const templates: Template[] = [...hubTabTemplates, ...pageTemplates, ...exhibitorTemplates, mainPageTemplate];
+export const templates: Template[] = [...pageTemplates, ...exhibitorTemplates, mainPageTemplate];

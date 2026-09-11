@@ -34,6 +34,7 @@ export const award = defineType({
       },
       initialValue: 'art-prize',
       validation: (rule) => rule.required(),
+      description: 'Only art prize awards are on the site: the art prize "awards" tab lists the newest year’s.',
     }),
     defineField({
       name: 'edition',
@@ -47,7 +48,10 @@ export const award = defineType({
       title: 'Granted by',
       type: 'reference',
       to: [{ type: 'partner' }],
-      description: 'The institution behind the award, if it has a partner document.',
+      // Granted by, winning gallery and citation are kept for the imported
+      // data but hidden: the awards tab shows name, laureates, outcome, text
+      // and image, nothing else.
+      hidden: true,
     }),
     defineField({
       name: 'laureates',
@@ -61,8 +65,7 @@ export const award = defineType({
       title: 'Winning gallery',
       type: 'reference',
       to: [{ type: 'exhibitor' }],
-      description: 'Fair awards only.',
-      hidden: ({ document }) => document?.family !== 'fair',
+      hidden: true,
     }),
     defineField({
       name: 'outcome',
@@ -72,7 +75,7 @@ export const award = defineType({
         'What the laureate gets, continuing their name: "will present a solo show during ceramic brussels 2027".',
     }),
     defineField({ name: 'description', title: 'Description', type: 'localeBlock' }),
-    defineField({ name: 'citation', title: 'Jury citation', type: 'localeBlock' }),
+    defineField({ name: 'citation', title: 'Jury citation', type: 'localeBlock', hidden: true }),
     defineField({ name: 'image', title: 'Image', type: 'figure' }),
     defineField({ name: 'order', title: 'Order', type: 'number', initialValue: 100 }),
   ],

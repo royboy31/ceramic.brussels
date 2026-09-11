@@ -39,6 +39,8 @@ export const programmeEvent = defineType({
       type: 'string',
       options: { list: [...PROGRAMME_SECTIONS], layout: 'radio' },
       initialValue: 'talks',
+      description:
+        'The tab that lists it, for the current edition. "Awards" events are not shown anywhere: that pill leads to the art prize awards.',
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -47,7 +49,10 @@ export const programmeEvent = defineType({
       type: 'datetime',
       validation: (rule) => rule.required(),
     }),
-    defineField({ name: 'endsAt', title: 'Ends', type: 'datetime' }),
+    // Ends, location, moderator, description and "upon invitation" are kept for
+    // the imported data but hidden: the design's programme row has no place for
+    // them, so nothing an editor typed there would ever reach the site.
+    defineField({ name: 'endsAt', title: 'Ends', type: 'datetime', hidden: true }),
     defineField({
       name: 'kind',
       title: 'Type',
@@ -71,7 +76,7 @@ export const programmeEvent = defineType({
       },
       description: 'Languages the event is held in.',
     }),
-    defineField({ name: 'location', title: 'Location', type: 'localeString', description: 'e.g. talk area, hall B' }),
+    defineField({ name: 'location', title: 'Location', type: 'localeString', hidden: true }),
     defineField({
       name: 'speakers',
       title: 'Speakers',
@@ -86,14 +91,15 @@ export const programmeEvent = defineType({
       description:
         'As displayed: "with Christine Germain-Donnat (French Ministry of Culture), Bertrand Mazeirat (Musée Ariana, CH)…"',
     }),
-    defineField({ name: 'moderator', title: 'Moderator', type: 'string' }),
-    defineField({ name: 'description', title: 'Description', type: 'localeBlock' }),
+    defineField({ name: 'moderator', title: 'Moderator', type: 'string', hidden: true }),
+    defineField({ name: 'description', title: 'Description', type: 'localeBlock', hidden: true }),
     defineField({ name: 'image', title: 'Image', type: 'figure' }),
     defineField({
       name: 'invitationOnly',
       title: 'Upon invitation',
       type: 'boolean',
       initialValue: false,
+      hidden: true,
     }),
   ],
   orderings: [

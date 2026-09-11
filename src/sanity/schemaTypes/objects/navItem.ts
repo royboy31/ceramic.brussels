@@ -116,6 +116,8 @@ export const navItem = defineType({
       type: 'array',
       of: [defineArrayMember({ type: 'navChild' })],
       description: 'Shown in small type under the item in the menu overlay.',
+      // Footer links are single pills; nothing renders sub-items there.
+      hidden: ({ path }) => path[0] === 'footerItems',
     }),
   ],
   preview,

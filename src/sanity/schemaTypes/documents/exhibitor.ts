@@ -79,7 +79,7 @@ export const exhibitor = defineType({
       title: 'Country',
       type: 'string',
       group: 'main',
-      description: 'Full name, for search and the filter input.',
+      description: 'Full name. Only used to work out the two-letter code when the code above is empty.',
     }),
     defineField({
       name: 'soloShow',
@@ -128,7 +128,8 @@ export const exhibitor = defineType({
       title: 'About the presentation',
       type: 'localeBlock',
       group: 'artists',
-      description: 'The paragraph next to the artist names, about what the booth shows.',
+      // Kept for the imported data, hidden: the exhibitor page has no place for it.
+      hidden: true,
     }),
 
     /* --- images ----------------------------------------------------------- */
@@ -139,7 +140,8 @@ export const exhibitor = defineType({
       group: 'media',
       of: [defineArrayMember({ type: 'figure' })],
       options: { layout: 'grid' },
-      description: 'First image is the card image. Fill caption, work title and year on each.',
+      description:
+        'The first image is the card in the exhibitor list; all of them make the slideshow on the gallery’s page. Fill caption, work title and year on each.',
     }),
     defineField({
       name: 'importNote',

@@ -171,22 +171,42 @@ objects into hrefs, so a menu anchor like `art-prize` + `laureates` lands on
 the right tab. The shared pieces are `HubNav`, `Sections`, `Slideshow`,
 `PersonCard`, `ExhibitorCard` and `LinkPill` in `src/components/`.
 
-**Main pages in the Studio.** The sidebar's first entry, **Main pages**,
-holds every top-level page — Homepage, Exhibitors, Artists, Guest of honour,
-Art prize, Programme, Partners, Visitors info, About, News, Contact — each opening the
-document that page is made from, the way Homepage does; the folder keeps
-"Exhibitors" from appearing twice in one list next to the exhibitor documents (`src/sanity/mainPages.ts`, wired in
-`structure.ts`). For a hub that is the first tab's page: the hub URL *is*
-the first tab, so `/en/about` and the "the fair" document are one page and
-there is no separate parent to edit. For a listing route (exhibitors,
-artists, news, contact) it is the one `page` in that section, whose lead paragraph,
-SEO and section stack wrap the list the route generates (`getMainPage` in
-`queries.ts`); the list itself stays code. The entries look the document
-up when the sidebar loads; a section with none yet opens a fresh document
-with a fixed id (`main-<section>`) and the parameterised `page-main`
-template, so the first click creates it in the right place. Layouts never
-link: applying a template copies blocks in, so editing one main page cannot
-change another.
+**The Studio sidebar follows the menu** (`src/sanity/structure.ts`). One
+folder per section - Exhibitors, Artists, Guest of honour, Art prize,
+Programme, Partners, Visitors info, About, News, Contact, Other pages - in
+menu order, after Homepage. Each folder opens with the page that section is
+made from (`src/sanity/mainPages.ts`), then the records that page lists:
+this year's first, a **Past years** folder per year, and for the programme
+a folder of events the site does not show. Shared things - Site settings,
+Menu and footer, Editions, all people, all partners, all pages, Page
+templates - are under **Setup**. Every page has one entry; the few items
+that open a shared document from a second place name it ("… (Site
+settings)"). For a hub the section's page is the first tab's page: the hub
+URL *is* the first tab, so `/en/about` and the "the fair" document are one
+page. For a listing route (exhibitors, artists, news, contact) it is the
+one `page` in that section, whose lead paragraph, SEO and section stack
+wrap the list the route generates (`getMainPage` in `queries.ts`). A section
+with no page yet opens a fresh document with a fixed id (`main-<section>`)
+and the parameterised `page-main` template, which starts with no blocks.
+Layouts never link: applying a template copies blocks in.
+
+**A page form shows only what its page reads** (`src/sanity/pageKinds.ts`).
+One `page` type serves hub tabs, listing main pages and standalone pages,
+and each route reads a different part of it - the exhibitors page never
+shows Body, a laureates tab only its lead - so every page field is hidden
+where its route ignores it, and Hub and slug are read-only once set. Fields
+no page reads at all (event location and description, partner subtitle,
+award citation…) are hidden in their schemas with a comment; the data
+stays. **Change `pageKinds.ts` together with the routes.**
+
+**Exhibitors are per year, as on the old site.** A gallery that comes back
+has one `exhibitor` record per year, often on the same slug. The current
+edition's are `/exhibitors` and `/exhibitors/<slug>`; a past edition's list
+is `/exhibitors/<year>` (the old site's address) and its galleries
+`/exhibitors/<year>/<slug>`, so no record hides behind another. A
+four-digit segment in `exhibitors/[slug].astro` is a year; `exhibitorPath()`
+in `src/lib/links.ts` builds every exhibitor link. The listing and detail
+markup are `ExhibitorsListing.astro` and `ExhibitorDetail.astro`.
 
 `page` slugs are per-language, which produces genuinely translated URLs
 (`/en/about`, `/fr/a-propos`, `/nl/over`). hreflang is generated from those same
@@ -317,9 +337,10 @@ The content model follows the 2027 Figma design. The shape to keep in mind:
 
 ### Creating and duplicating documents
 
-The Create menu offers **starting points** from `src/sanity/templates.ts`: one
-"new tab" per hub (which presets `section`, the field that makes a page a tab
-at all), two standalone page shapes, and one per exhibitor kind. They set
+The Create menu offers **starting points** from `src/sanity/templates.ts`: two
+standalone page shapes and one per exhibitor kind. There are no "new tab"
+templates: a hub's tabs are fixed in `src/lib/hubs.ts` and only those get a
+route, so an extra tab page showed a pill that led to a 404. They set
 initial values only - nothing is locked, and editing a template never touches
 documents already made from it, so adding or reworking them is free. Localised
 fields are seeded in English alone: an empty translation falls back to English,
@@ -340,7 +361,7 @@ exhibitor templates, and looking for them there is the obvious wrong turn.
 
 A template can also be linked to directly, which makes a usable bookmark:
 
-    /studio/#/intent/create/type=page;template=page-hub-art-prize/
+    /studio/#/intent/create/type=page;template=page-text/
 
 Only `page` and `exhibitor` have templates. `laureate`, `award` and `person`
 do not, so New in those panes gives a bare document.
@@ -576,6 +597,13 @@ questions.
   The site moved to project `5hqzhin7` on 2026-09-06 after the first
   project (`uia5r1rc`) ran dry; `run()` now also fails a build that makes
   more than 2,500 requests, and prints the total at exit.
+- **Preview encodes only text an editor reads.** Stega appends invisible
+  characters to strings so the Studio can click into them, and the page code
+  compares values like a programme tab or partner tier against known ones -
+  an encoded "talks" is not "talks", and preview rendered the Talks tab
+  empty. `stegaFilter` in `src/middleware.ts` keeps every fixed-list value,
+  Style setting, anchor, code and handle plain. A new field picked from a
+  list goes into its `PLAIN_KEYS`.
 - **Preview renders read the page to the end inside the store.** Astro
   streams responses, so the frontmatter (and its queries) runs when the body
   is pulled. `src/middleware.ts` awaits `response.text()` inside

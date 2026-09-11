@@ -31,11 +31,13 @@ export const partner = defineType({
       initialValue: 'institutional',
       validation: (rule) => rule.required(),
     }),
+    // Subtitle, current exhibition and instagram are kept for the imported data
+    // but hidden: no page in the design shows them.
     defineField({
       name: 'subtitle',
       title: 'Subtitle',
       type: 'localeString',
-      description: 'Small line under the name: "by Traiteur Benjamin", "Belgian craft beers".',
+      hidden: true,
     }),
     defineField({
       name: 'editions',
@@ -51,18 +53,17 @@ export const partner = defineType({
       type: 'array',
       of: [defineArrayMember({ type: 'figure' })],
       options: { layout: 'grid' },
-      description: 'Photos, for partners that get a full entry (hotel, vendors).',
+      description: 'Photos for the partners that get a full entry - the hotel and food & drinks - shown as a slideshow.',
     }),
     defineField({ name: 'description', title: 'Description', type: 'localeBlock' }),
     defineField({
       name: 'currentExhibition',
       title: 'Current exhibition',
       type: 'localeString',
-      description: 'Exhibition-pass institutions: what the pass gives access to, with dates.',
-      hidden: ({ document }) => document?.tier !== 'exhibition-pass',
+      hidden: true,
     }),
     defineField({ name: 'url', title: 'Website', type: 'url' }),
-    defineField({ name: 'instagram', title: 'Instagram handle', type: 'string', description: 'Without the @' }),
+    defineField({ name: 'instagram', title: 'Instagram handle', type: 'string', hidden: true }),
     defineField({ name: 'order', title: 'Sort order', type: 'number', initialValue: 100 }),
   ],
   orderings: [{ title: 'Sort order', name: 'orderAsc', by: [{ field: 'order', direction: 'asc' }] }],

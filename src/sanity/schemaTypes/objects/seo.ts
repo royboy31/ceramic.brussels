@@ -10,7 +10,7 @@ export const seo = defineType({
       name: 'title',
       title: 'Meta title',
       type: 'localeString',
-      description: 'Falls back to the document title when empty.',
+      description: 'The title in the browser tab and in search results. Leave empty for the page’s own name.',
     }),
     defineField({
       name: 'description',

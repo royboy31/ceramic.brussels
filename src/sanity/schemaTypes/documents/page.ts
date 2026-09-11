@@ -1,18 +1,23 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { PAGE_SECTIONS } from '../objects/routes';
 import { sectionsField } from '../objects/pageBuilder';
+import { pageHides } from '../../pageKinds';
 
 /**
- * Editorial pages. Two roles:
+ * Editorial pages. Three roles:
  *
  * - A tab inside a hub. The design gives every hub (about, art prize,
  *   programme, visitors info, partners) a row of pill tabs under its title:
- *   "the fair / advisory board / team / press / images". A page with a
- *   `section` becomes one of those tabs, ordered by `order`.
+ *   "the fair / advisory board / team / press / images". The tabs themselves
+ *   are fixed in code (src/lib/hubs.ts); a page whose `section` and English
+ *   slug name one of them carries that tab's text.
+ * - The main page of a listing (exhibitors, artists, news, contact): its lead,
+ *   blocks and SEO wrap the list the route generates.
  * - A standalone page (no `section`): gallery applications, legal pages.
  *
- * Content is a lead paragraph followed by titled sections and a closing image
- * row, which is how every text page in the design is built.
+ * Each route reads a different part of the document, so every field below is
+ * hidden on the pages that do not read it - see ../../pageKinds.ts. Hub and
+ * slug are read-only once set: they are what ties a document to its URL.
  *
  * Slugs are per-locale so French and Dutch get real translated URLs rather
  * than the half-translated mix the current site carries.
@@ -32,6 +37,8 @@ export const page = defineType({
       title: 'Title',
       type: 'localeString',
       group: 'main',
+      description:
+        'The page’s name in the Studio and the browser tab. On a hub tab it is also the pill label when Tab label is empty; on a standalone page it is the heading.',
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -40,6 +47,7 @@ export const page = defineType({
       type: 'localeSlug',
       group: 'placement',
       description: 'The URL segment in each language, without slashes.',
+      hidden: pageHides('slug'),
     }),
     defineField({
       name: 'section',
@@ -47,7 +55,9 @@ export const page = defineType({
       type: 'string',
       group: 'placement',
       options: { list: [...PAGE_SECTIONS] },
-      description: 'Makes this page a tab of that hub. Leave empty for a standalone page.',
+      description: 'The part of the site this page belongs to. Set when the page is made; it cannot be moved.',
+      hidden: pageHides('section'),
+      readOnly: ({ document }) => !!document?.section,
     }),
     defineField({
       name: 'tabLabel',
@@ -55,6 +65,7 @@ export const page = defineType({
       type: 'localeString',
       group: 'placement',
       description: 'Text on the pill tab. Falls back to the title.',
+      hidden: pageHides('tabLabel'),
     }),
     defineField({
       name: 'order',
@@ -62,14 +73,16 @@ export const page = defineType({
       type: 'number',
       group: 'placement',
       initialValue: 100,
-      description: 'Position among the hub’s tabs, or in the menu. Lower comes first.',
+      description: 'Position in the menu when the menu has no items of its own. Lower comes first.',
+      hidden: pageHides('order'),
     }),
     defineField({
       name: 'navLabel',
       title: 'Navigation label',
       type: 'localeString',
       group: 'placement',
-      description: 'Only for standalone pages: shown in the fallback menu. Leave empty to keep it out.',
+      description: 'Shown in the fallback menu, used only while Navigation has no items. Leave empty to keep it out.',
+      hidden: pageHides('navLabel'),
     }),
     defineField({
       name: 'intro',
@@ -77,15 +90,24 @@ export const page = defineType({
       type: 'localeText',
       group: 'main',
       description: 'The large text at the top of the page.',
+      hidden: pageHides('intro'),
     }),
-    defineField({ name: 'cover', title: 'Cover image', type: 'figure', group: 'main' }),
-    sectionsField({ group: 'main' }),
+    defineField({
+      name: 'cover',
+      title: 'Cover image',
+      type: 'figure',
+      group: 'main',
+      description: 'The large picture at the top of the page.',
+      hidden: pageHides('cover'),
+    }),
+    sectionsField({ group: 'main', hidden: pageHides('sections') }),
     defineField({
       name: 'body',
       title: 'Body',
       type: 'localeBlock',
       group: 'main',
-      description: 'Plain rich text, for pages that do not need titled sections.',
+      description: 'Plain rich text, after the blocks.',
+      hidden: pageHides('body'),
     }),
     defineField({
       name: 'images',
@@ -94,9 +116,10 @@ export const page = defineType({
       group: 'main',
       of: [defineArrayMember({ type: 'figure' })],
       options: { layout: 'grid' },
-      description: 'The row of three photos at the bottom of the page.',
+      description: 'The row of photos at the bottom of the page.',
+      hidden: pageHides('images'),
     }),
-    defineField({ name: 'seo', title: 'SEO', type: 'seo', group: 'meta' }),
+    defineField({ name: 'seo', title: 'SEO', type: 'seo', group: 'meta', hidden: pageHides('seo') }),
   ],
   orderings: [{ title: 'Order', name: 'orderAsc', by: [{ field: 'order', direction: 'asc' }] }],
   preview: {

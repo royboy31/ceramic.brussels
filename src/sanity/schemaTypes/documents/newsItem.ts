@@ -39,6 +39,8 @@ export const newsItem = defineType({
       title: 'Edition',
       type: 'reference',
       to: [{ type: 'edition' }],
+      // Not read by any page; hidden rather than removed so existing values stay.
+      hidden: true,
     }),
     defineField({ name: 'excerpt', title: 'Excerpt', type: 'localeText' }),
     defineField({ name: 'cover', title: 'Cover image', type: 'figure' }),
