@@ -12,8 +12,8 @@ import { onRequest as apiGuards } from '../functions/_middleware';
  * Two jobs, both only on the deployed Worker (and `astro dev`):
  *
  *   /preview/…   Let the request in on a valid preview cookie, then render
- *                the page with a drafts-reading, stega-encoding client so the
- *                Studio's Presentation tool can show it and click into it.
+ *                the page with a drafts-reading, stega-encoding client, so
+ *                every field on it opens in the Studio from its overlay.
  *   /api/…       Run the admin API's guards - security headers, CSRF check,
  *                session lookup - exactly as functions/_middleware.ts does on
  *                Pages, then let the endpoint run with the resolved user.
@@ -127,7 +127,7 @@ function deniedPage(): string {
 <style>body{font-family:system-ui,sans-serif;max-width:36rem;margin:4rem auto;padding:0 1.5rem;line-height:1.5;color:#1a1a1a}a{color:inherit}</style>
 </head><body>
 <h1>This is a preview address</h1>
-<p>It only opens from the Studio, or through a share link the Studio made.</p>
-<p><a href="/studio/#/presentation">Open the Studio</a></p>
+<p>It only opens from the Studio: Preview in the top bar, or Open preview in a document’s menu.</p>
+<p><a href="/studio/">Open the Studio</a></p>
 </body></html>`;
 }

@@ -5,9 +5,8 @@ import { LISTING_SECTIONS } from './schemaTypes/objects/routes';
 /**
  * Which `/preview/…` pages show a given document.
  *
- * Shared by the Presentation tool (its "Used on" banner and the page it opens
- * a document on, see presentation.ts) and the "Open preview" document action,
- * so the two can never disagree. Every entry mirrors a route under
+ * Used by "Open preview" in a document's menu and by Preview in the top bar,
+ * both through openPreview.ts. Every entry mirrors a route under
  * src/pages/[lang]/ and what that route lists: a person opens on the tab of
  * their group, a partner on the tab of their tier, an event on its programme
  * tab, a past exhibitor under its year. A document no page shows - last
@@ -22,10 +21,9 @@ export interface PreviewLocation {
 }
 
 /**
- * The fields the resolver needs, flattened. Presentation's `select` produces
- * exactly this shape; `previewFields()` derives most of it from a whole
- * document (the edition's year and current flag need a lookup, see
- * OpenPreviewAction.tsx).
+ * The fields the resolver needs, flattened. `previewFields()` derives most
+ * of it from a whole document (the edition's year and current flag need a
+ * lookup, see openPreview.ts).
  */
 export interface PreviewFields {
   title?: string | null;
@@ -46,25 +44,6 @@ export interface PreviewFields {
   ownYear?: number | null;
   isCurrent?: boolean | null;
 }
-
-/** `select` for defineLocations, matching PreviewFields. */
-export const PREVIEW_SELECT = {
-  title: 'title.en',
-  name: 'name',
-  section: 'section',
-  en: 'slug.en.current',
-  fr: 'slug.fr.current',
-  nl: 'slug.nl.current',
-  slug: 'slug.current',
-  tier: 'tier',
-  groups: 'groups',
-  family: 'family',
-  startsAt: 'startsAt',
-  year: 'edition.year',
-  current: 'edition.isCurrent',
-  ownYear: 'year',
-  isCurrent: 'isCurrent',
-} as const;
 
 /** Flattens a raw document into PreviewFields. */
 export function previewFields(doc: Record<string, any>): PreviewFields {

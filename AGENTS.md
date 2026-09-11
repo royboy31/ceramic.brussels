@@ -134,9 +134,13 @@ every page under `src/pages/[lang]/` is mounted a second time at
 `/preview/[lang]/…`, rendered on request from **drafts** by a small Worker
 that `scripts/pages-worker.mjs` moves to `dist/_worker.js` after the build.
 `dist/_routes.json` sends only `/preview/*` and `/api/*` to that Worker, so
-the published pages stay plain files. The Studio's **Preview** tab
-(`src/sanity/presentation.ts`) frames those pages, refreshes them as you
-type, and can make a share link for a partner. How it works: `src/middleware.ts`
+the published pages stay plain files. **Preview** in the Studio's top bar
+(`src/sanity/components/PreviewLauncher.tsx`) opens the page being edited,
+from its draft, in a new tab - the same as **Open preview** in a document's
+⋯ menu - and every field on that page has an "Open in Studio" link back to
+the editor (stega `studioUrl` is `/studio/#`: the Studio is on hash
+routing). It replaced the Presentation tool (editing beside a framed page)
+on 2026-09-11, and its share links went with it. How it works: `src/middleware.ts`
 lets a request in on the cookie `/api/preview/enable` issues, then renders the
 page inside `runWithPreview` (`src/lib/previewContext.ts`), which swaps the
 client every query in `queries.ts` uses for a drafts-reading, stega-encoding
@@ -416,7 +420,7 @@ environment in `wrangler.toml`; `npm run build:preview` sets it locally):
 | Pages | static HTML | static HTML, unchanged |
 | `/api/*` | Pages Functions in `functions/` | the Worker, through the **same** modules (`src/server/pagesShim.ts`) |
 | `/preview/*` | does not exist | the Worker, rendered from drafts |
-| Studio | as is | gains the Preview tab (`PUBLIC_PREVIEW_ENABLED`) |
+| Studio | as is | gains Preview and "Open preview" (`PUBLIC_PREVIEW_ENABLED`) |
 
 When on, `astro build` uses `@astrojs/cloudflare` (its Vite plugin refuses a
 Pages config, hence the separate `wrangler.worker.toml` it reads — keep its

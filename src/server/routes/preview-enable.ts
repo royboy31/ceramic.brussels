@@ -7,8 +7,9 @@ import { issuePreviewCookie } from '../preview';
 /**
  * GET /api/preview/enable?sanity-preview-secret=…&sanity-preview-pathname=…
  *
- * The door into `/preview/`. The Studio's Presentation tool opens its frame
- * here, and the share links it makes point here too. The secret in the URL
+ * The door into `/preview/`. Preview in the Studio's top bar and "Open
+ * preview" in a document's menu send their new tab here (src/sanity/
+ * openPreview.ts), with a secret made for that click. The secret in the URL
  * is checked against the ones Sanity holds for this project - a forged or
  * expired one is refused - and a valid visitor gets the preview cookie and
  * is sent on to the page they asked for.

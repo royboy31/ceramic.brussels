@@ -58,12 +58,15 @@ Content only; the code for it is on `kamindu` (not `main`).
   tab (the Preview tab's "open in new tab") shows an Open in Studio link on
   every field; the client builds it as `studioUrl` + `/intent/edit/…`, and
   `studioUrl` was `/studio`, a path no file answers on a hash-routed Studio.
-  It is `/studio/#` now (`src/middleware.ts`), which lands in the Preview
-  tool on that document and field. The link also names the page it came
-  from (`preview=`), but on a hash-routed Studio the overlay puts that inside
-  the hash, where the Preview tool does not look, so it framed the site root;
-  `sanity.config.ts` moves it into the query string as the Studio boots, and
-  the same page now opens beside the field.
+  It is `/studio/#` now (`src/middleware.ts`), and the link opens that
+  document in the editor with the field in view.
+- **Preview in the top bar opens the page in a new tab.** It was the
+  Presentation tool, which edits beside the page in a frame; Kamindu wanted
+  the page on its own, as the ⋯ menu's Open preview gives it. Preview now
+  opens the draft of the document being edited in a new tab and goes back
+  to the editor (`PreviewLauncher.tsx`; the Open preview action reports
+  which document is open). The Presentation tool is gone, and its share
+  links with it.
 - **Event times were an hour early on the site.** The date and time
   formatters in `src/lib/i18n.ts` had no time zone, so they used the
   machine's: Cloudflare builds in UTC and printed the 14:00 preview as 13:00;
