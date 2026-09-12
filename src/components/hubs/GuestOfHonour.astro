@@ -1,13 +1,13 @@
 ---
-import Base from '../../../layouts/Base.astro';
-import SanityImage from '../../../components/SanityImage.astro';
-import PortableText from '../../../components/PortableText.astro';
-import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { useTranslations, localePath } from '../../../lib/i18n';
-import { getGuestOfHonour, getHubPages } from '../../../lib/queries';
-import { HUBS, hubTabParams, hubTabPath, hubTabHref } from '../../../lib/hubs';
-import { urlFor } from '../../../sanity/image';
-import { styleAttrs } from '../../../lib/textStyle';
+import Base from '../../layouts/Base.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations, localePath } from '../../lib/i18n';
+import { getGuestOfHonour, getHubPages } from '../../lib/queries';
+import { HUBS, hubTabPath, hubTabHref , hubAltPaths } from '../../lib/hubs';
+import { urlFor } from '../../sanity/image';
+import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * The current edition's guest of honour, as the design's guest-of-honour
@@ -20,18 +20,14 @@ import { styleAttrs } from '../../../lib/textStyle';
  * document the edition points at: `intro`, the `sections` stack (biography,
  * sculptural practice), `works`, `video`, `interview`.
  */
-export function getStaticPaths() {
-  return hubTabParams('guest-of-honour', LOCALE_IDS);
-}
-
-const lang = Astro.params.lang as LocaleId;
+const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const hub = HUBS['guest-of-honour'];
-const tab = (Astro.params.tab as string | undefined) ?? hub.tabs[0].slug;
 const t = useTranslations(lang);
 
 const [data, pages] = await Promise.all([getGuestOfHonour(lang), getHubPages(lang, 'guest-of-honour')]);
 const artist = data?.artist;
-const path = hubTabPath('guest-of-honour', tab);
+const path = hubTabPath('guest-of-honour', tab, lang);
+const altPaths = hubAltPaths('guest-of-honour', tab);
 
 const origin = [artist?.birthYear && `°${artist.birthYear}`, artist?.nationality].filter(Boolean).join(', ');
 const sections: any[] = (artist?.sections ?? []).filter((s: any) => s?._type === 'contentSection' && s.body);
@@ -47,7 +43,7 @@ const posterSrc = poster ? urlFor(poster).width(1814).height(1208).fit('crop').a
 
 const tabs = hub.tabs.map((x) => {
   const page = pages.find((p: any) => p?.slugs?.en === x.slug);
-  return { slug: x.slug, label: page?.tabLabel ?? t(x.label), href: localePath(lang, hubTabHref('guest-of-honour', x)) };
+  return { slug: x.slug, label: page?.tabLabel ?? t(x.label), href: localePath(lang, hubTabHref('guest-of-honour', x, lang)) };
 });
 /** "Artist, *Title*, year" under a work. */
 const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workTitle ?? work.title, img.year ?? work.year].filter(Boolean);
@@ -59,6 +55,7 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
   description={artist?.seo?.description}
   noIndex={artist?.seo?.noIndex}
   path={path}
+  altPaths={altPaths}
   image={artist?.seo?.ogImage ?? artist?.portrait}
   editId={artist?._id}
   editType={artist?._type}

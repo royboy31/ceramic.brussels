@@ -1,15 +1,15 @@
 ---
-import Base from '../../../layouts/Base.astro';
-import HubNav from '../../../components/HubNav.astro';
-import PageSections from '../../../components/PageSections.astro';
-import SanityImage from '../../../components/SanityImage.astro';
-import Slideshow from '../../../components/Slideshow.astro';
-import PortableText from '../../../components/PortableText.astro';
-import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { useTranslations, formatDate, localePath } from '../../../lib/i18n';
-import { getHubPages, getSettings, getCurrentEdition, getPartners } from '../../../lib/queries';
-import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
-import { styleAttrs } from '../../../lib/textStyle';
+import Base from '../../layouts/Base.astro';
+import HubNav from '../../components/HubNav.astro';
+import PageSections from '../../components/PageSections.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import Slideshow from '../../components/Slideshow.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations, formatDate, localePath } from '../../lib/i18n';
+import { getHubPages, getSettings, getCurrentEdition, getPartners } from '../../lib/queries';
+import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
+import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * Visitors info, as the design's visitors-info pages draw it. Practical
@@ -21,12 +21,7 @@ import { styleAttrs } from '../../../lib/textStyle';
  * FAQ have no design page and follow the same patterns. Markup and rules
  * are Lilanga's build of the frames.
  */
-export function getStaticPaths() {
-  return hubTabParams('visit', LOCALE_IDS);
-}
-
-const lang = Astro.params.lang as LocaleId;
-const tab = (Astro.params.tab as string | undefined) ?? HUBS.visit.tabs[0].slug;
+const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const t = useTranslations(lang);
 
 const [pages, settings, edition, partners] = await Promise.all([
@@ -43,7 +38,7 @@ const practical = tab === 'practical-info';
 const info = settings?.practicalInfo ?? {};
 const vendors = partners.filter((p: any) => p.tier === 'food-drinks');
 const hotel = info.hotelDeal?.partner;
-const hotelHref = info.hotelDeal?.url ?? localePath(lang, hubTabPath('partners', 'hotel'));
+const hotelHref = info.hotelDeal?.url ?? localePath(lang, hubTabPath('partners', 'hotel', lang));
 
 /** "ceramic brussels’ 4th edition will take place from 20 till 24 January 2027 at Tour & Taxis, Brussels." */
 const composed =
@@ -70,7 +65,8 @@ const venueShort = String(info.venueName ?? edition?.venue ?? '')
   .replace(/\s*&\s*/g, '&')
   .trim();
 const siteName = settings?.siteName ?? 'ceramic brussels';
-const path = hubTabPath('visit', tab);
+const path = hubTabPath('visit', tab, lang);
+const altPaths = hubAltPaths('visit', tab);
 ---
 
 <Base
@@ -80,6 +76,7 @@ const path = hubTabPath('visit', tab);
   noIndex={page?.seo?.noIndex}
   image={page?.seo?.ogImage ?? page?.cover ?? (practical ? info.heroImage : undefined)}
   path={path}
+  altPaths={altPaths}
   editId={practical ? 'siteSettings' : page?._id}
   editType={practical ? 'siteSettings' : page?._type}
 >

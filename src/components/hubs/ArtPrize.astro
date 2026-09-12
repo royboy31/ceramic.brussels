@@ -1,17 +1,17 @@
 ---
-import Base from '../../../layouts/Base.astro';
-import HubNav from '../../../components/HubNav.astro';
-import Sections from '../../../components/Sections.astro';
-import PageSections from '../../../components/PageSections.astro';
-import SanityImage from '../../../components/SanityImage.astro';
-import Slideshow from '../../../components/Slideshow.astro';
-import PortableText from '../../../components/PortableText.astro';
-import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { useTranslations, localePath } from '../../../lib/i18n';
-import { getHubPages, getLaureates, getAwards, getPeople } from '../../../lib/queries';
-import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
-import { instagramUrl } from '../../../lib/links';
-import { styleAttrs } from '../../../lib/textStyle';
+import Base from '../../layouts/Base.astro';
+import HubNav from '../../components/HubNav.astro';
+import Sections from '../../components/Sections.astro';
+import PageSections from '../../components/PageSections.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import Slideshow from '../../components/Slideshow.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations, localePath } from '../../lib/i18n';
+import { getHubPages, getLaureates, getAwards, getPeople } from '../../lib/queries';
+import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
+import { instagramUrl } from '../../lib/links';
+import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * The art prize hub on its acid ground, as the design's three art prize
@@ -21,13 +21,8 @@ import { styleAttrs } from '../../../lib/textStyle';
  * sides. Awards: the intro line and a two-column masonry of award blocks.
  * Jury (no design page): the advisory-board article treatment.
  */
-export function getStaticPaths() {
-  return hubTabParams('art-prize', LOCALE_IDS);
-}
-
-const lang = Astro.params.lang as LocaleId;
+const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const hub = HUBS['art-prize'];
-const tab = (Astro.params.tab as string | undefined) ?? hub.tabs[0].slug;
 const t = useTranslations(lang);
 
 const pages = await getHubPages(lang, 'art-prize');
@@ -45,7 +40,8 @@ const awards = allAwards.filter((a: any) => a.year === awardYear);
 
 const jury = tab === 'jury' ? await getPeople(lang, 'jury') : [];
 
-const path = hubTabPath('art-prize', tab);
+const path = hubTabPath('art-prize', tab, lang);
+const altPaths = hubAltPaths('art-prize', tab);
 const tabKey = hub.tabs.find((x) => x.slug === tab)?.label;
 const tabLabel = page?.tabLabel ?? (tabKey ? t(tabKey) : tab);
 
@@ -76,6 +72,7 @@ const captionOf = (img: any, fallback?: string) => ({
   description={page?.seo?.description ?? page?.intro}
   noIndex={page?.seo?.noIndex}
   path={path}
+  altPaths={altPaths}
   theme="acid"
   image={page?.seo?.ogImage ?? page?.cover}
   editId={page?._id}

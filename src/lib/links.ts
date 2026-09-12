@@ -37,10 +37,10 @@ export function exhibitorPath(ex: { slug?: string; year?: number; current?: bool
  * main page at the listing, a standalone page at its own slug. Linking to a
  * tab's page by its slug alone gave /en/the-fair, which no route builds.
  */
-export function pagePath(doc: { section?: string; tab?: string; slug?: string }): string {
+export function pagePath(doc: { section?: string; tab?: string; slug?: string }, lang?: LocaleId): string {
   if (!doc.section) return doc.slug ?? '';
   if (LISTINGS.includes(doc.section)) return doc.section;
-  return hubTabPath(doc.section, doc.tab);
+  return hubTabPath(doc.section, doc.tab, lang);
 }
 
 export function resolveLink(lang: LocaleId, link: any): ResolvedLink | null {
@@ -63,22 +63,23 @@ export function resolveLink(lang: LocaleId, link: any): ResolvedLink | null {
         : doc._type === 'exhibitor'
           ? exhibitorPath(doc)
           : doc._type === 'page'
-            ? pagePath(doc)
+            ? pagePath(doc, lang)
             : [base, doc.slug].filter(Boolean).join('/');
     return { href: localePath(lang, path), label, external: false, arrow: '→' };
   }
 
   // 'route', and anything unset, points at a built-in section.
-  return { href: localePath(lang, routePath(link.route ?? '', link.anchor)), label, external: false, arrow: '→' };
+  return { href: localePath(lang, routePath(link.route ?? '', link.anchor, lang)), label, external: false, arrow: '→' };
 }
 
 /**
  * A built-in route with its "tab or anchor": a hub's tab, or on a route
  * without tabs a sub-page - "exhibitors" + "2026" is the 2026 exhibitor list.
  */
-function routePath(route: string, anchor?: string): string {
+function routePath(route: string, anchor?: string, lang?: LocaleId): string {
+  if (HUBS[route]) return hubTabPath(route, anchor, lang);
   if (!anchor) return route;
-  return HUBS[route] ? hubTabPath(route, anchor) : `${route}/${anchor}`;
+  return `${route}/${anchor}`;
 }
 
 /** Same for navigation items, which use `page`/`url` rather than `internal`/`external`. */
@@ -89,10 +90,10 @@ export function resolveNavItem(lang: LocaleId, item: any): ResolvedLink | null {
   }
   if (item.kind === 'page') {
     if (!item.pageSlug && !item.pageSection) return null;
-    const path = pagePath({ section: item.pageSection, tab: item.pageTab, slug: item.pageSlug });
+    const path = pagePath({ section: item.pageSection, tab: item.pageTab, slug: item.pageSlug }, lang);
     return { href: localePath(lang, path), label: item.label, external: false, arrow: '→' };
   }
-  return { href: localePath(lang, routePath(item.route ?? '', item.anchor)), label: item.label, external: false, arrow: '→' };
+  return { href: localePath(lang, routePath(item.route ?? '', item.anchor, lang)), label: item.label, external: false, arrow: '→' };
 }
 
 /** "Artist, *Title*, 2024" from a figure's caption parts, as plain strings. */

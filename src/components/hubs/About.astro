@@ -1,17 +1,17 @@
 ---
-import Base from '../../../layouts/Base.astro';
-import HubNav from '../../../components/HubNav.astro';
-import Sections from '../../../components/Sections.astro';
-import PageSections from '../../../components/PageSections.astro';
-import SanityImage from '../../../components/SanityImage.astro';
-import PortableText from '../../../components/PortableText.astro';
-import PersonCard from '../../../components/PersonCard.astro';
-import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { useTranslations, formatDate } from '../../../lib/i18n';
-import { instagramUrl } from '../../../lib/links';
-import { getHubPages, getPeople, getPressClips, getSettings, getEditions } from '../../../lib/queries';
-import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
-import { styleAttrs } from '../../../lib/textStyle';
+import Base from '../../layouts/Base.astro';
+import HubNav from '../../components/HubNav.astro';
+import Sections from '../../components/Sections.astro';
+import PageSections from '../../components/PageSections.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import PortableText from '../../components/PortableText.astro';
+import PersonCard from '../../components/PersonCard.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations, formatDate } from '../../lib/i18n';
+import { instagramUrl } from '../../lib/links';
+import { getHubPages, getPeople, getPressClips, getSettings, getEditions } from '../../lib/queries';
+import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
+import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * About hub, as the design's about pages draw it. The fair: the large
@@ -21,12 +21,7 @@ import { styleAttrs } from '../../../lib/textStyle';
  * collaborators). Press and images have no design page and follow the same
  * patterns. Markup and rules are Lilanga's build of the frames.
  */
-export function getStaticPaths() {
-  return hubTabParams('about', LOCALE_IDS);
-}
-
-const lang = Astro.params.lang as LocaleId;
-const tab = (Astro.params.tab as string | undefined) ?? HUBS.about.tabs[0].slug;
+const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const t = useTranslations(lang);
 
 /* Labels this hub needs that STRINGS does not carry yet - all three locales,
@@ -88,7 +83,8 @@ for (const section of rest) {
   else runs.push({ text, items: [section] });
 }
 const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
-const path = hubTabPath('about', tab);
+const path = hubTabPath('about', tab, lang);
+const altPaths = hubAltPaths('about', tab);
 const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'advisory', press: 'press', images: 'images' }[tab] ?? '';
 
 const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Boolean).length > 0 || img.credit;
@@ -101,6 +97,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
   noIndex={page?.seo?.noIndex}
   image={page?.seo?.ogImage ?? page?.cover}
   path={path}
+  altPaths={altPaths}
   editId={page?._id}
   editType={page?._type}
 >

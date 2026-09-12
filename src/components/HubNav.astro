@@ -32,7 +32,7 @@ const hub = HUBS[route];
 // other page of the hub led to a 404.
 const tabs = hub.tabs.map((tab) => {
   const page = tab.link ? null : pages.find((p) => p?.slugs?.en === tab.slug);
-  return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label), href: hubTabHref(route, tab), link: !!tab.link };
+  return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label), href: hubTabHref(route, tab, lang), link: !!tab.link };
 });
 ---
 

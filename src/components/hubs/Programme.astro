@@ -1,15 +1,15 @@
 ---
-import Base from '../../../layouts/Base.astro';
-import HubNav from '../../../components/HubNav.astro';
-import PageSections from '../../../components/PageSections.astro';
-import Figure from '../../../components/Figure.astro';
-import SanityImage from '../../../components/SanityImage.astro';
-import PortableText from '../../../components/PortableText.astro';
-import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { useTranslations, formatDay, formatTime, localePath } from '../../../lib/i18n';
-import { getHubPages, getProgramme } from '../../../lib/queries';
-import { HUBS, hubTabParams, hubTabPath, pageForTab } from '../../../lib/hubs';
-import { styleAttrs } from '../../../lib/textStyle';
+import Base from '../../layouts/Base.astro';
+import HubNav from '../../components/HubNav.astro';
+import PageSections from '../../components/PageSections.astro';
+import Figure from '../../components/Figure.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations, formatDay, formatTime, localePath } from '../../lib/i18n';
+import { getHubPages, getProgramme } from '../../lib/queries';
+import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
+import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * The programme hub, as the design's programme pages draw it. La Cambre is
@@ -20,12 +20,7 @@ import { styleAttrs } from '../../../lib/textStyle';
  * the title, the "FR / with A, B & C" line - with the picture alternating
  * sides. Markup and rules are Lilanga's build of the Figma programme frames.
  */
-export function getStaticPaths() {
-  return hubTabParams('programme', LOCALE_IDS);
-}
-
-const lang = Astro.params.lang as LocaleId;
-const tab = (Astro.params.tab as string | undefined) ?? HUBS.programme.tabs[0].slug;
+const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const t = useTranslations(lang);
 
 const [pages, events] = await Promise.all([getHubPages(lang, 'programme'), getProgramme(lang)]);
@@ -75,7 +70,8 @@ const lines = (s: string) => String(s ?? '').split(/\r?\n/);
 
 const isPage = tab === 'la-cambre';
 const showEmpty = days.length === 0 && (!isPage || !page);
-const path = hubTabPath('programme', tab);
+const path = hubTabPath('programme', tab, lang);
+const altPaths = hubAltPaths('programme', tab);
 ---
 
 <Base
@@ -85,6 +81,7 @@ const path = hubTabPath('programme', tab);
   noIndex={page?.seo?.noIndex}
   image={page?.seo?.ogImage ?? page?.cover}
   path={path}
+  altPaths={altPaths}
   editId={page?._id}
   editType={page?._type}
 >
