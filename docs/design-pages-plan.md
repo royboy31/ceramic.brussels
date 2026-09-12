@@ -19,6 +19,56 @@ components, binding each element to the field named below.
 `html pages/` is not committed (165 MB of PNGs); Lilanga has the source
 project. It is gitignored.
 
+## Status, 2026-09-12 late — the pages stop standing in for missing content
+
+Board card "Populate the Sanity back end with all current site content",
+the second half of the day. `main` = `7ca9541`.
+
+**The content was already there.** The card was written on 10.09 saying most
+fields were empty while the site still showed content, and asking where that
+content came from. Checked by sweeping all 895 built pages for anything
+served out of `public/assets/`: the only two left are `wordmark.svg` and
+`menu.svg`, both real chrome. Field by field - 0 pages missing a title, 0
+missing a lead, 0 missing an SEO description, nav labels complete, practical
+info complete (venue, address, map, four access modes, hotel deal), the
+current edition complete (dates, three opening-hour blocks, five ticket
+types, venue). Between the legacy import, the SEO fill and the morning's
+gallery fill, every fallback left in the code was already dead.
+
+**What was real was the masking.** The homepage invented a news / film /
+key-figures stack whenever `sections` came back empty, and since the query
+drops hidden blocks, *hiding* every block did the same thing as deleting
+them - the page still looked full, out of content the editor could not find
+or change. Four image slots fell back to a shipped file the same way. That
+is most of why the 10.09 demo was confusing.
+
+Empty renders empty now, in `index.astro` (hero image and the stack),
+`about/[...tab].astro`, `visit/[...tab].astro` and
+`guest-of-honour/[...tab].astro`. Checked by forcing the empty case and
+building: the homepage falls from 40,845 to 23,792 bytes with no news, film
+or key figures revived. Nothing on the live site moved - the branches
+removed never ran.
+
+**Two of the same kind are left on purpose,** written up for Lilanga in
+`docs/frontend-handbook.md` under a 2026-09-12 heading, because each needs a
+design decision rather than a deletion: `VideoEmbed` takes a required
+`poster` string and renders the `<img>` unconditionally, so a film with no
+poster would show a broken image until the frame can hold its shape without
+one; and `Header`'s dates-mark fallback is on every page, where a *stale*
+date graphic is worse than none.
+
+**A deploy of this kind cannot be verified from outside.** The change only
+removes branches that never executed, so the output is identical, and
+diffing a local build against the live site does not work either: production
+builds with `PREVIEW_RUNTIME=1` and a local `npm run build` does not, so the
+live HTML always carries a `globalThis.process` shim and bundles the shared
+CSS chunks differently. There is no deploy signal from the CLI - the repo is
+private and the `GITHUB_TOKEN` in `.env` is dead (401). The Cloudflare
+dashboard is the only place to confirm one.
+
+**The board card is not moved yet:** tasks.perelweb.be signed the session
+out, and signing back in is Kamindu's to do.
+
 ## Status, 2026-09-12 — the old-site fill is in, biography moved
 
 The two content steps left open the night before, both now applied against
