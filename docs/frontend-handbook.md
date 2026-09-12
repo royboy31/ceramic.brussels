@@ -64,6 +64,41 @@ page now renders the design's own markup and CSS. The pieces:
 - Pages the design does not cover yet (news, artists, editions, standalone
   pages, 404) are wrapped in `.legacy-page` and keep the older look.
 
+## Changed in your files on 2026-09-12 (kamindu branch) - please review
+
+One change, in four files, asked for by the task board ("Populate the
+Sanity back end with all current site content"). **The stand-in images and
+the invented homepage blocks are gone.** Four slots used to fall back to a
+file shipped in `public/assets/` when Sanity had nothing, and the homepage
+invented a news / film / key-figures stack when `sections` came back empty.
+Because the query drops hidden blocks, hiding every block did the same -
+so an editor could delete their way to a page that still looked full and
+could not be changed. That is most of why the 10.09 demo was confusing.
+
+Empty now renders empty, in `index.astro` (hero image and the section
+stack), `about/[...tab].astro` (the fair's cover), `visit/[...tab].astro`
+(practical info hero) and `guest-of-honour/[...tab].astro` (interview
+poster).
+
+**Nothing on the live site changes.** Every one of those slots is filled in
+Sanity today - checked against all 895 built pages, where the only files
+left from `public/assets/` are `wordmark.svg` and `menu.svg`. The branches
+removed were already dead; they were removed so they cannot silently come
+back.
+
+Two of the same kind are deliberately still there, because removing them
+needs a design decision rather than a deletion:
+
+- `components/VideoEmbed.astro` takes `poster: string` and renders the
+  `<img>` unconditionally, so `VideoSection.astro` and
+  `artists/[slug].astro` still fall back to `/assets/video-still.webp`. Drop
+  the fallback and a film with no poster gets a broken image. It needs the
+  frame to hold its shape with no poster - your call how.
+- `Header.astro` falls back to `/assets/date-logo.png` when the edition has
+  no dates mark. It is on every page, and a *stale* date graphic is worse
+  than none, so it is worth fixing - but it is site chrome, not page
+  content.
+
 ## Changed in your files on 2026-09-11 (kamindu branch) - please review
 
 Kamindu asked for these alongside a Studio clean-up, so the site, the

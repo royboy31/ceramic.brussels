@@ -158,10 +158,8 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
 
         {video && (
           <a id="interview-film" class="video col-span-8" href={video.url} target="_blank" rel="noreferrer">
-            {posterSrc ? (
+            {posterSrc && (
               <img src={posterSrc} alt={poster.alt ?? video.title ?? `${artist.name} — ${t('common.video')}`} width="1814" height="1208" />
-            ) : (
-              <img src="/assets/video-still.webp" alt={video.title ?? t('common.video')} width="1600" height="1066" />
             )}
             <span aria-hidden="true">▶</span>
           </a>

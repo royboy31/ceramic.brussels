@@ -4,7 +4,7 @@ import SanityImage from '../../components/SanityImage.astro';
 import PageSections from '../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations } from '../../lib/i18n';
-import { getHomepage, getCurrentEdition, getEditions, getNews } from '../../lib/queries';
+import { getHomepage, getCurrentEdition } from '../../lib/queries';
 import { resolveLink, type ResolvedLink } from '../../lib/links';
 import { styleAttrs } from '../../lib/textStyle';
 
@@ -38,20 +38,14 @@ const quickLinks: ResolvedLink[] = (home?.quickLinks ?? [])
   .filter(Boolean);
 
 /**
- * A homepage with no sections yet - a fresh dataset, or an editor who
- * cleared the stack - still shows the design's shape: latest news, the
- * film, the key figures, built from the same data the blocks would get.
+ * The stack as the editor left it, and nothing else. This used to invent
+ * news, film and key-figures blocks when `sections` came back empty, so a
+ * cleared homepage still looked full - and because the query drops hidden
+ * blocks, hiding every one of them did the same. An editor could delete
+ * their way to a page they could not change, which is most of why the
+ * 10.09 demo was confusing. Empty now renders empty.
  */
-let sections: any[] = home?.sections ?? [];
-if (sections.length === 0) {
-  const [editions, news] = await Promise.all([getEditions(lang), getNews(lang)]);
-  const figuresEdition = editions.find((e: any) => e.keyFigures?.length) ?? null;
-  sections = [
-    { _key: 'fallback-news', _type: 'newsSection', count: 2, items: news },
-    { _key: 'fallback-video', _type: 'videoSection', video: edition?.film },
-    { _key: 'fallback-figures', _type: 'keyFiguresSection', edition: figuresEdition },
-  ];
-}
+const sections: any[] = home?.sections ?? [];
 
 const eventSchema = edition
   ? {
@@ -83,21 +77,14 @@ const external = (link: ResolvedLink | null) =>
   {eventSchema && <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} slot="head" />}
 
   <section class="page-grid items-stretch">
+    {/* No stand-in: an empty Hero image reads as empty, so it can be found and filled. */}
     {
-      home?.heroImage?.asset ? (
+      home?.heroImage?.asset && (
         <SanityImage
           image={home.heroImage}
           widths={[800, 1200, 1600, 2000]}
           sizes="(max-width: 640px) 100vw, 66vw"
           loading="eager"
-          class="col-span-8 h-[43vw] max-h-[625px] min-h-[320px] w-full object-cover max-sm:col-span-full"
-        />
-      ) : (
-        <img
-          src="/assets/home-hero-1600.webp"
-          alt=""
-          width="1600"
-          height="1067"
           class="col-span-8 h-[43vw] max-h-[625px] min-h-[320px] w-full object-cover max-sm:col-span-full"
         />
       )

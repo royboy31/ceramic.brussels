@@ -89,10 +89,8 @@ const path = hubTabPath('visit', tab);
     practical && (
       <div class="content-wrap practical">
         <div class="top">
-          {info.heroImage?.asset ? (
+          {info.heroImage?.asset && (
             <SanityImage image={info.heroImage} widths={[700, 1000, 1400]} sizes="(max-width: 700px) 100vw, 50vw" loading="eager" />
-          ) : (
-            <img src="/assets/video-fair-alt.png" alt="" width="1400" height="933" />
           )}
           <section>
             {intro && (
