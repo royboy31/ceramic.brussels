@@ -19,6 +19,88 @@ components, binding each element to the field named below.
 `html pages/` is not committed (165 MB of PNGs); Lilanga has the source
 project. It is gitignored.
 
+## Status, 2026-09-13 — French and Dutch URLs, the hubs done
+
+Board card "Translate the FR and NL page slugs in Sanity". Branch
+**`fr-nl-slugs`**, three commits on top of `main`. Not merged: the listing
+routes are still to do.
+
+**The card was aimed at the wrong layer.** It says "a content job in the
+CMS, not code". It is not. `page.slug` has been a per-locale field all
+along, and one route already proved the mechanism - `[lang]/[...slug].astro`
+builds its params from `slugs[lang]` and derives `altPaths` from the same
+table, which is why `/fr/candidatures-galeries` was the only translated URL
+on the site. Every other segment is a **directory name on disk**, and a
+folder called `about` can only ever spell `/fr/about`. 296 of the 298 URLs
+per language were English under a French or Dutch prefix.
+
+The card also said this blocks the 301 map. It does not, any more:
+`scripts/legacy-redirects.mjs` reads each FR/NL target from the built page's
+own hreflang, so the map rewrites itself when a slug changes - watched it
+happen twice today.
+
+**Identifiers and URLs are now separate.** `slug` and `route` in `hubs.ts`
+stay the stable English identifiers, shared by the Sanity `anchor` field,
+`page.slug.en` and `pageForTab`, so nothing in the CMS moves and there is no
+content migration. The new `segment` is the only thing a visitor sees and it
+is translated. The six hub route files moved under one
+`[lang]/[hub]/[...tab].astro` that makes both segments dynamic and hands off
+to a component per hub; git recorded all six as renames, so the markup is
+untouched. `hubAltPaths` feeds hreflang from the same table, so the
+canonical and the alternates cannot disagree - the acceptance criterion is
+now true by construction.
+
+Astro ranks static segments above dynamic ones, so the listing directories
+still win over `[hub]` and `[lang]/[...slug].astro` stays below both. That
+was the one unknown and it was settled by a throwaway spike before any of
+this was written: a dummy `[hub]` route built 900 pages with no collision,
+`/en/about/team` still came from the real page, and `[...slug]` still served
+`/fr/candidatures-galeries`.
+
+**Where the words come from, after checking the live site.** All 47 old
+pages were read out of `legacy-export` (it carries their per-locale slugs)
+and the addresses confirmed still 200 on www.ceramic.brussels. The old site
+translated 28 of them. The rule settled on:
+
+- A **hub root** takes the live site's own address, because the new hub root
+  is that same page and the old URL then survives untouched. `/fr/infos-pratiques`
+  and `/fr/invitee-d-honneur` are built here and need no redirect at all.
+- A **tab** takes its segment from the tab label in `i18n.ts`. The live
+  site's wording cannot be preserved for a tab anyway: that site is flat and
+  this one is nested, so `/fr/equipe` becomes `/fr/a-propos/equipe` and a 301
+  fires whatever word is chosen. With nothing to preserve, matching the label
+  beats matching a superseded translation - hence `comite-consultatif` as the
+  tab is labelled rather than the old `comite-strategique`, `laureats` rather
+  than its inclusive `laureat-es`, `medias` rather than the English `media`
+  it never translated. Where the two agreed anyway - `partenaire-principal`,
+  `institutions`/`instellingen`, `hoofdpartner`, `entretien`, `programma` -
+  there was nothing to choose between.
+
+Two segments are not from either source and say why in the code: the art
+prize hub is `prix-art`/`kunstprijs` rather than the bare label, because the
+hub has an awards tab also labelled "prix" and `/fr/prix/prix` reads as a
+mistake.
+
+**Verified.** 897 pages, 298 per language, unchanged. hreflang reciprocal
+and consistent in all three languages. No French or Dutch page still links
+to an English hub path, and every internal link in the build resolves to a
+built page. Of 25 French hub paths only 3 are still identical to English
+(`contact`, `programme`, `programme/vip`) and of 25 Dutch only 4
+(`contact`, `partners`, `partners/hotel`, `partners/media`) - each a word
+that is genuinely the same in that language. Checked in Chrome:
+`/fr/prix-art/laureats` renders its five laureates with the switcher
+pointing at `/en/art-prize/laureates` and `/nl/kunstprijs/laureaten`.
+
+**Next, and the larger half by URL count: the listing routes** - exhibitors,
+artists, news, editions, contact. Same directory problem, and they carry the
+268 detail pages per language. The old site left `exhibitors` and `artists`
+untranslated in both languages, so by the rule above they take their labels:
+`exposants`/`exposanten`, `artistes`/`kunstenaars`, `actualites`/`nieuws`.
+Detail slugs - gallery and artist names - stay as they are. Do the whole
+card before the domain cutover: it changes ~592 URLs, and today pages.dev
+carries `X-Robots-Tag: noindex` and the real domain is not live, so there is
+no redirect debt to pay.
+
 ## Status, 2026-09-12 late — the pages stop standing in for missing content
 
 Board card "Populate the Sanity back end with all current site content",
