@@ -14,10 +14,17 @@ import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from './locales';
  * translated, which is what gives French and Dutch real URLs
  * (`/fr/a-propos/equipe`, not `/fr/about/team`) without a content migration.
  *
- * Segments are derived from the tab labels in `i18n.ts`, so the URL says what
- * the pill said: `tabs.team` is "équipe" in French, and the URL is `equipe`.
- * Accents and spaces are dropped; nothing else is invented. A missing segment
- * falls back to the English identifier, so adding a tab cannot break a build.
+ * **Where a segment comes from.** If the live ceramic.brussels already has a
+ * translated address for that page, it is kept verbatim, so the old URL and
+ * the new one agree and the 301 stays one hop: `invitee-d-honneur`,
+ * `infos-pratiques`, `partenaires`, `partenaire-principal`, `equipe`,
+ * `comite-strategique`, `laureat-es`, `institutions`/`instellingen`,
+ * `hoofdpartner`, `programma`, `entretien`. Where the live site never
+ * translated one - it left `art-prize`, `media`, `photos`, `faq` and every
+ * Dutch page in English - the segment is taken from the tab label in
+ * `i18n.ts`, so the URL says what the pill said. Nothing else is invented,
+ * and a missing segment falls back to the English identifier, so adding a
+ * tab cannot break a build.
  *
  * Labels come from STRINGS so they are translated with the build; an editor
  * can override a label through the page's `tabLabel`.
@@ -67,7 +74,7 @@ export const HUBS: Record<string, Hub> = {
     title: 'nav.artPrize',
     tabs: [
       { slug: 'about', segment: { fr: 'a-propos', nl: 'over' }, label: 'tabs.about' },
-      { slug: 'laureates', segment: { fr: 'laureats', nl: 'laureaten' }, label: 'tabs.laureates' },
+      { slug: 'laureates', segment: { fr: 'laureat-es', nl: 'laureaten' }, label: 'tabs.laureates' },
       { slug: 'awards', segment: { fr: 'prix', nl: 'prijzen' }, label: 'tabs.awards' },
       { slug: 'jury', label: 'tabs.jury' },
     ],
@@ -88,11 +95,11 @@ export const HUBS: Record<string, Hub> = {
     segment: { fr: 'partenaires' },
     title: 'nav.partners',
     tabs: [
-      { slug: 'main', segment: { fr: 'principal', nl: 'hoofdpartner' }, label: 'tabs.mainPartner' },
+      { slug: 'main', segment: { fr: 'partenaire-principal', nl: 'hoofdpartner' }, label: 'tabs.mainPartner' },
       { slug: 'institutions', segment: { nl: 'instellingen' }, label: 'tabs.institutions' },
       { slug: 'hotel', label: 'tabs.hotel' },
       { slug: 'event', segment: { fr: 'partenaires-evenement', nl: 'eventpartners' }, label: 'tabs.eventPartners' },
-      { slug: 'media', segment: { fr: 'medias' }, label: 'tabs.media' },
+      { slug: 'media', label: 'tabs.media' },
     ],
   },
   visit: {
@@ -114,7 +121,7 @@ export const HUBS: Record<string, Hub> = {
     title: 'nav.about',
     tabs: [
       { slug: 'the-fair', label: 'tabs.theFair' },
-      { slug: 'advisory-board', segment: { fr: 'comite-consultatif', nl: 'adviesraad' }, label: 'tabs.advisoryBoard' },
+      { slug: 'advisory-board', segment: { fr: 'comite-strategique', nl: 'adviesraad' }, label: 'tabs.advisoryBoard' },
       { slug: 'team', segment: { fr: 'equipe' }, label: 'tabs.team' },
       { slug: 'partners', label: 'tabs.partners', link: { route: 'partners' } },
       { slug: 'press', segment: { fr: 'presse', nl: 'pers' }, label: 'tabs.press' },
