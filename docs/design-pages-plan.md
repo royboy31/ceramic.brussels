@@ -19,6 +19,57 @@ components, binding each element to the field named below.
 `html pages/` is not committed (165 MB of PNGs); Lilanga has the source
 project. It is gitignored.
 
+## Status, 2026-09-12 — the old-site fill is in, biography moved
+
+The two content steps left open the night before, both now applied against
+production.
+
+**The biography move** (`scripts/move-artist-bio.mjs --apply`). One
+document: Marion Verboom's biography sat in a page section anchored
+`biography`, so the site printed a bio while the Studio showed an empty
+Biography field. It is now in `bio` (1,548 characters, English), and one
+section (`practice`) is left in her stack. The code that reads `bio` first
+on the guest-of-honour page shipped the night before, so nothing took the
+biography's place.
+
+**The old-site fill** (`scripts/legacy-fill.mjs --apply`), 13 mutations in
+one transaction `YEJx4bvFMU8IMjDKRLfaoT`:
+
+- edition photo galleries — 2024: 39, 2025: 66, 2026: 68 (the field is
+  `images`, not `gallery`);
+- the scenography section on "the fair" — two texts, the 2026 site plan and
+  its four photos, as the last three blocks of six;
+- the five homepage cards the old homepage had — 2026 catalogue, best booth,
+  best solo show, jury prize, 2026 exhibitors — as spotlights after the key
+  figures, on `homepage` and its draft;
+- the seven seeded `demo-event-2027-*` placeholders deleted. The programme
+  tabs now fall back to 2026, as the old site does.
+
+It took two runs. The first died partway through the uploads on a **502**
+from `api.sanity.io` — an upstream hiccup, not a bad file. Nothing was
+written: the transaction only runs once every image is up. Because
+`legacy-export/asset-map.json` caches each upload by its old media id, the
+re-run had 37 images left of 168 rather than starting again. **Keep that
+file.**
+
+**Turning the rebuild webhook off is a manual step, and cannot be scripted.**
+The write token is refused: `PATCH /hooks/projects/<id>/<hookId>` answers
+`401 "A service session is required to set 'isDisabled'"`. The API will
+report the flag (as `isDisabledByUser`) but not set it, so it has to be
+switched in sanity.io/manage → API → Webhooks → ⋯ → Disable. It matters here
+because `cloudflare-production-rebuild` filters on
+`!(_id in path("drafts.**"))` — every published document, image assets
+included — so 168 uploads would have fired the deploy hook some 175 times,
+and each build spends thousands of Sanity requests. That is the 2026-09-05
+quota wipeout exactly. Off for the run, on afterwards, then a single POST to
+the deploy hook (build `744777ac-a3ac-49cd-92ca-09e2f6b145a8`).
+
+**Still open** from the night before: the "link text can't change" feedback
+(ask the tester how they tried — a change needs Publish, then the rebuild);
+a "Copy share link" action, if partners still need draft approval links;
+`dev` and `lilanga` behind `main`; the Users screen's ignored `Stack space`;
+no Dutch `tabs.partners`; fifteen addresses with no document to hold SEO.
+
 ## Status, 2026-09-11 night — `main` brought up to `kamindu`
 
 `main` was fast-forwarded from `04f77df` to `kamindu` (`84a85ed` plus the
