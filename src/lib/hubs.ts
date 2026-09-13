@@ -14,22 +14,33 @@ import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from './locales';
  * translated, which is what gives French and Dutch real URLs
  * (`/fr/a-propos/equipe`, not `/fr/about/team`) without a content migration.
  *
- * **Where a segment comes from.** A *hub root* keeps the live site's own
- * address, because the new hub root is that same page and the old URL then
- * survives untouched - `/fr/infos-pratiques` and `/fr/invitee-d-honneur` are
- * built here and need no redirect at all.
+ * **Where a segment comes from: the live site first.** Wherever
+ * www.ceramic.brussels already has a French or Dutch address for a page, that
+ * is the segment, word for word - including where its French is inclusive
+ * (`laureat-es`) or its wording has since been superseded
+ * (`comite-strategique`, still the tab labelled "comité consultatif"). Only a
+ * page the old site never had, or never translated, is translated here. The
+ * slugs were read out of `legacy-export/normalized/pages.json`, which carries
+ * all 47 old pages per locale.
  *
- * A *tab* takes its segment from the tab label in `i18n.ts`, so the URL says
- * what the pill said: `tabs.team` reads "équipe" and the URL is `equipe`.
- * The live site's wording is not copied for tabs, because it cannot be
- * preserved anyway: that site was flat and this one is nested, so
- * `/fr/equipe` becomes `/fr/a-propos/equipe` and a 301 fires whatever the
- * word is. Matching the label is then worth more than matching a superseded
- * translation - which is why this is `comite-consultatif`, as the tab is
- * labelled, and not the old site's `comite-strategique`, and `laureats`
- * rather than its inclusive `laureat-es`. Where the two agree anyway
- * (`partenaire-principal`, `institutions`/`instellingen`, `hoofdpartner`,
- * `entretien`, `programma`) there was nothing to choose between.
+ * That rule pays off twice at a *hub root*, because the new hub root is the
+ * same page as the old one: `/fr/infos-pratiques`, `/fr/invitee-d-honneur`,
+ * `/nl/visitors-info`, `/nl/guest-of-honour` and `/fr|nl/art-prize` are built
+ * here exactly as the old site spells them and need no redirect at all. The
+ * last three keep an English word in a French or Dutch URL for that reason
+ * alone - the URL survives, which is worth more than the reading.
+ *
+ * A *tab* is nested where the old site was flat, so `/fr/equipe` becomes
+ * `/fr/a-propos/equipe` and a 301 fires whatever the word is: no URL survives
+ * either way. The old wording is still copied where it exists, so the word an
+ * editor knows stays the word; but where the old site left the tab in English
+ * it is translated here (`prix`/`prijzen`, `laureaten`, `medias`,
+ * `adviesraad`), since keeping the English bought no redirect.
+ *
+ * The one page not taken from the old site is the *about* hub, whose old slug
+ * is `ceramic-brussels` in all three languages - the site's own name, and the
+ * English has moved to `/en/about` regardless, so there was nothing to
+ * preserve.
  *
  * Accents and spaces are dropped. Nothing else is invented, and a missing
  * segment falls back to the English identifier, so adding a tab cannot break
@@ -67,8 +78,9 @@ export interface Hub {
 export const HUBS: Record<string, Hub> = {
   'guest-of-honour': {
     route: 'guest-of-honour',
-    // The old site used "invitee-d-honneur"; kept, so its 301s stay one hop.
-    segment: { fr: 'invitee-d-honneur', nl: 'eregast' },
+    // Both the old site's own addresses. Its Dutch was never translated, and
+    // keeping it means /nl/guest-of-honour survives the move untouched.
+    segment: { fr: 'invitee-d-honneur' },
     title: 'nav.guestOfHonour',
     tabs: [
       { slug: 'about', segment: { fr: 'a-propos', nl: 'over' }, label: 'tabs.about' },
@@ -77,13 +89,13 @@ export const HUBS: Record<string, Hub> = {
   },
   'art-prize': {
     route: 'art-prize',
-    // Not the bare label "prix"/"prijs": the hub has an "awards" tab whose
-    // label is also "prix", and /fr/prix/prix reads as a mistake.
-    segment: { fr: 'prix-art', nl: 'kunstprijs' },
+    // The old site published this page as /fr/art-prize and /nl/art-prize; it
+    // never translated either, and leaving them be keeps both URLs alive.
     title: 'nav.artPrize',
     tabs: [
       { slug: 'about', segment: { fr: 'a-propos', nl: 'over' }, label: 'tabs.about' },
-      { slug: 'laureates', segment: { fr: 'laureats', nl: 'laureaten' }, label: 'tabs.laureates' },
+      // French as the old site writes it, inclusive hyphen and all.
+      { slug: 'laureates', segment: { fr: 'laureat-es', nl: 'laureaten' }, label: 'tabs.laureates' },
       { slug: 'awards', segment: { fr: 'prix', nl: 'prijzen' }, label: 'tabs.awards' },
       { slug: 'jury', label: 'tabs.jury' },
     ],
@@ -113,11 +125,11 @@ export const HUBS: Record<string, Hub> = {
   },
   visit: {
     route: 'visit',
-    // The old site's own French address for this page.
-    segment: { fr: 'infos-pratiques', nl: 'praktische-info' },
+    // Both the old site's own addresses, French translated and Dutch not.
+    segment: { fr: 'infos-pratiques', nl: 'visitors-info' },
     title: 'nav.visit',
     tabs: [
-      { slug: 'practical-info', segment: { fr: 'infos-pratiques', nl: 'praktische-info' }, label: 'tabs.practicalInfo' },
+      { slug: 'practical-info', segment: { fr: 'infos-pratiques', nl: 'visitors-info' }, label: 'tabs.practicalInfo' },
       // "food & drinks" is the label in all three locales; the URL follows it.
       { slug: 'food-drinks', label: 'tabs.foodDrinks' },
       { slug: 'floor-plan', segment: { fr: 'plan', nl: 'plattegrond' }, label: 'tabs.floorPlan' },
@@ -130,7 +142,9 @@ export const HUBS: Record<string, Hub> = {
     title: 'nav.about',
     tabs: [
       { slug: 'the-fair', label: 'tabs.theFair' },
-      { slug: 'advisory-board', segment: { fr: 'comite-consultatif', nl: 'adviesraad' }, label: 'tabs.advisoryBoard' },
+      // The old site's French, superseded by the "comité consultatif" label
+      // but still the address people have; its Dutch was never translated.
+      { slug: 'advisory-board', segment: { fr: 'comite-strategique', nl: 'adviesraad' }, label: 'tabs.advisoryBoard' },
       { slug: 'team', segment: { fr: 'equipe' }, label: 'tabs.team' },
       { slug: 'partners', label: 'tabs.partners', link: { route: 'partners' } },
       { slug: 'press', segment: { fr: 'presse', nl: 'pers' }, label: 'tabs.press' },

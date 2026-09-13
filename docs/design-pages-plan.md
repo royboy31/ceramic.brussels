@@ -22,7 +22,7 @@ project. It is gitignored.
 ## Status, 2026-09-13 — French and Dutch URLs, the hubs done
 
 Board card "Translate the FR and NL page slugs in Sanity". Branch
-**`fr-nl-slugs`**, three commits on top of `main`. Not merged: the listing
+**`fr-nl-slugs`**, five commits on top of `main`. Not merged: the listing
 routes are still to do.
 
 **The card was aimed at the wrong layer.** It says "a content job in the
@@ -57,39 +57,56 @@ this was written: a dummy `[hub]` route built 900 pages with no collision,
 `/en/about/team` still came from the real page, and `[...slug]` still served
 `/fr/candidatures-galeries`.
 
-**Where the words come from, after checking the live site.** All 47 old
-pages were read out of `legacy-export` (it carries their per-locale slugs)
-and the addresses confirmed still 200 on www.ceramic.brussels. The old site
-translated 28 of them. The rule settled on:
+**Where the words come from: the live site first.** All 47 old pages were
+read out of `legacy-export/normalized/pages.json` (it carries their
+per-locale slugs) and the addresses confirmed still 200 on
+www.ceramic.brussels. The old site translated 28 of them. The rule, settled
+with Kamindu: **wherever the live site already has a French or Dutch address,
+that is the segment, word for word.** Only a page it never had, or never
+translated, is translated here. So the French keeps its inclusive
+`laureat-es` and its superseded `comite-strategique` - the tab is labelled
+"comité consultatif" now, but `comite-strategique` is the address people
+have.
 
-- A **hub root** takes the live site's own address, because the new hub root
-  is that same page and the old URL then survives untouched. `/fr/infos-pratiques`
-  and `/fr/invitee-d-honneur` are built here and need no redirect at all.
-- A **tab** takes its segment from the tab label in `i18n.ts`. The live
-  site's wording cannot be preserved for a tab anyway: that site is flat and
-  this one is nested, so `/fr/equipe` becomes `/fr/a-propos/equipe` and a 301
-  fires whatever word is chosen. With nothing to preserve, matching the label
-  beats matching a superseded translation - hence `comite-consultatif` as the
-  tab is labelled rather than the old `comite-strategique`, `laureats` rather
-  than its inclusive `laureat-es`, `medias` rather than the English `media`
-  it never translated. Where the two agreed anyway - `partenaire-principal`,
-  `institutions`/`instellingen`, `hoofdpartner`, `entretien`, `programma` -
-  there was nothing to choose between.
+The rule pays off twice at a **hub root**, because the new hub root is the
+same page as the old one, so the old URL survives untouched:
+`/fr/infos-pratiques`, `/fr/invitee-d-honneur`, `/nl/visitors-info`,
+`/nl/guest-of-honour` and `/fr|nl/art-prize` are built exactly as the old
+site spells them and need no redirect at all. The last three keep an English
+word inside a French or Dutch URL for that reason alone - the URL surviving
+is worth more than the reading.
 
-Two segments are not from either source and say why in the code: the art
-prize hub is `prix-art`/`kunstprijs` rather than the bare label, because the
-hub has an awards tab also labelled "prix" and `/fr/prix/prix` reads as a
-mistake.
+A **tab** is nested where the old site was flat, so `/fr/equipe` becomes
+`/fr/a-propos/equipe` and a 301 fires whatever the word is: no URL survives
+either way. The old wording is still copied where it exists, so the word an
+editor knows stays the word. But where the old site left a tab in English,
+it is translated here - `prix`/`prijzen`, `laureaten`, `medias`,
+`adviesraad` - because keeping the English bought no redirect and the card
+asks for URLs that read in their own language.
+
+The one page not taken from the old site is the **about** hub, whose old
+slug is `ceramic-brussels` in all three languages: the site's own name, and
+the English had moved to `/en/about` regardless, so there was nothing to
+preserve. It is `a-propos`/`over`.
 
 **Verified.** 897 pages, 298 per language, unchanged. hreflang reciprocal
-and consistent in all three languages. No French or Dutch page still links
-to an English hub path, and every internal link in the build resolves to a
-built page. Of 25 French hub paths only 3 are still identical to English
-(`contact`, `programme`, `programme/vip`) and of 25 Dutch only 4
-(`contact`, `partners`, `partners/hotel`, `partners/media`) - each a word
-that is genuinely the same in that language. Checked in Chrome:
-`/fr/prix-art/laureats` renders its five laureates with the switcher
-pointing at `/en/art-prize/laureates` and `/nl/kunstprijs/laureaten`.
+and consistent in all three languages, every alternate pointing at a page
+that was built. All 24,271 internal links in the build resolve, and no
+French or Dutch page links to an English hub path except the three kept on
+purpose. The 301 map regenerated itself from the new hreflang - 474 rules,
+every URL in `docs/legacy-site-inventory.md` covered, no rule whose source
+equals its target. Checked in Chrome: `/fr/prix-art/laureats` rendered its
+five laureates with the switcher wired to both siblings (that URL is now
+`/fr/art-prize/laureat-es`).
+
+**First pass, superseded.** The branch first gave tabs their segment from
+the tab label in `i18n.ts` and invented `prix-art`/`kunstprijs`, `eregast`,
+`praktische-info`, `laureats`, `comite-consultatif`. The reasoning was that
+a tab's URL changes either way, so the label was worth more than a
+superseded translation. Kamindu's rule reverses that where the live site has
+an address at all, which is right for two reasons the first pass missed: at
+a hub root the old URL genuinely does survive, and an editor searching for
+the page they know should find the word they know.
 
 **Next, and the larger half by URL count: the listing routes** - exhibitors,
 artists, news, editions, contact. Same directory problem, and they carry the
