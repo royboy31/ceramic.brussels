@@ -59,6 +59,7 @@ const LINK_TARGET = `{
 /** A `link` object resolved to something a template can render directly. */
 const LINK = `{
   kind,
+  path,
   route,
   anchor,
   ${styled('label')},
@@ -343,6 +344,7 @@ export function getNavPages(lang: LocaleId) {
 
 const NAV_TARGET = `
   kind,
+  path,
   route,
   anchor,
   url,

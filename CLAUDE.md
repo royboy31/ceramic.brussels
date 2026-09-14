@@ -336,8 +336,12 @@ The content model follows the 2027 Figma design. The shape to keep in mind:
 - **Images carry their caption.** `figure` has `caption` (artist),
   `workTitle` (render italic) and `year` next to `alt` and `credit`; the
   design's "Artist, *Title*, 2024" line is assembled from those.
-- **Links are objects.** A `link` is a route + optional anchor, a document
-  reference, or an external URL. Internal ones get "→", external ones "↗".
+- **Links are objects.** A `link` is a page of this site (`path`, picked
+  from the Studio's search box over every built page or typed -
+  `SitePathInput` in `src/sanity/components/SiteLinkInput.tsx`; older links
+  still carry a route + anchor pair, which is read too), a document
+  reference, or an external URL. Menu items work the same way. Internal
+  ones get "→", external ones "↗".
 - **Pages are section stacks.** `page.sections`, `homepage.sections` and
   `artist.sections` are page-builder arrays: an editor adds, deletes, drags
   and hides pre-designed blocks (text, image + text, image grid, slideshow,

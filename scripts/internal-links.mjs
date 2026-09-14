@@ -18,6 +18,12 @@
  * text is an artist's name and whose address is the guest-of-honour hub goes
  * to that artist's page. Email, phone and other sites' links are not touched.
  *
+ * Second pass, same run: the "A section of this site" links on buttons and
+ * in the menu, which stored a section and a tab typed by hand, get the
+ * `path` the Studio's search box now writes ("art-prize/laureates"), and
+ * the two old fields are cleared. links.ts reads both shapes, so this is
+ * tidiness: it keeps the old fields from showing beside the new box.
+ *
  *   node scripts/internal-links.mjs            plan and back up, write nothing
  *   node scripts/internal-links.mjs --apply    write, in one transaction
  *
@@ -161,6 +167,33 @@ for (const doc of docs) {
   }
 }
 
+/** "A section of this site" links and menu items still on route + anchor. */
+function* routeLinks(value, at) {
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      const item = value[i];
+      yield* routeLinks(item, `${at}[${item?._key ? `_key=="${item._key}"` : i}]`);
+    }
+    return;
+  }
+  if (!value || typeof value !== 'object') return;
+  const isTarget = 'kind' in value && ('route' in value || 'anchor' in value) && !('path' in value);
+  if (isTarget && (value.kind === 'route' || value.kind === undefined) && typeof value.route === 'string' && value.route !== '') {
+    yield { at, route: value.route, anchor: value.anchor };
+  }
+  for (const [key, child] of Object.entries(value)) {
+    if (key === 'markDefs' || key.startsWith('_')) continue;
+    yield* routeLinks(child, at ? `${at}.${key}` : key);
+  }
+}
+
+const linkPlan = [];
+for (const doc of docs) {
+  for (const { at, route, anchor } of routeLinks(doc, '')) {
+    linkPlan.push({ doc, at: at.replace(/^\./, ''), value: anchor ? `${route}/${anchor}` : route });
+  }
+}
+
 const describe = (v) => (v.internal ? `document ${v.internal._ref}` : `path ${v.path}`);
 const byTarget = {};
 for (const p of plan) {
@@ -168,7 +201,11 @@ for (const p of plan) {
   byTarget[key] = (byTarget[key] ?? 0) + 1;
 }
 console.log(Object.entries(byTarget).map(([k, n]) => `${String(n).padStart(3)}  ${k}`).join('\n'));
-const touched = [...new Set(plan.map((p) => p.doc._id))];
+const linkCounts = {};
+for (const p of linkPlan) linkCounts[p.value] = (linkCounts[p.value] ?? 0) + 1;
+console.log(`\n${linkPlan.length} button and menu links on section + tab, to become a path:`);
+console.log(Object.entries(linkCounts).map(([k, n]) => `${String(n).padStart(3)}  ${k}`).join('\n'));
+const touched = [...new Set([...plan, ...linkPlan].map((p) => p.doc._id))];
 console.log(`\n${plan.length} links in ${touched.length} documents (drafts counted separately).`);
 
 if (unmapped.length) {
@@ -199,8 +236,12 @@ if (!live.includes("name: 'internalLink'")) {
 const tx = client.transaction();
 for (const id of touched) {
   const doc = docs.find((d) => d._id === id);
-  const sets = Object.fromEntries(plan.filter((p) => p.doc._id === id).map((p) => [p.path, p.value]));
-  tx.patch(id, (patch) => patch.ifRevisionId(doc._rev).set(sets));
+  const sets = Object.fromEntries([
+    ...plan.filter((p) => p.doc._id === id).map((p) => [p.path, p.value]),
+    ...linkPlan.filter((p) => p.doc._id === id).map((p) => [`${p.at}.path`, p.value]),
+  ]);
+  const unsets = linkPlan.filter((p) => p.doc._id === id).flatMap((p) => [`${p.at}.route`, `${p.at}.anchor`]);
+  tx.patch(id, (patch) => patch.ifRevisionId(doc._rev).set(sets).unset(unsets));
 }
 const result = await tx.commit();
 console.log(`Written: ${result.results.length} documents, transaction ${result.transactionId}.`);

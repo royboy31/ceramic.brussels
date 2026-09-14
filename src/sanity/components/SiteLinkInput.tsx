@@ -2,35 +2,55 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Flex, Stack, Text } from '@sanity/ui';
 // Sanity UI 4 ships Autocomplete on its own subpath only; the root export is gone.
 import { Autocomplete } from '@sanity/ui/autocomplete';
-import { set, unset, useClient, type ObjectInputProps } from 'sanity';
+import { set, unset, useClient, type ObjectInputProps, type StringInputProps } from 'sanity';
 import { sitePath } from '../../lib/links';
 import { DOCUMENTS_QUERY, documentOption, pageOptions, type SiteLinkOption } from '../siteLinks';
 
 /**
- * The form of a "link to this site" mark in rich text: one search box.
+ * One search box for a link inside this site, used in two places:
  *
- * It lists every page of the site - the pages the code builds and every
- * document with a page (see ../siteLinks.ts) - and whatever is typed that
- * matches none of them is offered as a path of its own, so an editor can
- * pick or type. A picked document is stored as a reference, a picked page
- * or a typed path as `path`; the one not chosen is cleared, so a mark never
- * carries both. Above the box: what the link goes to now, and the English
- * address it renders as.
+ * - `SiteLinkInput` is the whole form of a "link to this site" mark in rich
+ *   text. It lists the pages the code builds and every document with a page
+ *   (see ../siteLinks.ts); a picked document is stored as a reference, a
+ *   picked page or a typed path as `path`, and the one not chosen is cleared.
+ * - `SitePathInput` is the `path` field of a `link` object or a menu item
+ *   under "A section of this site". Documents have their own radio option
+ *   there, so it lists pages only.
+ *
+ * Whatever is typed that matches nothing in the list is offered as a path of
+ * its own, so an editor can pick or type. Above the box: what the link goes
+ * to now, and the English address it renders as.
  */
-
-interface Value {
-  path?: string;
-  internal?: { _ref?: string };
-}
 
 const clean = (path: string) => path.trim().replace(/^\/+|\/+$/g, '');
 
-export function SiteLinkInput(props: ObjectInputProps) {
-  const value = (props.value ?? {}) as Value;
+interface Current {
+  title: string;
+  detail: string;
+}
+
+interface PickerProps {
+  id: string;
+  current: Current | null;
+  readOnly?: boolean;
+  includeDocs: boolean;
+  /** `path:<path>` or `doc:<id>`. */
+  onPick: (selected: string) => void;
+  onClear: () => void;
+  /** The store the picker feeds from, shared so both inputs read the same list. */
+  store: SiteLinkStore;
+}
+
+interface SiteLinkStore {
+  docs: SiteLinkOption[] | null;
+  pages: SiteLinkOption[];
+}
+
+/** The pages and documents the picker offers; one fetch per mount. */
+function useSiteLinkStore(): SiteLinkStore {
   const client = useClient({ apiVersion: '2025-02-19' });
   const [docs, setDocs] = useState<SiteLinkOption[] | null>(null);
   const [years, setYears] = useState<number[]>([]);
-  const [query, setQuery] = useState('');
 
   useEffect(() => {
     let live = true;
@@ -48,42 +68,32 @@ export function SiteLinkInput(props: ObjectInputProps) {
   }, [client]);
 
   const pages = useMemo(() => pageOptions(years), [years]);
+  return { docs, pages };
+}
+
+/** What a stored `path` points at, for the box above the picker. */
+function describePath(path: string | undefined, pages: SiteLinkOption[]): Current | null {
+  if (!path?.trim()) return null;
+  return {
+    title: pages.find((o) => clean(o.value.slice(5)) === clean(path))?.title ?? 'Typed path',
+    detail: sitePath(path, 'en') ?? path,
+  };
+}
+
+function SitePagePicker({ id, current, readOnly, includeDocs, onPick, onClear, store }: PickerProps) {
+  const [query, setQuery] = useState('');
+  const { docs, pages } = store;
 
   const typed = query.trim();
   const typedHref = typed ? sitePath(typed, 'en') : null;
   const options = useMemo(() => {
-    const all = [...pages, ...(docs ?? [])];
+    const all = includeDocs ? [...pages, ...(docs ?? [])] : pages;
     const known = all.some((o) => o.value.startsWith('path:') && clean(o.value.slice(5)) === clean(typed));
-    // Only an address on this site can be typed in; another site's is an External link.
+    // Only an address on this site can be typed in; another site's is an external link.
     return typed && typedHref && !known
       ? [{ value: `path:${typed}`, title: `Use "${typed}"`, group: 'Typed path', path: typedHref }, ...all]
       : all;
-  }, [pages, docs, typed, typedHref]);
-
-  const current: { title: string; detail: string } | null = value.internal?._ref
-    ? (() => {
-        const doc = docs?.find((o) => o.value === `doc:${value.internal!._ref}`);
-        if (doc) return { title: `${doc.group}: ${doc.title}`, detail: doc.path };
-        return docs
-          ? { title: 'A document that is not published, or no longer exists', detail: 'The text shows without this link until it is.' }
-          : { title: 'A document', detail: 'Loading…' };
-      })()
-    : value.path?.trim()
-      ? {
-          title: pages.find((o) => clean(o.value.slice(5)) === clean(value.path!))?.title ?? 'Typed path',
-          detail: sitePath(value.path, 'en') ?? value.path,
-        }
-      : null;
-
-  const choose = (selected: string) => {
-    if (selected.startsWith('doc:')) {
-      props.onChange([set({ _type: 'reference', _ref: selected.slice(4) }, ['internal']), unset(['path'])]);
-    } else if (selected.startsWith('path:')) {
-      const path = selected.slice(5);
-      props.onChange([set(path === '' ? '/' : path, ['path']), unset(['internal'])]);
-    }
-    setQuery('');
-  };
+  }, [includeDocs, pages, docs, typed, typedHref]);
 
   return (
     <Stack gap={3}>
@@ -98,26 +108,22 @@ export function SiteLinkInput(props: ObjectInputProps) {
                 {current.detail}
               </Text>
             </Stack>
-            {!props.readOnly && (
-              <Button
-                mode="bleed"
-                text="Clear"
-                fontSize={1}
-                onClick={() => props.onChange([unset(['path']), unset(['internal'])])}
-              />
-            )}
+            {!readOnly && <Button mode="bleed" text="Clear" fontSize={1} onClick={onClear} />}
           </Flex>
         </Card>
       )}
       <Autocomplete
-        id={`${props.id}-site-link`}
+        id={`${id}-site-link`}
         placeholder={current ? 'Change: search a page, or type a path' : 'Search a page, or type a path'}
         options={options}
-        loading={docs === null}
+        loading={includeDocs && docs === null}
         openButton
-        readOnly={props.readOnly}
+        readOnly={readOnly}
         onQueryChange={(q) => setQuery(q ?? '')}
-        onSelect={choose}
+        onSelect={(selected) => {
+          onPick(selected);
+          setQuery('');
+        }}
         filterOption={(q, option) =>
           option.group === 'Typed path' || `${option.title} ${option.group} ${option.path}`.toLowerCase().includes(q.toLowerCase())
         }
@@ -137,9 +143,68 @@ export function SiteLinkInput(props: ObjectInputProps) {
       />
       {typed && !typedHref && (
         <Text size={1} muted>
-          That is another site's address - use External link for it.
+          That is another site's address - use the external link for it.
         </Text>
       )}
     </Stack>
+  );
+}
+
+interface MarkValue {
+  path?: string;
+  internal?: { _ref?: string };
+}
+
+/** The "link to this site" mark in rich text: a page, a document, or a typed path. */
+export function SiteLinkInput(props: ObjectInputProps) {
+  const value = (props.value ?? {}) as MarkValue;
+  const store = useSiteLinkStore();
+
+  const current: Current | null = value.internal?._ref
+    ? (() => {
+        const doc = store.docs?.find((o) => o.value === `doc:${value.internal!._ref}`);
+        if (doc) return { title: `${doc.group}: ${doc.title}`, detail: doc.path };
+        return store.docs
+          ? { title: 'A document that is not published, or no longer exists', detail: 'The text shows without this link until it is.' }
+          : { title: 'A document', detail: 'Loading…' };
+      })()
+    : describePath(value.path, store.pages);
+
+  return (
+    <SitePagePicker
+      id={props.id}
+      current={current}
+      readOnly={props.readOnly}
+      includeDocs
+      store={store}
+      onPick={(selected) => {
+        if (selected.startsWith('doc:')) {
+          props.onChange([set({ _type: 'reference', _ref: selected.slice(4) }, ['internal']), unset(['path'])]);
+        } else {
+          const path = selected.slice(5);
+          props.onChange([set(path === '' ? '/' : path, ['path']), unset(['internal'])]);
+        }
+      }}
+      onClear={() => props.onChange([unset(['path']), unset(['internal'])])}
+    />
+  );
+}
+
+/** The `path` of a `link` object or menu item: a page of the site, picked or typed. */
+export function SitePathInput(props: StringInputProps) {
+  const store = useSiteLinkStore();
+  return (
+    <SitePagePicker
+      id={props.id}
+      current={describePath(props.value, store.pages)}
+      readOnly={props.readOnly}
+      includeDocs={false}
+      store={store}
+      onPick={(selected) => {
+        const path = selected.slice(5);
+        props.onChange(set(path === '' ? '/' : path));
+      }}
+      onClear={() => props.onChange(unset())}
+    />
   );
 }

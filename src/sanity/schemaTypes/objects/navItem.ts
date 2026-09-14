@@ -1,5 +1,6 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { BUILT_IN_ROUTES } from './routes';
+import { SitePathInput } from '../../components/SiteLinkInput';
 
 export { BUILT_IN_ROUTES };
 
@@ -19,19 +20,28 @@ const targetFields = [
     initialValue: 'route',
     validation: (rule) => rule.required(),
   }),
+  // "A section of this site" is the same search box as on a link object -
+  // see the comments in link.ts for `path` and the two fields it replaces.
+  defineField({
+    name: 'path',
+    title: 'Page',
+    type: 'string',
+    components: { input: SitePathInput },
+    hidden: ({ parent }) => parent?.kind !== 'route',
+  }),
   defineField({
     name: 'route',
     title: 'Section',
     type: 'string',
     options: { list: BUILT_IN_ROUTES.map((r) => ({ title: r.title, value: r.value })) },
-    hidden: ({ parent }) => parent?.kind !== 'route',
+    hidden: ({ parent }) => parent?.kind !== 'route' || !!parent?.path || !parent?.route,
   }),
   defineField({
     name: 'anchor',
     title: 'Tab or anchor',
     type: 'string',
     description: 'Optional. A tab within the section, e.g. "laureates".',
-    hidden: ({ parent }) => parent?.kind !== 'route',
+    hidden: ({ parent }) => parent?.kind !== 'route' || !!parent?.path || !parent?.route,
   }),
   defineField({
     name: 'page',
@@ -54,20 +64,23 @@ const preview = {
     kind: 'kind',
     route: 'route',
     anchor: 'anchor',
+    path: 'path',
     // One hop through the reference only. `page.title.en` reaches two levels
     // past the reference, which Sanity never resolves - the preview then sits
     // as a loading skeleton forever instead of erroring.
     pageTitle: 'page.title',
     url: 'url',
   },
-  prepare: ({ label, kind, route, anchor, pageTitle, url }: Record<string, any>) => {
+  prepare: ({ label, kind, route, anchor, path, pageTitle, url }: Record<string, any>) => {
     const pageLabel = typeof pageTitle === 'string' ? pageTitle : pageTitle?.en;
     const target =
       kind === 'page'
         ? pageLabel
         : kind === 'external'
           ? url
-          : `/${route ?? ''}${anchor ? `#${anchor}` : ''}`;
+          : path
+            ? `/${path.replace(/^\/+/, '')}`
+            : `/${route ?? ''}${anchor ? `#${anchor}` : ''}`;
     return { title: label ?? '(no label)', subtitle: target ?? '(nothing selected)' };
   },
 };

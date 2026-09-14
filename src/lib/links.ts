@@ -68,8 +68,10 @@ export function resolveLink(lang: LocaleId, link: any): ResolvedLink | null {
     return { href: localePath(lang, path), label, external: false, arrow: '→' };
   }
 
-  // 'route', and anything unset, points at a built-in section.
-  return { href: localePath(lang, routePath(link.route ?? '', link.anchor, lang)), label, external: false, arrow: '→' };
+  // 'route', and anything unset, points at a page of this site: `path` as
+  // picked or typed in the Studio, or the older section + tab pair.
+  const href = link.path ? sitePath(link.path, lang) : localePath(lang, routePath(link.route ?? '', link.anchor, lang));
+  return href ? { href, label, external: false, arrow: '→' } : null;
 }
 
 /**
@@ -144,7 +146,8 @@ export function resolveNavItem(lang: LocaleId, item: any): ResolvedLink | null {
     const path = pagePath({ section: item.pageSection, tab: item.pageTab, slug: item.pageSlug }, lang);
     return { href: localePath(lang, path), label: item.label, external: false, arrow: '→' };
   }
-  return { href: localePath(lang, routePath(item.route ?? '', item.anchor, lang)), label: item.label, external: false, arrow: '→' };
+  const href = item.path ? sitePath(item.path, lang) : localePath(lang, routePath(item.route ?? '', item.anchor, lang));
+  return href ? { href, label: item.label, external: false, arrow: '→' } : null;
 }
 
 /** "Artist, *Title*, 2024" from a figure's caption parts, as plain strings. */
