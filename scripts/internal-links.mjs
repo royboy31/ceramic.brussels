@@ -93,15 +93,14 @@ function targetFor(href, text, docId, artistsByName) {
   const oldAnchor = m[2] || undefined;
 
   const override = OVERRIDES.find((o) => o.doc === docId.replace(/^drafts\./, '') && o.href === href);
-  const years = /^exhibitors\/(\d{4})$/.exec(oldPath);
-  if (years) return { kind: 'route', route: 'exhibitors', anchor: years[1] };
+  if (/^exhibitors\/\d{4}$/.test(oldPath)) return { path: oldPath };
 
   const rule = TARGETS[oldPath];
   if (!rule) return { unmapped: true };
 
   const artist = artistsByName.get(text.trim().toLowerCase());
   if (oldPath === 'guest-of-honour' && artist) {
-    return { kind: 'internal', internal: { _type: 'reference', _ref: artist } };
+    return { internal: { _type: 'reference', _ref: artist } };
   }
 
   let anchor = rule.anchor;
@@ -110,7 +109,9 @@ function targetFor(href, text, docId, artistsByName) {
     anchor = rule.anchors[oldAnchor];
   }
   if (override) anchor = override.anchor;
-  return { kind: 'route', route: rule.route, ...(anchor ? { anchor } : {}) };
+  // The same "hub/tab" identifiers the Studio's list offers; links.ts
+  // `sitePath` writes them out in each page's language.
+  return { path: anchor ? `${rule.route}/${anchor}` : rule.route };
 }
 
 /** Every markDef in a document, with the patch path that addresses it. */
@@ -160,8 +161,7 @@ for (const doc of docs) {
   }
 }
 
-const describe = (v) =>
-  v.kind === 'internal' ? `document ${v.internal._ref}` : `${v.route || '(home)'}${v.anchor ? ` / ${v.anchor}` : ''}`;
+const describe = (v) => (v.internal ? `document ${v.internal._ref}` : `path ${v.path}`);
 const byTarget = {};
 for (const p of plan) {
   const key = `${p.href}  →  ${describe(p.value)}`;

@@ -1,6 +1,6 @@
-import type { LocaleId } from './locales';
+import { LOCALE_IDS, type LocaleId } from './locales';
 import { localePath } from './i18n';
-import { HUBS, hubTabPath } from './hubs';
+import { HUBS, hubFromSegment, hubTabPath, tabFromSegment } from './hubs';
 
 /**
  * Turns a `link` object from Sanity (see src/sanity/schemaTypes/objects/link.ts)
@@ -73,17 +73,54 @@ export function resolveLink(lang: LocaleId, link: any): ResolvedLink | null {
 }
 
 /**
- * A "link to this site" mark in rich text. It has the fields of a `link`
- * object, except that its document is a bare reference; `targets` (from
- * getLinkTargets) says where that document lives. Null when the target is
- * unset, deleted or unpublished, so the text renders without a dead anchor.
+ * A "link to this site" mark in rich text: a document, whose place `targets`
+ * (from getLinkTargets) knows, or a path the editor picked from the Studio's
+ * list or typed. Null when neither leads anywhere - an unset mark, a deleted
+ * or unpublished document - so the text renders without a dead anchor.
  */
 export function resolveTextLink(lang: LocaleId, mark: any, targets?: Map<string, any>): ResolvedLink | null {
-  if (mark?.kind === 'internal') {
-    const internal = targets?.get(mark.internal?._ref);
+  const ref = mark?.internal?._ref;
+  if (ref) {
+    const internal = targets?.get(ref);
     return internal ? resolveLink(lang, { kind: 'internal', internal }) : null;
   }
-  return resolveLink(lang, { kind: 'route', route: mark?.route, anchor: mark?.anchor });
+  const href = sitePath(mark?.path, lang);
+  return href ? { href, label: '', external: false, arrow: '→' } : null;
+}
+
+const OWN_HOST = /^https?:\/\/([\w-]+\.)*ceramic(\.brussels|-brussels\.pages\.dev)(?=\/|$|#|\?)/i;
+
+/**
+ * A path on this site as an editor gives it, as the same page's path in
+ * `lang`. It may come from the Studio's list ("art-prize/laureates",
+ * "exhibitors/2025") or be typed in any language, with or without the
+ * address in front ("https://ceramic.brussels/fr/a-propos/equipe"). Hub and
+ * tab segments are read back to their identifiers in whichever language they
+ * are written and put out in `lang`, so a French address in an English text
+ * lands on the English page. The rest is kept as typed. Null for another
+ * site's address - that is an External link.
+ */
+export function sitePath(input: string | undefined, lang: LocaleId): string | null {
+  if (typeof input !== 'string' || !input.trim()) return null;
+  const own = input.trim().replace(OWN_HOST, '');
+  if (/^[a-z][a-z\d+.-]*:/i.test(own) || own.startsWith('//')) return null;
+
+  const hashAt = own.indexOf('#');
+  const hash = hashAt === -1 ? '' : own.slice(hashAt);
+  const segments = (hashAt === -1 ? own : own.slice(0, hashAt)).split('?')[0].split('/').filter(Boolean);
+  if ((LOCALE_IDS as readonly string[]).includes(segments[0])) segments.shift();
+
+  const [first, second, ...rest] = segments;
+  const hub = first && (HUBS[first] ? first : LOCALE_IDS.map((l) => hubFromSegment(first, l)).find(Boolean));
+  let path = segments.join('/');
+  if (hub) {
+    const tab = second
+      ? (LOCALE_IDS.map((l) => tabFromSegment(hub, second, l)).find((t) => HUBS[hub].tabs.some((x) => x.slug === t)) ??
+        second)
+      : undefined;
+    path = [hubTabPath(hub, tab, lang), ...rest].join('/');
+  }
+  return localePath(lang, path) + hash;
 }
 
 /**

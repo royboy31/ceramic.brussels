@@ -1,7 +1,7 @@
 import { defineArrayMember, defineField } from 'sanity';
 import { DocumentIcon } from '@sanity/icons/Document';
-import { BUILT_IN_ROUTES } from './routes';
 import { LINKABLE_TYPES } from './link';
+import { SiteLinkInput } from '../../components/SiteLinkInput';
 import {
   HighlightIcon,
   MutedIcon,
@@ -77,44 +77,26 @@ export const richTextBlock = defineArrayMember({
         name: 'internalLink',
         title: 'Link to this site',
         icon: DocumentIcon,
-        options: { modal: { type: 'popover' } },
+        options: { modal: { type: 'dialog', width: 1 } },
+        // One search box over every page the site builds and every document
+        // with a page, which also takes a typed path (SiteLinkInput.tsx).
+        components: { input: SiteLinkInput },
         fields: [
-          defineField({
-            name: 'kind',
-            title: 'Links to',
-            type: 'string',
-            options: {
-              list: [
-                { title: 'A section of this site', value: 'route' },
-                { title: 'A document', value: 'internal' },
-              ],
-              layout: 'radio',
-            },
-            initialValue: 'route',
-          }),
-          defineField({
-            name: 'route',
-            title: 'Section',
-            type: 'string',
-            options: { list: BUILT_IN_ROUTES.map((r) => ({ title: r.title, value: r.value })) },
-            hidden: ({ parent }) => parent?.kind === 'internal',
-          }),
-          defineField({
-            name: 'anchor',
-            title: 'Tab or year',
-            type: 'string',
-            description:
-              'Optional. A tab of the section, e.g. "laureates" or "advisory-board", or a year: Exhibitors + "2025" is the 2025 list.',
-            hidden: ({ parent }) => parent?.kind === 'internal',
-          }),
+          // Picked from the list or typed: "art-prize/laureates", "exhibitors/2025",
+          // "/fr/a-propos/equipe". links.ts `sitePath` puts it in the page's language.
+          defineField({ name: 'path', title: 'Page', type: 'string' }),
+          // A document stays a reference, so the link follows a renamed slug.
           defineField({
             name: 'internal',
             title: 'Document',
             type: 'reference',
             to: LINKABLE_TYPES.map((type) => ({ type })),
-            hidden: ({ parent }) => parent?.kind !== 'internal',
           }),
         ],
+        validation: (Rule) =>
+          Rule.custom((value: any) =>
+            value?.internal?._ref || value?.path?.trim() ? true : 'Pick a page or a document, or type a path.',
+          ),
       },
       {
         type: 'object',

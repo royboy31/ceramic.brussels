@@ -25,7 +25,7 @@ const lang: LocaleId = LOCALE_IDS.includes(requested as LocaleId) ? (requested a
 // lives; the lookup is one memoised query per language, fetched only by a text
 // that has such a link.
 const linksDocument = (value ?? []).some((block: any) =>
-  block?.markDefs?.some((d: any) => d._type === 'internalLink' && d.kind === 'internal'),
+  block?.markDefs?.some((d: any) => d._type === 'internalLink' && d.internal?._ref),
 );
 const targets = linksDocument
   ? new Map((await getLinkTargets(lang)).map((t: any) => [t._id.replace(/^drafts\./, ''), t]))
