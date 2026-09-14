@@ -279,7 +279,13 @@ Also in `i18n.ts`: `localePath(lang, path)` for building links, and
   the name is stored, so the CSS here decides what each one looks like and
   restyling never needs a content migration. The list of roles lives in
   `src/sanity/schemaTypes/objects/richText.ts`; adding one means adding it in
-  both places.
+  both places. Links in text are two marks: **Link to this site** (a section
+  and tab, or a document - rendered as a relative path in the page's
+  language by `resolveTextLink` in `links.ts`, with document targets from
+  `getLinkTargets`) and **External link** (Sanity's own `href` mark, kept
+  field for field so existing text keeps its links). A typed
+  `https://ceramic.brussels/...` address is the thing the first one replaces;
+  `scripts/internal-links.mjs` converted the old site's.
 - **`EditLink.astro`** — deep-links into the Studio for the document being
   viewed. Shows in `astro dev` only, unless `PUBLIC_SHOW_EDIT_LINKS=true`.
 - **`CookieConsent.astro`** — the cookie banner, mounted by `Base.astro`

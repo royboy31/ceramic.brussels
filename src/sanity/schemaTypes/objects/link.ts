@@ -2,6 +2,13 @@ import { defineField, defineType } from 'sanity';
 import { BUILT_IN_ROUTES } from './routes';
 
 /**
+ * The documents a link can point at - the ones with a page of their own.
+ * Shared with the "link to this site" annotation in rich text (richText.ts),
+ * and src/lib/links.ts knows where each one lives.
+ */
+export const LINKABLE_TYPES = ['page', 'exhibitor', 'artist', 'newsItem', 'partner'] as const;
+
+/**
  * A link an editor places in content: a homepage quick link, a "more on the
  * fair →" line, a "book your tickets ↗" pill. It points at one of three things
  * - a built-in section of the site, a document, or an external address - and
@@ -45,13 +52,7 @@ export const link = defineType({
       name: 'internal',
       title: 'Document',
       type: 'reference',
-      to: [
-        { type: 'page' },
-        { type: 'exhibitor' },
-        { type: 'artist' },
-        { type: 'newsItem' },
-        { type: 'partner' },
-      ],
+      to: LINKABLE_TYPES.map((type) => ({ type })),
       hidden: ({ parent }) => parent?.kind !== 'internal',
     }),
     defineField({

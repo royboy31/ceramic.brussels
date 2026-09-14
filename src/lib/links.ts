@@ -73,6 +73,20 @@ export function resolveLink(lang: LocaleId, link: any): ResolvedLink | null {
 }
 
 /**
+ * A "link to this site" mark in rich text. It has the fields of a `link`
+ * object, except that its document is a bare reference; `targets` (from
+ * getLinkTargets) says where that document lives. Null when the target is
+ * unset, deleted or unpublished, so the text renders without a dead anchor.
+ */
+export function resolveTextLink(lang: LocaleId, mark: any, targets?: Map<string, any>): ResolvedLink | null {
+  if (mark?.kind === 'internal') {
+    const internal = targets?.get(mark.internal?._ref);
+    return internal ? resolveLink(lang, { kind: 'internal', internal }) : null;
+  }
+  return resolveLink(lang, { kind: 'route', route: mark?.route, anchor: mark?.anchor });
+}
+
+/**
  * A built-in route with its "tab or anchor": a hub's tab, or on a route
  * without tabs a sub-page - "exhibitors" + "2026" is the 2026 exhibitor list.
  */

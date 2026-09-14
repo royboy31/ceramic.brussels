@@ -1,7 +1,9 @@
 ---
 import SanityImage from './SanityImage.astro';
 import { styleAttrs } from '../lib/textStyle';
-import { normalizeHref } from '../lib/links';
+import { normalizeHref, resolveTextLink } from '../lib/links';
+import { getLinkTargets } from '../lib/queries';
+import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../lib/locales';
 
 /**
  * Minimal Portable Text renderer - blocks, lists, marks and inline figures.
@@ -12,8 +14,22 @@ interface Props {
   value: any[] | undefined;
   /** The Style tab set on the field this text came from, if any. */
   fieldStyle?: any;
+  /** Language for "link to this site" marks. Defaults to the route's `[lang]`. */
+  lang?: LocaleId;
 }
 const { value, fieldStyle } = Astro.props;
+const requested = Astro.props.lang ?? Astro.params.lang;
+const lang: LocaleId = LOCALE_IDS.includes(requested as LocaleId) ? (requested as LocaleId) : DEFAULT_LOCALE;
+
+// A "link to this site" naming a document needs to know where that document
+// lives; the lookup is one memoised query per language, fetched only by a text
+// that has such a link.
+const linksDocument = (value ?? []).some((block: any) =>
+  block?.markDefs?.some((d: any) => d._type === 'internalLink' && d.kind === 'internal'),
+);
+const targets = linksDocument
+  ? new Map((await getLinkTargets(lang)).map((t: any) => [t._id.replace(/^drafts\./, ''), t]))
+  : undefined;
 
 function escapeHtml(text: string): string {
   return text
@@ -61,6 +77,11 @@ function renderSpans(block: any): string {
         }
         // Anything else is a mark definition key - most often a link.
         const def = defs.find((d) => d._key === mark);
+        if (def?._type === 'internalLink') {
+          const resolved = resolveTextLink(lang, def, targets);
+          if (resolved) html = `<a href="${escapeHtml(resolved.href)}">${html}</a>`;
+          continue;
+        }
         const href = normalizeHref(def?.href ?? def?.external);
         if (href) {
           const external = /^https?:\/\//.test(href);

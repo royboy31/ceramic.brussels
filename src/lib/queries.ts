@@ -43,6 +43,19 @@ const SEO = `{
   "ogImage": seo.ogImage ${IMAGE}
 }`;
 
+/** What links.ts needs to know where a linked document lives. */
+const LINK_TARGET = `{
+  _id,
+  _type,
+  "slug": coalesce(slug.current, slug[$lang].current, slug.${DEFAULT_LOCALE}.current),
+  // A hub tab or listing page lives at its hub's path, not at its slug;
+  // a past exhibitor under its year. links.ts works out which.
+  section,
+  "tab": slug.${DEFAULT_LOCALE}.current,
+  "year": edition->year,
+  "current": edition->isCurrent == true
+}`;
+
 /** A `link` object resolved to something a template can render directly. */
 const LINK = `{
   kind,
@@ -50,16 +63,7 @@ const LINK = `{
   anchor,
   ${styled('label')},
   "external": external,
-  "internal": internal->{
-    _type,
-    "slug": coalesce(slug.current, slug[$lang].current, slug.${DEFAULT_LOCALE}.current),
-    // A hub tab or listing page lives at its hub's path, not at its slug;
-    // a past exhibitor under its year. links.ts works out which.
-    section,
-    "tab": slug.${DEFAULT_LOCALE}.current,
-    "year": edition->year,
-    "current": edition->isCurrent == true
-  }
+  "internal": internal->${LINK_TARGET}
 }`;
 
 const VIDEO = `{
@@ -269,6 +273,20 @@ function run<T>(query: string, params: Record<string, unknown> = {}): Promise<T>
 }
 
 /* ------------------------------------------------------------------ site */
+
+/**
+ * Every document a "link to this site" in rich text can point at, with where
+ * it lives. Rich text comes back raw from every query that selects it, so a
+ * reference inside it is not followed there; PortableText.astro looks it up
+ * here instead - one request per language for the whole build, rather than a
+ * projection repeated on every rich-text field.
+ */
+export function getLinkTargets(lang: LocaleId) {
+  return run<any[]>(
+    `*[_type in ["page", "exhibitor", "artist", "newsItem", "partner"] && !(_id in path("drafts.**"))] ${LINK_TARGET}`,
+    { lang },
+  );
+}
 
 export function getSettings(lang: LocaleId) {
   return run<any>(
