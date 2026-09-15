@@ -28,6 +28,7 @@ const Tag = link ? 'a' : 'div';
       class:list={['cta', `cta-${style}`, { 'cta-image': !!bg }]}
       id={section.anchor || undefined}
       href={link?.href}
+      data-sanity={bg && typeof section.image._sanity === 'string' ? section.image._sanity : undefined}
       style={bg ? `background-image: url(${bg})` : undefined}
       {...(link ? external : {})}
     >

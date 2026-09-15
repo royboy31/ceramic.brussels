@@ -49,6 +49,8 @@ const height = aspect
 
 const srcset = hasAsset ? widths.map((w) => `${build(w)} ${w}w`).join(', ') : '';
 const lqip = placeholder ? image?.lqip : undefined;
+// Set only in a preview render (previewImages.ts): tells the editing overlay which field this is.
+const editAttr = typeof image?._sanity === 'string' ? image._sanity : undefined;
 ---
 
 {
@@ -63,6 +65,7 @@ const lqip = placeholder ? image?.lqip : undefined;
       loading={loading}
       decoding="async"
       class={className}
+      data-sanity={editAttr}
       style={lqip ? `background-image:url(${lqip});background-size:cover;background-position:center;` : undefined}
     />
   ) : (

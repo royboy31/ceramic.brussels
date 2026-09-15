@@ -622,6 +622,15 @@ questions.
   empty. `stegaFilter` in `src/middleware.ts` keeps every fixed-list value,
   Style setting, anchor, code and handle plain. A new field picked from a
   list goes into its `PLAIN_KEYS`.
+- **Images are click-to-edit through `data-sanity`, not the marker.** The
+  overlay only finds an image by the marker in its `alt`, and two thirds of
+  the site's images have none. So a preview render asks for the content
+  source map with every query (`previewFetch` in `previewContext.ts`) and
+  `src/lib/previewImages.ts` writes each image's document and field onto
+  it as `_sanity`, which `SanityImage.astro` (and the banner block) emit as
+  `data-sanity`. It resolves through references, so a partner logo opens the
+  partner. A new component that draws a Sanity image without `SanityImage`
+  has to emit that attribute itself.
 - **Preview renders read the page to the end inside the store.** Astro
   streams responses, so the frontmatter (and its queries) runs when the body
   is pulled. `src/middleware.ts` awaits `response.text()` inside

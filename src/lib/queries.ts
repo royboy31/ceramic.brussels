@@ -1,5 +1,5 @@
 import type { LocaleId } from './locales';
-import { currentClient, isPreview } from './previewContext';
+import { currentClient, isPreview, previewFetch } from './previewContext';
 import { DEFAULT_LOCALE } from './locales';
 
 /**
@@ -255,7 +255,8 @@ if (import.meta.env.PROD && typeof process !== 'undefined' && typeof process.on 
 // `currentClient` is the build-time client, or the drafts-reading one inside a
 // preview request - see src/lib/previewContext.ts.
 function run<T>(query: string, params: Record<string, unknown> = {}): Promise<T> {
-  if (!import.meta.env.PROD || isPreview()) return currentClient().fetch<T>(query, params);
+  if (isPreview()) return previewFetch<T>(query, params);
+  if (!import.meta.env.PROD) return currentClient().fetch<T>(query, params);
   const key = `${query}\u0000${JSON.stringify(params)}`;
   let pending = memo.get(key) as Promise<T> | undefined;
   if (!pending) {
