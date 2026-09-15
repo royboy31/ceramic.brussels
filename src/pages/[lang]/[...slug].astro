@@ -102,6 +102,14 @@ const closingImages = (page.images ?? []).filter((img: any) => img?.asset);
 </Base>
 
 <style>
+  /* One centred column, the width of the application form block, so the
+     title, the text and the form line up as one thing in the middle of
+     the page rather than running down the left. */
+  .legacy-page {
+    max-width: 940px;
+    margin: 0 auto;
+  }
+
   .cover {
     margin: 0 0 3rem;
     width: 100%;
