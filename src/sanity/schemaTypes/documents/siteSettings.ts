@@ -17,6 +17,7 @@ export const siteSettings = defineType({
     { name: 'venue', title: 'Venue & access' },
     { name: 'faq', title: 'FAQ' },
     { name: 'press', title: 'Press' },
+    { name: 'applications', title: 'Applications' },
   ],
   fields: [
     defineField({
@@ -125,6 +126,75 @@ export const siteSettings = defineType({
     }),
     defineField({ name: 'pressKitUrl', title: 'Press kit URL', type: 'url', group: 'press' }),
     defineField({ name: 'pressEmail', title: 'Press email', type: 'string', group: 'press' }),
+
+    /**
+     * The gallery application form (the "Application form" block). One form
+     * on the site, one set of settings. Everything here is world-readable -
+     * the dataset is public - so only addresses that are already on the site
+     * belong here, never a key or a password.
+     */
+    defineField({
+      name: 'applications',
+      title: 'Application form',
+      type: 'object',
+      group: 'applications',
+      options: { collapsible: false },
+      fields: [
+        defineField({
+          name: 'open',
+          title: 'Applications are open',
+          type: 'boolean',
+          initialValue: true,
+          description: 'Off shows the message below instead of the form, wherever the form block is placed.',
+        }),
+        defineField({
+          name: 'closedMessage',
+          title: 'Message when closed',
+          type: 'localeText',
+          description: 'e.g. "Applications for 2027 are closed. The next call opens in spring 2027."',
+        }),
+        defineField({
+          name: 'recipient',
+          title: 'Send submissions to',
+          type: 'string',
+          description: 'The address that receives each request. Falls back to the contact email.',
+          validation: (rule) => rule.email(),
+        }),
+        defineField({ name: 'cc', title: 'Copy to', type: 'string', validation: (rule) => rule.email() }),
+        defineField({
+          name: 'senderName',
+          title: 'Sender name',
+          type: 'string',
+          description: 'What the applicant sees as the sender of the confirmation. Defaults to the site name.',
+        }),
+        defineField({
+          name: 'senderEmail',
+          title: 'Sender address',
+          type: 'string',
+          description: 'Must be on the domain verified with the email service. Defaults to the recipient.',
+          validation: (rule) => rule.email(),
+        }),
+        defineField({
+          name: 'confirmationSubject',
+          title: 'Confirmation email: subject',
+          type: 'localeString',
+          description: 'Sent to the applicant. {firstName}, {lastName}, {gallery} are filled in.',
+        }),
+        defineField({
+          name: 'confirmationText',
+          title: 'Confirmation email: text',
+          type: 'localeText',
+          rows: 8,
+          description: 'Plain text; a blank line starts a new paragraph. {firstName}, {lastName}, {gallery} are filled in.',
+        }),
+        defineField({
+          name: 'successMessage',
+          title: 'Message on the page after sending',
+          type: 'localeText',
+          description: 'Optional. Replaces the standard "thank you" line under the form.',
+        }),
+      ],
+    }),
   ],
   preview: {
     prepare: () => ({ title: 'Site settings' }),

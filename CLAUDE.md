@@ -346,7 +346,7 @@ The content model follows the 2027 Figma design. The shape to keep in mind:
   `artist.sections` are page-builder arrays: an editor adds, deletes, drags
   and hides pre-designed blocks (text, image + text, image grid, slideshow,
   video, quote, feature, banner, buttons, section title, people, key figures,
-  latest news, FAQ, embed). The look of each block is fixed in code; its
+  latest news, FAQ, embed, application form). The look of each block is fixed in code; its
   content and its place are the editor's. Every block has `hidden` (kept, not
   shown — the query drops it) and `anchor`. The homepage keeps a fixed hero
   above its stack. Blocks that draw on other content (people, key figures,
@@ -573,6 +573,18 @@ questions.
   `PreviewEditLinks.astro` rewrites each link to `sections[_key=="abc"].image`
   as the overlay draws it - that is what makes a section's picture or text
   open its own dialog rather than the top of the form.
+- **The gallery application form is a page-builder block.** `applicationFormSection`
+  draws the old site's four-field form (`ApplicationForm.astro`); its
+  settings - open or closed and the closed message, recipient, sender, the
+  confirmation email text - are one object on Site settings → Applications,
+  which the block's query branch and the submit route both read. The
+  submission goes to `/api/apply` on the Worker (`src/server/routes/apply.ts`,
+  injected by `preview-routes.mjs` like the preview door), which validates,
+  drops bots on a honeypot, refuses a repeat from the same address within
+  fifteen minutes, and sends two emails through Brevo - to the team and to
+  the applicant. Nothing is stored: the dataset is public. Until the
+  `BREVO_API_KEY` Pages secret exists the route answers 503 and the page
+  shows its failure state with the contact address, never a false "sent".
 - **Preview renders read the page to the end inside the store.** Astro
   streams responses, so the frontmatter (and its queries) runs when the body
   is pulled. `src/middleware.ts` awaits `response.text()` inside

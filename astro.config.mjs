@@ -143,7 +143,7 @@ export default defineConfig({
         // root export for them).
         ...[
           'BarChart', 'BlockContent', 'Blockquote', 'CodeBlock', 'Component', 'Dashboard', 'DocumentText',
-          'HelpCircle', 'Image', 'Images', 'Link', 'Play', 'Sparkles', 'StackCompact', 'Text', 'Users',
+          'Envelope', 'HelpCircle', 'Image', 'Images', 'Link', 'Play', 'Sparkles', 'StackCompact', 'Text', 'Users',
         ].map((n) => `@sanity/icons/${n}`),
       ],
     },

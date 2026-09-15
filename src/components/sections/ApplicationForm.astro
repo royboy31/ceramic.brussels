@@ -1,0 +1,310 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * The gallery application form.
+ *
+ * On the old site this was a JotForm in a frame: last name, first name,
+ * gallery, email, Send - the gate through which a gallery asks for the real
+ * application pack. This is the same four fields as a page of the site, with
+ * what the frame never had: inline validation, a visible success state, a
+ * visible failure state that names the person to write to instead, and a
+ * button that cannot be pressed twice.
+ *
+ * Whether the form is open, and what it says when it is not, comes from
+ * Site settings → Applications (the `form` key the query resolves). The
+ * submission goes to `/api/apply` on the Worker (src/server/routes/apply.ts),
+ * which sends the two emails once Brevo is connected; until then it answers
+ * 503 and the failure state shows.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { lang, section } = Astro.props;
+const t = useTranslations(lang);
+const form = section.form ?? {};
+const open = form.open !== false;
+const contact = form.contact || 'info@ceramic.brussels';
+const id = section.anchor || 'apply';
+const labels = {
+  firstName: t('apply.firstName'),
+  lastName: t('apply.lastName'),
+  gallery: t('apply.gallery'),
+  email: t('apply.email'),
+};
+---
+
+<section class="apply" id={id}>
+  {
+    section.heading && (
+      <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+        {section.heading}
+      </h2>
+    )
+  }
+  {
+    section.note && (
+      <p class="note body-24" {...styleAttrs(section.noteStyle)}>
+        {section.note}
+      </p>
+    )
+  }
+
+  {
+    !open ? (
+      <p class="closed body-24">{form.closedMessage || t('apply.closed')}</p>
+    ) : (
+      <form
+        class="form"
+        method="post"
+        action="/api/apply"
+        novalidate
+        data-apply
+        data-success={form.successMessage || t('apply.success')}
+        data-error={t('apply.error', { email: contact })}
+        data-duplicate={t('apply.duplicate')}
+        data-closed={form.closedMessage || t('apply.closed')}
+        data-required={t('apply.required')}
+        data-invalid-email={t('apply.invalidEmail')}
+        data-sending={t('apply.sending')}
+      >
+        <input type="hidden" name="lang" value={lang} />
+        {/* Bots fill every field; people never see this one. */}
+        <div class="hp" aria-hidden="true">
+          <label>
+            website <input type="text" name="website" tabindex="-1" autocomplete="off" />
+          </label>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label for={`${id}-firstName`}>{labels.firstName} *</label>
+            <input id={`${id}-firstName`} name="firstName" type="text" required autocomplete="given-name" maxlength="120" />
+            <p class="hint" data-hint aria-live="polite" />
+          </div>
+          <div class="field">
+            <label for={`${id}-lastName`}>{labels.lastName} *</label>
+            <input id={`${id}-lastName`} name="lastName" type="text" required autocomplete="family-name" maxlength="120" />
+            <p class="hint" data-hint aria-live="polite" />
+          </div>
+          <div class="field">
+            <label for={`${id}-gallery`}>{labels.gallery} *</label>
+            <input id={`${id}-gallery`} name="gallery" type="text" required autocomplete="organization" maxlength="200" />
+            <p class="hint" data-hint aria-live="polite" />
+          </div>
+          <div class="field">
+            <label for={`${id}-email`}>{labels.email} *</label>
+            <input id={`${id}-email`} name="email" type="email" required autocomplete="email" maxlength="254" inputmode="email" />
+            <p class="hint" data-hint aria-live="polite" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="submit" data-submit>
+            {t('apply.submit')} <span class="link-arrow" aria-hidden="true">→</span>
+          </button>
+          <p class="status" data-status role="status" aria-live="polite" />
+        </div>
+      </form>
+    )
+  }
+</section>
+
+<script>
+  // Progressive: without JavaScript the form still posts to /api/apply, which
+  // answers with a plain page. With it, the answer shows in place.
+  document.querySelectorAll<HTMLFormElement>('form[data-apply]').forEach((form) => {
+    const button = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const idle = button.innerHTML;
+    const say = (text: string, kind: 'ok' | 'bad' | '') => {
+      status.textContent = text;
+      status.dataset.kind = kind;
+    };
+
+    const check = (input: HTMLInputElement): boolean => {
+      const hint = input.parentElement?.querySelector<HTMLElement>('[data-hint]');
+      let problem = '';
+      if (input.required && !input.value.trim()) problem = form.dataset.required!;
+      else if (input.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim())) problem = form.dataset.invalidEmail!;
+      input.setAttribute('aria-invalid', problem ? 'true' : 'false');
+      if (hint) hint.textContent = problem;
+      return !problem;
+    };
+
+    form.querySelectorAll<HTMLInputElement>('.field input').forEach((input) => {
+      input.addEventListener('blur', () => check(input));
+      input.addEventListener('input', () => {
+        if (input.getAttribute('aria-invalid') === 'true') check(input);
+      });
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const inputs = [...form.querySelectorAll<HTMLInputElement>('.field input')];
+      const bad = inputs.filter((input) => !check(input));
+      if (bad.length) {
+        bad[0].focus();
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = form.dataset.sending!;
+      say('', '');
+
+      const data: Record<string, string> = {};
+      new FormData(form).forEach((value, key) => (data[key] = String(value)));
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const body = await response.json().catch(() => ({}));
+        if (response.ok) {
+          form.classList.add('sent');
+          say(form.dataset.success!, 'ok');
+          form.querySelectorAll<HTMLInputElement>('input, button').forEach((el) => (el.disabled = true));
+          return;
+        }
+        if (body?.error === 'duplicate') say(form.dataset.duplicate!, 'bad');
+        else if (body?.error === 'closed') say(form.dataset.closed!, 'bad');
+        else say(form.dataset.error!, 'bad');
+      } catch {
+        say(form.dataset.error!, 'bad');
+      }
+      button.disabled = false;
+      button.innerHTML = idle;
+    });
+  });
+</script>
+
+<style>
+  .apply {
+    margin: 0 0 3rem;
+  }
+  .note {
+    margin: 0 0 2rem;
+    max-width: var(--measure);
+  }
+  .closed {
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    max-width: var(--measure);
+  }
+  .form {
+    max-width: 760px;
+  }
+  .hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 2rem;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  label {
+    font-size: clamp(1rem, 1.4vw, 1.25rem);
+    letter-spacing: -0.01em;
+  }
+  input {
+    width: 100%;
+    padding: 0.55rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    font-size: clamp(1.1rem, 1.7vw, 1.5rem);
+    letter-spacing: -0.02em;
+    border-radius: 0;
+  }
+  input:focus-visible {
+    outline: none;
+    border-bottom-width: 2px;
+    background: color-mix(in oklab, var(--acid) 35%, transparent);
+  }
+  input[aria-invalid='true'] {
+    border-bottom-color: #c8102e;
+  }
+  .hint {
+    margin: 0;
+    min-height: 1.2em;
+    font-size: 0.95rem;
+    color: #c8102e;
+  }
+  .actions {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+  }
+  .submit {
+    cursor: pointer;
+    display: inline-block;
+    padding: 0.2rem 1.25rem;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--ground);
+    font-size: clamp(1rem, 1.6vw, 1.375rem);
+    letter-spacing: -0.01em;
+    text-transform: lowercase;
+    white-space: nowrap;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+  .submit:hover,
+  .submit:focus-visible {
+    background: var(--acid);
+    border-color: var(--acid);
+    color: var(--ink);
+  }
+  .submit:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+  .status {
+    margin: 0;
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    max-width: var(--measure);
+  }
+  .status[data-kind='ok'] {
+    padding: 0.2rem 0.6rem;
+    background: var(--acid);
+    color: #000;
+  }
+  .status[data-kind='bad'] {
+    color: #c8102e;
+  }
+  .sent .grid,
+  .sent .submit {
+    opacity: 0.45;
+  }
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .submit {
+      transition: none;
+    }
+  }
+</style>

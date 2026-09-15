@@ -6,6 +6,7 @@ import { BlockquoteIcon } from '@sanity/icons/Blockquote';
 import { CodeBlockIcon } from '@sanity/icons/CodeBlock';
 import { ComponentIcon } from '@sanity/icons/Component';
 import { DocumentTextIcon } from '@sanity/icons/DocumentText';
+import { EnvelopeIcon } from '@sanity/icons/Envelope';
 import { HelpCircleIcon } from '@sanity/icons/HelpCircle';
 import { ImageIcon } from '@sanity/icons/Image';
 import { ImagesIcon } from '@sanity/icons/Images';
@@ -591,6 +592,39 @@ export const embedSection = defineType({
   },
 });
 
+/**
+ * The gallery application form: the four fields the old site's JotForm
+ * asked for (name, gallery, email), as a block of the page. Whether it is
+ * open, where it sends and what the confirmation says live in Site settings
+ * → Applications, so the one form on the site has one set of settings.
+ * Rendering: src/components/sections/ApplicationForm.astro; the submission
+ * goes to /api/apply (src/server/routes/apply.ts).
+ */
+export const applicationFormSection = defineType({
+  name: 'applicationFormSection',
+  title: 'Application form',
+  type: 'object',
+  icon: EnvelopeIcon,
+  fields: [
+    headingField('Optional. Shown above the form.'),
+    defineField({
+      name: 'note',
+      title: 'Note',
+      type: 'localeText',
+      description: 'Optional. A line above the fields, e.g. the deadline.',
+    }),
+    anchorField(),
+    hiddenField(),
+  ],
+  preview: {
+    select: { heading: 'heading.en', hidden: 'hidden' },
+    prepare: ({ heading, hidden }) => ({
+      title: heading ?? 'Application form',
+      subtitle: sectionSubtitle('Application form', hidden, '· settings under Site settings → Applications'),
+    }),
+  },
+});
+
 /* ---------- the field ---------- */
 
 /** Every block a `page` or the homepage can hold. Order here is the order in the Add menu. */
@@ -611,6 +645,7 @@ export const PAGE_SECTION_TYPES = [
   'newsSection',
   'faqSection',
   'embedSection',
+  'applicationFormSection',
 ] as const;
 
 /** The subset that makes sense inside an artist profile or a news item. */
@@ -648,7 +683,7 @@ export function sectionsField(
   const groups = [
     { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection'] },
     { name: 'media', title: 'Images & video', of: ['gallerySection', 'slideshowSection', 'videoSection', 'spotlight'] },
-    { name: 'action', title: 'Links & banners', of: ['bannerSection', 'linksSection', 'embedSection'] },
+    { name: 'action', title: 'Links & banners', of: ['bannerSection', 'linksSection', 'embedSection', 'applicationFormSection'] },
     { name: 'lists', title: 'From other content', of: ['peopleSection', 'partnersSection', 'keyFiguresSection', 'newsSection'] },
   ]
     .map((g) => ({ ...g, of: g.of.filter(has) }))
@@ -692,4 +727,5 @@ export const pageBuilderTypes = [
   newsSection,
   linksSection,
   embedSection,
+  applicationFormSection,
 ];

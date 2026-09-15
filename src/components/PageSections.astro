@@ -16,6 +16,7 @@ import KeyFigures from './sections/KeyFigures.astro';
 import News from './sections/News.astro';
 import Faq from './sections/Faq.astro';
 import Embed from './sections/Embed.astro';
+import ApplicationForm from './sections/ApplicationForm.astro';
 
 /**
  * Renders a page-builder stack - the `sections` array of a page, the
@@ -112,6 +113,8 @@ for (const section of (sections ?? []).filter(Boolean)) {
             return <Faq lang={lang} section={s} />;
           case 'embedSection':
             return <Embed lang={lang} section={s} />;
+          case 'applicationFormSection':
+            return <ApplicationForm lang={lang} section={s} />;
           default:
             return null;
         }

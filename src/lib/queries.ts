@@ -170,6 +170,16 @@ const SECTIONS = `sections[hidden != true]{
   _type == "headingSection" => {
     ${styled('title')}
   },
+  _type == "applicationFormSection" => {
+    ${styled('heading')},
+    ${styled('note')},
+    "form": *[_type == "siteSettings"][0]{
+      "open": applications.open,
+      "closedMessage": ${localised('applications.closedMessage')},
+      "successMessage": ${localised('applications.successMessage')},
+      "contact": coalesce(applications.recipient, contactEmail)
+    }
+  },
   _type == "peopleSection" => {
     group,
     ${styled('heading')},
