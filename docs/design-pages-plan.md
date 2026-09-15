@@ -446,6 +446,40 @@ build clean (900 pages, 129 requests). What changed:
   exhibitor awards intro reads a `page` in section `exhibitors` with
   English slug `awards`, which nobody has made yet.
 
+### Design → Studio, what the 2026-09-14 build added or changed
+
+Same reading as the tables below: what the page shows, where an editor
+sets it. **Gap** marks what the Studio cannot set yet.
+
+| Design | Studio | State |
+| :-- | :-- | :-- |
+| Header: dates mark | Setup → Editions → current edition → Dates mark | ok |
+| Header: "main partner" lockup | Brand SVGs in `public/assets`; links to the partner of tier **main** (Partners) | ok, artwork is code |
+| Menu rows and sub-links | Setup → Menu and footer → items + children | ok; the design's extra rows (VIP, media, contact…) are for the editor to add |
+| Footer pills (instagram, newsletter, linkedin, cookies) | Menu and footer → footer items, else Site settings URLs | ok |
+| Home: hero picture + statement + link | Homepage → Hero image, Hero text (line breaks kept), Hero link | ok; the design draws five slideshow dots, the field is one image — **gap** if a slideshow is wanted |
+| Home: four quick links, last one grey | Homepage → Quick links (fourth is grey by position) | ok |
+| Home: "latest news" title, feature rows | Homepage stack: Section title block, Feature blocks (alternate sides in order) | ok |
+| Home: video row with poster, credit, "watch the video" | Video block; falls back to the newest edition's Film; credit = the poster's Photo credit | ok once an edition has a film |
+| Home: newsletter band | Banner block, gradient style | ok |
+| Home: key figures, 6 cells | Key figures block; the edition's Key figures list | ok |
+| Exhibitors: galleries / artists / catalogue / awards tabs | Code; catalogue = current edition → Catalogue URL (tab hidden when empty) | ok |
+| Exhibitors: ALL + A–Z, country menu | Code, from the exhibitors' names and countries | ok |
+| Exhibitors: filter pills | Exhibitor → Solo show, In country focus, Kind (publisher, jury prize); "awards" = winner of a fair award this edition | ok |
+| Exhibitor card badges | Solo show → black badge; In country focus → outlined badge with the edition's Country focus label | ok |
+| Exhibitor page: booth "B28 ●", city (CC), pills, presenting | Exhibitor → Booth, City, Country, Instagram, Website, Artists / Artists (text) | ok |
+| Exhibitor awards page: label, gallery, city, text, pictures, link | Award of family **fair** → Award name, **Winning gallery**, Description, Image (else the gallery's pictures) | **gap**: Winning gallery is hidden in the form; no sidebar list for fair awards |
+| Exhibitor awards page: intro line | `page` in section exhibitors, English slug `awards`, Lead | **gap**: no sidebar entry; main-page query must prefer the page whose slug is the section |
+| Artists list: name ↗ per letter | Artist → Name | ok (Figma's richer row - country, booth, solo badge - has the data but is not built) |
+| Laureates: picture(s), name, instagram pill | Laureate → Images; Artist → Name, Instagram | ok |
+| Laureates: "Poland, 1996" | Artist → Nationality, Year of birth (base line when nationality is empty) | ok, mostly unfilled |
+| Laureates: bio on two columns | Laureate → Statement, else Artist → Biography | ok |
+| Team: intro | About → team tab page → Lead | ok |
+| Team: directors with portrait and biography | People in group Team whose Role contains "direct" → Portrait, Role, Biography | ok; the split is by role wording |
+| Team: cards with role and email | Team → Role, Email; Collaborators → Role, Website | ok |
+| FAQ accordion, first open | Site settings → FAQ (question, answer) | ok; Figma's grouping by theme has no field |
+| Practical info, food & drinks, talks, La Cambre, partners, about, advisory board, guest of honour | unchanged, see the tables below | ok |
+
 ## Status, 2026-09-09 — live on production; main pages editable
 
 The ported design went to `main` in the morning (`8c20e75`) and has been
