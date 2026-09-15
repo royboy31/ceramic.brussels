@@ -2,21 +2,14 @@ import { defineMiddleware } from 'astro:middleware';
 import type { FilterDefault } from '@sanity/client';
 import { sanityClient } from 'sanity:client';
 import { runWithPreview } from './lib/previewContext';
-import { previewToken, workerEnv } from './server/runtime';
+import { previewToken } from './server/runtime';
 import { readPreviewCookie, verifyPreviewCookie } from './server/preview';
-import { runPagesChain } from './server/pagesShim';
-import { fail } from './server/http';
-import { onRequest as apiGuards } from '../functions/_middleware';
 
 /**
- * Two jobs, both only on the deployed Worker (and `astro dev`):
- *
- *   /preview/…   Let the request in on a valid preview cookie, then render
- *                the page with a drafts-reading, stega-encoding client, so
- *                every field on it opens in the Studio from its overlay.
- *   /api/…       Run the admin API's guards - security headers, CSRF check,
- *                session lookup - exactly as functions/_middleware.ts does on
- *                Pages, then let the endpoint run with the resolved user.
+ * One job, only on the deployed Worker (and `astro dev`): let a /preview/…
+ * request in on a valid preview cookie, then render the page with a
+ * drafts-reading, stega-encoding client, so every field on it opens in the
+ * Studio from its overlay.
  *
  * Everything else passes straight through. The static pages are prerendered
  * at build time; this runs for them then too, and does nothing.
@@ -25,7 +18,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
 
   if (pathname === '/preview' || pathname.startsWith('/preview/')) return preview(context, next);
-  if (pathname.startsWith('/api/') && !pathname.startsWith('/api/preview/')) return api(context, next);
 
   return next();
 });
@@ -72,23 +64,6 @@ async function preview(context: Ctx, next: Next): Promise<Response> {
   response.headers.set('cache-control', 'no-store');
   response.headers.set('x-robots-tag', 'noindex, nofollow');
   return response;
-}
-
-async function api(context: Ctx, next: Next): Promise<Response> {
-  const env = await workerEnv();
-  if (!env) return fail(503, 'The admin API only runs on the deployed site.');
-
-  const data = { user: null };
-  return runPagesChain(apiGuards as any[], context, {
-    env,
-    data,
-    next: async () => {
-      // The guards resolved the session; the endpoint reads it from locals.
-      (context.locals as any).user = data.user;
-      (context.locals as any).env = env;
-      return next();
-    },
-  });
 }
 
 /**

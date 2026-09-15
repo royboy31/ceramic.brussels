@@ -16,7 +16,7 @@ Yours to edit freely:
 
 | Path | What |
 | :-- | :-- |
-| `src/pages/**` | One `.astro` file per route. Markup and scoped CSS. **Not** `login.astro` (site accounts, Kamindu). |
+| `src/pages/**` | One `.astro` file per route. Markup and scoped CSS. |
 | `src/layouts/Base.astro` | The shell around every page: `<head>`, design tokens, header, menu, footer. |
 | `src/components/**` | Header, footer, menu overlay, cards, hub nav, and the 15 section blocks in `sections/`. |
 | `src/lib/i18n.ts` | UI strings (`STRINGS`), in all three locales, every time. |
@@ -31,9 +31,9 @@ Not yours, even when it looks like a one-line change:
 | `src/sanity/**` | Schemas, Studio structure and components. The Studio is live for editors; a schema change without a migration blanks published content. |
 | `src/lib/queries.ts` | The GROQ projections. A field only reaches a page if a query selects it, and Kamindu keeps the query in step with the schema and the build request budget. |
 | `src/lib/hubs.ts`, `src/lib/locales.ts`, `src/lib/links.ts` | Shared with the Sanity side: the tab list and locale list are imported by the schemas. Adding a tab is a backend request. |
-| `src/server/**`, `functions/`, `src/middleware.ts`, `src/preview/` | Site accounts and the drafts preview Worker. |
+| `src/server/**`, `src/middleware.ts`, `src/preview/` | The drafts preview Worker. |
 | `wrangler*.toml`, `astro.config.mjs`, `public/_headers`, `public/_redirects` | Deployment. |
-| `scripts/**`, `migrations/**`, `legacy-export/**` | Import, seeding, D1. |
+| `scripts/**`, `legacy-export/**` | Import and seeding. |
 
 `npm run boundary` prints every file your branch changes outside the first
 table. Run it before every commit; it is also what Kamindu will run on your

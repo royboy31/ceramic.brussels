@@ -19,10 +19,10 @@ const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET, PUBLIC_SITE_URL, PREVIE
  * Two shapes of build, chosen by PREVIEW_RUNTIME (wrangler.toml sets it per
  * environment; `.env` for a laptop that can run workerd):
  *
- *   off  Plain static site. Every page is an HTML file, /api is served by
- *        the Pages Functions in `functions/`, and there is no preview.
+ *   off  Plain static site. Every page is an HTML file and there is no
+ *        preview.
  *   on   The same static site, plus a Worker that renders /preview/… on
- *        demand from drafts and serves /api itself. scripts/pages-worker.mjs
+ *        demand from drafts and answers /api/preview/. scripts/pages-worker.mjs
  *        moves that Worker to dist/_worker.js after the build so Cloudflare
  *        Pages runs it. The Studio gets its Preview tab.
  *
@@ -147,14 +147,5 @@ export default defineConfig({
         ].map((n) => `@sanity/icons/${n}`),
       ],
     },
-    // `cloudflare:workers` only exists inside the Cloudflare build. The plain
-    // build never executes the module that imports it (src/server/cfEnv.ts),
-    // but Rollup still has to be told not to look for it.
-    ...(previewRuntime
-      ? {}
-      : {
-          build: { rollupOptions: { external: ['cloudflare:workers'] } },
-          ssr: { external: ['cloudflare:workers'] },
-        }),
   },
 });

@@ -133,7 +133,7 @@ into the HTML, which has two consequences worth internalising:
 every page under `src/pages/[lang]/` is mounted a second time at
 `/preview/[lang]/…`, rendered on request from **drafts** by a small Worker
 that `scripts/pages-worker.mjs` moves to `dist/_worker.js` after the build.
-`dist/_routes.json` sends only `/preview/*` and `/api/*` to that Worker, so
+`dist/_routes.json` sends only `/preview/*` and `/api/*` (the preview door) to that Worker, so
 the published pages stay plain files. **Preview** in the Studio's top bar
 (`src/sanity/components/PreviewLauncher.tsx`) opens the page being edited,
 from its draft, in a new tab - the same as **Open preview** in a document's
@@ -432,7 +432,6 @@ environment in `wrangler.toml`; `npm run build:preview` sets it locally):
 | | off | on |
 | :-- | :-- | :-- |
 | Pages | static HTML | static HTML, unchanged |
-| `/api/*` | Pages Functions in `functions/` | the Worker, through the **same** modules (`src/server/pagesShim.ts`) |
 | `/preview/*` | does not exist | the Worker, rendered from drafts |
 | Studio | as is | gains Preview and "Open preview" (`PUBLIC_PREVIEW_ENABLED`) |
 
@@ -440,93 +439,31 @@ When on, `astro build` uses `@astrojs/cloudflare` (its Vite plugin refuses a
 Pages config, hence the separate `wrangler.worker.toml` it reads — keep its
 bindings in step with `wrangler.toml`), and `scripts/pages-worker.mjs`
 rearranges the output into what Pages expects: static files at the root,
-`_worker.js/`, `_routes.json`. Pages ignores `functions/` once `_worker.js`
-exists, which is why the API is shimmed rather than duplicated. The adapter's
+`_worker.js/`, `_routes.json`. The adapter's
 dev server runs on workerd, which does not start on every machine — a laptop
 leaves `PREVIEW_RUNTIME` unset and `astro dev` is exactly as before. The
 adapter needs Astro ≥ 7.3; keep the two in step when upgrading either.
 
-## Site accounts
+## Editors and accounts
 
-Editors who do not have a Sanity account are managed in the Studio under
-**Users**. This is **Kamindu's** side of the project.
+Everyone who edits is a **Sanity project member** - invited at
+sanity.io/manage, signing in to `/studio` with Google, GitHub or e-mail, and
+attributed by name in every document's history. The plan includes up to 20
+seats, which is more than the team needs.
 
-**Why they are not documents.** The `production` dataset is ACL-public: it
-answers a GROQ query with no credentials at all, so anything stored in it is
-world-readable. A `user` document would publish email addresses and password
-hashes to the open internet. The accounts therefore live in **D1**, which is
-private, and the Studio screen is a custom tool that administers them over
-`/api/users` on the same origin.
+There used to be a second kind of account: site accounts in a private D1
+database, with a Users screen in the Studio, a `/login` page and an
+`/api/auth` + `/api/users` API, all sharing one Sanity token. It was removed
+on 2026-09-15 - the seats make it unnecessary, and one shared, non-expiring
+token in every editor's browser was a single point of failure that Sanity's
+history could not tell apart. Nothing of it is left in the code; the
+`ceramic-brussels-admin` D1 database and the `SANITY_STUDIO_TOKEN` Pages
+secret are the two things to delete by hand, and that token must be revoked
+at sanity.io/manage, because a browser that still holds it can edit until it
+is.
 
-| Path | What |
-| :-- | :-- |
-| `src/sanity/components/UsersTool.tsx` | The Users screen inside the Studio |
-| `src/pages/login.astro` | Sign-in for site accounts, and the hand-off into the Studio |
-| `functions/` | Pages Functions - auth, sessions, user management, audit |
-| `src/server/` | Shared modules those Functions import |
-| `migrations/` | D1 schema, applied with `npm run admin:migrate` |
-
-**Managing users needs its own sign-in.** A Sanity login says who you are to
-Sanity; it says nothing about whether you may administer these accounts, so the
-Users screen asks for D1 credentials of its own.
-
-**Accounts.** `npm run admin:user -- --email x@y.z --name "Name"` creates one
-and prints a temporary password, flagged so the person must choose their own on
-first sign-in. After the first admin exists, everything else happens in the
-Studio.
-
-### How a site account reaches the Studio
-
-The Studio's own login screen only accepts Sanity identities, so it can never
-authenticate one of these accounts. What it *does* accept is a token in
-`localStorage` under `__studio_auth_token_<projectId>`, holding
-`{token, authenticated}` - the key `createAuthStore` reads on boot, and the same
-one the Users screen looks at. `/login` and `/studio` are the same origin, so
-`/login` can simply write it.
-
-1. `/login` signs the person in against D1, exactly as the Users screen does.
-2. `POST /api/auth/studio-token` returns `SANITY_STUDIO_TOKEN` to any signed-in,
-   active account, and writes a `studio.token` row into `audit_log`.
-3. The page writes that key and navigates to `/studio`, which boots signed in.
-
-**Do not hand the token over as `/studio#token=…`.** `sanity` does support that -
-`consumeHashToken` reads it at boot - but **this Studio is on hash routing**, so
-the hash is also the route. Both read it: you are signed in *and* dropped on
-"Tool not found: token=…" with an empty screen. It was built that way first and
-that is exactly what happened.
-
-`auth.providers` in `sanity.config.ts` puts a **Ceramic Brussels account**
-button on the Studio's login screen pointing at `/login`, so the loop closes
-from either direction. The Studio passes the page it wanted as `?origin=`, and
-`/login` returns there - after checking it is same-origin - rather than always
-landing on the Studio root.
-
-**`SANITY_STUDIO_TOKEN` is a Pages secret**, a token created in
-sanity.io/manage with the narrowest role that lets an editor work. It is not
-`SANITY_API_WRITE_TOKEN`: that one is for migrations and imports, its grants are
-much wider, and the endpoint refuses to fall back to it - an unset secret
-returns 503 rather than handing out the wrong key.
-
-**What this costs, deliberately.** The token reaches the browser, where its
-holder can read it out of localStorage and use it from anywhere; it is one
-shared credential; Sanity tokens do not expire; and withdrawing it from one
-person means rotating it for everyone and having the others sign in again.
-Deactivating an account in the Users screen stops that person getting a *new*
-token, not one they already hold.
-
-**Attribution.** Edits arrive at Sanity as the token, not as the person, so
-Sanity's history cannot tell the team apart - every change reads as the robot
-the token belongs to. `audit_log` in D1 records who was handed a token and
-when, which is the only trace of the individual. It cannot see the edits
-themselves, because those go straight from the Studio to Sanity rather than
-through `/api`. Closing that gap means proxying the Sanity API so the token
-never leaves the server, which is the larger piece of work this defers.
-
-**Local development does not work on Windows.** `wrangler pages dev` needs
-workerd, which crashes with an access violation on that machine. Test on a
-branch preview instead - previews share the same D1 database.
-
-**Secrets** live in Pages, never in `wrangler.toml`.
+**Secrets** live in Pages, never in `wrangler.toml`. The only one the site
+needs is `SANITY_VIEWER_TOKEN`, for the drafts preview.
 
 ## Importing the old site
 

@@ -13,8 +13,6 @@
     "webhook": "node scripts/create-deploy-webhook.mjs",
     "content": "node scripts/content-status.mjs",
     "seed": "node scripts/seed.mjs",
-    "admin:user": "node scripts/admin-user.mjs",
-    "admin:migrate": "wrangler d1 migrations apply ceramic-brussels-admin --remote",
     "templates": "node scripts/seed-templates.mjs",
     "previews": "node scripts/section-previews.mjs",
     "build:preview": "node scripts/with-preview-runtime.mjs",
