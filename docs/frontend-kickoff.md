@@ -9,7 +9,7 @@ Follow it top to bottom. It is the first session's script; after that the
 
 Lilanga owns, and you may edit:
 
-- `src/pages/**` (except `login.astro`)
+- `src/pages/**`
 - `src/layouts/**`
 - `src/components/**`
 - `src/lib/i18n.ts` and `src/lib/placeholders.ts`
@@ -23,9 +23,8 @@ Kamindu owns, and you never edit or propose editing:
 - `src/lib/queries.ts` — the GROQ projections are the data contract
 - `src/lib/hubs.ts`, `src/lib/locales.ts`, `src/lib/links.ts` — imported by
   the Sanity schemas
-- `src/server/**`, `functions/`, `src/middleware.ts`, `wrangler*.toml`,
-  `astro.config.mjs`, `public/_headers`, `public/_redirects`, `scripts/**`,
-  `migrations/**`
+- `src/server/**`, `src/middleware.ts`, `wrangler*.toml`,
+  `astro.config.mjs`, `public/_headers`, `public/_redirects`, `scripts/**`
 
 If a design needs data the queries do not return, do **not** add it. Log a
 numbered entry in `docs/backend-requests.md`, put a

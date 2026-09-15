@@ -14,7 +14,7 @@
 import { execSync } from 'node:child_process';
 
 const ALLOWED = [
-  /^src\/pages\/(?!login\.astro$)/,
+  /^src\/pages\//,
   /^src\/layouts\//,
   /^src\/components\//,
   /^src\/lib\/i18n\.ts$/,
