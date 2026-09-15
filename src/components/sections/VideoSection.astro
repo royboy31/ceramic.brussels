@@ -2,7 +2,6 @@
 import type { LocaleId } from '../../lib/locales';
 import { useTranslations } from '../../lib/i18n';
 import VideoEmbed from '../VideoEmbed.astro';
-import SanityImage from '../SanityImage.astro';
 import { urlFor } from '../../sanity/image';
 import { styleAttrs } from '../../lib/textStyle';
 
@@ -37,13 +36,9 @@ const credit = video?.poster?.credit;
     (variant === 'home' ? (
       <section class="split feature feature--video" id={section.anchor || undefined}>
         <div class="video-frame">
-          <a href={video.url} target="_blank" rel="noopener noreferrer" aria-label={`${t('home.watchVideo')}: ${title}`}>
-            {video.poster?.asset ? (
-              <SanityImage image={video.poster} aspect={16 / 9} widths={[800, 1200, 1600, 2000]} sizes="(max-width: 640px) 100vw, 66vw" />
-            ) : (
-              <img src={poster} alt={title} width="1600" height="900" />
-            )}
-          </a>
+          {/* The film plays in the frame itself: the build linked out to YouTube
+              only because file:// pages cannot embed it (its README says so). */}
+          <VideoEmbed class="film" url={video.url} poster={poster} label={title} quiet />
           {credit && <small>{t('home.videoBy', { credit })}</small>}
         </div>
         <div class="feature__copy">
@@ -87,11 +82,8 @@ const credit = video?.poster?.credit;
     align-items: start;
     margin-top: 80px;
   }
-  .video-frame :global(img) {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    background: #000;
+  .video-frame :global(.film) {
+    margin: 0;
   }
   .video-frame small {
     margin-top: 7px;
