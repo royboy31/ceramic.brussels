@@ -38,7 +38,7 @@ const credit = video?.poster?.credit;
         <div class="video-frame">
           {/* The film plays in the frame itself: the build linked out to YouTube
               only because file:// pages cannot embed it (its README says so). */}
-          <VideoEmbed class="film" url={video.url} poster={poster} label={title} />
+          <VideoEmbed class="film" url={video.url} poster={poster} label={title} quiet />
           {credit && <small>{t('home.videoBy', { credit })}</small>}
         </div>
         <div class="feature__copy">

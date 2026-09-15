@@ -49,13 +49,7 @@ const count = (value: string) => {
             );
           })}
         </div>
-        {link && (
-          <p class="stats-link">
-            <a class="text-link" href={link.href} {...external}>
-              {link.label} {link.arrow}
-            </a>
-          </p>
-        )}
+        {/* The design's grid ends with the figures; the block's link is kept for the hub treatment. */}
       </section>
     ) : (
       <section class="stats" id={section.anchor || undefined}>

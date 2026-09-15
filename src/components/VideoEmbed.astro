@@ -14,10 +14,12 @@ interface Props {
   url: string;
   poster: string;
   label: string;
+  /** No title written over the picture; the label names the button for assistive tech only. */
+  quiet?: boolean;
   class?: string;
 }
 
-const { url, poster, label, class: className } = Astro.props;
+const { url, poster, label, quiet = false, class: className } = Astro.props;
 
 /** Accepts a watch?v=, youtu.be/ or /embed/ address. */
 function youtubeId(value: string): string | null {
@@ -49,8 +51,8 @@ const full = base ? `${base}?autoplay=1&mute=0&controls=1&playsinline=1&rel=0` :
           decoding="async"
         />
 
-        <button type="button" class="cover" data-video-play>
-          <span class="label">{label}</span>
+        <button type="button" class="cover" data-video-play aria-label={quiet ? label : undefined}>
+          {!quiet && <span class="label">{label}</span>}
         </button>
       </div>
     ) : (
