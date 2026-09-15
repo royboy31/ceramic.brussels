@@ -12,6 +12,7 @@ import MenuOverlay from '../components/MenuOverlay.astro';
 import CookieConsent from '../components/CookieConsent.astro';
 import { categoriesInUse } from '../lib/tracking';
 import { VisualEditing } from '@sanity/astro/visual-editing';
+import PreviewEditLinks from '../components/PreviewEditLinks.astro';
 import { isPreview } from '../lib/previewContext';
 import '../styles/design.css';
 
@@ -309,6 +310,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
       preview && (
         <>
           <VisualEditing enabled />
+          <PreviewEditLinks />
           {/* Keep navigation inside the preview tree: the pages link to their
               published addresses, which would drop the reader out of drafts. */}
           <script is:inline>

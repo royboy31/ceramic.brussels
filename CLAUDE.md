@@ -631,6 +631,11 @@ questions.
   `data-sanity`. It resolves through references, so a partner logo opens the
   partner. A new component that draws a Sanity image without `SanityImage`
   has to emit that attribute itself.
+  And the overlay spells every link's path the Presentation tool's way
+  (`sections:abc.image`), which the Structure tool cannot focus, so
+  `PreviewEditLinks.astro` rewrites each link to `sections[_key=="abc"].image`
+  as the overlay draws it - that is what makes a section's picture or text
+  open its own dialog rather than the top of the form.
 - **Preview renders read the page to the end inside the store.** Astro
   streams responses, so the frontmatter (and its queries) runs when the body
   is pulled. `src/middleware.ts` awaits `response.text()` inside
