@@ -295,9 +295,11 @@ const altPaths = hubAltPaths('visit', tab);
           </p>
         )}
         {settings?.faq?.length ? (
+          /* BACKEND-REQUEST #2: a category on each question - the design groups them under
+             headings (tickets, coming to the fair, ...) with a FILTERS row of those categories. */
           <div class="faq-list">
-            {settings.faq.map((q: any, i: number) => (
-              <details class="faq" open={i === 0}>
+            {settings.faq.map((q: any) => (
+              <details class="faq">
                 <summary>
                   <span class="question" {...styleAttrs(q.questionStyle)}>
                     {q.question}
@@ -316,6 +318,16 @@ const altPaths = hubAltPaths('visit', tab);
           <p class="empty body-24">{t('visit.noFaq')}</p>
         )}
         {page && <PageSections lang={lang} sections={page.sections} />}
+        {(() => {
+          const [before, after = ''] = t('visit.faqContact', { link: '\u0000' }).split('\u0000');
+          return (
+            <p class="faq-contact">
+              {before}
+              <a href={localePath(lang, 'contact')}>{t('visit.faqContactLink')}</a>
+              {after}
+            </p>
+          );
+        })()}
       </div>
     )
   }
@@ -464,31 +476,35 @@ const altPaths = hubAltPaths('visit', tab);
     }
   }
 
-  /* FAQ, from visitors-info/faq/index.html (2026-09-14 build): the first
-     question open, the others fold open with the arrow turning and the
-     answer growing. */
+  /* FAQ, from the visitors-info FAQ mock-up (2026-09-15): the questions in
+     two columns, every one closed, each over its own rule; they fold open
+     with the arrow turning and the answer growing. Rows pair across the
+     columns, so opening one never moves the other column's questions. */
   .faq-page {
     padding: 8px var(--gutter) 100px;
   }
   .faq-page > .intro-large {
-    max-width: 1050px;
+    max-width: 1100px;
     margin-bottom: 58px;
   }
   .faq-list {
-    border-bottom: 1px solid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 0 clamp(30px, 3vw, 44px);
+    display: grid;
   }
   .faq {
-    border-top: 1px solid;
+    border-bottom: 1px solid;
   }
   .faq summary {
     cursor: pointer;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.03em;
     justify-content: space-between;
-    align-items: center;
+    align-items: end;
     gap: 20px;
-    padding: 14px 0 20px;
-    font-size: 44px;
-    line-height: 1.08;
+    padding: 34px 0 6px;
+    font-size: clamp(22px, 2vw, 29px);
+    line-height: 1.1;
     list-style: none;
     display: flex;
   }
@@ -496,7 +512,8 @@ const altPaths = hubAltPaths('visit', tab);
     display: none;
   }
   .faq summary i {
-    font-size: 56px;
+    flex: none;
+    font-size: 1.15em;
     font-style: normal;
     line-height: 1;
     transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
@@ -513,11 +530,10 @@ const altPaths = hubAltPaths('visit', tab);
     grid-template-rows: 1fr;
   }
   .faq .answer > div {
-    letter-spacing: -0.025em;
-    max-width: 850px;
-    padding: 0 0 28px;
-    font-size: 24px;
-    line-height: 1.25;
+    letter-spacing: -0.02em;
+    padding: 6px 0 20px;
+    font-size: clamp(17px, 1.4vw, 20px);
+    line-height: 1.3;
     overflow: hidden;
   }
   .faq .answer :global(p + p) {
@@ -526,18 +542,26 @@ const altPaths = hubAltPaths('visit', tab);
   .faq-page .empty {
     padding-top: 10px;
   }
+  .faq-contact {
+    letter-spacing: -0.03em;
+    margin-top: clamp(60px, 6vw, 90px);
+    font-size: clamp(24px, 2.6vw, 38px);
+    line-height: 1.2;
+  }
+  .faq-contact a {
+    text-underline-offset: 0.15em;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+  }
   @media (width<=700px) {
     .faq-page > .intro-large {
       margin-bottom: 36px;
     }
+    .faq-list {
+      grid-template-columns: minmax(0, 1fr);
+    }
     .faq summary {
-      font-size: 29px;
-    }
-    .faq summary i {
-      font-size: 38px;
-    }
-    .faq .answer > div {
-      font-size: 18px;
+      padding-top: 26px;
     }
   }
 </style>

@@ -10,9 +10,11 @@ import { styleAttrs } from '../../../lib/textStyle';
 /**
  * Every artist, A–Z, as the design's exhibitors/artists/index.html draws it
  * (2026-09-14 build): the exhibitors title band with the artists tab
- * active and the ALL + A–Z row, then one ruled section per letter with the
- * names two across. The letters filter the sections in place; the page is
- * complete without JavaScript. Design by Lilanga.
+ * active and the ALL + A–Z row, then the letter sections flowing down two
+ * columns: a big initial beside a ruled list, one row per artist with the
+ * country code raised after the name and the booth at the right. The
+ * letters filter the sections in place; the page is complete without
+ * JavaScript. Design by Lilanga.
  */
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
@@ -35,6 +37,8 @@ const initial = (name: string) =>
 
 const letters = [...new Set(artists.map((a: any) => initial(a.name)))].sort() as string[];
 const byLetter = (letter: string) => artists.filter((a: any) => initial(a.name) === letter);
+/** The booth of the exhibitor presenting the artist, when one has been given. */
+const boothOf = (a: any): string | undefined => a.exhibitors?.find((ex: any) => ex.booth)?.booth;
 ---
 
 <Base
@@ -69,13 +73,23 @@ const byLetter = (letter: string) => artists.filter((a: any) => initial(a.name) 
           {letters.map((letter) => (
             <section id={letter} data-name={letter}>
               <h2>{letter}</h2>
-              <div>
-                {byLetter(letter).map((a: any) => (
-                  <a href={localePath(lang, `artists/${a.slug}`)}>
-                    {a.name} <span aria-hidden="true">↗</span>
-                  </a>
-                ))}
-              </div>
+              <ul>
+                {byLetter(letter).map((a: any) => {
+                  const booth = boothOf(a);
+                  return (
+                    <li>
+                      <a href={localePath(lang, `artists/${a.slug}`)}>
+                        <span class="name">
+                          {a.name}
+                          {a.countryCode && <sup>{a.countryCode}</sup>}
+                        </span>
+                        {/* BACKEND-REQUEST #1: the round "solo show" badge, before the booth */}
+                        {booth && <span class="booth">{booth} ●</span>}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
             </section>
           ))}
         </div>
@@ -95,60 +109,96 @@ const byLetter = (letter: string) => artists.filter((a: any) => initial(a.name) 
 </Base>
 
 <style>
-  /* From the design's exhibitors/artists/index.html (2026-09-14 build). */
+  /* The artists list as the design's exhibitors/artists frame draws it
+     (2026-09-15 mock-up): letter sections in two columns, ruled rows. */
   .artists-intro {
     padding: 40px var(--gutter) 0;
   }
   .artist-list {
+    columns: 2;
+    column-gap: clamp(30px, 4vw, 60px);
     padding: 40px var(--gutter) 100px;
   }
   .artist-list section {
-    border-top: 1px solid;
-    grid-template-columns: 90px 1fr;
-    padding: 14px 0 35px;
+    break-inside: avoid;
+    grid-template-columns: 30% 1fr;
+    margin-bottom: clamp(40px, 4.5vw, 64px);
     display: grid;
+    position: relative;
+  }
+  /* The rule starts a little in from the letter, which sits over its end. */
+  .artist-list section::before {
+    content: '';
+    border-top: 1px solid;
+    position: absolute;
+    top: 0;
+    left: 12%;
+    right: 0;
   }
   .artist-list section[hidden] {
     display: none;
   }
+  /* The top of the capital sits on the rule: the box is trimmed to the cap
+     height, or pulled up by Noi Grotesk's space above it where trimming is
+     not supported. */
   .artist-list h2 {
-    font-size: 56px;
+    font-size: clamp(48px, 5vw, 72px);
     font-weight: 400;
     line-height: 1;
+    text-box: trim-both cap alphabetic;
   }
-  .artist-list section > div {
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 45px;
-    display: grid;
+  @supports not (text-box: trim-both cap alphabetic) {
+    .artist-list h2 {
+      margin-top: -0.135em;
+    }
+  }
+  .artist-list ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .artist-list li {
+    border-bottom: 1px solid;
   }
   .artist-list a {
-    border-bottom: 1px solid #0000;
-    font-size: 28px;
-    line-height: 1.18;
-    width: max-content;
-    max-width: 100%;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 0.42em 0;
+    font-size: clamp(18px, 1.8vw, 26px);
+    line-height: 1.15;
+    display: flex;
   }
-  .artist-list a:hover {
-    border-color: #000;
+  .artist-list a:hover .name {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
   }
-  .artist-list a span {
-    font-size: 0.75em;
+  .artist-list sup {
+    margin-left: 0.3em;
+    font-size: 0.5em;
+  }
+  .booth {
+    flex: none;
+    font-size: 0.72em;
+    white-space: nowrap;
   }
   .empty {
     margin: 40px var(--gutter) 0;
   }
+  @media (width<=900px) {
+    .artist-list {
+      columns: 1;
+    }
+  }
   @media (width<=640px) {
     .artist-list section {
-      grid-template-columns: 48px 1fr;
+      grid-template-columns: 56px 1fr;
+    }
+    .artist-list section::before {
+      left: 24px;
     }
     .artist-list h2 {
-      font-size: 38px;
-    }
-    .artist-list section > div {
-      grid-template-columns: 1fr;
-    }
-    .artist-list a {
-      font-size: 21px;
+      font-size: 42px;
     }
   }
 </style>

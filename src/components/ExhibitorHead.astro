@@ -150,10 +150,12 @@ const mark = (activeLetter || 'ALL').toUpperCase();
     font-size: 27px;
     line-height: 1;
     text-align: center;
-    text-transform: uppercase;
+    /* The letters are lowercase in the design; ALL, the first, stays capitals. */
+    text-transform: lowercase;
     position: relative;
   }
   .alphabet > :first-child {
+    text-transform: uppercase;
     border: 1px solid;
     flex: 0 0 84px;
     min-width: 84px;
