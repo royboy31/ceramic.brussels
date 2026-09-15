@@ -288,7 +288,7 @@ const altPaths = hubAltPaths('visit', tab);
 
   {
     tab === 'faq' && (
-      <div class="content-wrap practical">
+      <div class="faq-page">
         {intro && (
           <p class="intro-large" {...styleAttrs(introStyle)}>
             {intro}
@@ -296,18 +296,18 @@ const altPaths = hubAltPaths('visit', tab);
         )}
         {settings?.faq?.length ? (
           <div class="faq-list">
-            {settings.faq.map((q: any) => (
-              <details class="faq">
+            {settings.faq.map((q: any, i: number) => (
+              <details class="faq" open={i === 0}>
                 <summary>
                   <span class="question" {...styleAttrs(q.questionStyle)}>
                     {q.question}
                   </span>
-                  <span class="arrow" aria-hidden="true">
-                    ↓
-                  </span>
+                  <i aria-hidden="true">↓</i>
                 </summary>
-                <div class="body-24 answer">
-                  <PortableText value={q.answer} fieldStyle={q.answerStyle} />
+                <div class="answer">
+                  <div>
+                    <PortableText value={q.answer} fieldStyle={q.answerStyle} />
+                  </div>
                 </div>
               </details>
             ))}
@@ -464,36 +464,83 @@ const altPaths = hubAltPaths('visit', tab);
     }
   }
 
-  /* FAQ: the talks accordion's look. */
+  /* FAQ, from visitors-info/faq/index.html (2026-09-14 build): the first
+     question open, the others fold open with the arrow turning and the
+     answer growing. */
+  .faq-page {
+    padding: 8px 30px 100px;
+  }
+  .faq-page > .intro-large {
+    max-width: 1050px;
+    margin-bottom: 58px;
+  }
   .faq-list {
-    margin-top: 40px;
-    border-top: 1px solid #000;
+    border-bottom: 1px solid;
   }
   .faq {
-    border-bottom: 1px solid #000;
+    border-top: 1px solid;
   }
   .faq summary {
-    list-style: none;
-    display: flex;
+    cursor: pointer;
+    letter-spacing: -0.04em;
     justify-content: space-between;
     align-items: center;
     gap: 20px;
-    padding: 18px 0;
-    cursor: pointer;
-    font-size: 28px;
-    letter-spacing: -0.03em;
+    padding: 14px 0 20px;
+    font-size: 44px;
+    line-height: 1.08;
+    list-style: none;
+    display: flex;
   }
   .faq summary::-webkit-details-marker {
     display: none;
   }
-  .faq .arrow {
-    transition: transform 0.2s ease;
+  .faq summary i {
+    font-size: 56px;
+    font-style: normal;
+    line-height: 1;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .faq[open] .arrow {
+  .faq[open] summary i {
     transform: rotate(180deg);
   }
   .faq .answer {
-    padding: 0 0 24px;
-    max-width: 1160px;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    display: grid;
+  }
+  .faq[open] .answer {
+    grid-template-rows: 1fr;
+  }
+  .faq .answer > div {
+    letter-spacing: -0.025em;
+    max-width: 850px;
+    padding: 0 0 28px;
+    font-size: 24px;
+    line-height: 1.25;
+    overflow: hidden;
+  }
+  .faq .answer :global(p + p) {
+    margin-top: 1em;
+  }
+  .faq-page .empty {
+    padding-top: 10px;
+  }
+  @media (width<=700px) {
+    .faq-page {
+      padding-inline: 10px;
+    }
+    .faq-page > .intro-large {
+      margin-bottom: 36px;
+    }
+    .faq summary {
+      font-size: 29px;
+    }
+    .faq summary i {
+      font-size: 38px;
+    }
+    .faq .answer > div {
+      font-size: 18px;
+    }
   }
 </style>

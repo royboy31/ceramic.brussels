@@ -6,10 +6,10 @@ import { exhibitorPath } from '../lib/links';
 
 /**
  * A card in the exhibitor grid, as the design's exhibitors/index.html draws
- * it: the picture in a 3:2 frame with the round black "solo show" badge and
- * the "focus …" tag, then the name with the country code as a superscript.
- * `data-*` attributes carry what the client-side filters need, and `id`
- * lets the A–Z row jump to the first card of a letter.
+ * it (2026-09-14 build): the picture in a 3:2 frame with the round black
+ * "solo show" badge and the outlined "focus …" badge, then the name with
+ * the country code as a superscript. `data-*` attributes carry what the
+ * client-side filters need: the initial, the tags, the country.
  */
 interface Props {
   lang: LocaleId;
@@ -18,9 +18,11 @@ interface Props {
   code?: string;
   /** Anchor for the A–Z row, set on the first card of each letter. */
   id?: string;
+  /** The exhibitor won one of the fair's awards this edition. */
+  awarded?: boolean;
 }
 
-const { lang, exhibitor: ex, code, id } = Astro.props;
+const { lang, exhibitor: ex, code, id, awarded = false } = Astro.props;
 const t = useTranslations(lang);
 
 /** First letter of the sort name, folded so "Éclat" files under E. */
@@ -29,13 +31,14 @@ const letter = (ex.sortName ?? ex.name ?? '')
   .replace(/\p{M}/gu, '')
   .trim()
   .charAt(0)
-  .toLowerCase();
+  .toUpperCase();
 
 const filters = [
   ex.soloShow && 'solo-show',
   ex.inCountryFocus && 'country-focus',
   ex.kind === 'publisher' && 'publishers',
   ex.kind === 'jury-prize' && 'jury-prize',
+  awarded && 'awards',
 ]
   .filter(Boolean)
   .join(' ');
@@ -50,29 +53,22 @@ const twoLines = (s: string) => {
 const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
 ---
 
-<article
-  class="col-span-4 max-md:col-span-6 max-sm:col-span-full"
-  id={id}
-  data-letter={letter}
-  data-filters={filters}
-  data-tags={filters}
->
-  <a href={localePath(lang, exhibitorPath(ex))} class="group block">
-    <div class="relative aspect-[1.5] overflow-hidden bg-neutral-100">
+<article id={id} data-name={letter} data-letter={letter} data-filters={filters} data-tags={filters} data-country={code}>
+  <a href={localePath(lang, exhibitorPath(ex))}>
+    <div class="gallery-image">
       {
         ex.image?.asset && (
           <SanityImage
             image={ex.image}
             aspect={1.5}
             widths={[400, 600, 900, 1200]}
-            sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw"
-            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.025]"
+            sizes="(max-width: 560px) 100vw, (max-width: 900px) 50vw, 33vw"
           />
         )
       }
       {
         (ex.soloShow || ex.kind === 'jury-prize') && (
-          <span class="absolute right-3 top-3 grid h-14 w-14 place-items-center rounded-full bg-black text-center text-sm leading-[.9] text-white">
+          <span class="badge badge--black">
             {twoLines(ex.kind === 'jury-prize' ? t('exhibitors.juryPrize') : t('exhibitors.soloShow')).map((l, i) => (
               <>
                 {i > 0 && <br />}
@@ -84,7 +80,7 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
       }
       {
         ex.inCountryFocus && (
-          <span class="absolute right-20 top-3 text-center text-sm leading-[.9]">
+          <span class="badge badge--outline">
             {twoLines(focusLabel).map((l, i) => (
               <>
                 {i > 0 && <br />}
@@ -95,8 +91,65 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
         )
       }
     </div>
-    <h2 class="mt-2 text-[clamp(1.5rem,2.8vw,2.5rem)] leading-[.95] tracking-[-.045em]">
-      {ex.name} {code && <sup class="text-[.45em] tracking-normal">{code}</sup>}
+    <h2>
+      {ex.name} {code && <sup>{code}</sup>}
     </h2>
   </a>
 </article>
+
+<style>
+  /* From the design's exhibitors/index.html (2026-09-14 build). */
+  .gallery-image {
+    aspect-ratio: 1.5;
+    background: #eee;
+    position: relative;
+    overflow: hidden;
+  }
+  .gallery-image :global(img) {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  article:hover :global(img) {
+    transform: scale(1.025);
+  }
+  h2 {
+    letter-spacing: -0.045em;
+    margin-top: 8px;
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 0.95;
+  }
+  sup {
+    letter-spacing: 0;
+    font-size: 15px;
+  }
+  .badge {
+    text-align: center;
+    border-radius: 50%;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    font-size: 13px;
+    line-height: 0.9;
+    display: grid;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+  .badge--black {
+    color: #fff;
+    background: #000;
+  }
+  .badge--outline {
+    background: #fff;
+    border: 1px solid;
+    right: 82px;
+  }
+  @media (width<=900px) {
+    h2 {
+      font-size: 28px;
+    }
+  }
+</style>

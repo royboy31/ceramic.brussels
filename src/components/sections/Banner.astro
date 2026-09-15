@@ -54,14 +54,25 @@ const Tag = link ? 'a' : 'div';
     background-size: cover;
     background-position: center;
   }
+  /* The design's `.newsletter` band (index.css, 2026-09-14 build): 126px tall, 42px type. */
   .cta-gradient {
     background: linear-gradient(180deg, var(--acid) 0%, var(--ground) 50%, var(--acid) 100%);
-    letter-spacing: -0.05em;
+    min-height: 126px;
+    margin-top: 68px;
+    font-size: 42px;
+    letter-spacing: 0;
   }
   .cta-solid {
     background: var(--acid);
     letter-spacing: -0.02em;
     font-weight: 600;
+  }
+  .cta :global(.link-arrow) {
+    transition: transform 0.25s;
+    display: inline-block;
+  }
+  a.cta:hover :global(.link-arrow) {
+    transform: translate(10px);
   }
   .cta-outline {
     border-top: 1px solid var(--ink);
@@ -88,6 +99,11 @@ const Tag = link ? 'a' : 'div';
   @media (max-width: 640px) {
     .cta {
       margin-inline: -10px;
+    }
+    .cta-gradient {
+      min-height: 100px;
+      padding: 15px;
+      font-size: 30px;
     }
   }
 </style>

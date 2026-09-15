@@ -1,7 +1,7 @@
 ---
 import { LOCALES, type LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
-import { getSettings, getNavPages, getNavigation, getCurrentEdition } from '../lib/queries';
+import { getSettings, getNavPages, getNavigation, getCurrentEdition, getPartners } from '../lib/queries';
 import { resolveNavItem } from '../lib/links';
 import { HUBS } from '../lib/hubs';
 import { urlFor } from '../sanity/image';
@@ -61,14 +61,17 @@ const acid = theme === 'acid' || tone === 'brand';
 const preview = isPreview();
 const t = useTranslations(lang);
 
-const [settings, navPages, navigation, edition] = await Promise.all([
+const [settings, navPages, navigation, edition, partners] = await Promise.all([
   getSettings(lang),
   getNavPages(lang),
   getNavigation(lang),
   getCurrentEdition(lang),
+  getPartners(lang),
 ]);
 
 const siteName = settings?.siteName ?? 'ceramic brussels';
+/** The header's lockup links to the main partner (tier "main") when there is one. */
+const mainPartner = partners.find((p: any) => p.tier === 'main') ?? null;
 const fullTitle = title === siteName ? siteName : `${title} — ${siteName}`;
 const metaDescription = description ?? settings?.defaultSeo?.description ?? settings?.tagline ?? '';
 
@@ -177,7 +180,14 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   <body class={acid ? 'acid-page' : undefined}>
     <a class="skip" href="#main">{t('common.skip')}</a>
 
-    <Header lang={lang} siteName={siteName} path={path} altPaths={altPaths} datesMark={edition?.datesMark} />
+    <Header
+      lang={lang}
+      siteName={siteName}
+      path={path}
+      altPaths={altPaths}
+      datesMark={edition?.datesMark}
+      mainPartner={mainPartner}
+    />
     <MenuOverlay lang={lang} items={nav} siteName={siteName} newsletterUrl={settings?.newsletterUrl} />
 
     <div class="edit-bar">
@@ -412,10 +422,10 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
      the footer band into an acid-to-white gradient. */
   body.acid-page,
   body.acid-page .site-header.acid-wash {
-    background: var(--acid);
+    background: #fdeb33;
   }
   body.acid-page footer.acid-wash {
-    background: linear-gradient(#fff350 0%, #fff 55%);
+    background: linear-gradient(#fdeb33 0%, #fff 55%);
   }
   .skip {
     position: absolute;

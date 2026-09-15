@@ -1,0 +1,219 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ExhibitorHead from '../../../components/ExhibitorHead.astro';
+import Slideshow from '../../../components/Slideshow.astro';
+import PortableText from '../../../components/PortableText.astro';
+import PageSections from '../../../components/PageSections.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { useTranslations, localePath } from '../../../lib/i18n';
+import { getAwards, getCurrentEdition, getHubPages } from '../../../lib/queries';
+import { pageForTab } from '../../../lib/hubs';
+import { countryCode } from '../../../lib/countries';
+import { exhibitorPath } from '../../../lib/links';
+import { styleAttrs } from '../../../lib/textStyle';
+
+/**
+ * /exhibitors/awards: the fair's exhibitor awards (best booth, best solo
+ * show…), as the design's exhibitors/awards/index.html draws it
+ * (2026-09-14 build): the exhibitors title band with the awards tab
+ * active, an intro line, then one ruled row per award - the winning
+ * gallery's pictures on the left, the award's name as a label, the
+ * gallery, its city, the citation and a link to the gallery on the right.
+ *
+ * Data: `award` documents of family "fair", the newest edition that has
+ * any (the current one once its awards are in). The intro is the `page` in
+ * section "exhibitors" whose English slug is `awards`, when an editor makes
+ * one; the list never comes from it. A static segment, so it wins over
+ * exhibitors/[slug].astro.
+ */
+export function getStaticPaths() {
+  return LOCALE_IDS.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as LocaleId;
+const t = useTranslations(lang);
+
+const [allAwards, edition, pages] = await Promise.all([getAwards(lang), getCurrentEdition(lang), getHubPages(lang, 'exhibitors')]);
+const page = pageForTab(pages, 'awards');
+const fair = allAwards.filter((a: any) => a.family === 'fair' && a.year);
+const year = fair.some((a: any) => a.year === edition?.year) ? edition.year : fair[0]?.year;
+const awards = fair.filter((a: any) => a.year === year);
+
+const placeOf = (g: any) => {
+  const code = countryCode(g?.countryCode ?? g?.country);
+  return [g?.city, code && `(${code})`].filter(Boolean).join(' ');
+};
+/** The award's own picture, else the gallery's pictures. */
+const imagesOf = (a: any): any[] =>
+  a.image?.asset ? [a.image] : (a.gallery?.images ?? []).filter((img: any) => img?.asset);
+---
+
+<Base
+  lang={lang}
+  title={page?.seo?.title ?? `${t('exhibitors.awardsPage')}${year ? ` ${year}` : ''}`}
+  description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
+  image={page?.seo?.ogImage ?? page?.cover}
+  path="exhibitors/awards"
+  editId={page?._id}
+  editType={page?._type}
+>
+  <ExhibitorHead lang={lang} active="awards" edition={edition} />
+
+  {
+    page?.intro && (
+      <div class="awards-intro">
+        <p {...styleAttrs(page.introStyle)}>{page.intro}</p>
+      </div>
+    )
+  }
+
+  {
+    awards.length ? (
+      <div class="awards-list">
+        {awards.map((a: any, i: number) => {
+          const images = imagesOf(a);
+          const gallery = a.gallery;
+          const winners = gallery ? [gallery.name] : (a.laureates ?? []).map((l: any) => l.name);
+          return (
+            <article>
+              <figure>
+                {images.length ? (
+                  <Slideshow images={images} aspect={1.5} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 50vw" label={a.name} id={`award-${i + 1}`} />
+                ) : (
+                  <div class="award-empty" />
+                )}
+              </figure>
+              <div class="award-copy">
+                <p class="label" {...styleAttrs(a.nameStyle)}>
+                  {a.name}
+                </p>
+                {winners.length > 0 && <h2>{winners.join(', ')}</h2>}
+                {gallery && placeOf(gallery) && <p class="place">{placeOf(gallery)}</p>}
+                {a.outcome && <p class="place">{a.outcome}</p>}
+                {a.description && <PortableText value={a.description} fieldStyle={a.descriptionStyle} />}
+                {gallery?.slug && (
+                  <a href={localePath(lang, exhibitorPath(gallery))}>
+                    {t('exhibitors.discoverGallery')}{' '}
+                    <span class="link-arrow" data-arrow="→" aria-hidden="true">
+                      →
+                    </span>
+                  </a>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    ) : (
+      <p class="empty">{t('exhibitors.awardsEmpty')}</p>
+    )
+  }
+  {
+    (page?.sections?.length ?? 0) > 0 && (
+      <div class="content-wrap">
+        <PageSections lang={lang} sections={page.sections} />
+      </div>
+    )
+  }
+</Base>
+
+<style>
+  /* From the design's exhibitors/awards/index.html (2026-09-14 build). */
+  .awards-intro {
+    padding: 45px 30px 30px;
+  }
+  .awards-intro p {
+    letter-spacing: -0.035em;
+    max-width: 950px;
+    font-size: 40px;
+    line-height: 1.08;
+  }
+  .awards-list {
+    padding: 0 30px 90px;
+  }
+  .awards-list article {
+    border-top: 1px solid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 40px;
+    padding: 35px 0 70px;
+    display: grid;
+  }
+  .awards-list figure {
+    margin: 0;
+    position: relative;
+  }
+  .awards-list :global(img),
+  .award-empty {
+    aspect-ratio: 1.5;
+    object-fit: cover;
+    width: 100%;
+    background: #f0efed;
+  }
+  .awards-list :global(figcaption) {
+    margin-top: 7px;
+  }
+  .award-copy .label {
+    text-transform: uppercase;
+    font-size: 21px;
+  }
+  .award-copy h2 {
+    letter-spacing: -0.045em;
+    margin-top: 12px;
+    font-size: 54px;
+    font-weight: 400;
+    line-height: 1;
+  }
+  .place {
+    margin-bottom: 38px;
+    font-size: 28px;
+  }
+  .award-copy :global(.rich-text) {
+    max-width: 610px;
+    font-size: 23px;
+    line-height: 1.25;
+  }
+  .award-copy > a {
+    gap: 8px;
+    margin-top: 34px;
+    font-size: 28px;
+    text-decoration: underline;
+    display: inline-flex;
+  }
+  .award-copy a span {
+    transition: transform 0.2s;
+  }
+  .award-copy a:hover span {
+    transform: translate(8px);
+  }
+  .empty {
+    padding: 45px 30px 90px;
+    font-size: 24px;
+  }
+  @media (width<=900px) {
+    .awards-intro,
+    .awards-list,
+    .empty {
+      padding-inline: 16px;
+    }
+  }
+  @media (width<=640px) {
+    .awards-intro,
+    .awards-list,
+    .empty {
+      padding-inline: 10px;
+    }
+    .awards-intro p {
+      font-size: 30px;
+    }
+    .awards-list article {
+      display: block;
+    }
+    .award-copy {
+      padding-top: 20px;
+    }
+    .award-copy h2 {
+      font-size: 40px;
+    }
+  }
+</style>

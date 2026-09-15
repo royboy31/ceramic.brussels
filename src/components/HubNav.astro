@@ -5,10 +5,10 @@ import { HUBS, hubTabHref } from '../lib/hubs';
 
 /**
  * The title band of a hub page, as the design draws it on every hub frame:
- * the hub name on five columns, the tabs right-aligned on the other seven
+ * the hub name on four columns, the tabs right-aligned on the other eight
  * as bordered buttons, the current one filled acid (or black on the acid
  * art prize pages, `dark`). Markup and rules are the `.section-head` block
- * Lilanga's build repeats on each page.
+ * Lilanga's build repeats on each page (2026-09-14 build: smaller pills).
  *
  * Tabs come from HUBS; a `page` document with the same English slug can
  * override a tab's label. A tab with a `link` leads to another hub.
@@ -68,24 +68,25 @@ const tabs = hub.tabs.map((tab) => {
   .section-head h1 {
     text-transform: lowercase;
     letter-spacing: -0.04em;
-    grid-column: span 5;
+    white-space: nowrap;
+    grid-column: span 4;
     font-size: 70px;
     font-weight: 600;
     line-height: 1;
   }
   .section-head nav {
-    grid-column: span 7;
+    grid-column: span 8;
     justify-content: flex-end;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
     display: flex;
   }
   .section-head a {
     white-space: nowrap;
     border: 1px solid #000;
-    padding: 8px 20px;
-    font-size: 28px;
-    line-height: 34px;
+    padding: 7px 15px;
+    font-size: 24px;
+    line-height: 30px;
   }
   .section-head a.active {
     background: #fff350;
@@ -105,6 +106,7 @@ const tabs = hub.tabs.map((tab) => {
       overflow-x: auto;
     }
     .section-head h1 {
+      white-space: normal;
       font-size: 48px;
     }
     .section-head a {

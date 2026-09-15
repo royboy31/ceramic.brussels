@@ -139,7 +139,7 @@ const captionOf = (img: any, fallback?: string) => ({
 
   {
     tab === 'laureates' && (
-      <div class="content-wrap laureates">
+      <div class="laureates">
         {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
         {laureates.length ? (
           laureates.map((l: any, i: number) => {
@@ -147,34 +147,41 @@ const captionOf = (img: any, fallback?: string) => ({
             const images = (l.images ?? []).filter((img: any) => img?.asset);
             const first = images[0] ?? (artist.portrait?.asset ? artist.portrait : null);
             const cap = captionOf(first, artist.name);
+            /* "Poland, 1996" as the design writes it; the base line when the nationality is not filled in. */
+            const place =
+              [artist.nationality, artist.birthYear].filter(Boolean).join(', ') ||
+              (artist.basedIn ? `${t('artists.basedIn')} ${artist.basedIn}` : '');
             return (
               <article class:list={[{ reverse: i % 2 === 1 }]}>
                 <figure>
-                  {images.length > 0 ? (
-                    <Slideshow
-                      images={images.map((img: any) => ({ ...img, caption: img.caption ?? artist.name }))}
-                      sizes="(max-width: 700px) 100vw, 433px"
-                      widths={[433, 866, 1300]}
-                      label={artist.name}
-                      id={`laureate-${i + 1}`}
-                    />
-                  ) : first ? (
-                    <>
-                      <SanityImage image={first} sizes="(max-width: 700px) 100vw, 433px" widths={[433, 866, 1300]} />
-                      <figcaption>
-                        <b>1/1</b>
-                        {(cap.who || cap.title) && (
-                          <span>
-                            {cap.who}
-                            {cap.title && `, ${cap.title}`}
-                            {cap.year && `, ${cap.year}`}
-                          </span>
-                        )}
-                      </figcaption>
-                    </>
-                  ) : (
-                    <div class="placeholder" />
-                  )}
+                  <div class="image">
+                    {images.length > 0 ? (
+                      <Slideshow
+                        images={images.map((img: any) => ({ ...img, caption: img.caption ?? artist.name }))}
+                        aspect={433 / 541}
+                        sizes="(max-width: 640px) 100vw, 433px"
+                        widths={[433, 866, 1300]}
+                        label={artist.name}
+                        id={`laureate-${i + 1}`}
+                      />
+                    ) : first ? (
+                      <>
+                        <SanityImage image={first} aspect={433 / 541} sizes="(max-width: 640px) 100vw, 433px" widths={[433, 866, 1300]} />
+                        <figcaption>
+                          <b>1/1</b>
+                          {(cap.who || cap.title) && (
+                            <span>
+                              {cap.who}
+                              {cap.title && `, ${cap.title}`}
+                              {cap.year && `, ${cap.year}`}
+                            </span>
+                          )}
+                        </figcaption>
+                      </>
+                    ) : (
+                      <div class="placeholder" />
+                    )}
+                  </div>
                 </figure>
                 <section>
                   <div class="name">
@@ -187,19 +194,13 @@ const captionOf = (img: any, fallback?: string) => ({
                       </a>
                     )}
                   </div>
-                  {(artist.birthYear || artist.basedIn) && (
-                    <p class="bio">
-                      {artist.birthYear && <>°{artist.birthYear}</>}
-                      {artist.birthYear && artist.basedIn && <br />}
-                      {artist.basedIn && (
-                        <>
-                          {t('artists.basedIn')} {artist.basedIn}
-                        </>
-                      )}
+                  {place && (
+                    <p class="place" {...styleAttrs(artist.nationalityStyle)}>
+                      {place}
                     </p>
                   )}
                   {(l.statement ?? artist.bio) && (
-                    <div class="two-col body-24 text">
+                    <div class="bio">
                       <PortableText value={l.statement ?? artist.bio} fieldStyle={l.statement ? l.statementStyle : artist.bioStyle} />
                     </div>
                   )}
@@ -349,13 +350,17 @@ const captionOf = (img: any, fallback?: string) => ({
     width: 100%;
   }
 
+  /* The laureates, from art-prize/laureates/index.html (2026-09-14 build). */
+  .laureates {
+    padding: 0 30px 100px;
+  }
   .laureates .intro-large {
     margin-bottom: 55px;
   }
   .laureates article {
     grid-template-columns: 433px 1fr;
     gap: 40px;
-    margin-bottom: 90px;
+    margin-bottom: 68px;
     display: grid;
   }
   .laureates article.reverse {
@@ -363,56 +368,65 @@ const captionOf = (img: any, fallback?: string) => ({
   }
   .laureates figure {
     margin: 0;
-    position: relative;
   }
   .reverse figure {
     order: 2;
   }
-  .laureates :global(img),
-  .laureates .placeholder {
+  .image {
+    position: relative;
+  }
+  .image :global(img),
+  .image .placeholder {
     object-fit: cover;
-    width: 433px;
-    height: 541px;
+    width: 100%;
+    aspect-ratio: 433 / 541;
     background: #f0efed;
   }
-  .laureates .dots {
-    bottom: 40px;
-  }
-  .laureates .dots i {
-    width: 10px;
-    height: 10px;
-  }
-  .laureates figcaption {
-    padding-top: 5px;
-    font-size: 14px;
+  .image :global(figcaption) {
+    gap: 14px;
+    padding-top: 6px;
+    font-size: 13px;
   }
   .name {
-    border-top: 2px solid;
+    border-top: 1px solid;
     justify-content: space-between;
+    align-items: start;
+    gap: 20px;
     padding-top: 8px;
     display: flex;
   }
   .name h2 {
-    font-size: 60px;
+    letter-spacing: -0.045em;
+    font-size: 48px;
+    font-weight: 400;
     line-height: 1;
   }
+  .place {
+    margin-top: 10px;
+    font-size: 27px;
+    line-height: 1.1;
+  }
+  /* The design lays the bio's paragraphs on a two-column grid, the third
+     one across both; the rich text arrives in one wrapper, so the grid
+     goes on that. */
   .bio {
-    margin: 18px 0 36px;
-    font-size: 40px;
-    line-height: 1.15;
+    margin-top: 34px;
+    font-size: 18px;
+    line-height: 1.25;
   }
-  /* The design splits the bio's paragraphs across the two columns; the rich
-     text arrives in one wrapper, so CSS columns do the same split. */
-  .laureates .text {
-    display: block;
-    columns: 2;
-    column-gap: 40px;
+  .bio :global(.rich-text) {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 40px;
+    display: grid;
   }
-  .text :global(p) {
-    break-inside: avoid;
+  .bio :global(.rich-text > p:nth-child(3)) {
+    grid-column: 1 / -1;
   }
-  .text :global(p + p) {
-    margin-top: 28px;
+  .laureates .pill {
+    flex: none;
+    padding: 2px 13px;
+    font-size: 16px;
+    line-height: 25px;
   }
 
   .awards-page .intro-large {
@@ -518,35 +532,52 @@ const captionOf = (img: any, fallback?: string) => ({
     .hero > p {
       font-size: 34px;
     }
-    figcaption span {
+    .hero figcaption span {
       display: none;
-    }
-    .laureates article,
-    .laureates article.reverse {
-      grid-template-columns: 1fr;
-    }
-    .reverse figure {
-      order: 0;
-    }
-    .laureates :global(img),
-    .laureates .placeholder {
-      width: 100%;
-      height: auto;
-    }
-    .name h2 {
-      font-size: 40px;
-    }
-    .bio {
-      font-size: 28px;
-    }
-    .laureates .text {
-      columns: 1;
     }
     .award-grid {
       columns: 1;
     }
     .award {
       font-size: 28px;
+    }
+  }
+  @media (width<=900px) {
+    .laureates article,
+    .laureates article.reverse {
+      grid-template-columns: 34% 1fr;
+      gap: 24px;
+    }
+    .laureates article.reverse {
+      grid-template-columns: 1fr 34%;
+    }
+    .bio :global(.rich-text) {
+      grid-template-columns: 1fr;
+    }
+    .bio :global(.rich-text > p:nth-child(3)) {
+      grid-column: auto;
+    }
+  }
+  @media (width<=640px) {
+    .laureates {
+      padding-inline: 10px;
+    }
+    .laureates article,
+    .laureates article.reverse {
+      flex-direction: column;
+      display: flex;
+    }
+    .reverse figure {
+      order: 0;
+    }
+    .name h2 {
+      font-size: 38px;
+    }
+    .place {
+      font-size: 24px;
+    }
+    .bio {
+      font-size: 17px;
     }
   }
 </style>

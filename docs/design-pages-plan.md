@@ -410,6 +410,42 @@ entries in this file exist only on `kamindu`. `dev` and `lilanga` still trail
 `main`. `git rebase origin/main` on `kamindu` lines it up: git skips the
 commits `main` already has as cherry-picks and replays only the docs.
 
+## Status, 2026-09-15 — the 2026-09-14 build ported (branch `design-2026-09-14`)
+
+Lilanga's next offline build (`ceramic-brussels-offline-html-2026-09-14`,
+now the `html pages` folder) was diffed against the one the port was made
+from; the differences went into the frontend on the branch, production
+build clean (900 pages, 129 requests). What changed:
+
+- **Shell.** Header as a flex row: dates mark + languages left, wordmark
+  centred, the Puilaetco "main partner" lockup (linked to the `main`
+  partner's URL) and the menu button right. Menu without the `+` toggles:
+  sub-links always in view, a row nudges left on hover, white top bar with
+  the × alone. Footer pills end in ↗. Hub tab pills smaller (24px, 4/8
+  columns). Art prize yellow is `#fdeb33`.
+- **Homepage.** Hero figure + statement with an arrow link, a ↓ to the
+  first block, four bordered quick links (the last grey), `latest news` as
+  a centred title, feature rows (`--news` copy left, `--guest` picture
+  left), the film as a poster linking to YouTube with its credit, the
+  gradient band at 126px/42px, key figures as a centred title over a
+  two-column ruled grid.
+- **Exhibitors.** `ExhibitorHead` (title band with galleries / artists /
+  catalogue / awards tabs and the ALL + A–Z buttons), a FILTERS row with a
+  country menu and an "awards" pill, `.badge` cards, the analora detail
+  layout (booth badge beside the name, city + pills beside "presenting"),
+  and a new `/exhibitors/awards` page from the `fair` award family.
+  `/artists` became the A–Z list of the design; the artists tab points
+  there, the URL did not move.
+- **Laureates** in the new row layout (48px name, "Country, year", bio on a
+  two-column grid). **Team** with directors (role matching "direct")
+  beside their biography, then the team and collaborators as small cards.
+  **FAQ** with the design's accordion, first question open.
+- Not changed: the Navigation document (the design's menu has more rows -
+  VIP, media, contact, catalogue…; that is editor content), the video
+  block has nothing to show until an edition carries a film, and the
+  exhibitor awards intro reads a `page` in section `exhibitors` with
+  English slug `awards`, which nobody has made yet.
+
 ## Status, 2026-09-09 — live on production; main pages editable
 
 The ported design went to `main` in the morning (`8c20e75`) and has been

@@ -4,12 +4,13 @@ import type { LocaleId } from '../lib/locales';
 
 /**
  * The menu overlay of the design: a panel sliding in from the right, one
- * acid "sheet" per menu row, and a `+` on the rows that have sub-items,
- * which open as an accordion (on hover with a mouse, on the button
- * otherwise). Markup, classes and behaviour are Lilanga's build of the
- * Figma menu frame (the index.html files under html pages); the rules for the
- * classes live in src/styles/design.css. Items come from the resolved Sanity navigation
- * that Base.astro builds, children included.
+ * acid "sheet" per menu row with its sub-items always in view under the
+ * heading, and a white top bar holding only the ×. A row with a mouse over
+ * it nudges left. Markup, classes and behaviour are Lilanga's build of the
+ * Figma menu frame (the index.html files under html pages, 2026-09-14
+ * build); the rules for the classes live in src/styles/design.css. Items
+ * come from the resolved Sanity navigation that Base.astro builds, children
+ * included; a row without children is `no-links` and stands taller.
  */
 interface Child {
   label: string;
@@ -27,7 +28,7 @@ interface Props {
   newsletterUrl?: string;
 }
 
-const { lang, items, siteName = 'ceramic brussels' } = Astro.props;
+const { lang, items } = Astro.props;
 const t = useTranslations(lang);
 const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } : {});
 ---
@@ -35,38 +36,27 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
 <dialog id="site-menu" data-menu aria-label={t('nav.menu')}>
   <div class="menu-panel">
     <div class="menu-top">
-      <span>{siteName}</span>
-      <button data-menu-close autofocus>{t('nav.close').toLowerCase()} <span aria-hidden="true">×</span></button>
+      <span aria-hidden="true"></span>
+      <button data-menu-close autofocus aria-label={t('nav.closeMenu')}><span aria-hidden="true">×</span></button>
     </div>
     <nav aria-label={t('nav.menu')} class="menu-stack">
       {
         items.map((item, i) => {
           const children = item.children ?? [];
           return (
-            <section class="menu-row" style={`--row:${i}`}>
+            <section class:list={['menu-row', { 'no-links': children.length === 0 }]} style={`--row:${i}`}>
               <div class="menu-sheet">
                 <div class="menu-heading">
                   <a href={item.href} {...rel(item.external)}>
                     {item.label}
                   </a>
-                  {children.length > 0 && (
-                    <button
-                      class="submenu-toggle"
-                      aria-label={`${t('nav.expand')} ${item.label}`}
-                      aria-expanded="false"
-                      aria-controls={`submenu-${i}`}
-                    >
-                      <span aria-hidden="true">+</span>
-                    </button>
-                  )}
                 </div>
                 {children.length > 0 && (
-                  <div class="submenu" id={`submenu-${i}`} inert>
+                  <div class="submenu" id={`submenu-${i}`}>
                     <div>
                       {children.map((c) => (
                         <a href={c.href} {...rel(c.external)}>
                           {c.label}
-                          <span aria-hidden="true"> ↗</span>
                         </a>
                       ))}
                     </div>
@@ -83,8 +73,8 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
 
 <script>
   // The design's menu behaviour, as built: open as a modal, slide in on the
-  // next frame, expand a row on mouse hover or on its + button, close on the
-  // button, on Escape, or on a click outside the panel.
+  // next frame, nudge a row while a mouse is over it, close on the button,
+  // on Escape, or on a click outside the panel.
   const dialog = document.querySelector<HTMLDialogElement>('[data-menu]');
   const openers = document.querySelectorAll<HTMLButtonElement>('[data-menu-open]');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -92,18 +82,13 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   let closing = false;
   let savedOverflow = '';
 
-  const expand = (row: Element, open: boolean) => {
-    row.classList.toggle('expanded', open);
-    row.querySelector('button')?.setAttribute('aria-expanded', String(open));
-    const sub = row.querySelector<HTMLElement>('.submenu');
-    if (sub) sub.inert = !open;
-  };
+  const expand = (row: Element, open: boolean) => row.classList.toggle('expanded', open);
 
   const close = () => {
     if (!dialog?.open || closing) return;
     closing = true;
     dialog.classList.remove('is-open');
-    window.setTimeout(() => dialog.close(), reduced.matches ? 0 : 680);
+    window.setTimeout(() => dialog.close(), reduced.matches ? 0 : 760);
   };
 
   openers.forEach((btn) =>
@@ -150,6 +135,5 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
       const to = (e as FocusEvent).relatedTarget as Node | null;
       if (!row.contains(to) && !row.matches(':hover')) expand(row, false);
     });
-    row.querySelector('button')?.addEventListener('click', () => expand(row, !row.classList.contains('expanded')));
   });
 </script>

@@ -1,5 +1,6 @@
 ---
 import ExhibitorCard from './ExhibitorCard.astro';
+import ExhibitorHead from './ExhibitorHead.astro';
 import PageSections from './PageSections.astro';
 import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
@@ -7,11 +8,12 @@ import { countryCode } from '../lib/countries';
 import { styleAttrs } from '../lib/textStyle';
 
 /**
- * One edition's exhibitors, as the design's exhibitors/index.html draws it:
- * the "a - b - c …" row, the FILTERS pills (solo show, country focus,
- * publishers, jury prize) and the three-column card grid. Letters are
- * anchors to the first card of that initial and the filters work on the
- * rendered list, so the page is complete without JavaScript.
+ * One edition's exhibitors, as the design's exhibitors/index.html draws it
+ * (2026-09-14 build): the title band with its tabs and the ALL + A–Z row,
+ * the FILTERS row (search by country, solo show, country focus, publishers,
+ * jury prize, awards) and the three-column card grid. The letters, the
+ * country and the pills all filter the rendered list in place, so the page
+ * is complete without JavaScript and costs nothing until clicked.
  *
  * The current edition's list is /exhibitors, wrapped in the Exhibitors main
  * page's lead and blocks. A past edition's is /exhibitors/<year>, the address
@@ -20,19 +22,19 @@ import { styleAttrs } from '../lib/textStyle';
 interface Props {
   lang: LocaleId;
   exhibitors: any[];
-  /** The edition the list belongs to: its focus names a filter, its year dates the jury prize. */
+  /** The edition the list belongs to: its focus names a filter, its year dates the jury prize, its catalogue is a tab. */
   edition: any;
   /** The Exhibitors main page - the current edition's list only. */
   page?: any;
   /** Set on a past edition's list. */
   year?: number;
   currentYear?: number;
+  /** `_id`s of the exhibitors that won one of the fair's awards, for the "awards" filter. */
+  awarded?: Set<string>;
 }
 
-const { lang, exhibitors, edition, page, year, currentYear } = Astro.props;
+const { lang, exhibitors, edition, page, year, currentYear, awarded = new Set<string>() } = Astro.props;
 const t = useTranslations(lang);
-
-const LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
 /** First letter of the sort name, folded so "Éclat" files under E. */
 const initial = (ex: any) =>
@@ -41,9 +43,7 @@ const initial = (ex: any) =>
     .replace(/\p{M}/gu, '')
     .trim()
     .charAt(0)
-    .toLowerCase();
-
-const present = new Set(exhibitors.map(initial));
+    .toUpperCase();
 
 const filters = [
   { id: 'solo-show', label: t('exhibitors.soloShow'), has: (ex: any) => ex.soloShow },
@@ -54,73 +54,73 @@ const filters = [
     label: `${t('exhibitors.juryPrize')}${edition?.year ? ` ${edition.year - 1}` : ''}`,
     has: (ex: any) => ex.kind === 'jury-prize',
   },
+  { id: 'awards', label: t('nav.awards').toLowerCase(), has: (ex: any) => awarded.has(ex._id) },
 ].filter((f) => exhibitors.some(f.has));
 
-/** The edition's catalogue, overview and floor plan, as the old site's year pages linked them. */
+/** The countries in the list, by code, for the "search by country" menu. */
+const codeOf = (ex: any) => countryCode(ex.countryCode ?? ex.country);
+const countries = [...new Set(exhibitors.map(codeOf).filter(Boolean))].sort() as string[];
+
+/** The edition's overview and floor plan, as the old site's year pages linked them. */
 const links = [
-  edition?.catalogueUrl && { href: edition.catalogueUrl, label: t('home.catalogue').toLowerCase() },
   edition?.overviewUrl && { href: edition.overviewUrl, label: t('editions.overview') },
   edition?.fairMapUrl && { href: edition.fairMapUrl, label: t('tabs.floorPlan') },
 ].filter(Boolean) as { href: string; label: string }[];
 ---
 
-<div class="page-grid py-2 md:py-4">
-  <h1 class="col-span-full text-[clamp(2rem,4.8vw,4.4rem)] font-semibold leading-none tracking-[-.04em]">
-    {t('nav.exhibitors').toLowerCase()}{year && ` ${year}`}
-  </h1>
-  {
-    page?.intro && (
-      <p class="intro-large col-span-full" {...styleAttrs(page.introStyle)}>
-        {page.intro}
-      </p>
-    )
-  }
-  {
-    (links.length > 0 || (year && currentYear)) && (
-      <p class="col-span-full edition-links">
-        {year && currentYear && (
-          <a href={localePath(lang, 'exhibitors')}>
-            {t('nav.exhibitors').toLowerCase()} {currentYear} →
-          </a>
-        )}
-        {links.map((l) => (
-          <a href={l.href} target="_blank" rel="noopener noreferrer">
-            {l.label} ↗
-          </a>
-        ))}
-      </p>
-    )
-  }
-</div>
+<ExhibitorHead lang={lang} active="galleries" edition={edition} year={year} alphabet={exhibitors.length > 0} />
+
+{
+  (page?.intro || links.length > 0 || (year && currentYear)) && (
+    <div class="exhibitor-intro">
+      {page?.intro && (
+        <p class="intro-large" {...styleAttrs(page.introStyle)}>
+          {page.intro}
+        </p>
+      )}
+      {(links.length > 0 || (year && currentYear)) && (
+        <p class="edition-links">
+          {year && currentYear && (
+            <a href={localePath(lang, 'exhibitors')}>
+              {t('nav.exhibitors').toLowerCase()} {currentYear} →
+            </a>
+          )}
+          {links.map((l) => (
+            <a href={l.href} target="_blank" rel="noopener noreferrer">
+              {l.label} ↗
+            </a>
+          ))}
+        </p>
+      )}
+    </div>
+  )
+}
+
 {
   exhibitors.length ? (
     <>
-      <div class="page-grid pt-4">
-        <p class="alphabet col-span-full text-[clamp(1.25rem,3.2vw,2.6rem)] tracking-[-.04em]" aria-label={t('exhibitors.byLetter')}>
-          {LETTERS.map((letter, i) => (
-            <>
-              {i > 0 && ' - '}
-              {present.has(letter) ? <a href={`#letter-${letter}`}>{letter}</a> : <span class="letter-off">{letter}</span>}
-            </>
-          ))}
-        </p>
-        {filters.length > 0 && (
-          <div class="col-span-full my-6 flex flex-wrap items-center gap-3 text-[clamp(1rem,2vw,1.75rem)]" id="exhibitor-filters">
-            <span class="uppercase">{t('exhibitors.filters')}</span>
-            {filters.map((f) => (
-              <button type="button" class="rounded-full border border-black px-4 py-1" data-filter={f.id} aria-pressed="false">
-                {f.label}
-              </button>
+      <div class="filters" id="exhibitor-filters">
+        <span>{t('exhibitors.filters')}:</span>
+        {countries.length > 1 && (
+          <select data-country aria-label={t('exhibitors.searchByCountry')}>
+            <option value="">{t('exhibitors.searchByCountry')} ↓</option>
+            {countries.map((c) => (
+              <option value={c}>{c}</option>
             ))}
-          </div>
+          </select>
         )}
+        {filters.map((f) => (
+          <button type="button" data-filter={f.id} aria-pressed="false">
+            {f.label}
+          </button>
+        ))}
       </div>
 
       <p class="empty" id="no-match" hidden>
         {t('exhibitors.noneMatch')}
       </p>
 
-      <div class="page-grid gap-y-7 pb-24" id="exhibitor-list" data-exhibitor-grid>
+      <div class="gallery-grid" id="exhibitor-list" data-exhibitor-grid>
         {exhibitors.map((ex: any, i: number) => {
           const letter = initial(ex);
           const first = i === 0 || initial(exhibitors[i - 1]) !== letter;
@@ -128,8 +128,9 @@ const links = [
             <ExhibitorCard
               lang={lang}
               exhibitor={ex}
-              code={countryCode(ex.countryCode ?? ex.country)}
+              code={codeOf(ex)}
               id={first ? `letter-${letter}` : undefined}
+              awarded={awarded.has(ex._id)}
             />
           );
         })}
@@ -149,20 +150,53 @@ const links = [
 }
 
 <style>
-  /* The design's row is plain text; only the letters that exist are links. */
-  .alphabet a {
-    text-decoration: none;
+  /* From the design's exhibitors/index.html (2026-09-14 build). */
+  .exhibitor-intro {
+    padding: 40px 30px 0;
   }
-  .alphabet a[aria-current] {
-    text-decoration: underline;
-    text-underline-offset: 0.12em;
+  .filters {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 30px;
+    display: flex;
   }
-  /* The design's row is one colour; a letter without an exhibitor is simply not a link. */
-  .letter-off {
-    opacity: 1;
+  .filters span {
+    margin-right: 8px;
+    text-transform: uppercase;
   }
-  button[aria-pressed='true'] {
-    background: #fff350;
+  .filters button,
+  .filters select {
+    border: 1px solid;
+    border-radius: 999px;
+    padding: 5px 16px;
+    font-size: 18px;
+    background: #fff;
+    cursor: pointer;
+    transition:
+      color 0.18s,
+      background-color 0.18s;
+  }
+  .filters select {
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .filters button.active,
+  .filters button[aria-pressed='true'],
+  .filters button:hover,
+  .filters select:hover,
+  .filters select.active {
+    color: #fff;
+    background: #000;
+  }
+  .gallery-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 42px 30px;
+    padding: 0 30px 100px;
+    display: grid;
+  }
+  .gallery-grid :global(article[hidden]) {
+    display: none;
   }
   .empty {
     margin: 0 30px 2rem;
@@ -180,47 +214,89 @@ const links = [
     padding: 3px 18px;
     text-decoration: none;
   }
+  @media (width<=900px) {
+    .exhibitor-intro,
+    .filters,
+    .gallery-grid {
+      padding-inline: 16px;
+    }
+    .gallery-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (width<=560px) {
+    .exhibitor-intro,
+    .filters,
+    .gallery-grid {
+      padding-inline: 10px;
+    }
+    .gallery-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 
 <script>
-  // Filter pills toggle; a card stays visible when it matches every active
-  // filter. Works on the already-rendered list and costs nothing until clicked.
+  // The letters, the country menu and the pills all work on the rendered
+  // list: a card stays visible when it matches the chosen letter, the
+  // chosen country and every active pill. `#A` in the address pre-selects a
+  // letter, which is how a detail page's letter row links back here.
+  const head = document.querySelector<HTMLElement>('[data-alphabet]');
   const bar = document.getElementById('exhibitor-filters');
   const list = document.getElementById('exhibitor-list');
   const noMatch = document.getElementById('no-match');
 
-  if (bar && list && noMatch) {
-    const buttons = Array.from(bar.querySelectorAll<HTMLButtonElement>('button[data-filter]'));
-    const cards = Array.from(list.querySelectorAll<HTMLElement>('[data-filters]'));
+  if (list && noMatch) {
+    const letters = Array.from(head?.querySelectorAll<HTMLButtonElement>('button[data-letter]') ?? []);
+    const buttons = Array.from(bar?.querySelectorAll<HTMLButtonElement>('button[data-filter]') ?? []);
+    const country = bar?.querySelector<HTMLSelectElement>('select[data-country]') ?? null;
+    const cards = Array.from(list.querySelectorAll<HTMLElement>('[data-name]'));
+    let letter = 'ALL';
 
     const apply = () => {
       const active = buttons.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.filter!);
+      const code = country?.value ?? '';
       let visible = 0;
       for (const card of cards) {
         const has = (card.dataset.filters ?? '').split(' ');
-        const match = active.every((f) => has.includes(f));
+        const match =
+          (letter === 'ALL' || card.dataset.name === letter) &&
+          (!code || card.dataset.country === code) &&
+          active.every((f) => has.includes(f));
         card.hidden = !match;
         if (match) visible++;
       }
       noMatch.hidden = visible > 0;
+      country?.classList.toggle('active', !!code);
+      for (const b of letters) {
+        const on = (b.dataset.letter ?? 'ALL') === letter;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', String(on));
+      }
     };
 
+    for (const b of letters) {
+      b.addEventListener('click', () => {
+        letter = b.dataset.letter ?? 'ALL';
+        if (letter !== 'ALL') history.replaceState(null, '', `#${letter}`);
+        else history.replaceState(null, '', location.pathname + location.search);
+        apply();
+      });
+    }
     for (const b of buttons) {
       b.addEventListener('click', () => {
         b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
         apply();
       });
     }
-  }
+    country?.addEventListener('change', apply);
 
-  // The letter row is plain anchors; this only paints the one just used.
-  const letters = Array.from(document.querySelectorAll<HTMLAnchorElement>('.alphabet a[href^="#letter-"]'));
-  const markLetter = () => {
-    for (const a of letters) {
-      if (a.getAttribute('href') === location.hash) a.setAttribute('aria-current', 'true');
-      else a.removeAttribute('aria-current');
-    }
-  };
-  window.addEventListener('hashchange', markLetter);
-  markLetter();
+    const fromHash = () => {
+      const m = location.hash.match(/^#([A-Za-z])$/);
+      letter = m ? m[1].toUpperCase() : 'ALL';
+      apply();
+    };
+    window.addEventListener('hashchange', fromHash);
+    if (/^#[A-Za-z]$/.test(location.hash)) fromHash();
+  }
 </script>
