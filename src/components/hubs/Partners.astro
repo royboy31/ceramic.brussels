@@ -1,0 +1,290 @@
+---
+import Base from '../../layouts/Base.astro';
+import HubNav from '../../components/HubNav.astro';
+import PageSections from '../../components/PageSections.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import Slideshow from '../../components/Slideshow.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import { getHubPages, getPartners } from '../../lib/queries';
+import { HUBS, PARTNER_TABS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * The partners hub, as the design's partners pages draw it. Every tab opens
+ * with the tab's name over a rule (`.category`). Institutions - and the tabs
+ * the design has no frame for: main partner, event partners, media - are a
+ * two-column grid of entries: name over a rule, text, then the website pill
+ * and the logo side by side. The hotel is one entry: the photo with the
+ * slideshow dots beside the name, the text and the pill. Markup and rules
+ * are Lilanga's build of the Figma partners frames.
+ */
+const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
+const t = useTranslations(lang);
+
+const [pages, partners] = await Promise.all([getHubPages(lang, 'partners'), getPartners(lang)]);
+const page = pageForTab(pages, tab);
+const hubTab = HUBS.partners.tabs.find((x) => x.slug === tab);
+const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
+
+const tiers = PARTNER_TABS[tab] ?? [];
+const listed = partners.filter((p: any) => tiers.includes(p.tier));
+const featured = tab === 'hotel';
+const path = hubTabPath('partners', tab, lang);
+const altPaths = hubAltPaths('partners', tab);
+const external = { target: '_blank', rel: 'noopener noreferrer' };
+---
+
+<Base
+  lang={lang}
+  title={page?.seo?.title ?? `${t('nav.partners')} — ${tabLabel}`}
+  description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
+  image={page?.seo?.ogImage ?? page?.cover}
+  path={path}
+  altPaths={altPaths}
+  editId={page?._id}
+  editType={page?._type}
+>
+  <HubNav lang={lang} route="partners" active={tab} pages={pages} />
+
+  <div class:list={['content-wrap', featured ? 'hotel-page' : 'institutions-page']}>
+    {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
+    {page && <PageSections lang={lang} sections={page.sections} />}
+    {
+      page?.body && (
+        <div class="body-24 page-body">
+          <PortableText value={page.body} fieldStyle={page.bodyStyle} />
+        </div>
+      )
+    }
+
+    <h2 class="category">{tabLabel}</h2>
+
+    {
+      listed.length === 0 ? (
+        <p class="empty">{t('partners.empty')}</p>
+      ) : featured ? (
+        listed.map((p: any, i: number) => (
+          <div class="hotel">
+            <figure>
+              {p.images?.some((img: any) => img?.asset) ? (
+                <Slideshow
+                  images={p.images}
+                  widths={[670, 1000, 1340]}
+                  sizes="(max-width: 700px) 100vw, 670px"
+                  label={p.name}
+                  id={`hotel-${i + 1}`}
+                />
+              ) : (
+                <div class="hotel-placeholder" />
+              )}
+            </figure>
+            <section>
+              <h2 class="panel-title" {...styleAttrs(p.nameStyle)}>
+                {p.name}
+              </h2>
+              {p.description && (
+                <div class="body-24">
+                  <PortableText value={p.description} fieldStyle={p.descriptionStyle} />
+                </div>
+              )}
+              {p.url && (
+                <a class="pill" href={p.url} {...external}>
+                  {t('common.website')} ↗
+                </a>
+              )}
+            </section>
+          </div>
+        ))
+      ) : (
+        <div class="institutions">
+          {listed.map((p: any) => (
+            <article>
+              <h3 {...styleAttrs(p.nameStyle)}>{p.name}</h3>
+              <div class="text">
+                {p.description && <PortableText value={p.description} fieldStyle={p.descriptionStyle} />}
+              </div>
+              <div class="institution-foot">
+                {p.url && (
+                  <a class="pill" href={p.url} {...external}>
+                    {t('common.website')} ↗
+                  </a>
+                )}
+                {p.logo?.asset && (
+                  <SanityImage image={p.logo} widths={[250, 500]} sizes="250px" class="logo" placeholder={false} />
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      page?.images?.length > 0 && (
+        <ul class="image-row">
+          {page.images.map((img: any) => (
+            <li>
+              <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 640px) 100vw, 440px" widths={[440, 880]} />
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  /* From the design's partners pages (html pages/partners/*). */
+  .category {
+    border-top: 2px solid;
+    padding-top: 12px;
+    font-size: 52px;
+  }
+  .hotel-page .category {
+    font-size: 60px;
+  }
+  .page-body {
+    max-width: 1160px;
+    margin: 0 0 40px;
+  }
+  .empty {
+    margin-top: 40px;
+    font-size: 24px;
+  }
+
+  /* institutions - and every other list tab */
+  .institutions {
+    grid-template-columns: 1fr 1fr;
+    gap: 80px 40px;
+    margin-top: 55px;
+    display: grid;
+  }
+  .institutions h3 {
+    border-bottom: 1px solid;
+    font-size: 36px;
+    font-weight: 600;
+  }
+  .institutions .text {
+    min-height: 210px;
+    padding-top: 25px;
+  }
+  .institutions .text :global(p) {
+    white-space: pre-line;
+    font-size: 24px;
+    line-height: 1.25;
+  }
+  .institutions .text :global(p + p) {
+    margin-top: 1em;
+  }
+  .institution-foot {
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    min-height: 78px;
+    display: flex;
+  }
+  /*
+   * The design's logo slot is a 250px-wide block against the right edge of the
+   * card, and its two examples are set text of about the same size. The real
+   * logos are files of wildly different proportions - 4:1 wordmarks next to
+   * near-square marks, several with transparent padding baked in - so the slot
+   * is fixed and the file is fitted into it, right-aligned. Sizing each file to
+   * its own bounds instead is what left one logo stranded mid-card and the next
+   * twice its size. `margin-left: auto` keeps the logo right when the partner
+   * has no website and it is the only thing in the row.
+   */
+  .institution-foot .pill {
+    flex: none;
+  }
+  .institution-foot :global(.logo) {
+    object-fit: contain;
+    object-position: right center;
+    width: 250px;
+    /* A replaced element will not shrink past its own width without this, so
+       in a narrow column the pill is what gives, and it collapses into a
+       three-line oval. The logo gives instead, and stays right-aligned. */
+    min-width: 0;
+    height: 78px;
+    margin-left: auto;
+  }
+
+  /* hotel */
+  .hotel {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 55px;
+    display: grid;
+  }
+  .hotel figure {
+    margin: 0;
+    position: relative;
+  }
+  .hotel :global(img) {
+    width: 100%;
+  }
+  .hotel-placeholder {
+    aspect-ratio: 3 / 2;
+    background: #f0efed;
+  }
+  .hotel figcaption {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    font-size: 24px;
+    padding: 6px 10px;
+    background: #fff;
+  }
+  .dots {
+    gap: 14px;
+    display: flex;
+    position: absolute;
+    bottom: 42px;
+    right: 50%;
+    transform: translate(50%);
+  }
+  .dots i {
+    background: #fff;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+  }
+  .hotel .pill {
+    margin-top: 35px;
+  }
+
+  .image-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin: 90px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (width<=700px) {
+    .institutions {
+      grid-template-columns: 1fr;
+    }
+    .institutions .text {
+      min-height: 0;
+    }
+    .institutions h3 {
+      font-size: 28px;
+    }
+    .hotel {
+      grid-template-columns: 1fr;
+    }
+    .category,
+    .hotel-page .category {
+      font-size: 42px;
+    }
+    .image-row {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-top: 40px;
+    }
+  }
+</style>

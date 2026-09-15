@@ -1,0 +1,292 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Slideshow from '../../../components/Slideshow.astro';
+import LinkPill from '../../../components/LinkPill.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { useTranslations, localePath, formatDateRange, formatDay, formatTime } from '../../../lib/i18n';
+import { getEditionArchive, getPastEditionYears } from '../../../lib/queries';
+import { styleAttrs } from '../../../lib/textStyle';
+
+/**
+ * One past edition, as the old site's past-editions pages had it: the dates
+ * and facts, the key figures, the guest of honour, the art prize (laureates,
+ * awards, jury), the programme, the team and the photos - all read from the
+ * records that point at the edition, so nothing here is typed twice. The old
+ * /pasteditions/… addresses redirect here by year. Laid out with the
+ * `.legacy-page` primitives, like /editions.
+ */
+export async function getStaticPaths() {
+  const years = await getPastEditionYears();
+  return LOCALE_IDS.flatMap((lang) => years.map((year) => ({ params: { lang, year: String(year) } })));
+}
+
+const lang = Astro.params.lang as LocaleId;
+const year = Number(Astro.params.year);
+const t = useTranslations(lang);
+
+const e = await getEditionArchive(lang, year);
+if (!e) return Astro.rewrite('/404');
+
+const title = e.title ?? `ceramic brussels ${year}`;
+const images: any[] = (e.images ?? []).filter((img: any) => img?.asset);
+const days = [...new Set((e.events ?? []).map((ev: any) => ev.startsAt.slice(0, 10)))] as string[];
+const onDay = (day: string) => e.events.filter((ev: any) => ev.startsAt.startsWith(day));
+const links = [
+  e.catalogueUrl && { href: e.catalogueUrl, label: t('home.catalogue') },
+  e.overviewUrl && { href: e.overviewUrl, label: t('editions.overview') },
+  e.pressClipsUrl && { href: e.pressClipsUrl, label: t('home.pressClips') },
+  e.fairMapUrl && { href: e.fairMapUrl, label: t('tabs.floorPlan') },
+  e.film?.url && { href: e.film.url, label: e.film.title ?? 'film' },
+].filter(Boolean) as { href: string; label: string }[];
+/** "A and B", "A, B and C". */
+const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ` ${t('common.and')} ` : ', ');
+---
+
+<Base lang={lang} title={title} description={e.intro ? undefined : `${title} — ${t('nav.editions')}`} path={`editions/${year}`} image={e.cover}>
+  <div class="legacy-page archive">
+    <p class="back"><a href={localePath(lang, 'editions')}>← {t('nav.editions')}</a></p>
+    <h1 class="section-title">{title}</h1>
+    {
+      (e.startDate || e.venue) && (
+        <p class="dates">
+          {e.startDate && e.endDate && formatDateRange(e.startDate, e.endDate, lang)}
+          {e.startDate && e.venue && ' · '}
+          {e.venue}
+        </p>
+      )
+    }
+
+    <dl class="facts">
+      {
+        e.exhibitorCount > 0 && (
+          <div>
+            <dt>{t('editions.exhibitorCount')}</dt>
+            <dd>
+              <a href={localePath(lang, `exhibitors/${year}`)}>{e.exhibitorCount} →</a>
+            </dd>
+          </div>
+        )
+      }
+      {
+        e.countryFocus && (
+          <div>
+            <dt>{t('exhibitors.countryFocus')}</dt>
+            <dd {...styleAttrs(e.countryFocusStyle)}>{e.countryFocus}</dd>
+          </div>
+        )
+      }
+      {
+        e.guestOfHonour?.name && (
+          <div>
+            <dt>{t('artists.guestOfHonour')}</dt>
+            <dd>
+              {e.guestOfHonour.slug ? <a href={localePath(lang, `artists/${e.guestOfHonour.slug}`)}>{e.guestOfHonour.name}</a> : e.guestOfHonour.name}
+            </dd>
+          </div>
+        )
+      }
+    </dl>
+
+    {
+      links.length > 0 && (
+        <p class="links">
+          {links.map((l) => (
+            <LinkPill lang={lang} href={l.href} label={l.label} external />
+          ))}
+        </p>
+      )
+    }
+
+    {
+      e.keyFigures?.length > 0 && (
+        <section>
+          <h2 class="panel-title">{t('home.keyFigures', { year })}</h2>
+          <div class="stats">
+            {e.keyFigures.map((figure: any) => (
+              <div>
+                <strong>{figure.value}</strong>
+                <span {...styleAttrs(figure.labelStyle)}>{figure.label}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      e.laureates?.length > 0 && (
+        <section>
+          <h2 class="panel-title">
+            {t('nav.artPrize')} — {t('tabs.laureates')}
+          </h2>
+          <ul class="names">
+            {e.laureates.map((l: any) => (
+              <li>{l.artist?.slug ? <a href={localePath(lang, `artists/${l.artist.slug}`)}>{l.artist.name}</a> : l.artist?.name}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      e.awards?.length > 0 && (
+        <section>
+          <h2 class="panel-title">{t('tabs.awards')}</h2>
+          <ul class="awards">
+            {e.awards.map((a: any) => (
+              <li>
+                <strong {...styleAttrs(a.nameStyle)}>{a.name}</strong>
+                {(a.laureates?.length > 0 || a.outcome) && (
+                  <span>
+                    {' → '}
+                    {(a.laureates ?? []).map((l: any, i: number) => (
+                      <>
+                        {joiner(i, a.laureates.length)}
+                        {l.slug ? <a href={localePath(lang, `artists/${l.slug}`)}>{l.name}</a> : l.name}
+                      </>
+                    ))}
+                    {a.laureates?.length > 0 && a.outcome && ' '}
+                    {a.outcome}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      e.jury?.length > 0 && (
+        <section>
+          <h2 class="panel-title">{t('tabs.jury')}</h2>
+          <ul class="names">
+            {e.jury.map((p: any) => (
+              <li>
+                {p.name}
+                {p.role && <span class="role" {...styleAttrs(p.roleStyle)}> — {p.role}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      days.length > 0 && (
+        <section>
+          <h2 class="panel-title">{t('nav.programme')}</h2>
+          {days.map((day) => (
+            <div class="day">
+              <h3>{formatDay(day, lang)}</h3>
+              <ul>
+                {onDay(day).map((ev: any) => (
+                  <li>
+                    <time datetime={ev.startsAt}>{formatTime(ev.startsAt, lang)}</time>
+                    <span>
+                      {ev.title}
+                      {ev.speakersText && <span class="role"> — {ev.speakersText}</span>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </section>
+      )
+    }
+
+    {
+      e.people?.length > 0 && (
+        <section>
+          <h2 class="panel-title">{t('tabs.team')}</h2>
+          <ul class="names">
+            {e.people.map((p: any) => (
+              <li>
+                {p.name}
+                {p.role && <span class="role" {...styleAttrs(p.roleStyle)}> — {p.role}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      images.length > 0 && (
+        <section>
+          <h2 class="panel-title">{t('tabs.images')}</h2>
+          <Slideshow images={images} aspect={1.5} sizes="(max-width: 900px) 100vw, 1000px" label={title} id="photos" />
+        </section>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .archive section {
+    margin-top: 3rem;
+  }
+  .back {
+    margin: 0 0 1rem;
+  }
+  .dates {
+    margin: 0.5rem 0 1.5rem;
+    font-size: clamp(1rem, 1.6vw, 1.35rem);
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 3rem;
+    margin: 0;
+  }
+  .facts dt {
+    color: var(--ink-2);
+  }
+  .facts dd {
+    margin: 0;
+    font-size: clamp(1.1rem, 2vw, 1.6rem);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 1.5rem;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem 2rem;
+  }
+  .stats strong {
+    display: block;
+    font-size: clamp(1.75rem, 3.5vw, 3rem);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+  }
+  .names,
+  .awards,
+  .day ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+    font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+  }
+  .names {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+  .role {
+    color: var(--ink-2);
+  }
+  .day h3 {
+    margin: 1.5rem 0 0.5rem;
+    font-weight: 400;
+  }
+  .day li {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: 1rem;
+  }
+</style>

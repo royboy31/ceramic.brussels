@@ -1,7 +1,7 @@
 ---
 import { LOCALES, type LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
-import { getSettings, getNavPages, getNavigation, getCurrentEdition } from '../lib/queries';
+import { getSettings, getNavPages, getNavigation, getCurrentEdition, getPartners } from '../lib/queries';
 import { resolveNavItem } from '../lib/links';
 import { HUBS } from '../lib/hubs';
 import { urlFor } from '../sanity/image';
@@ -9,7 +9,10 @@ import EditLink from '../components/EditLink.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MenuOverlay from '../components/MenuOverlay.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+import { categoriesInUse } from '../lib/tracking';
 import { VisualEditing } from '@sanity/astro/visual-editing';
+import PreviewEditLinks from '../components/PreviewEditLinks.astro';
 import { isPreview } from '../lib/previewContext';
 import '../styles/design.css';
 
@@ -59,14 +62,17 @@ const acid = theme === 'acid' || tone === 'brand';
 const preview = isPreview();
 const t = useTranslations(lang);
 
-const [settings, navPages, navigation, edition] = await Promise.all([
+const [settings, navPages, navigation, edition, partners] = await Promise.all([
   getSettings(lang),
   getNavPages(lang),
   getNavigation(lang),
   getCurrentEdition(lang),
+  getPartners(lang),
 ]);
 
 const siteName = settings?.siteName ?? 'ceramic brussels';
+/** The header's lockup links to the main partner (tier "main") when there is one. */
+const mainPartner = partners.find((p: any) => p.tier === 'main') ?? null;
 const fullTitle = title === siteName ? siteName : `${title} — ${siteName}`;
 const metaDescription = description ?? settings?.defaultSeo?.description ?? settings?.tagline ?? '';
 
@@ -164,17 +170,25 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
 
     <link rel="preload" href="/fonts/noi-grotesk-400.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://cdn.sanity.io" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <slot name="head" />
   </head>
 
   <body class={acid ? 'acid-page' : undefined}>
-    <a class="skip" href="#main">Skip to content</a>
+    <a class="skip" href="#main">{t('common.skip')}</a>
 
-    <Header lang={lang} siteName={siteName} path={path} altPaths={altPaths} datesMark={edition?.datesMark} />
+    <Header
+      lang={lang}
+      siteName={siteName}
+      path={path}
+      altPaths={altPaths}
+      datesMark={edition?.datesMark}
+      mainPartner={mainPartner}
+    />
     <MenuOverlay lang={lang} items={nav} siteName={siteName} newsletterUrl={settings?.newsletterUrl} />
 
     <div class="edit-bar">
@@ -186,7 +200,14 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
       <slot />
     </main>
 
-    <Footer siteName={siteName} links={footerNav} copyright={copyright} />
+    {/* The cookie banner stays out of Studio previews: editors are not visitors. */}
+    <Footer
+      siteName={siteName}
+      links={footerNav}
+      copyright={copyright}
+      consentLabel={!preview && categoriesInUse().length > 0 ? t('consent.settings') : undefined}
+    />
+    {!preview && <CookieConsent lang={lang} />}
 
     <script>
       // The design's page behaviours, as built (html pages): the trailing
@@ -299,6 +320,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
       preview && (
         <>
           <VisualEditing enabled />
+          <PreviewEditLinks />
           {/* Keep navigation inside the preview tree: the pages link to their
               published addresses, which would drop the reader out of drafts. */}
           <script is:inline>
@@ -402,10 +424,10 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
      the footer band into an acid-to-white gradient. */
   body.acid-page,
   body.acid-page .site-header.acid-wash {
-    background: var(--acid);
+    background: #fdeb33;
   }
   body.acid-page footer.acid-wash {
-    background: linear-gradient(#fff350 0%, #fff 55%);
+    background: linear-gradient(#fdeb33 0%, #fff 55%);
   }
   .skip {
     position: absolute;

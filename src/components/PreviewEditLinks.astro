@@ -1,0 +1,65 @@
+---
+/**
+ * Makes the overlay's "Open in Studio" links land on the field.
+ *
+ * The overlay spells a field path the Presentation tool's way -
+ * `sections:abc123.image` - in every link it draws, whatever it was given.
+ * Presentation is gone (2026-09-11); the Structure tool opens these links
+ * now, and it reads `sections[_key=="abc123"].image`. Given the first
+ * spelling it opens the document with nothing focused, so a picture or a
+ * paragraph inside a section stack led to the top of the page's form.
+ * This rewrites each link as the overlay renders it. Mounted by Base.astro
+ * in preview renders only.
+ */
+---
+
+<script is:inline>
+  (function () {
+    var SEGMENT = /^([\w-]+):(\d+|[\w-]+)$/;
+
+    // `sections:abc.image` -> `sections[_key=="abc"].image`; `images:2` -> `images[2]`.
+    function studioPath(urlPath) {
+      return urlPath
+        .split('.')
+        .map(function (segment) {
+          var m = SEGMENT.exec(segment);
+          if (!m) return segment;
+          return /^\d+$/.test(m[2]) ? m[1] + '[' + m[2] + ']' : m[1] + '[_key=="' + m[2] + '"]';
+        })
+        .join('.');
+    }
+
+    function fix(a) {
+      var href = a.getAttribute('href');
+      if (!href || href.indexOf('/intent/edit/') === -1) return;
+      var next = href.replace(/path=([^;?&]+)/g, function (whole, encoded) {
+        var path = decodeURIComponent(encoded);
+        return path.indexOf(':') === -1 ? whole : 'path=' + encodeURIComponent(studioPath(path));
+      });
+      if (next !== href) a.setAttribute('href', next);
+    }
+
+    function fixAll(root) {
+      if (root.nodeType !== 1) return;
+      if (root.tagName === 'A') fix(root);
+      if (root.querySelectorAll) root.querySelectorAll('a[href]').forEach(fix);
+    }
+
+    new MutationObserver(function (records) {
+      records.forEach(function (r) {
+        if (r.type === 'attributes') fix(r.target);
+        else r.addedNodes.forEach(fixAll);
+      });
+    }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['href'] });
+
+    // Belt and braces: whatever the observer missed is fixed as it is clicked.
+    document.addEventListener(
+      'click',
+      function (e) {
+        var a = e.target && e.target.closest && e.target.closest('a[href]');
+        if (a) fix(a);
+      },
+      true,
+    );
+  })();
+</script>

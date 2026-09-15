@@ -1,31 +1,39 @@
 ---
 /**
  * Site footer: the design's acid band with the copyright line on the left
- * and the social / newsletter links on the right. Markup and classes are
- * the design's (html pages); the rules live in src/styles/design.css.
+ * and the social / newsletter pills on the right, each ending in "↗", plus
+ * the cookie-settings pill. Markup and classes are the design's (html
+ * pages, 2026-09-14 build); the rules live in src/styles/design.css.
  * Links are resolved by Base.astro from the editable footer menu.
  */
 interface Props {
   siteName: string;
-  links: { label: string; href: string; external?: boolean }[];
+  links: { label: string; href: string; external?: boolean; arrow?: string }[];
   /** From Site settings; Base falls back to "© siteName, year". */
   copyright?: string;
+  /** Label of the pill that reopens the cookie banner; absent when no tracker is in use. */
+  consentLabel?: string;
 }
 
-const { siteName, links, copyright } = Astro.props;
+const { siteName, links, copyright, consentLabel } = Astro.props;
 const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
 ---
 
 <footer class="acid-wash flex min-h-20 flex-wrap items-center justify-between gap-4 px-[clamp(16px,2vw,30px)] py-5 text-sm md:text-lg">
   <p>{line}</p>
   {
-    links.length > 0 && (
-      <nav class="flex gap-3" aria-label={siteName}>
+    (links.length > 0 || consentLabel) && (
+      <nav class="flex flex-wrap justify-end gap-3" aria-label={siteName}>
         {links.map((link) => (
           <a class="rounded-full border border-black px-5 py-1" href={link.href} {...(link.external ? { rel: 'noopener noreferrer' } : {})}>
-            {link.label}
+            {link.label} {link.arrow ?? '↗'}
           </a>
         ))}
+        {consentLabel && (
+          <button type="button" class="rounded-full border border-black px-5 py-1" data-consent-open>
+            {consentLabel}
+          </button>
+        )}
       </nav>
     )
   }

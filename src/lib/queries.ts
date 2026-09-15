@@ -1,5 +1,5 @@
 import type { LocaleId } from './locales';
-import { currentClient, isPreview } from './previewContext';
+import { currentClient, isPreview, previewFetch } from './previewContext';
 import { DEFAULT_LOCALE } from './locales';
 
 /**
@@ -43,17 +43,28 @@ const SEO = `{
   "ogImage": seo.ogImage ${IMAGE}
 }`;
 
+/** What links.ts needs to know where a linked document lives. */
+const LINK_TARGET = `{
+  _id,
+  _type,
+  "slug": coalesce(slug.current, slug[$lang].current, slug.${DEFAULT_LOCALE}.current),
+  // A hub tab or listing page lives at its hub's path, not at its slug;
+  // a past exhibitor under its year. links.ts works out which.
+  section,
+  "tab": slug.${DEFAULT_LOCALE}.current,
+  "year": edition->year,
+  "current": edition->isCurrent == true
+}`;
+
 /** A `link` object resolved to something a template can render directly. */
 const LINK = `{
   kind,
+  path,
   route,
   anchor,
   ${styled('label')},
   "external": external,
-  "internal": internal->{
-    _type,
-    "slug": coalesce(slug.current, slug[$lang].current, slug.${DEFAULT_LOCALE}.current)
-  }
+  "internal": internal->${LINK_TARGET}
 }`;
 
 const VIDEO = `{
@@ -182,7 +193,11 @@ const SECTIONS = `sections[hidden != true]{
   _type == "keyFiguresSection" => {
     image ${IMAGE},
     "link": link ${LINK},
-    "edition": *[_type == "edition" && count(keyFigures) > 0] | order(year desc)[0]{ year, "keyFigures": ${KEY_FIGURES} }
+    // The edition the editor picked, or the newest one that has figures.
+    "edition": select(
+      defined(edition) => edition->{ year, "keyFigures": ${KEY_FIGURES} },
+      *[_type == "edition" && count(keyFigures) > 0] | order(year desc)[0]{ year, "keyFigures": ${KEY_FIGURES} }
+    )
   },
   _type == "newsSection" => {
     count,
@@ -240,7 +255,8 @@ if (import.meta.env.PROD && typeof process !== 'undefined' && typeof process.on 
 // `currentClient` is the build-time client, or the drafts-reading one inside a
 // preview request - see src/lib/previewContext.ts.
 function run<T>(query: string, params: Record<string, unknown> = {}): Promise<T> {
-  if (!import.meta.env.PROD || isPreview()) return currentClient().fetch<T>(query, params);
+  if (isPreview()) return previewFetch<T>(query, params);
+  if (!import.meta.env.PROD) return currentClient().fetch<T>(query, params);
   const key = `${query}\u0000${JSON.stringify(params)}`;
   let pending = memo.get(key) as Promise<T> | undefined;
   if (!pending) {
@@ -259,6 +275,20 @@ function run<T>(query: string, params: Record<string, unknown> = {}): Promise<T>
 }
 
 /* ------------------------------------------------------------------ site */
+
+/**
+ * Every document a "link to this site" in rich text can point at, with where
+ * it lives. Rich text comes back raw from every query that selects it, so a
+ * reference inside it is not followed there; PortableText.astro looks it up
+ * here instead - one request per language for the whole build, rather than a
+ * projection repeated on every rich-text field.
+ */
+export function getLinkTargets(lang: LocaleId) {
+  return run<any[]>(
+    `*[_type in ["page", "exhibitor", "artist", "newsItem", "partner"] && !(_id in path("drafts.**"))] ${LINK_TARGET}`,
+    { lang },
+  );
+}
 
 export function getSettings(lang: LocaleId) {
   return run<any>(
@@ -315,11 +345,14 @@ export function getNavPages(lang: LocaleId) {
 
 const NAV_TARGET = `
   kind,
+  path,
   route,
   anchor,
   url,
   ${styled('label')},
-  "pageSlug": coalesce(page->slug[$lang].current, page->slug.${DEFAULT_LOCALE}.current)
+  "pageSlug": coalesce(page->slug[$lang].current, page->slug.${DEFAULT_LOCALE}.current),
+  "pageSection": page->section,
+  "pageTab": page->slug.${DEFAULT_LOCALE}.current
 `;
 
 const NAV_ITEMS = `{
@@ -408,11 +441,52 @@ export function getEditions(lang: LocaleId) {
   return run<any[]>(
     `*[_type == "edition"] | order(year desc){
       ${EDITION_CORE},
+      "fairMapUrl": fairMap.asset->url,
       "film": film ${VIDEO},
       "images": images[] ${IMAGE},
       "exhibitorCount": count(*[_type == "exhibitor" && references(^._id)])
     }`,
     { lang },
+  );
+}
+
+/** The past editions' years, newest first, for their archive pages. */
+export function getPastEditionYears() {
+  return run<number[]>(`*[_type == "edition" && isCurrent != true && defined(year)] | order(year desc).year`);
+}
+
+/**
+ * One past edition with everything its year page shows, as the old site's
+ * past-editions pages had it: the facts, the art prize (laureates, awards,
+ * jury), the programme, the team and the photos - all read from the records
+ * that point at the edition.
+ */
+export function getEditionArchive(lang: LocaleId, year: number) {
+  return run<any>(
+    `*[_type == "edition" && year == $year][0]{
+      ${EDITION_CORE},
+      "fairMapUrl": fairMap.asset->url,
+      "film": film ${VIDEO},
+      "images": images[] ${IMAGE},
+      "exhibitorCount": count(*[_type == "exhibitor" && references(^._id)]),
+      "laureates": *[_type == "laureate" && references(^._id)] | order(order asc){
+        _id, "artist": artist->{ name, "slug": slug.current, ${styled('nationality')} }
+      },
+      "awards": *[_type == "award" && family == "art-prize" && references(^._id)] | order(order asc){
+        _id, ${styled('name')}, ${styled('outcome')},
+        "laureates": laureates[]->{ _id, name, "slug": slug.current }
+      },
+      "jury": *[_type == "person" && "jury" in groups && references(^._id)] | order(order asc, name asc){
+        _id, name, ${styled('role')}
+      },
+      "people": *[_type == "person" && references(^._id) && count(groups[@ in ["team", "collaborator", "advisory-board"]]) > 0]
+        | order(order asc, name asc){ _id, name, ${styled('role')} },
+      "events": *[_type == "programmeEvent" && references(^._id) && defined(startsAt)] | order(startsAt asc){
+        _id, startsAt, ${styled('title')}, ${styled('speakersText')},
+        "speakers": speakers[]->{ _id, _type, name, "slug": slug.current }
+      }
+    }`,
+    { lang, year },
   );
 }
 
@@ -423,6 +497,7 @@ const EXHIBITOR_CARD = `{
   soloShow, inCountryFocus,
   "slug": slug.current,
   "year": edition->year,
+  "current": edition->isCurrent == true,
   ${styled('countryFocusLabel', 'edition->countryFocus')},
   "image": images[0] ${IMAGE},
   "artists": artists[]->{ _id, name, "slug": slug.current },
@@ -447,30 +522,58 @@ export function getExhibitorsByYear(lang: LocaleId, year: number) {
   );
 }
 
-export function getExhibitorSlugs() {
-  return run<{ slug: string }[]>(
-    `*[_type == "exhibitor" && defined(slug.current)]{ "slug": slug.current }`,
+/**
+ * Every exhibitor page to build. The old site kept one list per year
+ * (/exhibitors, /exhibitors/2025, /exhibitors/2024), and a gallery that comes
+ * back has one record per year, often on the same slug - so the current
+ * edition's records live at /exhibitors/<slug> and a past edition's at
+ * /exhibitors/<year>/<slug>, and no record hides behind another.
+ */
+export function getExhibitorPaths() {
+  return run<{ current: string[]; past: { year: number; slug: string }[] }>(
+    `{
+      "current": *[_type == "exhibitor" && edition->isCurrent == true && defined(slug.current)].slug.current,
+      "past": *[_type == "exhibitor" && edition->isCurrent != true && defined(slug.current) && defined(edition->year)]{
+        "year": edition->year, "slug": slug.current
+      }
+    }`,
   );
 }
 
-export function getExhibitor(lang: LocaleId, slug: string) {
+const EXHIBITOR_FULL = `{
+  _id, _type, name, sortName, kind, booth, country, countryCode, city, website, instagram,
+  soloShow, inCountryFocus,
+  "slug": slug.current,
+  "year": edition->year,
+  "current": edition->isCurrent == true,
+  ${styled('countryFocusLabel', 'edition->countryFocus')},
+  ${styled('bio')},
+  ${styled('artistsText')},
+  "images": images[] ${IMAGE},
+  "artists": artists[]->{
+    _id, name, countryCode, "slug": slug.current, portrait ${IMAGE}
+  },
+  "seo": ${SEO}
+}`;
+
+/** True while statically building: every page of a type is rendered, so fetch the type once. */
+const building = () => import.meta.env.PROD && !isPreview();
+
+/**
+ * One exhibitor: the current edition's with this slug, or with `year`, that
+ * year's. A build fetches every exhibitor once per language and picks from
+ * that, rather than one request per page (216 records, three languages).
+ */
+export async function getExhibitor(lang: LocaleId, slug: string, year?: number) {
+  const matches = (e: any) => e.slug === slug && (year ? e.year === year : e.current);
+  if (building()) {
+    const all = await run<any[]>(`*[_type == "exhibitor" && defined(slug.current)] ${EXHIBITOR_FULL}`, { lang });
+    return all.find(matches) ?? null;
+  }
   return run<any>(
-    `*[_type == "exhibitor" && slug.current == $slug][0]{
-      _id, _type, name, sortName, kind, booth, country, countryCode, city, website, instagram,
-      soloShow, inCountryFocus,
-      "slug": slug.current,
-      "year": edition->year,
-      ${styled('countryFocusLabel', 'edition->countryFocus')},
-      ${styled('bio')},
-      ${styled('artistsText')},
-      ${styled('artistsNote')},
-      "images": images[] ${IMAGE},
-      "artists": artists[]->{
-        _id, name, countryCode, "slug": slug.current, portrait ${IMAGE}
-      },
-      "seo": ${SEO}
-    }`,
-    { lang, slug },
+    `*[_type == "exhibitor" && slug.current == $slug
+        && (($year == null && edition->isCurrent == true) || edition->year == $year)][0] ${EXHIBITOR_FULL}`,
+    { lang, slug, year: year ?? null },
   );
 }
 
@@ -515,13 +618,18 @@ const ARTIST_FULL = `
     ${styled('materials')},
     image ${IMAGE}
   },
-  "exhibitors": *[_type == "exhibitor" && references(^._id)]{
-    name, booth, "slug": slug.current, "year": edition->year
+  "exhibitors": *[_type == "exhibitor" && references(^._id)] | order(edition->year desc){
+    name, booth, "slug": slug.current, "year": edition->year, "current": edition->isCurrent == true
   },
   "seo": ${SEO}
 `;
 
-export function getArtist(lang: LocaleId, slug: string) {
+/** One artist. A build fetches them all once per language, as for exhibitors. */
+export async function getArtist(lang: LocaleId, slug: string) {
+  if (building()) {
+    const all = await run<any[]>(`*[_type == "artist" && defined(slug.current)]{ ${ARTIST_FULL} }`, { lang });
+    return all.find((a) => a.slug === slug) ?? null;
+  }
   return run<any>(`*[_type == "artist" && slug.current == $slug][0]{ ${ARTIST_FULL} }`, {
     lang,
     slug,
@@ -578,7 +686,14 @@ export function getAwards(lang: LocaleId) {
       "partner": partner->{ _id, name, url, logo ${IMAGE} },
       "laureates": laureates[]->{ _id, name, "slug": slug.current },
       "artist": laureates[0]->{ name, "slug": slug.current },
-      "gallery": winnerExhibitor->{ name, "slug": slug.current },
+      // The winning gallery with what the exhibitor awards page shows of it:
+      // its city, its edition (for exhibitorPath) and its pictures, which
+      // stand in when the award has no image of its own.
+      "gallery": winnerExhibitor->{
+        _id, name, city, country, countryCode, "slug": slug.current,
+        "year": edition->year, "current": edition->isCurrent == true,
+        "images": images[] ${IMAGE}
+      },
       image ${IMAGE}
     }`,
     { lang },
@@ -667,12 +782,42 @@ export function getHubPages(lang: LocaleId, section: string) {
   });
 }
 
+/**
+ * The main page behind a listing route (exhibitors, artists, news): its lead
+ * paragraph, SEO and section stack wrap the list the route generates. One
+ * page per section; the Studio's "Main pages" entry opens it. Null until an
+ * editor has made one, and the page renders without it.
+ */
+export function getMainPage(lang: LocaleId, section: string) {
+  // The main page carries the section as its English slug (mainPages.ts);
+  // a section can also hold other pages - exhibitors/awards reads its intro
+  // from one - so prefer the page whose slug says it is the main one.
+  return run<any>(
+    `coalesce(
+      *[_type == "page" && section == $section && slug.en.current == $section][0] ${PAGE},
+      *[_type == "page" && section == $section] | order(order asc)[0] ${PAGE}
+    )`,
+    { lang, section },
+  );
+}
+
 /* ------------------------------------------------- programme / partners / press */
 
-/** Current-edition events, ordered. Group by day and `section` in the page. */
+/**
+ * The programme: the current edition's events, and until it has any dated
+ * ones, the newest edition's that does - the old site kept showing its last
+ * programme until the next was out, and the design's talks are 2026's.
+ * Group by day and `section` in the page.
+ */
 export function getProgramme(lang: LocaleId) {
   return run<any[]>(
-    `*[_type == "programmeEvent" && edition->isCurrent == true] | order(startsAt asc){
+    `*[_type == "programmeEvent" && edition._ref == coalesce(
+        *[_type == "edition" && isCurrent == true
+          && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt)]) > 0][0]._id,
+        *[_type == "edition"
+          && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt) && section in ["talks", "vip", "project"]]) > 0]
+          | order(year desc)[0]._id
+      )] | order(startsAt asc){
       _id, startsAt, endsAt, kind, section, languages, moderator, invitationOnly,
       "slug": slug.current,
       ${styled('title')},

@@ -81,7 +81,9 @@ export const openingDay = defineType({
       name: 'date',
       title: 'Date',
       type: 'date',
-      description: 'First day this row covers. Used for structured data, not shown.',
+      // Kept for existing rows, hidden: the Day label is required and is what
+      // the page prints, so the date is never read.
+      hidden: true,
     }),
     defineField({
       name: 'slots',

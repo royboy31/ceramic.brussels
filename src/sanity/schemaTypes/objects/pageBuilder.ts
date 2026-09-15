@@ -17,6 +17,7 @@ import { TextIcon } from '@sanity/icons/Text';
 import { UsersIcon } from '@sanity/icons/Users';
 import { PERSON_GROUPS } from '../documents/person';
 import { PARTNER_TIERS } from '../../../lib/options';
+import { KeyFiguresInput } from '../../components/KeyFiguresInput';
 
 /**
  * The page builder.
@@ -56,7 +57,7 @@ export const anchorField = () =>
     name: 'anchor',
     title: 'Anchor',
     type: 'string',
-    description: 'Optional. Lets the menu link straight to this section, e.g. "team".',
+    description: 'Optional. Gives the section an address on its page, e.g. "team" makes …/about#team land on it.',
   });
 
 const headingField = (description?: string) =>
@@ -229,7 +230,8 @@ export const videoSection = defineType({
       name: 'video',
       title: 'Video',
       type: 'video',
-      description: 'YouTube or Vimeo. Leave the URL empty to show the current edition’s film.',
+      description:
+        'A YouTube link plays in the page; any other link shows the poster and opens the film in a new tab. Leave the URL empty to show the latest edition’s film.',
     }),
     anchorField(),
     hiddenField(),
@@ -345,23 +347,38 @@ export const peopleSection = defineType({
   },
 });
 
-/** The key figures table from the current edition, with an image and a link. */
+/**
+ * The key figures table, with a link under it. The figures are an edition's
+ * own (Setup → Editions → a year → Key figures), shared by every page that
+ * shows them; the block's form lists the ones it will show and links to them
+ * (KeyFiguresInput.tsx), so it no longer looks empty.
+ */
 export const keyFiguresSection = defineType({
   name: 'keyFiguresSection',
   title: 'Key figures',
   type: 'object',
   icon: BarChartIcon,
+  components: { input: KeyFiguresInput },
   fields: [
-    defineField({ name: 'image', title: 'Image next to the figures', type: 'figure' }),
+    defineField({
+      name: 'edition',
+      title: 'Figures from',
+      type: 'reference',
+      to: [{ type: 'edition' }],
+      description:
+        'Which edition’s figures to show. Leave empty for the newest edition that has figures. The numbers themselves are edited on the edition: Setup → Editions → that year → Key figures.',
+    }),
+    // Kept for existing blocks, hidden: the key figures table has no image slot.
+    defineField({ name: 'image', title: 'Image next to the figures', type: 'figure', hidden: true }),
     defineField({ name: 'link', title: 'Link under the figures', type: 'link' }),
     anchorField(),
     hiddenField(),
   ],
   preview: {
-    select: { media: 'image', hidden: 'hidden' },
-    prepare: ({ media, hidden }) => ({
-      title: 'Key figures',
-      subtitle: sectionSubtitle('From the current edition', hidden),
+    select: { media: 'image', hidden: 'hidden', year: 'edition.year' },
+    prepare: ({ media, hidden, year }) => ({
+      title: year ? `Key figures ${year}` : 'Key figures',
+      subtitle: sectionSubtitle(year ? `From the ${year} edition` : 'From the newest edition with figures', hidden),
       media,
     }),
   },
@@ -623,9 +640,10 @@ export function sectionsField(
     group?: string;
     description?: string;
     types?: readonly string[];
+    hidden?: (context: { document?: Record<string, any> }) => boolean;
   } = {},
 ) {
-  const { name = 'sections', title = 'Sections', group, description, types = PAGE_SECTION_TYPES } = overrides;
+  const { name = 'sections', title = 'Sections', group, description, hidden, types = PAGE_SECTION_TYPES } = overrides;
   const has = (t: string) => types.includes(t);
   const groups = [
     { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection'] },
@@ -641,6 +659,7 @@ export function sectionsField(
     title,
     type: 'array',
     group,
+    hidden,
     description:
       description ??
       'The page, block by block. Add, remove and drag to reorder; hide a block to take it off the site without losing it.',

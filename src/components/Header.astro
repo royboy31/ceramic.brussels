@@ -4,10 +4,13 @@ import { localePath, useTranslations } from '../lib/i18n';
 import { urlFor } from '../sanity/image';
 
 /**
- * Site header - dates mark left, wordmark centred, language switcher and
- * menu button right. Markup and classes are the design's (html pages);
- * the rules live in src/styles/design.css. The two lockups are brand
- * artwork; the dates mark comes from the current edition when it has one.
+ * Site header, as the 2026-09-14 build draws it: the dates mark and the
+ * language switcher on the left, the wordmark centred over the row, the
+ * main partner's lockup and the menu button on the right. Markup and
+ * classes are the design's (html pages); the rules live in
+ * src/styles/design.css. The lockups are brand artwork; the dates mark
+ * comes from the current edition when it has one, and the partner lockup
+ * links to the main partner's site when Sanity names one.
  */
 interface Props {
   lang: LocaleId;
@@ -17,26 +20,27 @@ interface Props {
   altPaths?: Partial<Record<LocaleId, string>>;
   /** The current edition's dates mark from Sanity; the shipped PNG is the fallback. */
   datesMark?: any;
+  /** The partner of tier "main", for the lockup's link and name. */
+  mainPartner?: { name?: string; url?: string } | null;
 }
 
-const { lang, siteName, path = '', altPaths, datesMark } = Astro.props;
+const { lang, siteName, path = '', altPaths, datesMark, mainPartner } = Astro.props;
 const t = useTranslations(lang);
 const datesSrc = datesMark?.asset
   ? urlFor(datesMark).width(600).auto('format').quality(85).url()
   : '/assets/date-logo.png';
 const home = localePath(lang);
+const partnerName = mainPartner?.name ?? 'Puilaetco';
+const Lockup = mainPartner?.url ? 'a' : 'div';
 ---
 
-<header class="site-header acid-wash relative z-40 h-[clamp(92px,11vw,159px)]">
-  <div class="page-grid h-full items-center">
-    <a href={home} aria-label={`${siteName} homepage`} class="site-date col-span-3 w-[clamp(130px,20vw,291px)]">
-      <img src={datesSrc} alt={datesMark?.alt ?? ''} class="h-auto w-full" width="291" height="70" />
-    </a>
-    <a href={home} class="site-wordmark col-span-6 flex justify-center" aria-label={`${siteName} homepage`}>
-      <img src="/assets/wordmark.svg" alt={siteName} class="h-[clamp(40px,5.2vw,75px)] w-[clamp(76px,10vw,144px)]" width="144" height="75" />
-    </a>
-    <div class="site-actions col-span-3 flex items-center justify-end gap-[clamp(12px,2vw,34px)]">
-      <nav aria-label={t('common.language')} class="hidden text-[clamp(12px,1.65vw,24px)] tracking-[-.05em] sm:block">
+<header class="site-header acid-wash">
+  <div class="site-header__inner">
+    <div class="site-header__left">
+      <a href={home} aria-label={`${siteName} homepage`} class="site-date">
+        <img src={datesSrc} alt={datesMark?.alt ?? ''} width="252" height="61" />
+      </a>
+      <nav aria-label={t('common.language')} class="site-languages">
         {
           LOCALES.map((l, i) => (
             <>
@@ -48,15 +52,35 @@ const home = localePath(lang);
           ))
         }
       </nav>
+    </div>
+    <a href={home} class="site-wordmark" aria-label={`${siteName} homepage`}>
+      <img src="/assets/wordmark.svg" alt={siteName} width="144" height="75" />
+    </a>
+    <div class="site-header__right">
+      <Lockup
+        class="site-partner"
+        aria-label={`${t('partners.main')} ${partnerName}`}
+        {...(mainPartner?.url ? { href: mainPartner.url, target: '_blank', rel: 'noopener noreferrer' } : {})}
+      >
+        <span>{t('partners.main')}</span>
+        {/* The design's lockup: the mark, then the name over the tagline. Its files are named the other way round; kept as the build pairs them. */}
+        <div class="partner-lockup" aria-hidden="true">
+          <img class="partner-mark" src="/assets/puilaetco-mark.svg" alt="" width="26" height="27" />
+          <div>
+            <img class="partner-name" src="/assets/puilaetco-tagline.svg" alt="" width="128" height="11" />
+            <img class="partner-tagline" src="/assets/puilaetco-name.svg" alt="" width="116" height="5" />
+          </div>
+        </div>
+      </Lockup>
       <button
         type="button"
         data-menu-open
         aria-label={t('nav.openMenu')}
         aria-controls="site-menu"
         aria-expanded="false"
-        class="h-[30px] w-[46px] cursor-pointer md:h-[37px] md:w-[56px]"
+        class="site-menu-button"
       >
-        <img src="/assets/menu.svg" alt="" class="h-full w-full" width="56" height="37" />
+        <img src="/assets/menu.svg" alt="" width="56" height="37" />
       </button>
     </div>
   </div>

@@ -34,7 +34,13 @@ export const siteSettings = defineType({
       group: 'identity',
       description: 'Footer text, e.g. "© ceramic brussels, 2026". Leave empty for an automatic year.',
     }),
-    defineField({ name: 'defaultSeo', title: 'Default SEO', type: 'seo', group: 'identity' }),
+    defineField({
+      name: 'defaultSeo',
+      title: 'Default SEO',
+      type: 'seo',
+      group: 'identity',
+      description: 'Used by any page that sets none of its own: the meta description and the social share image.',
+    }),
 
     defineField({ name: 'contactEmail', title: 'Contact email', type: 'string', group: 'contact' }),
     defineField({ name: 'newsletterUrl', title: 'Newsletter signup URL', type: 'url', group: 'contact' }),
@@ -47,7 +53,9 @@ export const siteSettings = defineType({
       title: 'Gallery applications URL',
       type: 'url',
       group: 'contact',
-      description: 'Where the "gallery applications are open" banner sends people.',
+      // Kept, hidden: no page reads it. The applications page is Other pages →
+      // gallery applications, and a banner block links wherever it is told to.
+      hidden: true,
     }),
 
     defineField({
@@ -64,7 +72,7 @@ export const siteSettings = defineType({
           description: 'e.g. "Tour & Taxis — Sheds 1 & 2bis"',
         }),
         defineField({ name: 'address', title: 'Address', type: 'text', rows: 3 }),
-        defineField({ name: 'mapUrl', title: 'Map link', type: 'url' }),
+        defineField({ name: 'mapUrl', title: 'Map link', type: 'url', hidden: true }),
         defineField({ name: 'intro', title: 'Lead paragraph', type: 'localeText' }),
         defineField({ name: 'heroImage', title: 'Image', type: 'figure' }),
         defineField({

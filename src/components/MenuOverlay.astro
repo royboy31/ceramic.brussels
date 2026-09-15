@@ -3,13 +3,16 @@ import { useTranslations } from '../lib/i18n';
 import type { LocaleId } from '../lib/locales';
 
 /**
- * The menu overlay of the design: a panel sliding in from the right, one
- * acid "sheet" per menu row, and a `+` on the rows that have sub-items,
- * which open as an accordion (on hover with a mouse, on the button
- * otherwise). Markup, classes and behaviour are Lilanga's build of the
- * Figma menu frame (the index.html files under html pages); the rules for the
- * classes live in src/styles/design.css. Items come from the resolved Sanity navigation
- * that Base.astro builds, children included.
+ * The menu overlay: the design's panel sliding in from the right with a
+ * white top bar holding only the ×, and inside it the live site's stacked
+ * rows - one acid-banded sheet per menu item, each collapsed to its top
+ * strip under the next sheet, growing to show its sub-links when hovered
+ * or focused (the rules at the foot of this file). Panel, bar and sheet
+ * markup are Lilanga's build of the Figma menu frame (the index.html files
+ * under html pages, 2026-09-14 build); their rules live in
+ * src/styles/design.css. Items come from the resolved Sanity navigation
+ * that Base.astro builds, children included; a row without children is
+ * `no-links` and stands taller.
  */
 interface Child {
   label: string;
@@ -27,7 +30,7 @@ interface Props {
   newsletterUrl?: string;
 }
 
-const { lang, items, siteName = 'ceramic brussels' } = Astro.props;
+const { lang, items } = Astro.props;
 const t = useTranslations(lang);
 const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } : {});
 ---
@@ -35,38 +38,27 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
 <dialog id="site-menu" data-menu aria-label={t('nav.menu')}>
   <div class="menu-panel">
     <div class="menu-top">
-      <span>{siteName}</span>
-      <button data-menu-close autofocus>{t('nav.close').toLowerCase()} <span aria-hidden="true">×</span></button>
+      <span aria-hidden="true"></span>
+      <button data-menu-close autofocus aria-label={t('nav.closeMenu')}><span aria-hidden="true">×</span></button>
     </div>
     <nav aria-label={t('nav.menu')} class="menu-stack">
       {
         items.map((item, i) => {
           const children = item.children ?? [];
           return (
-            <section class="menu-row" style={`--row:${i}`}>
+            <section class:list={['menu-row', { 'no-links': children.length === 0 }]} style={`--row:${i}`}>
               <div class="menu-sheet">
                 <div class="menu-heading">
                   <a href={item.href} {...rel(item.external)}>
                     {item.label}
                   </a>
-                  {children.length > 0 && (
-                    <button
-                      class="submenu-toggle"
-                      aria-label={`${t('nav.expand')} ${item.label}`}
-                      aria-expanded="false"
-                      aria-controls={`submenu-${i}`}
-                    >
-                      <span aria-hidden="true">+</span>
-                    </button>
-                  )}
                 </div>
                 {children.length > 0 && (
-                  <div class="submenu" id={`submenu-${i}`} inert>
+                  <div class="submenu" id={`submenu-${i}`}>
                     <div>
                       {children.map((c) => (
                         <a href={c.href} {...rel(c.external)}>
                           {c.label}
-                          <span aria-hidden="true"> ↗</span>
                         </a>
                       ))}
                     </div>
@@ -83,8 +75,8 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
 
 <script>
   // The design's menu behaviour, as built: open as a modal, slide in on the
-  // next frame, expand a row on mouse hover or on its + button, close on the
-  // button, on Escape, or on a click outside the panel.
+  // next frame, nudge a row while a mouse is over it, close on the button,
+  // on Escape, or on a click outside the panel.
   const dialog = document.querySelector<HTMLDialogElement>('[data-menu]');
   const openers = document.querySelectorAll<HTMLButtonElement>('[data-menu-open]');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -92,18 +84,23 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   let closing = false;
   let savedOverflow = '';
 
-  const expand = (row: Element, open: boolean) => {
-    row.classList.toggle('expanded', open);
-    row.querySelector('button')?.setAttribute('aria-expanded', String(open));
-    const sub = row.querySelector<HTMLElement>('.submenu');
-    if (sub) sub.inert = !open;
-  };
+  const expand = (row: Element, open: boolean) => row.classList.toggle('expanded', open);
+
+  // The rows are collapsed sheets, as on the live site: each shows only its
+  // top strip, the next sheet lying over the rest. A row grows to its full
+  // height when hovered or focused, so the height it grows to is measured
+  // once the panel is on screen.
+  const measure = () =>
+    dialog?.querySelectorAll<HTMLElement>('.menu-row').forEach((row) => {
+      const sheet = row.querySelector<HTMLElement>('.menu-sheet');
+      if (sheet) row.style.setProperty('--full', `${sheet.scrollHeight}px`);
+    });
 
   const close = () => {
     if (!dialog?.open || closing) return;
     closing = true;
     dialog.classList.remove('is-open');
-    window.setTimeout(() => dialog.close(), reduced.matches ? 0 : 680);
+    window.setTimeout(() => dialog.close(), reduced.matches ? 0 : 450);
   };
 
   openers.forEach((btn) =>
@@ -114,6 +111,7 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
       document.documentElement.style.overflow = 'hidden';
       dialog.showModal();
       openers.forEach((b) => b.setAttribute('aria-expanded', 'true'));
+      measure();
       requestAnimationFrame(() =>
         requestAnimationFrame(() => {
           if (!closing && dialog.open) dialog.classList.add('is-open');
@@ -146,10 +144,87 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
     row.addEventListener('pointerleave', () => {
       if (!row.contains(document.activeElement)) expand(row, false);
     });
+    row.addEventListener('focusin', () => expand(row, true));
     row.addEventListener('focusout', (e) => {
       const to = (e as FocusEvent).relatedTarget as Node | null;
       if (!row.contains(to) && !row.matches(':hover')) expand(row, false);
     });
-    row.querySelector('button')?.addEventListener('click', () => expand(row, !row.classList.contains('expanded')));
   });
+  addEventListener('resize', () => dialog?.open && measure());
 </script>
+
+<style>
+  /*
+   * The live site's stacked menu (www.ceramic.brussels): every row is a
+   * sheet with an acid band along its top, and the rows lie over each other
+   * so a collapsed row shows only that band with the top of its title, the
+   * lower part hidden under the next sheet. Hovering (or tabbing into) a row
+   * grows it to its full height - title and sub-links - and the rows below
+   * slide down. The last row has nothing over it and stays whole. The panel,
+   * its slide-in and the top bar are the design's, from design.css.
+   */
+  /* The panel comes in as one piece (the design slid every sheet in on its
+     own delay, which with overlapping sheets looked broken up). */
+  .menu-panel {
+    transform: translate(101%);
+    transition: transform 0.43s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  :global(.is-open) .menu-panel {
+    transform: none;
+  }
+  .menu-stack .menu-sheet,
+  .menu-panel .menu-top {
+    transform: none;
+    transition:
+      translate 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.22s;
+  }
+  .menu-row {
+    /* The title sits centred in its 55px strip; only its descenders go under the next sheet. */
+    --strip: 52px;
+    /* How far an open row rides up over the one above it (client feedback, 2026-09-15: like the live site). */
+    --lift: 24px;
+    /* A block, not the design's grid: the sheet keeps its full height and
+       hangs out of the row, under the next sheet. */
+    display: block;
+    height: var(--strip);
+    overflow: visible;
+    transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .menu-row:last-child {
+    height: auto;
+  }
+  .menu-row.expanded {
+    height: calc(var(--full, 0px) - var(--lift));
+  }
+  .menu-row:last-child.expanded {
+    height: auto;
+  }
+  .menu-sheet {
+    background: linear-gradient(#fff350 0, #fff999 1rem, #fff 2rem);
+  }
+  /* Up over the previous sheet, not off to the left (client feedback): the
+     design's -16px nudge and its acid edge are dropped. */
+  .menu-row.expanded .menu-sheet {
+    translate: 0 calc(-1 * var(--lift));
+    box-shadow: 0 -6px 18px #00000014;
+  }
+  /* Nothing above the first row to ride over: it only grows. */
+  .menu-row:first-child.expanded {
+    height: var(--full, auto);
+  }
+  .menu-row:first-child.expanded .menu-sheet {
+    translate: 0;
+  }
+  @media (width<=640px) {
+    .menu-row {
+      --strip: 48px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .menu-row {
+      transition: none;
+    }
+  }
+</style>

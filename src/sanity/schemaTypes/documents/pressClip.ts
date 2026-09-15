@@ -43,6 +43,8 @@ export const pressClip = defineType({
       title: 'Edition',
       type: 'reference',
       to: [{ type: 'edition' }],
+      // Not read by any page; hidden rather than removed so existing values stay.
+      hidden: true,
     }),
     defineField({ name: 'url', title: 'Article URL', type: 'url' }),
     defineField({ name: 'pdf', title: 'PDF scan', type: 'file' }),

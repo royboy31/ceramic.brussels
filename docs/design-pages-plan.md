@@ -19,6 +19,499 @@ components, binding each element to the field named below.
 `html pages/` is not committed (165 MB of PNGs); Lilanga has the source
 project. It is gitignored.
 
+## Status, 2026-09-13 — French and Dutch URLs, the hubs done
+
+Board card "Translate the FR and NL page slugs in Sanity". Branch
+**`fr-nl-slugs`**, five commits on top of `main`. Not merged: the listing
+routes are still to do.
+
+**The card was aimed at the wrong layer.** It says "a content job in the
+CMS, not code". It is not. `page.slug` has been a per-locale field all
+along, and one route already proved the mechanism - `[lang]/[...slug].astro`
+builds its params from `slugs[lang]` and derives `altPaths` from the same
+table, which is why `/fr/candidatures-galeries` was the only translated URL
+on the site. Every other segment is a **directory name on disk**, and a
+folder called `about` can only ever spell `/fr/about`. 296 of the 298 URLs
+per language were English under a French or Dutch prefix.
+
+The card also said this blocks the 301 map. It does not, any more:
+`scripts/legacy-redirects.mjs` reads each FR/NL target from the built page's
+own hreflang, so the map rewrites itself when a slug changes - watched it
+happen twice today.
+
+**Identifiers and URLs are now separate.** `slug` and `route` in `hubs.ts`
+stay the stable English identifiers, shared by the Sanity `anchor` field,
+`page.slug.en` and `pageForTab`, so nothing in the CMS moves and there is no
+content migration. The new `segment` is the only thing a visitor sees and it
+is translated. The six hub route files moved under one
+`[lang]/[hub]/[...tab].astro` that makes both segments dynamic and hands off
+to a component per hub; git recorded all six as renames, so the markup is
+untouched. `hubAltPaths` feeds hreflang from the same table, so the
+canonical and the alternates cannot disagree - the acceptance criterion is
+now true by construction.
+
+Astro ranks static segments above dynamic ones, so the listing directories
+still win over `[hub]` and `[lang]/[...slug].astro` stays below both. That
+was the one unknown and it was settled by a throwaway spike before any of
+this was written: a dummy `[hub]` route built 900 pages with no collision,
+`/en/about/team` still came from the real page, and `[...slug]` still served
+`/fr/candidatures-galeries`.
+
+**Where the words come from: the live site first.** All 47 old pages were
+read out of `legacy-export/normalized/pages.json` (it carries their
+per-locale slugs) and the addresses confirmed still 200 on
+www.ceramic.brussels. The old site translated 28 of them. The rule, settled
+with Kamindu: **wherever the live site already has a French or Dutch address,
+that is the segment, word for word.** Only a page it never had, or never
+translated, is translated here. So the French keeps its inclusive
+`laureat-es` and its superseded `comite-strategique` - the tab is labelled
+"comité consultatif" now, but `comite-strategique` is the address people
+have.
+
+The rule pays off twice at a **hub root**, because the new hub root is the
+same page as the old one, so the old URL survives untouched:
+`/fr/infos-pratiques`, `/fr/invitee-d-honneur`, `/nl/visitors-info`,
+`/nl/guest-of-honour` and `/fr|nl/art-prize` are built exactly as the old
+site spells them and need no redirect at all. The last three keep an English
+word inside a French or Dutch URL for that reason alone - the URL surviving
+is worth more than the reading.
+
+A **tab** is nested where the old site was flat, so `/fr/equipe` becomes
+`/fr/a-propos/equipe` and a 301 fires whatever the word is: no URL survives
+either way. The old wording is still copied where it exists, so the word an
+editor knows stays the word. But where the old site left a tab in English,
+it is translated here - `prix`/`prijzen`, `laureaten`, `medias`,
+`adviesraad` - because keeping the English bought no redirect and the card
+asks for URLs that read in their own language.
+
+The one page not taken from the old site is the **about** hub, whose old
+slug is `ceramic-brussels` in all three languages: the site's own name, and
+the English had moved to `/en/about` regardless, so there was nothing to
+preserve. It is `a-propos`/`over`.
+
+**Verified.** 897 pages, 298 per language, unchanged. hreflang reciprocal
+and consistent in all three languages, every alternate pointing at a page
+that was built. All 24,271 internal links in the build resolve, and no
+French or Dutch page links to an English hub path except the three kept on
+purpose. The 301 map regenerated itself from the new hreflang - 474 rules,
+every URL in `docs/legacy-site-inventory.md` covered, no rule whose source
+equals its target. Checked in Chrome: `/fr/prix-art/laureats` rendered its
+five laureates with the switcher wired to both siblings (that URL is now
+`/fr/art-prize/laureat-es`).
+
+**First pass, superseded.** The branch first gave tabs their segment from
+the tab label in `i18n.ts` and invented `prix-art`/`kunstprijs`, `eregast`,
+`praktische-info`, `laureats`, `comite-consultatif`. The reasoning was that
+a tab's URL changes either way, so the label was worth more than a
+superseded translation. Kamindu's rule reverses that where the live site has
+an address at all, which is right for two reasons the first pass missed: at
+a hub root the old URL genuinely does survive, and an editor searching for
+the page they know should find the word they know.
+
+**Next, and the larger half by URL count: the listing routes** - exhibitors,
+artists, news, editions, contact. Same directory problem, and they carry the
+268 detail pages per language. The old site left `exhibitors` and `artists`
+untranslated in both languages, so by the rule above they take their labels:
+`exposants`/`exposanten`, `artistes`/`kunstenaars`, `actualites`/`nieuws`.
+Detail slugs - gallery and artist names - stay as they are. Do the whole
+card before the domain cutover: it changes ~592 URLs, and today pages.dev
+carries `X-Robots-Tag: noindex` and the real domain is not live, so there is
+no redirect debt to pay.
+
+## Status, 2026-09-12 late — the pages stop standing in for missing content
+
+Board card "Populate the Sanity back end with all current site content",
+the second half of the day. `main` = `7ca9541`.
+
+**The content was already there.** The card was written on 10.09 saying most
+fields were empty while the site still showed content, and asking where that
+content came from. Checked by sweeping all 895 built pages for anything
+served out of `public/assets/`: the only two left are `wordmark.svg` and
+`menu.svg`, both real chrome. Field by field - 0 pages missing a title, 0
+missing a lead, 0 missing an SEO description, nav labels complete, practical
+info complete (venue, address, map, four access modes, hotel deal), the
+current edition complete (dates, three opening-hour blocks, five ticket
+types, venue). Between the legacy import, the SEO fill and the morning's
+gallery fill, every fallback left in the code was already dead.
+
+**What was real was the masking.** The homepage invented a news / film /
+key-figures stack whenever `sections` came back empty, and since the query
+drops hidden blocks, *hiding* every block did the same thing as deleting
+them - the page still looked full, out of content the editor could not find
+or change. Four image slots fell back to a shipped file the same way. That
+is most of why the 10.09 demo was confusing.
+
+Empty renders empty now, in `index.astro` (hero image and the stack),
+`about/[...tab].astro`, `visit/[...tab].astro` and
+`guest-of-honour/[...tab].astro`. Checked by forcing the empty case and
+building: the homepage falls from 40,845 to 23,792 bytes with no news, film
+or key figures revived. Nothing on the live site moved - the branches
+removed never ran.
+
+**Two of the same kind are left on purpose,** written up for Lilanga in
+`docs/frontend-handbook.md` under a 2026-09-12 heading, because each needs a
+design decision rather than a deletion: `VideoEmbed` takes a required
+`poster` string and renders the `<img>` unconditionally, so a film with no
+poster would show a broken image until the frame can hold its shape without
+one; and `Header`'s dates-mark fallback is on every page, where a *stale*
+date graphic is worse than none.
+
+**A deploy of this kind cannot be verified from outside.** The change only
+removes branches that never executed, so the output is identical, and
+diffing a local build against the live site does not work either: production
+builds with `PREVIEW_RUNTIME=1` and a local `npm run build` does not, so the
+live HTML always carries a `globalThis.process` shim and bundles the shared
+CSS chunks differently. There is no deploy signal from the CLI - the repo is
+private and the `GITHUB_TOKEN` in `.env` is dead (401). The Cloudflare
+dashboard is the only place to confirm one.
+
+**The board card is not moved yet:** tasks.perelweb.be signed the session
+out, and signing back in is Kamindu's to do.
+
+## Status, 2026-09-12 — the old-site fill is in, biography moved
+
+The two content steps left open the night before, both now applied against
+production.
+
+**The biography move** (`scripts/move-artist-bio.mjs --apply`). One
+document: Marion Verboom's biography sat in a page section anchored
+`biography`, so the site printed a bio while the Studio showed an empty
+Biography field. It is now in `bio` (1,548 characters, English), and one
+section (`practice`) is left in her stack. The code that reads `bio` first
+on the guest-of-honour page shipped the night before, so nothing took the
+biography's place.
+
+**The old-site fill** (`scripts/legacy-fill.mjs --apply`), 13 mutations in
+one transaction `YEJx4bvFMU8IMjDKRLfaoT`:
+
+- edition photo galleries — 2024: 39, 2025: 66, 2026: 68 (the field is
+  `images`, not `gallery`);
+- the scenography section on "the fair" — two texts, the 2026 site plan and
+  its four photos, as the last three blocks of six;
+- the five homepage cards the old homepage had — 2026 catalogue, best booth,
+  best solo show, jury prize, 2026 exhibitors — as spotlights after the key
+  figures, on `homepage` and its draft;
+- the seven seeded `demo-event-2027-*` placeholders deleted. The programme
+  tabs now fall back to 2026, as the old site does.
+
+It took two runs. The first died partway through the uploads on a **502**
+from `api.sanity.io` — an upstream hiccup, not a bad file. Nothing was
+written: the transaction only runs once every image is up. Because
+`legacy-export/asset-map.json` caches each upload by its old media id, the
+re-run had 37 images left of 168 rather than starting again. **Keep that
+file.**
+
+**Turning the rebuild webhook off is a manual step, and cannot be scripted.**
+The write token is refused: `PATCH /hooks/projects/<id>/<hookId>` answers
+`401 "A service session is required to set 'isDisabled'"`. The API will
+report the flag (as `isDisabledByUser`) but not set it, so it has to be
+switched in sanity.io/manage → API → Webhooks → ⋯ → Disable. It matters here
+because `cloudflare-production-rebuild` filters on
+`!(_id in path("drafts.**"))` — every published document, image assets
+included — so 168 uploads would have fired the deploy hook some 175 times,
+and each build spends thousands of Sanity requests. That is the 2026-09-05
+quota wipeout exactly. Off for the run, on afterwards, then a single POST to
+the deploy hook (build `744777ac-a3ac-49cd-92ca-09e2f6b145a8`).
+
+**Still open** from the night before: the "link text can't change" feedback
+(ask the tester how they tried — a change needs Publish, then the rebuild);
+a "Copy share link" action, if partners still need draft approval links;
+`dev` and `lilanga` behind `main`; the Users screen's ignored `Stack space`;
+no Dutch `tabs.partners`; fifteen addresses with no document to hold SEO.
+
+## Status, 2026-09-11 night — `main` brought up to `kamindu`
+
+`main` was fast-forwarded from `04f77df` to `kamindu` (`84a85ed` plus the
+commit that adds this note): no merge, `main` was already contained in
+`kamindu`. That brings everything below, and the 2026-09-11 Studio work
+(sidebar by menu section, per-page fields, exhibitors per year, year
+archives, programme fallback), to production. `dev` and `lilanga` were
+left as they were.
+
+**Rolling back.** The last production deployment before this is
+`da1b5ef6` (Cloudflare Pages, 2026-09-11 10:49 UTC, built from `04f77df`).
+1. Cloudflare → Workers & Pages → ceramic-brussels → Deployments →
+   `da1b5ef6` → ⋯ → Rollback to this deployment. Instant, site and Studio
+   together, no rebuild.
+2. That holds only until the next publish rebuilds `main`, so revert in git
+   as well: `git revert --no-edit 04f77df..<the commit that adds this note>`
+   on `main`, then push. No force-push.
+3. Content: the older code ignores the key figures block's "Figures from"
+   field. If `scripts/move-artist-bio.mjs` has run, restore Marion Verboom
+   from `legacy-export/backups/move-artist-bio-2026-09-11.json` first; the
+   older guest-of-honour page expects her biography as the first text block.
+
+**What changes on the site.** Every production page (705) was compared with
+a build of this version on the same content: head tags, text, and element
+counts, with the build address and Astro's class hashes set aside. The
+exhibitor and laureates pages were also compared side by side in a browser.
+- Past-edition exhibitors move from `/exhibitors/<slug>` to
+  `/exhibitors/<year>/<slug>`, as on the old site: 432 addresses, each one
+  present under its year (pages.dev is noindex, so nothing indexed breaks).
+  With `/exhibitors/<year>` and `/editions/<year>` the site has 894 pages.
+- Event times are Brussels time (14:00, not 13:00).
+- Slideshows show every image: exhibitors, laureates, hotel, food & drinks.
+- `/editions` links each year to its own page.
+- The skip link is translated on the French and Dutch pages.
+- Nothing else differs: titles, descriptions, share images, text and
+  layout of every other page are the same.
+
+**Live and checked.** Pushed at 23:23 (`04f77df..0a13c6e`); production
+deployment `ebba4aec` served it about 5½ minutes later. All 894 live pages
+were then compared with the build tested before the push: 890 identical,
+none missing or extra; the other four (the English `/editions` pages) differ
+only in the spacing of a date range ("24–28 January" on Cloudflare,
+"24 – 28 January" in the local build), which comes from the build machine's
+date library and is what production showed before. The production Studio
+loads with the new top bar and sidebar, and the homepage's key figures
+block shows the 2026 figures with its "Edit the 2026 figures" button.
+
+**Open after this:**
+- Two content steps now unblocked, waiting for a go: the biography move
+  (`scripts/move-artist-bio.mjs`, one document) and the old-site fill
+  (`scripts/legacy-fill.mjs`: 167 images still to upload, scenography,
+  five homepage cards, the seven placeholder 2027 events removed - the
+  programme now falls back to 2026, so nothing empties).
+- Feedback item "link text can't change": the field is there and editable;
+  ask the tester how they tried (a change needs Publish, then the rebuild).
+- Share links went with the Presentation tool; add a "Copy share link"
+  action if partners still need draft approval links.
+- `dev` and `lilanga` are behind `main`; Lilanga resets onto `main` before
+  his next PR. Tell him what changed in his files today: `i18n.ts` (Brussels
+  time zone), the guest-of-honour page (Biography first), the exhibitor
+  pages and slideshows from earlier today.
+- Small ones: the Users screen still uses `Stack space`, which this
+  `@sanity/ui` ignores (no spacing); `tabs.partners` has no Dutch string;
+  fifteen addresses have no document to hold SEO.
+
+## Status, 2026-09-11 afternoon — Studio cleaned up, SEO filled, preview links
+
+Content only; the code for it is on `kamindu` (not `main`).
+
+- **Studio clean-up applied** (`scripts/studio-cleanup.mjs`, one
+  transaction at 15:31). 38 documents deleted: the four invented press
+  clippings, the two "[SAMPLE]" drafts, a test document, the programme
+  "awards" tab page, the "public opening" events (opening hours, not
+  events) and the second copy of each 2024 event. 7 patched: Modern Shapes
+  2025 merged into one record ("B17 and B26"), the three 2027 laureates lose
+  the images copied from the 2026 ones, the Exhibitors page loses its three
+  empty blocks, gallery applications gets its text as a block, the JotForm
+  form and a button, and the 2026 edition gets the 2026 floor plan PDF.
+  Backup: `legacy-export/backups/studio-cleanup-2026-09-11.json`. Live on
+  production after one rebuild.
+- **The old-site fill (`scripts/legacy-fill.mjs`) did not run.** The session
+  running it dropped during the uploads (14 of 181 images uploaded and
+  cached, nothing written), which also left the rebuild webhook switched
+  off until it was noticed and switched back on. It is held on purpose:
+  it deletes the seven placeholder 2027 events, and `main`'s programme
+  query only reads the current edition, so production's talks/VIP/awards
+  tabs would go empty. Order: `kamindu`'s code onto `main` first (the
+  programme falls back to 2026 there), then the fill, then one rebuild.
+- **Every SEO block is filled** (`scripts/fill-seo.mjs`, transaction
+  `xLhu35w7OxU85WRZ5kT7au`): meta title, description and share image on 281
+  documents (18 pages, 44 artists, 215 exhibitors, 3 news, the homepage and
+  its draft) plus Site settings' default description, each taken from what
+  the built page renders, per language. Before, not one document had any.
+  A rebuild afterwards rendered all 896 pages with identical titles,
+  descriptions and share images. Left empty on purpose: Marion Verboom's
+  title (her artist page and the guest-of-honour hub title her
+  differently). Fifteen addresses have no document to hold SEO: the artists,
+  news and contact index pages (no main page yet), the five partner tabs,
+  `/editions` and its years, `/exhibitors/<year>`. On production only, until
+  `kamindu` reaches `main`, past-year exhibitors' titles carry the year.
+- **"Open in Studio" from a preview tab 404ed.** A preview opened in its own
+  tab (the Preview tab's "open in new tab") shows an Open in Studio link on
+  every field; the client builds it as `studioUrl` + `/intent/edit/…`, and
+  `studioUrl` was `/studio`, a path no file answers on a hash-routed Studio.
+  It is `/studio/#` now (`src/middleware.ts`), and the link opens that
+  document in the editor with the field in view.
+- **Preview in the top bar opens the page in a new tab.** It was the
+  Presentation tool, which edits beside the page in a frame; Kamindu wanted
+  the page on its own, as the ⋯ menu's Open preview gives it. Preview now
+  opens the draft of the document being edited in a new tab and goes back
+  to the editor (`PreviewLauncher.tsx`; the Open preview action reports
+  which document is open). The Presentation tool is gone, and its share
+  links with it.
+- **Event times were an hour early on the site.** The date and time
+  formatters in `src/lib/i18n.ts` had no time zone, so they used the
+  machine's: Cloudflare builds in UTC and printed the 14:00 preview as 13:00;
+  a local build here printed 18:30; the preview Worker disagreed with both.
+  They format in `Europe/Brussels` now.
+- **Editor feedback (Sanity.pdf).** "Stats not showing": the homepage's
+  key figures block held only its link, the numbers being the newest
+  edition's with figures (2026). The block now lists the figures it will
+  show, names the edition and links to it (`KeyFiguresInput.tsx`), and a
+  "Figures from" field picks the edition (empty: the newest with figures).
+  "Guest of honour biography not loading": Marion Verboom's biography was
+  seeded as the first text block of her sections, so her Biography field was
+  empty; the guest-of-honour page now reads Biography first, and
+  `scripts/move-artist-bio.mjs` moves the text there - to run once this code
+  is live on production, where the older page would put the next block in
+  its place. "Link text can't change": the Feature block's Link → Label is
+  there and editable (checked on the kamindu Studio); a change shows on the
+  site only after Publish and the rebuild that follows.
+- A preview page matches its built page otherwise: 132 pages compared
+  (every page that is not a record, and two of each record type, in three
+  languages), same text and structure, apart from the cookie banner, which
+  a preview leaves out on purpose.
+
+## Status, 2026-09-11 — old URLs redirected; pages.dev out of search
+
+`main` is `6417b67`, live on ceramic-brussels.pages.dev (deployment
+`5a70eb9f`). Three things landed since the entry below, each cherry-picked
+onto `main`:
+
+- **The production alias is noindexed** (`a11ade3`, 09-10). Cloudflare adds
+  `x-robots-tag: noindex` to branch previews by itself but not to
+  ceramic-brussels.pages.dev, so all 702 pages were crawlable before launch.
+  A rule at the end of `public/_headers` names that host only, so
+  www.ceramic.brussels will never get it. Before and after the deploy, 15 URLs
+  were compared: the header was the only change.
+- **The homepage "latest news" spacing** matches frame 4:4 (`e135cf7`, from
+  another session).
+- **Every old site URL redirects** (`6417b67`). `public/_redirects` held only
+  a comment pointing at a `legacyPath` field that never existed, so every old
+  URL would have 404ed at cutover. `scripts/legacy-redirects.mjs` now runs at
+  the end of `npm run build` and appends 474 rules to `dist/_redirects`. It
+  maps each old page, by its English slug, to the new English path. The old
+  FR/NL slugs come from `legacy-export/normalized`: the old site accepted any
+  slug under any language prefix, and every section of a long page was its
+  own URL, so each old slug gets a rule under /en, /fr and /nl. The FR/NL
+  targets come from each built page's hreflang, so the pending FR/NL slug
+  translation needs no second map. A target that was not built fails the
+  build. Verified on production: every URL in
+  `docs/legacy-site-inventory.md` has a rule (254), and all 475 answer 301 in
+  one hop onto a 200. The root now goes straight to `/en/`; it was two hops.
+  Judgement calls, each one line of the map: an old URL that is also a new
+  page keeps its new meaning (`/en/programme` was food & drinks, now the
+  programme hub). Past exhibitor years go to `/editions/`. `/contact` is a page
+  of its own again (`src/pages/[lang]/contact.astro`, 2026-09-11; it went to
+  about → team before), and the exhibition pass goes to partners → event.
+
+**At cutover:** run `node scripts/legacy-redirects.mjs --check
+https://www.ceramic.brussels` (and `curl -I` to confirm no noindex there),
+then remove the pages.dev noindex rule, or keep it: it never matches the real
+domain, and it keeps pages.dev from being indexed as a duplicate. Still open
+there:
+- The bare `ceramic.brussels` domain needs to redirect to www, and old links
+  on it take two hops unless the bare domain is also attached to Pages.
+- Old `/img/…` and `/storage/uploads/…` links, including the PDFs, are not
+  redirected; about 1,000 rules could be built from `asset-map.json`.
+- `#section` anchors land at the top of the right page, not on its tab; that
+  needs a small script in the page (frontend).
+- Canonical and hreflang tags point at slashless URLs, which Pages answers
+  with a 308 (frontend, `Base.astro`).
+
+Housekeeping: `kamindu` carries today's three changes under their original
+hashes (`0126daa`, `dad68e4`, `174fa3d`; `main` has them as cherry-picks).
+But it lacks Lilanga's three 09-09 fixes (licensed font, partner logos,
+exhibitor page), which went to `main` straight from `lilanga`. The status
+entries in this file exist only on `kamindu`. `dev` and `lilanga` still trail
+`main`. `git rebase origin/main` on `kamindu` lines it up: git skips the
+commits `main` already has as cherry-picks and replays only the docs.
+
+## Status, 2026-09-15 — the 2026-09-14 build ported (branch `design-2026-09-14`)
+
+Lilanga's next offline build (`ceramic-brussels-offline-html-2026-09-14`,
+now the `html pages` folder) was diffed against the one the port was made
+from; the differences went into the frontend on the branch, production
+build clean (900 pages, 129 requests). What changed:
+
+- **Shell.** Header as a flex row: dates mark + languages left, wordmark
+  centred, the Puilaetco "main partner" lockup (linked to the `main`
+  partner's URL) and the menu button right. Menu without the `+` toggles:
+  sub-links always in view, a row nudges left on hover, white top bar with
+  the × alone. Footer pills end in ↗. Hub tab pills smaller (24px, 4/8
+  columns). Art prize yellow is `#fdeb33`.
+- **Homepage.** Hero figure + statement with an arrow link, a ↓ to the
+  first block, four bordered quick links (the last grey), `latest news` as
+  a centred title, feature rows (`--news` copy left, `--guest` picture
+  left), the film as a poster linking to YouTube with its credit, the
+  gradient band at 126px/42px, key figures as a centred title over a
+  two-column ruled grid.
+- **Exhibitors.** `ExhibitorHead` (title band with galleries / artists /
+  catalogue / awards tabs and the ALL + A–Z buttons), a FILTERS row with a
+  country menu and an "awards" pill, `.badge` cards, the analora detail
+  layout (booth badge beside the name, city + pills beside "presenting"),
+  and a new `/exhibitors/awards` page from the `fair` award family.
+  `/artists` became the A–Z list of the design; the artists tab points
+  there, the URL did not move.
+- **Laureates** in the new row layout (48px name, "Country, year", bio on a
+  two-column grid). **Team** with directors (role matching "direct")
+  beside their biography, then the team and collaborators as small cards.
+  **FAQ** with the design's accordion, first question open.
+- Not changed: the Navigation document (the design's menu has more rows -
+  VIP, media, contact, catalogue…; that is editor content), the video
+  block has nothing to show until an edition carries a film, and the
+  exhibitor awards intro reads a `page` in section `exhibitors` with
+  English slug `awards`, which nobody has made yet.
+
+### Design → Studio, what the 2026-09-14 build added or changed
+
+Same reading as the tables below: what the page shows, where an editor
+sets it. **Gap** marks what the Studio cannot set yet.
+
+| Design | Studio | State |
+| :-- | :-- | :-- |
+| Header: dates mark | Setup → Editions → current edition → Dates mark | ok |
+| Header: "main partner" lockup | Brand SVGs in `public/assets`; links to the partner of tier **main** (Partners) | ok, artwork is code |
+| Menu rows and sub-links | Setup → Menu and footer → items + children | ok; the design's extra rows (VIP, media, contact…) are for the editor to add |
+| Footer pills (instagram, newsletter, linkedin, cookies) | Menu and footer → footer items, else Site settings URLs | ok |
+| Home: hero picture + statement + link | Homepage → Hero image, Hero text (line breaks kept), Hero link | ok; the design draws five slideshow dots, the field is one image — **gap** if a slideshow is wanted |
+| Home: four quick links, last one grey | Homepage → Quick links (fourth is grey by position) | ok |
+| Home: "latest news" title, feature rows | Homepage stack: Section title block, Feature blocks (alternate sides in order) | ok |
+| Home: video row with poster, credit, "watch the video" | Video block; falls back to the newest edition's Film; credit = the poster's Photo credit | ok once an edition has a film |
+| Home: newsletter band | Banner block, gradient style | ok |
+| Home: key figures, 6 cells | Key figures block; the edition's Key figures list | ok |
+| Exhibitors: galleries / artists / catalogue / awards tabs | Code; catalogue = current edition → Catalogue URL (tab hidden when empty) | ok |
+| Exhibitors: ALL + A–Z, country menu | Code, from the exhibitors' names and countries | ok |
+| Exhibitors: filter pills | Exhibitor → Solo show, In country focus, Kind (publisher, jury prize); "awards" = winner of a fair award this edition | ok |
+| Exhibitor card badges | Solo show → black badge; In country focus → outlined badge with the edition's Country focus label | ok |
+| Exhibitor page: booth "B28 ●", city (CC), pills, presenting | Exhibitor → Booth, City, Country, Instagram, Website, Artists / Artists (text) | ok |
+| Exhibitor awards page: label, gallery, city, text, pictures, link | Award of family **fair** → Award name, **Winning gallery**, Description, Image (else the gallery's pictures) | **gap**: Winning gallery is hidden in the form; no sidebar list for fair awards |
+| Exhibitor awards page: intro line | `page` in section exhibitors, English slug `awards`, Lead | **gap**: no sidebar entry; main-page query must prefer the page whose slug is the section |
+| Artists list: name ↗ per letter | Artist → Name | ok (Figma's richer row - country, booth, solo badge - has the data but is not built) |
+| Laureates: picture(s), name, instagram pill | Laureate → Images; Artist → Name, Instagram | ok |
+| Laureates: "Poland, 1996" | Artist → Nationality, Year of birth (base line when nationality is empty) | ok, mostly unfilled |
+| Laureates: bio on two columns | Laureate → Statement, else Artist → Biography | ok |
+| Team: intro | About → team tab page → Lead | ok |
+| Team: directors with portrait and biography | People in group Team whose Role contains "direct" → Portrait, Role, Biography | ok; the split is by role wording |
+| Team: cards with role and email | Team → Role, Email; Collaborators → Role, Website | ok |
+| FAQ accordion, first open | Site settings → FAQ (question, answer) | ok; Figma's grouping by theme has no field |
+| Practical info, food & drinks, talks, La Cambre, partners, about, advisory board, guest of honour | unchanged, see the tables below | ok |
+
+## Status, 2026-09-09 — live on production; main pages editable
+
+The ported design went to `main` in the morning (`8c20e75`) and has been
+on ceramic-brussels.pages.dev since. Three more things landed on `main`
+over the day, each cherry-picked straight from its branch:
+
+- **The favicon.** It had been Astro's scaffold logo since the first
+  commit. The old Twill site's own set replaced it — the acid dot as a real
+  16 + 32 ICO, an SVG and a 180px apple-touch-icon (`8ccb8fb`). Not taken:
+  the old `site.webmanifest`, which has an empty name.
+- **Lilanga's fixes** from `lilanga`: the licensed Noi Grotesk cut (the
+  trial carried no accents, curly quotes or dashes, so French and Dutch
+  had been falling back to Helvetica), the partner-logo halo and collisions,
+  and the exhibitor detail page filling the window.
+- **Main pages in the Studio** (`2309090`, then `a2a0ee3`). Editors could
+  not find where `/en/about` or `/en/exhibitors` are edited: a hub's URL is
+  its first tab, so the about page was the document called "ceramic
+  brussels" under About → Tab pages, and the listings had no document at
+  all. The sidebar now opens with a **Main pages** folder — Homepage,
+  Exhibitors, Artists, Guest of honour, Art prize, Programme, Partners,
+  Visitors info, About, News — each opening the document that page is made
+  from. The listings became editable the same way: a page in the
+  `exhibitors`, `artists` or `news` section supplies the lead paragraph,
+  SEO and a section stack rendered under the list; the list stays code.
+  Details in CLAUDE.md, "Main pages in the Studio". The dead
+  "Exhibitors — new tab" template is gone.
+
+What remains is unchanged from the list below, plus two housekeeping
+items: `dev` and `lilanga` trail `main` and want syncing before Lilanga's
+next push, and the exhibitors page's lead paragraph is an empty draft
+waiting for an editor (the old site never had one).
+
 ## Status, 2026-09-08 late — side-by-side pass done
 
 Every page was opened next to its design page in Chrome at 1440px, the

@@ -37,7 +37,8 @@ export const artist = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({ name: 'birthYear', title: 'Year of birth', type: 'number', group: 'main' }),
-    countryCodeField({ group: 'main', title: 'Nationality (code)' }),
+    // Kept for existing values, hidden: artist pages show Nationality, never the code.
+    countryCodeField({ group: 'main', title: 'Nationality (code)', hidden: true }),
     defineField({
       name: 'nationality',
       title: 'Nationality',
@@ -75,7 +76,8 @@ export const artist = defineType({
       title: 'Represented by',
       type: 'string',
       group: 'main',
-      description: 'Free text, e.g. "Galerie Lelong, Paris". Used on the guest-of-honour page.',
+      description:
+        'Free text, e.g. "Galerie Lelong, Paris". Shown as "shown by" on the artist’s page when no exhibitor lists the artist.',
     }),
 
     /* --- feature page ------------------------------------------------------ */

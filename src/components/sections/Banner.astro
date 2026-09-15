@@ -28,6 +28,7 @@ const Tag = link ? 'a' : 'div';
       class:list={['cta', `cta-${style}`, { 'cta-image': !!bg }]}
       id={section.anchor || undefined}
       href={link?.href}
+      data-sanity={bg && typeof section.image._sanity === 'string' ? section.image._sanity : undefined}
       style={bg ? `background-image: url(${bg})` : undefined}
       {...(link ? external : {})}
     >
@@ -43,7 +44,7 @@ const Tag = link ? 'a' : 'div';
     display: grid;
     place-items: center;
     min-height: clamp(100px, 10.5vw, 152px);
-    margin: 3.4rem -30px 3rem;
+    margin: 3.4rem 0 3rem;
     padding: 0.6rem 1rem;
     text-align: center;
     text-decoration: none;
@@ -54,14 +55,31 @@ const Tag = link ? 'a' : 'div';
     background-size: cover;
     background-position: center;
   }
+  /* Inside a padded content-wrap the band reaches the window edges; on the
+     homepage it already sits edge to edge, and a negative margin there
+     made the page scroll sideways. */
+  :global(.content-wrap) .cta {
+    margin-inline: calc(-1 * var(--gutter));
+  }
+  /* The design's `.newsletter` band (index.css, 2026-09-14 build): 126px tall, 42px type. */
   .cta-gradient {
     background: linear-gradient(180deg, var(--acid) 0%, var(--ground) 50%, var(--acid) 100%);
-    letter-spacing: -0.05em;
+    min-height: 126px;
+    margin-top: 68px;
+    font-size: 42px;
+    letter-spacing: 0;
   }
   .cta-solid {
     background: var(--acid);
     letter-spacing: -0.02em;
     font-weight: 600;
+  }
+  .cta :global(.link-arrow) {
+    transition: transform 0.25s;
+    display: inline-block;
+  }
+  a.cta:hover :global(.link-arrow) {
+    transform: translate(10px);
   }
   .cta-outline {
     border-top: 1px solid var(--ink);
@@ -80,14 +98,11 @@ const Tag = link ? 'a' : 'div';
     text-decoration-thickness: 2px;
   }
 
-  @media (max-width: 900px) {
-    .cta {
-      margin-inline: -16px;
-    }
-  }
   @media (max-width: 640px) {
-    .cta {
-      margin-inline: -10px;
+    .cta-gradient {
+      min-height: 100px;
+      padding: 15px;
+      font-size: 30px;
     }
   }
 </style>

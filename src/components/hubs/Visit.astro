@@ -1,0 +1,543 @@
+---
+import Base from '../../layouts/Base.astro';
+import HubNav from '../../components/HubNav.astro';
+import PageSections from '../../components/PageSections.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import Slideshow from '../../components/Slideshow.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations, formatDate, localePath } from '../../lib/i18n';
+import { getHubPages, getSettings, getCurrentEdition, getPartners } from '../../lib/queries';
+import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * Visitors info, as the design's visitors-info pages draw it. Practical
+ * info: photo and intro + opening hours on top, then address / tickets /
+ * hotel deal beside access and the venue diagram, then the photo row -
+ * from the current edition (hours, tickets) and site settings (venue,
+ * access, hotel deal, photos). Food & drinks: the intro and a 2x2 grid of
+ * the `food-drinks` partners with their slideshow figure. Floor plan and
+ * FAQ have no design page and follow the same patterns. Markup and rules
+ * are Lilanga's build of the frames.
+ */
+const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
+const t = useTranslations(lang);
+
+const [pages, settings, edition, partners] = await Promise.all([
+  getHubPages(lang, 'visit'),
+  getSettings(lang),
+  getCurrentEdition(lang),
+  getPartners(lang),
+]);
+const page = pageForTab(pages, tab);
+const hubTab = HUBS.visit.tabs.find((x) => x.slug === tab);
+const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
+
+const practical = tab === 'practical-info';
+const info = settings?.practicalInfo ?? {};
+const vendors = partners.filter((p: any) => p.tier === 'food-drinks');
+const hotel = info.hotelDeal?.partner;
+const hotelHref = info.hotelDeal?.url ?? localePath(lang, hubTabPath('partners', 'hotel', lang));
+
+/** "ceramic brussels’ 4th edition will take place from 20 till 24 January 2027 at Tour & Taxis, Brussels." */
+const composed =
+  edition?.startDate && edition?.endDate
+    ? t('visit.introSentence', {
+        ordinal: edition.ordinal ?? `${edition.year}`,
+        from: new Date(edition.startDate).getDate(),
+        till: formatDate(edition.endDate, lang),
+        venue: edition.venue ?? info.venueName ?? '',
+      })
+    : '';
+const intro = page?.intro ?? (practical ? (info.intro ?? composed) : undefined);
+const introStyle = page?.intro ? page.introStyle : practical && info.intro ? info.introStyle : null;
+
+const lines = (s: string | undefined) => String(s ?? '').split(/\r?\n/).filter(Boolean);
+/** The photo row at the foot of the page: site-settings images, then the hub page's own. */
+const photos: any[] = (practical ? [...(info.images ?? []), ...(page?.images ?? [])] : (page?.images ?? [])).filter(
+  (img: any) => img?.asset,
+);
+/** "tour&taxis" — the venue diagram's label, from the venue name. */
+const venueShort = String(info.venueName ?? edition?.venue ?? '')
+  .split(/\s[—–-]\s|,/)[0]
+  .toLowerCase()
+  .replace(/\s*&\s*/g, '&')
+  .trim();
+const siteName = settings?.siteName ?? 'ceramic brussels';
+const path = hubTabPath('visit', tab, lang);
+const altPaths = hubAltPaths('visit', tab);
+---
+
+<Base
+  lang={lang}
+  title={page?.seo?.title ?? `${t('nav.visit')} — ${tabLabel}`}
+  description={page?.seo?.description ?? intro}
+  noIndex={page?.seo?.noIndex}
+  image={page?.seo?.ogImage ?? page?.cover ?? (practical ? info.heroImage : undefined)}
+  path={path}
+  altPaths={altPaths}
+  editId={practical ? 'siteSettings' : page?._id}
+  editType={practical ? 'siteSettings' : page?._type}
+>
+  <HubNav lang={lang} route="visit" active={tab} pages={pages} />
+
+  {
+    practical && (
+      <div class="content-wrap practical">
+        <div class="top">
+          {info.heroImage?.asset && (
+            <SanityImage image={info.heroImage} widths={[700, 1000, 1400]} sizes="(max-width: 700px) 100vw, 50vw" loading="eager" />
+          )}
+          <section>
+            {intro && (
+              <p class="intro-large" {...styleAttrs(introStyle)}>
+                {intro}
+              </p>
+            )}
+            <h2 class="panel-title">{t('visit.openingHours')}</h2>
+            {edition?.openingHours?.length ? (
+              <div class="body-24">
+                {edition.openingHours.map((d: any) => (
+                  <p>
+                    <strong {...styleAttrs(d.labelStyle)}>{d.label ?? formatDate(d.date, lang)}</strong>
+                    {(d.slots ?? []).map((s: any) => (
+                      <>
+                        <br />
+                        {[s.time, s.label].filter(Boolean).join(' ')}
+                        {s.invitationOnly && ` (${t('visit.invitation')})`}
+                      </>
+                    ))}
+                  </p>
+                ))}
+                {edition.lastEntry && <p {...styleAttrs(edition.lastEntryStyle)}>{edition.lastEntry}</p>}
+              </div>
+            ) : (
+              <p class="empty">{t('visit.noHours')}</p>
+            )}
+          </section>
+        </div>
+
+        <div class="two-col details">
+          <section>
+            <h2 class="panel-title">{t('visit.address')}</h2>
+            <p class="body-24">
+              {info.venueName && <strong>{info.venueName}</strong>}
+              {lines(info.address).map((l) => (
+                <>
+                  <br />
+                  {l}
+                </>
+              ))}
+            </p>
+
+            <h2 class="panel-title">{t('visit.tickets')}</h2>
+            {edition?.tickets?.length ? (
+              <div class="body-24">
+                {edition.tickets.map((tk: any) => (
+                  <p>
+                    <strong {...styleAttrs(tk.nameStyle)}>{tk.name}</strong>
+                    <br />
+                    {tk.price}
+                    {tk.note && ` (${tk.note})`}
+                  </p>
+                ))}
+                {edition.ticketsNote && <p {...styleAttrs(edition.ticketsNoteStyle)}>{edition.ticketsNote}</p>}
+              </div>
+            ) : (
+              <p class="empty">{t('visit.noTickets')}</p>
+            )}
+            {edition?.ticketsUrl && (
+              <a class="pill dark" href={edition.ticketsUrl} target="_blank" rel="noopener noreferrer">
+                {t('visit.bookTickets')} ↗
+              </a>
+            )}
+
+            {(hotel || info.hotelDeal?.text) && (
+              <>
+                <h2 class="panel-title">{t('visit.hotelDeal')}</h2>
+                <p class="body-24">
+                  {hotel?.name && <strong>{hotel.name}</strong>}
+                  {info.hotelDeal?.text && (
+                    <>
+                      <br />
+                      {info.hotelDeal.text}
+                    </>
+                  )}
+                </p>
+                <a class="pill dark" href={hotelHref}>
+                  {t('visit.discoverHotel')} ↗
+                </a>
+              </>
+            )}
+          </section>
+
+          <section>
+            <h2 class="panel-title">{t('visit.access')}</h2>
+            {info.access?.length > 0 && (
+              <div class="body-24">
+                {info.access.map((a: any) => (
+                  <p>
+                    <strong {...styleAttrs(a.modeStyle)}>{a.mode}</strong>
+                    {lines(a.text).map((l) => (
+                      <>
+                        <br />
+                        {l}
+                      </>
+                    ))}
+                  </p>
+                ))}
+                {info.accessibility && <p {...styleAttrs(info.accessibilityStyle)}>{info.accessibility}</p>}
+              </div>
+            )}
+            <div class="venue-map" aria-label={`${info.venueName ?? edition?.venue ?? ''} location diagram`}>
+              <span>{venueShort}</span>
+              <b>
+                {siteName.split(' ').map((w: string, i: number) => (
+                  <>
+                    {i > 0 && <br />}
+                    {w}
+                  </>
+                ))}
+              </b>
+            </div>
+          </section>
+        </div>
+
+        {photos.length > 0 && (
+          <div class="photo-row">
+            {photos.map((img: any) => (
+              <SanityImage image={img} aspect={1.5} widths={[440, 660, 880]} sizes="(max-width: 700px) 100vw, 33vw" />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  {
+    tab === 'food-drinks' && (
+      <div class="content-wrap food-page">
+        {intro && (
+          <p class="intro-large" {...styleAttrs(introStyle)}>
+            {intro}
+          </p>
+        )}
+        {vendors.length ? (
+          <div class="food">
+            {vendors.map((v: any, i: number) => {
+              const shots = (v.images ?? []).filter((img: any) => img?.asset);
+              return (
+                <article>
+                  <h2>
+                    {v.url ? (
+                      <a href={v.url} target="_blank" rel="noopener noreferrer">
+                        {v.name} ↗
+                      </a>
+                    ) : (
+                      v.name
+                    )}
+                  </h2>
+                  {shots.length > 0 && (
+                    <figure>
+                      <Slideshow
+                        images={shots}
+                        aspect={1.5}
+                        widths={[660, 1000, 1340]}
+                        sizes="(max-width: 700px) 100vw, 50vw"
+                        label={v.name}
+                        id={`vendor-${i + 1}`}
+                      />
+                    </figure>
+                  )}
+                  {v.description && (
+                    <div class="body-24">
+                      <PortableText value={v.description} fieldStyle={v.descriptionStyle} />
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <p class="empty">{t('partners.empty')}</p>
+        )}
+      </div>
+    )
+  }
+
+  {
+    tab === 'floor-plan' && (
+      <div class="content-wrap practical">
+        {intro && (
+          <p class="intro-large" {...styleAttrs(introStyle)}>
+            {intro}
+          </p>
+        )}
+        {edition?.fairMapUrl ? (
+          <a class="pill dark" href={edition.fairMapUrl} target="_blank" rel="noopener noreferrer">
+            {t('visit.downloadMap')} ↗
+          </a>
+        ) : (
+          <p class="empty body-24">{t('visit.noMap')}</p>
+        )}
+        {page && <PageSections lang={lang} sections={page.sections} />}
+      </div>
+    )
+  }
+
+  {
+    tab === 'faq' && (
+      <div class="faq-page">
+        {intro && (
+          <p class="intro-large" {...styleAttrs(introStyle)}>
+            {intro}
+          </p>
+        )}
+        {settings?.faq?.length ? (
+          <div class="faq-list">
+            {settings.faq.map((q: any, i: number) => (
+              <details class="faq" open={i === 0}>
+                <summary>
+                  <span class="question" {...styleAttrs(q.questionStyle)}>
+                    {q.question}
+                  </span>
+                  <i aria-hidden="true">↓</i>
+                </summary>
+                <div class="answer">
+                  <div>
+                    <PortableText value={q.answer} fieldStyle={q.answerStyle} />
+                  </div>
+                </div>
+              </details>
+            ))}
+          </div>
+        ) : (
+          <p class="empty body-24">{t('visit.noFaq')}</p>
+        )}
+        {page && <PageSections lang={lang} sections={page.sections} />}
+      </div>
+    )
+  }
+
+  {
+    !practical && page?.body && (
+      <div class="content-wrap">
+        <div class="body-24">
+          <PortableText value={page.body} fieldStyle={page.bodyStyle} />
+        </div>
+      </div>
+    )
+  }
+</Base>
+
+<style>
+  /* From the design's visitors-info pages. */
+  .top {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    display: grid;
+  }
+  .top > :global(img) {
+    object-fit: cover;
+    width: 100%;
+    height: 447px;
+  }
+  .top .panel-title {
+    margin-top: 50px;
+  }
+  .details {
+    margin-top: 65px;
+  }
+  .details .panel-title {
+    margin-top: 50px;
+  }
+  .details section > .panel-title:first-child {
+    margin-top: 0;
+  }
+  .dark {
+    color: #fff;
+    background: #000;
+    margin-top: 30px;
+  }
+  .body-24 strong {
+    text-transform: uppercase;
+  }
+  .venue-map {
+    color: #000;
+    background: repeating-linear-gradient(35deg, #0000 0 22px, #ddd 23px 24px);
+    height: 520px;
+    margin-top: 35px;
+    position: relative;
+    overflow: hidden;
+  }
+  .venue-map span {
+    background: #fff;
+    padding: 12px;
+    font-size: 40px;
+    font-weight: 600;
+    position: absolute;
+    top: 30px;
+    right: 40px;
+  }
+  .venue-map b {
+    color: #fff;
+    text-align: center;
+    background: #000;
+    padding: 20px;
+    font-size: 20px;
+    line-height: 0.85;
+    position: absolute;
+    top: 210px;
+    left: 48%;
+  }
+  .photo-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-top: 90px;
+    display: grid;
+  }
+  .photo-row :global(img) {
+    aspect-ratio: 1.5;
+    object-fit: cover;
+    width: 100%;
+  }
+  @media (width<=700px) {
+    .top,
+    .photo-row {
+      grid-template-columns: 1fr;
+    }
+    .top > :global(img) {
+      height: auto;
+    }
+    .venue-map {
+      height: 320px;
+    }
+  }
+
+  /* food & drinks */
+  .food {
+    grid-template-columns: 1fr 1fr;
+    gap: 50px 40px;
+    margin-top: 55px;
+    display: grid;
+  }
+  .food h2 {
+    border-bottom: 2px solid;
+    margin-bottom: 24px;
+    font-size: 36px;
+    font-weight: 600;
+  }
+  .food figure {
+    margin: 0;
+    position: relative;
+  }
+  .food :global(img) {
+    aspect-ratio: 1.5;
+    object-fit: cover;
+    width: 100%;
+  }
+  .dots {
+    gap: 14px;
+    display: flex;
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translate(-50%);
+  }
+  .dots i {
+    background: #fff;
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+  }
+  .counter {
+    margin-top: 6px;
+    font-size: 20px;
+  }
+  .food .body-24 {
+    margin-top: 14px;
+  }
+  @media (width<=700px) {
+    .food {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* FAQ, from visitors-info/faq/index.html (2026-09-14 build): the first
+     question open, the others fold open with the arrow turning and the
+     answer growing. */
+  .faq-page {
+    padding: 8px var(--gutter) 100px;
+  }
+  .faq-page > .intro-large {
+    max-width: 1050px;
+    margin-bottom: 58px;
+  }
+  .faq-list {
+    border-bottom: 1px solid;
+  }
+  .faq {
+    border-top: 1px solid;
+  }
+  .faq summary {
+    cursor: pointer;
+    letter-spacing: -0.04em;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 0 20px;
+    font-size: 44px;
+    line-height: 1.08;
+    list-style: none;
+    display: flex;
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq summary i {
+    font-size: 56px;
+    font-style: normal;
+    line-height: 1;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .faq[open] summary i {
+    transform: rotate(180deg);
+  }
+  .faq .answer {
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    display: grid;
+  }
+  .faq[open] .answer {
+    grid-template-rows: 1fr;
+  }
+  .faq .answer > div {
+    letter-spacing: -0.025em;
+    max-width: 850px;
+    padding: 0 0 28px;
+    font-size: 24px;
+    line-height: 1.25;
+    overflow: hidden;
+  }
+  .faq .answer :global(p + p) {
+    margin-top: 1em;
+  }
+  .faq-page .empty {
+    padding-top: 10px;
+  }
+  @media (width<=700px) {
+    .faq-page > .intro-large {
+      margin-bottom: 36px;
+    }
+    .faq summary {
+      font-size: 29px;
+    }
+    .faq summary i {
+      font-size: 38px;
+    }
+    .faq .answer > div {
+      font-size: 18px;
+    }
+  }
+</style>

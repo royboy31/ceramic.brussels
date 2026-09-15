@@ -1,0 +1,163 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageSections from '../../components/PageSections.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import { getSettings, getPeople, getMainPage } from '../../lib/queries';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * Contact, with what the old site's /contact page carried: the general
+ * address large, the team members who have an email, the social links and
+ * the newsletter. Nothing is typed in here: the address and links come from
+ * Site settings, the people from the team group (anyone with an email is
+ * listed, in the team's order), and the main page (Studio → Main pages →
+ * Contact) adds a lead, SEO and blocks around it. The design has no frame for
+ * it, so it borrows the exhibitors title and the press tab's contact list.
+ */
+export function getStaticPaths() {
+  return LOCALE_IDS.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as LocaleId;
+const t = useTranslations(lang);
+const [settings, team, page] = await Promise.all([
+  getSettings(lang),
+  getPeople(lang, 'team'),
+  getMainPage(lang, 'contact'),
+]);
+
+const contacts = team.filter((p: any) => p.email);
+const social = [
+  { label: t('common.instagram'), href: settings?.instagramUrl },
+  { label: t('common.facebook'), href: settings?.facebookUrl },
+  { label: t('common.linkedin'), href: settings?.linkedinUrl },
+  { label: t('common.youtube'), href: settings?.youtubeUrl },
+].filter((link) => link.href);
+---
+
+<Base
+  lang={lang}
+  title={page?.seo?.title ?? page?.title ?? t('nav.contact')}
+  description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
+  image={page?.seo?.ogImage ?? page?.cover}
+  path="contact"
+  editId={page?._id}
+  editType={page?._type}
+>
+  <div class="page-grid py-2 md:py-4">
+    <h1 class="col-span-full text-[clamp(2rem,4.8vw,4.4rem)] font-semibold leading-none tracking-[-.04em]">
+      {t('nav.contact').toLowerCase()}
+    </h1>
+  </div>
+
+  <div class="content-wrap">
+    {
+      page?.intro && (
+        <p class="intro-large" {...styleAttrs(page.introStyle)}>
+          {page.intro}
+        </p>
+      )
+    }
+    {
+      settings?.contactEmail && (
+        <p class="intro-large address">
+          <a class="text-link" href={`mailto:${settings.contactEmail}`}>
+            {settings.contactEmail}
+          </a>
+        </p>
+      )
+    }
+
+    <div class="two-col columns">
+      {
+        contacts.length > 0 && (
+          <section>
+            <h2 class="panel-title">{t('contact.team')}</h2>
+            <div class="body-24 people">
+              {contacts.map((p: any) => (
+                <p>
+                  {p.role && (
+                    <>
+                      <strong {...styleAttrs(p.roleStyle)}>{p.role}</strong>
+                      <br />
+                    </>
+                  )}
+                  {p.name}
+                  <br />
+                  <a class="text-link" href={`mailto:${p.email}`}>
+                    {p.email}
+                  </a>
+                </p>
+              ))}
+            </div>
+          </section>
+        )
+      }
+      {
+        (social.length > 0 || settings?.newsletterUrl) && (
+          <section>
+            {social.length > 0 && (
+              <>
+                <h2 class="panel-title">{t('contact.follow')}</h2>
+                <div class="pills">
+                  {social.map((link) => (
+                    <a class="pill" href={link.href} target="_blank" rel="noopener noreferrer">
+                      {link.label} ↗
+                    </a>
+                  ))}
+                </div>
+              </>
+            )}
+            {settings?.newsletterUrl && (
+              <>
+                <h2 class="panel-title">{t('nav.newsletter').toLowerCase()}</h2>
+                <a class="pill dark" href={settings.newsletterUrl} target="_blank" rel="noopener noreferrer">
+                  {t('contact.newsletter')} ↗
+                </a>
+              </>
+            )}
+          </section>
+        )
+      }
+    </div>
+
+    {/* The main page's own blocks and text, under the addresses. */}
+    {(page?.sections?.length ?? 0) > 0 && <PageSections lang={lang} sections={page.sections} />}
+    {
+      page?.body && (
+        <div class="body-24 page-body">
+          <PortableText value={page.body} fieldStyle={page.bodyStyle} />
+        </div>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .address {
+    margin-bottom: 60px;
+  }
+  .columns {
+    margin-bottom: 80px;
+  }
+  .people p + p {
+    margin-top: 30px;
+  }
+  .pills {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 50px;
+    display: flex;
+  }
+  .pill.dark {
+    color: var(--ground);
+    background: var(--ink);
+  }
+  .page-body {
+    margin-top: 40px;
+    max-width: 1160px;
+  }
+</style>

@@ -1,0 +1,55 @@
+---
+import About from '../../../components/hubs/About.astro';
+import ArtPrize from '../../../components/hubs/ArtPrize.astro';
+import GuestOfHonour from '../../../components/hubs/GuestOfHonour.astro';
+import Partners from '../../../components/hubs/Partners.astro';
+import Programme from '../../../components/hubs/Programme.astro';
+import Visit from '../../../components/hubs/Visit.astro';
+import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { hubRouteParams, hubFromSegment, tabFromSegment } from '../../../lib/hubs';
+
+/**
+ * Every hub, in every language, from one route.
+ *
+ * The hub and tab segments are part of the URL, and they are translated
+ * (`/fr/a-propos/equipe`, `/nl/over/team`), so they cannot be folders on
+ * disk - a folder called `about` can only ever spell `/fr/about`. This route
+ * makes both segments dynamic and hands the page to the component for that
+ * hub; the six components are the former `src/pages/[lang]/<hub>/[...tab]`
+ * files, markup untouched.
+ *
+ * `hubRouteParams` supplies the identifiers as props alongside the localized
+ * segments, so nothing downstream has to translate a segment back. The
+ * fallbacks below are for the preview runtime, which renders this file on
+ * request and has no static paths.
+ *
+ * Astro ranks static segments above dynamic ones, so the listing routes
+ * (`exhibitors/`, `artists/`, `news/`, `editions/`) still win over `[hub]`,
+ * and `[lang]/[...slug].astro` stays below both. Verified by build.
+ */
+export function getStaticPaths() {
+  return hubRouteParams(LOCALE_IDS);
+}
+
+const lang = Astro.params.lang as LocaleId;
+const segment = Astro.params.hub as string;
+const props = Astro.props as { route?: string; tab?: string };
+
+const route = props.route ?? hubFromSegment(segment, lang);
+if (!route) return Astro.rewrite('/404');
+
+const tab = props.tab ?? tabFromSegment(route, Astro.params.tab as string | undefined, lang);
+
+const HUB_COMPONENTS: Record<string, any> = {
+  about: About,
+  'art-prize': ArtPrize,
+  'guest-of-honour': GuestOfHonour,
+  partners: Partners,
+  programme: Programme,
+  visit: Visit,
+};
+const Hub = HUB_COMPONENTS[route];
+if (!Hub) return Astro.rewrite('/404');
+---
+
+<Hub lang={lang} tab={tab} />

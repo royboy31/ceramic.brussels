@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import type { SanityClient } from '@sanity/client';
 import { sanityClient } from 'sanity:client';
+import { tagImages } from './previewImages';
 
 /**
  * Which Sanity client a render uses.
@@ -35,4 +36,16 @@ export function isPreview(): boolean {
 
 export function runWithPreview<T>(client: SanityClient, fn: () => Promise<T>): Promise<T> {
   return storage.run({ client }, fn);
+}
+
+/**
+ * A query in a preview render. The client marks every string for the
+ * overlay by itself; this asks for the source map it did that from and
+ * marks the images too (previewImages.ts), which the overlay cannot find
+ * on its own unless they have alt text.
+ */
+export async function previewFetch<T>(query: string, params: Record<string, unknown>): Promise<T> {
+  const response = await currentClient().fetch(query, params, { filterResponse: false });
+  tagImages(response.result, response.resultSourceMap);
+  return response.result as T;
 }

@@ -133,10 +133,14 @@ into the HTML, which has two consequences worth internalising:
 every page under `src/pages/[lang]/` is mounted a second time at
 `/preview/[lang]/…`, rendered on request from **drafts** by a small Worker
 that `scripts/pages-worker.mjs` moves to `dist/_worker.js` after the build.
-`dist/_routes.json` sends only `/preview/*` and `/api/*` to that Worker, so
-the published pages stay plain files. The Studio's **Preview** tab
-(`src/sanity/presentation.ts`) frames those pages, refreshes them as you
-type, and can make a share link for a partner. How it works: `src/middleware.ts`
+`dist/_routes.json` sends only `/preview/*` and `/api/*` (the preview door) to that Worker, so
+the published pages stay plain files. **Preview** in the Studio's top bar
+(`src/sanity/components/PreviewLauncher.tsx`) opens the page being edited,
+from its draft, in a new tab - the same as **Open preview** in a document's
+⋯ menu - and every field on that page has an "Open in Studio" link back to
+the editor (stega `studioUrl` is `/studio/#`: the Studio is on hash
+routing). It replaced the Presentation tool (editing beside a framed page)
+on 2026-09-11, and its share links went with it. How it works: `src/middleware.ts`
 lets a request in on the cookie `/api/preview/enable` issues, then renders the
 page inside `runWithPreview` (`src/lib/previewContext.ts`), which swaps the
 client every query in `queries.ts` uses for a drafts-reading, stega-encoding
@@ -170,6 +174,43 @@ their own documents. `src/lib/links.ts` turns Sanity `link` and navigation
 objects into hrefs, so a menu anchor like `art-prize` + `laureates` lands on
 the right tab. The shared pieces are `HubNav`, `Sections`, `Slideshow`,
 `PersonCard`, `ExhibitorCard` and `LinkPill` in `src/components/`.
+
+**The Studio sidebar follows the menu** (`src/sanity/structure.ts`). One
+folder per section - Exhibitors, Artists, Guest of honour, Art prize,
+Programme, Partners, Visitors info, About, News, Contact, Other pages - in
+menu order, after Homepage. Each folder opens with the page that section is
+made from (`src/sanity/mainPages.ts`), then the records that page lists:
+this year's first, a **Past years** folder per year, and for the programme
+a folder of events the site does not show. Shared things - Site settings,
+Menu and footer, Editions, all people, all partners, all pages, Page
+templates - are under **Setup**. Every page has one entry; the few items
+that open a shared document from a second place name it ("… (Site
+settings)"). For a hub the section's page is the first tab's page: the hub
+URL *is* the first tab, so `/en/about` and the "the fair" document are one
+page. For a listing route (exhibitors, artists, news, contact) it is the
+one `page` in that section, whose lead paragraph, SEO and section stack
+wrap the list the route generates (`getMainPage` in `queries.ts`). A section
+with no page yet opens a fresh document with a fixed id (`main-<section>`)
+and the parameterised `page-main` template, which starts with no blocks.
+Layouts never link: applying a template copies blocks in.
+
+**A page form shows only what its page reads** (`src/sanity/pageKinds.ts`).
+One `page` type serves hub tabs, listing main pages and standalone pages,
+and each route reads a different part of it - the exhibitors page never
+shows Body, a laureates tab only its lead - so every page field is hidden
+where its route ignores it, and Hub and slug are read-only once set. Fields
+no page reads at all (event location and description, partner subtitle,
+award citation…) are hidden in their schemas with a comment; the data
+stays. **Change `pageKinds.ts` together with the routes.**
+
+**Exhibitors are per year, as on the old site.** A gallery that comes back
+has one `exhibitor` record per year, often on the same slug. The current
+edition's are `/exhibitors` and `/exhibitors/<slug>`; a past edition's list
+is `/exhibitors/<year>` (the old site's address) and its galleries
+`/exhibitors/<year>/<slug>`, so no record hides behind another. A
+four-digit segment in `exhibitors/[slug].astro` is a year; `exhibitorPath()`
+in `src/lib/links.ts` builds every exhibitor link. The listing and detail
+markup are `ExhibitorsListing.astro` and `ExhibitorDetail.astro`.
 
 `page` slugs are per-language, which produces genuinely translated URLs
 (`/en/about`, `/fr/a-propos`, `/nl/over`). hreflang is generated from those same
@@ -238,9 +279,30 @@ Also in `i18n.ts`: `localePath(lang, path)` for building links, and
   the name is stored, so the CSS here decides what each one looks like and
   restyling never needs a content migration. The list of roles lives in
   `src/sanity/schemaTypes/objects/richText.ts`; adding one means adding it in
-  both places.
+  both places. Links in text are two marks: **Link to this site** and
+  **External link** (Sanity's own `href` mark, kept field for field so
+  existing text keeps its links). The first is one search box
+  (`src/sanity/components/SiteLinkInput.tsx`, list in `src/sanity/siteLinks.ts`)
+  over every page the code builds and every document with a page, which also
+  takes a typed path. A document is stored as a reference and looked up
+  through `getLinkTargets`; a page or typed path as `path`, which `sitePath`
+  in `links.ts` writes out in the reading page's language, whatever language
+  or host it was typed with. A pasted `https://ceramic.brussels/...` address
+  is the thing it replaces; `scripts/internal-links.mjs` converted the old
+  site's.
 - **`EditLink.astro`** — deep-links into the Studio for the document being
   viewed. Shows in `astro dev` only, unless `PUBLIC_SHOW_EDIT_LINKS=true`.
+- **`CookieConsent.astro`** — the cookie banner, mounted by `Base.astro`
+  (never in a preview render), with a "cookie settings" pill in the footer
+  to reopen it. The trackers and their ids live in `src/lib/tracking.ts`.
+  GA4 is the old site's own property (`G-XVTPYEC66H`), so the numbers carry
+  on across the move; it loads only after the visitor accepts statistics
+  (Consent Mode v2, basic mode) and only on `www.ceramic.brussels` -
+  pages.dev, previews and localhost show the banner but send nothing
+  (`localStorage['cb-tracking-test'] = '1'` lifts that in one browser).
+  Adding a tracker: its id there, its loader in the banner's script, its
+  text in `consent.*` in all three locales, and a `CONSENT_VERSION` bump so
+  everyone is asked again.
 - **`PageSections.astro`** — renders a page-builder stack (`sections` on a
   page, the homepage or an artist) in editor order, one component per block
   type from `src/components/sections/`. Text blocks are grouped by their
@@ -274,8 +336,12 @@ The content model follows the 2027 Figma design. The shape to keep in mind:
 - **Images carry their caption.** `figure` has `caption` (artist),
   `workTitle` (render italic) and `year` next to `alt` and `credit`; the
   design's "Artist, *Title*, 2024" line is assembled from those.
-- **Links are objects.** A `link` is a route + optional anchor, a document
-  reference, or an external URL. Internal ones get "→", external ones "↗".
+- **Links are objects.** A `link` is a page of this site (`path`, picked
+  from the Studio's search box over every built page or typed -
+  `SitePathInput` in `src/sanity/components/SiteLinkInput.tsx`; older links
+  still carry a route + anchor pair, which is read too), a document
+  reference, or an external URL. Menu items work the same way. Internal
+  ones get "→", external ones "↗".
 - **Pages are section stacks.** `page.sections`, `homepage.sections` and
   `artist.sections` are page-builder arrays: an editor adds, deletes, drags
   and hides pre-designed blocks (text, image + text, image grid, slideshow,
@@ -289,9 +355,10 @@ The content model follows the 2027 Figma design. The shape to keep in mind:
 
 ### Creating and duplicating documents
 
-The Create menu offers **starting points** from `src/sanity/templates.ts`: one
-"new tab" per hub (which presets `section`, the field that makes a page a tab
-at all), two standalone page shapes, and one per exhibitor kind. They set
+The Create menu offers **starting points** from `src/sanity/templates.ts`: two
+standalone page shapes and one per exhibitor kind. There are no "new tab"
+templates: a hub's tabs are fixed in `src/lib/hubs.ts` and only those get a
+route, so an extra tab page showed a pill that led to a 404. They set
 initial values only - nothing is locked, and editing a template never touches
 documents already made from it, so adding or reworking them is free. Localised
 fields are seeded in English alone: an empty translation falls back to English,
@@ -312,7 +379,7 @@ exhibitor templates, and looking for them there is the obvious wrong turn.
 
 A template can also be linked to directly, which makes a usable bookmark:
 
-    /studio/#/intent/create/type=page;template=page-hub-art-prize/
+    /studio/#/intent/create/type=page;template=page-text/
 
 Only `page` and `exhibitor` have templates. `laureate`, `award` and `person`
 do not, so New in those panes gives a bare document.
@@ -346,8 +413,18 @@ the dashboard ones when `wrangler.toml` exists and reads `[vars]` /
 
 `public/_headers` marks `/_astro/*` immutable and forces HTML to revalidate —
 without that, a rebuild would never reach anyone holding a cached page.
-`public/_redirects` is where legacy URLs from the old Laravel site go at
-migration time.
+It also sends `X-Robots-Tag: noindex` on `https://ceramic-brussels.pages.dev/*`
+only: Cloudflare noindexes branch previews by itself but not the production
+alias, which was crawlable before launch. The rule is scoped to that host, so
+`www.ceramic.brussels` never gets it; remove it at cutover as planned.
+The old site's URLs are not typed into `public/_redirects`:
+`scripts/legacy-redirects.mjs` runs after every build and appends some 470 rules
+to `dist/_redirects` from a map of old page → new English path, taking the
+old FR/NL slugs from `legacy-export/normalized` and the new FR/NL targets
+from each built page's hreflang, so a slug change needs no edit. A target
+that was not built fails the build. `--doc` checks every URL in
+`docs/legacy-site-inventory.md` has a rule; `--check <url>` tests them live
+(301, one hop, onto a 200) — run it against the real domain at cutover.
 
 **Two shapes of build, one command.** `PREVIEW_RUNTIME` decides (set per
 environment in `wrangler.toml`; `npm run build:preview` sets it locally):
@@ -355,101 +432,38 @@ environment in `wrangler.toml`; `npm run build:preview` sets it locally):
 | | off | on |
 | :-- | :-- | :-- |
 | Pages | static HTML | static HTML, unchanged |
-| `/api/*` | Pages Functions in `functions/` | the Worker, through the **same** modules (`src/server/pagesShim.ts`) |
 | `/preview/*` | does not exist | the Worker, rendered from drafts |
-| Studio | as is | gains the Preview tab (`PUBLIC_PREVIEW_ENABLED`) |
+| Studio | as is | gains Preview and "Open preview" (`PUBLIC_PREVIEW_ENABLED`) |
 
 When on, `astro build` uses `@astrojs/cloudflare` (its Vite plugin refuses a
 Pages config, hence the separate `wrangler.worker.toml` it reads — keep its
 bindings in step with `wrangler.toml`), and `scripts/pages-worker.mjs`
 rearranges the output into what Pages expects: static files at the root,
-`_worker.js/`, `_routes.json`. Pages ignores `functions/` once `_worker.js`
-exists, which is why the API is shimmed rather than duplicated. The adapter's
+`_worker.js/`, `_routes.json`. The adapter's
 dev server runs on workerd, which does not start on every machine — a laptop
 leaves `PREVIEW_RUNTIME` unset and `astro dev` is exactly as before. The
 adapter needs Astro ≥ 7.3; keep the two in step when upgrading either.
 
-## Site accounts
+## Editors and accounts
 
-Editors who do not have a Sanity account are managed in the Studio under
-**Users**. This is **Kamindu's** side of the project.
+Everyone who edits is a **Sanity project member** - invited at
+sanity.io/manage, signing in to `/studio` with Google, GitHub or e-mail, and
+attributed by name in every document's history. The plan includes up to 20
+seats, which is more than the team needs.
 
-**Why they are not documents.** The `production` dataset is ACL-public: it
-answers a GROQ query with no credentials at all, so anything stored in it is
-world-readable. A `user` document would publish email addresses and password
-hashes to the open internet. The accounts therefore live in **D1**, which is
-private, and the Studio screen is a custom tool that administers them over
-`/api/users` on the same origin.
+There used to be a second kind of account: site accounts in a private D1
+database, with a Users screen in the Studio, a `/login` page and an
+`/api/auth` + `/api/users` API, all sharing one Sanity token. It was removed
+on 2026-09-15 - the seats make it unnecessary, and one shared, non-expiring
+token in every editor's browser was a single point of failure that Sanity's
+history could not tell apart. Nothing of it is left in the code; the
+`ceramic-brussels-admin` D1 database and the `SANITY_STUDIO_TOKEN` Pages
+secret are the two things to delete by hand, and that token must be revoked
+at sanity.io/manage, because a browser that still holds it can edit until it
+is.
 
-| Path | What |
-| :-- | :-- |
-| `src/sanity/components/UsersTool.tsx` | The Users screen inside the Studio |
-| `src/pages/login.astro` | Sign-in for site accounts, and the hand-off into the Studio |
-| `functions/` | Pages Functions - auth, sessions, user management, audit |
-| `src/server/` | Shared modules those Functions import |
-| `migrations/` | D1 schema, applied with `npm run admin:migrate` |
-
-**Managing users needs its own sign-in.** A Sanity login says who you are to
-Sanity; it says nothing about whether you may administer these accounts, so the
-Users screen asks for D1 credentials of its own.
-
-**Accounts.** `npm run admin:user -- --email x@y.z --name "Name"` creates one
-and prints a temporary password, flagged so the person must choose their own on
-first sign-in. After the first admin exists, everything else happens in the
-Studio.
-
-### How a site account reaches the Studio
-
-The Studio's own login screen only accepts Sanity identities, so it can never
-authenticate one of these accounts. What it *does* accept is a token in
-`localStorage` under `__studio_auth_token_<projectId>`, holding
-`{token, authenticated}` - the key `createAuthStore` reads on boot, and the same
-one the Users screen looks at. `/login` and `/studio` are the same origin, so
-`/login` can simply write it.
-
-1. `/login` signs the person in against D1, exactly as the Users screen does.
-2. `POST /api/auth/studio-token` returns `SANITY_STUDIO_TOKEN` to any signed-in,
-   active account, and writes a `studio.token` row into `audit_log`.
-3. The page writes that key and navigates to `/studio`, which boots signed in.
-
-**Do not hand the token over as `/studio#token=…`.** `sanity` does support that -
-`consumeHashToken` reads it at boot - but **this Studio is on hash routing**, so
-the hash is also the route. Both read it: you are signed in *and* dropped on
-"Tool not found: token=…" with an empty screen. It was built that way first and
-that is exactly what happened.
-
-`auth.providers` in `sanity.config.ts` puts a **Ceramic Brussels account**
-button on the Studio's login screen pointing at `/login`, so the loop closes
-from either direction. The Studio passes the page it wanted as `?origin=`, and
-`/login` returns there - after checking it is same-origin - rather than always
-landing on the Studio root.
-
-**`SANITY_STUDIO_TOKEN` is a Pages secret**, a token created in
-sanity.io/manage with the narrowest role that lets an editor work. It is not
-`SANITY_API_WRITE_TOKEN`: that one is for migrations and imports, its grants are
-much wider, and the endpoint refuses to fall back to it - an unset secret
-returns 503 rather than handing out the wrong key.
-
-**What this costs, deliberately.** The token reaches the browser, where its
-holder can read it out of localStorage and use it from anywhere; it is one
-shared credential; Sanity tokens do not expire; and withdrawing it from one
-person means rotating it for everyone and having the others sign in again.
-Deactivating an account in the Users screen stops that person getting a *new*
-token, not one they already hold.
-
-**Attribution.** Edits arrive at Sanity as the token, not as the person, so
-Sanity's history cannot tell the team apart - every change reads as the robot
-the token belongs to. `audit_log` in D1 records who was handed a token and
-when, which is the only trace of the individual. It cannot see the edits
-themselves, because those go straight from the Studio to Sanity rather than
-through `/api`. Closing that gap means proxying the Sanity API so the token
-never leaves the server, which is the larger piece of work this defers.
-
-**Local development does not work on Windows.** `wrangler pages dev` needs
-workerd, which crashes with an access violation on that machine. Test on a
-branch preview instead - previews share the same D1 database.
-
-**Secrets** live in Pages, never in `wrangler.toml`.
+**Secrets** live in Pages, never in `wrangler.toml`. The only one the site
+needs is `SANITY_VIEWER_TOKEN`, for the drafts preview.
 
 ## Importing the old site
 
@@ -538,6 +552,27 @@ questions.
   The site moved to project `5hqzhin7` on 2026-09-06 after the first
   project (`uia5r1rc`) ran dry; `run()` now also fails a build that makes
   more than 2,500 requests, and prints the total at exit.
+- **Preview encodes only text an editor reads.** Stega appends invisible
+  characters to strings so the Studio can click into them, and the page code
+  compares values like a programme tab or partner tier against known ones -
+  an encoded "talks" is not "talks", and preview rendered the Talks tab
+  empty. `stegaFilter` in `src/middleware.ts` keeps every fixed-list value,
+  Style setting, anchor, code and handle plain. A new field picked from a
+  list goes into its `PLAIN_KEYS`.
+- **Images are click-to-edit through `data-sanity`, not the marker.** The
+  overlay only finds an image by the marker in its `alt`, and two thirds of
+  the site's images have none. So a preview render asks for the content
+  source map with every query (`previewFetch` in `previewContext.ts`) and
+  `src/lib/previewImages.ts` writes each image's document and field onto
+  it as `_sanity`, which `SanityImage.astro` (and the banner block) emit as
+  `data-sanity`. It resolves through references, so a partner logo opens the
+  partner. A new component that draws a Sanity image without `SanityImage`
+  has to emit that attribute itself.
+  And the overlay spells every link's path the Presentation tool's way
+  (`sections:abc.image`), which the Structure tool cannot focus, so
+  `PreviewEditLinks.astro` rewrites each link to `sections[_key=="abc"].image`
+  as the overlay draws it - that is what makes a section's picture or text
+  open its own dialog rather than the top of the form.
 - **Preview renders read the page to the end inside the store.** Astro
   streams responses, so the frontmatter (and its queries) runs when the body
   is pulled. `src/middleware.ts` awaits `response.text()` inside

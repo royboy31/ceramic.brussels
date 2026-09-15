@@ -29,7 +29,13 @@ interface Props {
 
 const { lang, sections = [], columns = 1, statementFirst = false, class: className } = Astro.props;
 const textColumns = Astro.props.textColumns ?? 1;
-const list = (sections ?? []).filter(Boolean);
+// A block with a heading and nothing under it is a prompt left unfilled (the
+// old starter blocks, a block cleared for later), not something to publish:
+// it would show as a bare title over a rule. The Section title block is the
+// one meant to stand alone.
+const list = (sections ?? []).filter(
+  (s: any) => s && (s.body || (s.images ?? []).some((img: any) => img?.asset) || (s.links ?? []).length > 0),
+);
 ---
 
 {

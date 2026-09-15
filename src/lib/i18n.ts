@@ -88,6 +88,8 @@ const STRINGS = {
     'exhibitors.backToAll': 'back to all',
     'exhibitors.previous': 'previous',
     'exhibitors.next': 'next',
+    'common.skip': 'Skip to content',
+    'editions.overview': 'overview',
     'artists.basedIn': 'Based in',
     'artists.previousGuests': 'Previous guests of honour',
     'artPrize.laureatesOf': 'Laureates {year}',
@@ -108,6 +110,27 @@ const STRINGS = {
     'visit.noFaq': 'No questions in Site settings yet.',
     'press.contacts': 'Press contacts',
     'press.clips': 'Press clips',
+    'nav.contact': 'Contact',
+    'contact.team': 'the team',
+    'contact.follow': 'follow us!',
+    'contact.newsletter': 'subscribe to our newsletter',
+    'consent.title': 'cookies',
+    'consent.body':
+      'With your permission we measure visits with Google Analytics, to see which pages are read. No tracking cookie is set until you agree, the site works the same either way, and you can change your mind under “cookie settings” at the bottom of every page.',
+    'consent.accept': 'accept all',
+    'consent.reject': 'refuse',
+    'consent.customise': 'choose',
+    'consent.save': 'save my choice',
+    'consent.settings': 'cookie settings',
+    'consent.necessary': 'necessary',
+    'consent.necessaryText': 'Remembers the choice you make here, in your browser. Always on, tracks nothing.',
+    'consent.analytics': 'statistics',
+    'consent.analyticsText':
+      'Google Analytics 4 counts visits and the pages read. Sets the _ga cookies, kept up to two years; the data is processed by Google.',
+    'consent.marketing': 'marketing',
+    'consent.marketingText': 'Lets advertising partners such as Meta measure our campaigns.',
+    'common.facebook': 'facebook',
+    'common.youtube': 'youtube',
     'common.instagram': 'instagram',
     'common.linkedin': 'linkedin',
     'common.email': 'email',
@@ -147,6 +170,15 @@ const STRINGS = {
     'programme.ceremony': 'awards',
     'programme.allKinds': 'all',
     'partners.main': 'main partner',
+    'exhibitors.galleries': 'galleries',
+    'exhibitors.searchByCountry': 'search by country',
+    'exhibitors.discoverGallery': 'discover the gallery',
+    'exhibitors.awardsPage': 'Exhibitor awards',
+    'exhibitors.awardsEmpty': 'No exhibitor awards have been published yet.',
+    'artists.noneMatch': 'No artists match that filter.',
+    'home.scrollDown': 'Scroll down',
+    'home.watchVideo': 'watch the video',
+    'home.videoBy': 'Video by {credit}',
     'partners.institutional': 'institutions',
     'partners.media': 'media',
     'partners.supplier': 'suppliers',
@@ -236,6 +268,8 @@ const STRINGS = {
     'exhibitors.backToAll': 'retour à la liste',
     'exhibitors.previous': 'précédent',
     'exhibitors.next': 'suivant',
+    'common.skip': 'Aller au contenu',
+    'editions.overview': 'bilan',
     'artists.basedIn': 'Vit à',
     'artists.previousGuests': 'Invités d’honneur précédents',
     'artPrize.laureatesOf': 'Lauréats {year}',
@@ -256,6 +290,27 @@ const STRINGS = {
     'visit.noFaq': 'Pas encore de questions dans les réglages du site.',
     'press.contacts': 'Contacts presse',
     'press.clips': 'Revue de presse',
+    'nav.contact': 'Contact',
+    'contact.team': 'l’équipe',
+    'contact.follow': 'suivez-nous !',
+    'contact.newsletter': 'abonnez-vous à la newsletter',
+    'consent.title': 'cookies',
+    'consent.body':
+      'Avec votre accord, nous mesurons les visites avec Google Analytics, pour savoir quelles pages sont lues. Aucun cookie de mesure n’est déposé tant que vous n’avez pas accepté, le site fonctionne de la même façon dans les deux cas, et vous pouvez changer d’avis via « paramètres des cookies » en bas de chaque page.',
+    'consent.accept': 'tout accepter',
+    'consent.reject': 'refuser',
+    'consent.customise': 'choisir',
+    'consent.save': 'enregistrer mon choix',
+    'consent.settings': 'paramètres des cookies',
+    'consent.necessary': 'nécessaires',
+    'consent.necessaryText': 'Retient dans votre navigateur le choix fait ici. Toujours actif, sans aucun suivi.',
+    'consent.analytics': 'statistiques',
+    'consent.analyticsText':
+      'Google Analytics 4 compte les visites et les pages lues. Dépose les cookies _ga, conservés jusqu’à deux ans ; les données sont traitées par Google.',
+    'consent.marketing': 'marketing',
+    'consent.marketingText': 'Permet à des partenaires publicitaires comme Meta de mesurer nos campagnes.',
+    'common.facebook': 'facebook',
+    'common.youtube': 'youtube',
     'common.instagram': 'instagram',
     'common.linkedin': 'linkedin',
     'common.email': 'e-mail',
@@ -295,6 +350,15 @@ const STRINGS = {
     'programme.ceremony': 'prix',
     'programme.allKinds': 'tout',
     'partners.main': 'partenaire principal',
+    'exhibitors.galleries': 'galeries',
+    'exhibitors.searchByCountry': 'chercher par pays',
+    'exhibitors.discoverGallery': 'découvrir la galerie',
+    'exhibitors.awardsPage': 'Prix des exposants',
+    'exhibitors.awardsEmpty': 'Aucun prix d’exposant n’a encore été publié.',
+    'artists.noneMatch': 'Aucun artiste ne correspond.',
+    'home.scrollDown': 'Défiler vers le bas',
+    'home.watchVideo': 'regarder la vidéo',
+    'home.videoBy': 'Vidéo : {credit}',
     'partners.institutional': 'institutions',
     'partners.media': 'médias',
     'partners.supplier': 'fournisseurs',
@@ -383,6 +447,8 @@ const STRINGS = {
     'exhibitors.backToAll': 'terug naar overzicht',
     'exhibitors.previous': 'vorige',
     'exhibitors.next': 'volgende',
+    'common.skip': 'Naar de inhoud',
+    'editions.overview': 'overzicht',
     'artists.basedIn': 'Woont in',
     'artists.previousGuests': 'Vorige eregasten',
     'artPrize.laureatesOf': 'Laureaten {year}',
@@ -403,6 +469,27 @@ const STRINGS = {
     'visit.noFaq': 'Nog geen vragen in de site-instellingen.',
     'press.contacts': 'Perscontacten',
     'press.clips': 'Persoverzicht',
+    'nav.contact': 'Contact',
+    'contact.team': 'het team',
+    'contact.follow': 'volg ons!',
+    'contact.newsletter': 'schrijf je in voor de nieuwsbrief',
+    'consent.title': 'cookies',
+    'consent.body':
+      'Met uw toestemming meten we bezoeken met Google Analytics, om te zien welke pagina’s gelezen worden. Er wordt geen trackingcookie geplaatst zolang u niet akkoord gaat, de site werkt in beide gevallen hetzelfde, en u kunt uw keuze wijzigen via ‘cookie-instellingen’ onderaan elke pagina.',
+    'consent.accept': 'alles accepteren',
+    'consent.reject': 'weigeren',
+    'consent.customise': 'kiezen',
+    'consent.save': 'mijn keuze opslaan',
+    'consent.settings': 'cookie-instellingen',
+    'consent.necessary': 'noodzakelijk',
+    'consent.necessaryText': 'Onthoudt in uw browser de keuze die u hier maakt. Altijd aan, volgt niets.',
+    'consent.analytics': 'statistieken',
+    'consent.analyticsText':
+      'Google Analytics 4 telt bezoeken en gelezen pagina’s. Plaatst de _ga-cookies, tot twee jaar bewaard; de gegevens worden door Google verwerkt.',
+    'consent.marketing': 'marketing',
+    'consent.marketingText': 'Laat advertentiepartners zoals Meta onze campagnes meten.',
+    'common.facebook': 'facebook',
+    'common.youtube': 'youtube',
     'common.instagram': 'instagram',
     'common.linkedin': 'linkedin',
     'common.email': 'e-mail',
@@ -442,6 +529,15 @@ const STRINGS = {
     'programme.ceremony': 'prijzen',
     'programme.allKinds': 'alles',
     'partners.main': 'hoofdpartner',
+    'exhibitors.galleries': 'galerieën',
+    'exhibitors.searchByCountry': 'zoeken op land',
+    'exhibitors.discoverGallery': 'ontdek de galerie',
+    'exhibitors.awardsPage': 'Exposantenprijzen',
+    'exhibitors.awardsEmpty': 'Er zijn nog geen exposantenprijzen gepubliceerd.',
+    'artists.noneMatch': 'Geen kunstenaars gevonden.',
+    'home.scrollDown': 'Naar beneden scrollen',
+    'home.watchVideo': 'bekijk de video',
+    'home.videoBy': 'Video: {credit}',
     'partners.institutional': 'instellingen',
     'partners.media': 'media',
     'partners.supplier': 'leveranciers',
@@ -466,6 +562,14 @@ export function localePath(lang: LocaleId, path = ''): string {
   return clean ? `/${lang}/${clean}` : `/${lang}`;
 }
 
+/**
+ * The fair's own clock. Without it, Intl formats in the time zone of whatever
+ * machine renders the page: Cloudflare builds in UTC, so a 14:00 preview
+ * printed as 13:00 on the site, a laptop in Colombo printed 18:30, and the
+ * preview Worker (UTC again) disagreed with a local build.
+ */
+const TIME_ZONE = 'Europe/Brussels';
+
 export function formatDate(value: string | undefined, lang: LocaleId): string {
   if (!value) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
@@ -473,6 +577,7 @@ export function formatDate(value: string | undefined, lang: LocaleId): string {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+    timeZone: TIME_ZONE,
   }).format(new Date(value));
 }
 
@@ -483,13 +588,14 @@ export function formatDateRange(start: string, end: string, lang: LocaleId): str
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+    timeZone: TIME_ZONE,
   }).formatRange(new Date(start), new Date(end));
 }
 
 export function formatTime(value: string | undefined, lang: LocaleId): string {
   if (!value) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
-  return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(
+  return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone: TIME_ZONE }).format(
     new Date(value),
   );
 }
@@ -498,7 +604,7 @@ export function formatTime(value: string | undefined, lang: LocaleId): string {
 export function formatDay(value: string | undefined, lang: LocaleId): string {
   if (!value) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
-  return new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long' }).format(
+  return new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', timeZone: TIME_ZONE }).format(
     new Date(value),
   );
 }

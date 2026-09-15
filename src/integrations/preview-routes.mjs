@@ -21,10 +21,10 @@ import path from 'node:path';
  *    prerendering is decided per component, so the original route would go
  *    on-demand with it and the site would stop being static.
  *
- * 2. The admin API and the preview door under `/api/`, from
- *    `src/server/routes/`. They live outside `src/pages/` on purpose: a page
- *    file that opts out of prerendering makes the plain static build refuse
- *    to run without an adapter.
+ * 2. The preview door under `/api/preview/`, from `src/server/routes/`. It
+ *    lives outside `src/pages/` on purpose: a page file that opts out of
+ *    prerendering makes the plain static build refuse to run without an
+ *    adapter.
  */
 export function previewRoutes({ prefix = '/preview', pagesDir = 'src/pages/[lang]', outDir = 'src/preview' } = {}) {
   return {
@@ -65,9 +65,8 @@ import Page from '${target.startsWith('.') ? target : `./${target}`}';
 
         injectRoute({ pattern: '/api/preview/enable', entrypoint: './src/server/routes/preview-enable.ts', prerender: false });
         injectRoute({ pattern: '/api/preview/disable', entrypoint: './src/server/routes/preview-disable.ts', prerender: false });
-        injectRoute({ pattern: '/api/[...path]', entrypoint: './src/server/routes/api.ts', prerender: false });
 
-        logger.info(`${files.length} preview routes mounted under ${prefix}/, plus /api/`);
+        logger.info(`${files.length} preview routes mounted under ${prefix}/, plus /api/preview/`);
       },
     },
   };

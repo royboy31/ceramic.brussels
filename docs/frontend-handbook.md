@@ -16,7 +16,7 @@ Yours to edit freely:
 
 | Path | What |
 | :-- | :-- |
-| `src/pages/**` | One `.astro` file per route. Markup and scoped CSS. **Not** `login.astro` (site accounts, Kamindu). |
+| `src/pages/**` | One `.astro` file per route. Markup and scoped CSS. |
 | `src/layouts/Base.astro` | The shell around every page: `<head>`, design tokens, header, menu, footer. |
 | `src/components/**` | Header, footer, menu overlay, cards, hub nav, and the 15 section blocks in `sections/`. |
 | `src/lib/i18n.ts` | UI strings (`STRINGS`), in all three locales, every time. |
@@ -31,9 +31,9 @@ Not yours, even when it looks like a one-line change:
 | `src/sanity/**` | Schemas, Studio structure and components. The Studio is live for editors; a schema change without a migration blanks published content. |
 | `src/lib/queries.ts` | The GROQ projections. A field only reaches a page if a query selects it, and Kamindu keeps the query in step with the schema and the build request budget. |
 | `src/lib/hubs.ts`, `src/lib/locales.ts`, `src/lib/links.ts` | Shared with the Sanity side: the tab list and locale list are imported by the schemas. Adding a tab is a backend request. |
-| `src/server/**`, `functions/`, `src/middleware.ts`, `src/preview/` | Site accounts and the drafts preview Worker. |
+| `src/server/**`, `src/middleware.ts`, `src/preview/` | The drafts preview Worker. |
 | `wrangler*.toml`, `astro.config.mjs`, `public/_headers`, `public/_redirects` | Deployment. |
-| `scripts/**`, `migrations/**`, `legacy-export/**` | Import, seeding, D1. |
+| `scripts/**`, `legacy-export/**` | Import and seeding. |
 
 `npm run boundary` prints every file your branch changes outside the first
 table. Run it before every commit; it is also what Kamindu will run on your
@@ -64,6 +64,68 @@ page now renders the design's own markup and CSS. The pieces:
 - Pages the design does not cover yet (news, artists, editions, standalone
   pages, 404) are wrapped in `.legacy-page` and keep the older look.
 
+## Changed in your files on 2026-09-12 (kamindu branch) - please review
+
+One change, in four files, asked for by the task board ("Populate the
+Sanity back end with all current site content"). **The stand-in images and
+the invented homepage blocks are gone.** Four slots used to fall back to a
+file shipped in `public/assets/` when Sanity had nothing, and the homepage
+invented a news / film / key-figures stack when `sections` came back empty.
+Because the query drops hidden blocks, hiding every block did the same -
+so an editor could delete their way to a page that still looked full and
+could not be changed. That is most of why the 10.09 demo was confusing.
+
+Empty now renders empty, in `index.astro` (hero image and the section
+stack), `about/[...tab].astro` (the fair's cover), `visit/[...tab].astro`
+(practical info hero) and `guest-of-honour/[...tab].astro` (interview
+poster).
+
+**Nothing on the live site changes.** Every one of those slots is filled in
+Sanity today - checked against all 895 built pages, where the only files
+left from `public/assets/` are `wordmark.svg` and `menu.svg`. The branches
+removed were already dead; they were removed so they cannot silently come
+back.
+
+Two of the same kind are deliberately still there, because removing them
+needs a design decision rather than a deletion:
+
+- `components/VideoEmbed.astro` takes `poster: string` and renders the
+  `<img>` unconditionally, so `VideoSection.astro` and
+  `artists/[slug].astro` still fall back to `/assets/video-still.webp`. Drop
+  the fallback and a film with no poster gets a broken image. It needs the
+  frame to hold its shape with no poster - your call how.
+- `Header.astro` falls back to `/assets/date-logo.png` when the edition has
+  no dates mark. It is on every page, and a *stale* date graphic is worse
+  than none, so it is worth fixing - but it is site chrome, not page
+  content.
+
+## Changed in your files on 2026-09-11 (kamindu branch) - please review
+
+Kamindu asked for these alongside a Studio clean-up, so the site, the
+Studio and the preview agree. Small on purpose; each is worth a look when
+you merge.
+
+- **Exhibitors per year, as on the old site.** `/exhibitors/<year>` lists a
+  past edition and `/exhibitors/<year>/<slug>` is its gallery; the current
+  edition is unchanged at `/exhibitors` and `/exhibitors/<slug>`. The list
+  and the detail moved into `components/ExhibitorsListing.astro` and
+  `components/ExhibitorDetail.astro` (same markup and CSS), and
+  `exhibitors/[slug].astro` renders a year list when the segment is four
+  digits. Links go through `exhibitorPath()` (`ExhibitorCard`, the artist
+  page, the pager). `/editions` links each year's exhibitor count to its list.
+- **Slideshows are real.** The exhibitor artwork, laureates, the hotel and
+  food & drinks use `Slideshow.astro` for every image, captions included,
+  instead of the first image with decorative dots.
+- **Text blocks with no text are skipped** (`Sections.astro`): a heading
+  with nothing under it no longer renders as a bare title over a rule.
+- **Editor order kept** on about/the fair and art prize/about: text blocks
+  stay where the editor put them, in runs drawn two across as before.
+- **HubNav** draws only the tabs in `hubs.ts`; extra pills led to 404s.
+- **Hub routes** pass the page's meta title and "hide from search engines"
+  to `Base` (art prize, programme, partners, visit, guest of honour).
+- **"Skip to content"** is `common.skip` in all three languages; the public
+  empty states no longer say "Add them in the Studio".
+
 ## Page → route → data → Figma
 
 Every page's frontmatter calls helpers from `src/lib/queries.ts`. Each takes
@@ -88,6 +150,7 @@ exactly which fields you have; the projection is the contract.
 | Artists index and detail (no frame) | `src/pages/[lang]/artists/index.astro`, `artists/[slug].astro` | `getArtists`, `getArtist` | `artist` |
 | News list and article (no frame) | `src/pages/[lang]/news/index.astro`, `news/[slug].astro` | `getNews`, `getNewsItem` | `newsItem` |
 | Past editions (no frame) | `src/pages/[lang]/editions.astro` | `getEditions` | `edition` |
+| Contact (no frame) | `src/pages/[lang]/contact.astro` | `getMainPage('contact')`, `getSettings`, `getPeople('team')` | `page` (section `contact`), `siteSettings` (address, social, newsletter), `person` (team members with an email) |
 | Standalone page (no frame) | `src/pages/[lang]/[...slug].astro` | `getPage` | `page` without a `section`, slug per locale |
 
 Frames marked "no frame" have no Figma yet. Build them from the closest frame

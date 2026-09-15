@@ -1,0 +1,580 @@
+---
+import Base from '../../layouts/Base.astro';
+import HubNav from '../../components/HubNav.astro';
+import Sections from '../../components/Sections.astro';
+import PageSections from '../../components/PageSections.astro';
+import SanityImage from '../../components/SanityImage.astro';
+import Slideshow from '../../components/Slideshow.astro';
+import PortableText from '../../components/PortableText.astro';
+import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { useTranslations, localePath } from '../../lib/i18n';
+import { getHubPages, getLaureates, getAwards, getPeople } from '../../lib/queries';
+import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
+import { instagramUrl } from '../../lib/links';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * The art prize hub on its acid ground, as the design's three art prize
+ * pages draw it. About: the cover with its counter, dots and caption beside
+ * the intro, the text sections two across, the partners row, the closing
+ * images. Laureates: one row per laureate, picture and text alternating
+ * sides. Awards: the intro line and a two-column masonry of award blocks.
+ * Jury (no design page): the advisory-board article treatment.
+ */
+const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
+const hub = HUBS['art-prize'];
+const t = useTranslations(lang);
+
+const pages = await getHubPages(lang, 'art-prize');
+const page = pageForTab(pages, tab);
+
+// The current edition's laureates; the latest edition with any when the
+// current one has none yet.
+const laureateYears = tab === 'laureates' ? await getLaureates(lang) : [];
+const laureates: any[] = (laureateYears.find((y: any) => y.isCurrent) ?? laureateYears[0])?.laureates ?? [];
+
+// The newest edition's art prize awards - the design lists one edition.
+const allAwards = tab === 'awards' ? (await getAwards(lang)).filter((a: any) => a.family === 'art-prize' && a.year) : [];
+const awardYear = allAwards[0]?.year;
+const awards = allAwards.filter((a: any) => a.year === awardYear);
+
+const jury = tab === 'jury' ? await getPeople(lang, 'jury') : [];
+
+const path = hubTabPath('art-prize', tab, lang);
+const altPaths = hubAltPaths('art-prize', tab);
+const tabKey = hub.tabs.find((x) => x.slug === tab)?.label;
+const tabLabel = page?.tabLabel ?? (tabKey ? t(tabKey) : tab);
+
+/** The stack in the editor's order, runs of text blocks drawn two across as the design does. */
+const runs: { text: boolean; items: any[] }[] = [];
+for (const s of page?.sections ?? []) {
+  const text = s?._type === 'contentSection';
+  const last = runs[runs.length - 1];
+  if (last && last.text === text) last.items.push(s);
+  else runs.push({ text, items: [s] });
+}
+const firstText = runs.findIndex((r) => r.text);
+const closing: any[] = (page?.images ?? []).filter((img: any) => img?.asset);
+
+/** "A and B", "A, B and C" - the design writes "and". */
+const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ` ${t('common.and')} ` : ', ');
+/** "Artist, *Title*, year" as the design captions a picture. */
+const captionOf = (img: any, fallback?: string) => ({
+  who: img?.caption ?? fallback,
+  title: img?.workTitle,
+  year: img?.year,
+});
+---
+
+<Base
+  lang={lang}
+  title={page?.seo?.title ?? `${t('nav.artPrize')} — ${tabLabel}`}
+  description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
+  path={path}
+  altPaths={altPaths}
+  theme="acid"
+  image={page?.seo?.ogImage ?? page?.cover}
+  editId={page?._id}
+  editType={page?._type}
+>
+  <HubNav lang={lang} route="art-prize" active={tab} pages={pages} dark />
+
+  {
+    tab === 'about' && (
+      <div class="content-wrap prize-about">
+        <div class="hero">
+          {page?.cover?.asset ? (
+            <figure>
+              <SanityImage image={page.cover} loading="eager" sizes="(max-width: 700px) 100vw, 66vw" widths={[600, 900, 1200, 1800]} />
+              <span class="dots" aria-hidden="true">
+                <i />
+              </span>
+              <figcaption>
+                <b>1/1</b>
+                {(page.cover.caption || page.cover.workTitle) && (
+                  <span>
+                    {captionOf(page.cover).who}
+                    {captionOf(page.cover).title && (
+                      <>
+                        {captionOf(page.cover).who ? ', ' : ''}
+                        <em>{captionOf(page.cover).title}</em>
+                      </>
+                    )}
+                    {captionOf(page.cover).year && `, ${captionOf(page.cover).year}`}
+                  </span>
+                )}
+              </figcaption>
+            </figure>
+          ) : (
+            <div />
+          )}
+          {page?.intro && <p {...styleAttrs(page.introStyle)}>{page.intro}</p>}
+        </div>
+
+        {runs.map((run, i) =>
+          run.text ? (
+            <Sections lang={lang} sections={run.items} columns={2} statementFirst={i === firstText} class="blocks" />
+          ) : (
+            <PageSections lang={lang} sections={run.items} />
+          ),
+        )}
+
+        {page?.body && (
+          <div class="body-24 blocks">
+            <PortableText value={page.body} fieldStyle={page.bodyStyle} />
+          </div>
+        )}
+
+        {closing.length > 0 && (
+          <div class="gallery">
+            {closing.map((img: any) => (
+              <SanityImage image={img} aspect={1.5} sizes="(max-width: 700px) 100vw, 33vw" widths={[400, 600, 900, 1200]} />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  {
+    tab === 'laureates' && (
+      <div class="laureates">
+        {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
+        {laureates.length ? (
+          laureates.map((l: any, i: number) => {
+            const artist = l.artist ?? {};
+            const images = (l.images ?? []).filter((img: any) => img?.asset);
+            const first = images[0] ?? (artist.portrait?.asset ? artist.portrait : null);
+            const cap = captionOf(first, artist.name);
+            /* "Poland, 1996" as the design writes it; the base line when the nationality is not filled in. */
+            const place =
+              [artist.nationality, artist.birthYear].filter(Boolean).join(', ') ||
+              (artist.basedIn ? `${t('artists.basedIn')} ${artist.basedIn}` : '');
+            return (
+              <article class:list={[{ reverse: i % 2 === 1 }]}>
+                <figure>
+                  <div class="image">
+                    {images.length > 0 ? (
+                      <Slideshow
+                        images={images.map((img: any) => ({ ...img, caption: img.caption ?? artist.name }))}
+                        aspect={433 / 541}
+                        sizes="(max-width: 640px) 100vw, 433px"
+                        widths={[433, 866, 1300]}
+                        label={artist.name}
+                        id={`laureate-${i + 1}`}
+                      />
+                    ) : first ? (
+                      <>
+                        <SanityImage image={first} aspect={433 / 541} sizes="(max-width: 640px) 100vw, 433px" widths={[433, 866, 1300]} />
+                        <figcaption>
+                          <b>1/1</b>
+                          {(cap.who || cap.title) && (
+                            <span>
+                              {cap.who}
+                              {cap.title && `, ${cap.title}`}
+                              {cap.year && `, ${cap.year}`}
+                            </span>
+                          )}
+                        </figcaption>
+                      </>
+                    ) : (
+                      <div class="placeholder" />
+                    )}
+                  </div>
+                </figure>
+                <section>
+                  <div class="name">
+                    <h2 {...styleAttrs(artist.nameStyle)}>
+                      {artist.slug ? <a href={localePath(lang, `artists/${artist.slug}`)}>{artist.name}</a> : artist.name}
+                    </h2>
+                    {artist.instagram && (
+                      <a class="pill" href={instagramUrl(artist.instagram)} target="_blank" rel="noopener noreferrer">
+                        {t('common.instagram')} ↗
+                      </a>
+                    )}
+                  </div>
+                  {place && (
+                    <p class="place" {...styleAttrs(artist.nationalityStyle)}>
+                      {place}
+                    </p>
+                  )}
+                  {(l.statement ?? artist.bio) && (
+                    <div class="bio">
+                      <PortableText value={l.statement ?? artist.bio} fieldStyle={l.statement ? l.statementStyle : artist.bioStyle} />
+                    </div>
+                  )}
+                </section>
+              </article>
+            );
+          })
+        ) : (
+          <p class="empty">{t('artPrize.noLaureates')}</p>
+        )}
+      </div>
+    )
+  }
+
+  {
+    tab === 'awards' && (
+      <div class="content-wrap awards-page">
+        {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
+        {awards.length ? (
+          <div class="award-grid">
+            {awards.map((a: any) => (
+              <article>
+                <h2 {...styleAttrs(a.nameStyle)}>{a.name}</h2>
+                {(a.laureates?.length > 0 || a.outcome) && (
+                  <p class="award">
+                    →{' '}
+                    <u>
+                      {(a.laureates ?? []).map((l: any, i: number) => (
+                        <>
+                          {joiner(i, a.laureates.length)}
+                          {l.slug ? <a href={localePath(lang, `artists/${l.slug}`)}>{l.name}</a> : l.name}
+                        </>
+                      ))}
+                      {a.laureates?.length > 0 && a.outcome && ' '}
+                      {a.outcome}
+                    </u>
+                  </p>
+                )}
+                {a.description && (
+                  <div class="body">
+                    <PortableText value={a.description} fieldStyle={a.descriptionStyle} />
+                  </div>
+                )}
+                {a.image?.asset && <SanityImage image={a.image} sizes="(max-width: 700px) 100vw, 50vw" widths={[500, 800, 1200]} />}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p class="empty">{t('awards.empty')}</p>
+        )}
+      </div>
+    )
+  }
+
+  {
+    tab === 'jury' && (
+      <div class="content-wrap">
+        {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
+        {jury.length ? (
+          <div class="people">
+            {jury.map((p: any) => (
+              <article>
+                <h2>{p.name}</h2>
+                <div>
+                  {p.portrait?.asset ? <SanityImage image={p.portrait} sizes="197px" widths={[197, 394, 600]} /> : <div class="placeholder" />}
+                  <section>
+                    {p.role && <strong {...styleAttrs(p.roleStyle)}>{p.role}</strong>}
+                    {p.bio && <PortableText value={p.bio} fieldStyle={p.bioStyle} />}
+                    {(p.instagram || p.website) && (
+                      <p class="links">
+                        {p.instagram && (
+                          <a class="pill" href={instagramUrl(p.instagram)} target="_blank" rel="noopener noreferrer">
+                            {t('common.instagram')} ↗
+                          </a>
+                        )}
+                        {p.website && (
+                          <a class="pill" href={p.website} target="_blank" rel="noopener noreferrer">
+                            {t('common.website')} ↗
+                          </a>
+                        )}
+                      </p>
+                    )}
+                  </section>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p class="empty">{t('artPrize.noJury')}</p>
+        )}
+      </div>
+    )
+  }
+</Base>
+
+<style>
+  /* From the design's art prize pages. */
+  .hero {
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+    display: grid;
+  }
+  .hero figure {
+    margin: 0;
+    position: relative;
+  }
+  .hero :global(img) {
+    width: 100%;
+  }
+  .dots {
+    gap: 14px;
+    display: flex;
+    position: absolute;
+    bottom: 42px;
+    left: 50%;
+    transform: translate(-50%);
+  }
+  .dots i {
+    background: #fff;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+  }
+  figcaption {
+    justify-content: space-between;
+    padding-top: 6px;
+    display: flex;
+  }
+  .hero > p {
+    letter-spacing: -0.04em;
+    font-size: 50px;
+    line-height: 1.1;
+  }
+  /* `blocks` is passed to Sections, whose markup carries no scope attribute. */
+  :global(.blocks) {
+    margin-top: 55px;
+  }
+  .gallery {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-top: 55px;
+    display: grid;
+  }
+  .gallery :global(img) {
+    aspect-ratio: 1.5;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  /* The laureates, from art-prize/laureates/index.html (2026-09-14 build). */
+  .laureates {
+    padding: 0 var(--gutter) 100px;
+  }
+  .laureates .intro-large {
+    margin-bottom: 55px;
+  }
+  .laureates article {
+    grid-template-columns: 433px 1fr;
+    gap: 40px;
+    margin-bottom: 68px;
+    display: grid;
+  }
+  .laureates article.reverse {
+    grid-template-columns: 1fr 433px;
+  }
+  .laureates figure {
+    margin: 0;
+  }
+  .reverse figure {
+    order: 2;
+  }
+  .image {
+    position: relative;
+  }
+  .image :global(img),
+  .image .placeholder {
+    object-fit: cover;
+    width: 100%;
+    aspect-ratio: 433 / 541;
+    background: #f0efed;
+  }
+  .image :global(figcaption) {
+    gap: 14px;
+    padding-top: 6px;
+    font-size: 13px;
+  }
+  .name {
+    border-top: 1px solid;
+    justify-content: space-between;
+    align-items: start;
+    gap: 20px;
+    padding-top: 8px;
+    display: flex;
+  }
+  .name h2 {
+    letter-spacing: -0.045em;
+    font-size: 48px;
+    font-weight: 400;
+    line-height: 1;
+  }
+  .place {
+    margin-top: 10px;
+    font-size: 27px;
+    line-height: 1.1;
+  }
+  /* The design lays the bio's paragraphs on a two-column grid, the third
+     one across both; the rich text arrives in one wrapper, so the grid
+     goes on that. */
+  .bio {
+    margin-top: 34px;
+    font-size: 18px;
+    line-height: 1.25;
+  }
+  .bio :global(.rich-text) {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 40px;
+    display: grid;
+  }
+  .bio :global(.rich-text > p:nth-child(3)) {
+    grid-column: 1 / -1;
+  }
+  .laureates .pill {
+    flex: none;
+    padding: 2px 13px;
+    font-size: 16px;
+    line-height: 25px;
+  }
+
+  .awards-page .intro-large {
+    margin-bottom: 0;
+  }
+  .award-grid {
+    columns: 2;
+    column-gap: 40px;
+    margin-top: 50px;
+  }
+  .award-grid article {
+    break-inside: avoid;
+    margin-bottom: 60px;
+  }
+  .award-grid h2 {
+    border-bottom: 2px solid;
+    padding-bottom: 8px;
+    font-size: 36px;
+    font-weight: 600;
+  }
+  .award {
+    margin-top: 25px;
+    font-size: 34px;
+    line-height: 1.15;
+  }
+  .body {
+    white-space: pre-line;
+    margin-top: 28px;
+    font-size: 20px;
+    line-height: 1.25;
+  }
+  .body :global(p + p) {
+    margin-top: 1.25em;
+  }
+  .award-grid :global(img) {
+    width: 100%;
+    margin-top: 36px;
+  }
+
+  /* The advisory-board treatment, for the jury. */
+  .people {
+    grid-template-columns: 1fr 1fr;
+    gap: 70px 40px;
+    margin-top: 55px;
+    display: grid;
+  }
+  .people h2 {
+    letter-spacing: -0.04em;
+    border-bottom: 1px solid;
+    font-size: 36px;
+    font-weight: 600;
+  }
+  .people article > div {
+    grid-template-columns: 197px 1fr;
+    gap: 40px;
+    margin-top: 28px;
+    display: grid;
+  }
+  .people :global(img),
+  .people .placeholder {
+    object-fit: cover;
+    width: 197px;
+    max-height: 270px;
+    background: #f0efed;
+  }
+  .people section {
+    font-size: 24px;
+    line-height: 1.22;
+  }
+  .people section :global(p) {
+    margin-top: 16px;
+  }
+  .links {
+    gap: 14px;
+    display: flex;
+  }
+  .empty {
+    padding-top: 40px;
+    font-size: 24px;
+  }
+
+  @media (width<=800px) {
+    .people {
+      grid-template-columns: 1fr;
+    }
+    .people article > div {
+      grid-template-columns: 120px 1fr;
+      gap: 18px;
+    }
+    .people :global(img),
+    .people .placeholder {
+      width: 120px;
+    }
+    .people h2 {
+      font-size: 28px;
+    }
+  }
+  @media (width<=700px) {
+    .hero,
+    .gallery {
+      grid-template-columns: 1fr;
+    }
+    .hero > p {
+      font-size: 34px;
+    }
+    .hero figcaption span {
+      display: none;
+    }
+    .award-grid {
+      columns: 1;
+    }
+    .award {
+      font-size: 28px;
+    }
+  }
+  @media (width<=900px) {
+    .laureates article,
+    .laureates article.reverse {
+      grid-template-columns: 34% 1fr;
+      gap: 24px;
+    }
+    .laureates article.reverse {
+      grid-template-columns: 1fr 34%;
+    }
+    .bio :global(.rich-text) {
+      grid-template-columns: 1fr;
+    }
+    .bio :global(.rich-text > p:nth-child(3)) {
+      grid-column: auto;
+    }
+  }
+  @media (width<=640px) {
+    .laureates article,
+    .laureates article.reverse {
+      flex-direction: column;
+      display: flex;
+    }
+    .reverse figure {
+      order: 0;
+    }
+    .name h2 {
+      font-size: 38px;
+    }
+    .place {
+      font-size: 24px;
+    }
+    .bio {
+      font-size: 17px;
+    }
+  }
+</style>
