@@ -696,7 +696,14 @@ export function getAwards(lang: LocaleId) {
       "partner": partner->{ _id, name, url, logo ${IMAGE} },
       "laureates": laureates[]->{ _id, name, "slug": slug.current },
       "artist": laureates[0]->{ name, "slug": slug.current },
-      "gallery": winnerExhibitor->{ name, "slug": slug.current },
+      // The winning gallery with what the exhibitor awards page shows of it:
+      // its city, its edition (for exhibitorPath) and its pictures, which
+      // stand in when the award has no image of its own.
+      "gallery": winnerExhibitor->{
+        _id, name, city, country, countryCode, "slug": slug.current,
+        "year": edition->year, "current": edition->isCurrent == true,
+        "images": images[] ${IMAGE}
+      },
       image ${IMAGE}
     }`,
     { lang },
@@ -792,7 +799,16 @@ export function getHubPages(lang: LocaleId, section: string) {
  * editor has made one, and the page renders without it.
  */
 export function getMainPage(lang: LocaleId, section: string) {
-  return run<any>(`*[_type == "page" && section == $section] | order(order asc)[0] ${PAGE}`, { lang, section });
+  // The main page carries the section as its English slug (mainPages.ts);
+  // a section can also hold other pages - exhibitors/awards reads its intro
+  // from one - so prefer the page whose slug says it is the main one.
+  return run<any>(
+    `coalesce(
+      *[_type == "page" && section == $section && slug.en.current == $section][0] ${PAGE},
+      *[_type == "page" && section == $section] | order(order asc)[0] ${PAGE}
+    )`,
+    { lang, section },
+  );
 }
 
 /* ------------------------------------------------- programme / partners / press */

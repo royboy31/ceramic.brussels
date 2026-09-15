@@ -34,7 +34,8 @@ export const award = defineType({
       },
       initialValue: 'art-prize',
       validation: (rule) => rule.required(),
-      description: 'Only art prize awards are on the site: the art prize "awards" tab lists the newest year’s.',
+      description:
+        'Art prize awards make the art prize "awards" tab; fair awards (best booth, best solo show…) make the exhibitors "awards" page. Both show the newest year that has any.',
     }),
     defineField({
       name: 'edition',
@@ -65,7 +66,9 @@ export const award = defineType({
       title: 'Winning gallery',
       type: 'reference',
       to: [{ type: 'exhibitor' }],
-      hidden: true,
+      description: 'The exhibitor a fair award went to. The exhibitors "awards" page shows its name, city and pictures.',
+      // Only a fair award has a winning gallery; an art prize award has laureates.
+      hidden: ({ document }) => document?.family !== 'fair',
     }),
     defineField({
       name: 'outcome',

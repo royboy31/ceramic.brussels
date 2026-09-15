@@ -6,9 +6,9 @@ import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * The key figures table, from the most recent edition that has any. On the
- * homepage it is the design's "key 2026 figures" table: five ruled cells
- * (visitors, exhibitors, artists, VIPs, press clips) whose numbers count up
- * as they scroll into view. Any further figure gets a plain cell.
+ * homepage it is the design's "key 2026 figures" grid (2026-09-14 build): a
+ * centred title over two columns of ruled cells, number and label on one
+ * baseline, whose numbers count up as they scroll into view.
  */
 interface Props {
   lang: LocaleId;
@@ -22,8 +22,6 @@ const edition = section.edition;
 const figures: any[] = edition?.keyFigures ?? [];
 const link = resolveLink(lang, section.link);
 const external = link?.external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
-
-const SLOTS = ['visitors', 'exhibitors', 'artists', 'vips', 'press'];
 /** "19,200" → 19200; "200+" → 200 with a "+" suffix, for the count-up. */
 const count = (value: string) => {
   const m = String(value ?? '').match(/^([\d.,\s]+)(.*)$/);
@@ -37,12 +35,12 @@ const count = (value: string) => {
   figures.length > 0 &&
     (variant === 'home' ? (
       <section class="home-stats" id={section.anchor || undefined}>
-        <p>{t('home.keyFigures', { year: edition.year })}</p>
-        <div class="home-stats__table">
-          {figures.map((figure: any, i: number) => {
+        <h2>{t('home.keyFigures', { year: edition.year })}</h2>
+        <div class="stats__grid">
+          {figures.map((figure: any) => {
             const c = count(figure.value);
             return (
-              <div class:list={['stat', SLOTS[i] ? `stat--${SLOTS[i]}` : null]}>
+              <div>
                 <strong data-count={c?.n} data-count-suffix={c?.suffix || undefined}>
                   {figure.value}
                 </strong>
@@ -82,62 +80,43 @@ const count = (value: string) => {
 }
 
 <style>
-  /* From the design's index.css. */
+  /* From the design's index.css (2026-09-14 build): `.stats`. */
   .home-stats {
-    margin-top: 54px;
+    margin-top: 65px;
   }
-  .home-stats > p {
-    letter-spacing: -0.05em;
-    text-transform: uppercase;
-    height: 70px;
-    margin: 0;
-    padding: 0 30px;
-    font-size: 40px;
-    line-height: 70px;
+  .home-stats h2 {
+    text-align: center;
+    letter-spacing: -0.04em;
+    margin-bottom: 42px;
+    font-size: 58px;
+    font-weight: 600;
+    line-height: 1;
   }
-  .home-stats__table {
+  .stats__grid {
     border-top: 1px solid #000;
-    border-bottom: 1px solid #000;
-    grid-template-rows: 145px 145px 162px;
     grid-template-columns: repeat(2, 1fr);
     display: grid;
   }
-  .home-stats .stat {
+  .stats__grid > div {
     border-bottom: 1px solid #000;
-    align-items: center;
+    align-items: baseline;
+    gap: 22px;
+    min-height: 116px;
+    padding: 15px 45px;
     display: flex;
   }
-  .home-stats .stat strong {
-    letter-spacing: -0.05em;
-    font-size: 120px;
+  .stats__grid > div:nth-child(odd) {
+    border-right: 1px solid #000;
+  }
+  .home-stats strong {
+    letter-spacing: -0.055em;
+    font-size: 72px;
     font-weight: 400;
-    line-height: 0.7;
+    line-height: 1;
   }
-  .home-stats .stat span {
-    letter-spacing: -0.04em;
-    font-size: 50px;
-    line-height: 50px;
-  }
-  .stat--visitors {
-    border-right: 1px solid #000;
-    padding-left: 30px;
-  }
-  .stat--exhibitors {
-    padding-left: 40px;
-  }
-  .stat--artists {
-    border-right: 1px solid #000;
-    justify-content: center;
-  }
-  .stat--vips {
-    justify-content: flex-end;
-    padding-right: 30px;
-  }
-  .stat--press {
-    border-bottom: 0;
-    grid-column: 1 / -1;
-    justify-content: center;
-    gap: 10px;
+  .home-stats span {
+    font-size: 31px;
+    line-height: 1;
   }
   .home-stats .stats-link {
     margin: 1.5rem 0 0;
@@ -145,36 +124,38 @@ const count = (value: string) => {
     font-size: clamp(1.25rem, 2.7vw, 2.5rem);
     letter-spacing: -0.05em;
   }
-  @media (width<=700px) {
-    .home-stats {
-      margin-top: 40px;
+  @media (width<=900px) {
+    .stats__grid > div {
+      padding-inline: 18px;
     }
-    .home-stats > p {
-      height: 50px;
-      padding: 0 10px;
+    .home-stats strong {
+      font-size: 54px;
+    }
+    .home-stats span {
       font-size: 22px;
-      line-height: 50px;
     }
-    .home-stats__table {
-      border-bottom: 0;
+  }
+  @media (width<=640px) {
+    .home-stats h2 {
+      font-size: 42px;
+    }
+    .stats__grid {
       display: block;
     }
-    .home-stats .stat {
-      border-bottom: 1px solid #000;
+    .stats__grid > div:nth-child(odd) {
       border-right: 0;
+    }
+    .stats__grid > div {
       justify-content: space-between;
-      min-height: 105px;
-      padding: 12px 10px;
+      min-height: 95px;
+      padding: 14px 10px;
     }
-    .home-stats .stat strong {
-      font-size: 64px;
+    .home-stats strong {
+      font-size: 50px;
     }
-    .home-stats .stat span {
-      font-size: 30px;
-      line-height: 1;
-    }
-    .stat--press {
-      justify-content: center;
+    .home-stats span {
+      text-align: right;
+      font-size: 22px;
     }
   }
 

@@ -1,0 +1,220 @@
+---
+import type { LocaleId } from '../lib/locales';
+import { useTranslations, localePath } from '../lib/i18n';
+
+/**
+ * The title band of the exhibitor pages, as the design's exhibitors pages
+ * draw it (2026-09-14 build): "exhibitors" on the left, the four bordered
+ * tabs on the right - galleries, artists, catalogue, awards - and under
+ * them the ALL + A–Z row. Galleries is the edition's list, artists the
+ * artist index, catalogue the edition's PDF (shown only when there is one),
+ * awards the fair's exhibitor awards.
+ *
+ * The letters are buttons on a list page, where the page's own script
+ * filters the list by initial (a `#A` in the address pre-selects a letter),
+ * and links back to the list on a detail page, where the exhibitor's own
+ * initial is marked.
+ */
+interface Props {
+  lang: LocaleId;
+  active: 'galleries' | 'artists' | 'awards';
+  /** The edition, for the catalogue tab. */
+  edition?: any;
+  /** A past edition's list or exhibitor: the year joins the title and the galleries tab points at that year. */
+  year?: number;
+  /** Draw the ALL + A–Z row. */
+  alphabet?: boolean;
+  /** The letter to mark: 'ALL' on a list, the exhibitor's initial on a detail page. */
+  activeLetter?: string;
+  /** On a detail page, the list the letters link back to ('exhibitors', 'exhibitors/2025'). */
+  letterHref?: string;
+}
+
+const { lang, active, edition, year, alphabet = false, activeLetter = 'ALL', letterHref } = Astro.props;
+const t = useTranslations(lang);
+
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const listPath = year ? `exhibitors/${year}` : 'exhibitors';
+const tabs = [
+  { key: 'galleries', label: t('exhibitors.galleries'), href: localePath(lang, listPath) },
+  { key: 'artists', label: t('nav.artists').toLowerCase(), href: localePath(lang, 'artists') },
+  edition?.catalogueUrl && { key: 'catalogue', label: t('home.catalogue').toLowerCase(), href: edition.catalogueUrl, external: true },
+  { key: 'awards', label: t('nav.awards').toLowerCase(), href: localePath(lang, 'exhibitors/awards') },
+].filter(Boolean) as { key: string; label: string; href: string; external?: boolean }[];
+const letters = ['ALL', ...LETTERS];
+const mark = (activeLetter || 'ALL').toUpperCase();
+---
+
+<header class="exhibitor-head">
+  <div class="exhibitor-head__top">
+    <h1>
+      {t('nav.exhibitors').toLowerCase()}
+      {year && ` ${year}`}
+    </h1>
+    <nav aria-label={t('nav.exhibitors')}>
+      {
+        tabs.map((tab) => (
+          <a
+            class:list={[{ active: tab.key === active }]}
+            href={tab.href}
+            aria-current={tab.key === active ? 'page' : undefined}
+            {...(tab.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          >
+            {tab.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+  {
+    alphabet && (
+      <nav class="alphabet" aria-label={t('exhibitors.byLetter')} data-alphabet>
+        {letters.map((letter) =>
+          letterHref ? (
+            <a
+              class:list={[{ active: letter === mark }]}
+              href={localePath(lang, letterHref) + (letter === 'ALL' ? '' : `#${letter}`)}
+              aria-current={letter === mark ? 'true' : undefined}
+            >
+              {letter === 'ALL' ? t('exhibitors.all') : letter}
+            </a>
+          ) : (
+            <button
+              type="button"
+              class:list={[{ active: letter === mark }]}
+              data-letter={letter}
+              aria-pressed={letter === mark ? 'true' : 'false'}
+            >
+              {letter === 'ALL' ? t('exhibitors.all') : letter}
+            </button>
+          ),
+        )}
+      </nav>
+    )
+  }
+</header>
+
+<style>
+  /* From the design's exhibitors pages (2026-09-14 build). The letter row
+     holds buttons on a list page and links on a detail page; the rules
+     address both. */
+  .exhibitor-head {
+    /* Room under the header before the title band (client feedback, 2026-09-15). */
+    padding: 60px var(--gutter) 0;
+  }
+  .exhibitor-head__top {
+    justify-content: space-between;
+    align-items: end;
+    gap: 32px;
+    display: flex;
+  }
+  h1 {
+    letter-spacing: -0.055em;
+    font-size: 70px;
+    font-weight: 600;
+    line-height: 0.9;
+  }
+  nav {
+    flex-wrap: wrap;
+    gap: 20px;
+    display: flex;
+  }
+  .exhibitor-head__top a {
+    text-align: center;
+    border: 1px solid #000;
+    min-width: 135px;
+    padding: 8px 24px;
+    font-size: 28px;
+    line-height: 1;
+    transition:
+      color 0.18s,
+      background-color 0.18s;
+  }
+  .exhibitor-head__top a.active {
+    background: #fff350;
+  }
+  .exhibitor-head__top a:hover {
+    color: #fff;
+    background: #050505;
+  }
+  .alphabet {
+    align-items: center;
+    gap: 0;
+    margin-top: 48px;
+  }
+  .alphabet > * {
+    cursor: pointer;
+    flex: 1;
+    min-width: 36px;
+    padding: 6px 3px;
+    font-size: 27px;
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    position: relative;
+  }
+  .alphabet > :first-child {
+    border: 1px solid;
+    flex: 0 0 84px;
+    min-width: 84px;
+    margin-right: 32px;
+    font-weight: 600;
+  }
+  .alphabet > :nth-child(n + 3):before {
+    content: '-';
+    font-weight: 400;
+    text-decoration: none;
+    position: absolute;
+    left: -3px;
+  }
+  .alphabet > :not(:first-child).active {
+    text-underline-offset: 0.14em;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+  .alphabet > :hover {
+    font-weight: 600;
+  }
+  @media (width<=900px) {
+    .exhibitor-head {
+      padding-top: 40px;
+    }
+    .exhibitor-head__top {
+      flex-direction: column;
+      align-items: start;
+    }
+    .exhibitor-head__top nav {
+      gap: 8px;
+    }
+    .exhibitor-head__top a {
+      min-width: auto;
+      padding: 7px 14px;
+      font-size: 20px;
+    }
+    .alphabet {
+      flex-wrap: nowrap;
+      margin-top: 28px;
+      overflow: auto;
+    }
+    .alphabet > * {
+      flex: 0 0 38px;
+      font-size: 22px;
+    }
+    .alphabet > :first-child {
+      flex-basis: 68px;
+      min-width: 68px;
+      margin-right: 20px;
+    }
+  }
+  @media (width<=640px) {
+    .exhibitor-head {
+      padding-top: 30px;
+    }
+    h1 {
+      font-size: 48px;
+    }
+    .exhibitor-head__top {
+      gap: 22px;
+    }
+  }
+</style>

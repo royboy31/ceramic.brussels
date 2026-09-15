@@ -2,14 +2,17 @@
 import type { LocaleId } from '../../lib/locales';
 import { useTranslations } from '../../lib/i18n';
 import VideoEmbed from '../VideoEmbed.astro';
+import SanityImage from '../SanityImage.astro';
 import { urlFor } from '../../sanity/image';
 import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * The film. The query already falls back to the latest edition's film when
  * the block's own video is empty. On the homepage it is the design's
- * edge-to-edge frame with the film playing silently on a loop; elsewhere the
- * poster-and-play embed.
+ * feature row (2026-09-14 build): the poster on two thirds, linking out to
+ * the film, with its credit underneath, and the title as a kicker with a
+ * "watch the video" arrow link beside it. Elsewhere the poster-and-play
+ * embed.
  */
 interface Props {
   lang: LocaleId;
@@ -23,30 +26,41 @@ const video = section.video;
 const poster = video?.poster?.asset
   ? urlFor(video.poster).width(1600).height(1066).fit('crop').auto('format').quality(78).url()
   : '/assets/video-still.webp';
-
-function youtubeId(value: string): string | null {
-  const m = String(value ?? '').match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{6,})/);
-  return m ? m[1] : null;
-}
-const id = video?.url ? youtubeId(video.url) : null;
-const loop = id
-  ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&playsinline=1&controls=0&rel=0&modestbranding=1`
-  : null;
+const title: string = video?.title ?? t('home.watch');
+/** Titles are written with line breaks in the Studio; keep them. */
+const lines = title.split(/\r?\n/);
+const credit = video?.poster?.credit;
 ---
 
 {
   video?.url &&
-    (variant === 'home' && loop ? (
-      <section class="home-video" id={section.anchor || undefined}>
-        <div class="home-video__frame">
-          <iframe
-            src={loop}
-            title={video.title ?? t('home.watch')}
-            allow="autoplay; encrypted-media; picture-in-picture"
-            referrerpolicy="strict-origin-when-cross-origin"
-            loading="eager"
-            tabindex="-1"
-          />
+    (variant === 'home' ? (
+      <section class="split feature feature--video" id={section.anchor || undefined}>
+        <div class="video-frame">
+          <a href={video.url} target="_blank" rel="noopener noreferrer" aria-label={`${t('home.watchVideo')}: ${title}`}>
+            {video.poster?.asset ? (
+              <SanityImage image={video.poster} aspect={16 / 9} widths={[800, 1200, 1600, 2000]} sizes="(max-width: 640px) 100vw, 66vw" />
+            ) : (
+              <img src={poster} alt={title} width="1600" height="900" />
+            )}
+          </a>
+          {credit && <small>{t('home.videoBy', { credit })}</small>}
+        </div>
+        <div class="feature__copy">
+          <p class="kicker" {...styleAttrs(video.titleStyle)}>
+            {lines.map((line, i) => (
+              <>
+                {i > 0 && <br />}
+                {line}
+              </>
+            ))}
+          </p>
+          <a class="arrow-link" href={video.url} target="_blank" rel="noopener noreferrer">
+            {t('home.watchVideo')}{' '}
+            <span class="link-arrow" data-arrow="→" aria-hidden="true">
+              →
+            </span>
+          </a>
         </div>
       </section>
     ) : (
@@ -62,51 +76,97 @@ const loop = id
 }
 
 <style>
-  /* From the design's index.css. */
-  .home-video {
-    height: 726px;
-    margin-top: 47px;
-    padding: 20px 0;
-    overflow: hidden;
+  /* From the design's index.css (2026-09-14 build): the film row. */
+  .split {
+    grid-template-columns: minmax(0, 2fr) minmax(310px, 1fr);
+    gap: 40px;
+    margin: 30px var(--gutter);
+    display: grid;
   }
-  .home-video__frame {
-    background: #000;
-    height: 686px;
-    position: relative;
-    overflow: hidden;
+  .feature--video {
+    align-items: start;
+    margin-top: 80px;
   }
-  .home-video iframe {
-    aspect-ratio: 16 / 9;
-    border: 0;
+  .video-frame :global(img) {
     width: 100%;
-    height: auto;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: #000;
   }
-  @media (width>=701px) and (width<=1439px) {
-    .home-video {
-      height: 50.4167vw;
-      margin-top: 3.2639vw;
-      padding: 1.3889vw 0;
+  .video-frame small {
+    margin-top: 7px;
+    display: block;
+  }
+  .feature__copy {
+    padding-top: 4px;
+  }
+  .kicker {
+    font-size: 34px;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+  /* Drawn underline that runs out right and back in from the left on hover (client feedback, 2026-09-15). */
+  .arrow-link {
+    align-items: center;
+    gap: 0.22em;
+    margin-top: 38px;
+    padding-bottom: 0.12em;
+    font-size: 30px;
+    line-height: 1;
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-size: 100% 1px;
+    background-position: 0 100%;
+    display: inline-flex;
+  }
+  .arrow-link:hover {
+    animation: underline-slide 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes underline-slide {
+    0% {
+      background-size: 100% 1px;
+      background-position: 0 100%;
     }
-    .home-video__frame {
-      height: 47.6389vw;
+    45% {
+      background-size: 0 1px;
+      background-position: 100% 100%;
+    }
+    50% {
+      background-size: 0 1px;
+      background-position: 0 100%;
+    }
+    100% {
+      background-size: 100% 1px;
+      background-position: 0 100%;
     }
   }
-  @media (width<=700px) {
-    .home-video {
-      height: auto;
-      margin-top: 24px;
-      padding: 0;
+  .arrow-link span {
+    transition: transform 0.25s;
+    display: inline-block;
+  }
+  .arrow-link:hover span {
+    transform: translate(10px);
+  }
+  @media (width<=900px) {
+    .split {
+      gap: 20px;
     }
-    .home-video__frame {
-      height: 68vw;
-      min-height: 300px;
+  }
+  @media (width<=640px) {
+    .split {
+      flex-direction: column;
+      margin: 15px var(--gutter) 40px;
+      display: flex;
     }
-    .home-video iframe {
-      width: max(121%, 534px);
+    .feature--video .feature__copy {
+      order: -1;
+    }
+    .kicker {
+      font-size: 22px;
+    }
+    .arrow-link {
+      font-size: 26px;
     }
   }
 
