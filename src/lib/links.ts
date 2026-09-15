@@ -175,6 +175,9 @@ export function instagramUrl(handle: string | undefined): string | undefined {
 export function normalizeHref(href: string | undefined): string | undefined {
   const h = href?.trim();
   if (!h) return undefined;
+  // A page of this site typed as a path ("/en/art-prize"): give it the
+  // trailing slash Pages serves, so the link is not a redirect (see localePath).
+  if (/^\/(en|fr|nl)(\/|$)/.test(h)) return h.replace(/^([^#?]*?)\/?(?=[#?]|$)/, '$1/');
   if (/^(https?:|mailto:|tel:|\/|#)/i.test(h)) return h;
   if (/^[^\s@/]+@[^\s@/]+\.[a-z]{2,}$/i.test(h)) return `mailto:${h}`;
   if (/^[\w-]+(\.[\w-]+)+(\/|$|\?)/.test(h)) return `https://${h}`;
