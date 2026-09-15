@@ -352,7 +352,7 @@ const captionOf = (img: any, fallback?: string) => ({
 
   /* The laureates, from art-prize/laureates/index.html (2026-09-14 build). */
   .laureates {
-    padding: 0 30px 100px;
+    padding: 0 var(--gutter) 100px;
   }
   .laureates .intro-large {
     margin-bottom: 55px;
@@ -559,9 +559,6 @@ const captionOf = (img: any, fallback?: string) => ({
     }
   }
   @media (width<=640px) {
-    .laureates {
-      padding-inline: 10px;
-    }
     .laureates article,
     .laureates article.reverse {
       flex-direction: column;

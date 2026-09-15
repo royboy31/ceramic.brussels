@@ -44,7 +44,7 @@ const Tag = link ? 'a' : 'div';
     display: grid;
     place-items: center;
     min-height: clamp(100px, 10.5vw, 152px);
-    margin: 3.4rem -30px 3rem;
+    margin: 3.4rem calc(-1 * var(--gutter)) 3rem;
     padding: 0.6rem 1rem;
     text-align: center;
     text-decoration: none;
@@ -92,15 +92,7 @@ const Tag = link ? 'a' : 'div';
     text-decoration-thickness: 2px;
   }
 
-  @media (max-width: 900px) {
-    .cta {
-      margin-inline: -16px;
-    }
-  }
   @media (max-width: 640px) {
-    .cta {
-      margin-inline: -10px;
-    }
     .cta-gradient {
       min-height: 100px;
       padding: 15px;

@@ -97,10 +97,10 @@ const byLetter = (letter: string) => artists.filter((a: any) => initial(a.name) 
 <style>
   /* From the design's exhibitors/artists/index.html (2026-09-14 build). */
   .artists-intro {
-    padding: 40px 30px 0;
+    padding: 40px var(--gutter) 0;
   }
   .artist-list {
-    padding: 40px 30px 100px;
+    padding: 40px var(--gutter) 100px;
   }
   .artist-list section {
     border-top: 1px solid;
@@ -135,19 +135,9 @@ const byLetter = (letter: string) => artists.filter((a: any) => initial(a.name) 
     font-size: 0.75em;
   }
   .empty {
-    margin: 40px 30px 0;
-  }
-  @media (width<=900px) {
-    .artists-intro,
-    .artist-list {
-      padding-inline: 16px;
-    }
+    margin: 40px var(--gutter) 0;
   }
   @media (width<=640px) {
-    .artists-intro,
-    .artist-list {
-      padding-inline: 10px;
-    }
     .artist-list section {
       grid-template-columns: 48px 1fr;
     }

@@ -166,6 +166,11 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   .menu-row {
     /* The title sits centred in its 55px strip; this leaves its lower few pixels under the next sheet, as the live site does. */
     --strip: 46px;
+    /* How far an open row rides up over the one above it (client feedback, 2026-09-15: like the live site). */
+    --lift: 24px;
+    /* A block, not the design's grid: the sheet keeps its full height and
+       hangs out of the row, under the next sheet. */
+    display: block;
     height: var(--strip);
     overflow: visible;
     transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
@@ -174,10 +179,26 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
     height: auto;
   }
   .menu-row.expanded {
-    height: var(--full, auto);
+    height: calc(var(--full, 0px) - var(--lift));
+  }
+  .menu-row:last-child.expanded {
+    height: auto;
   }
   .menu-sheet {
     background: linear-gradient(#fff350 0, #fff999 1rem, #fff 2rem);
+  }
+  /* Up over the previous sheet, not off to the left (client feedback): the
+     design's -16px nudge and its acid edge are dropped. */
+  .menu-row.expanded .menu-sheet {
+    translate: 0 calc(-1 * var(--lift));
+    box-shadow: 0 -6px 18px #00000014;
+  }
+  /* Nothing above the first row to ride over: it only grows. */
+  .menu-row:first-child.expanded {
+    height: var(--full, auto);
+  }
+  .menu-row:first-child.expanded .menu-sheet {
+    translate: 0;
   }
   @media (width<=640px) {
     .menu-row {

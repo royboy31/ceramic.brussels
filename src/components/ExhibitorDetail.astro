@@ -204,7 +204,7 @@ const bioRight = bio.slice(split);
   .detail {
     grid-template-columns: 433px minmax(0, 1fr);
     gap: 40px;
-    padding: 48px 30px 105px;
+    padding: 48px var(--gutter) 105px;
     display: grid;
   }
   .detail figure {
@@ -320,7 +320,6 @@ const bioRight = bio.slice(split);
   @media (width<=900px) {
     .detail {
       grid-template-columns: 1fr;
-      padding-inline: 16px;
     }
     .profile {
       margin-top: 20px;
@@ -334,7 +333,7 @@ const bioRight = bio.slice(split);
   }
   @media (width<=640px) {
     .detail {
-      padding: 30px 10px 70px;
+      padding: 30px var(--gutter) 70px;
     }
     .title-row {
       align-items: start;

@@ -468,7 +468,7 @@ const altPaths = hubAltPaths('visit', tab);
      question open, the others fold open with the arrow turning and the
      answer growing. */
   .faq-page {
-    padding: 8px 30px 100px;
+    padding: 8px var(--gutter) 100px;
   }
   .faq-page > .intro-large {
     max-width: 1050px;
@@ -527,9 +527,6 @@ const altPaths = hubAltPaths('visit', tab);
     padding-top: 10px;
   }
   @media (width<=700px) {
-    .faq-page {
-      padding-inline: 10px;
-    }
     .faq-page > .intro-large {
       margin-bottom: 36px;
     }

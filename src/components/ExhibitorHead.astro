@@ -99,7 +99,8 @@ const mark = (activeLetter || 'ALL').toUpperCase();
      holds buttons on a list page and links on a detail page; the rules
      address both. */
   .exhibitor-head {
-    padding: 28px 30px 0;
+    /* Room under the header before the title band (client feedback, 2026-09-15). */
+    padding: 60px var(--gutter) 0;
   }
   .exhibitor-head__top {
     justify-content: space-between;
@@ -176,7 +177,7 @@ const mark = (activeLetter || 'ALL').toUpperCase();
   }
   @media (width<=900px) {
     .exhibitor-head {
-      padding-inline: 16px;
+      padding-top: 40px;
     }
     .exhibitor-head__top {
       flex-direction: column;
@@ -207,7 +208,7 @@ const mark = (activeLetter || 'ALL').toUpperCase();
   }
   @media (width<=640px) {
     .exhibitor-head {
-      padding: 18px 10px 0;
+      padding-top: 30px;
     }
     h1 {
       font-size: 48px;

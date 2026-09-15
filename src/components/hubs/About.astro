@@ -513,7 +513,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
 
   /* From the design's team page (about/team/index.html, 2026-09-14 build). */
   .team-page {
-    padding: 10px 30px 110px;
+    padding: 10px var(--gutter) 110px;
   }
   .team-page > .intro-large {
     max-width: 980px;
@@ -606,9 +606,6 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
     margin-top: 40px;
   }
   @media (width<=900px) {
-    .team-page {
-      padding-inline: 16px;
-    }
     .directors {
       grid-template-columns: 1fr;
     }
@@ -617,9 +614,6 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
     }
   }
   @media (width<=640px) {
-    .team-page {
-      padding-inline: 10px;
-    }
     .team-page > .intro-large {
       font-size: 30px;
     }

@@ -121,7 +121,7 @@ const imagesOf = (a: any): any[] =>
 <style>
   /* From the design's exhibitors/awards/index.html (2026-09-14 build). */
   .awards-intro {
-    padding: 45px 30px 30px;
+    padding: 45px var(--gutter) 30px;
   }
   .awards-intro p {
     letter-spacing: -0.035em;
@@ -130,7 +130,7 @@ const imagesOf = (a: any): any[] =>
     line-height: 1.08;
   }
   .awards-list {
-    padding: 0 30px 90px;
+    padding: 0 var(--gutter) 90px;
   }
   .awards-list article {
     border-top: 1px solid;
@@ -187,22 +187,10 @@ const imagesOf = (a: any): any[] =>
     transform: translate(8px);
   }
   .empty {
-    padding: 45px 30px 90px;
+    padding: 45px var(--gutter) 90px;
     font-size: 24px;
   }
-  @media (width<=900px) {
-    .awards-intro,
-    .awards-list,
-    .empty {
-      padding-inline: 16px;
-    }
-  }
   @media (width<=640px) {
-    .awards-intro,
-    .awards-list,
-    .empty {
-      padding-inline: 10px;
-    }
     .awards-intro p {
       font-size: 30px;
     }

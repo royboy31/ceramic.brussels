@@ -80,7 +80,7 @@ const credit = video?.poster?.credit;
   .split {
     grid-template-columns: minmax(0, 2fr) minmax(310px, 1fr);
     gap: 40px;
-    margin: 30px;
+    margin: 30px var(--gutter);
     display: grid;
   }
   .feature--video {
@@ -105,15 +105,41 @@ const credit = video?.poster?.credit;
     line-height: 1.05;
     text-transform: uppercase;
   }
+  /* Drawn underline that runs out right and back in from the left on hover (client feedback, 2026-09-15). */
   .arrow-link {
-    text-underline-offset: 0.12em;
     align-items: center;
     gap: 0.22em;
     margin-top: 38px;
+    padding-bottom: 0.12em;
     font-size: 30px;
     line-height: 1;
-    text-decoration: underline;
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-size: 100% 1px;
+    background-position: 0 100%;
     display: inline-flex;
+  }
+  .arrow-link:hover {
+    animation: underline-slide 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes underline-slide {
+    0% {
+      background-size: 100% 1px;
+      background-position: 0 100%;
+    }
+    45% {
+      background-size: 0 1px;
+      background-position: 100% 100%;
+    }
+    50% {
+      background-size: 0 1px;
+      background-position: 0 100%;
+    }
+    100% {
+      background-size: 100% 1px;
+      background-position: 0 100%;
+    }
   }
   .arrow-link span {
     transition: transform 0.25s;
@@ -125,13 +151,12 @@ const credit = video?.poster?.credit;
   @media (width<=900px) {
     .split {
       gap: 20px;
-      margin-inline: 16px;
     }
   }
   @media (width<=640px) {
     .split {
       flex-direction: column;
-      margin: 15px 10px 40px;
+      margin: 15px var(--gutter) 40px;
       display: flex;
     }
     .feature--video .feature__copy {

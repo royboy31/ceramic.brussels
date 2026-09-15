@@ -62,7 +62,8 @@ const tabs = hub.tabs.map((tab) => {
   /* The design's .section-head, identical on every hub page. */
   .section-head {
     align-items: center;
-    padding-top: 5px;
+    /* Room under the header before the title band (client feedback, 2026-09-15). */
+    padding-top: 40px;
     padding-bottom: 28px;
   }
   .section-head h1 {
