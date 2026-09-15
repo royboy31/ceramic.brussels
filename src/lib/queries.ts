@@ -592,7 +592,13 @@ export function getArtists(lang: LocaleId) {
   return run<any[]>(
     `*[_type == "artist"] | order(name asc){
       ${ARTIST_CARD},
-      "exhibitors": *[_type == "exhibitor" && references(^._id)]{ name, "slug": slug.current, booth }
+      // Every exhibitor that presented the artist, any year, with what the
+      // list needs to pick the current edition's booth and solo-show badge
+      // (docs/backend-requests.md #1).
+      "exhibitors": *[_type == "exhibitor" && references(^._id)]{
+        name, "slug": slug.current, booth, soloShow,
+        "year": edition->year, "current": edition->isCurrent == true
+      }
     }`,
     { lang },
   );

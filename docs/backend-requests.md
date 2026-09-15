@@ -26,7 +26,9 @@ Status: `open` → `done` | `declined` (with a reason).
 
 ---
 
-## #1 · open · 2026-09-15 · solo show on the artists list
+## #1 · done · 2026-09-15 · solo show on the artists list
+
+**Done (Kamindu, 2026-09-15):** `getArtists` now selects `exhibitors[]{ name, slug, booth, soloShow, year, current }`. Pick the entry with `current == true` for the booth and the badge.
 
 **Page / component:** `src/pages/[lang]/artists/index.astro`, the letter lists
 **Figma frame:** client mock-up `screenshot/Screenshot_561.jpg` (exhibitors → artists, two columns)
