@@ -789,7 +789,16 @@ export function getHubPages(lang: LocaleId, section: string) {
  * editor has made one, and the page renders without it.
  */
 export function getMainPage(lang: LocaleId, section: string) {
-  return run<any>(`*[_type == "page" && section == $section] | order(order asc)[0] ${PAGE}`, { lang, section });
+  // The main page carries the section as its English slug (mainPages.ts);
+  // a section can also hold other pages - exhibitors/awards reads its intro
+  // from one - so prefer the page whose slug says it is the main one.
+  return run<any>(
+    `coalesce(
+      *[_type == "page" && section == $section && slug.en.current == $section][0] ${PAGE},
+      *[_type == "page" && section == $section] | order(order asc)[0] ${PAGE}
+    )`,
+    { lang, section },
+  );
 }
 
 /* ------------------------------------------------- programme / partners / press */

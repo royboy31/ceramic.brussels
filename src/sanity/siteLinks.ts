@@ -53,6 +53,7 @@ export function pageOptions(pastYears: number[]): SiteLinkOption[] {
 
   options.push(
     pathOption('exhibitors', t('nav.exhibitors')),
+    pathOption('exhibitors/awards', `${t('nav.exhibitors')} – ${t('nav.awards')}`),
     pathOption('artists', t('nav.artists')),
     pathOption('news', t('nav.news')),
     pathOption('editions', t('nav.editions')),

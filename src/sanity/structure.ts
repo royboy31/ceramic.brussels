@@ -49,19 +49,23 @@ async function lookup(context: StructureResolverContext): Promise<Lookup> {
       const hit = own.find((p) => p.slug === main.slug) ?? own[0];
       if (hit) mainIds[main.section] = hit._id.replace(/^drafts\./, '');
     }
+    /** Every section page by "section/slug", for the entries that open one page of a section. */
+    const pageIds: Record<string, string> = {};
+    for (const p of pages) if (p.slug) pageIds[`${p.section}/${p.slug}`] = p._id.replace(/^drafts\./, '');
     const current = editions.find((e) => e.isCurrent);
     return {
       mainIds,
+      pageIds,
       pastYears: editions.filter((e) => !e.isCurrent).map((e) => e.year),
       current: current ? { id: current._id, year: current.year } : undefined,
     };
   } catch {
-    return { mainIds: {}, pastYears: [] };
+    return { mainIds: {}, pageIds: {}, pastYears: [] };
   }
 }
 
 export const structure: StructureResolver = async (S, context) => {
-  const { mainIds, pastYears, current } = await lookup(context);
+  const { mainIds, pageIds, pastYears, current } = await lookup(context);
   const thisYear = current ? String(current.year) : 'Current';
 
   /** The page a section is made from, opened the way Homepage opens its singleton. */
@@ -172,6 +176,22 @@ export const structure: StructureResolver = async (S, context) => {
         mainPage('exhibitors', 'Exhibitors page'),
         list('exhibitors-current', `Exhibitors ${thisYear}`, 'exhibitor', CURRENT, {}, byName),
         byYear('exhibitors-past', 'Exhibitors, past years', 'exhibitor', 'true', byName),
+        // The exhibitors "awards" page: the fair's awards (best booth, best solo
+        // show…) of the newest year that has any, under an intro from a page of
+        // this section with the English slug "awards".
+        S.listItem()
+          .id('page-exhibitors-awards')
+          .title('Exhibitor awards page (intro)')
+          .schemaType('page')
+          .child(
+            pageIds['exhibitors/awards']
+              ? S.document().schemaType('page').documentId(pageIds['exhibitors/awards'])
+              : S.document()
+                  .schemaType('page')
+                  .documentId('page-exhibitors-awards')
+                  .initialValueTemplate('page-main', { section: 'exhibitors', slug: 'awards', title: 'Exhibitor awards' }),
+          ),
+        byYear('exhibitor-awards', 'Exhibitor awards by year (the site shows the newest)', 'award', 'family == "fair"', byOrder, true),
       ]),
 
       folder('artists', 'Artists', [mainPage('artists', 'Artists page'), list('artists-all', 'All artists', 'artist', 'true', {}, byName)]),
