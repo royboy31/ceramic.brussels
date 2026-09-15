@@ -3,14 +3,16 @@ import { useTranslations } from '../lib/i18n';
 import type { LocaleId } from '../lib/locales';
 
 /**
- * The menu overlay of the design: a panel sliding in from the right, one
- * acid "sheet" per menu row with its sub-items always in view under the
- * heading, and a white top bar holding only the ×. A row with a mouse over
- * it nudges left. Markup, classes and behaviour are Lilanga's build of the
- * Figma menu frame (the index.html files under html pages, 2026-09-14
- * build); the rules for the classes live in src/styles/design.css. Items
- * come from the resolved Sanity navigation that Base.astro builds, children
- * included; a row without children is `no-links` and stands taller.
+ * The menu overlay: the design's panel sliding in from the right with a
+ * white top bar holding only the ×, and inside it the live site's stacked
+ * rows - one acid-banded sheet per menu item, each collapsed to its top
+ * strip under the next sheet, growing to show its sub-links when hovered
+ * or focused (the rules at the foot of this file). Panel, bar and sheet
+ * markup are Lilanga's build of the Figma menu frame (the index.html files
+ * under html pages, 2026-09-14 build); their rules live in
+ * src/styles/design.css. Items come from the resolved Sanity navigation
+ * that Base.astro builds, children included; a row without children is
+ * `no-links` and stands taller.
  */
 interface Child {
   label: string;
@@ -84,6 +86,16 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
 
   const expand = (row: Element, open: boolean) => row.classList.toggle('expanded', open);
 
+  // The rows are collapsed sheets, as on the live site: each shows only its
+  // top strip, the next sheet lying over the rest. A row grows to its full
+  // height when hovered or focused, so the height it grows to is measured
+  // once the panel is on screen.
+  const measure = () =>
+    dialog?.querySelectorAll<HTMLElement>('.menu-row').forEach((row) => {
+      const sheet = row.querySelector<HTMLElement>('.menu-sheet');
+      if (sheet) row.style.setProperty('--full', `${sheet.scrollHeight}px`);
+    });
+
   const close = () => {
     if (!dialog?.open || closing) return;
     closing = true;
@@ -99,6 +111,7 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
       document.documentElement.style.overflow = 'hidden';
       dialog.showModal();
       openers.forEach((b) => b.setAttribute('aria-expanded', 'true'));
+      measure();
       requestAnimationFrame(() =>
         requestAnimationFrame(() => {
           if (!closing && dialog.open) dialog.classList.add('is-open');
@@ -131,9 +144,49 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
     row.addEventListener('pointerleave', () => {
       if (!row.contains(document.activeElement)) expand(row, false);
     });
+    row.addEventListener('focusin', () => expand(row, true));
     row.addEventListener('focusout', (e) => {
       const to = (e as FocusEvent).relatedTarget as Node | null;
       if (!row.contains(to) && !row.matches(':hover')) expand(row, false);
     });
   });
+  addEventListener('resize', () => dialog?.open && measure());
 </script>
+
+<style>
+  /*
+   * The live site's stacked menu (www.ceramic.brussels): every row is a
+   * sheet with an acid band along its top, and the rows lie over each other
+   * so a collapsed row shows only that band with the top of its title, the
+   * lower part hidden under the next sheet. Hovering (or tabbing into) a row
+   * grows it to its full height - title and sub-links - and the rows below
+   * slide down. The last row has nothing over it and stays whole. The panel,
+   * its slide-in and the top bar are the design's, from design.css.
+   */
+  .menu-row {
+    /* The title sits centred in its 55px strip; this leaves its lower few pixels under the next sheet, as the live site does. */
+    --strip: 46px;
+    height: var(--strip);
+    overflow: visible;
+    transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .menu-row:last-child {
+    height: auto;
+  }
+  .menu-row.expanded {
+    height: var(--full, auto);
+  }
+  .menu-sheet {
+    background: linear-gradient(#fff350 0, #fff999 1rem, #fff 2rem);
+  }
+  @media (width<=640px) {
+    .menu-row {
+      --strip: 42px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .menu-row {
+      transition: none;
+    }
+  }
+</style>
