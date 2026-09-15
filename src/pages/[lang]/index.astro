@@ -9,11 +9,12 @@ import { resolveLink, type ResolvedLink } from '../../lib/links';
 import { styleAttrs } from '../../lib/textStyle';
 
 /**
- * The homepage, as the design's index.html draws it: the hero (picture on
- * eight columns, statement and link on four), the four acid quick links,
- * then the `homepage` document's section stack rendered in its "home"
- * variant - "latest news", the features, the image link bands, the film,
- * the key figures - in the order the editor set.
+ * The homepage, as the design's index.html draws it (2026-09-14 build): the
+ * hero figure beside the statement and its arrow link, the down arrow, the
+ * four bordered quick links (the last one grey), then the `homepage`
+ * document's section stack rendered in its "home" variant - the centred
+ * "latest news" title, the feature rows, the film with its poster, the
+ * newsletter band, the key figures grid - in the order the editor set.
  *
  * Markup and classes are Lilanga's build of the Figma homepage; every slot
  * reads from Sanity.
@@ -46,6 +47,8 @@ const quickLinks: ResolvedLink[] = (home?.quickLinks ?? [])
  * 10.09 demo was confusing. Empty now renders empty.
  */
 const sections: any[] = home?.sections ?? [];
+/** The down arrow under the hero jumps to the first block, by its anchor when it has one. */
+const downTarget = sections[0]?.anchor ? `#${sections[0].anchor}` : '#sections';
 
 const eventSchema = edition
   ? {
@@ -76,21 +79,22 @@ const external = (link: ResolvedLink | null) =>
 >
   {eventSchema && <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} slot="head" />}
 
-  <section class="page-grid items-stretch">
+  <section class="hero">
     {/* No stand-in: an empty Hero image reads as empty, so it can be found and filled. */}
     {
       home?.heroImage?.asset && (
-        <SanityImage
-          image={home.heroImage}
-          widths={[800, 1200, 1600, 2000]}
-          sizes="(max-width: 640px) 100vw, 66vw"
-          loading="eager"
-          class="col-span-8 h-[43vw] max-h-[625px] min-h-[320px] w-full object-cover max-sm:col-span-full"
-        />
+        <figure>
+          <SanityImage
+            image={home.heroImage}
+            widths={[800, 1200, 1600, 2000]}
+            sizes="(max-width: 640px) 100vw, 66vw"
+            loading="eager"
+          />
+        </figure>
       )
     }
-    <div class="col-span-4 flex flex-col justify-center py-8 max-sm:col-span-full">
-      <h1 class="display text-[clamp(3rem,5vw,4.5rem)]" {...styleAttrs(headlineStyle)}>
+    <div class="hero__copy">
+      <h1 {...styleAttrs(headlineStyle)}>
         {lines.map((line, i) => (
           <>
             {i > 0 && <br />}
@@ -100,8 +104,11 @@ const external = (link: ResolvedLink | null) =>
       </h1>
       {
         heroLink && (
-          <a class="text-link mt-8 text-[clamp(1.25rem,2.7vw,2.5rem)]" href={heroLink.href} {...external(heroLink)}>
-            {heroLink.label} {heroLink.arrow}
+          <a class="arrow-link" href={heroLink.href} {...external(heroLink)}>
+            {heroLink.label}{' '}
+            <span class="link-arrow" data-arrow={heroLink.arrow} aria-hidden="true">
+              {heroLink.arrow}
+            </span>
           </a>
         )
       }
@@ -109,8 +116,16 @@ const external = (link: ResolvedLink | null) =>
   </section>
 
   {
+    sections.length > 0 && (
+      <a class="down-arrow" href={downTarget} aria-label={t('home.scrollDown')}>
+        ↓
+      </a>
+    )
+  }
+
+  {
     quickLinks.length > 0 && (
-      <nav class="home-quicklinks" aria-label={t('nav.menu')}>
+      <nav class="quicklinks" aria-label={t('nav.menu')}>
         {quickLinks.map((link) => (
           <a href={link.href} {...external(link)}>
             {link.label}
@@ -120,49 +135,117 @@ const external = (link: ResolvedLink | null) =>
     )
   }
 
-  <PageSections lang={lang} sections={sections} variant="home" />
+  <div id="sections">
+    <PageSections lang={lang} sections={sections} variant="home" />
+  </div>
 </Base>
 
 <style>
-  /* From the design's index.css (html pages/_astro/index.*.css). */
-  .home-quicklinks {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 21px;
-    height: 69px;
-    margin: 27px 30px 0;
+  /* From the design's index.css (html pages/_astro/index.*.css, 2026-09-14 build). */
+  .hero {
+    grid-template-columns: minmax(0, 2fr) minmax(310px, 1fr);
+    gap: 40px;
+    margin: 30px;
     display: grid;
   }
-  .home-quicklinks a {
-    letter-spacing: -0.05em;
-    background: #fff350;
-    place-items: center;
-    font-size: 40px;
+  .hero figure {
+    margin: 0;
+    position: relative;
+  }
+  .hero figure > :global(img) {
+    aspect-ratio: 887 / 591;
+    object-fit: cover;
+    width: 100%;
+  }
+  .hero__copy {
+    padding-top: 6px;
+  }
+  .hero h1 {
+    letter-spacing: -0.055em;
+    font-size: clamp(52px, 4.85vw, 70px);
+    font-weight: 400;
+    line-height: 0.94;
+  }
+  .arrow-link {
+    text-underline-offset: 0.12em;
+    align-items: center;
+    gap: 0.22em;
+    margin-top: 28px;
+    font-size: clamp(25px, 2.75vw, 40px);
     line-height: 1;
+    text-decoration: underline;
+    display: inline-flex;
+  }
+  .arrow-link span {
+    transition: transform 0.25s;
+    display: inline-block;
+  }
+  .arrow-link:hover span {
+    transform: translate(10px);
+  }
+  .down-arrow {
+    width: max-content;
+    margin: 8px auto 22px;
+    font-size: 64px;
+    font-weight: 200;
+    line-height: 1;
+    display: block;
+  }
+  .quicklinks {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 98px;
+    margin: 0 30px 60px;
     display: grid;
   }
-  .home-quicklinks a:last-child {
+  .quicklinks a {
+    text-align: center;
+    background: #fff350;
     border: 1px solid #000;
+    padding: 13px;
+    font-size: 30px;
+    line-height: 1;
+    transition:
+      background 0.2s,
+      color 0.2s;
   }
-  @media (width>=701px) and (width<=1439px) {
-    .home-quicklinks {
-      gap: 1.4583vw;
-      height: 4.7917vw;
-      margin: 1.875vw 2.0833vw 0;
+  .quicklinks a:last-child {
+    background: #eee;
+  }
+  .quicklinks a:hover {
+    color: #fff;
+    background: #000;
+  }
+  @media (width<=900px) {
+    .hero {
+      gap: 20px;
+      margin-inline: 16px;
     }
-    .home-quicklinks a {
-      font-size: 2.7778vw;
+    .quicklinks {
+      gap: 12px;
+      margin-inline: 16px;
     }
   }
-  @media (width<=700px) {
-    .home-quicklinks {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      height: auto;
-      margin: 14px 10px 0;
+  @media (width<=640px) {
+    .hero {
+      flex-direction: column;
+      margin: 15px 10px 40px;
+      display: flex;
     }
-    .home-quicklinks a {
-      min-height: 52px;
-      font-size: 24px;
+    .hero__copy {
+      padding-top: 10px;
+    }
+    .hero h1 {
+      font-size: 48px;
+    }
+    .arrow-link {
+      font-size: 26px;
+    }
+    .quicklinks {
+      grid-template-columns: 1fr 1fr;
+      margin: 0 10px 45px;
+    }
+    .quicklinks a {
+      font-size: 22px;
     }
   }
 </style>

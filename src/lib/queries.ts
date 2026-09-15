@@ -686,7 +686,14 @@ export function getAwards(lang: LocaleId) {
       "partner": partner->{ _id, name, url, logo ${IMAGE} },
       "laureates": laureates[]->{ _id, name, "slug": slug.current },
       "artist": laureates[0]->{ name, "slug": slug.current },
-      "gallery": winnerExhibitor->{ name, "slug": slug.current },
+      // The winning gallery with what the exhibitor awards page shows of it:
+      // its city, its edition (for exhibitorPath) and its pictures, which
+      // stand in when the award has no image of its own.
+      "gallery": winnerExhibitor->{
+        _id, name, city, country, countryCode, "slug": slug.current,
+        "year": edition->year, "current": edition->isCurrent == true,
+        "images": images[] ${IMAGE}
+      },
       image ${IMAGE}
     }`,
     { lang },

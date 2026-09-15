@@ -410,6 +410,76 @@ entries in this file exist only on `kamindu`. `dev` and `lilanga` still trail
 `main`. `git rebase origin/main` on `kamindu` lines it up: git skips the
 commits `main` already has as cherry-picks and replays only the docs.
 
+## Status, 2026-09-15 — the 2026-09-14 build ported (branch `design-2026-09-14`)
+
+Lilanga's next offline build (`ceramic-brussels-offline-html-2026-09-14`,
+now the `html pages` folder) was diffed against the one the port was made
+from; the differences went into the frontend on the branch, production
+build clean (900 pages, 129 requests). What changed:
+
+- **Shell.** Header as a flex row: dates mark + languages left, wordmark
+  centred, the Puilaetco "main partner" lockup (linked to the `main`
+  partner's URL) and the menu button right. Menu without the `+` toggles:
+  sub-links always in view, a row nudges left on hover, white top bar with
+  the × alone. Footer pills end in ↗. Hub tab pills smaller (24px, 4/8
+  columns). Art prize yellow is `#fdeb33`.
+- **Homepage.** Hero figure + statement with an arrow link, a ↓ to the
+  first block, four bordered quick links (the last grey), `latest news` as
+  a centred title, feature rows (`--news` copy left, `--guest` picture
+  left), the film as a poster linking to YouTube with its credit, the
+  gradient band at 126px/42px, key figures as a centred title over a
+  two-column ruled grid.
+- **Exhibitors.** `ExhibitorHead` (title band with galleries / artists /
+  catalogue / awards tabs and the ALL + A–Z buttons), a FILTERS row with a
+  country menu and an "awards" pill, `.badge` cards, the analora detail
+  layout (booth badge beside the name, city + pills beside "presenting"),
+  and a new `/exhibitors/awards` page from the `fair` award family.
+  `/artists` became the A–Z list of the design; the artists tab points
+  there, the URL did not move.
+- **Laureates** in the new row layout (48px name, "Country, year", bio on a
+  two-column grid). **Team** with directors (role matching "direct")
+  beside their biography, then the team and collaborators as small cards.
+  **FAQ** with the design's accordion, first question open.
+- Not changed: the Navigation document (the design's menu has more rows -
+  VIP, media, contact, catalogue…; that is editor content), the video
+  block has nothing to show until an edition carries a film, and the
+  exhibitor awards intro reads a `page` in section `exhibitors` with
+  English slug `awards`, which nobody has made yet.
+
+### Design → Studio, what the 2026-09-14 build added or changed
+
+Same reading as the tables below: what the page shows, where an editor
+sets it. **Gap** marks what the Studio cannot set yet.
+
+| Design | Studio | State |
+| :-- | :-- | :-- |
+| Header: dates mark | Setup → Editions → current edition → Dates mark | ok |
+| Header: "main partner" lockup | Brand SVGs in `public/assets`; links to the partner of tier **main** (Partners) | ok, artwork is code |
+| Menu rows and sub-links | Setup → Menu and footer → items + children | ok; the design's extra rows (VIP, media, contact…) are for the editor to add |
+| Footer pills (instagram, newsletter, linkedin, cookies) | Menu and footer → footer items, else Site settings URLs | ok |
+| Home: hero picture + statement + link | Homepage → Hero image, Hero text (line breaks kept), Hero link | ok; the design draws five slideshow dots, the field is one image — **gap** if a slideshow is wanted |
+| Home: four quick links, last one grey | Homepage → Quick links (fourth is grey by position) | ok |
+| Home: "latest news" title, feature rows | Homepage stack: Section title block, Feature blocks (alternate sides in order) | ok |
+| Home: video row with poster, credit, "watch the video" | Video block; falls back to the newest edition's Film; credit = the poster's Photo credit | ok once an edition has a film |
+| Home: newsletter band | Banner block, gradient style | ok |
+| Home: key figures, 6 cells | Key figures block; the edition's Key figures list | ok |
+| Exhibitors: galleries / artists / catalogue / awards tabs | Code; catalogue = current edition → Catalogue URL (tab hidden when empty) | ok |
+| Exhibitors: ALL + A–Z, country menu | Code, from the exhibitors' names and countries | ok |
+| Exhibitors: filter pills | Exhibitor → Solo show, In country focus, Kind (publisher, jury prize); "awards" = winner of a fair award this edition | ok |
+| Exhibitor card badges | Solo show → black badge; In country focus → outlined badge with the edition's Country focus label | ok |
+| Exhibitor page: booth "B28 ●", city (CC), pills, presenting | Exhibitor → Booth, City, Country, Instagram, Website, Artists / Artists (text) | ok |
+| Exhibitor awards page: label, gallery, city, text, pictures, link | Award of family **fair** → Award name, **Winning gallery**, Description, Image (else the gallery's pictures) | **gap**: Winning gallery is hidden in the form; no sidebar list for fair awards |
+| Exhibitor awards page: intro line | `page` in section exhibitors, English slug `awards`, Lead | **gap**: no sidebar entry; main-page query must prefer the page whose slug is the section |
+| Artists list: name ↗ per letter | Artist → Name | ok (Figma's richer row - country, booth, solo badge - has the data but is not built) |
+| Laureates: picture(s), name, instagram pill | Laureate → Images; Artist → Name, Instagram | ok |
+| Laureates: "Poland, 1996" | Artist → Nationality, Year of birth (base line when nationality is empty) | ok, mostly unfilled |
+| Laureates: bio on two columns | Laureate → Statement, else Artist → Biography | ok |
+| Team: intro | About → team tab page → Lead | ok |
+| Team: directors with portrait and biography | People in group Team whose Role contains "direct" → Portrait, Role, Biography | ok; the split is by role wording |
+| Team: cards with role and email | Team → Role, Email; Collaborators → Role, Website | ok |
+| FAQ accordion, first open | Site settings → FAQ (question, answer) | ok; Figma's grouping by theme has no field |
+| Practical info, food & drinks, talks, La Cambre, partners, about, advisory board, guest of honour | unchanged, see the tables below | ok |
+
 ## Status, 2026-09-09 — live on production; main pages editable
 
 The ported design went to `main` in the morning (`8c20e75`) and has been

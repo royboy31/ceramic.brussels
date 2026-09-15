@@ -4,7 +4,14 @@ import ExhibitorDetail from '../../../components/ExhibitorDetail.astro';
 import ExhibitorsListing from '../../../components/ExhibitorsListing.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations } from '../../../lib/i18n';
-import { getExhibitor, getExhibitorPaths, getExhibitors, getExhibitorsByYear, getEditions } from '../../../lib/queries';
+import {
+  getExhibitor,
+  getExhibitorPaths,
+  getExhibitors,
+  getExhibitorsByYear,
+  getEditions,
+  getCurrentEdition,
+} from '../../../lib/queries';
 
 /**
  * /exhibitors/<slug>: a current-edition exhibitor's page.
@@ -27,6 +34,7 @@ const year = /^\d{4}$/.test(slug) ? Number(slug) : undefined;
 let listing: { exhibitors: any[]; edition: any; currentYear?: number } | null = null;
 let exhibitor: any = null;
 let list: any[] = [];
+let edition: any = null;
 
 if (year) {
   const [exhibitors, editions] = await Promise.all([getExhibitorsByYear(lang, year), getEditions(lang)]);
@@ -36,7 +44,7 @@ if (year) {
     currentYear: editions.find((e: any) => e.isCurrent)?.year,
   };
 } else {
-  [exhibitor, list] = await Promise.all([getExhibitor(lang, slug), getExhibitors(lang)]);
+  [exhibitor, list, edition] = await Promise.all([getExhibitor(lang, slug), getExhibitors(lang), getCurrentEdition(lang)]);
   if (!exhibitor) return Astro.rewrite('/404');
 }
 
@@ -71,7 +79,7 @@ const orgSchema = exhibitor && {
       editType={exhibitor._type}
     >
       <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} slot="head" />
-      <ExhibitorDetail lang={lang} exhibitor={exhibitor} list={list} listPath="exhibitors" />
+      <ExhibitorDetail lang={lang} exhibitor={exhibitor} list={list} listPath="exhibitors" edition={edition} />
     </Base>
   )
 }

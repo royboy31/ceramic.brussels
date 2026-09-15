@@ -16,10 +16,12 @@ import { styleAttrs } from '../../lib/textStyle';
 /**
  * About hub, as the design's about pages draw it. The fair: the large
  * intro, the hero figure beside the first text section, the other sections
- * two a row, the closing strip of photos. Advisory board and team: the
- * intro and the two-column people grid (team followed by its
- * collaborators). Press and images have no design page and follow the same
- * patterns. Markup and rules are Lilanga's build of the frames.
+ * two a row, the closing strip of photos. Advisory board: the intro and
+ * the two-column people grid. Team (2026-09-14 build): the intro, the
+ * directors with portrait and biography, then the team and the
+ * collaborators as grids of small cards. Press and images have no design
+ * page and follow the same patterns. Markup and rules are Lilanga's build
+ * of the frames.
  */
 const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const t = useTranslations(lang);
@@ -59,7 +61,22 @@ const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
 const board = tab === 'advisory-board' ? await getPeople(lang, 'advisory-board') : [];
 const team = tab === 'team' ? await getPeople(lang, 'team') : [];
 const collaborators = tab === 'team' ? await getPeople(lang, 'collaborator') : [];
-const people = tab === 'team' ? team : board;
+/**
+ * The team page (2026-09-14 build) opens with the two directors, portrait
+ * beside biography, then the rest of the team as a grid of small cards.
+ * Who is a director is read from the role ("co-director", "directrice"…),
+ * the one thing the person record says about it.
+ */
+const directors = team.filter((p: any) => /direct/i.test(p.role ?? ''));
+const staff = team.filter((p: any) => !directors.includes(p));
+/** "GP" - the initials standing in for a missing portrait, as the design draws them. */
+const initials = (name: string) =>
+  String(name ?? '')
+    .split(/\s+/)
+    .map((w) => w.charAt(0))
+    .join('')
+    .slice(0, 3)
+    .toUpperCase();
 
 const [clips, settings] = tab === 'press' ? await Promise.all([getPressClips(), getSettings(lang)]) : [[], null];
 // Newest first, grouped by year, which is how a press list is actually read.
@@ -85,7 +102,7 @@ for (const section of rest) {
 const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
 const path = hubTabPath('about', tab, lang);
 const altPaths = hubAltPaths('about', tab);
-const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'advisory', press: 'press', images: 'images' }[tab] ?? '';
+const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-page', press: 'press', images: 'images' }[tab] ?? '';
 
 const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Boolean).length > 0 || img.credit;
 ---
@@ -103,7 +120,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
 >
   <HubNav lang={lang} route="about" active={tab} pages={pages} />
 
-  <div class:list={['content-wrap', wrap]}>
+  <div class:list={wrap === 'team-page' ? [wrap] : ['content-wrap', wrap]}>
     {
       page?.intro && (
         <p class="intro-large" {...styleAttrs(page.introStyle)}>
@@ -158,10 +175,10 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
 
     {/* --------------------------------------------- advisory board / team */}
     {
-      (tab === 'advisory-board' || tab === 'team') &&
-        (people.length ? (
+      tab === 'advisory-board' &&
+        (board.length ? (
           <div class="people">
-            {people.map((p: any) => (
+            {board.map((p: any) => (
               <PersonCard lang={lang} person={p} />
             ))}
           </div>
@@ -169,18 +186,85 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
           <p class="empty">{s('peopleEmpty')}</p>
         ))
     }
+
+    {/* ------------------------------------------------------------- team */}
     {
-      tab === 'team' && collaborators.length > 0 && (
-        <section class="group">
-          <h2 class="panel-title">{s('collaborators')}</h2>
-          <div class="people">
-            {collaborators.map((p: any) => (
-              <PersonCard lang={lang} person={p} />
-            ))}
-          </div>
+      tab === 'team' && directors.length > 0 && (
+        <section class="directors">
+          {directors.map((p: any) => (
+            <article>
+              <div class="team-portrait">
+                {p.portrait?.asset ? (
+                  <SanityImage image={p.portrait} aspect={4 / 5} widths={[210, 420, 630]} sizes="210px" />
+                ) : (
+                  <span aria-hidden="true">{initials(p.name)}</span>
+                )}
+              </div>
+              <div>
+                <h2>{p.name}</h2>
+                {p.role && (
+                  <p class="role" {...styleAttrs(p.roleStyle)}>
+                    {p.role}
+                  </p>
+                )}
+                {p.bio && <PortableText value={p.bio} fieldStyle={p.bioStyle} />}
+              </div>
+            </article>
+          ))}
         </section>
       )
     }
+    {
+      tab === 'team' && staff.length > 0 && (
+        <>
+          <h2 class="team-title">{t('tabs.team').toLowerCase()}</h2>
+          <section class="team-grid">
+            {staff.map((p: any) => (
+              <article>
+                <div class="team-portrait team-portrait--small">
+                  {p.portrait?.asset ? (
+                    <SanityImage image={p.portrait} aspect={1.15} widths={[440, 660, 880]} sizes="(max-width: 640px) 100vw, 33vw" />
+                  ) : (
+                    <span aria-hidden="true">{initials(p.name)}</span>
+                  )}
+                </div>
+                <h3>{p.name}</h3>
+                {p.role && <p {...styleAttrs(p.roleStyle)}>{p.role}</p>}
+                {p.email && <a href={`mailto:${p.email}`}>{p.email} ↗</a>}
+              </article>
+            ))}
+          </section>
+        </>
+      )
+    }
+    {
+      tab === 'team' && collaborators.length > 0 && (
+        <>
+          <h2 class="team-title">{s('collaborators')}</h2>
+          <section class="team-grid">
+            {collaborators.map((p: any) => (
+              <article>
+                <div class="team-portrait team-portrait--small">
+                  {p.portrait?.asset ? (
+                    <SanityImage image={p.portrait} aspect={1.15} widths={[440, 660, 880]} sizes="(max-width: 640px) 100vw, 33vw" />
+                  ) : (
+                    <span aria-hidden="true">{initials(p.name)}</span>
+                  )}
+                </div>
+                <h3>{p.name}</h3>
+                {p.role && <p {...styleAttrs(p.roleStyle)}>{p.role}</p>}
+                {p.website && (
+                  <a href={p.website} target="_blank" rel="noopener noreferrer">
+                    {t('common.website')} ↗
+                  </a>
+                )}
+              </article>
+            ))}
+          </section>
+        </>
+      )
+    }
+    {tab === 'team' && team.length === 0 && collaborators.length === 0 && <p class="empty">{s('peopleEmpty')}</p>}
 
     {/* ------------------------------------------------------------- press */}
     {
@@ -423,6 +507,130 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
   }
   @media (width<=800px) {
     .people {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* From the design's team page (about/team/index.html, 2026-09-14 build). */
+  .team-page {
+    padding: 10px 30px 110px;
+  }
+  .team-page > .intro-large {
+    max-width: 980px;
+    line-height: 1.1;
+  }
+  .directors {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 64px;
+    display: grid;
+  }
+  .directors article {
+    border-top: 1px solid;
+    grid-template-columns: 210px 1fr;
+    gap: 25px;
+    padding-top: 12px;
+    display: grid;
+  }
+  .team-portrait {
+    aspect-ratio: 4 / 5;
+    letter-spacing: -0.05em;
+    background: linear-gradient(145deg, #fff350, #fff);
+    place-items: center;
+    width: 210px;
+    font-size: 54px;
+    display: grid;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Laid over the box rather than sized by it, so the picture can never
+     stretch the 4:5 frame to its own height. */
+  .team-portrait :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .directors h2,
+  .team-title {
+    letter-spacing: -0.04em;
+    font-size: 38px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .role {
+    text-transform: uppercase;
+    margin: 8px 0 22px;
+  }
+  .directors article > div:last-child :global(.rich-text) {
+    font-size: 20px;
+    line-height: 1.28;
+  }
+  .directors article > div:last-child :global(p + p) {
+    margin-top: 1em;
+  }
+  .team-title {
+    border-top: 1px solid;
+    margin-top: 80px;
+    padding-top: 12px;
+  }
+  .team-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-top: 30px;
+    display: grid;
+  }
+  .team-portrait--small {
+    aspect-ratio: 1.15;
+    width: 100%;
+    font-size: 44px;
+  }
+  .team-grid h3 {
+    margin-top: 12px;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1;
+  }
+  .team-grid p {
+    margin-top: 5px;
+    font-size: 20px;
+  }
+  .team-grid a {
+    margin-top: 18px;
+    font-size: 17px;
+    text-decoration: underline;
+    display: inline-block;
+  }
+  .team-page .empty {
+    margin-top: 40px;
+  }
+  @media (width<=900px) {
+    .team-page {
+      padding-inline: 16px;
+    }
+    .directors {
+      grid-template-columns: 1fr;
+    }
+    .team-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (width<=640px) {
+    .team-page {
+      padding-inline: 10px;
+    }
+    .team-page > .intro-large {
+      font-size: 30px;
+    }
+    .directors article {
+      grid-template-columns: 1fr;
+    }
+    .team-portrait {
+      aspect-ratio: 1.2;
+      width: 100%;
+    }
+    .team-grid {
       grid-template-columns: 1fr;
     }
   }

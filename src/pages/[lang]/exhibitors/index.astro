@@ -3,7 +3,7 @@ import Base from '../../../layouts/Base.astro';
 import ExhibitorsListing from '../../../components/ExhibitorsListing.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations } from '../../../lib/i18n';
-import { getExhibitors, getCurrentEdition, getMainPage } from '../../../lib/queries';
+import { getExhibitors, getCurrentEdition, getMainPage, getAwards } from '../../../lib/queries';
 
 /**
  * The current edition's exhibitors. The list and its filters are
@@ -18,11 +18,16 @@ const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 // The main page document (Studio → Exhibitors → Exhibitors page): lead, SEO
 // and blocks around the list. The list itself never comes from it.
-const [exhibitors, edition, page] = await Promise.all([
+const [exhibitors, edition, page, awards] = await Promise.all([
   getExhibitors(lang),
   getCurrentEdition(lang),
   getMainPage(lang, 'exhibitors'),
+  getAwards(lang),
 ]);
+/** This edition's fair-award winners, for the "awards" filter pill. */
+const awarded = new Set<string>(
+  awards.filter((a: any) => a.family === 'fair' && a.year === edition?.year && a.gallery?._id).map((a: any) => a.gallery._id),
+);
 ---
 
 <Base
@@ -35,5 +40,5 @@ const [exhibitors, edition, page] = await Promise.all([
   editId={page?._id}
   editType={page?._type}
 >
-  <ExhibitorsListing lang={lang} exhibitors={exhibitors} edition={edition} page={page} />
+  <ExhibitorsListing lang={lang} exhibitors={exhibitors} edition={edition} page={page} awarded={awarded} />
 </Base>
