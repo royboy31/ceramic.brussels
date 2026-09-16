@@ -7,7 +7,7 @@ import { HUBS } from '../lib/hubs';
  * listing (exhibitors, artists, news, contact), a standalone page - and each
  * route reads a different part of it: the exhibitors page never shows Body, a
  * laureates tab shows only its lead paragraph, a guest-of-honour tab only its
- * label. The page form hides every field the page being edited does not read
+ * label and slug. The page form hides every field the page being edited does not read
  * (page.ts), so an editor never fills in something that changes nothing, and
  * the placement fields that tie a main page to its URL are out of reach.
  *
@@ -40,7 +40,8 @@ const TEXT: PageField[] = ['intro', 'sections', 'body', 'images'];
 const HUB_TABS: Record<string, Record<string, PageField[]>> = {
   about: { 'the-fair': FULL, '*': TEXT },
   'art-prize': { about: FULL, laureates: ['intro'], awards: ['intro'], jury: ['intro'] },
-  programme: { '*': FULL },
+  // Talks and VIP list events; only La Cambre draws the closing images.
+  programme: { 'la-cambre': FULL, '*': TEXT },
   partners: { '*': TEXT },
   visit: {
     'practical-info': ['intro', 'images'],
@@ -64,8 +65,9 @@ export function pageFields(section?: string | null, slug?: string | null): Set<P
   if (!hub) return new Set(STANDALONE);
   const tabSlug = slug || hub.tabs[0]?.slug;
   const tab = hub.tabs.find((t) => t.slug === tabSlug);
-  // The guest of honour is an artist document; its tab pages only name the pills.
-  if (section === 'guest-of-honour') return new Set(['title', 'tabLabel', 'section']);
+  // The guest of honour is an artist document; its tab pages only name the
+  // pills - matched on the English slug, so that stays visible.
+  if (section === 'guest-of-honour') return new Set(['title', 'tabLabel', 'slug', 'section']);
   // A tab that links to another hub (programme → awards, about → partners)
   // has no page of its own, so nothing on the document is ever shown.
   if (tab?.link) return new Set(['title', 'section']);

@@ -4,7 +4,7 @@ import { schemaTypes } from './src/sanity/schemaTypes';
 import { structure } from './src/sanity/structure';
 import { StudioNavbar } from './src/sanity/components/StudioNavbar';
 import { duplicateAction } from './src/sanity/components/DuplicateAction';
-import { templates } from './src/sanity/templates';
+import { TAB_TEMPLATE_PREFIX, templates } from './src/sanity/templates';
 import { applyTemplateAction, saveAsTemplateAction } from './src/sanity/components/TemplateActions';
 import { PreviewLauncher, PreviewIcon } from './src/sanity/components/PreviewLauncher';
 import { openPreviewAction } from './src/sanity/components/OpenPreviewAction';
@@ -52,6 +52,9 @@ export default defineConfig({
     templates: (prev) => [...prev.filter((t) => !SINGLETONS.has(t.schemaType)), ...templates],
   },
   document: {
+    // The per-tab page templates belong to their hub's "Tab intros" pane,
+    // not to the navbar's Create menu, where the hub would have to be guessed.
+    newDocumentOptions: (prev) => prev.filter((item) => !item.templateId.startsWith(TAB_TEMPLATE_PREFIX)),
     actions: (prev, { schemaType }) => {
       const base = SINGLETONS.has(schemaType)
         ? prev.filter(({ action }) => action !== 'unpublish' && action !== 'delete' && action !== 'duplicate')

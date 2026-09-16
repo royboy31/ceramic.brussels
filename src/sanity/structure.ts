@@ -1,8 +1,10 @@
 import type { ListItemBuilder, StructureBuilder, StructureResolver, StructureResolverContext } from 'sanity/structure';
-import { PARTNER_TABS } from '../lib/hubs';
+import { HUBS, PARTNER_TABS } from '../lib/hubs';
+import { useTranslations } from '../lib/i18n';
 import { PERSON_GROUPS } from './schemaTypes/documents/person';
 import { PARTNER_TIERS } from './schemaTypes/documents/partner';
 import { MAIN_PAGES, type MainPage } from './mainPages';
+import { TAB_TEMPLATE_PREFIX } from './templates';
 
 /**
  * The sidebar, organised the way the site's menu is: one folder per section,
@@ -20,6 +22,8 @@ import { MAIN_PAGES, type MainPage } from './mainPages';
 interface Lookup {
   /** section → the id of the page that section's folder opens. */
   mainIds: Record<string, string>;
+  /** Every section page by "section/slug", for the entries that open one page of a section. */
+  pageIds: Record<string, string>;
   /** Past edition years, newest first. */
   pastYears: number[];
   current?: { id: string; year: number };
@@ -125,9 +129,24 @@ export const structure: StructureResolver = async (S, context) => {
       );
   };
 
-  /** A hub's other tab pages - the intros above its lists. Made with the hub; never created here. */
-  const tabIntros = (section: string, rootSlug: string, title: string) =>
-    S.listItem()
+  /**
+   * A hub's other tab pages - the intros above its lists. The pane's New
+   * button offers one `page-tab-…` starting point (templates.ts) per tab of
+   * hubs.ts that has no page yet, with the hub and slug already set, so a
+   * missing tab page is made in place and lands on its route; a tab that has
+   * a page is not offered again. `rootSlug` is the tab the hub's own entry
+   * opens (or '' when the hub has none: the guest of honour's root is the
+   * artist).
+   */
+  const tabIntros = (section: string, rootSlug: string, title: string) => {
+    const t = useTranslations('en');
+    const hub = HUBS[section];
+    const label = (key: Parameters<typeof t>[0]) => {
+      const text = t(key);
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    };
+    const missing = (hub?.tabs ?? []).filter((tab) => !tab.link && tab.slug !== rootSlug && !pageIds[`${section}/${tab.slug}`]);
+    return S.listItem()
       .id(`tabs-${section}`)
       .title(title)
       .schemaType('page')
@@ -139,8 +158,11 @@ export const structure: StructureResolver = async (S, context) => {
           .filter('_type == "page" && section == $section && slug.en.current != $root')
           .params({ section, root: rootSlug })
           .defaultOrdering([{ field: 'order', direction: 'asc' }])
-          .initialValueTemplates([]),
+          .initialValueTemplates(
+            missing.map((tab) => S.initialValueTemplateItem(`${TAB_TEMPLATE_PREFIX}${section}-${tab.slug}`).title(`${label(tab.label)} tab`)),
+          ),
       );
+  };
 
   const currentEdition = (id: string, title: string) =>
     current
@@ -204,6 +226,8 @@ export const structure: StructureResolver = async (S, context) => {
           '_id in *[_type == "edition" && isCurrent == true].guestOfHonour._ref',
         ),
         currentEdition('guest-edition', `Choose the guest (edition ${thisYear})`),
+        // The hub's pills read their labels from these pages; the page itself is the artist's.
+        tabIntros('guest-of-honour', '', 'Tab labels (about, interview)'),
       ]),
 
       folder('art-prize', 'Art prize', [

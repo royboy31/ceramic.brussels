@@ -52,6 +52,7 @@ const LINK_TARGET = `{
   // a past exhibitor under its year. links.ts works out which.
   section,
   "tab": slug.${DEFAULT_LOCALE}.current,
+  tier,
   "year": edition->year,
   "current": edition->isCurrent == true
 }`;
@@ -216,7 +217,7 @@ const SECTIONS = `sections[hidden != true]{
   },
   _type == "faqSection" => {
     ${styled('heading')},
-    "items": items[]{ _key, ${styled('question')}, ${styled('answer')} }
+    "items": items[]{ _key, category, ${styled('question')}, ${styled('answer')} }
   },
   _type == "embedSection" => {
     url, height,
@@ -316,7 +317,7 @@ export function getSettings(lang: LocaleId) {
       pressEmail,
       pressKitUrl,
       "pressContacts": pressContacts[]{ _key, name, email, url, instagram, ${styled('region')} },
-      "faq": faq[]{ _key, ${styled('question')}, ${styled('answer')} },
+      "faq": faq[]{ _key, category, ${styled('question')}, ${styled('answer')} },
       "practicalInfo": {
         "venueName": practicalInfo.venueName,
         "address": practicalInfo.address,

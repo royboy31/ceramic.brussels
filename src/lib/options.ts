@@ -53,4 +53,18 @@ export const NEWS_CATEGORIES = [
   { title: 'Press release', value: 'press-release' },
 ] as const;
 
+/**
+ * The headings the visitors-info FAQ groups its questions under, and the
+ * filter pills above them (client mock-up of 2026-09-15). Labels are in
+ * STRINGS as `faq.category.<value>`; the Studio shows these English titles.
+ */
+export const FAQ_CATEGORIES = [
+  { title: 'Tickets', value: 'tickets' },
+  { title: 'Coming to the fair', value: 'visiting' },
+  { title: 'Food & drinks', value: 'food-drinks' },
+  { title: 'Media', value: 'media' },
+  { title: 'Advisory board', value: 'advisory-board' },
+  { title: 'Other', value: 'other' },
+] as const;
+
 export type Option = { readonly title: string; readonly value: string };

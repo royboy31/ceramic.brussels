@@ -3,7 +3,7 @@ import Base from '../../../layouts/Base.astro';
 import Figure from '../../../components/Figure.astro';
 import PageSections from '../../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { useTranslations, localePath, formatDate } from '../../../lib/i18n';
+import { hasString, useTranslations, localePath, formatDate } from '../../../lib/i18n';
 import { getNews, getMainPage } from '../../../lib/queries';
 import { styleAttrs } from '../../../lib/textStyle';
 
@@ -17,6 +17,11 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
+/** NEWS_CATEGORIES, translated in STRINGS; an unknown value shows as stored. */
+const categoryLabel = (category: string) => {
+  const key = `news.category.${category}`;
+  return hasString(key) ? t(key) : category;
+};
 // The main page document (Studio → Main pages → News): lead, SEO and blocks
 // around the list. The posts themselves never come from it.
 const [news, page] = await Promise.all([getNews(lang), getMainPage(lang, 'news')]);
@@ -58,7 +63,7 @@ const [lead, ...rest] = news;
           <div class="lead-text">
             <p class="meta">
               <time datetime={lead.publishedAt}>{formatDate(lead.publishedAt, lang)}</time>
-              {lead.category && <span class="cat">{lead.category}</span>}
+              {lead.category && <span class="cat">{categoryLabel(lead.category)}</span>}
             </p>
             <h2 {...styleAttrs(lead.titleStyle)}>{lead.title}</h2>
             {lead.excerpt && <p class="excerpt" {...styleAttrs(lead.excerptStyle)}>{lead.excerpt}</p>}
@@ -84,7 +89,7 @@ const [lead, ...rest] = news;
 
                   <p class="meta">
                     <time datetime={item.publishedAt}>{formatDate(item.publishedAt, lang)}</time>
-                    {item.category && <span class="cat">{item.category}</span>}
+                    {item.category && <span class="cat">{categoryLabel(item.category)}</span>}
                   </p>
                   <h3 {...styleAttrs(item.titleStyle)}>{item.title}</h3>
                   {item.excerpt && <p class="excerpt" {...styleAttrs(item.excerptStyle)}>{item.excerpt}</p>}

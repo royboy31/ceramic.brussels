@@ -17,8 +17,6 @@ export const BUILT_IN_ROUTES = [
   { title: 'Visitors info', value: 'visit' },
   { title: 'About', value: 'about' },
   { title: 'News', value: 'news' },
-  { title: 'Awards', value: 'awards' },
-  { title: 'Press', value: 'press' },
   { title: 'Past editions', value: 'editions' },
   { title: 'Contact', value: 'contact' },
 ] as const;

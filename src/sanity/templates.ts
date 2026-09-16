@@ -1,4 +1,6 @@
 import type { Template } from 'sanity';
+import { HUBS } from '../lib/hubs';
+import { useTranslations } from '../lib/i18n';
 import { EXHIBITOR_KINDS } from '../lib/options';
 
 /**
@@ -106,4 +108,32 @@ const mainPageTemplate: Template = {
   }),
 };
 
-export const templates: Template[] = [...pageTemplates, ...exhibitorTemplates, mainPageTemplate];
+/**
+ * One starting point per hub tab of hubs.ts - `page-tab-<hub>-<tab>`, hub and
+ * English slug preset, so the page lands on its route. A hub's "Tab intros"
+ * pane offers the ones its hub still lacks (structure.ts); they are kept out
+ * of the navbar's Create menu (sanity.config.ts), where the hub would have to
+ * be guessed. A Structure template item can only name a template by id, so
+ * the parameterised `page-main` cannot serve here.
+ */
+const t = useTranslations('en');
+const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+export const TAB_TEMPLATE_PREFIX = 'page-tab-';
+const tabPageTemplates: Template[] = Object.values(HUBS).flatMap((hub) =>
+  hub.tabs
+    .filter((tab) => !tab.link)
+    .map((tab, i) => ({
+      id: `${TAB_TEMPLATE_PREFIX}${hub.route}-${tab.slug}`,
+      title: `${capitalise(t(tab.label))} tab (${t(hub.title)})`,
+      description: `The ${t(hub.title)} hub's "${t(tab.label)}" tab, on its route.`,
+      schemaType: 'page',
+      value: {
+        section: hub.route,
+        order: i,
+        title: { en: capitalise(t(tab.label)) },
+        slug: { en: { _type: 'slug', current: tab.slug } },
+      },
+    })),
+);
+
+export const templates: Template[] = [...pageTemplates, ...exhibitorTemplates, mainPageTemplate, ...tabPageTemplates];

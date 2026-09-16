@@ -88,7 +88,9 @@ const PLAIN_KEYS = new Set([
   // built into ids, codes and links. `slug` covers the per-language page
   // slugs (slug.en.current), which the client's own rule misses: encoded,
   // no hub tab found its page and preview dropped every tab's own text.
-  'anchor', 'countryCode', 'instagram', 'phone', 'slug',
+  'anchor', 'countryCode', 'country', 'instagram', 'phone', 'slug',
+  // addresses built into mailto: links (contact page, press, the application form)
+  'contactEmail', 'pressEmail', 'recipient', 'cc', 'senderEmail',
   // a "link to this site" mark's path in rich text (links.ts sitePath)
   'path',
 ]);

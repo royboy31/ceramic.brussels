@@ -28,13 +28,6 @@ const editions = await getEditions(lang);
 const past = editions.filter((e: any) => !e.isCurrent);
 const list = past.length ? past : editions;
 
-/* Labels STRINGS does not carry yet - to move into src/lib/i18n.ts. */
-const LOCAL = {
-  en: { overview: 'overview', film: 'film', empty: 'No editions published yet.' },
-  fr: { overview: 'bilan', film: 'film', empty: 'Aucune édition publiée pour le moment.' },
-  nl: { overview: 'overzicht', film: 'film', empty: 'Nog geen edities gepubliceerd.' },
-} as const;
-const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key];
 ---
 
 <Base lang={lang} title={t('nav.editions')} path="editions">
@@ -119,12 +112,12 @@ const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key]
                       {edition.catalogueUrl && (
                         <LinkPill lang={lang} href={edition.catalogueUrl} label={t('home.catalogue')} external />
                       )}
-                      {edition.overviewUrl && <LinkPill lang={lang} href={edition.overviewUrl} label={s('overview')} external />}
+                      {edition.overviewUrl && <LinkPill lang={lang} href={edition.overviewUrl} label={t('editions.overview')} external />}
                       {edition.pressClipsUrl && (
                         <LinkPill lang={lang} href={edition.pressClipsUrl} label={t('home.pressClips')} external />
                       )}
                       {edition.film?.url && (
-                        <LinkPill lang={lang} href={edition.film.url} label={edition.film.title ?? s('film')} external />
+                        <LinkPill lang={lang} href={edition.film.url} label={edition.film.title ?? t('editions.film')} external />
                       )}
                     </p>
                   )}
@@ -156,7 +149,7 @@ const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key]
       </ul>
     ) : (
       <p class="empty">
-        {s('empty')}
+        {t('editions.empty')}
       </p>
     )
   }

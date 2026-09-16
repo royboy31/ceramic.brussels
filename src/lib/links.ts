@@ -1,6 +1,6 @@
 import { LOCALE_IDS, type LocaleId } from './locales';
 import { localePath } from './i18n';
-import { HUBS, hubFromSegment, hubTabPath, tabFromSegment } from './hubs';
+import { HUBS, PARTNER_TABS, hubFromSegment, hubTabPath, tabFromSegment } from './hubs';
 
 /**
  * Turns a `link` object from Sanity (see src/sanity/schemaTypes/objects/link.ts)
@@ -39,8 +39,24 @@ export function exhibitorPath(ex: { slug?: string; year?: number; current?: bool
  */
 export function pagePath(doc: { section?: string; tab?: string; slug?: string }, lang?: LocaleId): string {
   if (!doc.section) return doc.slug ?? '';
-  if (LISTINGS.includes(doc.section)) return doc.section;
+  // A listing's main page carries the section as its English slug; any other
+  // page of the section is a sub-page of the listing (exhibitors/awards).
+  if (LISTINGS.includes(doc.section)) return doc.tab && doc.tab !== doc.section ? `${doc.section}/${doc.tab}` : doc.section;
   return hubTabPath(doc.section, doc.tab, lang);
+}
+
+/**
+ * Where a partner is shown: the partners tab that lists its tier, or for the
+ * two tiers no partners tab lists, the page whose block does (food & drinks
+ * on visitors info, the art prize hub). Every partner used to link to the
+ * hub root, which is the main partner's tab.
+ */
+export function partnerPath(partner: { tier?: string | null }, lang?: LocaleId): string {
+  const tier = partner.tier ?? '';
+  if (tier === 'food-drinks') return hubTabPath('visit', 'food-drinks', lang);
+  if (tier === 'art-prize') return hubTabPath('art-prize', undefined, lang);
+  const tab = Object.keys(PARTNER_TABS).find((key) => PARTNER_TABS[key].includes(tier));
+  return hubTabPath('partners', tab, lang);
 }
 
 export function resolveLink(lang: LocaleId, link: any): ResolvedLink | null {
@@ -59,7 +75,7 @@ export function resolveLink(lang: LocaleId, link: any): ResolvedLink | null {
     if (base === undefined) return null;
     const path =
       doc._type === 'partner'
-        ? base
+        ? partnerPath(doc, lang)
         : doc._type === 'exhibitor'
           ? exhibitorPath(doc)
           : doc._type === 'page'

@@ -7,7 +7,7 @@ import Slideshow from '../../components/Slideshow.astro';
 import SanityImage from '../../components/SanityImage.astro';
 import PortableText from '../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { useTranslations, formatDay, formatTime, localePath } from '../../lib/i18n';
+import { hasString, useTranslations, formatDay, formatTime, localePath } from '../../lib/i18n';
 import { getHubPages, getProgramme } from '../../lib/queries';
 import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
 import { styleAttrs } from '../../lib/textStyle';
@@ -29,20 +29,10 @@ const page = pageForTab(pages, tab);
 const hubTab = HUBS.programme.tabs.find((x) => x.slug === tab);
 const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
 
-/**
- * The category shown in braces above each event, "{ Artist Talk }". Mirrors
- * EVENT_KINDS in the schema; the Studio's English titles serve every locale.
- */
-const KIND_LABEL: Record<string, string> = {
-  'artist-talk': 'Artist Talk',
-  roundtable: 'Roundtable',
-  talk: 'Talk',
-  'book-launch': 'Book Launch',
-  tour: 'Guided Tour',
-  workshop: 'Workshop',
-  ceremony: 'Award Ceremony',
-  opening: 'Preview',
-  other: 'Event',
+/** The category shown in braces above each event, "{ Artist Talk }": EVENT_KINDS, translated in STRINGS. */
+const kindLabel = (kind: string) => {
+  const key = `programme.kind.${kind}`;
+  return hasString(key) ? t(key) : kind;
 };
 
 const section = tab === 'la-cambre' ? 'project' : tab;
@@ -140,7 +130,7 @@ const altPaths = hubAltPaths('programme', tab);
                   const parts = metaParts(e);
                   const copy = (
                     <div>
-                      <b>{e.kind ? `{ ${KIND_LABEL[e.kind] ?? e.kind} }` : ''}</b>
+                      <b>{e.kind ? `{ ${kindLabel(e.kind)} }` : ''}</b>
                       <time datetime={e.startsAt}>{formatTime(e.startsAt, lang)}</time>
                       <h2 {...styleAttrs(e.titleStyle)}>
                         {lines(e.title).map((line, k) => (

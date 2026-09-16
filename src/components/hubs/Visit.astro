@@ -6,7 +6,8 @@ import SanityImage from '../../components/SanityImage.astro';
 import Slideshow from '../../components/Slideshow.astro';
 import PortableText from '../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { useTranslations, formatDate, localePath } from '../../lib/i18n';
+import { useTranslations, formatDate, localePath, type StringKey } from '../../lib/i18n';
+import { FAQ_CATEGORIES } from '../../lib/options';
 import { getHubPages, getSettings, getCurrentEdition, getPartners } from '../../lib/queries';
 import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
 import { styleAttrs } from '../../lib/textStyle';
@@ -23,6 +24,20 @@ import { styleAttrs } from '../../lib/textStyle';
  */
 const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const t = useTranslations(lang);
+
+/**
+ * The FAQ's questions under their category headings, in the order of
+ * FAQ_CATEGORIES (client mock-up of 2026-09-15); a question without a
+ * category, or with one the list no longer has, sits under "other". Only
+ * the categories in use get a heading and a filter pill.
+ */
+const faqGroups = (faq: any[] | undefined) => {
+  const known = FAQ_CATEGORIES.map((c) => c.value as string);
+  const of = (q: any) => (known.includes(q.category) ? q.category : 'other');
+  return known
+    .map((value) => ({ value, label: t(`faq.category.${value}` as StringKey), items: (faq ?? []).filter((q) => of(q) === value) }))
+    .filter((g) => g.items.length > 0);
+};
 
 const [pages, settings, edition, partners] = await Promise.all([
   getHubPages(lang, 'visit'),
@@ -295,25 +310,49 @@ const altPaths = hubAltPaths('visit', tab);
           </p>
         )}
         {settings?.faq?.length ? (
-          /* BACKEND-REQUEST #2: a category on each question - the design groups them under
-             headings (tickets, coming to the fair, ...) with a FILTERS row of those categories. */
-          <div class="faq-list">
-            {settings.faq.map((q: any) => (
-              <details class="faq">
-                <summary>
-                  <span class="question" {...styleAttrs(q.questionStyle)}>
-                    {q.question}
-                  </span>
-                  <i aria-hidden="true">↓</i>
-                </summary>
-                <div class="answer">
-                  <div>
-                    <PortableText value={q.answer} fieldStyle={q.answerStyle} />
+          (() => {
+            const groups = faqGroups(settings.faq);
+            return (
+              <>
+                {groups.length > 1 && (
+                  <div class="filters" id="faq-filters">
+                    <span>{t('faq.filters')}:</span>
+                    <button type="button" data-filter="" aria-pressed="true">
+                      {t('faq.all')}
+                    </button>
+                    {groups.map((g) => (
+                      <button type="button" data-filter={g.value} aria-pressed="false">
+                        {g.label}
+                      </button>
+                    ))}
                   </div>
+                )}
+                <div class="faq-groups" id="faq-groups">
+                  {groups.map((g) => (
+                    <section class="faq-group" data-category={g.value}>
+                      {/* No heading while nothing is categorised: one "other" group is just the list. */}
+                      {(groups.length > 1 || g.value !== 'other') && <h2>{g.label}</h2>}
+                      {g.items.map((q: any) => (
+                        <details class="faq">
+                          <summary>
+                            <span class="question" {...styleAttrs(q.questionStyle)}>
+                              {q.question}
+                            </span>
+                            <i aria-hidden="true">↓</i>
+                          </summary>
+                          <div class="answer">
+                            <div>
+                              <PortableText value={q.answer} fieldStyle={q.answerStyle} />
+                            </div>
+                          </div>
+                        </details>
+                      ))}
+                    </section>
+                  ))}
                 </div>
-              </details>
-            ))}
-          </div>
+              </>
+            );
+          })()
         ) : (
           <p class="empty body-24">{t('visit.noFaq')}</p>
         )}
@@ -487,11 +526,51 @@ const altPaths = hubAltPaths('visit', tab);
     max-width: 1100px;
     margin-bottom: 58px;
   }
-  .faq-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: 0 clamp(30px, 3vw, 44px);
-    display: grid;
+  .filters {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    display: flex;
+  }
+  .filters span {
+    margin-right: 8px;
+    text-transform: uppercase;
+  }
+  .filters button {
+    border: 1px solid;
+    border-radius: 999px;
+    padding: 5px 16px;
+    font-size: 18px;
+    background: #fff;
+    cursor: pointer;
+    transition:
+      color 0.18s,
+      background 0.18s;
+  }
+  .filters button[aria-pressed='true'],
+  .filters button:hover {
+    color: #fff;
+    background: #000;
+  }
+  /* The groups flow down two columns, each heading over a rule with its
+     questions beneath; a group never splits across the columns. */
+  .faq-groups {
+    columns: 2;
+    column-gap: clamp(30px, 3vw, 44px);
+  }
+  .faq-group {
+    break-inside: avoid;
+    margin-bottom: clamp(40px, 4vw, 64px);
+  }
+  .faq-group h2 {
+    letter-spacing: -0.03em;
+    border-bottom: 1px solid;
+    margin: 0;
+    padding-bottom: 10px;
+    font-size: clamp(22px, 2vw, 29px);
+    font-weight: 700;
+    line-height: 1.1;
   }
   .faq {
     border-bottom: 1px solid;
@@ -553,6 +632,11 @@ const altPaths = hubAltPaths('visit', tab);
     text-decoration: underline;
     text-decoration-thickness: 1px;
   }
+  @media (width<=760px) {
+    .faq-groups {
+      columns: 1;
+    }
+  }
   @media (width<=700px) {
     .faq-page > .intro-large {
       margin-bottom: 36px;
@@ -565,3 +649,19 @@ const altPaths = hubAltPaths('visit', tab);
     }
   }
 </style>
+
+<script>
+  // FAQ filter pills: one category at a time, "all" showing every group.
+  const bar = document.getElementById('faq-filters');
+  const groups = Array.from(document.querySelectorAll<HTMLElement>('#faq-groups .faq-group'));
+  if (bar && groups.length) {
+    const buttons = Array.from(bar.querySelectorAll<HTMLButtonElement>('button[data-filter]'));
+    for (const button of buttons) {
+      button.addEventListener('click', () => {
+        const value = button.dataset.filter ?? '';
+        for (const b of buttons) b.setAttribute('aria-pressed', String(b === button));
+        for (const group of groups) group.hidden = !!value && group.dataset.category !== value;
+      });
+    }
+  }
+</script>

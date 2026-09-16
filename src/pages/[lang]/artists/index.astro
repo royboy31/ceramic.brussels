@@ -37,8 +37,12 @@ const initial = (name: string) =>
 
 const letters = [...new Set(artists.map((a: any) => initial(a.name)))].sort() as string[];
 const byLetter = (letter: string) => artists.filter((a: any) => initial(a.name) === letter);
-/** The booth of the exhibitor presenting the artist, when one has been given. */
-const boothOf = (a: any): string | undefined => a.exhibitors?.find((ex: any) => ex.booth)?.booth;
+/**
+ * The exhibitor presenting the artist at this edition - for the booth and the
+ * solo-show badge. Past editions' exhibitors are linked too, so without the
+ * `current` flag the list could show an old booth (backend request #1).
+ */
+const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
 ---
 
 <Base
@@ -75,7 +79,7 @@ const boothOf = (a: any): string | undefined => a.exhibitors?.find((ex: any) => 
               <h2>{letter}</h2>
               <ul>
                 {byLetter(letter).map((a: any) => {
-                  const booth = boothOf(a);
+                  const ex = showingNow(a);
                   return (
                     <li>
                       <a href={localePath(lang, `artists/${a.slug}`)}>
@@ -83,8 +87,12 @@ const boothOf = (a: any): string | undefined => a.exhibitors?.find((ex: any) => 
                           {a.name}
                           {a.countryCode && <sup>{a.countryCode}</sup>}
                         </span>
-                        {/* BACKEND-REQUEST #1: the round "solo show" badge, before the booth */}
-                        {booth && <span class="booth">{booth} ●</span>}
+                        {(ex?.soloShow || ex?.booth) && (
+                          <span class="tail">
+                            {ex.soloShow && <span class="solo">{t('exhibitors.soloShow')}</span>}
+                            {ex.booth && <span class="booth">{ex.booth} ●</span>}
+                          </span>
+                        )}
                       </a>
                     </li>
                   );
@@ -177,10 +185,29 @@ const boothOf = (a: any): string | undefined => a.exhibitors?.find((ex: any) => 
     margin-left: 0.3em;
     font-size: 0.5em;
   }
-  .booth {
+  .tail {
     flex: none;
+    align-items: center;
+    gap: 10px;
+    display: inline-flex;
+  }
+  .booth {
     font-size: 0.72em;
     white-space: nowrap;
+  }
+  /* The round black "solo show" badge of the exhibitor cards, at list size. */
+  .solo {
+    color: #fff;
+    text-align: center;
+    letter-spacing: 0;
+    border-radius: 50%;
+    place-items: center;
+    width: 2.1em;
+    height: 2.1em;
+    font-size: 0.42em;
+    line-height: 0.9;
+    background: #000;
+    display: grid;
   }
   .empty {
     margin: 40px var(--gutter) 0;

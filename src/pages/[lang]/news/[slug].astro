@@ -3,7 +3,7 @@ import Base from '../../../layouts/Base.astro';
 import SanityImage from '../../../components/SanityImage.astro';
 import PortableText from '../../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { useTranslations, localePath, formatDate } from '../../../lib/i18n';
+import { hasString, useTranslations, localePath, formatDate } from '../../../lib/i18n';
 import { getNewsItem, getNewsSlugs } from '../../../lib/queries';
 import { styleAttrs } from '../../../lib/textStyle';
 
@@ -19,6 +19,11 @@ export async function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const slug = Astro.params.slug as string;
 const t = useTranslations(lang);
+/** NEWS_CATEGORIES, translated in STRINGS; an unknown value shows as stored. */
+const categoryLabel = (category: string) => {
+  const key = `news.category.${category}`;
+  return hasString(key) ? t(key) : category;
+};
 
 const item = await getNewsItem(lang, slug);
 if (!item) return Astro.rewrite('/404');
@@ -49,7 +54,7 @@ const articleSchema = {
   <article class="post">
     <p class="meta">
       <time datetime={item.publishedAt}>{formatDate(item.publishedAt, lang)}</time>
-      {item.category && <span class="cat">{item.category}</span>}
+      {item.category && <span class="cat">{categoryLabel(item.category)}</span>}
     </p>
 
     <h1 class="title" {...styleAttrs(item.titleStyle)}>{item.title}</h1>

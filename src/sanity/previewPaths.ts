@@ -185,8 +185,12 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
 function pageLocations(d: PreviewFields, at: (path: string, l?: LocaleId) => string): PreviewLocation[] {
   const title = d.title ?? 'Page';
   if (d.section) {
-    // A listing's main page is the listing itself.
-    if ((LISTING_SECTIONS as readonly string[]).includes(d.section)) return [{ title, href: at(`/${d.section}`) }];
+    // A listing's main page is the listing itself; another page of the
+    // section is a sub-page of it (exhibitors/awards).
+    if ((LISTING_SECTIONS as readonly string[]).includes(d.section)) {
+      const sub = d.en && d.en !== d.section ? `/${d.section}/${d.en}` : `/${d.section}`;
+      return [{ title, href: at(sub) }];
+    }
     const hub = HUBS[d.section];
     if (!hub) return [];
     const first = hub.tabs[0]?.slug;

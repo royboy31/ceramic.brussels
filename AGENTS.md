@@ -343,7 +343,9 @@ The content model follows the 2027 Figma design. The shape to keep in mind:
   `SitePathInput` in `src/sanity/components/SiteLinkInput.tsx`; older links
   still carry a route + anchor pair, which is read too), a document
   reference, or an external URL. Menu items work the same way. Internal
-  ones get "→", external ones "↗".
+  ones get "→", external ones "↗". A partner document links to the partners
+  tab that lists its tier (`partnerPath` in `links.ts`); a page in a listing
+  section that is not the main page links to `<section>/<slug>`.
 - **Pages are section stacks.** `page.sections`, `homepage.sections` and
   `artist.sections` are page-builder arrays: an editor adds, deletes, drags
   and hides pre-designed blocks (text, image + text, image grid, slideshow,

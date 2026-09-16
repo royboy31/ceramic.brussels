@@ -39,7 +39,9 @@ Status: `open` → `done` | `declined` (with a reason).
 
 ---
 
-## #2 · open · 2026-09-15 · FAQ categories
+## #2 · done · 2026-09-15 · FAQ categories
+
+**Done (Kamindu, 2026-09-16):** `faqItem.category`, one of `FAQ_CATEGORIES` in `src/lib/options.ts` (tickets, visiting, food-drinks, media, advisory-board, other), selected in `getSettings` → `faq[]` and in the `faqSection` block's items. Labels are `faq.category.<value>` in STRINGS; the Visit hub's FAQ tab groups the questions under those headings with a FILTERS row of pills. Editors pick the category on each question in Site settings → FAQ; a question without one sits under "other".
 
 **Page / component:** `src/components/hubs/Visit.astro`, FAQ tab (`/en/visit/faq`)
 **Figma frame:** client mock-up `screenshot/Screenshot_565.jpg` (visitors info → FAQ, two columns)

@@ -1,4 +1,5 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
+import { FAQ_CATEGORIES } from '../../../lib/options';
 
 /**
  * Structured practical information. The design lays opening hours, tickets
@@ -166,10 +167,20 @@ export const faqItem = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({ name: 'answer', title: 'Answer', type: 'localeBlock' }),
+    defineField({
+      name: 'category',
+      title: 'Category',
+      type: 'string',
+      description: 'The heading this question sits under on the FAQ page, and its filter pill. Unsorted questions go last, under "Other".',
+      options: { list: [...FAQ_CATEGORIES] },
+    }),
   ],
   preview: {
-    select: { question: 'question.en' },
-    prepare: ({ question }) => ({ title: question ?? '(no question)' }),
+    select: { question: 'question.en', category: 'category' },
+    prepare: ({ question, category }) => ({
+      title: question ?? '(no question)',
+      subtitle: FAQ_CATEGORIES.find((c) => c.value === category)?.title,
+    }),
   },
 });
 

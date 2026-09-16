@@ -19,7 +19,7 @@ import { styleAttrs } from '../../lib/textStyle';
  *
  * Whether the form is open, and what it says when it is not, comes from
  * Site settings → Applications (the `form` key the query resolves). The
- * submission goes to `/api/apply` on the Worker (src/server/routes/apply.ts),
+ * submission goes to `/api/apply/` on the Worker (with the slash: every URL Pages serves ends in one, and the bare path is a 308 away) (src/server/routes/apply.ts),
  * which sends the two emails once Brevo is connected; until then it answers
  * 503 and the failure state shows.
  */
@@ -65,7 +65,7 @@ const fields = [
       <form
         class="form"
         method="post"
-        action="/api/apply"
+        action="/api/apply/"
         novalidate
         data-apply
         data-success={form.successMessage || t('apply.success')}

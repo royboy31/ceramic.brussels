@@ -26,32 +26,6 @@ import { styleAttrs } from '../../lib/textStyle';
 const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const t = useTranslations(lang);
 
-/* Labels this hub needs that STRINGS does not carry yet - all three locales,
-   so nothing ships in English on a French page. To move into src/lib/i18n.ts. */
-const LOCAL = {
-  en: {
-    collaborators: 'collaborators',
-    pressKit: 'press kit',
-    imagesEmpty: 'No edition has a photo gallery yet.',
-    peopleEmpty: 'Nobody has been published in this group yet.',
-    pageEmpty: 'This page has no content yet.',
-  },
-  fr: {
-    collaborators: 'collaborateurs',
-    pressKit: 'dossier de presse',
-    imagesEmpty: 'Aucune édition n’a encore de galerie photo.',
-    peopleEmpty: 'Personne n’a encore été publié dans ce groupe.',
-    pageEmpty: 'Cette page n’a pas encore de contenu.',
-  },
-  nl: {
-    collaborators: 'medewerkers',
-    pressKit: 'perskit',
-    imagesEmpty: 'Nog geen enkele editie heeft een fotogalerij.',
-    peopleEmpty: 'Nog niemand gepubliceerd in deze groep.',
-    pageEmpty: 'Deze pagina heeft nog geen inhoud.',
-  },
-} as const;
-const s = (key: keyof (typeof LOCAL)['en']) => LOCAL[lang][key] ?? LOCAL.en[key];
 
 const pages = await getHubPages(lang, 'about');
 const page = pageForTab(pages, tab);
@@ -168,7 +142,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
           </>
         ) : (
           <p class="empty">
-            {s('pageEmpty')}
+            {t('about.pageEmpty')}
           </p>
         ))
     }
@@ -183,7 +157,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
             ))}
           </div>
         ) : (
-          <p class="empty">{s('peopleEmpty')}</p>
+          <p class="empty">{t('about.peopleEmpty')}</p>
         ))
     }
 
@@ -240,7 +214,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
     {
       tab === 'team' && collaborators.length > 0 && (
         <>
-          <h2 class="team-title">{s('collaborators')}</h2>
+          <h2 class="team-title">{t('about.collaborators')}</h2>
           <section class="team-grid">
             {collaborators.map((p: any) => (
               <article>
@@ -264,7 +238,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
         </>
       )
     }
-    {tab === 'team' && team.length === 0 && collaborators.length === 0 && <p class="empty">{s('peopleEmpty')}</p>}
+    {tab === 'team' && team.length === 0 && collaborators.length === 0 && <p class="empty">{t('about.peopleEmpty')}</p>}
 
     {/* ------------------------------------------------------------- press */}
     {
@@ -315,7 +289,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
             )}
             {settings?.pressKitUrl && (
               <a class="pill dark" href={settings.pressKitUrl} target="_blank" rel="noopener noreferrer">
-                {s('pressKit')} ↗
+                {t('about.pressKit')} ↗
               </a>
             )}
             {settings?.pressEmail && (
@@ -400,7 +374,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
             </section>
           ))
         ) : (
-          <p class="empty">{s('imagesEmpty')}</p>
+          <p class="empty">{t('about.imagesEmpty')}</p>
         ))
     }
 

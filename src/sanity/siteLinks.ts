@@ -1,6 +1,6 @@
 import { HUBS } from '../lib/hubs';
 import { useTranslations } from '../lib/i18n';
-import { exhibitorPath } from '../lib/links';
+import { exhibitorPath, partnerPath } from '../lib/links';
 
 /**
  * What the "link to this site" search box offers (components/SiteLinkInput.tsx).
@@ -79,6 +79,7 @@ export const DOCUMENTS_QUERY = `{
     _type,
     "title": coalesce(name, title.en, title),
     "slug": coalesce(slug.current, slug.en.current),
+    tier,
     "year": edition->year,
     "current": edition->isCurrent == true
   } | order(_type asc, title asc),
@@ -102,7 +103,7 @@ export function documentOption(doc: any): SiteLinkOption | null {
     group,
     path,
   });
-  if (doc._type === 'partner') return option('/partners');
+  if (doc._type === 'partner') return option(`/${partnerPath(doc)}`);
   if (!doc.slug) return null;
   switch (doc._type) {
     case 'artist':
