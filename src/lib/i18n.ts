@@ -598,10 +598,17 @@ export function useTranslations(lang: LocaleId) {
   };
 }
 
-/** Build a locale-prefixed path. */
+/**
+ * Build a locale-prefixed path, always with the trailing slash.
+ *
+ * Pages serves every page at its slash form (`/en/about/`) and answers the
+ * other with a 308, and the sitemap lists the slash form. So every link,
+ * canonical, hreflang and og:url is built here in that one shape, and a
+ * visitor never hits a redirect on the way to a page of this site.
+ */
 export function localePath(lang: LocaleId, path = ''): string {
   const clean = path.replace(/^\/+|\/+$/g, '');
-  return clean ? `/${lang}/${clean}` : `/${lang}`;
+  return clean ? `/${lang}/${clean}/` : `/${lang}/`;
 }
 
 /**

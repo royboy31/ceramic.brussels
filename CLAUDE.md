@@ -260,7 +260,9 @@ t('news.readMore')
 back to English rather than breaking, so an untranslated string ships silently —
 a shipped English label on a French page is a bug nobody gets warned about.
 
-Also in `i18n.ts`: `localePath(lang, path)` for building links, and
+Also in `i18n.ts`: `localePath(lang, path)` for building links - always
+with the trailing slash, the one form Pages serves without a redirect, so
+never hand-write `/en/...` - and
 `formatDate` / `formatDateRange` / `formatTime`, which are locale-aware
 (`en-GB`, `fr-BE`, `nl-BE`). Use those rather than `toLocaleDateString`.
 

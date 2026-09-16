@@ -68,6 +68,10 @@ function fixSanityWindowsAlias() {
 // https://astro.build/config
 export default defineConfig({
   site: PUBLIC_SITE_URL || 'https://www.ceramic.brussels',
+  // Pages serves /en/about/ and 308s /en/about; links and canonicals are
+  // built in the slash form (localePath), and the dev server insists on it
+  // too, so a slashless link shows up here before it ships as a redirect.
+  trailingSlash: 'always',
 
   // Deliberately NOT using Astro's built-in `i18n` config. Enabling it makes the
   // dev server 404 the /studio route that @sanity/astro injects (the static
