@@ -19,18 +19,18 @@ const { siteName, links, copyright, consentLabel } = Astro.props;
 const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
 ---
 
-<footer class="acid-wash flex min-h-20 flex-wrap items-center justify-between gap-4 px-[clamp(16px,2vw,30px)] py-5 text-sm md:text-lg">
-  <p>{line}</p>
+<footer class="site-footer acid-wash flex min-h-20 flex-wrap items-center justify-between gap-4 px-[clamp(16px,2vw,30px)] py-5">
+  <p class="footer-credit">{line}</p>
   {
     (links.length > 0 || consentLabel) && (
-      <nav class="flex flex-wrap justify-end gap-3" aria-label={siteName}>
+      <nav class="footer-pills flex flex-wrap justify-end" aria-label={siteName}>
         {links.map((link) => (
-          <a class="rounded-full border border-black px-5 py-1" href={link.href} {...(link.external ? { rel: 'noopener noreferrer' } : {})}>
+          <a class="footer-pill" href={link.href} {...(link.external ? { rel: 'noopener noreferrer' } : {})}>
             {link.label} {link.arrow ?? '↗'}
           </a>
         ))}
         {consentLabel && (
-          <button type="button" class="rounded-full border border-black px-5 py-1" data-consent-open>
+          <button type="button" class="footer-pill" data-consent-open>
             {consentLabel}
           </button>
         )}
@@ -38,3 +38,31 @@ const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
     )
   }
 </footer>
+
+<style>
+  /* 2026-09-16 feedback: smaller pills with the stroke closer to the text and
+     tighter letter-spacing, a smaller credit, and the cookie pill hovering
+     black like the links (design.css only covers `footer a`). */
+  .footer-credit {
+    font-size: clamp(0.8125rem, 1.1vw, 1rem);
+    letter-spacing: -0.02em;
+  }
+  .footer-pills {
+    gap: 8px;
+  }
+  .footer-pill {
+    border: 1px solid #050505;
+    border-radius: 999px;
+    padding: 1px 11px 0;
+    font-size: clamp(0.8125rem, 1.1vw, 1rem);
+    line-height: 1.5;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+    transition: color 0.18s, background-color 0.18s;
+  }
+  .footer-pill:hover,
+  .footer-pill:focus-visible {
+    color: #fff;
+    background-color: #050505;
+  }
+</style>

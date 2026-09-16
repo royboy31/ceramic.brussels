@@ -62,12 +62,14 @@ const Tag = link ? 'a' : 'div';
     margin-inline: calc(-1 * var(--gutter));
   }
   /* The design's `.newsletter` band (index.css, 2026-09-14 build): 126px tall, 42px type. */
+  /* The text matches the homepage's feature headlines, 40px at -0.04em
+     (client feedback, 2026-09-16). */
   .cta-gradient {
     background: linear-gradient(180deg, var(--acid) 0%, var(--ground) 50%, var(--acid) 100%);
     min-height: 126px;
     margin-top: 68px;
-    font-size: 42px;
-    letter-spacing: 0;
+    font-size: 40px;
+    letter-spacing: -0.04em;
   }
   .cta-solid {
     background: var(--acid);

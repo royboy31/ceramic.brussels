@@ -372,13 +372,22 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     font-style: normal;
     font-display: swap;
   }
+  /* Black, from the same package: the exhibitor letters' hover and selected
+     state (client feedback, 2026-09-16). */
+  @font-face {
+    font-family: 'Noi Grotesk';
+    src: url('/fonts/noi-grotesk-900.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+  }
 
   /* The design's look is in src/styles/design.css (Lilanga's build of the
      sixteen design pages: preflight, utilities, header, menu, footer, grid).
      What is left here: the tokens the older components still read, the
      page frame, and the site's own furniture (skip link, edit bar). */
   :root {
-    --acid: #fff350;
+    --acid: var(--color-acid, #ffed00);
     --ground: #ffffff;
     --surface: #fafaf9;
     --surface-2: #f0efed;
@@ -422,12 +431,50 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   /* Whole-page acid, used by the art prize section: the design wraps those
      pages in `.yellow-page`, which also flattens the header wash and turns
      the footer band into an acid-to-white gradient. */
-  body.acid-page,
+  body.acid-page {
+    background: var(--acid);
+    --band-bg: var(--acid);
+  }
+  /* The art prize header fades from white at the top into the acid, with a
+     fine black rule under it (client feedback, 2026-09-16). */
   body.acid-page .site-header.acid-wash {
-    background: #fdeb33;
+    background: linear-gradient(#fff 0%, var(--acid) 62%);
+    border-bottom: 1px solid var(--ink);
+  }
+  /* The title band with a page's tabs (hub pages, exhibitors, guest of
+     honour) stays at the top of the window while the page scrolls, so the
+     sub-pages are always a click away, and fades into the page below it
+     instead of cutting the text off with a hard edge (client feedback,
+     2026-09-16). --band-bg is the page's ground. */
+  .title-band {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--band-bg, #fff);
+  }
+  .title-band::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 28px;
+    background: linear-gradient(var(--band-bg, #fff), transparent);
+    pointer-events: none;
+    /* Only once the page has scrolled: at rest the fade would lie over the
+       top of the content. Without scroll timelines it simply never shows. */
+    opacity: 0;
+    animation: title-band-fade linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 120px;
+  }
+  @keyframes title-band-fade {
+    to {
+      opacity: 1;
+    }
   }
   body.acid-page footer.acid-wash {
-    background: linear-gradient(#fdeb33 0%, #fff 55%);
+    background: linear-gradient(var(--acid) 0%, #fff 55%);
   }
   .skip {
     position: absolute;

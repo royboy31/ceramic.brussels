@@ -10,7 +10,7 @@ import { styleAttrs } from '../../../lib/textStyle';
 /**
  * Every artist, A–Z, as the design's exhibitors/artists/index.html draws it
  * (2026-09-14 build): the exhibitors title band with the artists tab
- * active and the ALL + A–Z row, then the letter sections flowing down two
+ * active and the A–Z row, then the letter sections flowing down two
  * columns: a big initial beside a ruled list, one row per artist with the
  * country code raised after the name and the booth at the right. The
  * letters filter the sections in place; the page is complete without
@@ -135,9 +135,10 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
     position: relative;
   }
   /* The rule starts a little in from the letter, which sits over its end. */
+  /* A heavier rule beside the letter (client feedback, 2026-09-16). */
   .artist-list section::before {
     content: '';
-    border-top: 1px solid;
+    border-top: 3px solid;
     position: absolute;
     top: 0;
     left: 12%;
@@ -168,6 +169,9 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
   .artist-list li {
     border-bottom: 1px solid;
   }
+  /* Client feedback, 2026-09-16: tighter names, the country code bigger and
+     hung from the top of the capitals as on the exhibitor cards, and the
+     whole row turning acid on hover instead of an underline. */
   .artist-list a {
     justify-content: space-between;
     align-items: baseline;
@@ -175,15 +179,22 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
     padding: 0.42em 0;
     font-size: clamp(18px, 1.8vw, 26px);
     line-height: 1.15;
+    letter-spacing: -0.04em;
     display: flex;
+    transition: background-color 0.18s;
   }
-  .artist-list a:hover .name {
-    text-decoration: underline;
-    text-underline-offset: 0.15em;
+  .artist-list a:hover,
+  .artist-list a:focus-visible {
+    background: var(--color-acid);
   }
   .artist-list sup {
     margin-left: 0.3em;
     font-size: 0.5em;
+    letter-spacing: 0;
+    line-height: 1;
+    vertical-align: top;
+    position: relative;
+    top: 0.12em;
   }
   .tail {
     flex: none;
@@ -193,6 +204,7 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
   }
   .booth {
     font-size: 0.72em;
+    letter-spacing: -0.02em;
     white-space: nowrap;
   }
   /* The round black "solo show" badge of the exhibitor cards, at list size. */
@@ -232,7 +244,7 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
 
 <script>
   // The letter row filters the sections in place; `#A` in the address
-  // pre-selects a letter.
+  // pre-selects a letter, and clicking the chosen letter again clears it.
   const head = document.querySelector<HTMLElement>('[data-alphabet]');
   const list = document.getElementById('artist-list');
   const noMatch = document.getElementById('no-match');
@@ -240,18 +252,19 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
   if (head && list && noMatch) {
     const buttons = Array.from(head.querySelectorAll<HTMLButtonElement>('button[data-letter]'));
     const sections = Array.from(list.querySelectorAll<HTMLElement>('section[data-name]'));
-    let letter = 'ALL';
+    // '' is no letter chosen: every section.
+    let letter = '';
 
     const apply = () => {
       let visible = 0;
       for (const section of sections) {
-        const match = letter === 'ALL' || section.dataset.name === letter;
+        const match = !letter || section.dataset.name === letter;
         section.hidden = !match;
         if (match) visible++;
       }
       noMatch.hidden = visible > 0;
       for (const b of buttons) {
-        const on = (b.dataset.letter ?? 'ALL') === letter;
+        const on = b.dataset.letter === letter;
         b.classList.toggle('active', on);
         b.setAttribute('aria-pressed', String(on));
       }
@@ -259,8 +272,8 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
 
     for (const b of buttons) {
       b.addEventListener('click', () => {
-        letter = b.dataset.letter ?? 'ALL';
-        history.replaceState(null, '', letter === 'ALL' ? location.pathname + location.search : `#${letter}`);
+        letter = b.dataset.letter === letter ? '' : (b.dataset.letter ?? '');
+        history.replaceState(null, '', letter ? `#${letter}` : location.pathname + location.search);
         apply();
       });
     }

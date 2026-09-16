@@ -115,9 +115,11 @@ const image = section.image?.asset ? section.image : null;
     padding-top: 4px;
   }
   /* The design writes its kickers in capitals ("ART PRIZE", "GUEST OF HONOUR"). */
+  /* Tighter capitals (client feedback, 2026-09-16, homepage reference image). */
   .kicker {
     font-size: 32px;
     line-height: 1.05;
+    letter-spacing: -0.03em;
     text-transform: uppercase;
   }
   .split.feature h3 {
@@ -131,15 +133,16 @@ const image = section.image?.asset ? section.image : null;
   /* Drawn underline that runs out right and back in from the left on hover (client feedback, 2026-09-15). */
   .arrow-link {
     align-items: center;
-    gap: 0.22em;
+    letter-spacing: -0.03em;
+    gap: 0.14em;
     margin-top: 38px;
-    padding-bottom: 0.12em;
+    padding-bottom: 0.03em;
     font-size: 30px;
     line-height: 1;
     text-decoration: none;
     background-image: linear-gradient(currentColor, currentColor);
     background-repeat: no-repeat;
-    background-size: 100% 1px;
+    background-size: 100% 2px;
     background-position: 0 100%;
     display: inline-flex;
   }
@@ -148,19 +151,19 @@ const image = section.image?.asset ? section.image : null;
   }
   @keyframes underline-slide {
     0% {
-      background-size: 100% 1px;
+      background-size: 100% 2px;
       background-position: 0 100%;
     }
     45% {
-      background-size: 0 1px;
+      background-size: 0 2px;
       background-position: 100% 100%;
     }
     50% {
-      background-size: 0 1px;
+      background-size: 0 2px;
       background-position: 0 100%;
     }
     100% {
-      background-size: 100% 1px;
+      background-size: 100% 2px;
       background-position: 0 100%;
     }
   }

@@ -9,9 +9,9 @@ import { styleAttrs } from '../lib/textStyle';
 
 /**
  * One edition's exhibitors, as the design's exhibitors/index.html draws it
- * (2026-09-14 build): the title band with its tabs and the ALL + A–Z row,
- * the FILTERS row (search by country, solo show, country focus, publishers,
- * jury prize, awards) and the three-column card grid. The letters, the
+ * (2026-09-14 build): the title band with its tabs and the A–Z row,
+ * the FILTERS row (search by country, solo show, awards, country focus,
+ * jury prize, publishers) and the three-column card grid. The letters, the
  * country and the pills all filter the rendered list in place, so the page
  * is complete without JavaScript and costs nothing until clicked.
  *
@@ -45,16 +45,17 @@ const initial = (ex: any) =>
     .charAt(0)
     .toUpperCase();
 
+/** In the client's order (2026-09-16): awards right after solo show, publishers last. */
 const filters = [
   { id: 'solo-show', label: t('exhibitors.soloShow'), has: (ex: any) => ex.soloShow },
+  { id: 'awards', label: t('nav.awards').toLowerCase(), has: (ex: any) => awarded.has(ex._id) },
   { id: 'country-focus', label: edition?.countryFocus ?? t('exhibitors.countryFocus'), has: (ex: any) => ex.inCountryFocus },
-  { id: 'publishers', label: t('exhibitors.publishers'), has: (ex: any) => ex.kind === 'publisher' },
   {
     id: 'jury-prize',
     label: `${t('exhibitors.juryPrize')}${edition?.year ? ` ${edition.year - 1}` : ''}`,
     has: (ex: any) => ex.kind === 'jury-prize',
   },
-  { id: 'awards', label: t('nav.awards').toLowerCase(), has: (ex: any) => awarded.has(ex._id) },
+  { id: 'publishers', label: t('exhibitors.publishers'), has: (ex: any) => ex.kind === 'publisher' },
 ].filter((f) => exhibitors.some(f.has));
 
 /** The countries in the list, by code, for the "search by country" menu. */
@@ -165,12 +166,16 @@ const links = [
     margin-right: 8px;
     text-transform: uppercase;
   }
+  /* Thin like the footer pills - the stroke close to the text, tighter
+     letter-spacing, the text size unchanged (client feedback, 2026-09-16). */
   .filters button,
   .filters select {
     border: 1px solid;
     border-radius: 999px;
-    padding: 5px 16px;
+    padding: 1px 12px 0;
     font-size: 18px;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
     background: #fff;
     cursor: pointer;
     transition:
@@ -180,6 +185,11 @@ const links = [
   .filters select {
     appearance: none;
     -webkit-appearance: none;
+  }
+  /* A chosen pill says it can be undone: a × before its label. */
+  .filters button[aria-pressed='true']::before {
+    content: '×';
+    margin-right: 0.3em;
   }
   .filters button.active,
   .filters button[aria-pressed='true'],
@@ -241,7 +251,8 @@ const links = [
     const buttons = Array.from(bar?.querySelectorAll<HTMLButtonElement>('button[data-filter]') ?? []);
     const country = bar?.querySelector<HTMLSelectElement>('select[data-country]') ?? null;
     const cards = Array.from(list.querySelectorAll<HTMLElement>('[data-name]'));
-    let letter = 'ALL';
+    // '' is no letter chosen: the whole list.
+    let letter = '';
 
     const apply = () => {
       const active = buttons.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.filter!);
@@ -250,7 +261,7 @@ const links = [
       for (const card of cards) {
         const has = (card.dataset.filters ?? '').split(' ');
         const match =
-          (letter === 'ALL' || card.dataset.name === letter) &&
+          (!letter || card.dataset.name === letter) &&
           (!code || card.dataset.country === code) &&
           active.every((f) => has.includes(f));
         card.hidden = !match;
@@ -259,7 +270,7 @@ const links = [
       noMatch.hidden = visible > 0;
       country?.classList.toggle('active', !!code);
       for (const b of letters) {
-        const on = (b.dataset.letter ?? 'ALL') === letter;
+        const on = b.dataset.letter === letter;
         b.classList.toggle('active', on);
         b.setAttribute('aria-pressed', String(on));
       }
@@ -267,8 +278,9 @@ const links = [
 
     for (const b of letters) {
       b.addEventListener('click', () => {
-        letter = b.dataset.letter ?? 'ALL';
-        if (letter !== 'ALL') history.replaceState(null, '', `#${letter}`);
+        // Clicking the chosen letter again clears it.
+        letter = b.dataset.letter === letter ? '' : (b.dataset.letter ?? '');
+        if (letter) history.replaceState(null, '', `#${letter}`);
         else history.replaceState(null, '', location.pathname + location.search);
         apply();
       });
@@ -283,7 +295,7 @@ const links = [
 
     const fromHash = () => {
       const m = location.hash.match(/^#([A-Za-z])$/);
-      letter = m ? m[1].toUpperCase() : 'ALL';
+      letter = m ? m[1].toUpperCase() : '';
       apply();
     };
     window.addEventListener('hashchange', fromHash);
