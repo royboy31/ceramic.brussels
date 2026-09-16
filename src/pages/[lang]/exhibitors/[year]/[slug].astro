@@ -2,7 +2,7 @@
 import Base from '../../../../layouts/Base.astro';
 import ExhibitorDetail from '../../../../components/ExhibitorDetail.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../../lib/locales';
-import { getExhibitor, getExhibitorPaths, getExhibitorsByYear } from '../../../../lib/queries';
+import { getExhibitor, getExhibitorPaths } from '../../../../lib/queries';
 
 /**
  * A past edition's exhibitor: /exhibitors/<year>/<slug>. A gallery that came
@@ -24,7 +24,7 @@ const lang = Astro.params.lang as LocaleId;
 const year = Number(Astro.params.year);
 const slug = Astro.params.slug as string;
 
-const [exhibitor, list] = await Promise.all([getExhibitor(lang, slug, year), getExhibitorsByYear(lang, year)]);
+const exhibitor = await getExhibitor(lang, slug, year);
 if (!exhibitor) return Astro.rewrite('/404');
 ---
 
@@ -38,5 +38,5 @@ if (!exhibitor) return Astro.rewrite('/404');
   editId={exhibitor._id}
   editType={exhibitor._type}
 >
-  <ExhibitorDetail lang={lang} exhibitor={exhibitor} list={list} listPath={`exhibitors/${year}`} year={year} />
+  <ExhibitorDetail lang={lang} exhibitor={exhibitor} listPath={`exhibitors/${year}`} year={year} />
 </Base>

@@ -66,6 +66,21 @@ for (const s of page?.sections ?? []) {
 const firstText = runs.findIndex((r) => r.text);
 const closing: any[] = (page?.images ?? []).filter((img: any) => img?.asset);
 
+/**
+ * The laureate bios end on a paragraph that is only the artist's "@handle"
+ * linked to Instagram, and the artist's own instagram field is empty. The
+ * client wants the instagram pill instead (feedback, 2026-09-16), so that
+ * closing paragraph is lifted out of the text and becomes the pill's link.
+ */
+const liftInstagram = (blocks: any[] | undefined) => {
+  const list = Array.isArray(blocks) ? blocks : [];
+  const last = list[list.length - 1];
+  const text = (last?.children ?? []).map((c: any) => c?.text ?? '').join('').trim();
+  const link = (last?.markDefs ?? []).find((m: any) => /instagram\.com/i.test(m?.href ?? ''));
+  if (last?._type !== 'block' || !link || !/^@[\w.]+$/.test(text)) return { blocks: list, href: null };
+  return { blocks: list.slice(0, -1), href: link.href as string };
+};
+
 /** "A and B", "A, B and C" - the design writes "and". */
 const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ` ${t('common.and')} ` : ', ');
 /** "Artist, *Title*, year" as the design captions a picture. */
@@ -101,7 +116,7 @@ const captionOf = (img: any, fallback?: string) => ({
                 <i />
               </span>
               <figcaption>
-                <b>1/1</b>
+                <span class="counter">1/1</span>
                 {(page.cover.caption || page.cover.workTitle) && (
                   <span>
                     {captionOf(page.cover).who}
@@ -154,7 +169,10 @@ const captionOf = (img: any, fallback?: string) => ({
         {laureates.length ? (
           laureates.map((l: any, i: number) => {
             const artist = l.artist ?? {};
-            const images = (l.images ?? []).filter((img: any) => img?.asset);
+            // Five pictures per laureate (client feedback, 2026-09-16).
+            const images = (l.images ?? []).filter((img: any) => img?.asset).slice(0, 5);
+            const text = liftInstagram(l.statement ?? artist.bio);
+            const instagram = artist.instagram ? instagramUrl(artist.instagram) : text.href;
             const first = images[0] ?? (artist.portrait?.asset ? artist.portrait : null);
             const cap = captionOf(first, artist.name);
             /* "Poland, 1996" as the design writes it: the written nationality, else the
@@ -200,8 +218,8 @@ const captionOf = (img: any, fallback?: string) => ({
                     <h2 {...styleAttrs(artist.nameStyle)}>
                       {artist.slug ? <a href={localePath(lang, `artists/${artist.slug}`)}>{artist.name}</a> : artist.name}
                     </h2>
-                    {artist.instagram && (
-                      <a class="pill" href={instagramUrl(artist.instagram)} target="_blank" rel="noopener noreferrer">
+                    {instagram && (
+                      <a class="pill" href={instagram} target="_blank" rel="noopener noreferrer">
                         {t('common.instagram')} ↗
                       </a>
                     )}
@@ -211,9 +229,9 @@ const captionOf = (img: any, fallback?: string) => ({
                       {place}
                     </p>
                   )}
-                  {(l.statement ?? artist.bio) && (
+                  {text.blocks.length > 0 && (
                     <div class="bio">
-                      <PortableText value={l.statement ?? artist.bio} fieldStyle={l.statement ? l.statementStyle : artist.bioStyle} />
+                      <PortableText value={text.blocks} fieldStyle={l.statement ? l.statementStyle : artist.bioStyle} />
                     </div>
                   )}
                 </section>
@@ -239,16 +257,14 @@ const captionOf = (img: any, fallback?: string) => ({
                 {(a.laureates?.length > 0 || a.outcome) && (
                   <p class="award">
                     →{' '}
-                    <u>
-                      {(a.laureates ?? []).map((l: any, i: number) => (
-                        <>
-                          {joiner(i, a.laureates.length)}
-                          {l.slug ? <a href={localePath(lang, `artists/${l.slug}`)}>{l.name}</a> : l.name}
-                        </>
-                      ))}
-                      {a.laureates?.length > 0 && a.outcome && ' '}
-                      {a.outcome}
-                    </u>
+                    {(a.laureates ?? []).map((l: any, i: number) => (
+                      <>
+                        {joiner(i, a.laureates.length)}
+                        {l.slug ? <a href={localePath(lang, `artists/${l.slug}`)}>{l.name}</a> : l.name}
+                      </>
+                    ))}
+                    {a.laureates?.length > 0 && a.outcome && ' '}
+                    {a.outcome}
                   </p>
                 )}
                 {a.description && (
@@ -338,13 +354,23 @@ const captionOf = (img: any, fallback?: string) => ({
   }
   figcaption {
     justify-content: space-between;
-    padding-top: 6px;
+    padding-top: 3px;
     display: flex;
   }
+  /* Client feedback, 2026-09-16: the intro beside the cover is the size of
+     the "5 laureates will be presented…" statement (40px), and that size is
+     set a touch tighter than the design's -0.025em, here and in the
+     statement. The counter under the cover is Regular. */
   .hero > p {
-    letter-spacing: -0.04em;
-    font-size: 50px;
-    line-height: 1.1;
+    letter-spacing: -0.035em;
+    font-size: 40px;
+    line-height: 46px;
+  }
+  .prize-about :global(.statement .cs-body .rich-text > p:first-child) {
+    letter-spacing: -0.035em;
+  }
+  .hero .counter {
+    font-weight: 400;
   }
   /* `blocks` is passed to Sections, whose markup carries no scope attribute. */
   :global(.blocks) {
@@ -396,7 +422,7 @@ const captionOf = (img: any, fallback?: string) => ({
   }
   .image :global(figcaption) {
     gap: 14px;
-    padding-top: 8px;
+    padding-top: 3px;
     font-size: 15px;
   }
   .name {
@@ -417,22 +443,31 @@ const captionOf = (img: any, fallback?: string) => ({
     margin-top: 12px;
     font-size: 36px;
     line-height: 1.1;
+    letter-spacing: -0.04em;
   }
-  /* One column of paragraphs, a line's space between them (laureates
-     mock-up, 2026-09-15). */
+  /* Two columns, with the guest of honour page's body letter-spacing
+     (client feedback, 2026-09-16; was one column in the 2026-09-15 mock-up). */
   .bio {
+    columns: 2;
+    column-gap: 40px;
     margin-top: 32px;
     font-size: 22px;
     line-height: 1.3;
+    letter-spacing: -0.03em;
+  }
+  .bio :global(p) {
+    break-inside: avoid;
   }
   .bio :global(p + p) {
     margin-top: 1.3em;
   }
+  /* The instagram pill of the gallery pages. */
   .laureates .pill {
     flex: none;
-    padding: 2px 13px;
-    font-size: 16px;
-    line-height: 25px;
+    margin-top: 10px;
+    padding: 4px 15px;
+    font-size: 19px;
+    line-height: 1.5;
   }
 
   .awards-page .intro-large {
@@ -447,22 +482,29 @@ const captionOf = (img: any, fallback?: string) => ({
     break-inside: avoid;
     margin-bottom: 60px;
   }
+  /* Titles and body as on the guest of honour page: -0.04em, semibold, a
+     2px rule right under the text; body -0.03em at 24/30. The "→ …" line is
+     not underlined and matches the 40px text of the about tab (client
+     feedback, 2026-09-16). */
   .award-grid h2 {
     border-bottom: 2px solid;
-    padding-bottom: 8px;
-    font-size: 36px;
+    letter-spacing: -0.04em;
+    font-size: 40px;
     font-weight: 600;
+    line-height: 48px;
   }
   .award {
     margin-top: 25px;
-    font-size: 34px;
-    line-height: 1.15;
+    font-size: 40px;
+    line-height: 46px;
+    letter-spacing: -0.035em;
   }
   .body {
     white-space: pre-line;
     margin-top: 28px;
-    font-size: 20px;
-    line-height: 1.25;
+    font-size: 24px;
+    line-height: 30px;
+    letter-spacing: -0.03em;
   }
   .body :global(p + p) {
     margin-top: 1.25em;
@@ -481,9 +523,10 @@ const captionOf = (img: any, fallback?: string) => ({
   }
   .people h2 {
     letter-spacing: -0.04em;
-    border-bottom: 1px solid;
+    border-bottom: 2px solid;
     font-size: 36px;
     font-weight: 600;
+    line-height: 1.2;
   }
   .people article > div {
     grid-template-columns: 197px 1fr;
@@ -501,6 +544,7 @@ const captionOf = (img: any, fallback?: string) => ({
   .people section {
     font-size: 24px;
     line-height: 1.22;
+    letter-spacing: -0.03em;
   }
   .people section :global(p) {
     margin-top: 16px;
@@ -546,6 +590,15 @@ const captionOf = (img: any, fallback?: string) => ({
     }
     .award {
       font-size: 28px;
+      line-height: 1.15;
+    }
+    .award-grid h2 {
+      font-size: 30px;
+      line-height: 1.2;
+    }
+    .body {
+      font-size: 18px;
+      line-height: 1.3;
     }
   }
   @media (width<=900px) {
@@ -565,6 +618,7 @@ const captionOf = (img: any, fallback?: string) => ({
     }
     .bio {
       font-size: 19px;
+      columns: 1;
     }
   }
   @media (width<=640px) {

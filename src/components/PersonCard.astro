@@ -68,11 +68,13 @@ const hasLinks = person.instagram || person.website || person.email || person.ph
 
 <style>
   /* From the design's advisory-board page (`.people article`). */
+  /* Title rule as on the guest of honour page (client feedback, 2026-09-16). */
   h2 {
     letter-spacing: -0.04em;
-    border-bottom: 1px solid;
+    border-bottom: 2px solid;
     font-size: 36px;
     font-weight: 600;
+    line-height: 1.2;
   }
   article > div {
     grid-template-columns: 197px 1fr;
@@ -93,6 +95,7 @@ const hasLinks = person.instagram || person.website || person.email || person.ph
   section {
     font-size: 24px;
     line-height: 1.22;
+    letter-spacing: -0.03em;
   }
   section :global(p) {
     margin-top: 16px;

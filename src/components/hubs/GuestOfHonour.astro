@@ -60,7 +60,7 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
   editId={artist?._id}
   editType={artist?._type}
 >
-  <header class="subnav page-grid">
+  <header class="subnav page-grid title-band">
     <h1>{t(hub.title)}</h1>
     <nav>
       {
@@ -79,13 +79,23 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     ) : (
       <div id={tab} class="guest-page page-grid">
         {artist.portrait?.asset ? (
-          <SanityImage
-            image={artist.portrait}
-            class="portrait"
-            loading="eager"
-            sizes="(max-width: 700px) 100vw, 33vw"
-            widths={[500, 800, 1000, 1400]}
-          />
+          <figure class="portrait-figure">
+            <SanityImage
+              image={artist.portrait}
+              class="portrait"
+              loading="eager"
+              sizes="(max-width: 700px) 100vw, 33vw"
+              widths={[500, 800, 1000, 1400]}
+            />
+            {/* Every picture can carry its caption and credit (client feedback, 2026-09-16). */}
+            {(artist.portrait.caption || artist.portrait.credit) && (
+              <figcaption>
+                {artist.portrait.caption}
+                {artist.portrait.caption && artist.portrait.credit && ' '}
+                {artist.portrait.credit && `© ${artist.portrait.credit}`}
+              </figcaption>
+            )}
+          </figure>
         ) : (
           <div class="portrait bg-neutral-100" />
         )}
@@ -132,14 +142,20 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
           )}
         </section>
 
+        {/* Up to five works in a row that runs off the right edge; a click on
+            the right half slides it one picture on, on the left half one back
+            (client feedback, 2026-09-16). Without JS it scrolls sideways. */}
         {tab !== 'interview' && works.length > 0 && (
-          <section class="gallery col-span-full">
-            {works.slice(0, 2).map((w: any) => (
-              <figure>
-                <SanityImage image={w.image} widths={[670, 1000, 1340]} sizes="(max-width: 700px) 100vw, 670px" />
-                <figcaption>{caption(w.image, w).join(', ')}</figcaption>
-              </figure>
-            ))}
+          <section class="gallery col-span-full" data-gallery>
+            <div class="gallery-track" data-gallery-track>
+              {works.slice(0, 5).map((w: any) => (
+                <figure>
+                  <SanityImage image={w.image} aspect={670 / 447} widths={[670, 1000, 1340]} sizes="(max-width: 700px) 85vw, 42vw" />
+                  <figcaption>{caption(w.image, w).join(', ')}</figcaption>
+                </figure>
+              ))}
+            </div>
+            {works.length > 2 && <span class="gallery-arrow" data-gallery-arrow aria-hidden="true" hidden />}
           </section>
         )}
 
@@ -192,7 +208,7 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     font-size: 28px;
   }
   .subnav a.active {
-    background: #fff350;
+    background: var(--color-acid);
   }
   .guest-page {
     padding-top: 22px;
@@ -204,6 +220,16 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     grid-column: span 4;
     width: 100%;
     height: 607px;
+  }
+  .portrait-figure {
+    grid-column: span 4;
+    margin: 0;
+  }
+  .portrait-figure figcaption {
+    margin-top: 3px;
+    font-size: 16px;
+    line-height: 20px;
+    text-align: left;
   }
   .intro {
     grid-column: span 8;
@@ -259,21 +285,48 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     margin-top: 30px;
   }
   .gallery {
-    grid-template-columns: 670px 670px;
-    gap: 40px;
+    position: relative;
     margin-top: 109px;
-    display: grid;
-    overflow: hidden;
+    /* Runs out to the window's right edge, so the next picture peeks in. */
+    margin-right: calc(-1 * var(--gutter));
+  }
+  .gallery-track {
+    display: flex;
+    gap: 30px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .gallery-track::-webkit-scrollbar {
+    display: none;
+  }
+  .gallery figure {
+    flex: 0 0 calc((100% - var(--gutter) - 30px) / 2.25);
+    margin: 0;
+    scroll-snap-align: start;
   }
   .gallery :global(img) {
     object-fit: cover;
-    width: 670px;
-    height: 447px;
+    width: 100%;
+    aspect-ratio: 670 / 447;
+    height: auto;
+  }
+  .gallery-arrow {
+    position: absolute;
+    z-index: 3;
+    translate: -50% -50%;
+    pointer-events: none;
+    font-size: clamp(56px, 5.5vw, 84px);
+    line-height: 1;
+  }
+  .gallery.arrow-cursor .gallery-track {
+    cursor: none;
   }
   .gallery figcaption {
     text-align: center;
+    margin-top: 3px;
     font-size: 16px;
-    line-height: 30px;
+    line-height: 20px;
   }
   .practice {
     margin-top: 50px;
@@ -326,6 +379,7 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
       font-size: 20px;
     }
     :global(.portrait),
+    .portrait-figure,
     .intro,
     .practice,
     .video {
@@ -362,13 +416,13 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
       line-height: 1.3;
     }
     .gallery {
-      grid-template-columns: 1fr;
-      gap: 20px;
       margin-top: 60px;
     }
-    .gallery :global(img) {
-      width: 100%;
-      height: auto;
+    .gallery-track {
+      gap: 16px;
+    }
+    .gallery figure {
+      flex-basis: 85%;
     }
     .video span {
       border-radius: 18px;
@@ -378,3 +432,36 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     }
   }
 </style>
+
+<script>
+  // The works row: with a mouse, the pointer is a big arrow (← on the left
+  // half, → on the right) and a click slides the row one picture that way.
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((gallery) => {
+    const track = gallery.querySelector<HTMLElement>('[data-gallery-track]');
+    const arrow = gallery.querySelector<HTMLElement>('[data-gallery-arrow]');
+    if (!track || !arrow || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const items = [...track.children] as HTMLElement[];
+    const step = () => (items[1] ? items[1].offsetLeft - items[0].offsetLeft : track.clientWidth);
+    let dir = 1;
+    gallery.classList.add('arrow-cursor');
+    track.addEventListener('pointermove', (event) => {
+      const box = gallery.getBoundingClientRect();
+      const x = event.clientX - box.left;
+      dir = x < track.clientWidth / 2 ? -1 : 1;
+      arrow.textContent = dir < 0 ? '←' : '→';
+      arrow.style.left = `${x}px`;
+      arrow.style.top = `${event.clientY - box.top}px`;
+      arrow.hidden = false;
+    });
+    track.addEventListener('pointerleave', () => (arrow.hidden = true));
+    track.addEventListener('click', () => {
+      const max = track.scrollWidth - track.clientWidth;
+      let left = track.scrollLeft + dir * step();
+      // Past either end, wrap round to the other.
+      if (track.scrollLeft >= max - 2 && dir > 0) left = 0;
+      else if (track.scrollLeft <= 2 && dir < 0) left = max;
+      track.scrollTo({ left, behavior: reduced ? 'auto' : 'smooth' });
+    });
+  });
+</script>

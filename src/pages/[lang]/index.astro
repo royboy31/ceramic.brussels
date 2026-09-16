@@ -170,18 +170,21 @@ const external = (link: ResolvedLink | null) =>
   }
   /* The underline is a drawn line rather than text-decoration, so on hover
      it can run out to the right and back in from the left (client
-     feedback, 2026-09-15); the arrow keeps its slide. */
+     feedback, 2026-09-15); the arrow keeps its slide. 2026-09-16: the line
+     is 2px and sits closer to the text, the arrow closer to the label. */
   .arrow-link {
     align-items: center;
-    gap: 0.22em;
+    letter-spacing: -0.03em;
+    gap: 0.14em;
     margin-top: 28px;
-    padding-bottom: 0.12em;
-    font-size: clamp(25px, 2.75vw, 40px);
+    padding-bottom: 0.03em;
+    /* The size of the other arrow links on the page (client feedback, 2026-09-16). */
+    font-size: clamp(22px, 2.1vw, 30px);
     line-height: 1;
     text-decoration: none;
     background-image: linear-gradient(currentColor, currentColor);
     background-repeat: no-repeat;
-    background-size: 100% 1px;
+    background-size: 100% 2px;
     background-position: 0 100%;
     display: inline-flex;
   }
@@ -190,19 +193,19 @@ const external = (link: ResolvedLink | null) =>
   }
   @keyframes underline-slide {
     0% {
-      background-size: 100% 1px;
+      background-size: 100% 2px;
       background-position: 0 100%;
     }
     45% {
-      background-size: 0 1px;
+      background-size: 0 2px;
       background-position: 100% 100%;
     }
     50% {
-      background-size: 0 1px;
+      background-size: 0 2px;
       background-position: 0 100%;
     }
     100% {
-      background-size: 100% 1px;
+      background-size: 100% 2px;
       background-position: 0 100%;
     }
   }
@@ -229,11 +232,13 @@ const external = (link: ResolvedLink | null) =>
   }
   .quicklinks a {
     text-align: center;
-    background: #fff350;
+    background: var(--color-acid);
     border: 1px solid #000;
     padding: 13px;
     font-size: 30px;
     line-height: 1;
+    /* Tighter (client feedback, 2026-09-16). */
+    letter-spacing: -0.03em;
     transition:
       background 0.2s,
       color 0.2s;

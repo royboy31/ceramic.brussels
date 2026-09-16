@@ -192,8 +192,21 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
     overflow: visible;
     transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
+  /* The last row has no sheet over it, so it used to stand open. It is
+     collapsed like the others (client feedback, 2026-09-16): its own sheet
+     is cut to the strip and grows to its measured height. */
   .menu-row:last-child {
     height: auto;
+  }
+  .menu-row:last-child .menu-sheet {
+    max-height: var(--strip);
+    transition:
+      max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      translate 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.22s;
+  }
+  .menu-row:last-child.expanded .menu-sheet {
+    max-height: var(--full, 100vh);
   }
   .menu-row.expanded {
     height: calc(var(--full, 0px) - var(--lift));
@@ -201,8 +214,34 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   .menu-row:last-child.expanded {
     height: auto;
   }
+  /* A deeper, more gradual acid band than the design's 2rem fade, closer to
+     the live site's menu (client feedback, 2026-09-16). */
   .menu-sheet {
-    background: linear-gradient(#fff350 0, #fff999 1rem, #fff 2rem);
+    background: linear-gradient(
+      var(--color-acid) 0,
+      var(--color-acid) 0.4rem,
+      color-mix(in srgb, var(--color-acid) 55%, #fff) 1.75rem,
+      #fff 3.75rem
+    );
+  }
+  /* Tighter sub-links and heavier underlines (client feedback, 2026-09-16). */
+  .submenu a {
+    letter-spacing: -0.03em;
+  }
+  @media (hover: hover) {
+    .menu-heading > a:hover,
+    .submenu a:hover {
+      text-decoration-thickness: 2px;
+    }
+    .menu-heading > a:hover {
+      text-decoration-thickness: 3px;
+    }
+  }
+  .menu-heading > a:focus-visible,
+  .submenu a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    text-decoration-thickness: 2px;
   }
   /* Up over the previous sheet, not off to the left (client feedback): the
      design's -16px nudge and its acid edge are dropped. */
@@ -210,7 +249,13 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
     translate: 0 calc(-1 * var(--lift));
     box-shadow: 0 -6px 18px #00000014;
   }
-  /* Nothing above the first row to ride over: it only grows. */
+  /* A row without sub-links is the design's taller strip, which put its
+     title under the next sheet; only the last row, with nothing over it,
+     keeps that height. */
+  .menu-row.no-links:not(:last-child) :global(.menu-heading) {
+    min-height: var(--strip);
+  }
+    /* Nothing above the first row to ride over: it only grows. */
   .menu-row:first-child.expanded {
     height: var(--full, auto);
   }

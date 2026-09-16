@@ -16,12 +16,15 @@ import { styleAttrs } from '../../../lib/textStyle';
  * /exhibitors/awards: the fair's exhibitor awards (best booth, best solo
  * show…), as the design's exhibitors/awards/index.html draws it
  * (2026-09-14 build): the exhibitors title band with the awards tab
- * active, an intro line, then one ruled row per award - the winning
- * gallery's pictures on the left, the award's name as a label, the
- * gallery, its city, the citation and a link to the gallery on the right.
+ * active, an intro line, then one row per award, rebuilt to the client's
+ * Figma frame of 2026-09-16: the pictures on the left; on the right the
+ * award's name over a rule, what it rewards, and "PREVIOUS LAUREATE (2026)"
+ * with the winning gallery - or "NEW THIS YEAR" for an award that has never
+ * been given.
  *
- * Data: `award` documents of family "fair", the newest edition that has
- * any (the current one once its awards are in). The intro is the `page` in
+ * Data: `award` documents of family "fair". The awards listed are the
+ * current edition's once they exist, else the newest edition's; the previous
+ * laureate is the last earlier winner of an award with the same name. The intro is the `page` in
  * section "exhibitors" whose English slug is `awards`, when an editor makes
  * one; the list never comes from it. A static segment, so it wins over
  * exhibitors/[slug].astro.
@@ -36,16 +39,26 @@ const t = useTranslations(lang);
 const [allAwards, edition, pages] = await Promise.all([getAwards(lang), getCurrentEdition(lang), getHubPages(lang, 'exhibitors')]);
 const page = pageForTab(pages, 'awards');
 const fair = allAwards.filter((a: any) => a.family === 'fair' && a.year);
-const year = fair.some((a: any) => a.year === edition?.year) ? edition.year : fair[0]?.year;
-const awards = fair.filter((a: any) => a.year === year);
+const current = edition?.year;
+const year = fair.some((a: any) => a.year === current) ? current : fair[0]?.year;
+const sameAward = (a: any, b: any) => String(a?.name ?? '').trim().toLowerCase() === String(b?.name ?? '').trim().toLowerCase();
 
-const placeOf = (g: any) => {
-  const code = countryCode(g?.countryCode ?? g?.country);
-  return [g?.city, code && `(${code})`].filter(Boolean).join(' ');
+const awards = fair
+  .filter((a: any) => a.year === year)
+  .map((a: any) => {
+    // A current award looks back for an earlier winner; a past edition's
+    // award is itself the latest laureate.
+    const earlier = fair.filter((b: any) => b.year < a.year && sameAward(a, b));
+    const previous = a.year === current ? earlier.find((b: any) => b.gallery) ?? null : a.gallery ? a : null;
+    return { ...a, previous, isNew: a.year === current && earlier.length === 0 };
+  });
+
+/** The award's own picture, else its winning gallery's, else the previous laureate's. */
+const imagesOf = (a: any): any[] => {
+  if (a.image?.asset) return [a.image];
+  const own = (a.gallery?.images ?? []).filter((img: any) => img?.asset);
+  return own.length ? own : (a.previous?.gallery?.images ?? []).filter((img: any) => img?.asset);
 };
-/** The award's own picture, else the gallery's pictures. */
-const imagesOf = (a: any): any[] =>
-  a.image?.asset ? [a.image] : (a.gallery?.images ?? []).filter((img: any) => img?.asset);
 ---
 
 <Base
@@ -73,8 +86,9 @@ const imagesOf = (a: any): any[] =>
       <div class="awards-list">
         {awards.map((a: any, i: number) => {
           const images = imagesOf(a);
-          const gallery = a.gallery;
-          const winners = gallery ? [gallery.name] : (a.laureates ?? []).map((l: any) => l.name);
+          const prev = a.previous;
+          const gallery = prev?.gallery;
+          const code = gallery ? countryCode(gallery.countryCode ?? gallery.country) : null;
           return (
             <article>
               <figure>
@@ -85,20 +99,27 @@ const imagesOf = (a: any): any[] =>
                 )}
               </figure>
               <div class="award-copy">
-                <p class="label" {...styleAttrs(a.nameStyle)}>
-                  {a.name}
-                </p>
-                {winners.length > 0 && <h2>{winners.join(', ')}</h2>}
-                {gallery && placeOf(gallery) && <p class="place">{placeOf(gallery)}</p>}
-                {a.outcome && <p class="place">{a.outcome}</p>}
+                <h2 {...styleAttrs(a.nameStyle)}>{a.name}</h2>
+                {a.isNew && <p class="label">{t('exhibitors.newThisYear')}</p>}
                 {a.description && <PortableText value={a.description} fieldStyle={a.descriptionStyle} />}
-                {gallery?.slug && (
-                  <a href={localePath(lang, exhibitorPath(gallery))}>
-                    {t('exhibitors.discoverGallery')}{' '}
-                    <span class="link-arrow" data-arrow="→" aria-hidden="true">
-                      →
-                    </span>
-                  </a>
+                {gallery && (
+                  <div class="laureate">
+                    <p class="label">{t('exhibitors.previousLaureate', { year: prev.year })}</p>
+                    <p>
+                      {gallery.slug ? (
+                        <a href={localePath(lang, exhibitorPath(gallery))}>
+                          {gallery.name}
+                          {code && ` (${code})`}
+                        </a>
+                      ) : (
+                        <>
+                          {gallery.name}
+                          {code && ` (${code})`}
+                        </>
+                      )}
+                      {prev.outcome && <span {...styleAttrs(prev.outcomeStyle)}>, {prev.outcome}</span>}
+                    </p>
+                  </div>
                 )}
               </div>
             </article>
@@ -121,22 +142,23 @@ const imagesOf = (a: any): any[] =>
 <style>
   /* From the design's exhibitors/awards/index.html (2026-09-14 build). */
   .awards-intro {
-    padding: 45px var(--gutter) 30px;
+    padding: 36px var(--gutter) 34px;
   }
   .awards-intro p {
     letter-spacing: -0.035em;
     max-width: 950px;
-    font-size: 40px;
-    line-height: 1.08;
+    font-size: clamp(28px, 2.6vw, 40px);
+    line-height: 1.15;
   }
+  /* The rows of the Figma frame: pictures on the left half, the text beside
+     them, no rules between rows. */
   .awards-list {
     padding: 0 var(--gutter) 90px;
   }
   .awards-list article {
-    border-top: 1px solid;
-    grid-template-columns: 1.05fr 1fr;
-    gap: 40px;
-    padding: 35px 0 70px;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px 40px;
+    padding-bottom: 50px;
     display: grid;
   }
   .awards-list figure {
@@ -151,57 +173,58 @@ const imagesOf = (a: any): any[] =>
     background: #f0efed;
   }
   .awards-list :global(figcaption) {
-    margin-top: 7px;
+    margin-top: 3px;
   }
-  .award-copy .label {
-    text-transform: uppercase;
-    font-size: 21px;
-  }
+  /* The guest of honour page's title: semibold, tight, a 2px rule right under it. */
   .award-copy h2 {
-    letter-spacing: -0.045em;
-    margin-top: 12px;
-    font-size: 54px;
-    font-weight: 400;
-    line-height: 1;
-  }
-  .place {
-    margin-bottom: 38px;
-    font-size: 28px;
+    border-bottom: 2px solid;
+    text-transform: lowercase;
+    letter-spacing: -0.04em;
+    font-size: clamp(28px, 2.5vw, 36px);
+    font-weight: 600;
+    line-height: 1.2;
   }
   .award-copy :global(.rich-text) {
-    max-width: 610px;
-    font-size: 23px;
-    line-height: 1.25;
+    max-width: 640px;
+    margin-top: 18px;
+    font-size: clamp(18px, 1.5vw, 22px);
+    line-height: 1.3;
+    letter-spacing: -0.03em;
   }
-  .award-copy > a {
-    gap: 8px;
-    margin-top: 34px;
-    font-size: 28px;
+  .award-copy .label {
+    margin-top: 18px;
+    text-transform: uppercase;
+    font-size: clamp(15px, 1.2vw, 18px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .laureate {
+    margin-top: 26px;
+    font-size: clamp(18px, 1.5vw, 22px);
+    line-height: 1.3;
+    letter-spacing: -0.03em;
+  }
+  .laureate .label {
+    margin-top: 0;
+  }
+  .laureate a {
     text-decoration: underline;
-    display: inline-flex;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.12em;
   }
-  .award-copy a span {
-    transition: transform 0.2s;
-  }
-  .award-copy a:hover span {
-    transform: translate(8px);
+  .laureate a:hover {
+    background: var(--color-acid);
   }
   .empty {
     padding: 45px var(--gutter) 90px;
     font-size: 24px;
   }
   @media (width<=640px) {
-    .awards-intro p {
-      font-size: 30px;
-    }
     .awards-list article {
       display: block;
     }
     .award-copy {
-      padding-top: 20px;
-    }
-    .award-copy h2 {
-      font-size: 40px;
+      padding-top: 16px;
     }
   }
 </style>

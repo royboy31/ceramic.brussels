@@ -121,9 +121,15 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
     font-weight: 400;
     line-height: 0.95;
   }
+  /* Bigger, and hung from the top of the capitals rather than raised off
+     the baseline (client feedback, 2026-09-16). */
   sup {
     letter-spacing: 0;
-    font-size: 15px;
+    font-size: 0.5em;
+    line-height: 1;
+    vertical-align: top;
+    position: relative;
+    top: 0.01em;
   }
   .badge {
     text-align: center;

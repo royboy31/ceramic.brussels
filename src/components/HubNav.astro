@@ -36,7 +36,7 @@ const tabs = hub.tabs.map((tab) => {
 });
 ---
 
-<div class:list={['section-head', 'page-grid', className]}>
+<div class:list={['section-head', 'page-grid', 'title-band', className]}>
   <h1>{t(hub.title)}</h1>
   {
     tabs.length > 1 && (
@@ -62,9 +62,10 @@ const tabs = hub.tabs.map((tab) => {
   /* The design's .section-head, identical on every hub page. */
   .section-head {
     align-items: center;
-    /* Room under the header before the title band (client feedback, 2026-09-15). */
-    padding-top: 40px;
-    padding-bottom: 28px;
+    /* Room under the header before the title band (client feedback,
+       2026-09-15), a little less since 2026-09-16 ("a bit higher up"). */
+    padding-top: 26px;
+    padding-bottom: 22px;
   }
   .section-head h1 {
     text-transform: lowercase;
@@ -90,7 +91,7 @@ const tabs = hub.tabs.map((tab) => {
     line-height: 30px;
   }
   .section-head a.active {
-    background: #fff350;
+    background: var(--color-acid);
   }
   .section-head a.active.dark {
     color: #fff;

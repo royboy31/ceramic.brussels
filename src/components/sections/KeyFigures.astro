@@ -93,11 +93,16 @@ const count = (value: string) => {
     grid-template-columns: repeat(2, 1fr);
     display: grid;
   }
+  /* Bigger figures, centred in the height of their box and still on the
+     left (client feedback, 2026-09-16). */
   .stats__grid > div {
     border-bottom: 1px solid #000;
+    /* One wrapping line centred in the box, figure and label on a shared baseline. */
+    flex-wrap: wrap;
+    align-content: center;
     align-items: baseline;
-    gap: 22px;
-    min-height: 116px;
+    gap: 0 22px;
+    min-height: 140px;
     padding: 15px 45px;
     display: flex;
   }
@@ -106,9 +111,9 @@ const count = (value: string) => {
   }
   .home-stats strong {
     letter-spacing: -0.055em;
-    font-size: 72px;
+    font-size: clamp(64px, 6.6vw, 96px);
     font-weight: 400;
-    line-height: 1;
+    line-height: 0.85;
   }
   .home-stats span {
     font-size: 31px;
@@ -125,7 +130,7 @@ const count = (value: string) => {
       padding-inline: 18px;
     }
     .home-stats strong {
-      font-size: 54px;
+      font-size: 60px;
     }
     .home-stats span {
       font-size: 22px;
@@ -147,7 +152,7 @@ const count = (value: string) => {
       padding: 14px 10px;
     }
     .home-stats strong {
-      font-size: 50px;
+      font-size: 56px;
     }
     .home-stats span {
       text-align: right;
