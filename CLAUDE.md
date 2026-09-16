@@ -594,7 +594,10 @@ questions.
   fifteen minutes, and sends two emails through Brevo - to the team and to
   the applicant. Nothing is stored: the dataset is public. Until the
   `BREVO_API_KEY` Pages secret exists the route answers 503 and the page
-  shows its failure state with the contact address, never a false "sent".
+  shows its failure state with the contact address, never a false "sent" -
+  except on branch previews, where `APPLY_DRY_RUN = "1"` in `wrangler.toml`
+  logs the submission instead and still goes on to the thank-you page, so
+  the flow can be tried before Brevo is connected.
 - **Preview renders read the page to the end inside the store.** Astro
   streams responses, so the frontmatter (and its queries) runs when the body
   is pulled. `src/middleware.ts` awaits `response.text()` inside

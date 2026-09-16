@@ -17,7 +17,9 @@ import { localePath } from '../../lib/i18n';
  *
  * Until BREVO_API_KEY is set as a Pages secret and the sender domain is
  * verified in Brevo, this answers 503 and the form shows its failure state
- * with the contact address - never a false "sent".
+ * with the contact address - never a false "sent". The one exception is a
+ * branch preview, where APPLY_DRY_RUN=1 (wrangler.toml) lets the flow be
+ * tried end to end with the emails logged instead of sent.
  */
 export const prerender = false;
 
@@ -184,7 +186,12 @@ export const POST: APIRoute = async ({ request }) => {
   if (cfg.open === false) return answer(403, 'closed', 'Applications are closed', 'Applications are not open at the moment.');
 
   const apiKey = getSecret('BREVO_API_KEY');
-  if (!apiKey) {
+  // Branch previews (wrangler.toml [env.preview.vars]) may run the whole flow
+  // without an email service: the submission goes to the log and the browser
+  // on to the thank-you page. Production never has APPLY_DRY_RUN, so there a
+  // missing key still refuses rather than pretend.
+  const dryRun = !apiKey && getSecret('APPLY_DRY_RUN') === '1';
+  if (!apiKey && !dryRun) {
     console.error('[apply] BREVO_API_KEY is not set; submission not delivered');
     return answer(503, 'unconfigured', 'Not available yet', `The form is not connected yet. Please write to ${cfg.recipient || cfg.contactEmail || 'the team'}.`);
   }
@@ -192,7 +199,8 @@ export const POST: APIRoute = async ({ request }) => {
   if (await isRepeat(submission.email)) return answer(409, 'duplicate', 'Already received', 'We already have a request from this address.');
 
   try {
-    await deliver(apiKey, submission, cfg);
+    if (dryRun) console.warn('[apply] APPLY_DRY_RUN: not delivered', JSON.stringify({ ...submission, to: cfg.recipient, cc: cfg.cc }));
+    else await deliver(apiKey!, submission, cfg);
   } catch (error) {
     console.error('[apply] delivery failed:', error instanceof Error ? error.message : error);
     return answer(502, 'delivery', 'Could not send', `Your request could not be sent. Please write to ${cfg.recipient || cfg.contactEmail || 'the team'}.`);

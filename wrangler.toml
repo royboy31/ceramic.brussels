@@ -43,6 +43,11 @@ PUBLIC_SANITY_PROJECT_ID = "5hqzhin7"
 PUBLIC_SANITY_DATASET = "production"
 PUBLIC_SITE_URL = "https://dev.ceramic-brussels.pages.dev"
 PUBLIC_SHOW_EDIT_LINKS = "true"
+# The gallery application form on a preview accepts a submission without an
+# email service: the Worker logs it and sends the browser on to the thank-you
+# page, so the whole flow can be tried before Brevo is connected. Never set
+# this on production, where a missing BREVO_API_KEY must refuse.
+APPLY_DRY_RUN = "1"
 # The preview runtime. PREVIEW_RUNTIME=1 makes `astro build` add the Cloudflare
 # adapter and the on-demand /preview and /api/preview routes, and
 # scripts/pages-worker.mjs then moves the Worker to dist/_worker.js so Pages
