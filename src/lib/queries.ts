@@ -178,6 +178,7 @@ const SECTIONS = `sections[hidden != true]{
       "open": applications.open,
       "closedMessage": ${localised('applications.closedMessage')},
       "successMessage": ${localised('applications.successMessage')},
+      "successSlugs": applications.successPage->{ "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current },
       "contact": coalesce(applications.recipient, contactEmail)
     }
   },

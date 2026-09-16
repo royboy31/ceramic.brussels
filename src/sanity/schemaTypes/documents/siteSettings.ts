@@ -188,10 +188,19 @@ export const siteSettings = defineType({
           description: 'Plain text; a blank line starts a new paragraph. {firstName}, {lastName}, {gallery} are filled in.',
         }),
         defineField({
+          name: 'successPage',
+          title: 'Page shown after sending',
+          type: 'reference',
+          to: [{ type: 'page' }],
+          options: { filter: '!defined(section)' },
+          description:
+            'A standalone page (Other pages) the applicant lands on once the request is sent - the thank-you page, in the language of the form. Without one, the message below shows under the form instead.',
+        }),
+        defineField({
           name: 'successMessage',
-          title: 'Message on the page after sending',
+          title: 'Message under the form after sending',
           type: 'localeText',
-          description: 'Optional. Replaces the standard "thank you" line under the form.',
+          description: 'Optional. Used when no page is chosen above; replaces the standard "thank you" line.',
         }),
       ],
     }),

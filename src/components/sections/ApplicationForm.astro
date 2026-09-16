@@ -1,6 +1,6 @@
 ---
 import type { LocaleId } from '../../lib/locales';
-import { useTranslations } from '../../lib/i18n';
+import { localePath, useTranslations } from '../../lib/i18n';
 import { styleAttrs } from '../../lib/textStyle';
 
 /**
@@ -17,7 +17,8 @@ import { styleAttrs } from '../../lib/textStyle';
  * design.css, the `.two-col` split): a label and an underlined field per
  * column, the black pill of the site's calls to action to send.
  *
- * Whether the form is open, and what it says when it is not, comes from
+ * Whether the form is open, what it says when it is not, and where a sent
+ * request lands (a thank-you page, or a line under the form) come from
  * Site settings → Applications (the `form` key the query resolves). The
  * submission goes to `/api/apply/` on the Worker (with the slash: every URL Pages serves ends in one, and the bare path is a 308 away) (src/server/routes/apply.ts),
  * which sends the two emails once Brevo is connected; until then it answers
@@ -34,6 +35,9 @@ const form = section.form ?? {};
 const open = form.open !== false;
 const contact = form.contact || 'info@ceramic.brussels';
 const id = section.anchor || 'apply';
+/** The thank-you page in this language (Site settings → Applications → Page shown after sending), or none. */
+const successSlug = form.successSlugs?.[lang] ?? form.successSlugs?.en;
+const successUrl = successSlug ? localePath(lang, successSlug) : undefined;
 const fields = [
   { name: 'firstName', label: t('apply.firstName'), type: 'text', autocomplete: 'given-name', max: 120 },
   { name: 'lastName', label: t('apply.lastName'), type: 'text', autocomplete: 'family-name', max: 120 },
@@ -69,6 +73,7 @@ const fields = [
         novalidate
         data-apply
         data-success={form.successMessage || t('apply.success')}
+        data-success-url={successUrl}
         data-error={t('apply.error', { email: contact })}
         data-duplicate={t('apply.duplicate')}
         data-closed={form.closedMessage || t('apply.closed')}
@@ -169,8 +174,15 @@ const fields = [
         const body = await response.json().catch(() => ({}));
         if (response.ok) {
           form.classList.add('sent');
-          say(form.dataset.success!, 'ok');
           form.querySelectorAll<HTMLInputElement>('input, button').forEach((el) => (el.disabled = true));
+          // The thank-you page when one is set; the line under the form otherwise.
+          const next = form.dataset.successUrl;
+          if (next) {
+            say(form.dataset.sending!, '');
+            location.assign(next);
+            return;
+          }
+          say(form.dataset.success!, 'ok');
           return;
         }
         if (body?.error === 'duplicate') say(form.dataset.duplicate!, 'bad');

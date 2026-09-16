@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { getSecret } from 'astro:env/server';
 import { sanityClient } from 'sanity:client';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../lib/locales';
+import { localePath } from '../../lib/i18n';
 
 /**
  * POST /api/apply - the gallery application form (ApplicationForm.astro).
@@ -9,7 +10,8 @@ import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../lib/locales';
  * Takes the four fields, checks them, checks that applications are open
  * (Site settings → Applications), turns away bots and repeats, and sends two
  * emails through Brevo: the submission to the team, a confirmation to the
- * applicant. Nothing is stored: the dataset is world-readable, so an
+ * applicant - then sends the browser to the thank-you page named in Site
+ * settings (a 303, or the address in the JSON answer). Nothing is stored: the dataset is world-readable, so an
  * application document would publish the applicant's email, and the
  * private database went with the site accounts. The emails are the record.
  *
@@ -40,6 +42,8 @@ interface FormSettings {
   confirmationText?: string;
   contactEmail?: string;
   siteName?: string;
+  /** Slug of the thank-you page in the form's language, when one is set. */
+  successSlug?: string;
 }
 
 const json = (status: number, body: Record<string, unknown>) =>
@@ -81,6 +85,7 @@ async function settings(lang: LocaleId): Promise<FormSettings> {
       "senderEmail": applications.senderEmail,
       "confirmationSubject": coalesce(applications.confirmationSubject[$lang], applications.confirmationSubject.en),
       "confirmationText": coalesce(applications.confirmationText[$lang], applications.confirmationText.en),
+      "successSlug": coalesce(applications.successPage->slug[$lang].current, applications.successPage->slug.en.current),
       contactEmail, siteName
     }`,
     { lang },
@@ -193,7 +198,12 @@ export const POST: APIRoute = async ({ request }) => {
     return answer(502, 'delivery', 'Could not send', `Your request could not be sent. Please write to ${cfg.recipient || cfg.contactEmail || 'the team'}.`);
   }
 
-  return wantsJson ? json(200, { ok: true }) : page(200, 'Thank you', 'Your request has been received. A confirmation is on its way to you.');
+  // Sent. The thank-you page when Site settings names one: a redirect for a
+  // browser that posted the form itself, its address for the script.
+  const next = cfg.successSlug ? localePath(lang, cfg.successSlug) : undefined;
+  if (wantsJson) return json(200, { ok: true, ...(next ? { redirect: next } : {}) });
+  if (next) return new Response(null, { status: 303, headers: { location: next, 'cache-control': 'no-store' } });
+  return page(200, 'Thank you', 'Your request has been received. A confirmation is on its way to you.');
 };
 
 export const GET: APIRoute = () => json(405, { ok: false, error: 'method' });

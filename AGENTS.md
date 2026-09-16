@@ -426,7 +426,10 @@ The old site's URLs are not typed into `public/_redirects`:
 to `dist/_redirects` from a map of old page → new English path, taking the
 old FR/NL slugs from `legacy-export/normalized` and the new FR/NL targets
 from each built page's hreflang, so a slug change needs no edit. A target
-that was not built fails the build. `--doc` checks every URL in
+that was not built fails the build. `scripts/sitemap-noindex.mjs` then drops
+every page whose HTML says noindex (the thank-you page, anything an editor
+hid from search engines) from the sitemap, which the integration cannot do
+by itself. `--doc` checks every URL in
 `docs/legacy-site-inventory.md` has a rule; `--check <url>` tests them live
 (301, one hop, onto a 200) — run it against the real domain at cutover.
 
@@ -580,8 +583,11 @@ questions.
 - **The gallery application form is a page-builder block.** `applicationFormSection`
   draws the old site's four-field form (`ApplicationForm.astro`); its
   settings - open or closed and the closed message, recipient, sender, the
-  confirmation email text - are one object on Site settings → Applications,
-  which the block's query branch and the submit route both read. The
+  confirmation email text, the thank-you page a sent request lands on - are
+  one object on Site settings → Applications, which the block's query
+  branch and the submit route both read. The thank-you page is an ordinary
+  standalone `page` (Other pages → "Thank you", noindex); without one the
+  success line shows under the form. The
   submission goes to `/api/apply` on the Worker (`src/server/routes/apply.ts`,
   injected by `preview-routes.mjs` like the preview door), which validates,
   drops bots on a honeypot, refuses a repeat from the same address within
