@@ -63,8 +63,6 @@ async function tooManyFailures(request: Request, count: boolean): Promise<boolea
 export const POST: APIRoute = async ({ request }) => {
   const wantsJson = (request.headers.get('accept') ?? '').includes('application/json');
   const body = await readBody(request);
-  // TEMPORARY diagnostic (2026-09-17): a form post lost `next` on the preview; a JSON one did not.
-  console.warn('[vip] enter body', JSON.stringify({ type: request.headers.get('content-type'), keys: Object.keys(body), next: body.next, lang: body.lang }));
   const lang = (LOCALE_IDS as string[]).includes(body.lang) ? (body.lang as LocaleId) : DEFAULT_LOCALE;
   const accessPage = localePath(lang, hubTabPath('vip', 'access', lang));
   const next = safeNext(body.next, localePath(lang, hubTabPath('vip', 'programme', lang)));
