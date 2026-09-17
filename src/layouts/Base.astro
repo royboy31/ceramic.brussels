@@ -216,6 +216,20 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
       // fold fade in. All of it steps aside for prefers-reduced-motion.
       const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
+      // The pinned header and title band shrink once the page is scrolled.
+      // A little hysteresis (72 down, 24 up) keeps the two states from
+      // flickering into each other at the threshold.
+      let shrunk = false;
+      const onScroll = () => {
+        const y = window.scrollY;
+        if (y > 72 && !shrunk) shrunk = true;
+        else if (y < 24 && shrunk) shrunk = false;
+        else return;
+        document.body.toggleAttribute('data-scrolled', shrunk);
+      };
+      addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
       const ARROWS = new Set(['→', '↗', '←']);
       document.querySelectorAll('a').forEach((a) => {
         if (a.querySelector('.link-arrow')) return;
@@ -462,6 +476,76 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   .site-header {
     position: sticky;
     top: 0;
+    height: var(--header-h);
+    transition: height 0.28s var(--motion-ease);
+  }
+  /* Scrolled, both pinned bands shrink, so a scrolled page keeps more of the
+     window for the page itself (client feedback, 2026-09-17: the header and
+     the title band "take a lot from the screen"). `data-scrolled` is set on
+     the body below. */
+  body[data-scrolled] {
+    --header-h: 84px;
+  }
+  body[data-scrolled] .site-date {
+    width: 168px;
+  }
+  body[data-scrolled] .site-wordmark {
+    width: 96px;
+    height: 50px;
+    top: 17px;
+  }
+  body[data-scrolled] .site-partner {
+    display: none;
+  }
+  body[data-scrolled] .site-menu-button {
+    width: 44px;
+    height: 29px;
+  }
+  .site-date,
+  .site-wordmark,
+  .site-menu-button {
+    transition:
+      width 0.28s var(--motion-ease),
+      height 0.28s var(--motion-ease),
+      top 0.28s var(--motion-ease);
+  }
+  /* The band's own sizes are tokens (HubNav, ExhibitorHead), so the scrolled
+     state retunes them rather than overriding each scoped rule. */
+  :is(.section-head, .exhibitor-head) h1,
+  :is(.section-head, .exhibitor-head__top) a {
+    transition:
+      font-size 0.28s var(--motion-ease),
+      padding 0.28s var(--motion-ease);
+  }
+  body[data-scrolled] {
+    --band-h1: 44px;
+    --band-pill: 20px;
+    --band-pill-pad: 4px 14px;
+    --band-pad-top: 14px;
+    --band-pad-bottom: 12px;
+  }
+  body[data-scrolled] .alphabet {
+    margin-top: 12px;
+  }
+  @media (width<=640px) {
+    body[data-scrolled] {
+      --header-h: 64px;
+    }
+    body[data-scrolled] .site-date {
+      width: 110px;
+    }
+    body[data-scrolled] .site-wordmark {
+      width: 62px;
+      height: 33px;
+      top: 14px;
+    }
+    body[data-scrolled] {
+      --band-h1: 30px;
+      --band-pill: 16px;
+      --band-pill-pad: 3px 10px;
+      --band-pad-top: 10px;
+      --band-pad-bottom: 8px;
+    }
   }
   .title-band {
     position: sticky;

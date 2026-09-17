@@ -113,7 +113,7 @@ const mark = activeLetter.toUpperCase();
     /* Room under the header before the title band (client feedback,
        2026-09-15), a little less since 2026-09-16 ("a bit higher up"); the
        band itself stays pinned while scrolling (.title-band, Base.astro). */
-    padding: 36px var(--gutter) 20px;
+    padding: var(--band-pad-top, 36px) var(--gutter) var(--band-pad-bottom, 20px);
   }
   .exhibitor-head__top {
     justify-content: space-between;
@@ -123,7 +123,7 @@ const mark = activeLetter.toUpperCase();
   }
   h1 {
     letter-spacing: -0.055em;
-    font-size: 70px;
+    font-size: var(--band-h1, 70px);
     font-weight: 600;
     line-height: 0.9;
   }
@@ -140,8 +140,8 @@ const mark = activeLetter.toUpperCase();
     text-align: center;
     border: 1px solid #000;
     min-width: 135px;
-    padding: 10px 24px;
-    font-size: 28px;
+    padding: var(--band-pill-pad, 10px 24px);
+    font-size: var(--band-pill, 28px);
     line-height: 1;
     transition:
       color 0.18s,
