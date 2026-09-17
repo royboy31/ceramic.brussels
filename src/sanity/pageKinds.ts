@@ -40,8 +40,11 @@ const TEXT: PageField[] = ['intro', 'sections', 'body', 'images'];
 const HUB_TABS: Record<string, Record<string, PageField[]>> = {
   about: { 'the-fair': FULL, '*': TEXT },
   'art-prize': { about: FULL, laureates: ['intro'], awards: ['intro'], jury: ['intro'] },
-  // Talks and VIP list events; only La Cambre draws the closing images.
+  // Talks lists events; only La Cambre draws the closing images.
   programme: { 'la-cambre': FULL, '*': TEXT },
+  // The about tab is the public page; programme lists VIP events under its
+  // text; the access page is the locked state (its forms are code).
+  vip: { about: FULL, programme: TEXT, access: ['intro', 'sections'], '*': TEXT },
   partners: { '*': TEXT },
   visit: {
     'practical-info': ['intro', 'images'],

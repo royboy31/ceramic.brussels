@@ -580,6 +580,28 @@ questions.
   `PreviewEditLinks.astro` rewrites each link to `sections[_key=="abc"].image`
   as the overlay draws it - that is what makes a section's picture or text
   open its own dialog rather than the top of the form.
+- **The VIP hub's three locked tabs are rendered by the Worker, never
+  built.** `vip` in `src/lib/hubs.ts` has `locked` tabs (programme, lounge,
+  hotel deal) and a `hidden` one (access, the door). A production build
+  leaves the locked tabs out (`hubRouteParams`), `src/integrations/
+  vip-routes.mjs` mounts them on request at `/[lang]/vip/[tab]` through
+  `src/server/routes/vip-tab.astro`, and `scripts/pages-worker.mjs` puts
+  their paths in `_routes.json` and robots.txt. `src/middleware.ts` lets a
+  request in on a VIP session (Workers KV, `VIP_SESSIONS`), the preview
+  cookie, or Site settings → VIP → "A code is required" being off; everyone
+  else is sent to `/[lang]/vip/access/`. Codes are hashed with the
+  `VIP_CODE_PEPPER` Pages secret into the guest table of D1 `VIP_DB` (the
+  old `ceramic-brussels-admin` database, reused) by `npm run vip -- --import
+  guests.csv`, which also writes the codes back for the invitation mailing;
+  the same pepper must be in `.env` for that script. The hotel's code is a
+  D1 setting (`--set hotel_code=…`) filled into `{code}` on the hotel tab,
+  so it is never in Sanity. A live render goes through `runLive` in
+  `previewContext.ts`, which makes `run()` skip the build memo - a Worker
+  isolate lives long enough to otherwise serve stale content. `astro dev`
+  has no Worker: the locked tabs open without a code there, and the gate is
+  tried on a branch preview. KV's free tier allows 1,000 writes a day, one
+  per code entry: Workers Paid before the mailing. The whole design is in
+  `docs/vip-access.md`.
 - **The gallery application form is a page-builder block.** `applicationFormSection`
   draws the old site's four-field form (`ApplicationForm.astro`); its
   settings - open or closed and the closed message, recipient, sender, the

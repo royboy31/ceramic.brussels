@@ -16,7 +16,9 @@
     "templates": "node scripts/seed-templates.mjs",
     "previews": "node scripts/section-previews.mjs",
     "build:preview": "node scripts/with-preview-runtime.mjs",
-    "boundary": "node scripts/boundary.mjs"
+    "boundary": "node scripts/boundary.mjs",
+    "vip": "node scripts/vip-guests.mjs",
+    "vip:migrate": "wrangler d1 migrations apply ceramic-brussels-admin --remote"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.0",

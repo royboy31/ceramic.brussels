@@ -1,5 +1,5 @@
 import type { LocaleId } from './locales';
-import { currentClient, isPreview, previewFetch } from './previewContext';
+import { currentClient, isPreview, previewFetch, isLive } from './previewContext';
 import { DEFAULT_LOCALE } from './locales';
 
 /**
@@ -268,7 +268,7 @@ if (import.meta.env.PROD && typeof process !== 'undefined' && typeof process.on 
 // preview request - see src/lib/previewContext.ts.
 function run<T>(query: string, params: Record<string, unknown> = {}): Promise<T> {
   if (isPreview()) return previewFetch<T>(query, params);
-  if (!import.meta.env.PROD) return currentClient().fetch<T>(query, params);
+  if (!import.meta.env.PROD || isLive()) return currentClient().fetch<T>(query, params);
   const key = `${query}\u0000${JSON.stringify(params)}`;
   let pending = memo.get(key) as Promise<T> | undefined;
   if (!pending) {
@@ -606,9 +606,11 @@ export function getArtists(lang: LocaleId) {
       ${ARTIST_CARD},
       // Every exhibitor that presented the artist, any year, with what the
       // list needs to pick the current edition's booth and solo-show badge
-      // (docs/backend-requests.md #1).
+      // (docs/backend-requests.md #1) and to drive the galleries list's
+      // filters - kind, country focus, and the id an award's winner is
+      // matched on (#4).
       "exhibitors": *[_type == "exhibitor" && references(^._id)]{
-        name, "slug": slug.current, booth, soloShow,
+        _id, name, "slug": slug.current, booth, soloShow, kind, inCountryFocus,
         "year": edition->year, "current": edition->isCurrent == true
       }
     }`,
@@ -712,7 +714,9 @@ export function getAwards(lang: LocaleId) {
         "year": edition->year, "current": edition->isCurrent == true,
         "images": images[] ${IMAGE}
       },
-      image ${IMAGE}
+      image ${IMAGE},
+      // The slideshow beside an award (#5): several photos; image stays as before.
+      "images": images[] ${IMAGE}
     }`,
     { lang },
   );
@@ -768,7 +772,10 @@ export function getNewsItem(lang: LocaleId, slug: string) {
 const PAGE = `{
   _id, _type, section, order,
   ${styled('title')},
-  "tabLabel": coalesce(${localised('tabLabel')}, ${localised('title')}),
+  // An editor's own pill label, in the page's language only (#6): with the
+  // usual fallbacks an English title overrode the translated tabs.* label on
+  // the French and Dutch pills. Absent, the pill reads STRINGS.
+  "tabLabel": tabLabel[$lang],
   ${styled('intro')},
   ${styled('body')},
   "sections": ${SECTIONS},
@@ -833,10 +840,10 @@ export function getProgramme(lang: LocaleId) {
         *[_type == "edition" && isCurrent == true
           && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt)]) > 0][0]._id,
         *[_type == "edition"
-          && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt) && section in ["talks", "vip", "project"]]) > 0]
+          && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt) && section in ["talks", "awards", "vip", "project"]]) > 0]
           | order(year desc)[0]._id
       )] | order(startsAt asc){
-      _id, startsAt, endsAt, kind, section, languages, moderator, invitationOnly,
+      _id, startsAt, endsAt, kind, section, venue, languages, moderator, invitationOnly,
       "slug": slug.current,
       ${styled('title')},
       ${styled('location')},
@@ -858,6 +865,23 @@ export function getPartners(lang: LocaleId) {
   return run<any[]>(
     `*[_type == "partner" && ${PARTNER_IS_LISTED}]
       | order(order asc, name asc) ${PARTNER}`,
+    { lang },
+  );
+}
+
+/**
+ * The VIP hub's settings (Site settings → VIP): what the access page's
+ * "not a VIP yet?" form needs, and the address VIPs write to. The gate
+ * itself reads `gateOpen` on the Worker (src/server/vip.ts).
+ */
+export function getVipSettings(lang: LocaleId) {
+  return run<any>(
+    `*[_type == "siteSettings"][0]{
+      "gateOpen": vip.gateOpen,
+      "contact": coalesce(vip.contactEmail, contactEmail),
+      "successMessage": ${localised('vip.successMessage')},
+      "successSlugs": vip.successPage->{ "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current }
+    }`,
     { lang },
   );
 }

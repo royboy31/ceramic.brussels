@@ -244,23 +244,33 @@ export const structure: StructureResolver = async (S, context) => {
 
       folder('programme', 'Programme', [
         mainPage('programme', 'Programme page (La Cambre)'),
-        tabIntros('programme', 'la-cambre', 'Tab intros (talks, VIP)'),
+        tabIntros('programme', 'la-cambre', 'Tab intros (talks, award ceremony)'),
         list('events-talks', `Talks ${thisYear}`, 'programmeEvent', `${CURRENT} && section == "talks"`, {}, [
           { field: 'startsAt', direction: 'asc' },
         ]),
-        list('events-vip', `VIP ${thisYear}`, 'programmeEvent', `${CURRENT} && section == "vip"`, {}, [
+        // The award ceremony tab folds a day's events into one block.
+        list('events-awards', `Award ceremony ${thisYear}`, 'programmeEvent', `${CURRENT} && section == "awards"`, {}, [
           { field: 'startsAt', direction: 'asc' },
         ]),
         list('events-project', `La Cambre ${thisYear}`, 'programmeEvent', `${CURRENT} && section == "project"`, {}, [
           { field: 'startsAt', direction: 'asc' },
         ]),
-        list(
-          'events-hidden',
-          'Not on the site (no date, or the Awards tab)',
-          'programmeEvent',
-          `${CURRENT} && (!defined(startsAt) || !(section in ["talks", "vip", "project"]))`,
-        ),
+        list('events-hidden', 'Not on the site (no date)', 'programmeEvent', `${CURRENT} && !defined(startsAt)`),
         byYear('events-past', 'Programme, past years', 'programmeEvent', 'true', [{ field: 'startsAt', direction: 'asc' }]),
+      ]),
+
+      // The VIP hub (docs/vip-access.md): the about page is public, the
+      // programme, lounge and hotel deal tabs open with a code. The guest
+      // list and the codes are not in Sanity - they live in Cloudflare and
+      // are managed with `npm run vip` (Kamindu).
+      folder('vip', 'VIP', [
+        mainPage('vip', 'VIP page (about, public)'),
+        tabIntros('vip', 'about', 'Tab intros (programme, lounge, hotel deal) and the access page'),
+        list('events-vip', `VIP programme ${thisYear}`, 'programmeEvent', `${CURRENT} && section == "vip"`, {}, [
+          { field: 'startsAt', direction: 'asc' },
+        ]),
+        byYear('events-vip-past', 'VIP programme, past years', 'programmeEvent', 'section == "vip"', [{ field: 'startsAt', direction: 'asc' }]),
+        siteSettings('Access requests form (Site settings)', 'vip-settings'),
       ]),
 
       folder('partners', 'Partners', [
@@ -288,7 +298,7 @@ export const structure: StructureResolver = async (S, context) => {
 
       folder('about', 'About', [
         mainPage('about', 'About page (the fair)'),
-        tabIntros('about', 'the-fair', 'Tab intros (advisory board, team, press, images)'),
+        tabIntros('about', 'the-fair', 'Tab intros (advisory board, contact; press and images are built without a pill)'),
         list('people-board', 'Advisory board', 'person', `"advisory-board" in groups && ${PEOPLE_NOW}`, {}, byOrder),
         list('people-team', 'Team and collaborators', 'person', `("team" in groups || "collaborator" in groups) && ${PEOPLE_NOW}`, {}, byOrder),
         list('press', 'Press clippings', 'pressClip', 'true', {}, [{ field: 'publishedAt', direction: 'desc' }]),

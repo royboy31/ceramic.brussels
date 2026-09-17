@@ -1,0 +1,163 @@
+---
+import type { LocaleId } from '../lib/locales';
+import { localePath, useTranslations } from '../lib/i18n';
+import { hubTabPath } from '../lib/hubs';
+
+/**
+ * "VIP already? Access the full programme by entering your code below" -
+ * the box on the VIP about page and the left half of the access page
+ * (Figma VIP frames, docs/vip-access.md).
+ *
+ * Posts to `/api/vip/enter/` on the Worker, which sets the session cookie
+ * and sends the browser on to `next`: the tab the visitor was on their way
+ * to (the gate puts it in the address as `?next=`, read here in the
+ * browser), or the VIP programme. Works without JavaScript; with it, a
+ * wrong code is said in place instead of by a round trip.
+ */
+interface Props {
+  lang: LocaleId;
+  /** The VIP team's address, for the "not recognised" line. */
+  contact?: string;
+  class?: string;
+}
+
+const { lang, contact = 'vip@ceramic.brussels', class: className } = Astro.props;
+const t = useTranslations(lang);
+const fallback = localePath(lang, hubTabPath('vip', 'programme', lang));
+---
+
+<form
+  class:list={['vip-code', className]}
+  method="post"
+  action="/api/vip/enter/"
+  novalidate
+  data-vip-code
+  data-wrong={t('vip.wrongCode', { email: contact })}
+  data-sending={t('vip.sending')}
+>
+  <input type="hidden" name="lang" value={lang} />
+  <input type="hidden" name="next" value={fallback} data-next />
+  <h2 class="panel-title">{t('vip.already')}</h2>
+  <p class="body-24">{t('vip.enterCode')}</p>
+  <div class="row">
+    <label class="sr-only" for="vip-code">{t('vip.code')}</label>
+    <input id="vip-code" name="code" type="text" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder={t('vip.code')} maxlength="40" />
+    <button type="submit" class="pill dark" data-submit>
+      <span class="link-arrow" aria-hidden="true">→</span> {t('vip.enter')}
+    </button>
+  </div>
+  <p class="status body-24" data-status role="status" aria-live="polite" />
+</form>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('form[data-vip-code]').forEach((form) => {
+    const params = new URLSearchParams(location.search);
+    const next = form.querySelector<HTMLInputElement>('[data-next]')!;
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const button = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const idle = button.innerHTML;
+    // Where the gate sent us from; a same-site path only.
+    const wanted = params.get('next');
+    if (wanted && wanted.startsWith('/') && !wanted.startsWith('//')) next.value = wanted;
+    if (params.get('error') === 'code') status.textContent = form.dataset.wrong!;
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const code = form.querySelector<HTMLInputElement>('[name=code]')!;
+      if (!code.value.trim()) {
+        code.focus();
+        return;
+      }
+      button.disabled = true;
+      button.textContent = form.dataset.sending!;
+      status.textContent = '';
+      const data: Record<string, string> = {};
+      new FormData(form).forEach((value, key) => (data[key] = String(value)));
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const body = await response.json().catch(() => ({}));
+        if (response.ok && body?.next) {
+          location.assign(body.next);
+          return;
+        }
+        status.textContent = form.dataset.wrong!;
+      } catch {
+        status.textContent = form.dataset.wrong!;
+      }
+      button.disabled = false;
+      button.innerHTML = idle;
+    });
+  });
+</script>
+
+<style>
+  .vip-code {
+    background: var(--surface-2, #f2f2f2);
+    padding: 28px 30px 30px;
+  }
+  .vip-code .panel-title {
+    border: 0;
+    margin-bottom: 8px;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    margin-top: 24px;
+  }
+  input[type='text'] {
+    flex: 1 1 200px;
+    min-width: 0;
+    padding: 8px 12px;
+    border: 1px solid currentColor;
+    border-radius: 0;
+    background: #fff;
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  input[type='text']:focus-visible {
+    outline: 2px solid;
+    outline-offset: 2px;
+  }
+  .pill.dark {
+    cursor: pointer;
+    background: #050505;
+    border-color: #050505;
+    color: #fff;
+    text-transform: lowercase;
+    white-space: nowrap;
+  }
+  .pill:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+  .status {
+    margin: 16px 0 0;
+    color: #c8102e;
+  }
+  .status:empty {
+    display: none;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  @media (width<=700px) {
+    .vip-code {
+      padding: 20px 16px 22px;
+    }
+    input[type='text'] {
+      font-size: 18px;
+    }
+  }
+</style>

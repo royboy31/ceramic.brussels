@@ -1,0 +1,17 @@
+---
+/**
+ * The VIP hub's locked tabs, rendered on request by the Worker.
+ *
+ * Mounted at `/[lang]/vip/[tab]` by src/integrations/vip-routes.mjs, on a
+ * build with the preview runtime only: those tabs are left out of the static
+ * build (hubs.ts `hubRouteParams`) so that no file of them exists, and this
+ * wrapper renders the same hub route the static tabs are made from, once
+ * src/middleware.ts has let the request through. `route` names the hub the
+ * page would otherwise read from its `[hub]` segment, which this pattern
+ * has no need of.
+ */
+export const prerender = false;
+import Page from '../../pages/[lang]/[hub]/[...tab].astro';
+---
+
+<Page route="vip" />

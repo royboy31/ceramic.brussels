@@ -1,15 +1,24 @@
 import { defineMiddleware } from 'astro:middleware';
 import type { FilterDefault } from '@sanity/client';
 import { sanityClient } from 'sanity:client';
-import { runWithPreview } from './lib/previewContext';
+import { runLive, runWithPreview } from './lib/previewContext';
 import { previewToken } from './server/runtime';
 import { readPreviewCookie, verifyPreviewCookie } from './server/preview';
+import { hubTabPath, lockedTabFromPath } from './lib/hubs';
+import { localePath } from './lib/i18n';
+import type { LocaleId } from './lib/locales';
+import { gateOpen, vipEnv } from './server/vip';
+import { readVipSession } from './server/vipSession';
 
 /**
- * One job, only on the deployed Worker (and `astro dev`): let a /preview/…
- * request in on a valid preview cookie, then render the page with a
- * drafts-reading, stega-encoding client, so every field on it opens in the
- * Studio from its overlay.
+ * Two jobs, only on the deployed Worker (and `astro dev`):
+ *
+ * 1. Let a /preview/… request in on a valid preview cookie, then render the
+ *    page with a drafts-reading, stega-encoding client, so every field on it
+ *    opens in the Studio from its overlay.
+ * 2. Keep the VIP hub's locked tabs behind their code (docs/vip-access.md):
+ *    a request with a VIP session is rendered on request from published
+ *    content; every other one is sent to the hub's access page.
  *
  * Everything else passes straight through. The static pages are prerendered
  * at build time; this runs for them then too, and does nothing.
@@ -19,11 +28,60 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   if (pathname === '/preview' || pathname.startsWith('/preview/')) return preview(context, next);
 
+  const locked = lockedTabFromPath(pathname);
+  if (locked) return vipGate(context, next, locked);
+
   return next();
 });
 
 type Next = () => Promise<Response>;
 type Ctx = Parameters<Parameters<typeof defineMiddleware>[0]>[0];
+
+/**
+ * The VIP gate. Open for an editor with the preview cookie and for everyone
+ * while Site settings → VIP says no code is needed; otherwise a KV read on
+ * the session cookie decides. Under `astro dev` there is no Worker and no
+ * KV, and the tab renders like any other. A locked tab's answer is never
+ * cached and never indexed, whichever way the gate went.
+ */
+async function vipGate(context: Ctx, next: Next, locked: { lang: LocaleId; tab: string }): Promise<Response> {
+  const { request, url } = context;
+  const env = await vipEnv();
+  if (!env) return next();
+
+  // Pages serves every address in its slash form; the on-demand route insists on it too.
+  if (!url.pathname.endsWith('/')) {
+    return new Response(null, { status: 308, headers: { location: `${url.pathname}/${url.search}`, 'cache-control': 'no-store' } });
+  }
+
+  const token = previewToken();
+  let allowed = !!token && (await verifyPreviewCookie(readPreviewCookie(request), token));
+  if (!allowed) allowed = !(await gateOpen());
+  if (!allowed) allowed = (await readVipSession(env.VIP_SESSIONS, request)) !== null;
+
+  if (!allowed) {
+    const access = localePath(locked.lang, hubTabPath('vip', 'access', locked.lang));
+    return new Response(null, {
+      status: 302,
+      headers: {
+        location: `${access}?next=${encodeURIComponent(url.pathname)}`,
+        'cache-control': 'private, no-store',
+        'x-robots-tag': 'noindex, nofollow',
+      },
+    });
+  }
+
+  // Read to the end inside the store, as the preview does: the frontmatter
+  // runs as the stream is pulled.
+  const response = await runLive(async () => {
+    const rendered = await next();
+    const body = await rendered.text();
+    return new Response(body, rendered);
+  });
+  response.headers.set('cache-control', 'private, no-store');
+  response.headers.set('x-robots-tag', 'noindex, nofollow');
+  return response;
+}
 
 async function preview(context: Ctx, next: Next): Promise<Response> {
   const token = previewToken();
@@ -80,7 +138,7 @@ async function preview(context: Ctx, next: Next): Promise<Response> {
  */
 const PLAIN_KEYS = new Set([
   // fixed lists (schemaTypes: options.list)
-  'section', 'tier', 'kind', 'family', 'category', 'groups', 'group', 'languages', 'route', 'appliesTo',
+  'section', 'tier', 'kind', 'family', 'category', 'groups', 'group', 'languages', 'route', 'appliesTo', 'venue',
   'imageSide', 'aspect', 'display', 'variant', 'layout',
   // Style tab (objects/textStyle.ts), stored under each field's `style`
   'style', 'size', 'weight', 'transform', 'colour', 'background', 'align', 'marginTop', 'marginBottom',

@@ -31,6 +31,8 @@ const hub = HUBS[route];
 
 // Only the tabs in hubs.ts: they are the ones with a route. A pill for any
 // other page of the hub led to a 404.
+// A hidden tab (press, images, the VIP access page) has a route but no pill;
+// a locked one is not for crawlers to follow (docs/vip-access.md).
 // `tabLabel` falls back to the page title in the query (BACKEND-REQUEST #6),
 // so only a label that differs from the title is an editor's override;
 // otherwise the translated label wins ("conférences", not an English title).
@@ -39,7 +41,7 @@ const tabs = hub.tabs
   .map((tab) => {
     const page = tab.link ? null : pages.find((p) => p?.slugs?.en === tab.slug);
     const override = page?.tabLabel && page.tabLabel !== page.title ? page.tabLabel : null;
-    return { slug: tab.slug, label: override ?? t(tab.label), href: hubTabHref(route, tab, lang), link: !!tab.link };
+    return { slug: tab.slug, label: override ?? t(tab.label), href: hubTabHref(route, tab, lang), link: !!tab.link, locked: !!tab.locked };
   });
 ---
 
@@ -55,6 +57,7 @@ const tabs = hub.tabs
               class:list={[{ active: current, dark: current && dark }]}
               href={localePath(lang, tab.href)}
               aria-current={current ? 'page' : undefined}
+              rel={tab.locked ? 'nofollow' : undefined}
             >
               {tab.label}
             </a>

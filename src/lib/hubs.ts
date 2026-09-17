@@ -65,8 +65,16 @@ export interface HubTab {
    */
   link?: { route: string; tab?: string };
   /**
+   * Behind the VIP gate (docs/vip-access.md). A locked tab is never
+   * prerendered: the Worker renders it on request once src/middleware.ts has
+   * found a VIP session, and sends everyone else to the hub's access page.
+   * In `astro dev` there is no Worker and it renders like any other tab.
+   */
+  locked?: boolean;
+  /**
    * Built and reachable, but no pill: a tab the design no longer shows whose
-   * address must keep working (the old site's URLs redirect onto it).
+   * address must keep working (the old site's URLs redirect onto it), or the
+   * VIP access page, which the gate redirects to.
    */
   hidden?: boolean;
 }
@@ -112,8 +120,31 @@ export const HUBS: Record<string, Hub> = {
     tabs: [
       { slug: 'la-cambre', label: 'tabs.laCambre' },
       { slug: 'talks', segment: { fr: 'conferences' }, label: 'tabs.talks' },
-      { slug: 'awards', label: 'tabs.awardCeremony' },
-      { slug: 'vip', label: 'tabs.vip' },
+      // The award ceremony: a tab of its own since the client's mock-up of
+      // 2026-09-16 (backend request #3), no longer a link to the art prize
+      // awards - that page carries the link as a button. The old site never
+      // had this page, so the segments are simply translated.
+      { slug: 'awards', segment: { fr: 'remise-des-prix', nl: 'prijsuitreiking' }, label: 'tabs.awardCeremony' },
+      // VIP left this hub for one of its own (Figma VIP frames, 2026-09-17).
+    ],
+  },
+  /**
+   * The VIP hub: the about tab is public and carries the "enter your code"
+   * box; the three others are locked (docs/vip-access.md). `access` is the
+   * locked state the gate redirects to - "VIP already? / not a VIP yet?" -
+   * and has no pill. The hub segment stays "vip" in every language: the
+   * on-demand route the Worker serves the locked tabs from is
+   * `/[lang]/vip/[tab]`, which needs a fixed word there.
+   */
+  vip: {
+    route: 'vip',
+    title: 'nav.vip',
+    tabs: [
+      { slug: 'about', segment: { fr: 'a-propos', nl: 'over' }, label: 'tabs.about' },
+      { slug: 'programme', segment: { nl: 'programma' }, label: 'tabs.vipProgramme', locked: true },
+      { slug: 'lounge', label: 'tabs.vipLounge', locked: true },
+      { slug: 'hotel-deal', segment: { fr: 'offre-hotel', nl: 'hotelaanbod' }, label: 'tabs.hotelDeal', locked: true },
+      { slug: 'access', segment: { fr: 'acces', nl: 'toegang' }, label: 'tabs.vipAccess', hidden: true },
     ],
   },
   partners: {
@@ -227,12 +258,17 @@ export function hubTabHref(route: string, tab: HubTab, lang: LocaleId = DEFAULT_
  * tab, every locale, each carrying that locale's segments. Link tabs have no
  * page of their own. `props` hands the route the identifiers, so nothing
  * downstream has to translate a segment back.
+ *
+ * Locked tabs are left out of a production build: a static file would be
+ * served to anyone, gate or no gate. The Worker renders them on request
+ * (src/integrations/vip-routes.mjs). `astro dev` has no Worker, so there
+ * they are built like any other tab and open without a code.
  */
-export function hubRouteParams(locales: readonly LocaleId[]) {
+export function hubRouteParams(locales: readonly LocaleId[], { includeLocked = !import.meta.env.PROD } = {}) {
   return locales.flatMap((lang) =>
     Object.keys(HUBS).flatMap((route) =>
       HUBS[route].tabs
-        .filter((tab) => !tab.link)
+        .filter((tab) => !tab.link && (includeLocked || !tab.locked))
         .map((tab, i) => ({
           params: {
             lang,
@@ -248,4 +284,35 @@ export function hubRouteParams(locales: readonly LocaleId[]) {
 /** The `page` document that carries a tab's text, matched on its English slug. */
 export function pageForTab(pages: any[], slug: string) {
   return pages.find((p) => p?.slugs?.en === slug) ?? null;
+}
+
+/* ----------------------------------------------------------------- VIP */
+
+/** The locked tab a locale-prefixed pathname points at, or null: `/fr/vip/programme/` → "programme". */
+export function lockedTabFromPath(pathname: string): { lang: LocaleId; tab: string } | null {
+  const [lang, hub, segment, ...rest] = pathname.split('/').filter(Boolean);
+  if (!lang || !(LOCALE_IDS as readonly string[]).includes(lang) || rest.length) return null;
+  if (hub !== hubSegment('vip', lang as LocaleId) || !segment) return null;
+  const tab = HUBS.vip.tabs.find((x) => x.locked && tabSegment('vip', x.slug, lang as LocaleId) === segment);
+  return tab ? { lang: lang as LocaleId, tab: tab.slug } : null;
+}
+
+/**
+ * Every locked tab's path in every language, with and without the trailing
+ * slash - what `_routes.json` sends to the Worker and robots.txt disallows.
+ */
+export function lockedPaths(): string[] {
+  return LOCALE_IDS.flatMap((lang) =>
+    HUBS.vip.tabs
+      .filter((tab) => tab.locked)
+      .flatMap((tab) => {
+        const path = `/${lang}/${hubTabPath('vip', tab.slug, lang)}`;
+        return [path, `${path}/`];
+      }),
+  );
+}
+
+/** The access page's path in every language, for robots.txt. */
+export function accessPaths(): string[] {
+  return LOCALE_IDS.map((lang) => `/${lang}/${hubTabPath('vip', 'access', lang)}/`);
 }

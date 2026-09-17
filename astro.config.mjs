@@ -7,6 +7,7 @@ import cloudflare from '@astrojs/cloudflare';
 import { loadEnv } from 'vite';
 import path from 'node:path';
 import { previewRoutes } from './src/integrations/preview-routes.mjs';
+import { vipRoutes } from './src/integrations/vip-routes.mjs';
 
 // astro.config runs in Node before Astro loads .env, so pull the vars manually.
 const { PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET, PUBLIC_SITE_URL, PREVIEW_RUNTIME } = loadEnv(
@@ -125,6 +126,8 @@ export default defineConfig({
       filter: (page) => !page.includes('/studio') && !page.includes('/login') && !page.includes('/preview/'),
     }),
     ...(previewRuntime ? [previewRoutes()] : []),
+    // The VIP hub's locked tabs and API, on the Worker; the paths list on every build.
+    vipRoutes({ onDemand: previewRuntime }),
   ],
   vite: {
     plugins: [fixSanityWindowsAlias()],
@@ -151,5 +154,14 @@ export default defineConfig({
         ].map((n) => `@sanity/icons/${n}`),
       ],
     },
+    // `cloudflare:workers` only exists inside the Cloudflare build. The plain
+    // build never executes the module that imports it (src/server/cfEnv.ts),
+    // but Rollup still has to be told not to look for it.
+    ...(previewRuntime
+      ? {}
+      : {
+          build: { rollupOptions: { external: ['cloudflare:workers'] } },
+          ssr: { external: ['cloudflare:workers'] },
+        }),
   },
 });

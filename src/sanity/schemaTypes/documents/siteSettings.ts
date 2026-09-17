@@ -18,6 +18,7 @@ export const siteSettings = defineType({
     { name: 'faq', title: 'FAQ' },
     { name: 'press', title: 'Press' },
     { name: 'applications', title: 'Applications' },
+    { name: 'vip', title: 'VIP' },
   ],
   fields: [
     defineField({
@@ -201,6 +202,85 @@ export const siteSettings = defineType({
           title: 'Message under the form after sending',
           type: 'localeText',
           description: 'Optional. Used when no page is chosen above; replaces the standard "thank you" line.',
+        }),
+      ],
+    }),
+
+    /**
+     * The VIP hub's "not a VIP yet?" request form and its access page
+     * (docs/vip-access.md). Same shape as the application form: everything
+     * here is world-readable, so addresses only. The codes and the guest
+     * list are not in Sanity at all.
+     */
+    defineField({
+      name: 'vip',
+      title: 'VIP access',
+      type: 'object',
+      group: 'vip',
+      options: { collapsible: false },
+      fields: [
+        defineField({
+          name: 'gateOpen',
+          title: 'A code is required',
+          type: 'boolean',
+          initialValue: true,
+          description:
+            'On: the VIP programme, lounge and hotel deal tabs open only with a code. Off (after the fair, say): they open for everyone. Takes up to five minutes to reach the site.',
+        }),
+        defineField({
+          name: 'contactEmail',
+          title: 'VIP team address',
+          type: 'string',
+          description: 'Shown to VIPs who need help, e.g. vip@ceramic.brussels. Falls back to the contact email.',
+          validation: (rule) => rule.email(),
+        }),
+        defineField({
+          name: 'recipient',
+          title: 'Send access requests to',
+          type: 'string',
+          description: 'The address that receives each "not a VIP yet?" request. Falls back to the VIP team address.',
+          validation: (rule) => rule.email(),
+        }),
+        defineField({ name: 'cc', title: 'Copy to', type: 'string', validation: (rule) => rule.email() }),
+        defineField({
+          name: 'senderName',
+          title: 'Sender name',
+          type: 'string',
+          description: 'What the requester sees as the sender of the confirmation. Defaults to the site name.',
+        }),
+        defineField({
+          name: 'senderEmail',
+          title: 'Sender address',
+          type: 'string',
+          description: 'Must be on the domain verified with the email service. Defaults to the recipient.',
+          validation: (rule) => rule.email(),
+        }),
+        defineField({
+          name: 'confirmationSubject',
+          title: 'Confirmation email: subject',
+          type: 'localeString',
+          description: 'Sent to the requester. {firstName}, {lastName}, {institution} are filled in. Empty: no confirmation is sent.',
+        }),
+        defineField({
+          name: 'confirmationText',
+          title: 'Confirmation email: text',
+          type: 'localeText',
+          rows: 6,
+          description: 'Plain text; a blank line starts a new paragraph. {firstName}, {lastName}, {institution} are filled in.',
+        }),
+        defineField({
+          name: 'successPage',
+          title: 'Page shown after sending',
+          type: 'reference',
+          to: [{ type: 'page' }],
+          options: { filter: '!defined(section)' },
+          description: 'A standalone page (Other pages) the requester lands on. Without one, the message below shows under the form.',
+        }),
+        defineField({
+          name: 'successMessage',
+          title: 'Message under the form after sending',
+          type: 'localeText',
+          description: 'Optional. Used when no page is chosen above.',
         }),
       ],
     }),

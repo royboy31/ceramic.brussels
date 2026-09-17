@@ -42,8 +42,14 @@ export const EVENT_KINDS = [
 export const PROGRAMME_SECTIONS = [
   { title: 'Talks', value: 'talks' },
   { title: 'Awards', value: 'awards' },
-  { title: 'VIP programme', value: 'vip' },
+  { title: 'VIP programme (VIP hub, behind the code)', value: 'vip' },
   { title: 'La Cambre (partner project)', value: 'project' },
+] as const;
+
+/** Where a VIP programme event happens: the filter pills on the VIP programme tab. Labels in STRINGS as `vip.venue.<value>`. */
+export const EVENT_VENUES = [
+  { title: 'On-site (at the fair)', value: 'on-site' },
+  { title: 'Off-site (in town)', value: 'off-site' },
 ] as const;
 
 export const NEWS_CATEGORIES = [

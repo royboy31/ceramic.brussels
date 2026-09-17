@@ -21,8 +21,18 @@ import path from 'node:path';
 
 const DIST = path.resolve('dist');
 
+/**
+ * The VIP hub's paths, written by src/integrations/vip-routes.mjs: the
+ * locked tabs the Worker must own, and the access page. Read here and
+ * removed, so the deploy never carries the file.
+ */
+const vipPathsFile = path.join(DIST, '_vip-paths.json');
+const vip = fs.existsSync(vipPathsFile) ? JSON.parse(fs.readFileSync(vipPathsFile, 'utf8')) : { locked: [], access: [] };
+fs.rmSync(vipPathsFile, { force: true });
+
 if (process.env.PREVIEW_RUNTIME !== '1') {
-  console.log('[pages-worker] PREVIEW_RUNTIME is off - static build, nothing to do');
+  blockRobots(path.join(DIST, 'robots.txt'));
+  console.log('[pages-worker] PREVIEW_RUNTIME is off - static build, nothing else to do');
   process.exit(0);
 }
 
@@ -73,15 +83,43 @@ if (parent !== DIST && fs.existsSync(parent) && fs.readdirSync(parent).length ==
 // CI reads that redirect at deploy time and fails on the missing target.
 fs.rmSync(path.resolve('.wrangler/deploy'), { recursive: true, force: true });
 
-// 3. Route only the on-demand paths through the Worker.
+// 3. Route only the on-demand paths through the Worker: the preview, the
+//    API, and the VIP hub's locked tabs, which have no static file and are
+//    rendered once src/middleware.ts has seen a VIP session.
 fs.writeFileSync(
   path.join(DIST, '_routes.json'),
-  JSON.stringify({ version: 1, include: ['/preview', '/preview/*', '/api/*'], exclude: [] }, null, 2) + '\n',
+  JSON.stringify({ version: 1, include: ['/preview', '/preview/*', '/api/*', ...vip.locked], exclude: [] }, null, 2) + '\n',
 );
 
-console.log(`[pages-worker] wrote dist/_worker.js (${fs.readdirSync(workerOut).length} files) and dist/_routes.json`);
+// 4. Keep crawlers off the VIP hub's locked tabs and its access page.
+blockRobots(path.join(DIST, 'robots.txt'));
+
+console.log(`[pages-worker] wrote dist/_worker.js (${fs.readdirSync(workerOut).length} files) and dist/_routes.json (${vip.locked.length} VIP paths)`);
 
 /* ---------- helpers ---------- */
+
+/**
+ * Appends the VIP disallows to robots.txt. The locked tabs are also noindex
+ * on every answer and the access page in its HTML; a disallowed address can
+ * still be listed from links alone, and this stops the crawl itself.
+ */
+function blockRobots(robots) {
+  const paths = [...vip.locked.filter((p) => p.endsWith('/')), ...vip.access];
+  if (!paths.length || !fs.existsSync(robots)) return;
+  const lines = [
+    '',
+    '# The VIP hub: its locked tabs open only with a code, and its access page is',
+    '# the door. Added at build by scripts/pages-worker.mjs from src/lib/hubs.ts.',
+    ...paths.map((p) => `Disallow: ${p}`),
+    'Disallow: /api/',
+  ];
+  const text = fs.readFileSync(robots, 'utf8');
+  // Directives belong to the `User-agent: *` group at the top: before the Sitemap line.
+  const at = text.indexOf('\nSitemap:');
+  const patched = at === -1 ? `${text.trimEnd()}\n${lines.join('\n')}\n` : `${text.slice(0, at)}\n${lines.join('\n')}\n${text.slice(at)}`;
+  fs.writeFileSync(robots, patched);
+  console.log(`[pages-worker] robots.txt: ${paths.length} VIP paths disallowed`);
+}
 
 function find(dir, match) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
