@@ -234,16 +234,19 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
   .intro {
     grid-column: span 8;
   }
+  /* Name and "°1983, France" measured off the design: the name's capitals
+     start 21px under the rule, the date's 17px. */
   .title-row {
     border-top: 2px solid;
     justify-content: space-between;
-    padding-top: 6px;
+    padding-top: 10px;
     display: flex;
   }
   .title-row h2 {
-    letter-spacing: -0.05em;
-    font-size: 60px;
-    line-height: 60px;
+    letter-spacing: -0.06em;
+    margin-top: 3px;
+    font-size: 62px;
+    line-height: 62px;
   }
   .title-row p {
     letter-spacing: -0.04em;
@@ -252,7 +255,7 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
   }
   .lead {
     letter-spacing: -0.04em;
-    margin-top: 28px;
+    margin-top: 38px;
     font-size: 40px;
     line-height: 50px;
   }
@@ -267,6 +270,10 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     font-size: 40px;
     font-weight: 600;
     line-height: 48px;
+  }
+  /* The design leaves ~58px between the lead and "biography". */
+  .intro h3 {
+    margin-top: 45px;
   }
   .columns {
     columns: 2;
@@ -286,7 +293,8 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
   }
   .gallery {
     position: relative;
-    margin-top: 109px;
+    /* ~60px under the biography's last line, as the design has it. */
+    margin-top: 50px;
     /* Runs out to the window's right edge, so the next picture peeks in. */
     margin-right: calc(-1 * var(--gutter));
   }

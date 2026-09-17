@@ -12,13 +12,15 @@ import { HUBS, PARTNER_TABS, hubTabPath, pageForTab , hubAltPaths } from '../../
 import { styleAttrs } from '../../lib/textStyle';
 
 /**
- * The partners hub, as the design's partners pages draw it. Every tab opens
- * with the tab's name over a rule (`.category`). Institutions - and the tabs
- * the design has no frame for: main partner, event partners, media - are a
- * two-column grid of entries: name over a rule, text, then the website pill
- * and the logo side by side. The hotel is one entry: the photo with the
- * slideshow dots beside the name, the text and the pill. Markup and rules
- * are Lilanga's build of the Figma partners frames.
+ * The partners hub, as the design's partners pages draw it. The content
+ * starts right under the tabs: the frames have no heading repeating the
+ * tab's name (the first HTML build did). Institutions - and the tabs the
+ * design has no frame for: main partner, event partners, media - are a
+ * two-column grid of entries: the name over a rule, linking to the
+ * partner's website with its arrow, the text, then the logo. The hotel is
+ * one entry: the photo with its slideshow beside the name (linked the same
+ * way) and the text. Markup and rules are Lilanga's build of the Figma
+ * partners frames.
  */
 const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const t = useTranslations(lang);
@@ -60,8 +62,6 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
       )
     }
 
-    <h2 class="category">{tabLabel}</h2>
-
     {
       listed.length === 0 ? (
         <p class="empty">{t('partners.empty')}</p>
@@ -83,17 +83,18 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
             </figure>
             <section>
               <h2 class="panel-title" {...styleAttrs(p.nameStyle)}>
-                {p.name}
+                {p.url ? (
+                  <a href={p.url} {...external}>
+                    {p.name} <span class="link-arrow" data-arrow="↗" aria-hidden="true">↗</span>
+                  </a>
+                ) : (
+                  p.name
+                )}
               </h2>
               {p.description && (
                 <div class="body-24">
                   <PortableText value={p.description} fieldStyle={p.descriptionStyle} />
                 </div>
-              )}
-              {p.url && (
-                <a class="pill" href={p.url} {...external}>
-                  {t('common.website')} ↗
-                </a>
               )}
             </section>
           </div>
@@ -102,16 +103,19 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
         <div class="institutions">
           {listed.map((p: any) => (
             <article>
-              <h3 {...styleAttrs(p.nameStyle)}>{p.name}</h3>
+              <h3 {...styleAttrs(p.nameStyle)}>
+                {p.url ? (
+                  <a href={p.url} {...external}>
+                    {p.name} <span class="link-arrow" data-arrow="↗" aria-hidden="true">↗</span>
+                  </a>
+                ) : (
+                  p.name
+                )}
+              </h3>
               <div class="text">
                 {p.description && <PortableText value={p.description} fieldStyle={p.descriptionStyle} />}
               </div>
               <div class="institution-foot">
-                {p.url && (
-                  <a class="pill" href={p.url} {...external}>
-                    {t('common.website')} ↗
-                  </a>
-                )}
                 {p.logo?.asset && (
                   <SanityImage image={p.logo} widths={[250, 500]} sizes="250px" class="logo" placeholder={false} />
                 )}
@@ -138,14 +142,6 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
 
 <style>
   /* From the design's partners pages (html pages/partners/*). */
-  .category {
-    border-top: 2px solid;
-    padding-top: 12px;
-    font-size: 52px;
-  }
-  .hotel-page .category {
-    font-size: 60px;
-  }
   .page-body {
     max-width: 1160px;
     margin: 0 0 40px;
@@ -153,6 +149,12 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
   .empty {
     margin-top: 40px;
     font-size: 24px;
+  }
+  /* With no lead or body above, the list starts right under the tabs: the
+     frames put the first title's rule and the hotel photo ~65px under them. */
+  .content-wrap > .institutions:first-child,
+  .content-wrap > .hotel:first-child {
+    margin-top: 33px;
   }
 
   /* institutions - and every other list tab */
@@ -197,19 +199,14 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
    * near-square marks, several with transparent padding baked in - so the slot
    * is fixed and the file is fitted into it, right-aligned. Sizing each file to
    * its own bounds instead is what left one logo stranded mid-card and the next
-   * twice its size. `margin-left: auto` keeps the logo right when the partner
-   * has no website and it is the only thing in the row.
+   * twice its size. `margin-left: auto` keeps it against the right edge.
    */
-  .institution-foot .pill {
-    flex: none;
-  }
   .institution-foot :global(.logo) {
     object-fit: contain;
     object-position: right center;
     width: 250px;
-    /* A replaced element will not shrink past its own width without this, so
-       in a narrow column the pill is what gives, and it collapses into a
-       three-line oval. The logo gives instead, and stays right-aligned. */
+    /* A replaced element will not shrink past its own width without this;
+       in a narrow column the logo gives, and stays right-aligned. */
     min-width: 0;
     height: 78px;
     margin-left: auto;
@@ -233,31 +230,6 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
     aspect-ratio: 3 / 2;
     background: #f0efed;
   }
-  .hotel figcaption {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    font-size: 24px;
-    padding: 6px 10px;
-    background: #fff;
-  }
-  .dots {
-    gap: 14px;
-    display: flex;
-    position: absolute;
-    bottom: 42px;
-    right: 50%;
-    transform: translate(50%);
-  }
-  .dots i {
-    background: #fff;
-    border-radius: 50%;
-    width: 12px;
-    height: 12px;
-  }
-  .hotel .pill {
-    margin-top: 35px;
-  }
 
   .image-row {
     display: grid;
@@ -280,10 +252,6 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
     }
     .hotel {
       grid-template-columns: 1fr;
-    }
-    .category,
-    .hotel-page .category {
-      font-size: 42px;
     }
     .image-row {
       grid-template-columns: 1fr;

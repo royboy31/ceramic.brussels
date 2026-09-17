@@ -21,6 +21,14 @@ const { lang, section } = Astro.props;
 const t = useTranslations(lang);
 const partners = (section.partners ?? []).filter((p: any) => p?.name);
 const display = section.display === 'list' ? 'list' : 'logos';
+/**
+ * The logo row shows the partners that have a logo file: a name set as text
+ * among the logos read as a broken image and pushed the row out of line.
+ * Only when none has a logo yet do the names stand in, so the row is never
+ * empty under its paragraph.
+ */
+const withLogo = partners.filter((p: any) => p.logo?.asset);
+const logoRow = withLogo.length > 0 ? withLogo : partners;
 ---
 
 {
@@ -32,14 +40,14 @@ const display = section.display === 'list' ? 'list' : 'logos';
         </h2>
       )}
       {display === 'logos' ? (
-        <div class="two-col">
+        <div class="two-col logo-cols">
           {section.body && (
             <div class="body-24">
               <PortableText value={section.body} fieldStyle={section.bodyStyle} />
             </div>
           )}
           <div class="logos">
-            {partners.map((p: any) =>
+            {logoRow.map((p: any) =>
               p.url ? (
                 <a href={p.url} rel="noopener noreferrer" target="_blank" aria-label={p.name}>
                   {p.logo?.asset ? (
@@ -87,11 +95,15 @@ const display = section.display === 'list' ? 'list' : 'logos';
   .partners {
     margin-top: 65px;
   }
+  /* The logo row sits level with the middle of the paragraph beside it. */
+  .logo-cols {
+    align-items: center;
+  }
   /*
-   * The design's row is three logos spread with `space-around`. It says
-   * nothing about a partner with no logo file, and the CMS has several: their
-   * names fall back to text, so the row wraps and keeps a gap rather than
-   * letting two long names overlap where `space-around` runs out of room.
+   * The design's row is three logos spread with `space-around`. When the
+   * names stand in for missing logos (see `logoRow`), the row wraps and keeps
+   * a gap rather than letting two long names overlap where `space-around`
+   * runs out of room.
    */
   .logos {
     flex-wrap: wrap;

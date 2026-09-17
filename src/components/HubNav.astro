@@ -11,7 +11,8 @@ import { HUBS, hubTabHref } from '../lib/hubs';
  * Lilanga's build repeats on each page (2026-09-14 build: smaller pills).
  *
  * Tabs come from HUBS; a `page` document with the same English slug can
- * override a tab's label. A tab with a `link` leads to another hub.
+ * override a tab's label through its Tab label field. A tab with a `link`
+ * leads to another hub; a `hidden` one has a page but no pill.
  */
 interface Props {
   lang: LocaleId;
@@ -30,13 +31,17 @@ const hub = HUBS[route];
 
 // Only the tabs in hubs.ts: they are the ones with a route. A pill for any
 // other page of the hub led to a 404.
-// A hidden tab (the VIP access page) has a route but no pill; a locked one
-// is not for crawlers to follow (docs/vip-access.md).
+// A hidden tab (press, images, the VIP access page) has a route but no pill;
+// a locked one is not for crawlers to follow (docs/vip-access.md).
+// `tabLabel` falls back to the page title in the query (BACKEND-REQUEST #6),
+// so only a label that differs from the title is an editor's override;
+// otherwise the translated label wins ("conférences", not an English title).
 const tabs = hub.tabs
   .filter((tab) => !tab.hidden)
   .map((tab) => {
     const page = tab.link ? null : pages.find((p) => p?.slugs?.en === tab.slug);
-    return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label), href: hubTabHref(route, tab, lang), link: !!tab.link, locked: !!tab.locked };
+    const override = page?.tabLabel && page.tabLabel !== page.title ? page.tabLabel : null;
+    return { slug: tab.slug, label: override ?? t(tab.label), href: hubTabHref(route, tab, lang), link: !!tab.link, locked: !!tab.locked };
   });
 ---
 

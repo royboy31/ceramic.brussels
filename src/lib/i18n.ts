@@ -82,6 +82,7 @@ const STRINGS = {
     'tabs.theFair': 'ceramic brussels',
     'tabs.advisoryBoard': 'advisory board',
     'tabs.team': 'team',
+    'tabs.contact': 'contact',
     'tabs.partners': 'partners',
     'tabs.press': 'press',
     'tabs.images': 'images',
@@ -337,6 +338,7 @@ const STRINGS = {
     'tabs.advisoryBoard': 'comité consultatif',
     'tabs.partners': 'partenaires',
     'tabs.team': 'équipe',
+    'tabs.contact': 'contact',
     'tabs.press': 'presse',
     'tabs.images': 'images',
     'home.keyFigures': 'chiffres clés {year}',
@@ -590,6 +592,7 @@ const STRINGS = {
     'tabs.theFair': 'ceramic brussels',
     'tabs.advisoryBoard': 'adviesraad',
     'tabs.team': 'team',
+    'tabs.contact': 'contact',
     'tabs.partners': 'partners',
     'tabs.press': 'pers',
     'tabs.images': 'beelden',
@@ -807,8 +810,8 @@ const TIME_ZONE = 'Europe/Brussels';
 
 /**
  * A day with its weekday and year, "Thursday 21 January 2026" - the award
- * ceremony's heading in the design. `formatDay` is the same without the
- * year, and stays as it is for the talks accordion.
+ * ceremony's and the talks accordion's heading in the design. `formatDay` is
+ * the same without the year.
  */
 export function formatDayLong(value: string | undefined, lang: LocaleId): string {
   if (!value) return '';

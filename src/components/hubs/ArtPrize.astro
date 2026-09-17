@@ -64,6 +64,12 @@ for (const s of page?.sections ?? []) {
   else runs.push({ text, items: [s] });
 }
 const firstText = runs.findIndex((r) => r.text);
+/**
+ * The cover is one image today; the design draws the hero as a slideshow
+ * with a dot per picture and a "1/3" counter. Both follow the real count:
+ * no dot for a lone picture.
+ */
+const heroImages: any[] = page?.cover?.asset ? [page.cover] : [];
 const closing: any[] = (page?.images ?? []).filter((img: any) => img?.asset);
 
 /**
@@ -112,11 +118,15 @@ const captionOf = (img: any, fallback?: string) => ({
           {page?.cover?.asset ? (
             <figure>
               <SanityImage image={page.cover} loading="eager" sizes="(max-width: 700px) 100vw, 66vw" widths={[600, 900, 1200, 1800]} />
-              <span class="dots" aria-hidden="true">
-                <i />
-              </span>
+              {heroImages.length > 1 && (
+                <span class="dots" aria-hidden="true">
+                  {heroImages.map((_, i) => (
+                    <i class:list={{ active: i === 0 }} />
+                  ))}
+                </span>
+              )}
               <figcaption>
-                <span class="counter">1/1</span>
+                <span class="counter">1/{heroImages.length}</span>
                 {(page.cover.caption || page.cover.workTitle) && (
                   <span>
                     {captionOf(page.cover).who}
@@ -174,7 +184,7 @@ const captionOf = (img: any, fallback?: string) => ({
             const text = liftInstagram(l.statement ?? artist.bio);
             const instagram = artist.instagram ? instagramUrl(artist.instagram) : text.href;
             const first = images[0] ?? (artist.portrait?.asset ? artist.portrait : null);
-            const cap = captionOf(first, artist.name);
+            const cap = captionOf(first, first?.workTitle ? undefined : artist.name);
             /* "Poland, 1996" as the design writes it: the written nationality, else the
                country named from its code in the page's language; the base line when neither is there. */
             const country = artist.nationality || regionName(artist.countryCode);
@@ -187,7 +197,13 @@ const captionOf = (img: any, fallback?: string) => ({
                   <div class="image">
                     {images.length > 0 ? (
                       <Slideshow
-                        images={images.map((img: any) => ({ ...img, caption: img.caption ?? artist.name }))}
+                        images={images.map((img: any) => ({
+                          ...img,
+                          // The design captions a work "*Title* series #5": the name stands in
+                          // only for a picture with no title, and no credit is shown.
+                          caption: img.caption ?? (img.workTitle ? undefined : artist.name),
+                          credit: undefined,
+                        }))}
                         aspect={2 / 3}
                         sizes="(max-width: 640px) 100vw, 433px"
                         widths={[433, 866, 1300]}
@@ -202,7 +218,12 @@ const captionOf = (img: any, fallback?: string) => ({
                           {(cap.who || cap.title) && (
                             <span>
                               {cap.who}
-                              {cap.title && `, ${cap.title}`}
+                              {cap.title && (
+                                <>
+                                  {cap.who ? ', ' : ''}
+                                  <em>{cap.title}</em>
+                                </>
+                              )}
                               {cap.year && `, ${cap.year}`}
                             </span>
                           )}
@@ -370,7 +391,28 @@ const captionOf = (img: any, fallback?: string) => ({
     letter-spacing: -0.035em;
   }
   .hero .counter {
+    font-size: 22px;
     font-weight: 400;
+    line-height: 1.2;
+  }
+  .hero figcaption {
+    align-items: baseline;
+    padding-top: 6px;
+  }
+  .dots i:not(.active) {
+    opacity: 0.5;
+  }
+  /* The "applications" block: lines an editor set to Lead are drawn at the
+     statement size, and consecutive ones stack with no gap (the design's
+     three "→" lines). */
+  .prize-about :global(.cs-body .rich-text > p.lead) {
+    letter-spacing: -0.035em;
+    font-size: 40px;
+    line-height: 46px;
+    margin-bottom: 0;
+  }
+  .prize-about :global(.cs-body .rich-text > p.lead + p.lead) {
+    margin-top: 0;
   }
   /* `blocks` is passed to Sections, whose markup carries no scope attribute. */
   :global(.blocks) {
@@ -435,7 +477,7 @@ const captionOf = (img: any, fallback?: string) => ({
   }
   .name h2 {
     letter-spacing: -0.045em;
-    font-size: 56px;
+    font-size: 60px;
     font-weight: 400;
     line-height: 1;
   }
@@ -581,6 +623,10 @@ const captionOf = (img: any, fallback?: string) => ({
     }
     .hero > p {
       font-size: 34px;
+    }
+    .prize-about :global(.cs-body .rich-text > p.lead) {
+      font-size: 28px;
+      line-height: 1.15;
     }
     .hero figcaption span {
       display: none;

@@ -8,7 +8,7 @@ import LinkPill from '../../components/LinkPill.astro';
 import SanityImage from '../../components/SanityImage.astro';
 import PortableText from '../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { hasString, useTranslations, formatDay, formatDayLong, formatTime, localePath } from '../../lib/i18n';
+import { hasString, useTranslations, formatDayLong, formatTime, localePath } from '../../lib/i18n';
 import { getHubPages, getProgramme } from '../../lib/queries';
 import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
 import { styleAttrs } from '../../lib/textStyle';
@@ -108,7 +108,7 @@ const altPaths = hubAltPaths('programme', tab);
 >
   <HubNav lang={lang} route="programme" active={tab} pages={pages} />
 
-  <div class:list={['content-wrap', { talks: !isPage }]}>
+  <div class:list={['content-wrap', { talks: !isPage, 'talks-tab': !isPage && !isAwards }]}>
     {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
 
     {
@@ -237,7 +237,7 @@ const altPaths = hubAltPaths('programme', tab);
           {days.map((day, i) => (
             <details>
               <summary>
-                {formatDay(day, lang)} <span aria-hidden="true">↓</span>
+                {formatDayLong(day, lang)} <span aria-hidden="true">↓</span>
               </summary>
               <div class="events">
                 {onDay(day).map((e: any, j: number) => {
@@ -437,7 +437,11 @@ const altPaths = hubAltPaths('programme', tab);
     }
   }
   /* The accordion beside the tab's pictures, both from the top rule
-     (programme talks mock-up, 2026-09-15). */
+     (programme talks mock-up, 2026-09-15). The frame sets the lead ~43px
+     under the tab band and the accordion ~100px under the lead. */
+  .talks-tab > .intro-large {
+    margin-top: 14px;
+  }
   .talks-layout {
     grid-template-columns: minmax(0, 1fr) 31%;
     align-items: start;
@@ -445,19 +449,23 @@ const altPaths = hubAltPaths('programme', tab);
     margin-top: 52px;
     display: grid;
   }
+  .talks-tab > .intro-large + .talks-layout {
+    margin-top: 98px;
+  }
+  /* 2px rules, 50px day headings in ~95px rows. */
   .days {
-    border-bottom: 1px solid;
+    border-bottom: 2px solid;
   }
   .days details {
-    border-top: 1px solid;
+    border-top: 2px solid;
   }
   .days summary {
     cursor: pointer;
     letter-spacing: -0.04em;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 0;
-    font-size: clamp(34px, 3.3vw, 48px);
+    padding: 17px 0 18px;
+    font-size: clamp(34px, 3.5vw, 50px);
     line-height: 1.15;
     list-style: none;
     display: flex;

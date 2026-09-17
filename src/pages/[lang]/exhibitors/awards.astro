@@ -53,7 +53,11 @@ const awards = fair
     return { ...a, previous, isNew: a.year === current && earlier.length === 0 };
   });
 
-/** The award's own picture, else its winning gallery's, else the previous laureate's. */
+/**
+ * The award's own picture, else its winning gallery's, else the previous laureate's.
+ * BACKEND-REQUEST #5: the frame shows three photos per award ("1/3"); `award.image`
+ * is a single image, so an award's own pictures are one slide until `award.images[]` exists.
+ */
 const imagesOf = (a: any): any[] => {
   if (a.image?.asset) return [a.image];
   const own = (a.gallery?.images ?? []).filter((img: any) => img?.asset);
@@ -146,7 +150,7 @@ const imagesOf = (a: any): any[] => {
   }
   .awards-intro p {
     letter-spacing: -0.035em;
-    max-width: 950px;
+    max-width: 1120px;
     font-size: clamp(28px, 2.6vw, 40px);
     line-height: 1.15;
   }
@@ -154,6 +158,10 @@ const imagesOf = (a: any): any[] => {
      them, no rules between rows. */
   .awards-list {
     padding: 0 var(--gutter) 90px;
+  }
+  /* Without an intro the rows would touch the title band. */
+  :global(.exhibitor-head) + .awards-list {
+    padding-top: 36px;
   }
   .awards-list article {
     grid-template-columns: 1fr 1fr;
@@ -184,19 +192,23 @@ const imagesOf = (a: any): any[] => {
     font-weight: 600;
     line-height: 1.2;
   }
+  /* The text starts 22px under the rule, as in the frame. */
   .award-copy :global(.rich-text) {
     max-width: 640px;
-    margin-top: 18px;
+    margin-top: 10px;
     font-size: clamp(18px, 1.5vw, 22px);
     line-height: 1.3;
     letter-spacing: -0.03em;
   }
+  /* "PREVIOUS LAUREATE (2026)" / "NEW THIS YEAR": bold capitals at the
+     frame's 22px. Noi Grotesk ships 400/600/900, so 600 is the bold cut. */
   .award-copy .label {
     margin-top: 18px;
     text-transform: uppercase;
-    font-size: clamp(15px, 1.2vw, 18px);
+    font-size: clamp(17px, 1.53vw, 22px);
     font-weight: 600;
-    letter-spacing: -0.01em;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
   }
   .laureate {
     margin-top: 26px;
@@ -207,10 +219,9 @@ const imagesOf = (a: any): any[] => {
   .laureate .label {
     margin-top: 0;
   }
+  /* Plain text in the frame; the link shows itself on hover. */
   .laureate a {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.12em;
+    text-decoration: none;
   }
   .laureate a:hover {
     background: var(--color-acid);

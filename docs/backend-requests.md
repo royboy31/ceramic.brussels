@@ -128,3 +128,47 @@ No awards event carries a `location`, so the design's "HALL C" chip is hidden
 is already selected by `getProgramme`).
 
 ---
+
+## #4 · open · 2026-09-17 · filters on the artists list
+
+**Page / component:** `src/pages/[lang]/artists/index.astro`, above the letter lists
+**Figma frame:** `ceramics-layouts/ceramic brussels — exhibitors — artists.png`
+**The design shows:** the same "FILTERS:" row as the galleries list - solo show, focus España, publishers, jury prize 2026, awards - narrowing the artists to those whose current exhibitor matches.
+**The query returns today:** `getArtists` → `exhibitors[]{ name, slug, booth, soloShow, year, current }`; no exhibitor `_id`, `kind` or `inCountryFocus`, which is what the galleries list filters on (and `_id` is how an award's `winnerExhibitor` is matched).
+**Rendered meanwhile:** the filters the returned fields can drive; the others are left out, marked in the markup.
+**Asked for:** `_id`, `kind` and `inCountryFocus` on `exhibitors[]` in `getArtists`.
+
+---
+
+## #5 · open · 2026-09-17 · several pictures per award
+
+**Page / component:** `src/pages/[lang]/exhibitors/awards.astro` (and the art prize awards tab, which reads the same `award`)
+**Figma frame:** `ceramics-layouts/ceramic brussels — exhibitors — awards.png`
+**The design shows:** each award beside a slideshow of three fair photos with the "1/3" counter and a caption per photo.
+**The query returns today:** `award.image`, one `figure`; without it the page falls back to the winning gallery's artwork.
+**Rendered meanwhile:** the one image, as a single-slide slideshow.
+**Asked for:** an `images[]` array of `figure` on `award` (keeping `image` readable, or migrating it into `images[0]`), selected in the awards projections.
+
+---
+
+## #6 · open · 2026-09-17 · tab labels in French and Dutch
+
+**Page / component:** `src/components/HubNav.astro`, every hub's pills
+**Figma frame:** all hub frames; seen on `/fr/programme` where the talks pill reads "talks" instead of "conférences"
+**The design shows:** each pill in the page's language.
+**The query returns today:** `PAGE` in `queries.ts` → `"tabLabel": coalesce(localised('tabLabel'), localised('title'))`. Localised fields fall back to English, so a page with only an English title overrides the translated `tabs.*` label in STRINGS on the French and Dutch pages.
+**Rendered meanwhile:** since 2026-09-17 `HubNav` treats a `tabLabel` equal to the page title as no override and uses the translated label, so the pills are right already; a proper `tabLabel` without the fallback would remove that guess.
+**Asked for:** return `tabLabel` only when an editor set one (no `title` fallback, or no English fallback for it), so the frontend falls back to `t(hubTab.label)`. Or say which of the two should win and the frontend follows.
+
+---
+
+## #7 · open · 2026-09-17 · the about hub's three tabs
+
+**Page / component:** `src/lib/hubs.ts`, `HUBS.about` (changed on `lilanga` at Lilanga's request - please confirm or redo)
+**Figma frame:** `ceramics-layouts/ceramic brussels —about — ceramic brussels.png`, `-1.png`, `-2.png`
+**The design shows:** three pills - ceramic brussels / advisory board / contact - where "contact" is the directors and the team.
+**The code said:** six tabs - ceramic brussels, advisory board, team, partners (a link to the partners hub), press, images.
+**Changed:** the `team` tab is labelled `tabs.contact` ("contact" in all three languages) and keeps its slug and address (`/en/about/team`, `/fr/a-propos/equipe`), which the page document, `previewPaths.ts` and the legacy redirects (`founders`, `team`) use. The partners link tab is removed. Press and images get a new `hidden: true` on `HubTab`: still built, no pill, so the redirects onto `about/press` and `about/images` keep a target.
+**Your decisions:** whether the team tab's address should become `contact` (it needs the redirect map and `previewPaths.ts` changed with it, and sits next to the existing `/[lang]/contact` page); whether press and images stay reachable or go, with their redirects re-pointed; and the menu's about links in the navigation document, which may still list press and images.
+
+---

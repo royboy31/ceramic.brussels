@@ -14,8 +14,9 @@ import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * Visitors info, as the design's visitors-info pages draw it. Practical
- * info: photo and intro + opening hours on top, then address / tickets /
- * hotel deal beside access and the venue diagram, then the photo row -
+ * info: two columns - photo, address, tickets, hotel deal at the left;
+ * intro, opening hours, access, the venue diagram at the right - then the
+ * photo row -
  * from the current edition (hours, tickets) and site settings (venue,
  * access, hotel deal, photos). Food & drinks: the intro and a 2x2 grid of
  * the `food-drinks` partners with their slideshow figure. Floor plan and
@@ -100,121 +101,137 @@ const altPaths = hubAltPaths('visit', tab);
   {
     practical && (
       <div class="content-wrap practical">
-        <div class="top">
-          {info.heroImage?.asset && (
-            <SanityImage image={info.heroImage} widths={[700, 1000, 1400]} sizes="(max-width: 700px) 100vw, 50vw" loading="eager" />
-          )}
+        {/* Two independent columns, as the frame draws them: each runs down on
+            its own, so neither leaves a gap under the other's longer panel.
+            On a phone the four groups interleave (photo, intro + hours,
+            address to hotel, access + map) - see the CSS. */}
+        <div class="two-col columns">
           <section>
-            {intro && (
-              <p class="intro-large" {...styleAttrs(introStyle)}>
-                {intro}
-              </p>
+            {info.heroImage?.asset && (
+              <SanityImage
+                image={info.heroImage}
+                widths={[700, 1000, 1400]}
+                sizes="(max-width: 700px) 100vw, 50vw"
+                loading="eager"
+                class="visit-photo"
+              />
             )}
-            <h2 class="panel-title">{t('visit.openingHours')}</h2>
-            {edition?.openingHours?.length ? (
-              <div class="body-24">
-                {edition.openingHours.map((d: any) => (
-                  <p>
-                    <strong {...styleAttrs(d.labelStyle)}>{d.label ?? formatDate(d.date, lang)}</strong>
-                    {(d.slots ?? []).map((s: any) => (
-                      <>
-                        <br />
-                        {[s.time, s.label].filter(Boolean).join(' ')}
-                        {s.invitationOnly && ` (${t('visit.invitation')})`}
-                      </>
-                    ))}
-                  </p>
-                ))}
-                {edition.lastEntry && <p {...styleAttrs(edition.lastEntryStyle)}>{edition.lastEntry}</p>}
-              </div>
-            ) : (
-              <p class="empty">{t('visit.noHours')}</p>
-            )}
-          </section>
-        </div>
-
-        <div class="two-col details">
-          <section>
-            <h2 class="panel-title">{t('visit.address')}</h2>
-            <p class="body-24">
-              {info.venueName && <strong>{info.venueName}</strong>}
-              {lines(info.address).map((l) => (
-                <>
-                  <br />
-                  {l}
-                </>
-              ))}
-            </p>
-
-            <h2 class="panel-title">{t('visit.tickets')}</h2>
-            {edition?.tickets?.length ? (
-              <div class="body-24">
-                {edition.tickets.map((tk: any) => (
-                  <p>
-                    <strong {...styleAttrs(tk.nameStyle)}>{tk.name}</strong>
-                    <br />
-                    {tk.price}
-                    {tk.note && ` (${tk.note})`}
-                  </p>
-                ))}
-                {edition.ticketsNote && <p {...styleAttrs(edition.ticketsNoteStyle)}>{edition.ticketsNote}</p>}
-              </div>
-            ) : (
-              <p class="empty">{t('visit.noTickets')}</p>
-            )}
-            {edition?.ticketsUrl && (
-              <a class="pill dark" href={edition.ticketsUrl} target="_blank" rel="noopener noreferrer">
-                {t('visit.bookTickets')} ↗
-              </a>
-            )}
-
-            {(hotel || info.hotelDeal?.text) && (
-              <>
-                <h2 class="panel-title">{t('visit.hotelDeal')}</h2>
-                <p class="body-24">
-                  {hotel?.name && <strong>{hotel.name}</strong>}
-                  {info.hotelDeal?.text && (
-                    <>
-                      <br />
-                      {info.hotelDeal.text}
-                    </>
-                  )}
-                </p>
-                <a class="pill dark" href={hotelHref}>
-                  {t('visit.discoverHotel')} ↗
-                </a>
-              </>
-            )}
-          </section>
-
-          <section>
-            <h2 class="panel-title">{t('visit.access')}</h2>
-            {info.access?.length > 0 && (
-              <div class="body-24">
-                {info.access.map((a: any) => (
-                  <p>
-                    <strong {...styleAttrs(a.modeStyle)}>{a.mode}</strong>
-                    {lines(a.text).map((l) => (
-                      <>
-                        <br />
-                        {l}
-                      </>
-                    ))}
-                  </p>
-                ))}
-                {info.accessibility && <p {...styleAttrs(info.accessibilityStyle)}>{info.accessibility}</p>}
-              </div>
-            )}
-            <div class="venue-map" aria-label={`${info.venueName ?? edition?.venue ?? ''} location diagram`}>
-              <span>{venueShort}</span>
-              <b>
-                {siteName.split(' ').map((w: string, i: number) => (
+            <div class="group address">
+              <h2 class="panel-title">{t('visit.address')}</h2>
+              <p class="body-24">
+                {info.venueName && <strong>{info.venueName}</strong>}
+                {lines(info.address).map((l) => (
                   <>
-                    {i > 0 && <br />}
-                    {w}
+                    <br />
+                    {l}
                   </>
                 ))}
-              </b>
+              </p>
+
+              <h2 class="panel-title">{t('visit.tickets')}</h2>
+              {edition?.tickets?.length ? (
+                <div class="body-24">
+                  {edition.tickets.map((tk: any) => (
+                    <p>
+                      <strong {...styleAttrs(tk.nameStyle)}>{tk.name}</strong>
+                      <br />
+                      {tk.price}
+                      {tk.note && ` (${tk.note})`}
+                    </p>
+                  ))}
+                  {edition.ticketsNote && <p {...styleAttrs(edition.ticketsNoteStyle)}>{edition.ticketsNote}</p>}
+                </div>
+              ) : (
+                <p class="empty">{t('visit.noTickets')}</p>
+              )}
+              {edition?.ticketsUrl && (
+                <a class="pill dark" href={edition.ticketsUrl} target="_blank" rel="noopener noreferrer">
+                  {t('visit.bookTickets')} <span class="link-arrow" data-arrow="↗" aria-hidden="true">↗</span>
+                </a>
+              )}
+
+              {(hotel || info.hotelDeal?.text) && (
+                <>
+                  <h2 class="panel-title">{t('visit.hotelDeal')}</h2>
+                  <p class="body-24">
+                    {hotel?.name && <strong>{hotel.name}</strong>}
+                    {info.hotelDeal?.text && (
+                      <>
+                        <br />
+                        {info.hotelDeal.text}
+                      </>
+                    )}
+                  </p>
+                  <a
+                    class="pill dark"
+                    href={hotelHref}
+                    {...(/^https?:\/\//.test(hotelHref) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  >
+                    {t('visit.discoverHotel')} <span class="link-arrow" data-arrow="↗" aria-hidden="true">↗</span>
+                  </a>
+                </>
+              )}
+            </div>
+          </section>
+
+          <section>
+            <div class="group hours">
+              {intro && (
+                <p class="intro-large" {...styleAttrs(introStyle)}>
+                  {intro}
+                </p>
+              )}
+              <h2 class="panel-title">{t('visit.openingHours')}</h2>
+              {edition?.openingHours?.length ? (
+                <div class="body-24">
+                  {edition.openingHours.map((d: any) => (
+                    <p>
+                      <strong {...styleAttrs(d.labelStyle)}>{d.label ?? formatDate(d.date, lang)}</strong>
+                      {(d.slots ?? []).map((s: any) => (
+                        <>
+                          <br />
+                          {[s.time, s.label].filter(Boolean).join(' ')}
+                          {s.invitationOnly && ` (${t('visit.invitation')})`}
+                        </>
+                      ))}
+                    </p>
+                  ))}
+                  {edition.lastEntry && <p {...styleAttrs(edition.lastEntryStyle)}>{edition.lastEntry}</p>}
+                </div>
+              ) : (
+                <p class="empty">{t('visit.noHours')}</p>
+              )}
+            </div>
+
+            <div class="group access">
+              <h2 class="panel-title">{t('visit.access')}</h2>
+              {info.access?.length > 0 && (
+                <div class="body-24">
+                  {info.access.map((a: any) => (
+                    <p>
+                      <strong {...styleAttrs(a.modeStyle)}>{a.mode}</strong>
+                      {lines(a.text).map((l) => (
+                        <>
+                          <br />
+                          {l}
+                        </>
+                      ))}
+                    </p>
+                  ))}
+                  {info.accessibility && <p {...styleAttrs(info.accessibilityStyle)}>{info.accessibility}</p>}
+                </div>
+              )}
+              <div class="venue-map" aria-label={`${info.venueName ?? edition?.venue ?? ''} location diagram`}>
+                <span>{venueShort}</span>
+                <b>
+                  {siteName.split(' ').map((w: string, i: number) => (
+                    <>
+                      {i > 0 && <br />}
+                      {w}
+                    </>
+                  ))}
+                </b>
+              </div>
             </div>
           </section>
         </div>
@@ -247,7 +264,7 @@ const altPaths = hubAltPaths('visit', tab);
                   <h2>
                     {v.url ? (
                       <a href={v.url} target="_blank" rel="noopener noreferrer">
-                        {v.name} ↗
+                        {v.name} <span class="link-arrow" data-arrow="↗" aria-hidden="true">↗</span>
                       </a>
                     ) : (
                       v.name
@@ -384,35 +401,47 @@ const altPaths = hubAltPaths('visit', tab);
 
 <style>
   /* From the design's visitors-info pages. */
-  .top {
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    display: grid;
+  .columns {
+    align-items: start;
   }
-  .top > :global(img) {
+  .columns :global(.visit-photo) {
     object-fit: cover;
     width: 100%;
     height: 447px;
   }
-  .top .panel-title {
+  .panel-title {
     margin-top: 50px;
   }
-  .details {
-    margin-top: 65px;
-  }
-  .details .panel-title {
-    margin-top: 50px;
-  }
-  .details section > .panel-title:first-child {
+  .group > .panel-title:first-child {
     margin-top: 0;
   }
+  /* The frame's address rule sits ~125px under the photo. */
+  .address {
+    margin-top: 80px;
+  }
+  .hours > .intro-large + .panel-title {
+    margin-top: 54px;
+  }
+  .access {
+    margin-top: 45px;
+  }
+  /* The frame's opening-hours days sit closer than body-24's 28px. */
+  .hours .body-24 :global(p + p) {
+    margin-top: 18px;
+  }
+  /* The calls to action: 44px tall, 30px either side, a space before the arrow. */
   .dark {
     color: #fff;
     background: #000;
     margin-top: 30px;
+    padding: 4px 30px;
   }
+  /* The labels (days, tickets, access modes) are the 600 cut in normal
+     tracking; the browser's bold resolves to the 900 file. */
   .body-24 strong {
     text-transform: uppercase;
+    letter-spacing: 0;
+    font-weight: 600;
   }
   .venue-map {
     color: #000;
@@ -454,12 +483,31 @@ const altPaths = hubAltPaths('visit', tab);
     width: 100%;
   }
   @media (width<=700px) {
-    .top,
     .photo-row {
       grid-template-columns: 1fr;
     }
-    .top > :global(img) {
+    /* One column, read in order: photo, intro + hours, address to hotel,
+       access + map. */
+    .columns {
+      gap: 0;
+    }
+    .columns > section {
+      display: contents;
+    }
+    .columns :global(.visit-photo) {
       height: auto;
+    }
+    .hours {
+      order: 1;
+      margin-top: 28px;
+    }
+    .address {
+      order: 2;
+      margin-top: 50px;
+    }
+    .access {
+      order: 3;
+      margin-top: 50px;
     }
     .venue-map {
       height: 320px;
@@ -476,7 +524,9 @@ const altPaths = hubAltPaths('visit', tab);
   /* Title rule as on the guest of honour page (client feedback, 2026-09-16). */
   .food h2 {
     border-bottom: 2px solid;
-    margin-bottom: 24px;
+    /* The frame's rule sits ~12px under the text, the picture 28px below it. */
+    margin-bottom: 28px;
+    padding-bottom: 4px;
     letter-spacing: -0.04em;
     font-size: 36px;
     font-weight: 600;
@@ -491,30 +541,18 @@ const altPaths = hubAltPaths('visit', tab);
     object-fit: cover;
     width: 100%;
   }
-  .dots {
-    gap: 14px;
-    display: flex;
-    position: absolute;
-    bottom: 14px;
-    left: 50%;
-    transform: translate(-50%);
-  }
-  .dots i {
-    background: #fff;
-    border-radius: 50%;
-    width: 10px;
-    height: 10px;
-  }
-  .counter {
-    margin-top: 6px;
-    font-size: 20px;
-  }
   .food .body-24 {
     margin-top: 14px;
+    font-size: 22px;
+    line-height: 30px;
   }
   @media (width<=700px) {
     .food {
       grid-template-columns: 1fr;
+    }
+    .food .body-24 {
+      font-size: 18px;
+      line-height: 1.3;
     }
   }
 

@@ -151,9 +151,13 @@ const slideId = (i: number) => `${id}-${i + 1}`;
     font-size: 0.875rem;
     line-height: 1.3;
   }
+  /* The counter at the frames' size (22px), the caption line beside it
+     unchanged. Proportional figures: each slide has its own counter, so
+     nothing jumps, and tabular ones spread "1/1" apart. */
   .counter {
     flex: 0 0 auto;
-    font-variant-numeric: tabular-nums;
+    font-size: 22px;
+    line-height: 1;
   }
   .caption {
     text-align: right;
@@ -174,8 +178,8 @@ const slideId = (i: number) => `${id}-${i + 1}`;
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    gap: 10px;
-    padding-bottom: 12px;
+    gap: 17px;
+    padding-bottom: 16px;
     pointer-events: none;
   }
   .no-aspect .dots {
@@ -183,16 +187,24 @@ const slideId = (i: number) => `${id}-${i + 1}`;
     aspect-ratio: auto;
     padding: 0.5rem 0 0;
   }
+  /* White dots as the frames draw them: the current one solid, the others
+     see-through. */
   .dots a {
     pointer-events: auto;
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
     padding: 0;
     border-radius: 50%;
-    background: rgb(0 0 0 / 0.25);
-    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.5);
+    background: var(--color-white);
+    opacity: 0.45;
+    transition: opacity 0.18s;
   }
-  .dots a[aria-current] {
+  .dots a[aria-current],
+  .dots a:hover {
+    opacity: 1;
+  }
+  /* Without an aspect the dots sit under the picture, on the page: ink. */
+  .no-aspect .dots a {
     background: var(--ink);
   }
   .dots a:focus-visible {

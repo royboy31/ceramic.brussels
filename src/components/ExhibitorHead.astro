@@ -14,8 +14,9 @@ import { useTranslations, localePath } from '../lib/i18n';
  * filters the list by initial (a `#A` in the address pre-selects a letter,
  * and clicking the chosen letter again clears it), and links back to the
  * list on a detail page, where the exhibitor's own initial is marked and
- * links to the whole list. There is no ALL button any more (client
- * feedback, 2026-09-16): deselecting the letter is how you get back.
+ * links to the whole list. There is no ALL button (client feedback,
+ * 2026-09-16, confirmed 2026-09-17): deselecting the letter is how you get
+ * back.
  */
 interface Props {
   lang: LocaleId;
@@ -72,9 +73,16 @@ const mark = activeLetter.toUpperCase();
   /* The letters sit under the band, outside it, so only the band stays pinned. */
   alphabet && (
       <nav class="alphabet" aria-label={t('exhibitors.byLetter')} data-alphabet>
-        {LETTERS.map((letter) =>
+        {LETTERS.map((letter, i) => [
+          /* A real separator between the letters, so a wide letter pushes it along. */
+          i > 0 && (
+            <span class="sep" aria-hidden="true">
+              -
+            </span>
+          ),
           letterHref ? (
             <a
+              data-glyph={letter}
               class:list={[{ active: letter === mark }]}
               href={localePath(lang, letterHref) + (letter === mark ? '' : `#${letter}`)}
               aria-current={letter === mark ? 'true' : undefined}
@@ -84,6 +92,7 @@ const mark = activeLetter.toUpperCase();
           ) : (
             <button
               type="button"
+              data-glyph={letter}
               class:list={[{ active: letter === mark }]}
               data-letter={letter}
               aria-pressed={letter === mark ? 'true' : 'false'}
@@ -91,7 +100,7 @@ const mark = activeLetter.toUpperCase();
               {letter}
             </button>
           ),
-        )}
+        ])}
       </nav>
     )
 }
@@ -120,14 +129,18 @@ const mark = activeLetter.toUpperCase();
   }
   nav {
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 28px;
     display: flex;
   }
+  .alphabet {
+    flex-wrap: nowrap;
+  }
+  /* 50px tall, 28px apart, as in the Figma exhibitors frames. */
   .exhibitor-head__top a {
     text-align: center;
     border: 1px solid #000;
     min-width: 135px;
-    padding: 8px 24px;
+    padding: 10px 24px;
     font-size: 28px;
     line-height: 1;
     transition:
@@ -143,41 +156,46 @@ const mark = activeLetter.toUpperCase();
     color: #050505;
     background: var(--color-acid);
   }
-  /* Right-aligned, bigger letters; hover and the chosen letter are Black and
-     underlined (client feedback, 2026-09-16). Each letter has a fixed width
-     so the heavier weight does not push its neighbours. */
+  /* The letters spread over the whole row, gutter to gutter; hover and the chosen letter are
+     Black and underlined (client feedback, 2026-09-16). Each letter is as wide as its
+     Black cut (the hidden ::after), so the heavier weight does not push its
+     neighbours; the dashes between them are real text, so a wide letter
+     (m, w) keeps its distance instead of running into one. */
   .alphabet {
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 0;
-    margin-top: 24px;
+    margin-top: 22px;
     padding-inline: var(--gutter);
-  }
-  .alphabet > * {
-    cursor: pointer;
-    flex: 0 0 auto;
-    width: 44px;
-    padding: 6px 3px;
     font-size: 34px;
     line-height: 1;
+  }
+  .alphabet > :is(a, button) {
+    cursor: pointer;
+    flex: 0 0 auto;
+    padding: 6px 1px;
     text-align: center;
     /* The letters are lowercase in the design. */
     text-transform: lowercase;
     text-underline-offset: 0.14em;
     text-decoration-thickness: 2px;
-    position: relative;
   }
-  .alphabet > :nth-child(n + 2):before {
-    content: '-';
+  .alphabet > :is(a, button)::after {
+    content: attr(data-glyph);
+    display: block;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    font-weight: 900;
+  }
+  .alphabet .sep {
+    flex: 0 0 auto;
+    padding-inline: 0.18em;
     font-weight: 400;
-    text-decoration: none;
-    position: absolute;
-    left: 0;
-    transform: translateX(-50%);
   }
   .alphabet > .active,
-  .alphabet > :hover,
-  .alphabet > :focus-visible {
+  .alphabet > :is(a, button):hover,
+  .alphabet > :is(a, button):focus-visible {
     font-weight: 900;
     text-decoration-line: underline;
   }
@@ -205,8 +223,7 @@ const mark = activeLetter.toUpperCase();
     .alphabet {
       justify-content: flex-start;
     }
-    .alphabet > * {
-      width: 38px;
+    .alphabet {
       font-size: 26px;
     }
   }

@@ -10,10 +10,11 @@ import { styleAttrs } from '../../../lib/textStyle';
 /**
  * Every artist, A–Z, as the design's exhibitors/artists/index.html draws it
  * (2026-09-14 build): the exhibitors title band with the artists tab
- * active and the A–Z row, then the letter sections flowing down two
- * columns: a big initial beside a ruled list, one row per artist with the
- * country code raised after the name and the booth at the right. The
- * letters filter the sections in place; the page is complete without
+ * active, the A–Z row and the FILTERS row, then the letter sections dealt
+ * into two balanced columns: a big initial beside a ruled list, one row per
+ * artist with the country code raised after the name and the booth at the
+ * right. The
+ * letters and pills filter the list in place; the page is complete without
  * JavaScript. Design by Lilanga.
  */
 export function getStaticPaths() {
@@ -43,6 +44,33 @@ const byLetter = (letter: string) => artists.filter((a: any) => initial(a.name) 
  * `current` flag the list could show an old booth (backend request #1).
  */
 const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
+
+/**
+ * The FILTERS row of the frame: solo show, focus, publishers, jury prize,
+ * awards. Only the solo show can be told from what `getArtists` returns.
+ * BACKEND-REQUEST #4: `exhibitors[]` needs `_id`, `kind` and `inCountryFocus`
+ * for the focus, publishers, jury prize and awards pills; until then they are
+ * left out rather than guessed.
+ */
+const rowFilters = (a: any) => [showingNow(a)?.soloShow && 'solo-show'].filter(Boolean).join(' ');
+const filters = [{ id: 'solo-show', label: t('exhibitors.soloShow'), has: (a: any) => showingNow(a)?.soloShow }].filter((f) =>
+  artists.some(f.has),
+);
+
+/**
+ * The letters flow into two columns the way the frame stacks them: each letter
+ * goes to whichever column is shorter so far, measured in rows plus the room a
+ * letter's heading takes. The script re-deals them when a filter hides rows;
+ * on a narrow screen the columns dissolve and `order` keeps A–Z.
+ */
+const HEADING_ROWS = 1.5;
+const columns: string[][] = [[], []];
+const heights = [0, 0];
+for (const letter of letters) {
+  const col = heights[0] <= heights[1] ? 0 : 1;
+  columns[col].push(letter);
+  heights[col] += byLetter(letter).length + HEADING_ROWS;
+}
 ---
 
 <Base
@@ -70,35 +98,60 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
   {
     artists.length ? (
       <>
+        {filters.length > 0 && (
+          <div class="filters" id="artist-filters">
+            <span>{t('exhibitors.filters')}:</span>
+            {filters.map((f) => (
+              <button type="button" data-filter={f.id} aria-pressed="false">
+                {f.label}
+              </button>
+            ))}
+          </div>
+        )}
         <p class="empty" id="no-match" hidden>
           {t('artists.noneMatch')}
         </p>
         <div class="artist-list" id="artist-list">
-          {letters.map((letter) => (
-            <section id={letter} data-name={letter}>
-              <h2>{letter}</h2>
-              <ul>
-                {byLetter(letter).map((a: any) => {
-                  const ex = showingNow(a);
-                  return (
-                    <li>
-                      <a href={localePath(lang, `artists/${a.slug}`)}>
-                        <span class="name">
-                          {a.name}
-                          {a.countryCode && <sup>{a.countryCode}</sup>}
-                        </span>
-                        {(ex?.soloShow || ex?.booth) && (
-                          <span class="tail">
-                            {ex.soloShow && <span class="solo">{t('exhibitors.soloShow')}</span>}
-                            {ex.booth && <span class="booth">{ex.booth} ●</span>}
-                          </span>
-                        )}
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
+          {columns.map((column) => (
+            <div class="artist-column" data-column>
+              {column.map((letter) => (
+                <section id={letter} data-name={letter} style={`order: ${letters.indexOf(letter)}`}>
+                  <h2>{letter}</h2>
+                  <ul>
+                    {byLetter(letter).map((a: any) => {
+                      const ex = showingNow(a);
+                      return (
+                        <li data-filters={rowFilters(a)}>
+                          <a href={localePath(lang, `artists/${a.slug}`)}>
+                            <span class="name">
+                              {a.name}
+                              {a.countryCode && <sup>{a.countryCode}</sup>}
+                            </span>
+                            {(ex?.soloShow || ex?.booth) && (
+                              <span class="tail">
+                                {ex.soloShow && (
+                                  <span class="solo">
+                                    {t('exhibitors.soloShow')
+                                      .split(/\s+/)
+                                      .map((w: string, i: number) => (
+                                        <>
+                                          {i > 0 && <br />}
+                                          {w}
+                                        </>
+                                      ))}
+                                  </span>
+                                )}
+                                {ex.booth && <span class="booth">{ex.booth} ●</span>}
+                              </span>
+                            )}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              ))}
+            </div>
           ))}
         </div>
       </>
@@ -122,14 +175,58 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
   .artists-intro {
     padding: 40px var(--gutter) 0;
   }
+  /* The FILTERS row, as on the galleries list (ExhibitorsListing.astro). */
+  .filters {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 30px var(--gutter) 0;
+    display: flex;
+  }
+  .filters span {
+    margin-right: 6px;
+    text-transform: uppercase;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  /* Thin like the footer pills (client feedback, 2026-09-16). */
+  .filters button {
+    border: 1px solid;
+    border-radius: 999px;
+    padding: 1px 12px 0;
+    font-size: 18px;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
+    background: #fff;
+    cursor: pointer;
+    transition:
+      color 0.18s,
+      background-color 0.18s;
+  }
+  /* A chosen pill says it can be undone: a × before its label. */
+  .filters button[aria-pressed='true']::before {
+    content: '×';
+    margin-right: 0.3em;
+  }
+  .filters button[aria-pressed='true'],
+  .filters button:hover {
+    color: #fff;
+    background: #000;
+  }
+  /* Two columns 42px apart, each a stack of letters (see the frontmatter). */
   .artist-list {
-    columns: 2;
-    column-gap: clamp(30px, 4vw, 60px);
-    padding: 40px var(--gutter) 100px;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: 42px;
+    padding: 54px var(--gutter) 100px;
+    display: grid;
+  }
+  .artist-column {
+    min-width: 0;
   }
   .artist-list section {
-    break-inside: avoid;
-    grid-template-columns: 30% 1fr;
+    grid-template-columns: 35% 1fr;
     margin-bottom: clamp(40px, 4.5vw, 64px);
     display: grid;
     position: relative;
@@ -144,14 +241,15 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
     left: 12%;
     right: 0;
   }
-  .artist-list section[hidden] {
+  .artist-list section[hidden],
+  .artist-list li[hidden] {
     display: none;
   }
   /* The top of the capital sits on the rule: the box is trimmed to the cap
      height, or pulled up by Noi Grotesk's space above it where trimming is
      not supported. */
   .artist-list h2 {
-    font-size: clamp(48px, 5vw, 72px);
+    font-size: clamp(48px, 6.5vw, 94px);
     font-weight: 400;
     line-height: 1;
     text-box: trim-both cap alphabetic;
@@ -171,12 +269,13 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
   }
   /* Client feedback, 2026-09-16: tighter names, the country code bigger and
      hung from the top of the capitals as on the exhibitor cards, and the
-     whole row turning acid on hover instead of an underline. */
+     whole row turning acid on hover instead of an underline. Rows are 56px
+     apart at full size, as in the frame. */
   .artist-list a {
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     gap: 16px;
-    padding: 0.42em 0;
+    padding: 0.48em 0;
     font-size: clamp(18px, 1.8vw, 26px);
     line-height: 1.15;
     letter-spacing: -0.04em;
@@ -207,26 +306,36 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
     letter-spacing: -0.02em;
     white-space: nowrap;
   }
-  /* The round black "solo show" badge of the exhibitor cards, at list size. */
+  /* The round black "solo show" badge of the exhibitor cards, at list size:
+     30px across - no taller than the name, so the row keeps its pitch - with
+     the two words still readable. */
   .solo {
     color: #fff;
     text-align: center;
-    letter-spacing: 0;
+    letter-spacing: -0.02em;
     border-radius: 50%;
     place-items: center;
-    width: 2.1em;
-    height: 2.1em;
-    font-size: 0.42em;
-    line-height: 0.9;
+    width: 30px;
+    height: 30px;
+    font-size: 10.5px;
+    line-height: 0.85;
     background: #000;
     display: grid;
   }
   .empty {
     margin: 40px var(--gutter) 0;
   }
+  /* One column: the two stacks dissolve and each letter's `order` keeps A–Z. */
   @media (width<=900px) {
     .artist-list {
-      columns: 1;
+      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+    }
+    .artist-column {
+      display: contents;
     }
   }
   @media (width<=640px) {
@@ -239,41 +348,75 @@ const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
     .artist-list h2 {
       font-size: 42px;
     }
+    .filters span {
+      font-size: 20px;
+    }
   }
 </style>
 
 <script>
-  // The letter row filters the sections in place; `#A` in the address
-  // pre-selects a letter, and clicking the chosen letter again clears it.
+  // The letter row and the pills filter the list in place; `#A` in the
+  // address pre-selects a letter, and clicking the chosen letter again clears
+  // it. After each change the letters still showing are dealt into the two
+  // columns again, each to the shorter one, so a filtered list stays balanced.
   const head = document.querySelector<HTMLElement>('[data-alphabet]');
+  const bar = document.getElementById('artist-filters');
   const list = document.getElementById('artist-list');
   const noMatch = document.getElementById('no-match');
 
-  if (head && list && noMatch) {
-    const buttons = Array.from(head.querySelectorAll<HTMLButtonElement>('button[data-letter]'));
-    const sections = Array.from(list.querySelectorAll<HTMLElement>('section[data-name]'));
+  if (list && noMatch) {
+    const letters = Array.from(head?.querySelectorAll<HTMLButtonElement>('button[data-letter]') ?? []);
+    const pills = Array.from(bar?.querySelectorAll<HTMLButtonElement>('button[data-filter]') ?? []);
+    const columns = Array.from(list.querySelectorAll<HTMLElement>('[data-column]'));
+    // A–Z, whichever column each starts in.
+    const sections = Array.from(list.querySelectorAll<HTMLElement>('section[data-name]')).sort((a, b) =>
+      (a.dataset.name ?? '').localeCompare(b.dataset.name ?? ''),
+    );
     // '' is no letter chosen: every section.
     let letter = '';
 
+    const deal = () => {
+      const heights = columns.map(() => 0);
+      for (const section of sections) {
+        if (section.hidden) continue;
+        const col = heights[0] <= heights[1] ? 0 : 1;
+        columns[col].append(section);
+        heights[col] += section.querySelectorAll('li:not([hidden])').length + 1.5;
+      }
+    };
+
     const apply = () => {
+      const active = pills.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.filter!);
       let visible = 0;
       for (const section of sections) {
-        const match = !letter || section.dataset.name === letter;
-        section.hidden = !match;
-        if (match) visible++;
+        let rows = 0;
+        for (const li of section.querySelectorAll<HTMLElement>('li')) {
+          const has = (li.dataset.filters ?? '').split(' ');
+          li.hidden = !active.every((f) => has.includes(f));
+          if (!li.hidden) rows++;
+        }
+        section.hidden = rows === 0 || (!!letter && section.dataset.name !== letter);
+        if (!section.hidden) visible++;
       }
       noMatch.hidden = visible > 0;
-      for (const b of buttons) {
+      for (const b of letters) {
         const on = b.dataset.letter === letter;
         b.classList.toggle('active', on);
         b.setAttribute('aria-pressed', String(on));
       }
+      if (columns.length === 2) deal();
     };
 
-    for (const b of buttons) {
+    for (const b of letters) {
       b.addEventListener('click', () => {
         letter = b.dataset.letter === letter ? '' : (b.dataset.letter ?? '');
         history.replaceState(null, '', letter ? `#${letter}` : location.pathname + location.search);
+        apply();
+      });
+    }
+    for (const b of pills) {
+      b.addEventListener('click', () => {
+        b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
         apply();
       });
     }
