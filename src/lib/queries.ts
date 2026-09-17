@@ -833,7 +833,7 @@ export function getProgramme(lang: LocaleId) {
         *[_type == "edition" && isCurrent == true
           && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt)]) > 0][0]._id,
         *[_type == "edition"
-          && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt) && section in ["talks", "vip", "project"]]) > 0]
+          && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt) && section in ["talks", "awards", "vip", "project"]]) > 0]
           | order(year desc)[0]._id
       )] | order(startsAt asc){
       _id, startsAt, endsAt, kind, section, venue, languages, moderator, invitationOnly,

@@ -40,7 +40,7 @@ export const programmeEvent = defineType({
       options: { list: [...PROGRAMME_SECTIONS], layout: 'radio' },
       initialValue: 'talks',
       description:
-        'The tab that lists it, for the current edition. "VIP programme" is the VIP hub’s locked tab, shown to visitors with a code. "Awards" events are not shown anywhere: that pill leads to the art prize awards.',
+        'The tab that lists it, for the current edition. "VIP programme" is the VIP hub’s locked tab, shown to visitors with a code. "Awards" is the programme’s award ceremony tab, which shows a day’s events as one block.',
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -85,7 +85,15 @@ export const programmeEvent = defineType({
       },
       description: 'Languages the event is held in.',
     }),
-    defineField({ name: 'location', title: 'Location', type: 'localeString', hidden: true }),
+    // The award ceremony tab draws it as the hall chip ("HALL C"); hidden
+    // elsewhere, where the programme row has no place for it.
+    defineField({
+      name: 'location',
+      title: 'Location',
+      type: 'localeString',
+      description: 'The hall, e.g. "Hall C". Shown on the award ceremony tab.',
+      hidden: ({ document }) => document?.section !== 'awards',
+    }),
     defineField({
       name: 'speakers',
       title: 'Speakers',

@@ -82,6 +82,7 @@ const TIER_PAGES: Record<string, PreviewLocation> = {
 const EVENT_TABS: Record<string, PreviewLocation> = {
   talks: { title: 'Programme – talks', href: '/programme/talks' },
   vip: { title: 'VIP – VIP programme', href: '/vip/programme' },
+  awards: { title: 'Programme – award ceremony', href: '/programme/awards' },
   project: { title: 'Programme – La Cambre', href: '/programme' },
 };
 

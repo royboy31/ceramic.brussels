@@ -116,7 +116,11 @@ export const HUBS: Record<string, Hub> = {
     tabs: [
       { slug: 'la-cambre', label: 'tabs.laCambre' },
       { slug: 'talks', segment: { fr: 'conferences' }, label: 'tabs.talks' },
-      { slug: 'awards', label: 'tabs.awards', link: { route: 'art-prize', tab: 'awards' } },
+      // The award ceremony: a tab of its own since the client's mock-up of
+      // 2026-09-16 (backend request #3), no longer a link to the art prize
+      // awards - that page carries the link as a button. The old site never
+      // had this page, so the segments are simply translated.
+      { slug: 'awards', segment: { fr: 'remise-des-prix', nl: 'prijsuitreiking' }, label: 'tabs.awardCeremony' },
       // VIP left this hub for one of its own (Figma VIP frames, 2026-09-17).
     ],
   },

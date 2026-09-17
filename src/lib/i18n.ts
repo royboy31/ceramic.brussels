@@ -34,6 +34,8 @@ const STRINGS = {
     'news.readMore': 'Read more',
     'programme.empty': 'The programme has not been announced yet.',
     'programme.speakers': 'With',
+    'programme.exhibitorAwards': 'see all exhibitors awards',
+    'programme.artPrizeAwards': 'see all art prize awards',
     'partners.empty': 'No partners published yet.',
     'press.empty': 'No press coverage published yet.',
     'press.readArticle': 'Read article',
@@ -58,6 +60,7 @@ const STRINGS = {
     'tabs.interview': 'interview',
     'tabs.laureates': 'laureates',
     'tabs.awards': 'awards',
+    'tabs.awardCeremony': 'award ceremony',
     'tabs.jury': 'jury',
     'tabs.laCambre': 'ceramic brussels x La Cambre',
     'tabs.talks': 'talks',
@@ -177,7 +180,7 @@ const STRINGS = {
     'nav.sub.about': 'ceramic brussels / advisory board / team / press / images',
     'nav.sub.exhibitors': 'galleries / country focus / publishers / jury prize',
     'nav.sub.awards': 'about / laureates / awards / jury',
-    'nav.sub.programme': 'ceramic brussels x La Cambre / talks / awards',
+    'nav.sub.programme': 'ceramic brussels x La Cambre / talks / award ceremony',
     'nav.sub.artists': 'guest of honour / represented artists',
     'nav.sub.press': 'coverage / press kit / images',
     'nav.openMenu': 'Open menu',
@@ -285,6 +288,8 @@ const STRINGS = {
     'news.readMore': 'Lire la suite',
     'programme.empty': 'Le programme n’a pas encore été annoncé.',
     'programme.speakers': 'Avec',
+    'programme.exhibitorAwards': 'voir tous les prix des exposants',
+    'programme.artPrizeAwards': 'voir tous les prix de l’art prize',
     'partners.empty': 'Aucun partenaire publié pour le moment.',
     'press.empty': 'Aucune revue de presse publiée pour le moment.',
     'press.readArticle': 'Lire l’article',
@@ -309,6 +314,7 @@ const STRINGS = {
     'tabs.interview': 'entretien',
     'tabs.laureates': 'lauréats',
     'tabs.awards': 'prix',
+    'tabs.awardCeremony': 'cérémonie de remise des prix',
     'tabs.jury': 'jury',
     'tabs.laCambre': 'ceramic brussels x La Cambre',
     'tabs.talks': 'conférences',
@@ -428,7 +434,7 @@ const STRINGS = {
     'nav.sub.about': 'ceramic brussels / comité / équipe / presse / images',
     'nav.sub.exhibitors': 'galeries / focus pays / éditeurs / prix du jury',
     'nav.sub.awards': 'à propos / lauréats / prix / jury',
-    'nav.sub.programme': 'ceramic brussels x La Cambre / conférences / prix',
+    'nav.sub.programme': 'ceramic brussels x La Cambre / conférences / remise des prix',
     'nav.sub.artists': "invité d'honneur / artistes représentés",
     'nav.sub.press': 'articles / dossier de presse / images',
     'nav.openMenu': 'Ouvrir le menu',
@@ -536,6 +542,8 @@ const STRINGS = {
     'news.readMore': 'Lees meer',
     'programme.empty': 'Het programma is nog niet bekendgemaakt.',
     'programme.speakers': 'Met',
+    'programme.exhibitorAwards': 'alle exposantenprijzen bekijken',
+    'programme.artPrizeAwards': 'alle art prize-prijzen bekijken',
     'partners.empty': 'Nog geen partners gepubliceerd.',
     'press.empty': 'Nog geen persberichten gepubliceerd.',
     'press.readArticle': 'Lees artikel',
@@ -560,6 +568,7 @@ const STRINGS = {
     'tabs.interview': 'interview',
     'tabs.laureates': 'laureaten',
     'tabs.awards': 'prijzen',
+    'tabs.awardCeremony': 'prijsuitreiking',
     'tabs.jury': 'jury',
     'tabs.laCambre': 'ceramic brussels x La Cambre',
     'tabs.talks': 'talks',
@@ -679,7 +688,7 @@ const STRINGS = {
     'nav.sub.about': 'ceramic brussels / adviesraad / team / pers / beelden',
     'nav.sub.exhibitors': 'galeries / landenfocus / uitgevers / juryprijs',
     'nav.sub.awards': 'over / laureaten / prijzen / jury',
-    'nav.sub.programme': 'ceramic brussels x La Cambre / lezingen / prijzen',
+    'nav.sub.programme': 'ceramic brussels x La Cambre / lezingen / prijsuitreiking',
     'nav.sub.artists': 'eregast / vertegenwoordigde kunstenaars',
     'nav.sub.press': 'artikels / perskit / beelden',
     'nav.openMenu': 'Menu openen',
@@ -795,6 +804,27 @@ export function localePath(lang: LocaleId, path = ''): string {
  * preview Worker (UTC again) disagreed with a local build.
  */
 const TIME_ZONE = 'Europe/Brussels';
+
+/**
+ * A day with its weekday and year, "Thursday 21 January 2026" - the award
+ * ceremony's heading in the design. `formatDay` is the same without the
+ * year, and stays as it is for the talks accordion.
+ */
+export function formatDayLong(value: string | undefined, lang: LocaleId): string {
+  if (!value) return '';
+  const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
+  return new Intl.DateTimeFormat(locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: TIME_ZONE,
+  })
+    .format(new Date(value))
+    // en-GB writes "Thursday, 21 January"; the design has no comma, and
+    // neither fr-BE nor nl-BE puts one there.
+    .replace(/,/g, '');
+}
 
 export function formatDate(value: string | undefined, lang: LocaleId): string {
   if (!value) return '';

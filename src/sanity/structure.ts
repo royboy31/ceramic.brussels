@@ -244,19 +244,18 @@ export const structure: StructureResolver = async (S, context) => {
 
       folder('programme', 'Programme', [
         mainPage('programme', 'Programme page (La Cambre)'),
-        tabIntros('programme', 'la-cambre', 'Tab intros (talks)'),
+        tabIntros('programme', 'la-cambre', 'Tab intros (talks, award ceremony)'),
         list('events-talks', `Talks ${thisYear}`, 'programmeEvent', `${CURRENT} && section == "talks"`, {}, [
+          { field: 'startsAt', direction: 'asc' },
+        ]),
+        // The award ceremony tab folds a day's events into one block.
+        list('events-awards', `Award ceremony ${thisYear}`, 'programmeEvent', `${CURRENT} && section == "awards"`, {}, [
           { field: 'startsAt', direction: 'asc' },
         ]),
         list('events-project', `La Cambre ${thisYear}`, 'programmeEvent', `${CURRENT} && section == "project"`, {}, [
           { field: 'startsAt', direction: 'asc' },
         ]),
-        list(
-          'events-hidden',
-          'Not on the site (no date, or the Awards tab)',
-          'programmeEvent',
-          `${CURRENT} && (!defined(startsAt) || !(section in ["talks", "vip", "project"]))`,
-        ),
+        list('events-hidden', 'Not on the site (no date)', 'programmeEvent', `${CURRENT} && !defined(startsAt)`),
         byYear('events-past', 'Programme, past years', 'programmeEvent', 'true', [{ field: 'startsAt', direction: 'asc' }]),
       ]),
 
