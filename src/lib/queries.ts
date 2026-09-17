@@ -606,9 +606,11 @@ export function getArtists(lang: LocaleId) {
       ${ARTIST_CARD},
       // Every exhibitor that presented the artist, any year, with what the
       // list needs to pick the current edition's booth and solo-show badge
-      // (docs/backend-requests.md #1).
+      // (docs/backend-requests.md #1) and to drive the galleries list's
+      // filters - kind, country focus, and the id an award's winner is
+      // matched on (#4).
       "exhibitors": *[_type == "exhibitor" && references(^._id)]{
-        name, "slug": slug.current, booth, soloShow,
+        _id, name, "slug": slug.current, booth, soloShow, kind, inCountryFocus,
         "year": edition->year, "current": edition->isCurrent == true
       }
     }`,
@@ -712,7 +714,9 @@ export function getAwards(lang: LocaleId) {
         "year": edition->year, "current": edition->isCurrent == true,
         "images": images[] ${IMAGE}
       },
-      image ${IMAGE}
+      image ${IMAGE},
+      // The slideshow beside an award (#5): several photos; image stays as before.
+      "images": images[] ${IMAGE}
     }`,
     { lang },
   );
@@ -768,7 +772,10 @@ export function getNewsItem(lang: LocaleId, slug: string) {
 const PAGE = `{
   _id, _type, section, order,
   ${styled('title')},
-  "tabLabel": coalesce(${localised('tabLabel')}, ${localised('title')}),
+  // An editor's own pill label, in the page's language only (#6): with the
+  // usual fallbacks an English title overrode the translated tabs.* label on
+  // the French and Dutch pills. Absent, the pill reads STRINGS.
+  "tabLabel": tabLabel[$lang],
   ${styled('intro')},
   ${styled('body')},
   "sections": ${SECTIONS},

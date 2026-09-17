@@ -129,7 +129,9 @@ is already selected by `getProgramme`).
 
 ---
 
-## #4 · open · 2026-09-17 · filters on the artists list
+## #4 · done · 2026-09-17 · filters on the artists list
+
+**Done (Kamindu, 2026-09-17):** `getArtists` → `exhibitors[]` now carries `_id`, `kind` and `inCountryFocus` next to the fields of #1.
 
 **Page / component:** `src/pages/[lang]/artists/index.astro`, above the letter lists
 **Figma frame:** `ceramics-layouts/ceramic brussels — exhibitors — artists.png`
@@ -140,7 +142,9 @@ is already selected by `getProgramme`).
 
 ---
 
-## #5 · open · 2026-09-17 · several pictures per award
+## #5 · done · 2026-09-17 · several pictures per award
+
+**Done (Kamindu, 2026-09-17):** `award.images[]` (figures, "Slideshow" in the Studio), selected as `images` in `getAwards` beside the unchanged `image`. No migration: `image` keeps working, and a page can read `images` when it has any, else `[image]`.
 
 **Page / component:** `src/pages/[lang]/exhibitors/awards.astro` (and the art prize awards tab, which reads the same `award`)
 **Figma frame:** `ceramics-layouts/ceramic brussels — exhibitors — awards.png`
@@ -151,7 +155,9 @@ is already selected by `getProgramme`).
 
 ---
 
-## #6 · open · 2026-09-17 · tab labels in French and Dutch
+## #6 · done · 2026-09-17 · tab labels in French and Dutch
+
+**Done (Kamindu, 2026-09-17):** `PAGE` → `"tabLabel": tabLabel[$lang]` - an editor's own label in the page's language, or nothing; no title fallback, no English fallback. The pill reads `t(hubTab.label)` when it is absent, so HubNav's "equal to the title" guess can go.
 
 **Page / component:** `src/components/HubNav.astro`, every hub's pills
 **Figma frame:** all hub frames; seen on `/fr/programme` where the talks pill reads "talks" instead of "conférences"
@@ -162,7 +168,9 @@ is already selected by `getProgramme`).
 
 ---
 
-## #7 · open · 2026-09-17 · the about hub's three tabs
+## #7 · done · 2026-09-17 · the about hub's three tabs
+
+**Done (Kamindu, 2026-09-17):** confirmed as changed on `lilanga`. The decisions: the team tab keeps its `team` address (the page document, `previewPaths.ts` and the `founders`/`team` redirects use it, and `/[lang]/contact` is a separate page); press and images stay built without a pill, so their redirects keep a target and the content stays reachable by address; the published menu lists no press or images link under about, so nothing to re-point. `nav.sub.about` and the Studio's "Tab intros" entry now read the three tabs.
 
 **Page / component:** `src/lib/hubs.ts`, `HUBS.about` (changed on `lilanga` at Lilanga's request - please confirm or redo)
 **Figma frame:** `ceramics-layouts/ceramic brussels —about — ceramic brussels.png`, `-1.png`, `-2.png`

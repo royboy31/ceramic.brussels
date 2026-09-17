@@ -298,7 +298,7 @@ export const structure: StructureResolver = async (S, context) => {
 
       folder('about', 'About', [
         mainPage('about', 'About page (the fair)'),
-        tabIntros('about', 'the-fair', 'Tab intros (advisory board, team, press, images)'),
+        tabIntros('about', 'the-fair', 'Tab intros (advisory board, contact; press and images are built without a pill)'),
         list('people-board', 'Advisory board', 'person', `"advisory-board" in groups && ${PEOPLE_NOW}`, {}, byOrder),
         list('people-team', 'Team and collaborators', 'person', `("team" in groups || "collaborator" in groups) && ${PEOPLE_NOW}`, {}, byOrder),
         list('press', 'Press clippings', 'pressClip', 'true', {}, [{ field: 'publishedAt', direction: 'desc' }]),
