@@ -51,3 +51,65 @@ Status: `open` → `done` | `declined` (with a reason).
 **Asked for:** a category per question (e.g. `faq[].category`, a short list of options, localised label), selected in the `faq[]` projection - or `faq` as groups `{ title, items[] }` if editors should name and order the categories themselves.
 
 ---
+
+## #3 · open · 2026-09-16 · the programme's award ceremony as a real tab
+
+**Page / component:** `src/components/hubs/Programme.astro`, award ceremony tab (`/en/programme/awards`)
+**Figma frame:** client mock-up `screenshot/ceramic brussels — programme — award ceremony.png`
+**The design shows:** a fourth programme pill reading **"award ceremony"**, active
+(yellow), with a page of its own: the tab's lead paragraph, then two columns -
+a slideshow at the left, and at the right the ceremony's day heading
+("Thursday 21 January 2026"), each event as "{ award ceremony }" + a boxed
+hall chip + the time over a rule, its title, its description, the
+"EN / with …" line, and two pills, "see all exhibitors awards →" and
+"see all art prize awards →".
+
+**The code says today:** `src/lib/hubs.ts` makes this tab a *link* tab —
+`{ slug: 'awards', label: 'tabs.awards', link: { route: 'art-prize', tab: 'awards' } }`
+— so `hubRouteParams` skips it (`.filter((tab) => !tab.link)`), no route is
+built, and `HubNav` can never mark it active, which is why the pill never goes
+yellow. `programmeEvent.section` already offers `awards`, and
+`src/sanity/schemaTypes/documents/programmeEvent.ts` says so explicitly:
+*"Awards events are not shown anywhere: that pill leads to the art prize
+awards."* Three published events carry `section == "awards"`
+(`event-2027-best-gallery-booth-2026-4`, `-best-solo-show-2026-5`,
+`-ceramic-brussels-art-prize-6`), all `kind: "ceremony"`, all on 2026-01-22,
+with descriptions — they render nowhere today.
+
+**Rendered meanwhile:** nothing — without the route the tab cannot be reached.
+The layout, its CSS and its strings are built and working; they are dead code
+until the line below changes.
+
+**Asked for:** in `src/lib/hubs.ts`, the programme hub's `awards` tab, one line:
+
+```ts
+// from
+{ slug: 'awards', label: 'tabs.awards', link: { route: 'art-prize', tab: 'awards' } },
+// to
+{ slug: 'awards', label: 'tabs.awardCeremony' },
+```
+
+`tabs.awardCeremony` is already in STRINGS in all three locales ("award
+ceremony" / "cérémonie de remise des prix" / "prijsuitreiking"). It is a new
+key on purpose: `tabs.awards` is shared with the art prize's own awards tab,
+which keeps reading "awards" / "prix" / "prijzen".
+
+Two decisions that are yours, both in that file:
+
+1. **A translated `segment`?** Left off, so the URLs are `/fr/programme/awards`
+   and `/nl/programma/awards`. The old site has no award ceremony page to
+   preserve, so nothing is lost either way, but `ceremonie-de-remise-des-prix`
+   / `prijsuitreiking` would match how the other tabs read.
+2. **Does the art prize's awards tab still want a pill here?** The design
+   replaces the link pill with this tab, and the "see all art prize awards →"
+   pill inside the page now carries that link instead.
+
+**Also needed, but content not code:** a `page` document with `section:
+"programme"` and `slug.en: "awards"` for the tab's lead paragraph and the
+slideshow's pictures (`images`). Only `la-cambre`, `talks` and `vip` exist, so
+the lead is absent and the slideshow falls back to the `fair` placeholder pool.
+No awards event carries a `location`, so the design's "HALL C" chip is hidden
+(marked in the markup at the chip — content, not schema: `location`
+is already selected by `getProgramme`).
+
+---

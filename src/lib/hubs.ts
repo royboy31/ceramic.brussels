@@ -107,7 +107,7 @@ export const HUBS: Record<string, Hub> = {
     tabs: [
       { slug: 'la-cambre', label: 'tabs.laCambre' },
       { slug: 'talks', segment: { fr: 'conferences' }, label: 'tabs.talks' },
-      { slug: 'awards', label: 'tabs.awards', link: { route: 'art-prize', tab: 'awards' } },
+      { slug: 'awards', label: 'tabs.awardCeremony' },
       { slug: 'vip', label: 'tabs.vip' },
     ],
   },
