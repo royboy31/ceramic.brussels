@@ -78,12 +78,20 @@ const credit = video?.poster?.credit;
     margin: 30px var(--gutter);
     display: grid;
   }
+  /* Picture 887px and copy 423px at the 1440 frame. */
   .feature--video {
+    grid-template-columns: minmax(0, 887fr) minmax(310px, 423fr);
     align-items: start;
     margin-top: 80px;
   }
   .video-frame :global(.film) {
     margin: 0;
+  }
+  /* The homepage frame's picture is 887x574, not the full-width embed's
+     height; only this row, the hub video block keeps its own. */
+  .video-frame :global(.frame) {
+    height: auto;
+    aspect-ratio: 887 / 574;
   }
   .video-frame small {
     margin-top: 7px;
@@ -92,9 +100,11 @@ const credit = video?.poster?.credit;
   .feature__copy {
     padding-top: 4px;
   }
+  /* The same size and tracking as the feature rows' kickers. */
   .kicker {
-    font-size: 34px;
-    line-height: 1.05;
+    font-size: 36px;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
     text-transform: uppercase;
   }
   /* Drawn underline that runs out right and back in from the left on hover (client feedback, 2026-09-15). */
@@ -151,6 +161,10 @@ const credit = video?.poster?.credit;
       flex-direction: column;
       margin: 15px var(--gutter) 40px;
       display: flex;
+    }
+    /* Stretched: the frame has no width of its own to shrink to. */
+    .feature--video {
+      align-items: stretch;
     }
     .feature--video .feature__copy {
       order: -1;

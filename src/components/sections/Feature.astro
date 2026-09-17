@@ -99,8 +99,10 @@ const image = section.image?.asset ? section.image : null;
     margin: 30px var(--gutter);
     display: grid;
   }
+  /* Copy and picture in two equal halves, 40px apart, both ways round
+     (homepage frame: a 655px picture either side). */
   .split.feature {
-    grid-template-columns: minmax(310px, 1fr) minmax(0, 1.7fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
     margin-top: 44px;
   }
@@ -117,8 +119,8 @@ const image = section.image?.asset ? section.image : null;
   /* The design writes its kickers in capitals ("ART PRIZE", "GUEST OF HONOUR"). */
   /* Tighter capitals (client feedback, 2026-09-16, homepage reference image). */
   .kicker {
-    font-size: 32px;
-    line-height: 1.05;
+    font-size: 36px;
+    line-height: 1.15;
     letter-spacing: -0.03em;
     text-transform: uppercase;
   }
@@ -126,9 +128,9 @@ const image = section.image?.asset ? section.image : null;
     letter-spacing: -0.04em;
     max-width: 590px;
     margin-top: 18px;
-    font-size: 40px;
+    font-size: 42px;
     font-weight: 400;
-    line-height: 1.03;
+    line-height: 1.2;
   }
   /* Drawn underline that runs out right and back in from the left on hover (client feedback, 2026-09-15). */
   .arrow-link {
@@ -175,8 +177,6 @@ const image = section.image?.asset ? section.image : null;
     transform: translate(10px);
   }
   .split.feature--guest {
-    grid-template-columns: 1fr 1fr;
-    gap: 44px;
     margin-top: 82px;
   }
   @media (width<=900px) {

@@ -17,9 +17,9 @@ import { styleAttrs } from '../../lib/textStyle';
  * About hub, as the design's about pages draw it. The fair: the large
  * intro, the hero figure beside the first text section, the other sections
  * two a row, the closing strip of photos. Advisory board: the intro and
- * the two-column people grid. Team (2026-09-14 build): the intro, the
- * directors with portrait and biography, then the team and the
- * collaborators as grids of small cards. Press and images have no design
+ * the two-column people grid. Team (the design's "contact" page): the
+ * intro, the directors as people cards with e-mail and phone, then the
+ * team as smaller cards in the same grid. Press and images have no design
  * page and follow the same patterns. Markup and rules are Lilanga's build
  * of the frames.
  */
@@ -34,25 +34,17 @@ const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
 
 const board = tab === 'advisory-board' ? await getPeople(lang, 'advisory-board') : [];
 const team = tab === 'team' ? await getPeople(lang, 'team') : [];
-const collaborators = tab === 'team' ? await getPeople(lang, 'collaborator') : [];
 /**
- * The team page (2026-09-14 build) opens with the two directors, portrait
- * beside biography, then the rest of the team as a grid of small cards.
+ * The team page, drawn as the design's "contact" page: the directors as
+ * advisory-board cards with their e-mail and phone, then the rest of the
+ * team two a row, name, role, e-mail and phone beside the portrait. The
+ * design has no collaborators list, so that group is not shown here.
  * Who is a director is read from the role ("co-director", "directrice"…),
  * the one thing the person record says about it.
  */
 const directors = team.filter((p: any) => /direct/i.test(p.role ?? ''));
 const staff = team.filter((p: any) => !directors.includes(p));
-/** "GP" - the initials standing in for a missing portrait, as the design draws them. */
-const initials = (name: string) =>
-  String(name ?? '')
-    .split(/\s+/)
-    .map((w) => w.charAt(0))
-    .join('')
-    .slice(0, 3)
-    .toUpperCase();
-
-const [clips, settings] = tab === 'press' ? await Promise.all([getPressClips(), getSettings(lang)]) : [[], null];
+const [clips, settings] = await Promise.all([tab === 'press' ? getPressClips() : [], getSettings(lang)]);
 // Newest first, grouped by year, which is how a press list is actually read.
 const years = [...new Set(clips.map((c: any) => c.publishedAt?.slice(0, 4)))]
   .filter(Boolean)
@@ -74,6 +66,15 @@ for (const section of rest) {
   else runs.push({ text, items: [section] });
 }
 const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
+// Base appends the site name to every title. The first tab is the hub itself
+// and is labelled with the site name, and an SEO title an editor ended with
+// it would carry it twice ("About — ceramic brussels — ceramic brussels").
+const isHubRoot = HUBS.about.tabs[0]?.slug === tab;
+const siteName = settings?.siteName ?? 'ceramic brussels';
+const seoTitle = page?.seo?.title;
+const ownTitle = seoTitle?.toLowerCase().endsWith(` — ${siteName}`.toLowerCase())
+  ? seoTitle.slice(0, -` — ${siteName}`.length)
+  : seoTitle;
 const path = hubTabPath('about', tab, lang);
 const altPaths = hubAltPaths('about', tab);
 const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-page', press: 'press', images: 'images' }[tab] ?? '';
@@ -83,7 +84,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
 
 <Base
   lang={lang}
-  title={page?.seo?.title ?? `${t('nav.about')} — ${tabLabel}`}
+  title={ownTitle || (isHubRoot ? t('nav.about') : `${t('nav.about')} — ${tabLabel}`)}
   description={page?.seo?.description ?? page?.intro}
   noIndex={page?.seo?.noIndex}
   image={page?.seo?.ogImage ?? page?.cover}
@@ -164,81 +165,26 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
     {/* ------------------------------------------------------------- team */}
     {
       tab === 'team' && directors.length > 0 && (
-        <section class="directors">
+        <div class="people directors">
           {directors.map((p: any) => (
-            <article>
-              <div class="team-portrait">
-                {p.portrait?.asset ? (
-                  <SanityImage image={p.portrait} aspect={4 / 5} widths={[210, 420, 630]} sizes="210px" />
-                ) : (
-                  <span aria-hidden="true">{initials(p.name)}</span>
-                )}
-              </div>
-              <div>
-                <h2>{p.name}</h2>
-                {p.role && (
-                  <p class="role" {...styleAttrs(p.roleStyle)}>
-                    {p.role}
-                  </p>
-                )}
-                {p.bio && <PortableText value={p.bio} fieldStyle={p.bioStyle} />}
-              </div>
-            </article>
+            <PersonCard lang={lang} person={p} variant="contact" />
           ))}
-        </section>
+        </div>
       )
     }
     {
       tab === 'team' && staff.length > 0 && (
         <>
           <h2 class="team-title">{t('tabs.team').toLowerCase()}</h2>
-          <section class="team-grid">
+          <div class="people team-grid">
             {staff.map((p: any) => (
-              <article>
-                <div class="team-portrait team-portrait--small">
-                  {p.portrait?.asset ? (
-                    <SanityImage image={p.portrait} aspect={1.15} widths={[440, 660, 880]} sizes="(max-width: 640px) 100vw, 33vw" />
-                  ) : (
-                    <span aria-hidden="true">{initials(p.name)}</span>
-                  )}
-                </div>
-                <h3>{p.name}</h3>
-                {p.role && <p {...styleAttrs(p.roleStyle)}>{p.role}</p>}
-                {p.email && <a href={`mailto:${p.email}`}>{p.email} ↗</a>}
-              </article>
+              <PersonCard lang={lang} person={p} variant="team" />
             ))}
-          </section>
+          </div>
         </>
       )
     }
-    {
-      tab === 'team' && collaborators.length > 0 && (
-        <>
-          <h2 class="team-title">{t('about.collaborators')}</h2>
-          <section class="team-grid">
-            {collaborators.map((p: any) => (
-              <article>
-                <div class="team-portrait team-portrait--small">
-                  {p.portrait?.asset ? (
-                    <SanityImage image={p.portrait} aspect={1.15} widths={[440, 660, 880]} sizes="(max-width: 640px) 100vw, 33vw" />
-                  ) : (
-                    <span aria-hidden="true">{initials(p.name)}</span>
-                  )}
-                </div>
-                <h3>{p.name}</h3>
-                {p.role && <p {...styleAttrs(p.roleStyle)}>{p.role}</p>}
-                {p.website && (
-                  <a href={p.website} target="_blank" rel="noopener noreferrer">
-                    {t('common.website')} ↗
-                  </a>
-                )}
-              </article>
-            ))}
-          </section>
-        </>
-      )
-    }
-    {tab === 'team' && team.length === 0 && collaborators.length === 0 && <p class="empty">{t('about.peopleEmpty')}</p>}
+    {tab === 'team' && team.length === 0 && <p class="empty">{t('about.peopleEmpty')}</p>}
 
     {/* ------------------------------------------------------------- press */}
     {
@@ -485,121 +431,37 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
     }
   }
 
-  /* From the design's team page (about/team/index.html, 2026-09-14 build). */
+  /* From the design's contact page (the team tab). */
   .team-page {
     padding: 10px var(--gutter) 110px;
   }
   .team-page > .intro-large {
-    max-width: 980px;
-    line-height: 1.1;
+    max-width: 1160px;
   }
-  .directors {
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    margin-top: 64px;
-    display: grid;
+  .team-page > .intro-large + .directors {
+    margin-top: 50px;
   }
-  .directors article {
-    border-top: 1px solid;
-    grid-template-columns: 210px 1fr;
-    gap: 25px;
-    padding-top: 12px;
-    display: grid;
-  }
-  .team-portrait {
-    aspect-ratio: 4 / 5;
-    letter-spacing: -0.05em;
-    background: linear-gradient(145deg, var(--color-acid), #fff);
-    place-items: center;
-    width: 210px;
-    font-size: 54px;
-    display: grid;
-    position: relative;
-    overflow: hidden;
-  }
-  /* Laid over the box rather than sized by it, so the picture can never
-     stretch the 4:5 frame to its own height. */
-  .team-portrait :global(img) {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .directors h2,
   .team-title {
     letter-spacing: -0.04em;
-    font-size: 38px;
+    border-bottom: 2px solid;
+    margin-top: 60px;
+    font-size: 36px;
     font-weight: 600;
-    line-height: 1;
+    line-height: 1.2;
   }
-  .role {
-    text-transform: uppercase;
-    margin: 8px 0 22px;
-  }
-  .directors article > div:last-child :global(.rich-text) {
-    font-size: 20px;
-    line-height: 1.28;
-  }
-  .directors article > div:last-child :global(p + p) {
-    margin-top: 1em;
-  }
-  .team-title {
-    border-top: 1px solid;
-    margin-top: 80px;
-    padding-top: 12px;
-  }
-  .team-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 40px;
-    margin-top: 30px;
-    display: grid;
-  }
-  .team-portrait--small {
-    aspect-ratio: 1.15;
-    width: 100%;
-    font-size: 44px;
-  }
-  .team-grid h3 {
-    margin-top: 12px;
-    font-size: 28px;
-    font-weight: 400;
-    line-height: 1;
-  }
-  .team-grid p {
-    margin-top: 5px;
-    font-size: 20px;
-  }
-  .team-grid a {
-    margin-top: 18px;
-    font-size: 17px;
-    text-decoration: underline;
-    display: inline-block;
+  .people.team-grid {
+    gap: 45px 40px;
+    margin-top: 24px;
   }
   .team-page .empty {
     margin-top: 40px;
-  }
-  @media (width<=900px) {
-    .directors {
-      grid-template-columns: 1fr;
-    }
-    .team-grid {
-      grid-template-columns: 1fr 1fr;
-    }
   }
   @media (width<=640px) {
     .team-page > .intro-large {
       font-size: 30px;
     }
-    .directors article {
-      grid-template-columns: 1fr;
-    }
-    .team-portrait {
-      aspect-ratio: 1.2;
-      width: 100%;
-    }
-    .team-grid {
-      grid-template-columns: 1fr;
+    .team-title {
+      font-size: 28px;
     }
   }
 

@@ -255,7 +255,16 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   .menu-row.no-links:not(:last-child) :global(.menu-heading) {
     min-height: var(--strip);
   }
-    /* Nothing above the first row to ride over: it only grows. */
+  /* A row without sub-links has nothing to show: it neither grows nor rides
+     up over the row above (it used to cover that row's title on hover). */
+  .menu-row.no-links.expanded:not(:last-child) {
+    height: var(--strip);
+  }
+  .menu-row.no-links.expanded .menu-sheet {
+    translate: 0;
+    box-shadow: none;
+  }
+  /* Nothing above the first row to ride over: it only grows. */
   .menu-row:first-child.expanded {
     height: var(--full, auto);
   }

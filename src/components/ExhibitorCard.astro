@@ -7,7 +7,7 @@ import { exhibitorPath } from '../lib/links';
 /**
  * A card in the exhibitor grid, as the design's exhibitors/index.html draws
  * it (2026-09-14 build): the picture in a 3:2 frame with the round black
- * "solo show" badge and the outlined "focus …" badge, then the name with
+ * "solo show" badge and the two-line "focus …" words, then the name with
  * the country code as a superscript. `data-*` attributes carry what the
  * client-side filters need: the initial, the tags, the country.
  */
@@ -80,12 +80,11 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
       }
       {
         ex.inCountryFocus && (
-          <span class="badge badge--outline">
-            {twoLines(focusLabel).map((l, i) => (
-              <>
-                {i > 0 && <br />}
-                {l}
-              </>
+          <span class:list={['focus', { 'focus--beside': ex.soloShow || ex.kind === 'jury-prize' }]}>
+            {/* The frame adds the focus country's outline map after the words;
+                there is no source for it yet (DESIGN-DIFF-PLAN §0.7). */}
+            {twoLines(focusLabel).map((l) => (
+              <span>{l}</span>
             ))}
           </span>
         )
@@ -98,7 +97,8 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
 </article>
 
 <style>
-  /* From the design's exhibitors/index.html (2026-09-14 build). */
+  /* From the design's exhibitors/index.html (2026-09-14 build), sizes
+     checked against the Figma galleries frame (2026-09-17). */
   .gallery-image {
     aspect-ratio: 1.5;
     background: #eee;
@@ -116,10 +116,10 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
   }
   h2 {
     letter-spacing: -0.045em;
-    margin-top: 8px;
-    font-size: 36px;
+    margin-top: 16px;
+    font-size: 40px;
     font-weight: 400;
-    line-height: 0.95;
+    line-height: 1.03;
   }
   /* Bigger, and hung from the top of the capitals rather than raised off
      the baseline (client feedback, 2026-09-16). */
@@ -131,14 +131,16 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
     position: relative;
     top: 0.01em;
   }
+  /* The round "solo show" badge: the words nearly fill the circle. */
   .badge {
     text-align: center;
     border-radius: 50%;
     place-items: center;
-    width: 62px;
-    height: 62px;
-    font-size: 13px;
-    line-height: 0.9;
+    width: 60px;
+    height: 60px;
+    font-size: 19px;
+    line-height: 0.85;
+    letter-spacing: -0.03em;
     display: grid;
     position: absolute;
     top: 12px;
@@ -148,10 +150,24 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
     color: #fff;
     background: #000;
   }
-  .badge--outline {
-    background: #fff;
-    border: 1px solid;
-    right: 82px;
+  /* The country focus is words only, no circle: the first line to the left,
+     the second stepped in to the right. Beside a badge it moves left of it. */
+  .focus {
+    display: grid;
+    position: absolute;
+    top: 12px;
+    right: 22px;
+    font-size: 22px;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+  }
+  .focus > :last-child {
+    justify-self: end;
+    padding-left: 0.9em;
+  }
+  .focus--beside {
+    top: 18px;
+    right: 90px;
   }
   @media (width<=900px) {
     h2 {
