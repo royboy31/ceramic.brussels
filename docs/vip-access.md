@@ -172,18 +172,20 @@ longer to be deleted.
 
 ## Status, 2026-09-17
 
-Built on kamindu: the hub, the five tabs (a first working build, markup for
-Lilanga), the gate, the three routes, the session store, the migration
-(applied: the old tables are gone), the import script, robots. The KV
-namespace exists (`5155f6c4aed24d8f82341a81f96cb005`), the hotel code is
-set, one test guest is in. Still to do by hand, in Roy's Cloudflare account:
+On main (4dd26f7) and verified end to end on production: the hub, the five
+tabs (a first working build, markup for Lilanga), the gate, the three
+routes, the session store, the migration (applied: the old tables are
+gone), the import script, robots. The KV namespace exists
+(`5155f6c4aed24d8f82341a81f96cb005`), the `VIP_CODE_PEPPER` secret is set
+for production and preview, the hotel code is set, one test guest is in
+and has entered: a code opened a session, the three locked tabs answered,
+a wrong code was refused, leaving locked them again. Still to do:
 
-- `wrangler pages secret put VIP_CODE_PEPPER --project-name ceramic-brussels`
-  for production and again with `--environment preview`, with the value of
-  `VIP_CODE_PEPPER` in Kamindu's `.env`. Until then entering a code answers
-  "not recognised".
-- The Workers Paid plan before the mailing; a rate limiting rule on
-  `/api/vip/enter/`.
+- Roy: the Workers Paid plan before the mailing; a rate limiting rule on
+  `/api/vip/enter/`; the Brevo key for the request form.
+- Lilanga: the pages to the Figma frames (his branch is behind main).
+- Editors: the tabs' text and the VIP events in the Studio.
+- The team's spreadsheet through `npm run vip -- --import`.
 
 ## Order of work
 
