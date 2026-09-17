@@ -64,6 +64,11 @@ export interface HubTab {
    * generated for a link tab and it is never the active one.
    */
   link?: { route: string; tab?: string };
+  /**
+   * Built and reachable, but no pill: a tab the design no longer shows whose
+   * address must keep working (the old site's URLs redirect onto it).
+   */
+  hidden?: boolean;
 }
 
 export interface Hub {
@@ -145,10 +150,13 @@ export const HUBS: Record<string, Hub> = {
       // The old site's French, superseded by the "comité consultatif" label
       // but still the address people have; its Dutch was never translated.
       { slug: 'advisory-board', segment: { fr: 'comite-strategique', nl: 'adviesraad' }, label: 'tabs.advisoryBoard' },
-      { slug: 'team', segment: { fr: 'equipe' }, label: 'tabs.team' },
-      { slug: 'partners', label: 'tabs.partners', link: { route: 'partners' } },
-      { slug: 'press', segment: { fr: 'presse', nl: 'pers' }, label: 'tabs.press' },
-      { slug: 'images', segment: { nl: 'beelden' }, label: 'tabs.images' },
+      // The design's "contact" tab (Figma about frames, 2026-09-17): the
+      // directors and the team. Slug and address stay `team`, which the page
+      // document and the old site's redirects use.
+      { slug: 'team', segment: { fr: 'equipe' }, label: 'tabs.contact' },
+      // Not in the design's three tabs; still built for the redirects onto them.
+      { slug: 'press', segment: { fr: 'presse', nl: 'pers' }, label: 'tabs.press', hidden: true },
+      { slug: 'images', segment: { nl: 'beelden' }, label: 'tabs.images', hidden: true },
     ],
   },
 };

@@ -14,10 +14,9 @@ import { useTranslations, localePath } from '../lib/i18n';
  * filters the list by initial (a `#A` in the address pre-selects a letter,
  * and clicking the chosen letter again clears it), and links back to the
  * list on a detail page, where the exhibitor's own initial is marked and
- * links to the whole list. A boxed ALL comes first and shows the whole list
- * again, as in the Figma exhibitors frames (back since 2026-09-17, after the
- * 2026-09-16 feedback had removed it); clicking the chosen letter again still
- * clears it too.
+ * links to the whole list. There is no ALL button (client feedback,
+ * 2026-09-16, confirmed 2026-09-17): deselecting the letter is how you get
+ * back.
  */
 interface Props {
   lang: LocaleId;
@@ -74,16 +73,6 @@ const mark = activeLetter.toUpperCase();
   /* The letters sit under the band, outside it, so only the band stays pinned. */
   alphabet && (
       <nav class="alphabet" aria-label={t('exhibitors.byLetter')} data-alphabet>
-        {letterHref ? (
-          <a class="all" href={localePath(lang, letterHref)}>
-            {t('exhibitors.all')}
-          </a>
-        ) : (
-          /* data-letter="" is "no letter": the listing scripts treat it like any letter. */
-          <button type="button" class="all" data-letter="" aria-pressed="true">
-            {t('exhibitors.all')}
-          </button>
-        )}
         {LETTERS.map((letter, i) => [
           /* A real separator between the letters, so a wide letter pushes it along. */
           i > 0 && (
@@ -167,8 +156,7 @@ const mark = activeLetter.toUpperCase();
     color: #050505;
     background: var(--color-acid);
   }
-  /* ALL at the left, the letters spread over the rest of the row to the
-     right edge (Figma exhibitors frames); hover and the chosen letter are
+  /* The letters spread over the whole row, gutter to gutter; hover and the chosen letter are
      Black and underlined (client feedback, 2026-09-16). Each letter is as wide as its
      Black cut (the hidden ::after), so the heavier weight does not push its
      neighbours; the dashes between them are real text, so a wide letter
@@ -191,25 +179,6 @@ const mark = activeLetter.toUpperCase();
     text-transform: lowercase;
     text-underline-offset: 0.14em;
     text-decoration-thickness: 2px;
-  }
-  .alphabet > .all {
-    text-transform: uppercase;
-    border: 1px solid;
-    margin-right: 30px;
-    padding: 10px 14px;
-    font-size: 24px;
-    font-weight: 600;
-    transition: background-color 0.18s;
-  }
-  .alphabet > .all::after {
-    content: none;
-  }
-  .alphabet > .all:is(.active, :hover, :focus-visible) {
-    font-weight: 600;
-    text-decoration-line: none;
-  }
-  .alphabet > .all:is(:hover, :focus-visible) {
-    background: var(--color-acid);
   }
   .alphabet > :is(a, button)::after {
     content: attr(data-glyph);
@@ -256,11 +225,6 @@ const mark = activeLetter.toUpperCase();
     }
     .alphabet {
       font-size: 26px;
-    }
-    .alphabet > .all {
-      margin-right: 16px;
-      padding: 6px 10px;
-      font-size: 18px;
     }
   }
   @media (width<=640px) {

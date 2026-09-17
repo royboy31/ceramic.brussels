@@ -117,7 +117,7 @@ const fallbackNav = [
     label: t(hub.title),
     href: localePath(lang, hub.route),
     external: false,
-    sub: hub.tabs.map((tab) => t(tab.label)).join(' / '),
+    sub: hub.tabs.filter((tab) => !tab.hidden).map((tab) => t(tab.label)).join(' / '),
     children: [],
   })),
   ...navPages.map((p: any) => ({ label: p.label, href: localePath(lang, p.slug), external: false, children: [] })),
