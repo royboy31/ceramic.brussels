@@ -60,7 +60,7 @@ async function tooManyFailures(request: Request, count: boolean): Promise<boolea
   return false;
 }
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
   const wantsJson = (request.headers.get('accept') ?? '').includes('application/json');
   const body = await readBody(request);
   const lang = (LOCALE_IDS as string[]).includes(body.lang) ? (body.lang as LocaleId) : DEFAULT_LOCALE;
@@ -73,7 +73,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const origin = request.headers.get('origin');
   if (origin && new URL(origin).host !== new URL(request.url).host) return json(403, { ok: false, error: 'origin' });
 
-  const env = vipEnv(locals);
+  const env = await vipEnv();
   const pepper = codePepper();
   if (!env || !pepper) {
     console.error('[vip] enter: VIP_DB, VIP_SESSIONS or VIP_CODE_PEPPER is missing on this deployment');

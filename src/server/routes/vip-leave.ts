@@ -8,10 +8,10 @@ import { clearVipCookie, deleteVipSession } from '../vipSession';
 /** POST /api/vip/leave - ends the VIP session and returns to the VIP page. */
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
   const data = await request.formData().catch(() => null);
   const lang = (LOCALE_IDS as string[]).includes(String(data?.get('lang'))) ? (String(data?.get('lang')) as LocaleId) : DEFAULT_LOCALE;
-  const env = vipEnv(locals);
+  const env = await vipEnv();
   if (env) await deleteVipSession(env.VIP_SESSIONS, request).catch(() => undefined);
   return new Response(null, {
     status: 303,

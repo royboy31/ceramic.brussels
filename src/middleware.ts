@@ -45,8 +45,8 @@ type Ctx = Parameters<Parameters<typeof defineMiddleware>[0]>[0];
  * cached and never indexed, whichever way the gate went.
  */
 async function vipGate(context: Ctx, next: Next, locked: { lang: LocaleId; tab: string }): Promise<Response> {
-  const { request, url, locals } = context;
-  const env = vipEnv(locals);
+  const { request, url } = context;
+  const env = await vipEnv();
   if (!env) return next();
 
   // Pages serves every address in its slash form; the on-demand route insists on it too.

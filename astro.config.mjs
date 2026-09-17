@@ -154,5 +154,14 @@ export default defineConfig({
         ].map((n) => `@sanity/icons/${n}`),
       ],
     },
+    // `cloudflare:workers` only exists inside the Cloudflare build. The plain
+    // build never executes the module that imports it (src/server/cfEnv.ts),
+    // but Rollup still has to be told not to look for it.
+    ...(previewRuntime
+      ? {}
+      : {
+          build: { rollupOptions: { external: ['cloudflare:workers'] } },
+          ssr: { external: ['cloudflare:workers'] },
+        }),
   },
 });

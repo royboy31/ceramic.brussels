@@ -38,9 +38,16 @@ export interface VipEnv {
   VIP_SESSIONS: KVLike;
 }
 
-/** The bindings, when this runs on the Worker; null under `astro dev`, which has neither. */
-export function vipEnv(locals: App.Locals): VipEnv | null {
-  const env = locals.runtime?.env as Partial<VipEnv> | undefined;
+/**
+ * The bindings, when this runs on the Worker; null under `astro dev` and
+ * on a build without the runtime, which have neither. Reached through
+ * `cloudflare:workers` (cfEnv.ts, loaded lazily behind the build flag): the
+ * Astro 7 adapter no longer puts them on `Astro.locals.runtime.env`.
+ */
+export async function vipEnv(): Promise<VipEnv | null> {
+  if (import.meta.env.PREVIEW_RUNTIME !== '1') return null;
+  const mod = await import('./cfEnv').catch(() => null);
+  const env = mod?.env as Partial<VipEnv> | undefined;
   return env?.VIP_DB && env?.VIP_SESSIONS ? (env as VipEnv) : null;
 }
 

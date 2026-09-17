@@ -50,7 +50,7 @@ const tabLabel = page?.tabLabel ?? t(hubTab.label);
 // The hotel's code, from the settings table the Worker can read: an editor
 // writes `{code}` where it goes. Nothing to fill under `astro dev`.
 if (tab === 'hotel-deal' && page) {
-  const env = vipEnv(Astro.locals);
+  const env = await vipEnv();
   const code = env ? await vipSetting(env.VIP_DB, 'hotel_code').catch(() => null) : null;
   if (code) page = JSON.parse(JSON.stringify(page).split('{code}').join(code.replace(/[\\"]/g, '')));
 }
