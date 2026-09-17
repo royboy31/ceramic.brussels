@@ -1,5 +1,5 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
-import { EVENT_KINDS, PROGRAMME_SECTIONS } from '../../../lib/options';
+import { EVENT_KINDS, EVENT_VENUES, PROGRAMME_SECTIONS } from '../../../lib/options';
 
 /**
  * One entry in the programme: a talk, a roundtable, the award ceremony, a
@@ -40,8 +40,17 @@ export const programmeEvent = defineType({
       options: { list: [...PROGRAMME_SECTIONS], layout: 'radio' },
       initialValue: 'talks',
       description:
-        'The tab that lists it, for the current edition. "Awards" events are not shown anywhere: that pill leads to the art prize awards.',
+        'The tab that lists it, for the current edition. "VIP programme" is the VIP hub’s locked tab, shown to visitors with a code. "Awards" events are not shown anywhere: that pill leads to the art prize awards.',
       validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'venue',
+      title: 'On-site or off-site',
+      type: 'string',
+      options: { list: [...EVENT_VENUES], layout: 'radio' },
+      initialValue: 'off-site',
+      description: 'The VIP programme tab filters its events on this.',
+      hidden: ({ document }) => document?.section !== 'vip',
     }),
     defineField({
       name: 'startsAt',
@@ -92,7 +101,14 @@ export const programmeEvent = defineType({
         'As displayed: "with Christine Germain-Donnat (French Ministry of Culture), Bertrand Mazeirat (Musée Ariana, CH)…"',
     }),
     defineField({ name: 'moderator', title: 'Moderator', type: 'string', hidden: true }),
-    defineField({ name: 'description', title: 'Description', type: 'localeBlock', hidden: true }),
+    // Shown for VIP events, whose row in the design carries a paragraph;
+    // hidden elsewhere, where the programme row has no place for it.
+    defineField({
+      name: 'description',
+      title: 'Description',
+      type: 'localeBlock',
+      hidden: ({ document }) => document?.section !== 'vip',
+    }),
     defineField({ name: 'image', title: 'Image', type: 'figure' }),
     defineField({
       name: 'invitationOnly',

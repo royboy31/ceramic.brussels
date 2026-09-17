@@ -81,7 +81,7 @@ const TIER_PAGES: Record<string, PreviewLocation> = {
 
 const EVENT_TABS: Record<string, PreviewLocation> = {
   talks: { title: 'Programme – talks', href: '/programme/talks' },
-  vip: { title: 'Programme – VIP', href: '/programme/vip' },
+  vip: { title: 'VIP – VIP programme', href: '/vip/programme' },
   project: { title: 'Programme – La Cambre', href: '/programme' },
 };
 
@@ -127,6 +127,7 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
         loc('Visitors info – FAQ', '/visit/faq'),
         loc('Contact', '/contact'),
         loc('About – press', '/about/press'),
+        loc('VIP – access page', '/vip/access'),
         loc('Footer (homepage)', ''),
       ];
     case 'edition':

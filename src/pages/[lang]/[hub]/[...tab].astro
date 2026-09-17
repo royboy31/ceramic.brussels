@@ -5,6 +5,7 @@ import GuestOfHonour from '../../../components/hubs/GuestOfHonour.astro';
 import Partners from '../../../components/hubs/Partners.astro';
 import Programme from '../../../components/hubs/Programme.astro';
 import Visit from '../../../components/hubs/Visit.astro';
+import Vip from '../../../components/hubs/Vip.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { hubRouteParams, hubFromSegment, tabFromSegment } from '../../../lib/hubs';
 
@@ -21,7 +22,8 @@ import { hubRouteParams, hubFromSegment, tabFromSegment } from '../../../lib/hub
  * `hubRouteParams` supplies the identifiers as props alongside the localized
  * segments, so nothing downstream has to translate a segment back. The
  * fallbacks below are for the preview runtime, which renders this file on
- * request and has no static paths.
+ * request and has no static paths, and for the VIP hub's locked tabs, which
+ * src/server/routes/vip-tab.astro renders the same way with `route` set.
  *
  * Astro ranks static segments above dynamic ones, so the listing routes
  * (`exhibitors/`, `artists/`, `news/`, `editions/`) still win over `[hub]`,
@@ -47,6 +49,7 @@ const HUB_COMPONENTS: Record<string, any> = {
   partners: Partners,
   programme: Programme,
   visit: Visit,
+  vip: Vip,
 };
 const Hub = HUB_COMPONENTS[route];
 if (!Hub) return Astro.rewrite('/404');

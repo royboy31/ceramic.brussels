@@ -30,10 +30,14 @@ const hub = HUBS[route];
 
 // Only the tabs in hubs.ts: they are the ones with a route. A pill for any
 // other page of the hub led to a 404.
-const tabs = hub.tabs.map((tab) => {
-  const page = tab.link ? null : pages.find((p) => p?.slugs?.en === tab.slug);
-  return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label), href: hubTabHref(route, tab, lang), link: !!tab.link };
-});
+// A hidden tab (the VIP access page) has a route but no pill; a locked one
+// is not for crawlers to follow (docs/vip-access.md).
+const tabs = hub.tabs
+  .filter((tab) => !tab.hidden)
+  .map((tab) => {
+    const page = tab.link ? null : pages.find((p) => p?.slugs?.en === tab.slug);
+    return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label), href: hubTabHref(route, tab, lang), link: !!tab.link, locked: !!tab.locked };
+  });
 ---
 
 <div class:list={['section-head', 'page-grid', 'title-band', className]}>
@@ -48,6 +52,7 @@ const tabs = hub.tabs.map((tab) => {
               class:list={[{ active: current, dark: current && dark }]}
               href={localePath(lang, tab.href)}
               aria-current={current ? 'page' : undefined}
+              rel={tab.locked ? 'nofollow' : undefined}
             >
               {tab.label}
             </a>

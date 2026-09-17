@@ -1,0 +1,273 @@
+---
+import type { LocaleId } from '../lib/locales';
+import { localePath, useTranslations } from '../lib/i18n';
+
+/**
+ * "Not a VIP yet? Fill in the form below" - the right half of the VIP
+ * access page (Figma VIP frames, docs/vip-access.md): first name, last
+ * name, institution, function, email, send. The gallery application form's
+ * behaviour, field for field: inline validation, a visible success and
+ * failure state, a button that cannot be pressed twice.
+ *
+ * Posts to `/api/vip/request/` on the Worker (src/server/routes/
+ * vip-request.ts), which emails the VIP team once Brevo is connected and
+ * answers 503 until then, so the failure state names the address to write
+ * to instead.
+ */
+interface Props {
+  lang: LocaleId;
+  /** Site settings → VIP, from getVipSettings: contact, successMessage, successSlugs. */
+  settings?: any;
+  class?: string;
+}
+
+const { lang, settings = {}, class: className } = Astro.props;
+const t = useTranslations(lang);
+const contact = settings.contact || 'vip@ceramic.brussels';
+const successSlug = settings.successSlugs?.[lang] ?? settings.successSlugs?.en;
+const successUrl = successSlug ? localePath(lang, successSlug) : undefined;
+const id = 'vip-request';
+const fields = [
+  { name: 'firstName', label: t('vip.firstName'), type: 'text', autocomplete: 'given-name', max: 120 },
+  { name: 'lastName', label: t('vip.lastName'), type: 'text', autocomplete: 'family-name', max: 120 },
+  { name: 'institution', label: t('vip.institution'), type: 'text', autocomplete: 'organization', max: 200 },
+  { name: 'function', label: t('vip.function'), type: 'text', autocomplete: 'organization-title', max: 200 },
+  { name: 'email', label: t('vip.email'), type: 'email', autocomplete: 'email', max: 254 },
+];
+---
+
+<form
+  class:list={['vip-request', className]}
+  method="post"
+  action="/api/vip/request/"
+  novalidate
+  data-vip-request
+  data-success={settings.successMessage || t('vip.sent')}
+  data-success-url={successUrl}
+  data-error={t('vip.error', { email: contact })}
+  data-duplicate={t('vip.duplicate')}
+  data-required={t('apply.required')}
+  data-invalid-email={t('apply.invalidEmail')}
+  data-sending={t('vip.sending')}
+>
+  <input type="hidden" name="lang" value={lang} />
+  {/* Bots fill every field; people never see this one. */}
+  <div class="hp" aria-hidden="true">
+    <label>
+      website <input type="text" name="website" tabindex="-1" autocomplete="off" />
+    </label>
+  </div>
+
+  <h2 class="panel-title">{t('vip.notYet')}</h2>
+  <p class="body-24">{t('vip.fillForm')}</p>
+
+  <div class="fields">
+    {
+      fields.map((f) => (
+        <div class:list={['field', { wide: f.name === 'email' }]}>
+          <label class="body-24" for={`${id}-${f.name}`}>
+            {f.label}
+            <span class="req" aria-hidden="true">
+              *
+            </span>
+          </label>
+          <input
+            id={`${id}-${f.name}`}
+            name={f.name}
+            type={f.type}
+            required
+            autocomplete={f.autocomplete}
+            maxlength={f.max}
+            inputmode={f.type === 'email' ? 'email' : undefined}
+          />
+          <p class="hint" data-hint aria-live="polite" />
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="pill dark" data-submit>
+      <span class="link-arrow" aria-hidden="true">→</span> {t('vip.send')}
+    </button>
+    <p class="status body-24" data-status role="status" aria-live="polite" />
+  </div>
+</form>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('form[data-vip-request]').forEach((form) => {
+    const button = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const idle = button.innerHTML;
+    const say = (text: string, kind: 'ok' | 'bad' | '') => {
+      status.textContent = text;
+      status.dataset.kind = kind;
+    };
+
+    const check = (input: HTMLInputElement): boolean => {
+      const hint = input.parentElement?.querySelector<HTMLElement>('[data-hint]');
+      let problem = '';
+      if (input.required && !input.value.trim()) problem = form.dataset.required!;
+      else if (input.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim())) problem = form.dataset.invalidEmail!;
+      input.setAttribute('aria-invalid', problem ? 'true' : 'false');
+      if (hint) hint.textContent = problem;
+      return !problem;
+    };
+
+    form.querySelectorAll<HTMLInputElement>('.field input').forEach((input) => {
+      input.addEventListener('blur', () => check(input));
+      input.addEventListener('input', () => {
+        if (input.getAttribute('aria-invalid') === 'true') check(input);
+      });
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const inputs = [...form.querySelectorAll<HTMLInputElement>('.field input')];
+      const bad = inputs.filter((input) => !check(input));
+      if (bad.length) {
+        bad[0].focus();
+        return;
+      }
+      button.disabled = true;
+      button.textContent = form.dataset.sending!;
+      say('', '');
+      const data: Record<string, string> = {};
+      new FormData(form).forEach((value, key) => (data[key] = String(value)));
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const body = await response.json().catch(() => ({}));
+        if (response.ok) {
+          form.classList.add('sent');
+          form.querySelectorAll<HTMLInputElement>('input, button').forEach((el) => (el.disabled = true));
+          const next = form.dataset.successUrl;
+          if (next) {
+            say(form.dataset.sending!, '');
+            location.assign(next);
+            return;
+          }
+          say(form.dataset.success!, 'ok');
+          return;
+        }
+        if (body?.error === 'duplicate') say(form.dataset.duplicate!, 'bad');
+        else say(form.dataset.error!, 'bad');
+      } catch {
+        say(form.dataset.error!, 'bad');
+      }
+      button.disabled = false;
+      button.innerHTML = idle;
+    });
+  });
+</script>
+
+<style>
+  .vip-request .panel-title {
+    border: 0;
+    margin-bottom: 8px;
+  }
+  .hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 40px;
+    margin-top: 24px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+  }
+  .field.wide {
+    grid-column: 1 / -1;
+  }
+  label {
+    letter-spacing: -0.025em;
+    text-transform: lowercase;
+    font-size: 20px;
+  }
+  .req {
+    color: var(--ink-3, #6b6b6b);
+  }
+  input {
+    width: 100%;
+    margin-top: 6px;
+    padding: 8px 0 10px;
+    border: 0;
+    border-bottom: 1px solid currentColor;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+  input:focus-visible {
+    outline: none;
+    box-shadow: inset 0 -2px 0 currentColor;
+  }
+  input[aria-invalid='true'] {
+    border-bottom-color: #c8102e;
+    box-shadow: inset 0 -2px 0 #c8102e;
+  }
+  .hint {
+    margin: 8px 0 0;
+    min-height: 1.4em;
+    font-size: 16px;
+    line-height: 1.3;
+    color: #c8102e;
+  }
+  .actions {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px 40px;
+  }
+  .pill.dark {
+    cursor: pointer;
+    background: #050505;
+    border-color: #050505;
+    color: #fff;
+    text-transform: lowercase;
+  }
+  .pill:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+  .status {
+    margin: 0;
+    max-width: 62ch;
+  }
+  .status:empty {
+    display: none;
+  }
+  .status[data-kind='ok'] {
+    padding: 6px 14px;
+    background: var(--color-acid);
+    color: #050505;
+  }
+  .status[data-kind='bad'] {
+    color: #c8102e;
+  }
+  .sent .fields {
+    opacity: 0.45;
+  }
+  @media (width<=700px) {
+    .fields {
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+    input {
+      font-size: 18px;
+    }
+  }
+</style>

@@ -1,5 +1,5 @@
 import type { LocaleId } from './locales';
-import { currentClient, isPreview, previewFetch } from './previewContext';
+import { currentClient, isPreview, previewFetch, isLive } from './previewContext';
 import { DEFAULT_LOCALE } from './locales';
 
 /**
@@ -268,7 +268,7 @@ if (import.meta.env.PROD && typeof process !== 'undefined' && typeof process.on 
 // preview request - see src/lib/previewContext.ts.
 function run<T>(query: string, params: Record<string, unknown> = {}): Promise<T> {
   if (isPreview()) return previewFetch<T>(query, params);
-  if (!import.meta.env.PROD) return currentClient().fetch<T>(query, params);
+  if (!import.meta.env.PROD || isLive()) return currentClient().fetch<T>(query, params);
   const key = `${query}\u0000${JSON.stringify(params)}`;
   let pending = memo.get(key) as Promise<T> | undefined;
   if (!pending) {
@@ -836,7 +836,7 @@ export function getProgramme(lang: LocaleId) {
           && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt) && section in ["talks", "vip", "project"]]) > 0]
           | order(year desc)[0]._id
       )] | order(startsAt asc){
-      _id, startsAt, endsAt, kind, section, languages, moderator, invitationOnly,
+      _id, startsAt, endsAt, kind, section, venue, languages, moderator, invitationOnly,
       "slug": slug.current,
       ${styled('title')},
       ${styled('location')},
@@ -858,6 +858,23 @@ export function getPartners(lang: LocaleId) {
   return run<any[]>(
     `*[_type == "partner" && ${PARTNER_IS_LISTED}]
       | order(order asc, name asc) ${PARTNER}`,
+    { lang },
+  );
+}
+
+/**
+ * The VIP hub's settings (Site settings → VIP): what the access page's
+ * "not a VIP yet?" form needs, and the address VIPs write to. The gate
+ * itself reads `gateOpen` on the Worker (src/server/vip.ts).
+ */
+export function getVipSettings(lang: LocaleId) {
+  return run<any>(
+    `*[_type == "siteSettings"][0]{
+      "gateOpen": vip.gateOpen,
+      "contact": coalesce(vip.contactEmail, contactEmail),
+      "successMessage": ${localised('vip.successMessage')},
+      "successSlugs": vip.successPage->{ "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current }
+    }`,
     { lang },
   );
 }

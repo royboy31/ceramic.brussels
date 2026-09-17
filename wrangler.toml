@@ -36,6 +36,23 @@ PUBLIC_SITE_URL = "https://ceramic-brussels.pages.dev"
 PREVIEW_RUNTIME = "1"
 PUBLIC_PREVIEW_ENABLED = "true"
 
+# The VIP hub's stores (docs/vip-access.md). D1 holds the guest list - one
+# row per VIP with the hash of their code, never the code - and a settings
+# table; it is the database the removed site accounts left behind, reused,
+# with its old tables dropped by migrations/0002_vip_guests.sql. KV holds the
+# sessions, one expiring key each. Production and previews share both; a
+# preview is tried with codes of its own. Kept in step with
+# wrangler.worker.toml, which the Cloudflare adapter reads at build time.
+[[d1_databases]]
+binding = "VIP_DB"
+database_name = "ceramic-brussels-admin"
+database_id = "5c35303c-7b4e-48f9-9480-d236f7ae4ff5"
+migrations_dir = "migrations"
+
+[[kv_namespaces]]
+binding = "VIP_SESSIONS"
+id = "5155f6c4aed24d8f82341a81f96cb005"
+
 # Branch previews: canonical tags and the sitemap must point at the preview
 # host, and editors get an Edit button on every page.
 [env.preview.vars]
@@ -56,3 +73,13 @@ APPLY_DRY_RUN = "1"
 # which lives in the dashboard, never here. On for previews and production.
 PREVIEW_RUNTIME = "1"
 PUBLIC_PREVIEW_ENABLED = "true"
+
+[[env.preview.d1_databases]]
+binding = "VIP_DB"
+database_name = "ceramic-brussels-admin"
+database_id = "5c35303c-7b4e-48f9-9480-d236f7ae4ff5"
+migrations_dir = "migrations"
+
+[[env.preview.kv_namespaces]]
+binding = "VIP_SESSIONS"
+id = "5155f6c4aed24d8f82341a81f96cb005"

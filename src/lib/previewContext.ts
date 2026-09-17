@@ -20,6 +20,8 @@ import { tagImages } from './previewImages';
 
 interface PreviewStore {
   client: SanityClient;
+  /** A preview render: drafts, stega, the overlay. False for a live render of published content. */
+  preview: boolean;
 }
 
 const storage = new AsyncLocalStorage<PreviewStore>();
@@ -31,11 +33,28 @@ export function currentClient(): SanityClient {
 
 /** True while rendering a preview request. Base.astro uses it to mount the visual editing overlay. */
 export function isPreview(): boolean {
-  return storage.getStore() !== undefined;
+  return storage.getStore()?.preview === true;
+}
+
+/**
+ * True while the Worker renders a page on request from published content -
+ * the VIP hub's locked tabs (src/middleware.ts). queries.ts then fetches
+ * each query afresh instead of memoising it: the build's memo lives for the
+ * life of the module, which on the Worker is the life of the isolate, and a
+ * page rendered from it would never see a publish.
+ */
+export function isLive(): boolean {
+  const store = storage.getStore();
+  return store !== undefined && !store.preview;
 }
 
 export function runWithPreview<T>(client: SanityClient, fn: () => Promise<T>): Promise<T> {
-  return storage.run({ client }, fn);
+  return storage.run({ client, preview: true }, fn);
+}
+
+/** Render `fn` with the ordinary published-content client, unmemoised. */
+export function runLive<T>(fn: () => Promise<T>): Promise<T> {
+  return storage.run({ client: sanityClient, preview: false }, fn);
 }
 
 /**
