@@ -6,6 +6,7 @@ import PageSections from '../../components/PageSections.astro';
 import SanityImage from '../../components/SanityImage.astro';
 import PortableText from '../../components/PortableText.astro';
 import PersonCard from '../../components/PersonCard.astro';
+import Slideshow from '../../components/Slideshow.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations, formatDate } from '../../lib/i18n';
 import { instagramUrl } from '../../lib/links';
@@ -66,6 +67,15 @@ for (const section of rest) {
   else runs.push({ text, items: [section] });
 }
 const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
+/**
+ * The hero of "ceramic brussels" is a slideshow in the design (client
+ * feedback, 2026-09-17: "make the big image at the top of the page a
+ * 3-image slideshow"). `PAGE` in queries.ts returns one `cover` per page and
+ * `images` is the closing strip, so there is one picture to show; the markup
+ * is the shared Slideshow so an array needs no rework here.
+ * See BACKEND-REQUEST #12.
+ */
+const heroImages = [page?.cover].filter((img: any) => img?.asset);
 // Base appends the site name to every title. The first tab is the hub itself
 // and is labelled with the site name, and an SEO title an editor ended with
 // it would carry it twice ("About — ceramic brussels — ceramic brussels").
@@ -110,16 +120,17 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
         (page ? (
           <>
             <div class="hero">
-              <figure>
-                {page.cover?.asset && (
-                  <SanityImage image={page.cover} widths={[900, 1200, 1800]} sizes="(max-width: 700px) 100vw, 66vw" loading="eager" />
-                )}
-                <span class="dots" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-              </figure>
+              {/* BACKEND-REQUEST #12: the design wants this hero to be a
+                  three-image slideshow; `PAGE` in queries.ts returns a single
+                  `cover`, so the slideshow is fed the one image it has and
+                  will show its dots and counter the moment an array arrives. */}
+              <Slideshow
+                images={heroImages}
+                widths={[900, 1200, 1800]}
+                sizes="(max-width: 700px) 100vw, 66vw"
+                label={page.title}
+                id="about-hero"
+              />
               {leadSection && <Sections lang={lang} sections={[leadSection]} columns={1} textColumns={1} />}
             </div>
             {runs.map((run) =>
@@ -185,6 +196,13 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
       )
     }
     {tab === 'team' && team.length === 0 && <p class="empty">{t('about.peopleEmpty')}</p>}
+    {/* BACKEND-REQUEST #13: the design closes this tab with a "contact" block -
+        the "initiated and organized jointly by studio emosi and ceramic
+        brussels ASBL" line, a "discover studio emosi's projects ↗" pill and
+        the ASBL's postal address. `getSettings` carries none of the three
+        (`practicalInfo.address` is the fair's venue, not the office), so the
+        block is left to the page's own section stack below until the fields
+        exist. */}
 
     {/* ------------------------------------------------------------- press */}
     {
@@ -364,19 +382,25 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
     width: 100%;
     height: 605px;
   }
-  .dots {
-    gap: 14px;
-    display: flex;
+  /* The slideshow's dots sit on the bottom edge of the picture, as the frame
+     draws them; the caption line only earns its place once there is more
+     than one picture to count. */
+  .hero :global(.slideshow .dots) {
     position: absolute;
-    bottom: 14px;
-    left: 50%;
-    transform: translate(-50%);
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 605px;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 0 16px;
+    gap: 14px;
   }
-  .dots i {
+  .hero :global(.slideshow .dots a) {
     background: #fff;
-    border-radius: 50%;
-    width: 12px;
-    height: 12px;
+  }
+  .hero :global(.slideshow[data-slides='1'] figcaption) {
+    display: none;
   }
   .copy {
     margin-top: 50px;
@@ -410,6 +434,10 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
     .hero :global(img) {
       height: auto;
     }
+    .hero :global(.slideshow .dots) {
+      height: auto;
+      inset: auto 0 16px;
+    }
     .strip {
       grid-template-columns: 1fr;
     }
@@ -431,6 +459,49 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
     }
   }
 
+  /* The advisory board three a row (client feedback, 2026-09-17): a card is
+     a third of the shell, so the portrait is a share of it rather than a
+     fixed 197px, and the type steps down with the column. The biography now
+     runs the card's full width under the portrait, which is what makes a
+     third of a window readable at all. Two a row under 1200px, one under
+     800px - her complaint was a narrow window, so the layout has to fold. */
+  .advisory .people {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 60px 30px;
+    --portrait-col: minmax(0, 44%);
+    --portrait-gap: 17px;
+  }
+  .advisory .people :global(.role) {
+    font-size: 20px;
+    line-height: 26px;
+  }
+  .advisory .people :global(.bio) {
+    font-size: 20px;
+  }
+  .advisory .people :global(.bio .rich-text p + p) {
+    margin-top: 24px;
+  }
+  @media (width<=1200px) {
+    .advisory .people {
+      grid-template-columns: 1fr 1fr;
+      gap: 70px 40px;
+    }
+  }
+  @media (width<=800px) {
+    .advisory .people {
+      grid-template-columns: 1fr;
+      --portrait-col: 120px;
+      --portrait-gap: 18px;
+    }
+    .advisory .people :global(.role) {
+      font-size: 17px;
+      line-height: 1.35;
+    }
+    .advisory .people :global(.bio) {
+      font-size: 18px;
+    }
+  }
+
   /* From the design's contact page (the team tab). */
   .team-page {
     padding: 10px var(--gutter) 110px;
@@ -441,11 +512,15 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
   .team-page > .intro-large + .directors {
     margin-top: 50px;
   }
+  /* The design's small grey "team" label over a hairline rule the width of
+     the page (client feedback, 2026-09-17), not the big black panel title. */
   .team-title {
+    color: var(--ink-2);
     letter-spacing: -0.04em;
-    border-bottom: 2px solid;
+    border-bottom: 1px solid var(--ink);
     margin-top: 60px;
-    font-size: 36px;
+    padding-bottom: 6px;
+    font-size: 32px;
     font-weight: 600;
     line-height: 1.2;
   }
@@ -461,7 +536,7 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
       font-size: 30px;
     }
     .team-title {
-      font-size: 28px;
+      font-size: 24px;
     }
   }
 

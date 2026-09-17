@@ -18,8 +18,8 @@ import { styleAttrs } from '../../lib/textStyle';
  * intro, opening hours, access, the venue diagram at the right - then the
  * photo row -
  * from the current edition (hours, tickets) and site settings (venue,
- * access, hotel deal, photos). Food & drinks: the intro and a 2x2 grid of
- * the `food-drinks` partners with their slideshow figure. Floor plan and
+ * access, hotel deal, photos). Food & drinks: the intro and a three-column
+ * grid of the `food-drinks` partners with their slideshow figure. Floor plan and
  * FAQ have no design page and follow the same patterns. Markup and rules
  * are Lilanga's build of the frames.
  */
@@ -145,7 +145,7 @@ const altPaths = hubAltPaths('visit', tab);
                 <p class="empty">{t('visit.noTickets')}</p>
               )}
               {edition?.ticketsUrl && (
-                <a class="pill dark" href={edition.ticketsUrl} target="_blank" rel="noopener noreferrer">
+                <a class="pill cta acid" href={edition.ticketsUrl} target="_blank" rel="noopener noreferrer">
                   {t('visit.bookTickets')} <span class="link-arrow" data-arrow="↗" aria-hidden="true">↗</span>
                 </a>
               )}
@@ -163,7 +163,7 @@ const altPaths = hubAltPaths('visit', tab);
                     )}
                   </p>
                   <a
-                    class="pill dark"
+                    class="pill cta light"
                     href={hotelHref}
                     {...(/^https?:\/\//.test(hotelHref) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   >
@@ -275,8 +275,8 @@ const altPaths = hubAltPaths('visit', tab);
                       <Slideshow
                         images={shots}
                         aspect={1.5}
-                        widths={[660, 1000, 1340]}
-                        sizes="(max-width: 700px) 100vw, 50vw"
+                        widths={[440, 660, 900, 1340]}
+                        sizes="(max-width: 700px) 100vw, (max-width: 1180px) 50vw, 33vw"
                         label={v.name}
                         id={`vendor-${i + 1}`}
                       />
@@ -307,7 +307,7 @@ const altPaths = hubAltPaths('visit', tab);
           </p>
         )}
         {edition?.fairMapUrl ? (
-          <a class="pill dark" href={edition.fairMapUrl} target="_blank" rel="noopener noreferrer">
+          <a class="pill cta dark" href={edition.fairMapUrl} target="_blank" rel="noopener noreferrer">
             {t('visit.downloadMap')} ↗
           </a>
         ) : (
@@ -430,11 +430,27 @@ const altPaths = hubAltPaths('visit', tab);
     margin-top: 18px;
   }
   /* The calls to action: 44px tall, 30px either side, a space before the arrow. */
-  .dark {
-    color: #fff;
-    background: #000;
+  .cta {
     margin-top: 30px;
     padding: 4px 30px;
+  }
+  .dark {
+    color: var(--ground);
+    background: var(--ink);
+  }
+  /* "book your tickets" is acid with black text, and turns black with white
+     text on hover; "discover the hotel" is white with a black outline
+     (client feedback, 2026-09-17). Both hovers are design.css's own .pill
+     rule - it is .pill.dark that swaps the other way, so neither carries it. */
+  .acid {
+    color: var(--ink);
+    background: var(--acid);
+    border-color: var(--ink);
+  }
+  .light {
+    color: var(--ink);
+    background: var(--ground);
+    border-color: var(--ink);
   }
   /* The labels (days, tickets, access modes) are the 600 cut in normal
      tracking; the browser's bold resolves to the 900 file. */
@@ -514,9 +530,12 @@ const altPaths = hubAltPaths('visit', tab);
     }
   }
 
-  /* food & drinks */
+  /* food & drinks. Three columns, so the pictures read smaller (client
+     feedback, 2026-09-17); two once a column would be under ~330px, one on a
+     phone. Each vendor is the same stack as before: title and ↗ over its
+     rule, the slideshow, its counter, then the description. */
   .food {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 50px 40px;
     margin-top: 55px;
     display: grid;
@@ -546,9 +565,17 @@ const altPaths = hubAltPaths('visit', tab);
     font-size: 22px;
     line-height: 30px;
   }
+  @media (width<=1180px) {
+    .food {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
   @media (width<=700px) {
     .food {
       grid-template-columns: 1fr;
+    }
+    .food h2 {
+      font-size: 30px;
     }
     .food .body-24 {
       font-size: 18px;

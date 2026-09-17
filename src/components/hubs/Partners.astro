@@ -16,11 +16,14 @@ import { styleAttrs } from '../../lib/textStyle';
  * starts right under the tabs: the frames have no heading repeating the
  * tab's name (the first HTML build did). Institutions - and the tabs the
  * design has no frame for: main partner, event partners, media - are a
- * two-column grid of entries: the name over a rule, linking to the
- * partner's website with its arrow, the text, then the logo. The hotel is
- * one entry: the photo with its slideshow beside the name (linked the same
- * way) and the text. Markup and rules are Lilanga's build of the Figma
- * partners frames.
+ * two-column grid of entries: the name over a rule, the text, then the
+ * "website ↗" pill and the logo side by side. The hotel is one entry: the
+ * photo with its slideshow beside the name, the text and the pill. Markup
+ * and rules are Lilanga's build of the Figma partners frames.
+ *
+ * The name itself is not a link (client feedback of 2026-09-17, with the
+ * annotated institutions frame): the pill carries the website, and it is
+ * the pill everywhere - institutions, hotel, main, event and media.
  */
 const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const t = useTranslations(lang);
@@ -36,6 +39,24 @@ const featured = tab === 'hotel';
 const path = hubTabPath('partners', tab, lang);
 const altPaths = hubAltPaths('partners', tab);
 const external = { target: '_blank', rel: 'noopener noreferrer' };
+
+/*
+ * BACKEND-REQUEST #11: a per-partner logo scale on `partner` (see
+ * docs/backend-requests.md). The logo files are of wildly different
+ * proportions, and one fixed box makes a square mark read half the size of a
+ * 4:1 wordmark beside it - the client's "sometimes the logos are very small,
+ * sometimes big". Until an editor can set a size, the slot's height is
+ * derived from the file's own aspect ratio (`dimensions`, which the IMAGE
+ * projection already returns): the wider the file, the shorter the slot, so
+ * the logos cover comparable area and read as one family. Between equal
+ * height (exponent 0) and equal area (0.5); 0.45 keeps the widest wordmark
+ * inside the 250px slot.
+ */
+const logoHeight = (image: any, max = 78, base = 92) => {
+  const ar = image?.dimensions?.aspectRatio;
+  if (!ar || !Number.isFinite(ar) || ar <= 0) return max;
+  return Math.round(Math.min(max, Math.max(38, base / Math.pow(ar, 0.45))));
+};
 ---
 
 <Base
@@ -83,18 +104,17 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
             </figure>
             <section>
               <h2 class="panel-title" {...styleAttrs(p.nameStyle)}>
-                {p.url ? (
-                  <a href={p.url} {...external}>
-                    {p.name} <span class="link-arrow" data-arrow="↗" aria-hidden="true">↗</span>
-                  </a>
-                ) : (
-                  p.name
-                )}
+                {p.name}
               </h2>
               {p.description && (
                 <div class="body-24">
                   <PortableText value={p.description} fieldStyle={p.descriptionStyle} />
                 </div>
+              )}
+              {p.url && (
+                <a class="pill" href={p.url} {...external}>
+                  {t('common.website')} ↗
+                </a>
               )}
             </section>
           </div>
@@ -103,21 +123,21 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
         <div class="institutions">
           {listed.map((p: any) => (
             <article>
-              <h3 {...styleAttrs(p.nameStyle)}>
-                {p.url ? (
-                  <a href={p.url} {...external}>
-                    {p.name} <span class="link-arrow" data-arrow="↗" aria-hidden="true">↗</span>
-                  </a>
-                ) : (
-                  p.name
-                )}
-              </h3>
+              <h3 {...styleAttrs(p.nameStyle)}>{p.name}</h3>
               <div class="text">
                 {p.description && <PortableText value={p.description} fieldStyle={p.descriptionStyle} />}
               </div>
               <div class="institution-foot">
+                {p.url && (
+                  <a class="pill" href={p.url} {...external}>
+                    {t('common.website')} ↗
+                  </a>
+                )}
                 {p.logo?.asset && (
-                  <SanityImage image={p.logo} widths={[250, 500]} sizes="250px" class="logo" placeholder={false} />
+                  /* BACKEND-REQUEST #11: slot height from the file's aspect ratio, see `logoHeight` above. */
+                  <span class="logo-slot" style={`--logo-h:${logoHeight(p.logo)}px`}>
+                    <SanityImage image={p.logo} widths={[250, 500]} sizes="250px" class="logo" placeholder={false} />
+                  </span>
                 )}
               </div>
             </article>
@@ -192,6 +212,9 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
     min-height: 78px;
     display: flex;
   }
+  .institution-foot .pill {
+    flex: none;
+  }
   /*
    * The design's logo slot is a 250px-wide block against the right edge of the
    * card, and its two examples are set text of about the same size. The real
@@ -199,17 +222,29 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
    * near-square marks, several with transparent padding baked in - so the slot
    * is fixed and the file is fitted into it, right-aligned. Sizing each file to
    * its own bounds instead is what left one logo stranded mid-card and the next
-   * twice its size. `margin-left: auto` keeps it against the right edge.
+   * twice its size. `margin-left: auto` keeps the logo right when the partner
+   * has no website and it is the only thing in the row; `--logo-h` is set per
+   * partner in the frontmatter (see `logoHeight`) so a square mark and a wide
+   * wordmark carry about the same weight.
    */
-  .institution-foot :global(.logo) {
+  .logo-slot {
+    flex: 1 1 auto;
+    /* A replaced element will not shrink past its own width without this, so
+       in a narrow column the pill is what gives, and it collapses into a
+       three-line oval. The logo gives instead, and stays right-aligned. */
+    min-width: 0;
+    max-width: 250px;
+    margin-left: auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .logo-slot :global(.logo) {
     object-fit: contain;
     object-position: right center;
-    width: 250px;
-    /* A replaced element will not shrink past its own width without this;
-       in a narrow column the logo gives, and stays right-aligned. */
+    width: 100%;
     min-width: 0;
-    height: 78px;
-    margin-left: auto;
+    height: var(--logo-h, 78px);
   }
 
   /* hotel */
@@ -229,6 +264,24 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
   .hotel-placeholder {
     aspect-ratio: 3 / 2;
     background: #f0efed;
+  }
+  .hotel .pill {
+    margin-top: 35px;
+  }
+
+  /*
+   * Client feedback of 2026-09-17: "make the website buttons less thick,
+   * harmonise everywhere", with the footer pills as the reference - a 1px
+   * stroke close to the text, tight letter-spacing, no tall oval. The global
+   * `.pill` (design.css) is 24px over a 34px line with 3px/18px of padding;
+   * this scopes the slimmer set to the partners tabs, where the pill sits
+   * under 24px body text.
+   */
+  .pill {
+    padding: 1px 13px 0;
+    font-size: 20px;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
   }
 
   .image-row {
@@ -252,6 +305,9 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
     }
     .hotel {
       grid-template-columns: 1fr;
+    }
+    .pill {
+      font-size: 16px;
     }
     .image-row {
       grid-template-columns: 1fr;

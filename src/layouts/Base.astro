@@ -446,9 +446,26 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
      sub-pages are always a click away, and fades into the page below it
      instead of cutting the text off with a hard edge (client feedback,
      2026-09-16). --band-bg is the page's ground. */
-  .title-band {
+  /* The header stays at the top of the window too (client feedback,
+     2026-09-17: "it should always be everywhere"), so the title band pins
+     under it rather than behind it. --header-h mirrors the header heights in
+     design.css; keep the two in step. */
+  :root {
+    /* Measured, not the 159px rule in design.css: a later rule overrides it. */
+    --header-h: 149px;
+  }
+  @media (width<=640px) {
+    :root {
+      --header-h: 96px;
+    }
+  }
+  .site-header {
     position: sticky;
     top: 0;
+  }
+  .title-band {
+    position: sticky;
+    top: var(--header-h);
     z-index: 20;
     background: var(--band-bg, #fff);
   }

@@ -468,7 +468,8 @@ const captionOf = (img: any, fallback?: string) => ({
     font-size: 15px;
   }
   .name {
-    border-top: 1px solid;
+    /* 2px, as above the guest of honour's name (client feedback, 2026-09-17). */
+    border-top: 2px solid;
     justify-content: space-between;
     align-items: start;
     gap: 20px;

@@ -157,3 +157,69 @@ is already selected by `getProgramme`).
 **Your decisions:** whether the team tab's address should become `contact` (it needs the redirect map and `previewPaths.ts` changed with it, and sits next to the existing `/[lang]/contact` page); whether press and images stay reachable or go, with their redirects re-pointed; and the menu's about links in the navigation document, which may still list press and images.
 
 ---
+
+## #8 · open · 2026-09-17 · the programme tabs in the designer's order
+
+**Page / component:** `src/lib/hubs.ts`, `HUBS.programme.tabs` (Kamindu's file - not changed here)
+**Figma frame:** client feedback, WhatsApp "Ceramic Website", 2026-09-17 15:05 (Léonie)
+**The design shows:** the programme submenu in this order - **talks, award ceremony, ceramic brussels x La Cambre, exhibition pass (coming up)**.
+**The code says today:** the tab list and its order live in `HUBS.programme.tabs`; the first tab is the hub root, so reordering also moves `/[lang]/programme` onto a different tab and the redirects and `previewPaths.ts` follow it.
+**Rendered meanwhile:** the order as `hubs.ts` has it; nothing changed on the frontend.
+**Asked for:** reorder `HUBS.programme.tabs` to talks / awards / la-cambre, and say whether "exhibition pass (coming up)" should be a fourth tab now (a `page` document plus a slug, or a `hidden` placeholder) or wait until there is content. Talks becoming the first tab makes `/[lang]/programme` the talks page - please confirm that is wanted and re-point the legacy redirects with it.
+
+---
+
+## #9 · open · 2026-09-17 · several pictures per programme event
+
+**Page / component:** `src/components/hubs/Programme.astro`, the talks accordion rows
+**Figma frame:** client feedback, WhatsApp "Ceramic Website", 2026-09-17 15:05 (Léonie): "Could you make all photos inside the accordion elements a slideshow?"
+**The design shows:** each event in the accordion beside a slideshow of its own photos, with the counter and caption the other slideshows have.
+**The query returns today:** `getProgramme` → `image ${IMAGE}`, one `figure` per `programmeEvent`.
+**Rendered meanwhile:** the one image, drawn through the shared `Slideshow` component as a single slide (its counter and caption line are hidden while there is only one), so the markup is ready for an array; a placeholder from the fair pool while an event has no picture.
+**Asked for:** an `images[]` array of `figure` on `programmeEvent` (keeping `image` readable, or migrating it into `images[0]`), selected in the `getProgramme` projection. Same shape as request #5 for `award`.
+
+---
+
+## #10 · open · 2026-09-17 · remove the media tab from the partners hub
+
+**Page / component:** `src/lib/hubs.ts`, `HUBS.partners.tabs` (Kamindu's file - not changed here)
+**Figma frame:** client feedback of 2026-09-17, annotated frame `screenshot/WhatsApp Image 2026-09-17 at 8.37.02 PM-2.jpeg` (the "media" pill is crossed out)
+**The design shows:** four pills on the partners hub - main partner, institutions, hotel, event partners. The designer: *"Remove the « media » submenu (it will appear in the press & media tab)."*
+**The code says today:** a fifth tab `{ slug: 'media', segment: { fr: 'medias' }, label: 'tabs.media' }`, which `PARTNER_TABS.media` maps to the `media` tier.
+**Rendered meanwhile:** nothing changed - the pill is still there, the tab still builds, the frontend does not edit `hubs.ts`.
+**Asked for:** drop the media tab from `HUBS.partners.tabs`, or mark it `hidden: true` if `/en/partners/media` must keep answering for the legacy redirects (`hidden` already exists on `HubTab`, used by about → press / images). **The `media` partner tier itself stays**: media partners are still partner documents with `tier: "media"`, they just move to the press & media tab of the about hub, so nothing in the schema or in `PARTNER_TABS`' other rows should change. Please say which tab is to list them so the frontend can render them there.
+
+---
+
+## #11 · open · 2026-09-17 · a size control for partner logos
+
+**Page / component:** `src/components/hubs/Partners.astro`, the logo under each partner (institutions, main, event, media tabs)
+**Figma frame:** client feedback of 2026-09-17, same annotated frame
+**The design shows:** the logos in a row of cards reading as one family. The designer: *"I was wondering if there's any way to adjust the size of the logos for every partner? I see sometimes the logos are very small, sometimes big, is there a way to keep control of that?"* - she wants the size to be an editor's decision, per partner.
+**The query returns today:** `PARTNER` in `queries.ts` → `_id, name, tier, url, instagram, order, subtitle, description, currentExhibition, editions, logo, images`. The logo is a plain image; there is no scale, size or display-width field anywhere on `partner`.
+**Rendered meanwhile:** the frontend normalises optically instead of asking the editor: the logo slot is still 250px wide, but its height is now derived from the file's own aspect ratio (`asset->metadata.dimensions`, which `IMAGE` already returns) - the wider the file, the shorter the slot - so a near-square mark and a 4:1 wordmark cover comparable area. `logoHeight()` in `src/components/hubs/Partners.astro`, marked `BACKEND-REQUEST #11`. It evens out the worst of it but it cannot know that a file has whitespace baked into it, which is the other half of the problem.
+**Asked for:** a `logoScale` on `partner` - a number the editor sets, e.g. a percentage 50-150 defaulting to 100, or a three-value list (small / medium / large) if a free number is too loose - selected in `PARTNER` so it reaches every tab and the `partnersSection` block. The frontend multiplies the computed slot height by it. A fixed list of values would need adding to `stegaFilter`'s `PLAIN_KEYS`.
+
+---
+
+## #12 · open · 2026-09-17 · a three-image hero on about → ceramic brussels
+
+**Page / component:** `src/components/hubs/About.astro`, the `the-fair` tab's hero
+**Figma frame:** client feedback, WhatsApp "Ceramic Website", 2026-09-17 15:08 (Léonie): "Make the big image at the top of the page a 3-image slideshow"
+**The design shows:** the large picture beside "the fair" as a slideshow of three pictures, with the white dots on the image the other slideshows have.
+**The query returns today:** `PAGE` in `queries.ts` → `cover ${IMAGE}`, one `figure` per page. `images[]` is already spoken for: it is the closing strip of photos at the foot of the page.
+**Rendered meanwhile:** the hero is drawn through the shared `Slideshow` component with the one `cover` as its only slide (its dots and counter stay hidden while there is one), so an array needs no further work here.
+**Asked for:** a `heroImages[]` array of `figure` on `page` - or `cover` widened into an array - selected in `PAGE`. Same shape as requests #5 and #9.
+
+---
+
+## #13 · open · 2026-09-17 · the contact block on about → contact
+
+**Page / component:** `src/components/hubs/About.astro`, the `team` tab (the design's "contact" page)
+**Figma frame:** client feedback, WhatsApp "Ceramic Website", 2026-09-17 15:09 (Léonie), wireframe image 6
+**The design shows:** under the team grid, a "contact" heading over a rule, then three things: the line "ceramic brussels is initiated and organized jointly by studio emosi and ceramic brussels ASBL.", a "discover studio emosi's projects ↗" pill, and the organisation's postal address ("Rue Franz Merjay 148C…").
+**The query returns today:** `getSettings` → `contactEmail`, the social URLs, `practicalInfo.address`. That address is the **fair's venue** (Brussels Expo), which the visit hub prints, not the ASBL's office; there is no organiser line and no studio emosi link anywhere in the projection.
+**Rendered meanwhile:** nothing is invented. The tab still renders the team page's own section stack under the grid, so an editor can build the block out of a section title + text + buttons meanwhile.
+**Asked for:** an Organisation group on Site settings - `organiserText` (localeText), `organiserLink` (a `link`, so the pill's label is editable) and `postalAddress` (text) - returned by `getSettings`. If any of the three is meant to live on the about/contact `page` instead, say which and the frontend reads it there.
+
+---

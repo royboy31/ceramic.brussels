@@ -8,10 +8,12 @@ import { styleAttrs } from '../lib/textStyle';
 
 /**
  * One person of the advisory board, the team or the jury, as the design's
- * advisory-board page draws it: the name over a rule, the portrait (with
- * its credit) on the left, the role in capitals, the biography, then the
- * instagram / website pills. Lives inside a `.people` grid (the page or
- * People.astro).
+ * advisory-board page draws it: the name over a rule, then a row of the
+ * portrait (with its credit) on the left and the role in capitals with the
+ * instagram / website pills under it on the right, and the biography at the
+ * card's full width below both (client feedback, 2026-09-17: the bio beside
+ * the portrait left a hopelessly narrow column on a small window). Lives
+ * inside a `.people` grid (the page or People.astro).
  *
  * The design's contact page draws two more shapes:
  * - `contact` (the directors): the same card, with the e-mail as an
@@ -37,16 +39,11 @@ const contactLines = !board && (person.email || person.phone);
 
 <article class:list={[className, `is-${variant}`]}>
   {!team && <h2>{person.name}</h2>}
-  <div>
+  <div class="row">
     <figure>
       {
         person.portrait?.asset ? (
-          <SanityImage
-            image={person.portrait}
-            widths={[200, 400]}
-            sizes="197px"
-            aspect={board ? undefined : 197 / 270}
-          />
+          <SanityImage image={person.portrait} widths={[200, 400]} sizes="197px" aspect={197 / 270} />
         ) : (
           <div class="no-portrait" aria-hidden="true" />
         )
@@ -62,7 +59,7 @@ const contactLines = !board && (person.email || person.phone);
           </p>
         )
       }
-      {!team && person.bio && <PortableText value={person.bio} fieldStyle={person.bioStyle} />}
+      {!team && !board && person.bio && <PortableText value={person.bio} fieldStyle={person.bioStyle} />}
       {
         contactLines && (
           <p class="contact">
@@ -103,6 +100,13 @@ const contactLines = !board && (person.email || person.phone);
       }
     </section>
   </div>
+  {
+    board && person.bio && (
+      <div class="bio">
+        <PortableText value={person.bio} fieldStyle={person.bioStyle} />
+      </div>
+    )
+  }
 </article>
 
 <style>
@@ -115,23 +119,28 @@ const contactLines = !board && (person.email || person.phone);
     font-weight: 600;
     line-height: 1.2;
   }
-  article > div {
-    grid-template-columns: 197px 1fr;
-    gap: 40px;
+  /* The portrait column: a fixed 197px here, a share of the card where a
+     page packs the cards tighter (the advisory board's three a row). */
+  article > .row {
+    grid-template-columns: var(--portrait-col, 197px) 1fr;
+    gap: var(--portrait-gap, 40px);
     margin-top: 32px;
     display: grid;
   }
   figure {
     margin: 0;
   }
+  /* One box for every portrait, so three cards in a row line their credits
+     and biographies up. The figure column sets the width; the box keeps the
+     design's 197 x 270 proportion whatever that column is. */
   article :global(img),
   .no-portrait {
     object-fit: cover;
-    width: 197px;
-    max-height: 270px;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 197 / 270;
   }
   .no-portrait {
-    height: 270px;
     background: var(--surface-2);
   }
   /* "© Somebody's Name" under the portrait. */
@@ -157,8 +166,16 @@ const contactLines = !board && (person.email || person.phone);
     line-height: 30px;
     margin-bottom: 13px;
   }
-  section :global(.rich-text p + p) {
+  section :global(.rich-text p + p),
+  .bio :global(.rich-text p + p) {
     margin-top: 30px;
+  }
+  /* The biography, at the card's full width under the portrait and the role. */
+  .bio {
+    margin-top: 26px;
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: -0.03em;
   }
   /* The small "website ↗" pill of the design, not the 24px site pill. */
   .links {
@@ -190,14 +207,8 @@ const contactLines = !board && (person.email || person.phone);
     margin-top: 20px;
   }
 
-  /* The contact page's directors: every portrait the same 197×270 box. */
-  .is-contact :global(img),
-  .is-team :global(img) {
-    height: 270px;
-  }
-
   /* The contact page's team: no title rule, the name heads the text. */
-  .is-team > div {
+  .is-team > .row {
     margin-top: 0;
   }
   .is-team h3 {
@@ -217,18 +228,9 @@ const contactLines = !board && (person.email || person.phone);
     margin-top: 26px;
   }
   @media (width<=800px) {
-    article > div {
-      grid-template-columns: 120px 1fr;
-      gap: 18px;
-    }
-    article :global(img),
-    .no-portrait {
-      width: 120px;
-    }
-    .is-contact :global(img),
-    .is-team :global(img),
-    .no-portrait {
-      height: 164px;
+    article > .row {
+      grid-template-columns: var(--portrait-col, 120px) 1fr;
+      gap: var(--portrait-gap, 18px);
     }
     h2 {
       font-size: 28px;
@@ -236,11 +238,16 @@ const contactLines = !board && (person.email || person.phone);
     figcaption {
       font-size: 13px;
     }
-    section {
+    section,
+    .bio {
       font-size: 18px;
     }
-    section :global(.rich-text p + p) {
+    section :global(.rich-text p + p),
+    .bio :global(.rich-text p + p) {
       margin-top: 1em;
+    }
+    .bio {
+      margin-top: 18px;
     }
     .role,
     .is-team h3 {

@@ -155,8 +155,15 @@ const logoRow = withLogo.length > 0 ? withLogo : partners;
     margin-top: 20px;
     white-space: pre-line;
   }
+  /* Same slim pill as the partners tabs (client feedback of 2026-09-17:
+     "make the website buttons less thick, harmonise everywhere"), with the
+     footer pills as the reference. */
   .institutions .pill {
     margin-top: 24px;
+    padding: 1px 13px 0;
+    font-size: 20px;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
   }
   @media (width<=700px) {
     .institutions {
@@ -168,6 +175,9 @@ const logoRow = withLogo.length > 0 ? withLogo : partners;
     }
     .institutions article :global(p) {
       font-size: 18px;
+    }
+    .institutions .pill {
+      font-size: 16px;
     }
     .logos {
       flex-wrap: wrap;
