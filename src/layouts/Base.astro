@@ -220,11 +220,27 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
       // A little hysteresis (72 down, 24 up) keeps the two states from
       // flickering into each other at the threshold.
       let shrunk = false;
+      let changedAt = 0;
+      let pending = 0;
       const onScroll = () => {
         const y = window.scrollY;
         if (y > 72 && !shrunk) shrunk = true;
         else if (y < 24 && shrunk) shrunk = false;
         else return;
+        // One change per transition: a state that has just flipped stays put
+        // until the sizes have settled, so a scroll that lands near the
+        // threshold cannot chatter between the two. The change is not
+        // dropped, only deferred - otherwise letting go inside the window
+        // would leave the wrong band size until the next scroll.
+        const now = performance.now();
+        const wait = 350 - (now - changedAt);
+        if (wait > 0) {
+          shrunk = !shrunk;
+          clearTimeout(pending);
+          pending = setTimeout(onScroll, wait);
+          return;
+        }
+        changedAt = now;
         document.body.toggleAttribute('data-scrolled', shrunk);
       };
       addEventListener('scroll', onScroll, { passive: true });
@@ -483,6 +499,12 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
      window for the page itself (client feedback, 2026-09-17: the header and
      the title band "take a lot from the screen"). `data-scrolled` is set on
      the body below. */
+  /* Growing the header again adds ~113px above the viewport, and scroll
+     anchoring would answer by moving the scroll position, which could cross
+     the shrink threshold again and toggle the two states back and forth. */
+  body {
+    overflow-anchor: none;
+  }
   body[data-scrolled] {
     --header-h: 84px;
   }
@@ -551,6 +573,9 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     position: sticky;
     top: var(--header-h);
     z-index: 20;
+    /* Same duration and easing as the header's height, so the band travels
+       with it instead of jumping to the end while it animates. */
+    transition: top 0.28s var(--motion-ease);
     background: var(--band-bg, #fff);
   }
   .title-band::after {
