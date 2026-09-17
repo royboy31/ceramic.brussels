@@ -74,12 +74,6 @@ const lines = (s: string | undefined) => String(s ?? '').split(/\r?\n/).filter(B
 const photos: any[] = (practical ? [...(info.images ?? []), ...(page?.images ?? [])] : (page?.images ?? [])).filter(
   (img: any) => img?.asset,
 );
-/** "tour&taxis" — the venue diagram's label, from the venue name. */
-const venueShort = String(info.venueName ?? edition?.venue ?? '')
-  .split(/\s[—–-]\s|,/)[0]
-  .toLowerCase()
-  .replace(/\s*&\s*/g, '&')
-  .trim();
 const siteName = settings?.siteName ?? 'ceramic brussels';
 const path = hubTabPath('visit', tab, lang);
 const altPaths = hubAltPaths('visit', tab);
@@ -221,17 +215,18 @@ const altPaths = hubAltPaths('visit', tab);
                   {info.accessibility && <p {...styleAttrs(info.accessibilityStyle)}>{info.accessibility}</p>}
                 </div>
               )}
-              <div class="venue-map" aria-label={`${info.venueName ?? edition?.venue ?? ''} location diagram`}>
-                <span>{venueShort}</span>
-                <b>
-                  {siteName.split(' ').map((w: string, i: number) => (
-                    <>
-                      {i > 0 && <br />}
-                      {w}
-                    </>
-                  ))}
-                </b>
-              </div>
+              {/* The designer's site diagram (2026-09-17), under the access
+                  modes as the design places it. It is artwork, not content:
+                  a new edition in another hall needs a new file here. */}
+              <img
+                class="venue-map"
+                src="/assets/venue-map.png"
+                width="760"
+                height="536"
+                loading="lazy"
+                decoding="async"
+                alt={t('visit.mapAlt')}
+              />
             </div>
           </section>
         </div>
@@ -460,32 +455,9 @@ const altPaths = hubAltPaths('visit', tab);
     font-weight: 600;
   }
   .venue-map {
-    color: #000;
-    background: repeating-linear-gradient(35deg, #0000 0 22px, #ddd 23px 24px);
-    height: 520px;
+    width: 100%;
+    height: auto;
     margin-top: 35px;
-    position: relative;
-    overflow: hidden;
-  }
-  .venue-map span {
-    background: #fff;
-    padding: 12px;
-    font-size: 40px;
-    font-weight: 600;
-    position: absolute;
-    top: 30px;
-    right: 40px;
-  }
-  .venue-map b {
-    color: #fff;
-    text-align: center;
-    background: #000;
-    padding: 20px;
-    font-size: 20px;
-    line-height: 0.85;
-    position: absolute;
-    top: 210px;
-    left: 48%;
   }
   .photo-row {
     grid-template-columns: repeat(3, 1fr);
@@ -524,9 +496,6 @@ const altPaths = hubAltPaths('visit', tab);
     .access {
       order: 3;
       margin-top: 50px;
-    }
-    .venue-map {
-      height: 320px;
     }
   }
 
