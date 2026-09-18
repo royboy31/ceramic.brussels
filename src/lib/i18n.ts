@@ -260,6 +260,9 @@ const STRINGS = {
     'vip.venue.off-site': 'off-site programme',
     'vip.venue.all': 'all',
     'vip.empty': 'The VIP programme will be published shortly.',
+    'vip.specialRate': 'special rate',
+    'vip.bookStay': 'book your stay',
+    'vip.discoverHotel': 'discover {name}',
   },
   fr: {
     'nav.exhibitors': 'Exposants',
@@ -516,6 +519,9 @@ const STRINGS = {
     'vip.venue.off-site': 'programme hors les murs',
     'vip.venue.all': 'tout',
     'vip.empty': 'Le programme VIP sera publié prochainement.',
+    'vip.specialRate': 'tarif spécial',
+    'vip.bookStay': 'réservez votre séjour',
+    'vip.discoverHotel': 'découvrir {name}',
   },
   nl: {
     'nav.exhibitors': 'Exposanten',
@@ -772,6 +778,9 @@ const STRINGS = {
     'vip.venue.off-site': 'programma in de stad',
     'vip.venue.all': 'alles',
     'vip.empty': 'Het VIP-programma wordt binnenkort gepubliceerd.',
+    'vip.specialRate': 'speciaal tarief',
+    'vip.bookStay': 'boek uw verblijf',
+    'vip.discoverHotel': 'ontdek {name}',
   },
 } as const;
 

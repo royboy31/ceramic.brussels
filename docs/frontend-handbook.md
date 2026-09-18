@@ -54,6 +54,24 @@ page now renders the design's own markup and CSS. The pieces:
 - **The shell** (`Header`, `MenuOverlay` with the `+` accordion, `Footer`)
   and **`HubNav`** (the `.section-head` title band; `dark` on acid pages)
   carry the design markup; the acid pages get `body.acid-page`.
+- **Design scaffolding, when a page is genuinely new.** The VIP hub shipped
+  before anything for it existed in Sanity, so `src/components/vipContent.ts`
+  holds the frames' own copy and `public/assets/vip/` their pictures, and a
+  tab renders them while it has no `page` document (`fromDesign` in
+  `Vip.astro`). It is a stopgap with an off switch, not a pattern to reach
+  for: English only, one flag, logged as a request (#17), and deleted once
+  the documents exist. Prefer an empty state; use this only when the client
+  has to see a new page before the Studio can hold it.
+- **Three page grounds, one prop.** `theme` on `Base.astro` is `default`
+  (white), `acid` (the art prize yellow, `body.acid-page`) or `dark` (black,
+  `body.dark-page` - the three locked VIP tabs). `dark` flips the tokens
+  (`--ground`, `--ink`, `--rule`, `--surface*`) rather than restating each
+  rule, so the shared blocks, pills and slideshows come along; it paints the
+  header and footer flat black, inverts the brand artwork, and turns the
+  active tab into a white chip. The cookie banner and the menu are the
+  site's furniture, not the page's, so they reset the tokens back to
+  daylight inside themselves. A block that hard-codes `#fff` or `#050505`
+  instead of a token will be the thing that looks wrong there.
 - **Blocks have a `variant`**: `PageSections variant="home"` renders the
   homepage's blocks the way the homepage draws them (`Heading` as
   "latest news", `Feature` rows, `Links` as the image bands, `VideoSection`

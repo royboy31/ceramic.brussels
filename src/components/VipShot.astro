@@ -1,0 +1,76 @@
+---
+import type { VipImage } from './vipContent';
+import Figure from './Figure.astro';
+import type { PoolName } from '../lib/placeholders';
+
+/**
+ * One of the VIP frames' own pictures, from `public/assets/vip/`: the design
+ * export, not a Sanity asset, so it is a plain `<img>` with the file's real
+ * width and height rather than `SanityImage`.
+ *
+ * It draws the caption line the design puts under every picture - the credit
+ * at the right - so a fallback picture and a slideshow slide read the same.
+ * With no image it falls through to the shared placeholder pool, which is
+ * what the one row of the frame with no export gets.
+ *
+ * Goes when the VIP tabs are in Sanity (see src/components/vipContent.ts).
+ */
+interface Props {
+  image?: VipImage;
+  /** Placeholder pool and seed, for a row the export has no picture for. */
+  pool?: PoolName;
+  seed?: string;
+  aspect?: number;
+  sizes?: string;
+  loading?: 'eager' | 'lazy';
+  class?: string;
+}
+
+const { image, pool = 'fair', seed = '', aspect = 3 / 2, sizes, loading = 'lazy', class: className } = Astro.props;
+---
+
+{
+  image ? (
+    <figure class:list={['vip-shot', className]}>
+      <img
+        src={image.src}
+        width={image.width}
+        height={image.height}
+        alt={image.alt}
+        sizes={sizes}
+        loading={loading}
+        decoding="async"
+        style={`aspect-ratio: ${aspect}`}
+      />
+      {image.credit && (
+        <figcaption>
+          <span class="credit">© {image.credit}</span>
+        </figcaption>
+      )}
+    </figure>
+  ) : (
+    <div class:list={['vip-shot', 'vip-shot-empty', className]}>
+      <Figure image={null} pool={pool} seed={seed} aspect={aspect} sizes={sizes} loading={loading} />
+    </div>
+  )
+}
+
+<style>
+  .vip-shot {
+    margin: 0;
+  }
+  .vip-shot img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  figcaption {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--ink-2);
+  }
+</style>

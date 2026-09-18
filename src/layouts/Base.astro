@@ -32,8 +32,9 @@ interface Props {
   /** Per-locale paths, when slugs differ per language. */
   altPaths?: Partial<Record<LocaleId, string>>;
   noIndex?: boolean;
-  /** 'acid' paints the whole page yellow, as the art prize section is. */
-  theme?: 'default' | 'acid';
+  /** 'acid' paints the whole page yellow, as the art prize section is;
+   *  'dark' knocks it out in black, as the locked VIP tabs are. */
+  theme?: 'default' | 'acid' | 'dark';
   /** Alias kept for pages written against the skeleton: 'brand' = 'acid'. */
   tone?: 'default' | 'brand';
   /** Social share image for this page. Falls back to the one in Site settings. */
@@ -57,6 +58,7 @@ const {
   editType,
 } = Astro.props;
 const acid = theme === 'acid' || tone === 'brand';
+const dark = theme === 'dark';
 // True inside a /preview/ render: drafts, stega-encoded strings, and the
 // Studio's editing overlay mounted at the end of the body.
 const preview = isPreview();
@@ -111,9 +113,24 @@ const editorNav = (navigation?.items ?? [])
   })
   .filter(Boolean) as { label: string; href: string; external: boolean; sub?: string; children: any[] }[];
 
+/**
+ * The menu's own order, which is not the order `hubs.ts` lists the hubs in:
+ * the design puts **VIP after partners**, where HUBS has it next to the
+ * programme it left. A hub missing from this list still follows, so adding
+ * one cannot drop it from the menu. This orders the fallback only - the live
+ * menu is the `navigation` document, and the VIP row there is the editor's
+ * to add (Setup → Menu and footer).
+ */
+const MENU_ORDER = ['guest-of-honour', 'art-prize', 'programme', 'partners', 'vip', 'visit', 'about'];
+const byMenuOrder = (a: { route: string }, b: { route: string }) => {
+  const at = MENU_ORDER.indexOf(a.route);
+  const bt = MENU_ORDER.indexOf(b.route);
+  return (at < 0 ? MENU_ORDER.length : at) - (bt < 0 ? MENU_ORDER.length : bt);
+};
+
 const fallbackNav = [
   { label: t('nav.exhibitors'), href: localePath(lang, 'exhibitors'), external: false, sub: t('nav.sub.exhibitors'), children: [] },
-  ...Object.values(HUBS).map((hub) => ({
+  ...Object.values(HUBS).sort(byMenuOrder).map((hub) => ({
     label: t(hub.title),
     href: localePath(lang, hub.route),
     external: false,
@@ -178,7 +195,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     <slot name="head" />
   </head>
 
-  <body class={acid ? 'acid-page' : undefined}>
+  <body class:list={[{ 'acid-page': acid, 'dark-page': dark }]}>
     <a class="skip" href="#main">{t('common.skip')}</a>
 
     <Header
@@ -471,6 +488,92 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     background: linear-gradient(#fff 0%, var(--acid) 62%);
     border-bottom: 1px solid var(--ink);
   }
+
+  /* Whole-page black, used by the three locked VIP tabs (Figma VIP frames,
+     2026-09-17): the header, the title band, the page and the footer are one
+     black field, every mark knocked out white, and the active tab is a white
+     chip. The tokens flip rather than each rule being restated, so the
+     shared blocks (sections, slideshow, pills, PortableText) come along.
+
+     The brand artwork is black-on-transparent SVG and PNG with no white
+     counterpart, so it is inverted in place - it is pure black line work,
+     which inverts exactly. A coloured mark would need its own file. */
+  body.dark-page {
+    background: var(--dark-ground);
+    color: #fff;
+    --dark-ground: #050505;
+    --ground: var(--dark-ground);
+    --band-bg: var(--dark-ground);
+    --surface: #141414;
+    --surface-2: #1c1c1c;
+    --ink: #ffffff;
+    --ink-2: #c9c7c3;
+    --ink-3: #96938e;
+    --rule: #ffffff;
+    --accent: #ffffff;
+  }
+  body.dark-page :is(.site-header, footer).acid-wash {
+    background: var(--dark-ground);
+  }
+  body.dark-page .site-header {
+    border-bottom: 1px solid #fff;
+  }
+  body.dark-page :is(.site-header, .site-footer) img {
+    filter: invert(1);
+  }
+  /* The menu overlay keeps the light identity: it is the site's, not the
+     page's, and it slides over whatever is underneath. */
+  body.dark-page dialog img {
+    filter: none;
+  }
+  body.dark-page :is(.pill, .footer-pill) {
+    border-color: #fff;
+  }
+  /* design.css hovers every pill to white-on-black with !important; on a
+     black page it has to go the other way. */
+  body.dark-page
+    :where(.pill, .section-head a, .subnav a, [data-filter], footer a, .footer-pill):hover,
+  body.dark-page .section-head a.active:hover {
+    color: #050505 !important;
+    background-color: #fff !important;
+  }
+  body.dark-page .section-head a.active {
+    color: #050505;
+    background: #fff !important;
+  }
+  body.dark-page a:focus-visible,
+  body.dark-page button:focus-visible {
+    outline-color: #fff;
+  }
+  /* The rules the design draws under a heading are white here. */
+  body.dark-page .rule,
+  body.dark-page hr {
+    border-color: #fff;
+  }
+  /* The cookie banner and the menu are the site's own furniture, not the
+     page's: both keep the light identity wherever they open, so the tokens
+     go back to their daylight values inside them rather than each rule
+     being restated. Without this the banner's buttons paint themselves in
+     `--ground`, which is black here, over a black label. */
+  body.dark-page :is(.consent, dialog) {
+    --ground: #ffffff;
+    --surface: #fafaf9;
+    --surface-2: #f0efed;
+    --ink: #050505;
+    --ink-2: #55534f;
+    --ink-3: #8a8781;
+    --rule: #e0dedb;
+    --accent: #050505;
+    color: #050505;
+  }
+  body.dark-page :is(.consent, dialog) :is(.pill, .footer-pill, button, a) {
+    border-color: #050505;
+  }
+  body.dark-page :is(.consent, dialog) :where(button, a):hover {
+    color: #fff !important;
+    background-color: #050505 !important;
+  }
+
   /* The title band with a page's tabs (hub pages, exhibitors, guest of
      honour) stays at the top of the window while the page scrolls, so the
      sub-pages are always a click away, and fades into the page below it

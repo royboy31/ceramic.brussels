@@ -246,3 +246,153 @@ is already selected by `getProgramme`).
 **Asked for:** an Organisation group on Site settings - `organiserText` (localeText), `organiserLink` (a `link`, so the pill's label is editable) and `postalAddress` (text) - returned by `getSettings`. If any of the three is meant to live on the about/contact `page` instead, say which and the frontend reads it there.
 
 ---
+## #14 · open · 2026-09-18 · a booking link on a VIP programme event
+
+**Page / component:** `src/components/hubs/Vip.astro`, the VIP programme tab
+**Figma frame:** `output.pdf` page 3 (VIP frames, 2026-09-18)
+**The design shows:** every off-site entry ends in a pill - "book your visit ↗"
+on KANAL, Charles Kaisin, Galila's P.O.C, Hôtel Solvay, Charles Riva and
+Vanhaerents, "book the party ↗" on the MAD Brussels afterparty - and the
+on-site entry ends in "discover Puilaetco →". Both the label and the target
+change per event, so neither can be a fixed string in the code.
+**The query returns today:** `getProgramme` → `_id, startsAt, endsAt, kind,
+section, venue, languages, moderator, invitationOnly, slug, title, location,
+description, speakersText, speakers[], image`. There is no link anywhere on
+`programmeEvent`.
+**Rendered meanwhile:** the pill is drawn, with the frame's own label, and
+points at the VIP team's address - the one the contact block gives for "any
+queries regarding your visit or reservation". No venue URL is guessed. A
+`programmeEvent` that carries its own link gets no pill at all today, so
+wiring this field also removes that gap.
+**Asked for:** a `link` (the shared `link` object, so the label is the
+editor's and internal/external gives the right arrow) on `programmeEvent`,
+selected in the `getProgramme` projection. The `link` object is already used
+by `page`, `partner` and the page-builder blocks, so `resolveLink` renders it
+with no further work here.
+
+---
+
+## #15 · open · 2026-09-18 · a VIP event that repeats every day
+
+**Page / component:** `src/components/hubs/Vip.astro`, the VIP programme tab,
+on-site section
+**Figma frame:** `output.pdf` page 3, "discovery tours by Puilaetco"
+**The design shows:** the on-site entry is dated **"everyday — 11:00 /
+16:00"**: it runs on all five days, at two times, and the frame prints that
+instead of a date. The VIP lounge frame does the same ("VIP aperitivos,
+everyday — 17:30 → 19:00").
+**The query returns today:** `startsAt` is one required datetime and `endsAt`
+is hidden, so an event that repeats is either one document on an arbitrary day
+(and the page prints that day, which is wrong) or five documents (and the
+design's single block becomes five).
+**Rendered meanwhile:** the tab shows the frames' own entries
+(`src/components/vipContent.ts`), where "everyday — 11:00 / 16:00" is a
+string, so the design is on screen. Once the tab has a `page` document the
+component switches to Sanity and the on-site row prints
+`formatTime(startsAt)` alone - no day, which reads correctly for a one-off
+and understates a repeat. The off-site section is genuinely per-day and is
+grouped by `startsAt`, so it needs nothing.
+**Asked for:** the simplest thing that renders the frame - a `whenText`
+(localeString) on `programmeEvent`, shown in place of the formatted time when
+it is set, so an editor writes "everyday — 11:00 / 16:00" once. A recurrence
+model (`days[]` + `times[]`) would also work but is far more than these two
+blocks need.
+
+**Also, content rather than schema:** only two VIP events exist for the
+current edition (Preview, Vernissage) and both are `venue: "off-site"`, so
+the design's on-site section has nothing to draw and the seven off-site
+entries of the frame are not in Sanity at all. The tab renders what is there.
+
+---
+
+## #16 · open · 2026-09-18 · the hotel's special rate as its own fields
+
+**Page / component:** `src/components/hubs/Vip.astro`, the hotel deal tab
+**Figma frame:** `output.pdf` page 5
+**The design shows:** a bordered panel with three distinct things - the label
+"special rate" in the top right corner, the rate line **"€160/night breakfast
+included"** in bold caps, and under it the paragraph "Use code CERAMIC27 to
+enjoy a special rate of €160 per night…". Beside the panel, above it, sit the
+hotel's own name, its description and "discover The Hoxton ↗".
+**The query returns today:** `getSettings` → `practicalInfo.hotelDeal{ text,
+url, partner-> }`. One Text field has to carry both the rate line and the
+paragraph, and there is nothing to put in the panel's label.
+**Rendered meanwhile:** the panel is drawn from the frame's own two lines
+(`src/components/vipContent.ts`) while the tab has no `page` document, with
+the label from a UI string (`vip.specialRate`, all three locales). `{code}`
+in that paragraph is filled from the D1 setting `hotel_code` on a Worker
+render and falls back to the frame's CERAMIC27, so the live code still never
+sits in the repo or in Sanity.
+**Asked for:** a `rate` (localeString) beside `text` on
+`practicalInfo.hotelDeal`, selected in `getSettings`, so the two lines are two
+fields and the split can go. If the panel is meant to be reusable on other
+pages it should instead be a page-builder block (label, rate, text, link) -
+say which and the frontend follows.
+
+---
+## #17 · open · 2026-09-18 · the VIP tabs have no page documents
+
+**Page / component:** `src/components/hubs/Vip.astro`, all five tabs
+**Figma frame:** `output.pdf`, the five VIP frames (2026-09-18)
+**The design shows:** five full pages - lead, pictures, "programme overview"
+with two groups of rows, an on-site and a four-day off-site programme, the
+lounge's scenography, aperitivos and agenda, and the hotel deal.
+**The query returns today:** `getHubPages(lang, 'vip')` → nothing. No `page`
+document exists with `section: "vip"` for any of `about`, `programme`,
+`lounge`, `hotel-deal`, `access`, so every tab has no lead, no cover, no
+section stack and no body. `getProgramme` returns two VIP events (Preview,
+Vernissage, both 2026, both `venue: "off-site"`, neither with a description)
+where the frame lists eight for 2027.
+**Rendered meanwhile:** the frames' own copy and pictures, from
+`src/components/vipContent.ts` and `public/assets/vip/`, so the pages can be
+reviewed and shown now. **This is scaffolding and is meant to be deleted.**
+A tab switches to Sanity the moment it has a `page` document - `fromDesign`
+in the component is the whole of the mechanism - so the hand-over is one
+document at a time and needs no frontend change.
+**Two fields that are only fields, and change what the page prints today:**
+ - **Site settings → VIP → contact email** is empty, so `getVipSettings`
+   coalesces it to the site's `contactEmail` and the contact block, the
+   "book your visit" pills and the wrong-code line all say
+   *info@ceramic.brussels*. The frame says **vip@ceramic.brussels**.
+ - **Partner "Embelco" has no website URL**, so its pill is dropped. The
+   lounge frame draws "discover Embelco →" beside "discover MAD Brussels";
+   filling the URL brings it back with no code change.
+
+**Asked for:** five `page` documents in section `vip` with the English slugs
+`about`, `programme`, `lounge`, `hotel-deal` and `access`, and the 2027 VIP
+events of the frame as `programmeEvent`s with `section: "vip"` and `venue`
+set. The copy is transcribed in `src/components/vipContent.ts` and the
+pictures are in `public/assets/vip/`, ready to be uploaded; the English is
+the only language the design has. Two notes for whoever types it in: the
+frame's MAD Brussels afterparty and its three lounge agenda rows repeat
+another entry's paragraph (still placeholder in the design), and the Charles
+Riva row is credited "© Hotel Solvay" by mistake, which the fallback corrects.
+
+---
+## #18 · open · 2026-09-18 · a VIP row in the menu, after partners
+
+**Page / component:** the slide-in menu (`src/components/MenuOverlay.astro`,
+fed by `getNavigation` through `Base.astro`)
+**Figma frame:** the VIP frames of 2026-09-18; the hub exists and is linked
+from nothing.
+**The design shows:** VIP as a menu row of its own, **after partners** and
+before visitors info, with its tabs on the sub-line (about / VIP programme /
+VIP lounge / hotel deal).
+**The query returns today:** `getNavigation` → the seven rows the
+`navigation` document holds - exhibitors, guest of honour, art prize,
+programme, partners, visitors info, about. There is no VIP row, so the hub
+is reachable only by typing the address.
+**Rendered meanwhile:** nothing invented - the menu renders the document as
+it is. The *fallback* menu (used only when the document has no items) now
+orders the hubs the way the design does, VIP after partners, through
+`MENU_ORDER` in `Base.astro`.
+**Asked for:** a `navItem` for the VIP hub between `navItem4` (partners) and
+the visitors-info row, with `navChild`ren for its four pills. **It belongs in
+`scripts/apply-design-content.mjs`, not only in the Studio**: the `nav` step
+does `set('navigation', { items })` with fixed `_key`s, so it replaces the
+whole array - a row added by hand in the Studio disappears the next time
+`--only=nav` runs. Labels, for the three locales: VIP / VIP / VIP, and the
+tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
+`tabs.vipLounge`, `tabs.hotelDeal`).
+
+---

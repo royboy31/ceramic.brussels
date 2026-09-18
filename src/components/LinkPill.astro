@@ -15,10 +15,16 @@ interface Props {
   label?: string;
   external?: boolean;
   variant?: 'pill' | 'text' | 'solid';
+  /**
+   * Keep the label's own capitals. The design sets pill labels lowercase,
+   * but not where the label is a name - "discover The Hoxton ↗", "discover
+   * MAD Brussels ↗" on the VIP frames.
+   */
+  preserveCase?: boolean;
   class?: string;
 }
 
-const { lang, link, href, label, external, variant = 'pill', class: className } = Astro.props;
+const { lang, link, href, label, external, variant = 'pill', preserveCase = false, class: className } = Astro.props;
 
 const resolved: ResolvedLink | null = link
   ? resolveLink(lang, link)
@@ -30,7 +36,7 @@ const resolved: ResolvedLink | null = link
 {
   resolved && (
     <a
-      class:list={['link', variant, className]}
+      class:list={['link', variant, { caps: preserveCase }, className]}
       href={resolved.href}
       {...(resolved.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
     >
@@ -62,6 +68,9 @@ const resolved: ResolvedLink | null = link
     transition:
       background-color 0.15s ease,
       color 0.15s ease;
+  }
+  .caps {
+    text-transform: none;
   }
   .pill:hover,
   .pill:focus-visible {

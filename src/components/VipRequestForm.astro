@@ -64,7 +64,7 @@ const fields = [
   <div class="fields">
     {
       fields.map((f) => (
-        <div class:list={['field', { wide: f.name === 'email' }]}>
+        <div class="field">
           <label class="body-24" for={`${id}-${f.name}`}>
             {f.label}
             <span class="req" aria-hidden="true">
@@ -84,14 +84,17 @@ const fields = [
         </div>
       ))
     }
+
+    {/* The frame puts the button in the second column, level with the
+        e-mail box that ends the first. */}
+    <div class="actions">
+      <button type="submit" class="send" data-submit>
+        <span class="link-arrow" aria-hidden="true">→</span> {t('vip.send')}
+      </button>
+    </div>
   </div>
 
-  <div class="actions">
-    <button type="submit" class="pill dark" data-submit>
-      <span class="link-arrow" aria-hidden="true">→</span> {t('vip.send')}
-    </button>
-    <p class="status body-24" data-status role="status" aria-live="polite" />
-  </div>
+  <p class="status body-24" data-status role="status" aria-live="polite" />
 </form>
 
 <script>
@@ -186,9 +189,6 @@ const fields = [
     display: flex;
     flex-direction: column;
   }
-  .field.wide {
-    grid-column: 1 / -1;
-  }
   label {
     letter-spacing: -0.025em;
     text-transform: lowercase;
@@ -200,23 +200,22 @@ const fields = [
   input {
     width: 100%;
     margin-top: 6px;
-    padding: 8px 0 10px;
-    border: 0;
-    border-bottom: 1px solid currentColor;
+    padding: 6px 12px 8px;
+    border: 1px solid currentColor;
     border-radius: 0;
-    background: transparent;
+    background: var(--ground, #fff);
     color: inherit;
     font-size: 24px;
     line-height: 1.25;
     letter-spacing: -0.025em;
   }
   input:focus-visible {
-    outline: none;
-    box-shadow: inset 0 -2px 0 currentColor;
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
   }
   input[aria-invalid='true'] {
-    border-bottom-color: #c8102e;
-    box-shadow: inset 0 -2px 0 #c8102e;
+    border-color: #c8102e;
+    box-shadow: inset 0 0 0 1px #c8102e;
   }
   .hint {
     margin: 8px 0 0;
@@ -225,26 +224,40 @@ const fields = [
     line-height: 1.3;
     color: #c8102e;
   }
+  /* In the grid's last cell, pushed down so the button sits on the same
+     line as the e-mail box beside it. */
   .actions {
-    margin-top: 28px;
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 20px 40px;
+    align-items: flex-end;
+    min-height: 100%;
+    padding-bottom: 2px;
   }
-  .pill.dark {
+  /* The same square-cornered black block as the code button: the access
+     frame draws both that way, labels in caps. */
+  .send {
     cursor: pointer;
     background: #050505;
-    border-color: #050505;
+    border: 1px solid #050505;
+    border-radius: 0;
     color: #fff;
-    text-transform: lowercase;
+    padding: 9px 18px;
+    font-size: 18px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
   }
-  .pill:disabled {
+  .send:hover,
+  .send:focus-visible {
+    background: var(--color-acid);
+    color: #050505;
+  }
+  .send:disabled {
     cursor: default;
     opacity: 0.55;
   }
   .status {
-    margin: 0;
+    margin: 24px 0 0;
     max-width: 62ch;
   }
   .status:empty {
@@ -265,6 +278,10 @@ const fields = [
     .fields {
       grid-template-columns: 1fr;
       gap: 22px;
+    }
+    .actions {
+      min-height: 0;
+      margin-top: 6px;
     }
     input {
       font-size: 18px;

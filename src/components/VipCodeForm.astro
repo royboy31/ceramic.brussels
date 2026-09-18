@@ -18,10 +18,21 @@ interface Props {
   lang: LocaleId;
   /** The VIP team's address, for the "not recognised" line. */
   contact?: string;
+  /**
+   * "VIP already?" over the box. The access page asks it, because the box
+   * is answering the other half of the page; the about tab's box stands on
+   * its own and the design gives it the arrow line alone.
+   */
+  heading?: boolean;
+  /**
+   * The arrow before ENTER. The access frame draws "→ ENTER"; the narrower
+   * box on the about tab drops the arrow.
+   */
+  arrow?: boolean;
   class?: string;
 }
 
-const { lang, contact = 'vip@ceramic.brussels', class: className } = Astro.props;
+const { lang, contact = 'vip@ceramic.brussels', heading = true, arrow = true, class: className } = Astro.props;
 const t = useTranslations(lang);
 const fallback = localePath(lang, hubTabPath('vip', 'programme', lang));
 ---
@@ -37,13 +48,18 @@ const fallback = localePath(lang, hubTabPath('vip', 'programme', lang));
 >
   <input type="hidden" name="lang" value={lang} />
   <input type="hidden" name="next" value={fallback} data-next />
-  <h2 class="panel-title">{t('vip.already')}</h2>
-  <p class="body-24">{t('vip.enterCode')}</p>
+  {heading && <h2 class="panel-title">{t('vip.already')}</h2>}
+  <p class="lead">{t('vip.enterCode')}</p>
   <div class="row">
     <label class="sr-only" for="vip-code">{t('vip.code')}</label>
     <input id="vip-code" name="code" type="text" required autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder={t('vip.code')} maxlength="40" />
-    <button type="submit" class="pill dark" data-submit>
-      <span class="link-arrow" aria-hidden="true">→</span> {t('vip.enter')}
+    <button type="submit" class="enter" data-submit>
+      {arrow && (
+        <>
+          <span class="link-arrow" aria-hidden="true">→</span>{' '}
+        </>
+      )}
+      {t('vip.enter')}
     </button>
   </div>
   <p class="status body-24" data-status role="status" aria-live="polite" />
@@ -103,6 +119,12 @@ const fallback = localePath(lang, hubTabPath('vip', 'programme', lang));
     border: 0;
     margin-bottom: 8px;
   }
+  /* The frames set this line large, a step under the panel title. */
+  .vip-code .lead {
+    font-size: clamp(20px, 2vw, 28px);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
   .row {
     display: flex;
     flex-wrap: wrap;
@@ -126,15 +148,27 @@ const fallback = localePath(lang, hubTabPath('vip', 'programme', lang));
     outline: 2px solid;
     outline-offset: 2px;
   }
-  .pill.dark {
+  /* A square-cornered black block, not a pill: the frames draw the code
+     button that way, with the label in caps. */
+  .enter {
     cursor: pointer;
     background: #050505;
-    border-color: #050505;
+    border: 1px solid #050505;
+    border-radius: 0;
     color: #fff;
-    text-transform: lowercase;
+    padding: 9px 18px;
+    font-size: 18px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     white-space: nowrap;
   }
-  .pill:disabled {
+  .enter:hover,
+  .enter:focus-visible {
+    background: var(--color-acid);
+    color: #050505;
+  }
+  .enter:disabled {
     cursor: default;
     opacity: 0.55;
   }

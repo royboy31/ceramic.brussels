@@ -4,32 +4,41 @@ import HubNav from '../../components/HubNav.astro';
 import PageSections from '../../components/PageSections.astro';
 import SanityImage from '../../components/SanityImage.astro';
 import PortableText from '../../components/PortableText.astro';
-import Figure from '../../components/Figure.astro';
+import Slideshow from '../../components/Slideshow.astro';
+import LinkPill from '../../components/LinkPill.astro';
+import VipShot from '../../components/VipShot.astro';
 import VipCodeForm from '../../components/VipCodeForm.astro';
 import VipRequestForm from '../../components/VipRequestForm.astro';
 import type { LocaleId } from '../../lib/locales';
-import { hasString, useTranslations, formatDay, formatTime } from '../../lib/i18n';
-import { getHubPages, getProgramme, getVipSettings } from '../../lib/queries';
+import { useTranslations, localePath, formatDayLong, formatTime } from '../../lib/i18n';
+import { getHubPages, getProgramme, getPartners, getSettings, getVipSettings } from '../../lib/queries';
 import { HUBS, hubTabPath, hubAltPaths, pageForTab } from '../../lib/hubs';
 import { styleAttrs } from '../../lib/textStyle';
+import { VIP_CONTENT, type VipLink, type VipRow } from '../vipContent';
 import { vipEnv, vipSetting } from '../../server/vip';
 
 /**
- * The VIP hub (Figma VIP frames, docs/vip-access.md). Five tabs from one
- * component:
+ * The VIP hub (Figma VIP frames of 2026-09-18, docs/vip-access.md). Five
+ * tabs from one component:
  *
- * - about: public. The tab's page - lead, cover, blocks, body, images -
- *   with the "enter your code" box beside the cover.
- * - programme, lounge, hotel-deal: locked. The Worker renders them once
- *   src/middleware.ts has seen a VIP session; the page's text as above,
- *   and on the programme tab the current edition's VIP events grouped by
- *   day behind an on-site / off-site filter. The hotel tab's `{code}` is
- *   filled from D1, so the hotel's code never sits in Sanity.
- * - access: the locked state the gate redirects to - "VIP already?" beside
- *   "not a VIP yet?" - public, noindex.
+ * - **about**: public, on white. The lead, the picture, the grey "enter your
+ *   code" box with the page's paragraph under it, then "programme overview"
+ *   and the two closing columns.
+ * - **programme, lounge, hotel-deal**: locked, and **black** - the design
+ *   knocks these three out (`theme="dark"` on Base, which flips the tokens
+ *   so the shared blocks come along). The Worker renders them once
+ *   src/middleware.ts has seen a VIP session; `astro dev` has no Worker and
+ *   opens them to anyone.
+ * - **access**: the locked state the gate redirects to - "VIP already?"
+ *   beside "not a VIP yet?" - public, noindex.
  *
- * A first working build of the frames; the markup is Lilanga's to bring
- * to the design.
+ * **Sanity first, the frames second.** The hub is new and no `page` document
+ * exists for any of its tabs, so a tab without one renders the frames' own
+ * copy and pictures from `src/components/vipContent.ts` - `fromDesign` below is the
+ * whole of it. Creating the tab's page in the Studio switches that tab over
+ * for good; when all five are there, the flag, the fallbacks and that file
+ * go together. Data the design needs and the model does not carry is logged
+ * in docs/backend-requests.md (#14-#16).
  */
 const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const t = useTranslations(lang);
@@ -39,145 +48,493 @@ if (!hubTab) return Astro.rewrite('/404');
 const locked = !!hubTab.locked;
 const isAccess = tab === 'access';
 
-const [pages, settings, events] = await Promise.all([
+const [pages, settings, site, partners, events] = await Promise.all([
   getHubPages(lang, 'vip'),
   getVipSettings(lang),
+  getSettings(lang),
+  getPartners(lang),
   tab === 'programme' ? getProgramme(lang) : Promise.resolve([] as any[]),
 ]);
 let page = pageForTab(pages, tab);
-const tabLabel = page?.tabLabel ?? t(hubTab.label);
 
-// The hotel's code, from the settings table the Worker can read: an editor
-// writes `{code}` where it goes. Nothing to fill under `astro dev`.
-if (tab === 'hotel-deal' && page) {
-  const env = await vipEnv();
-  const code = env ? await vipSetting(env.VIP_DB, 'hotel_code').catch(() => null) : null;
-  if (code) page = JSON.parse(JSON.stringify(page).split('{code}').join(code.replace(/[\\"]/g, '')));
+const contact = settings?.contact || site?.contactEmail || 'vip@ceramic.brussels';
+
+/**
+ * The frames' links resolve here rather than in the content file, so no URL
+ * is written down twice: a tab of this hub, a tab of another, or a partner's
+ * own website from its document - which is why "discover Embelco" simply
+ * does not appear while that partner has no URL. A booking pill writes to
+ * the VIP team, the address the contact block gives for exactly that, until
+ * the venues' own links arrive (request #14).
+ */
+const partnerUrl = (name: string) => partners.find((p: any) => p?.name === name)?.url ?? null;
+function resolveVipLink(link: VipLink) {
+  switch (link.kind) {
+    case 'tab':
+      return { href: localePath(lang, hubTabPath('vip', link.tab, lang)), label: link.label, external: false, caps: false };
+    case 'hub':
+      return { href: localePath(lang, hubTabPath(link.route, link.tab, lang)), label: link.label, external: false, caps: false };
+    case 'partner': {
+      const url = partnerUrl(link.partner);
+      // "discover The Hoxton", "discover MAD Brussels": a name, so the pill
+      // keeps its capitals where every other label is set lowercase.
+      return url ? { href: url, label: link.label, external: true, caps: true } : null;
+    }
+    case 'booking':
+      return { href: `mailto:${contact}`, label: link.label, external: true, caps: false };
+    case 'email':
+      return { href: `mailto:${contact}`, label: link.label ?? contact, external: true, caps: true };
+  }
+}
+type Resolved = { href: string; label: string; external: boolean; caps: boolean };
+const vipLinks = (links: readonly VipLink[] = []) => links.map(resolveVipLink).filter(Boolean) as Resolved[];
+
+/**
+ * The hotel's code, from the settings table the Worker can read: `{code}` is
+ * filled wherever it appears, in the page or in the rate paragraph. Under
+ * `astro dev`, and until the setting exists, the frame's own code stands in.
+ */
+const hotelCode =
+  tab === 'hotel-deal'
+    ? await vipEnv()
+        .then((env) => (env ? vipSetting(env.VIP_DB, 'hotel_code') : null))
+        .catch(() => null)
+    : null;
+if (hotelCode && page) {
+  page = JSON.parse(JSON.stringify(page).split('{code}').join(String(hotelCode).replace(/[\\"]/g, '')));
 }
 
-/* The programme tab: this edition's VIP events, by day. */
+/* The programme tab: this edition's VIP events, on-site then off-site. */
 const listed = tab === 'programme' ? events.filter((e: any) => e.section === 'vip' && e.startsAt) : [];
-const days = [...new Set(listed.map((e: any) => e.startsAt.slice(0, 10)))] as string[];
-const onDay = (day: string) => listed.filter((e: any) => e.startsAt.startsWith(day));
-const venues = [...new Set(listed.map((e: any) => e.venue).filter(Boolean))] as string[];
-const venueLabel = (venue: string) => (hasString(`vip.venue.${venue}`) ? t(`vip.venue.${venue}` as any) : venue);
+const onSite = listed.filter((e: any) => e.venue === 'on-site');
+const offSite = listed.filter((e: any) => e.venue !== 'on-site');
+const days = [...new Set(offSite.map((e: any) => e.startsAt.slice(0, 10)))] as string[];
+const onDay = (day: string) => offSite.filter((e: any) => e.startsAt.startsWith(day));
 const lines = (s: string) => String(s ?? '').split(/\r?\n/);
 
 const path = hubTabPath('vip', tab, lang);
 const altPaths = hubAltPaths('vip', tab);
+const tabLabel = page?.tabLabel ?? t(hubTab.label);
 const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
+const hasSections = (page?.sections ?? []).length > 0;
+/**
+ * **The one switch.** No `page` document for this tab yet, so the frames'
+ * own copy and pictures stand in for all of it - including the programme,
+ * where the two VIP events the 2026 import left behind are not the eight the
+ * frame lists. The moment Kamindu creates the tab's page this flips and the
+ * Studio is the only source again.
+ */
+const fromDesign = !page;
+/** One `cover` today; the array is what request #12 asks for site-wide. */
+const heroImages = page?.cover?.asset ? [page.cover] : [];
+
+const C = VIP_CONTENT;
+const intro =
+  page?.intro ??
+  (tab === 'about'
+    ? C.about.intro
+    : tab === 'lounge'
+      ? C.lounge.intro
+      : tab === 'hotel-deal'
+        ? C.hotelDeal.intro
+        : undefined);
+const rate = {
+  ...C.hotelDeal.rate,
+  text: C.hotelDeal.rate.text.split('{code}').join(String(hotelCode || C.hotelDeal.rate.fallbackCode)),
+};
 ---
 
 <Base
   lang={lang}
   title={page?.seo?.title ?? `${t('nav.vip')} — ${tabLabel}`}
-  description={page?.seo?.description ?? page?.intro}
+  description={page?.seo?.description ?? intro}
   noIndex={locked || isAccess || page?.seo?.noIndex}
   image={page?.seo?.ogImage ?? page?.cover}
+  theme={locked ? 'dark' : 'default'}
   path={path}
   altPaths={altPaths}
   editId={page?._id}
   editType={page?._type}
 >
-  <HubNav lang={lang} route="vip" active={tab} pages={pages} />
+  <HubNav lang={lang} route="vip" active={tab} pages={pages} class="vip-band" />
 
   <div class="content-wrap vip">
-    {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
+    {intro && <p class="intro-large" {...styleAttrs(page?.introStyle)}>{intro}</p>}
 
+    {/* ------------------------------------------------------------ about */}
     {
-      tab === 'about' ? (
-        <div class="two-col about-top">
-          {page?.cover?.asset ? (
-            <SanityImage image={page.cover} loading="eager" aspect={3 / 2} widths={[600, 900, 1200]} sizes="(max-width: 900px) 100vw, 560px" />
-          ) : (
-            <div />
-          )}
-          {settings?.gateOpen !== false && <VipCodeForm lang={lang} contact={settings?.contact} />}
+      tab === 'about' && (
+        <div class="split-8-4 about-top">
+          <div>
+            {heroImages.length > 0 ? (
+              <Slideshow
+                images={heroImages}
+                aspect={3 / 2}
+                id="vip-hero"
+                label={tabLabel}
+                sizes="(max-width: 900px) 100vw, 62vw"
+                widths={[600, 900, 1200, 1600]}
+              />
+            ) : (
+              <VipShot image={C.about.hero} aspect={3 / 2} loading="eager" sizes="(max-width: 900px) 100vw, 62vw" />
+            )}
+          </div>
+          <aside>
+            {settings?.gateOpen !== false && <VipCodeForm lang={lang} contact={contact} heading={false} arrow={false} />}
+            <div class="body-20 gate-note">
+              {page?.body ? (
+                <PortableText value={page.body} fieldStyle={page.bodyStyle} />
+              ) : (
+                <p>
+                  {C.about.note.split(C.about.noteLink.phrase)[0]}
+                  <a
+                    class="text-link"
+                    href={localePath(lang, hubTabPath(C.about.noteLink.route, C.about.noteLink.tab, lang))}
+                  >
+                    {C.about.noteLink.phrase}
+                  </a>
+                  {C.about.note.split(C.about.noteLink.phrase)[1]}
+                </p>
+              )}
+            </div>
+          </aside>
         </div>
-      ) : (
-        page?.cover?.asset && (
-          <SanityImage
-            image={page.cover}
-            loading="eager"
-            aspect={16 / 9}
-            widths={[600, 900, 1200, 1600]}
-            sizes="(max-width: 1440px) 100vw, 1380px"
-            class="cover"
-          />
-        )
       )
     }
 
-    {page && <PageSections lang={lang} sections={page.sections} />}
-
     {
-      page?.body && (
-        <div class="body-24 page-body">
-          <PortableText value={page.body} fieldStyle={page.bodyStyle} />
-        </div>
-      )
-    }
-
-    {
-      tab === 'programme' && days.length > 0 && (
-        <section class="programme" data-vip-programme>
-          {venues.length > 1 && (
-            <nav class="venues" aria-label={t('tabs.vipProgramme')}>
-              <button type="button" class="pill active" data-venue="">
-                {t('vip.venue.all')}
-              </button>
-              {venues.map((venue) => (
-                <button type="button" class="pill" data-venue={venue}>
-                  {venueLabel(venue)}
-                </button>
+      /* "programme overview" - the editor's section stack once there is one. */
+      tab === 'about' && fromDesign && (
+        <section class="group overview">
+          <h2 class="group-title">{C.about.overview.title}</h2>
+          {C.about.overview.groups.map((group) => (
+            <div class="subgroup">
+              <h3 class="subgroup-title">{group.title}</h3>
+              {group.rows.map((row: VipRow) => (
+                <article class="split-8-4 overview-row">
+                  <div>
+                    {row.eyebrow && <p class="eyebrow-strong">{row.eyebrow}</p>}
+                    <p class="body-20">{row.text}</p>
+                    {vipLinks(row.links).length > 0 && (
+                      <p class="links">
+                        {vipLinks(row.links).map((l) => (
+                          <LinkPill lang={lang} href={l.href} label={l.label} external={l.external} preserveCase={l.caps} />
+                        ))}
+                      </p>
+                    )}
+                  </div>
+                  <VipShot image={row.image} seed={row.eyebrow} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 30vw" />
+                </article>
               ))}
-            </nav>
+            </div>
+          ))}
+        </section>
+      )
+    }
+
+    {
+      tab === 'about' && fromDesign && (
+        <section class="two-col closing">
+          {C.about.closing.map((column: VipRow) => (
+            <div>
+              <h2 class="panel-title">{column.title}</h2>
+              <p class="body-20">{column.text}</p>
+              {vipLinks(column.links).length > 0 && (
+                <p class="links">
+                  {vipLinks(column.links).map((l) => (
+                    <LinkPill
+                      lang={lang}
+                      href={l.href}
+                      label={l.label}
+                      external={l.external}
+                      preserveCase={l.caps}
+                      variant={l.href.startsWith('mailto:') ? 'text' : 'pill'}
+                    />
+                  ))}
+                </p>
+              )}
+            </div>
+          ))}
+        </section>
+      )
+    }
+
+    {/* ----------------------------------------------------------- lounge */}
+    {
+      tab === 'lounge' && (
+        <div class="two-col lounge-top">
+          {heroImages.length > 0 ? (
+            <Slideshow
+              images={heroImages}
+              aspect={3 / 2}
+              id="vip-cover"
+              label={tabLabel}
+              sizes="(max-width: 900px) 100vw, 46vw"
+              widths={[600, 900, 1200]}
+            />
+          ) : (
+            <VipShot image={C.lounge.cover} aspect={3 / 2} loading="eager" sizes="(max-width: 900px) 100vw, 46vw" />
           )}
-          <div class="days">
-            {days.map((day) => (
-              <section class="day" data-day>
-                <h2>{formatDay(day, lang)}</h2>
-                <div class="events">
-                  {onDay(day).map((e: any, j: number) => {
-                    const copy = (
-                      <div class="copy">
-                        <time datetime={e.startsAt}>{formatTime(e.startsAt, lang)}</time>
-                        <h3 {...styleAttrs(e.titleStyle)}>
-                          {lines(e.title).map((line, k) => (
-                            <>
-                              {k > 0 && <br />}
-                              {line}
-                            </>
-                          ))}
-                        </h3>
-                        {e.venue && <p class="venue-tag">{venueLabel(e.venue)}</p>}
-                        {e.description && (
-                          <div class="text">
-                            <PortableText value={e.description} fieldStyle={e.descriptionStyle} />
-                          </div>
-                        )}
-                        {e.speakersText && <p class="speakers">{e.speakersText}</p>}
-                      </div>
-                    );
-                    const picture = (
-                      <Figure image={e.image} pool="fair" seed={e.slug ?? e._id} aspect={460 / 289} sizes="(max-width: 700px) 100vw, 460px" widths={[460, 920]} />
-                    );
-                    return (
-                      <article data-venue={e.venue ?? ''}>
-                        {j % 2 === 0 ? copy : picture}
-                        {j % 2 === 0 ? picture : copy}
-                      </article>
-                    );
-                  })}
+          {fromDesign && (
+            <div>
+              <h2 class="panel-title">{C.lounge.scenography.title}</h2>
+              <p class="body-20">{C.lounge.scenography.text}</p>
+              {vipLinks(C.lounge.scenography.links).length > 0 && (
+                <p class="links">
+                  {vipLinks(C.lounge.scenography.links).map((l) => (
+                    <LinkPill lang={lang} href={l.href} label={l.label} external={l.external} preserveCase={l.caps} />
+                  ))}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    {
+      tab === 'lounge' && fromDesign && (
+        <div class="two-col aperitivos">
+          <div>
+            <h2 class="panel-title">{C.lounge.aperitivos.title}</h2>
+            <p class="event-when">{C.lounge.aperitivos.when}</p>
+            <p class="body-20 event-text">{C.lounge.aperitivos.text}</p>
+          </div>
+          <VipShot image={C.lounge.aperitivos.image} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 46vw" />
+        </div>
+      )
+    }
+
+    {
+      tab === 'lounge' && fromDesign && (
+        <section class="group agenda">
+          <h2 class="group-title">{C.lounge.agenda.title}</h2>
+          <div class="rows">
+            {C.lounge.agenda.rows.map((row: VipRow) => (
+              <article class="row row-image-first">
+                <VipShot image={row.image} seed={row.title} aspect={3 / 2} sizes="(max-width: 900px) 100vw, 30vw" />
+                <div class="row-copy">
+                  <h3 class="event-title">{row.title}</h3>
+                  <p class="event-when">{row.when}</p>
+                  <p class="body-20 event-text">{row.text}</p>
+                  {vipLinks(row.links).length > 0 && (
+                    <p class="links">
+                      {vipLinks(row.links).map((l) => (
+                        <LinkPill lang={lang} href={l.href} label={l.label} external={l.external} preserveCase={l.caps} />
+                      ))}
+                    </p>
+                  )}
                 </div>
-              </section>
+              </article>
             ))}
           </div>
         </section>
       )
     }
 
-    {tab === 'programme' && days.length === 0 && !page && <p class="empty body-24">{t('vip.empty')}</p>}
+    {/* ------------------------------------------------------- hotel deal */}
+    {
+      tab === 'hotel-deal' && (
+        <div class="two-col hotel">
+          {heroImages.length > 0 ? (
+            <Slideshow
+              images={heroImages}
+              aspect={3 / 2}
+              id="vip-hotel"
+              label={tabLabel}
+              sizes="(max-width: 900px) 100vw, 46vw"
+              widths={[600, 900, 1200]}
+            />
+          ) : (
+            <VipShot image={C.hotelDeal.cover} aspect={3 / 2} loading="eager" sizes="(max-width: 900px) 100vw, 46vw" />
+          )}
+          <div>
+            {page?.body ? (
+              <div class="body-20">
+                <PortableText value={page.body} fieldStyle={page.bodyStyle} />
+              </div>
+            ) : (
+              <>
+                <h2 class="panel-title">{C.hotelDeal.hotel.title}</h2>
+                <p class="body-20">{C.hotelDeal.hotel.text}</p>
+                {vipLinks(C.hotelDeal.hotel.links).length > 0 && (
+                  <p class="links">
+                    {vipLinks(C.hotelDeal.hotel.links).map((l) => (
+                      <LinkPill lang={lang} href={l.href} label={l.label} external={l.external} preserveCase={l.caps} />
+                    ))}
+                  </p>
+                )}
+              </>
+            )}
+
+            {/* BACKEND-REQUEST #16: the rate line and the paragraph want two
+                fields on Site settings → Hotel deal; they are two here. */}
+            <div class="rate">
+              <p class="rate-label">{t('vip.specialRate')}</p>
+              <h3 class="rate-heading">{rate.heading}</h3>
+              <p class="rate-body body-20">{rate.text}</p>
+              {vipLinks([rate.link]).map((l) => (
+                <p class="rate-link">
+                  <LinkPill lang={lang} href={l.href} label={l.label} external={l.external} preserveCase={l.caps} />
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    {/* -------------------------------------------------------- programme */}
+    {
+      tab === 'programme' && (
+        <section class="group">
+          <h2 class="group-title">{t('vip.venue.on-site')}</h2>
+          <div class="rows">
+            {!fromDesign
+              ? onSite.map((e: any) => (
+                  <article class="row row-half">
+                    <Slideshow
+                      images={e.image?.asset ? [e.image] : []}
+                      pool="fair"
+                      seed={e.slug ?? e._id}
+                      aspect={3 / 2}
+                      id={`vip-on-${e._id}`}
+                      label={e.title}
+                      sizes="(max-width: 900px) 100vw, 46vw"
+                      widths={[600, 900, 1200]}
+                    />
+                    <div class="row-copy">
+                      <h3 class="event-title ruled" {...styleAttrs(e.titleStyle)}>
+                        {lines(e.title).map((line, k) => (
+                          <>
+                            {k > 0 && <br />}
+                            {line}
+                          </>
+                        ))}
+                      </h3>
+                      {/* BACKEND-REQUEST #15: the frame dates this "everyday —
+                          11:00 / 16:00"; one datetime cannot say that. */}
+                      <p class="event-when">{formatTime(e.startsAt, lang)}</p>
+                      {e.description && (
+                        <div class="event-text body-20">
+                          <PortableText value={e.description} fieldStyle={e.descriptionStyle} />
+                        </div>
+                      )}
+                      {/* BACKEND-REQUEST #14: no link on programmeEvent, so no pill. */}
+                    </div>
+                  </article>
+                ))
+              : C.programme.onSite.rows.map((row: VipRow) => (
+                  <article class="row row-half">
+                    <VipShot
+                      image={row.image}
+                      seed={row.title}
+                      aspect={3 / 2}
+                      loading="eager"
+                      sizes="(max-width: 900px) 100vw, 46vw"
+                    />
+                    <div class="row-copy">
+                      <h3 class="event-title ruled">{row.title}</h3>
+                      <p class="event-when">{row.when}</p>
+                      <p class="body-20 event-text">{row.text}</p>
+                      {row.note && <p class="event-note body-20">{row.note}</p>}
+                      {vipLinks(row.links).length > 0 && (
+                        <p class="links">
+                          {vipLinks(row.links).map((l) => (
+                            <LinkPill lang={lang} href={l.href} label={l.label} external={l.external} preserveCase={l.caps} />
+                          ))}
+                        </p>
+                      )}
+                    </div>
+                  </article>
+                ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      tab === 'programme' && (
+        <section class="group off-site">
+          <h2 class="group-title">{t('vip.venue.off-site')}</h2>
+          {!fromDesign
+            ? days.map((day) => (
+                <section class="day">
+                  <h3 class="day-title">{formatDayLong(day, lang)}</h3>
+                  <div class="rows">
+                    {onDay(day).map((e: any) => (
+                      <article class="row">
+                        <div class="row-copy">
+                          <h4 class="event-line" {...styleAttrs(e.titleStyle)}>
+                            {lines(e.title).join(' ')} — {formatTime(e.startsAt, lang)}
+                          </h4>
+                          {e.description && (
+                            <div class="event-text body-20">
+                              <PortableText value={e.description} fieldStyle={e.descriptionStyle} />
+                            </div>
+                          )}
+                          {/* BACKEND-REQUEST #14: the frame ends every row in
+                              "book your visit ↗"; programmeEvent has no link. */}
+                        </div>
+                        <Slideshow
+                          images={e.image?.asset ? [e.image] : []}
+                          pool="fair"
+                          seed={e.slug ?? e._id}
+                          aspect={3 / 2}
+                          id={`vip-off-${e._id}`}
+                          label={e.title}
+                          sizes="(max-width: 900px) 100vw, 30vw"
+                          widths={[460, 920]}
+                        />
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ))
+            : C.programme.offSite.days.map((day) => (
+                <section class="day">
+                  <h3 class="day-title">{day.title}</h3>
+                  <div class="rows">
+                    {day.rows.map((row: VipRow) => (
+                      <article class="row">
+                        <div class="row-copy">
+                          <h4 class="event-line">
+                            {row.title} — {row.when}
+                          </h4>
+                          <p class="body-20 event-text">{row.text}</p>
+                          {vipLinks(row.links).length > 0 && (
+                            <p class="links">
+                              {vipLinks(row.links).map((l) => (
+                                <LinkPill lang={lang} href={l.href} label={l.label} external={l.external} preserveCase={l.caps} />
+                              ))}
+                            </p>
+                          )}
+                        </div>
+                        <VipShot
+                          image={row.image}
+                          seed={row.title}
+                          aspect={3 / 2}
+                          sizes="(max-width: 900px) 100vw, 30vw"
+                        />
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ))}
+        </section>
+      )
+    }
+
+    {/* The editor's own blocks, once a page carries them. */}
+    {hasSections && <PageSections lang={lang} sections={page.sections} />}
+
+    {
+      page?.body && tab !== 'about' && tab !== 'hotel-deal' && (
+        <div class="body-24 page-body">
+          <PortableText value={page.body} fieldStyle={page.bodyStyle} />
+        </div>
+      )
+    }
 
     {
       closingImages.length > 0 && (
@@ -191,10 +548,11 @@ const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
       )
     }
 
+    {/* ----------------------------------------------------------- access */}
     {
       isAccess && (
         <div class="two-col access">
-          <VipCodeForm lang={lang} contact={settings?.contact} />
+          <VipCodeForm lang={lang} contact={contact} />
           <VipRequestForm lang={lang} settings={settings} />
         </div>
       )
@@ -211,35 +569,202 @@ const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
   </div>
 </Base>
 
-<script>
-  // The on-site / off-site pills: hide the events of the other kind, and a
-  // day that has none left.
-  document.querySelectorAll<HTMLElement>('[data-vip-programme]').forEach((root) => {
-    const pills = [...root.querySelectorAll<HTMLButtonElement>('[data-venue]')].filter((el) => el.tagName === 'BUTTON');
-    pills.forEach((pill) => {
-      pill.addEventListener('click', () => {
-        const wanted = pill.dataset.venue ?? '';
-        pills.forEach((p) => p.classList.toggle('active', p === pill));
-        root.querySelectorAll<HTMLElement>('article[data-venue]').forEach((article) => {
-          article.hidden = !!wanted && article.dataset.venue !== wanted;
-        });
-        root.querySelectorAll<HTMLElement>('[data-day]').forEach((day) => {
-          day.hidden = ![...day.querySelectorAll<HTMLElement>('article')].some((a) => !a.hidden);
-        });
-      });
-    });
-  });
-</script>
-
 <style>
-  :global(.cover) {
-    width: 100%;
-    margin: 40px 0;
+  /* The frames' body size: a step under .body-24, which the design keeps for
+     the lead paragraphs. */
+  .body-20 {
+    font-size: 20px;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+  .body-20 :global(p + p) {
+    margin-top: 1em;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    margin-top: 18px;
+  }
+
+  /* The frames' recurring split: copy on two thirds, picture on a third. */
+  .split-8-4 {
+    display: grid;
+    grid-template-columns: 8fr 4fr;
+    gap: 30px;
+    align-items: start;
   }
   .about-top {
-    align-items: start;
-    margin-top: 40px;
+    margin-top: 36px;
   }
+  .gate-note {
+    margin-top: 28px;
+  }
+
+  .group {
+    margin-top: 56px;
+  }
+  .group-title {
+    border-top: 1px solid;
+    padding-top: 14px;
+    letter-spacing: -0.04em;
+    font-size: clamp(30px, 3.2vw, 44px);
+    font-weight: 400;
+    line-height: 1.05;
+    text-transform: lowercase;
+  }
+  /* "at the fair", "beyond the fair": ruled under itself, over the copy
+     column only, as the day headings of the programme frame are. */
+  .subgroup {
+    margin-top: 36px;
+  }
+  .subgroup-title {
+    border-bottom: 1px solid;
+    padding-bottom: 6px;
+    max-width: 66%;
+    letter-spacing: -0.03em;
+    font-size: clamp(22px, 2vw, 28px);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .overview-row {
+    margin-top: 30px;
+  }
+  .eyebrow-strong {
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .closing {
+    margin-top: 72px;
+  }
+  .closing .panel-title,
+  .lounge-top .panel-title,
+  .hotel .panel-title {
+    border-bottom-width: 1px;
+    margin-bottom: 18px;
+  }
+
+  .lounge-top,
+  .hotel {
+    margin-top: 36px;
+    align-items: start;
+  }
+  .aperitivos {
+    margin-top: 56px;
+    align-items: start;
+  }
+  .aperitivos .panel-title {
+    border-bottom: 1px solid;
+    margin-bottom: 14px;
+  }
+
+  .rate {
+    margin-top: 28px;
+    padding: 14px 20px 22px;
+    border: 1px solid currentColor;
+  }
+  .rate-label {
+    text-align: right;
+    letter-spacing: -0.04em;
+    font-size: 30px;
+    line-height: 1;
+  }
+  .rate-heading {
+    margin-top: 4px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+  .rate-body {
+    margin-top: 6px;
+  }
+  .rate-link {
+    margin-top: 18px;
+  }
+
+  .day {
+    margin-top: 44px;
+  }
+  .day-title {
+    border-bottom: 1px solid;
+    padding-bottom: 8px;
+    max-width: 66%;
+    letter-spacing: -0.03em;
+    font-size: clamp(24px, 2.2vw, 30px);
+    font-weight: 400;
+    line-height: 1.15;
+  }
+  .rows {
+    display: grid;
+    gap: 44px;
+    margin-top: 28px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 8fr 4fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .row-image-first {
+    grid-template-columns: 4fr 8fr;
+  }
+  .row-half {
+    grid-template-columns: 1fr 1fr;
+  }
+  /* The off-site programme and the lounge's agenda stop short of the right
+     edge in the frames - the day rule, the rows and the group rule all end
+     on the same line, a fifth in from the page edge. */
+  .off-site .day-title,
+  .off-site .rows,
+  .agenda .group-title,
+  .agenda .rows {
+    max-width: 83%;
+  }
+  .off-site .row {
+    grid-template-columns: 6fr 4fr;
+    gap: 30px;
+  }
+  .agenda .row {
+    grid-template-columns: 4fr 6fr;
+    gap: 30px;
+  }
+  .event-title {
+    letter-spacing: -0.03em;
+    font-size: clamp(24px, 2.2vw, 30px);
+    font-weight: 400;
+    line-height: 1.15;
+  }
+  /* The on-site entry's title is ruled under, as the frame draws it. */
+  .event-title.ruled {
+    border-bottom: 1px solid;
+    padding-bottom: 8px;
+  }
+  .event-when,
+  .event-line {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+  .event-when {
+    margin-top: 10px;
+  }
+  .event-text {
+    margin-top: 12px;
+    max-width: 62ch;
+  }
+  .event-note {
+    margin-top: 12px;
+    font-style: italic;
+  }
+
   .page-body {
     max-width: 1160px;
     margin-top: 40px;
@@ -256,91 +781,8 @@ const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
     align-items: start;
     margin-top: 40px;
   }
-  /* The programme, after the design's VIP programme frame: pills, then a
-     ruled day heading and one row per event with the picture alternating. */
-  .programme {
-    margin-top: 52px;
-  }
-  .venues {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-  .venues .pill {
-    cursor: pointer;
-    text-transform: lowercase;
-  }
-  .venues .pill.active {
-    background: var(--color-acid);
-  }
-  .days {
-    border-bottom: 1px solid;
-  }
-  .day {
-    border-top: 1px solid;
-    padding: 16px 0 40px;
-  }
-  .day h2 {
-    letter-spacing: -0.04em;
-    font-size: clamp(34px, 3.3vw, 48px);
-    line-height: 1.15;
-    margin-bottom: 24px;
-  }
-  .events {
-    display: grid;
-    gap: 36px;
-  }
-  .events article {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 40px;
-    align-items: start;
-  }
-  .events article:nth-child(2n) {
-    grid-template-columns: 1fr 2fr;
-  }
-  .events :global(img) {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 460 / 289;
-    object-fit: cover;
-  }
-  .copy time {
-    display: block;
-    font-size: 30px;
-    line-height: 1.1;
-  }
-  .copy h3 {
-    border-top: 1px solid;
-    margin-top: 6px;
-    padding-top: 10px;
-    font-size: 30px;
-    font-weight: 400;
-    line-height: 1.2;
-  }
-  .venue-tag {
-    margin-top: 10px;
-    font-size: 18px;
-    text-transform: lowercase;
-    color: var(--ink-3, #6b6b6b);
-  }
-  .text {
-    margin-top: 16px;
-    font-size: 20px;
-    line-height: 1.3;
-    max-width: 62ch;
-  }
-  .speakers {
-    margin-top: 12px;
-    font-size: 20px;
-    line-height: 1.3;
-  }
-  .empty {
-    margin-top: 40px;
-  }
   .leave {
-    margin-top: 60px;
+    margin-top: 72px;
   }
   .leave button {
     cursor: pointer;
@@ -350,25 +792,42 @@ const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
     padding: 0;
     text-transform: lowercase;
   }
+
   @media (width<=900px) {
+    .split-8-4 {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
     .image-row {
       grid-template-columns: 1fr;
       gap: 20px;
       margin-top: 40px;
     }
+    .subgroup-title,
+    .day-title,
+    .off-site .day-title,
+    .off-site .rows,
+    .agenda .group-title,
+    .agenda .rows {
+      max-width: none;
+    }
   }
   @media (width<=700px) {
-    .events article,
-    .events article:nth-child(2n) {
+    .row,
+    .row-image-first,
+    .row-half,
+    .off-site .row,
+    .agenda .row {
       grid-template-columns: 1fr;
+      gap: 20px;
     }
-    .copy time,
-    .copy h3 {
-      font-size: 24px;
-    }
-    .text,
-    .speakers {
+    .body-20,
+    .event-when,
+    .event-line {
       font-size: 18px;
+    }
+    .rate-label {
+      font-size: 24px;
     }
   }
 </style>

@@ -84,6 +84,11 @@ const tabs = hub.tabs
     font-weight: 600;
     line-height: 1;
   }
+  /* VIP is an initialism, not a word: the band lowercases every other hub
+     title, and `vip-band` (passed by the VIP hub) keeps its capitals. */
+  .section-head.vip-band h1 {
+    text-transform: uppercase;
+  }
   .section-head nav {
     grid-column: span 8;
     justify-content: flex-end;
@@ -93,7 +98,9 @@ const tabs = hub.tabs
   }
   .section-head a {
     white-space: nowrap;
-    border: 1px solid #000;
+    /* currentColor, not #000: the tab follows the page's ink, so the pills
+       come out white on the black VIP tabs without a second rule. */
+    border: 1px solid currentColor;
     padding: var(--band-pill-pad, 7px 15px);
     font-size: var(--band-pill, 24px);
     line-height: 30px;

@@ -159,6 +159,11 @@ const slideId = (i: number) => `${id}-${i + 1}`;
     font-size: 22px;
     line-height: 1;
   }
+  /* One picture is not a carousel: the frames only ever print the counter
+     where there is something to count, and "1/1" reads as a mistake. */
+  .slideshow[data-slides='1'] .counter {
+    display: none;
+  }
   .caption {
     text-align: right;
   }
