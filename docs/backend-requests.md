@@ -181,7 +181,11 @@ is already selected by `getProgramme`).
 
 ---
 
-## #8 · open · 2026-09-17 · the programme tabs in the designer's order
+## #8 · done · 2026-09-17 · the programme tabs in the designer's order
+
+**Done (Kamindu, 2026-09-19):** `HUBS.programme.tabs` is now **talks / awards / la-cambre**, so `/[lang]/programme` is the talks page and La Cambre moved to `/[lang]/programme/la-cambre`. Confirmed with Kamindu: the old site's `/programme` was an alias of food & drinks and already redirects onto the hub root, so the move costs no URL. `programme-69` (the 2026 talks page) now redirects to `programme` rather than `programme/talks`, which is no longer built; `src/sanity/previewPaths.ts` moves `talks` onto `/programme` and `project` onto `/programme/la-cambre`; the Studio's Programme folder is relabelled and its main page is the talks document; `scripts/apply-design-content.mjs` lists the three tabs in this order, award ceremony included. `node scripts/legacy-redirects.mjs --doc` is clean: 254 inventory URLs, 474 rules, none orphaned.
+
+**Not done, deliberately:** the fourth pill, "exhibition pass (coming up)". A tab is a pill onto a page, and there is no content for it - say the word and it is three lines in `hubs.ts` plus a `page` document.
 
 **Page / component:** `src/lib/hubs.ts`, `HUBS.programme.tabs` (Kamindu's file - not changed here)
 **Figma frame:** client feedback, WhatsApp "Ceramic Website", 2026-09-17 15:05 (Léonie)
@@ -192,7 +196,9 @@ is already selected by `getProgramme`).
 
 ---
 
-## #9 · open · 2026-09-17 · several pictures per programme event
+## #9 · done · 2026-09-17 · several pictures per programme event
+
+**Done (Kamindu, 2026-09-19):** `programmeEvent.images[]` (figures, "Slideshow" in the Studio), selected as `images` in `getProgramme` beside the unchanged `image`. The same shape as `award.images` (#5), so read `images` when it has any and fall back to `[image]`. No migration: every existing event keeps its single picture.
 
 **Page / component:** `src/components/hubs/Programme.astro`, the talks accordion rows
 **Figma frame:** client feedback, WhatsApp "Ceramic Website", 2026-09-17 15:05 (Léonie): "Could you make all photos inside the accordion elements a slideshow?"
@@ -203,7 +209,11 @@ is already selected by `getProgramme`).
 
 ---
 
-## #10 · open · 2026-09-17 · remove the media tab from the partners hub
+## #10 · done · 2026-09-17 · remove the media tab from the partners hub
+
+**Done (Kamindu, 2026-09-19):** The partners hub's `media` tab is `hidden: true` - no pill, still built, so `/en/partners/media` and its translations keep answering the legacy redirects. The `media` tier and `PARTNER_TABS` are untouched.
+
+**Where they go:** the about hub's `press` tab, which is a visible pill again and is relabelled **press & media** (`tabs.pressMedia`, added to all three locales in `i18n.ts` - the one frontend file this round touches). Its address stays `/[lang]/about/press` and its translations, which the page document and the old site's redirects use. **Over to you:** `About.astro`'s press tab renders the press contacts, kit and clips; it does not list partners yet. `getPartners` already returns the `media` tier, so it is a filter and a card grid.
 
 **Page / component:** `src/lib/hubs.ts`, `HUBS.partners.tabs` (Kamindu's file - not changed here)
 **Figma frame:** client feedback of 2026-09-17, annotated frame `screenshot/WhatsApp Image 2026-09-17 at 8.37.02 PM-2.jpeg` (the "media" pill is crossed out)
@@ -214,7 +224,9 @@ is already selected by `getProgramme`).
 
 ---
 
-## #11 · open · 2026-09-17 · a size control for partner logos
+## #11 · done · 2026-09-17 · a size control for partner logos
+
+**Done (Kamindu, 2026-09-19):** `partner.logoScale`, a number between 50 and 150 with `initialValue: 100`, selected in `PARTNER` so it reaches every tab and the `partnersSection` block. Multiply the slot height your `logoHeight()` works out by `logoScale / 100`, treating a missing value as 100. A number rather than a small / medium / large list, on purpose: the corrections are particular, and a number needs no entry in `stegaFilter`'s `PLAIN_KEYS` (a fixed-list string would).
 
 **Page / component:** `src/components/hubs/Partners.astro`, the logo under each partner (institutions, main, event, media tabs)
 **Figma frame:** client feedback of 2026-09-17, same annotated frame
@@ -225,7 +237,9 @@ is already selected by `getProgramme`).
 
 ---
 
-## #12 · open · 2026-09-17 · a three-image hero on about → ceramic brussels
+## #12 · done · 2026-09-17 · a three-image hero on about → ceramic brussels
+
+**Done (Kamindu, 2026-09-19):** `page.heroImages[]` (figures, "Cover slideshow" in the Studio), selected as `heroImages` in `PAGE`. `cover` is untouched and still the field for a page with one picture, so nothing migrates; read `heroImages` when it has any, else `[cover]` - which is what `About.astro` already builds. `heroImages` is in `pageKinds.ts` wherever `cover` is (`FULL` and `STANDALONE`), so the field shows on exactly the pages that draw a cover.
 
 **Page / component:** `src/components/hubs/About.astro`, the `the-fair` tab's hero
 **Figma frame:** client feedback, WhatsApp "Ceramic Website", 2026-09-17 15:08 (Léonie): "Make the big image at the top of the page a 3-image slideshow"
@@ -236,7 +250,9 @@ is already selected by `getProgramme`).
 
 ---
 
-## #13 · open · 2026-09-17 · the contact block on about → contact
+## #13 · done · 2026-09-17 · the contact block on about → contact
+
+**Done (Kamindu, 2026-09-19):** Three fields on Site settings → Contact, returned by `getSettings`: `organiserText` (localeText, the "initiated and organized jointly by…" line), `organiserLink` (a `link`, so the pill's label and target are the editor's and `resolveLink` gives it the right arrow) and `postalAddress` (text). They are fields of their own rather than a second reading of `practicalInfo.address`, which is the fair's **venue** and belongs to the visit hub.
 
 **Page / component:** `src/components/hubs/About.astro`, the `team` tab (the design's "contact" page)
 **Figma frame:** client feedback, WhatsApp "Ceramic Website", 2026-09-17 15:09 (Léonie), wireframe image 6
@@ -246,7 +262,9 @@ is already selected by `getProgramme`).
 **Asked for:** an Organisation group on Site settings - `organiserText` (localeText), `organiserLink` (a `link`, so the pill's label is editable) and `postalAddress` (text) - returned by `getSettings`. If any of the three is meant to live on the about/contact `page` instead, say which and the frontend reads it there.
 
 ---
-## #14 · open · 2026-09-18 · a booking link on a VIP programme event
+## #14 · done · 2026-09-18 · a booking link on a VIP programme event
+
+**Done (Kamindu, 2026-09-19):** `programmeEvent.link`, the shared `link` object, selected as `link` in the `getProgramme` projection. Label, target and internal/external are all the editor's, so "book your visit ↗", "book the party ↗" and "discover Puilaetco →" are one field. `resolveLink` renders it as everywhere else, and `kind`, `route`, `anchor` and `path` are already in `stegaFilter`'s `PLAIN_KEYS`, so it survives a preview render. An event with no link gets no pill - drop the mailto fallback when you wire it.
 
 **Page / component:** `src/components/hubs/Vip.astro`, the VIP programme tab
 **Figma frame:** `output.pdf` page 3 (VIP frames, 2026-09-18)
@@ -272,7 +290,11 @@ with no further work here.
 
 ---
 
-## #15 · open · 2026-09-18 · a VIP event that repeats every day
+## #15 · done · 2026-09-18 · a VIP event that repeats every day
+
+**Done (Kamindu, 2026-09-19):** `programmeEvent.whenText` (localeString, "When (free text)" in the Studio), selected as `whenText` in `getProgramme`. Print it in place of the formatted time when it is set. The recurrence model is deliberately not built: two blocks in the whole design need it.
+
+**Still content, not schema:** the current edition has two VIP events (Preview, Vernissage), both off-site, against the frame's eight. That is part of #17.
 
 **Page / component:** `src/components/hubs/Vip.astro`, the VIP programme tab,
 on-site section
@@ -305,7 +327,9 @@ entries of the frame are not in Sanity at all. The tab renders what is there.
 
 ---
 
-## #16 · open · 2026-09-18 · the hotel's special rate as its own fields
+## #16 · done · 2026-09-18 · the hotel's special rate as its own fields
+
+**Done (Kamindu, 2026-09-19):** `practicalInfo.hotelDeal.rate` (localeString) beside the existing `text`, both selected in `getSettings`. The rate line and the paragraph are two fields now, so the split in `vipContent.ts` can go. Kept on `practicalInfo` rather than made a page-builder block: the panel appears on one tab, and moving it later costs a query line. `{code}` substitution is unchanged and still works in either field.
 
 **Page / component:** `src/components/hubs/Vip.astro`, the hotel deal tab
 **Figma frame:** `output.pdf` page 5
@@ -331,6 +355,8 @@ say which and the frontend follows.
 
 ---
 ## #17 · open · 2026-09-18 · the VIP tabs have no page documents
+
+**Still open, on purpose (Kamindu, 2026-09-19):** the scaffolding stays. The five `page` documents would flip `fromDesign` off for good, and the copy the client has signed off on is still moving; typing the frames' English into Sanity now would replace a designed page with an empty one. The Studio is ready for them - the VIP folder already offers the about page and the tab intros - so this is a content session, not a code change, and it wants the client's final text. The two fields that cost nothing are handled below.
 
 **Page / component:** `src/components/hubs/Vip.astro`, all five tabs
 **Figma frame:** `output.pdf`, the five VIP frames (2026-09-18)
@@ -358,6 +384,8 @@ document at a time and needs no frontend change.
    lounge frame draws "discover Embelco →" beside "discover MAD Brussels";
    filling the URL brings it back with no code change.
 
+**The two fields:** Site settings → VIP → contact email and the Embelco partner URL are one-line edits in the Studio, both listed in `docs/vip-access.md` for the editors' pass. Neither needs a schema or a query change.
+
 **Asked for:** five `page` documents in section `vip` with the English slugs
 `about`, `programme`, `lounge`, `hotel-deal` and `access`, and the 2027 VIP
 events of the frame as `programmeEvent`s with `section: "vip"` and `venue`
@@ -369,7 +397,11 @@ another entry's paragraph (still placeholder in the design), and the Charles
 Riva row is credited "© Hotel Solvay" by mistake, which the fallback corrects.
 
 ---
-## #18 · open · 2026-09-18 · a VIP row in the menu, after partners
+## #18 · done · 2026-09-18 · a VIP row in the menu, after partners
+
+**Done (Kamindu, 2026-09-19):** A `navItem` keyed `navItemVip` sits between partners and visitors info in `scripts/apply-design-content.mjs`, labelled VIP / VIP / VIP, with `navChild`ren for about, VIP programme, VIP lounge and hotel deal. The three locked children are linked like any other: a visitor without a session is sent to the access page by the gate, which is the intended door.
+
+**Not yet in the dataset.** The script writes to the live `production` dataset, so `--only=nav` is run deliberately, not as part of a build. Until it is, the live menu is the `navigation` document as it stands - no VIP row, and the programme children still in the old order. Say the word and it runs.
 
 **Page / component:** the slide-in menu (`src/components/MenuOverlay.astro`,
 fed by `getNavigation` through `Base.astro`)

@@ -80,10 +80,11 @@ const TIER_PAGES: Record<string, PreviewLocation> = {
 };
 
 const EVENT_TABS: Record<string, PreviewLocation> = {
-  talks: { title: 'Programme – talks', href: '/programme/talks' },
+  // Talks is the hub root since the designer's order of 2026-09-17 (#8).
+  talks: { title: 'Programme – talks', href: '/programme' },
   vip: { title: 'VIP – VIP programme', href: '/vip/programme' },
   awards: { title: 'Programme – award ceremony', href: '/programme/awards' },
-  project: { title: 'Programme – La Cambre', href: '/programme' },
+  project: { title: 'Programme – La Cambre', href: '/programme/la-cambre' },
 };
 
 /** The types that have a preview at all. */

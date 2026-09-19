@@ -243,8 +243,8 @@ export const structure: StructureResolver = async (S, context) => {
       ]),
 
       folder('programme', 'Programme', [
-        mainPage('programme', 'Programme page (La Cambre)'),
-        tabIntros('programme', 'la-cambre', 'Tab intros (talks, award ceremony)'),
+        mainPage('programme', 'Programme page (talks)'),
+        tabIntros('programme', 'talks', 'Tab intros (award ceremony, La Cambre)'),
         list('events-talks', `Talks ${thisYear}`, 'programmeEvent', `${CURRENT} && section == "talks"`, {}, [
           { field: 'startsAt', direction: 'asc' },
         ]),

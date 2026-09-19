@@ -45,6 +45,33 @@ export const siteSettings = defineType({
     }),
 
     defineField({ name: 'contactEmail', title: 'Contact email', type: 'string', group: 'contact' }),
+    // The closing block of about -> contact (request #13): who runs the fair,
+    // a pill to the studio's own site, and the organisation's postal address.
+    // `practicalInfo.address` is the *venue* and belongs to the visit hub, so
+    // this is a field of its own rather than a second reading of that one.
+    defineField({
+      name: 'organiserText',
+      title: 'Organiser line',
+      type: 'localeText',
+      group: 'contact',
+      description:
+        'Under the team grid: "ceramic brussels is initiated and organized jointly by studio emosi and ceramic brussels ASBL."',
+    }),
+    defineField({
+      name: 'organiserLink',
+      title: 'Organiser link',
+      type: 'link',
+      group: 'contact',
+      description: 'The pill beside it: "discover studio emosi’s projects".',
+    }),
+    defineField({
+      name: 'postalAddress',
+      title: 'Postal address',
+      type: 'text',
+      rows: 3,
+      group: 'contact',
+      description: 'The organisation’s office, not the fair’s venue: "Rue Franz Merjay 148C, 1050 Brussels".',
+    }),
     defineField({ name: 'newsletterUrl', title: 'Newsletter signup URL', type: 'url', group: 'contact' }),
     defineField({ name: 'instagramUrl', title: 'Instagram URL', type: 'url', group: 'contact' }),
     defineField({ name: 'linkedinUrl', title: 'LinkedIn URL', type: 'url', group: 'contact' }),
@@ -96,7 +123,21 @@ export const siteSettings = defineType({
               type: 'reference',
               to: [{ type: 'partner' }],
             }),
-            defineField({ name: 'text', title: 'Text', type: 'localeText' }),
+            // The VIP hotel panel draws two distinct lines (request #16): the
+            // rate in bold caps, and the paragraph under it. One Text field
+            // had to carry both, and the split was the page's guess.
+            defineField({
+              name: 'rate',
+              title: 'Rate line',
+              type: 'localeString',
+              description: 'The bold line in the panel: "€160/night breakfast included".',
+            }),
+            defineField({
+              name: 'text',
+              title: 'Text',
+              type: 'localeText',
+              description: 'The paragraph under the rate. "{code}" is replaced with the hotel code.',
+            }),
             defineField({ name: 'url', title: 'Booking link', type: 'url' }),
           ],
         }),

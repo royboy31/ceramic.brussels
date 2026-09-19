@@ -67,8 +67,10 @@ const PAGES = {
   // guest of honour
   'guest-of-honour': 'guest-of-honour',
   'interview-with-marion-verboom': 'guest-of-honour/interview',
-  // the 2026 talks page, never published but linked from two pages
-  'programme-69': 'programme/talks',
+  // the 2026 talks page, never published but linked from two pages. Talks is
+  // the programme hub root since the designer's order of 2026-09-17 (#8), so
+  // the target is the hub itself - /programme/talks is no longer built.
+  'programme-69': 'programme',
   // food & drinks
   'food-and-drinks-2': 'visit/food-drinks',
   'food-and-drinks': 'visit/food-drinks',

@@ -117,14 +117,22 @@ export const HUBS: Record<string, Hub> = {
     route: 'programme',
     segment: { nl: 'programma' },
     title: 'nav.programme',
+    // The designer's order of 2026-09-17 (backend request #8): talks first,
+    // which makes /[lang]/programme the talks page, then the award ceremony,
+    // then La Cambre. The old site's /programme was an alias of food & drinks
+    // and already redirects onto this hub root, so the move costs no URL; the
+    // 2026 talks page (`programme-69`) is re-pointed at the root in
+    // scripts/legacy-redirects.mjs, and src/sanity/previewPaths.ts follows.
+    // The design's fourth pill, "exhibition pass (coming up)", is deliberately
+    // not here: a tab with no content is a pill onto an empty page.
     tabs: [
-      { slug: 'la-cambre', label: 'tabs.laCambre' },
       { slug: 'talks', segment: { fr: 'conferences' }, label: 'tabs.talks' },
       // The award ceremony: a tab of its own since the client's mock-up of
       // 2026-09-16 (backend request #3), no longer a link to the art prize
       // awards - that page carries the link as a button. The old site never
       // had this page, so the segments are simply translated.
       { slug: 'awards', segment: { fr: 'remise-des-prix', nl: 'prijsuitreiking' }, label: 'tabs.awardCeremony' },
+      { slug: 'la-cambre', label: 'tabs.laCambre' },
       // VIP left this hub for one of its own (Figma VIP frames, 2026-09-17).
     ],
   },
@@ -156,7 +164,12 @@ export const HUBS: Record<string, Hub> = {
       { slug: 'institutions', segment: { nl: 'instellingen' }, label: 'tabs.institutions' },
       { slug: 'hotel', label: 'tabs.hotel' },
       { slug: 'event', segment: { fr: 'partenaires-evenement', nl: 'eventpartners' }, label: 'tabs.eventPartners' },
-      { slug: 'media', segment: { fr: 'medias' }, label: 'tabs.media' },
+      // The designer's annotated frame of 2026-09-17 crosses this pill out
+      // (backend request #10): media partners are listed on the about hub's
+      // press & media tab instead. Kept built, without a pill, because the
+      // old site's /partners/media and its translations redirect onto it -
+      // and the `media` tier itself is untouched.
+      { slug: 'media', segment: { fr: 'medias' }, label: 'tabs.media', hidden: true },
     ],
   },
   visit: {
@@ -185,8 +198,11 @@ export const HUBS: Record<string, Hub> = {
       // directors and the team. Slug and address stay `team`, which the page
       // document and the old site's redirects use.
       { slug: 'team', segment: { fr: 'equipe' }, label: 'tabs.contact' },
-      // Not in the design's three tabs; still built for the redirects onto them.
-      { slug: 'press', segment: { fr: 'presse', nl: 'pers' }, label: 'tabs.press', hidden: true },
+      // Back as a pill, and renamed: the media partners the partners hub no
+      // longer lists are shown here (backend request #10). The address stays
+      // `press`, which the page document and the old site's redirects use.
+      { slug: 'press', segment: { fr: 'presse', nl: 'pers' }, label: 'tabs.pressMedia' },
+      // Not in the design's tabs; still built for the redirects onto it.
       { slug: 'images', segment: { nl: 'beelden' }, label: 'tabs.images', hidden: true },
     ],
   },

@@ -58,6 +58,18 @@ export const programmeEvent = defineType({
       type: 'datetime',
       validation: (rule) => rule.required(),
     }),
+    // An event that repeats has no one date to print: the VIP frames date the
+    // discovery tours "everyday - 11:00 / 16:00" and the lounge aperitivos
+    // "everyday - 17:30 -> 19:00". Written once here, it stands in for the
+    // formatted time wherever the page would print it (request #15). A
+    // recurrence model would carry more than these two blocks ever need.
+    defineField({
+      name: 'whenText',
+      title: 'When (free text)',
+      type: 'localeString',
+      description:
+        'Shown instead of the time when the event repeats: "everyday — 11:00 / 16:00". Leave empty for a normal, dated event.',
+    }),
     // Ends, location, moderator, description and "upon invitation" are kept for
     // the imported data but hidden: the design's programme row has no place for
     // them, so nothing an editor typed there would ever reach the site.
@@ -117,7 +129,34 @@ export const programmeEvent = defineType({
       type: 'localeBlock',
       hidden: ({ document }) => document?.section !== 'vip',
     }),
-    defineField({ name: 'image', title: 'Image', type: 'figure' }),
+    defineField({
+      name: 'image',
+      title: 'Image',
+      type: 'figure',
+      description: 'One picture, as before. The slideshow below wins when it has any.',
+    }),
+    // The same shape as `award.images` (request #5): the accordion rows of the
+    // talks tab and the VIP programme draw their pictures through the shared
+    // Slideshow, which shows one slide without its counter (request #9).
+    defineField({
+      name: 'images',
+      title: 'Slideshow',
+      type: 'array',
+      of: [defineArrayMember({ type: 'figure' })],
+      options: { layout: 'grid' },
+      description: 'Several pictures for this event, each with its caption. Replaces the single image above.',
+    }),
+    // "book your visit ↗", "discover Puilaetco →": the label and the target
+    // both change per event, so neither can be a fixed string in the page
+    // (request #14). The shared `link` object gives the editor the choice of a
+    // page of this site, a document or an external address, and the arrow
+    // follows from it.
+    defineField({
+      name: 'link',
+      title: 'Link',
+      type: 'link',
+      description: 'The pill that ends the row: "book your visit", "discover Puilaetco". Left empty, no pill is drawn.',
+    }),
     defineField({
       name: 'invitationOnly',
       title: 'Upon invitation',

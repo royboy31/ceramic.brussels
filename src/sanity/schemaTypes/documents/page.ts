@@ -100,6 +100,20 @@ export const page = defineType({
       description: 'The large picture at the top of the page.',
       hidden: pageHides('cover'),
     }),
+    // The design turns that one picture into a slideshow on about -> ceramic
+    // brussels (request #12). `images` was already spoken for - it is the
+    // closing strip at the foot of the page - so the hero gets its own array,
+    // and the single `cover` above stays readable for every page that has one.
+    defineField({
+      name: 'heroImages',
+      title: 'Cover slideshow',
+      type: 'array',
+      of: [defineArrayMember({ type: 'figure' })],
+      options: { layout: 'grid' },
+      group: 'main',
+      description: 'Several pictures at the top of the page, each with its caption. Replaces the cover image above.',
+      hidden: pageHides('heroImages'),
+    }),
     sectionsField({ group: 'main', hidden: pageHides('sections') }),
     defineField({
       name: 'body',

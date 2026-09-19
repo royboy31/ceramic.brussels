@@ -170,6 +170,39 @@ apply. Revoking `SANITY_STUDIO_TOKEN` at sanity.io/manage and deleting
 that Pages secret are still to do by hand - the database itself is no
 longer to be deleted.
 
+## Status, 2026-09-19
+
+Lilanga's five pages are in (`kamindu`, merged from `lilanga` 7af7e33): the
+about tab and the access page on white, the three locked tabs knocked out
+black through `theme="dark"` on `Base.astro`, and `VipShot`, `vipContent.ts`
+and `public/assets/vip/` behind them. They land on the gate unchanged - the
+code box still posts `code` and `next` to `/api/vip/enter/`, the request form
+still posts the seven fields to `/api/vip/request/`, and the hotel tab still
+reads the `hotel_code` setting through `vipEnv()` / `vipSetting`. Both build
+shapes pass: the static build emits the about and access pages in three
+languages, and the preview-runtime build writes 18 locked paths into
+`_routes.json` and 12 disallows into `robots.txt`.
+
+**The tabs render from the frames, not from Sanity.** No `page` document
+exists in section `vip`, so `fromDesign` in `Vip.astro` stands the design's
+own copy and pictures in. That is deliberate and it is backend request #17:
+creating the documents switches a tab over for good, one at a time.
+
+Still to do, none of it code:
+
+- **Roy:** the Workers Paid plan before the mailing; a rate limiting rule on
+  `/api/vip/enter/`; the Brevo key for the request form.
+- **The dataset:** `node scripts/apply-design-content.mjs --only=nav` has not been run, so the
+  live menu still has no VIP row (request #18 put it in the script).
+- **Editors, two fields that change what the page prints today:** Site
+  settings → VIP → contact email is empty, so the contact block and the
+  booking pills say *info@ceramic.brussels* where the frame says
+  *vip@ceramic.brussels*; and the partner **Embelco** has no website URL, so
+  its "discover Embelco →" pill is dropped from the lounge tab. Filling
+  either needs no deploy.
+- **Editors:** the five tabs' text and the 2027 VIP events.
+- The team's spreadsheet through `npm run vip -- --import`.
+
 ## Status, 2026-09-17
 
 On main (4dd26f7) and verified end to end on production: the hub, the five

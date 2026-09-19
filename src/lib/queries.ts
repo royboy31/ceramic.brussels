@@ -91,6 +91,9 @@ const PARTNER = `{
   ${styled('currentExhibition')},
   "editions": editions[]->year,
   logo ${IMAGE},
+  // The editor's own correction to this logo's size (#11), applied on top of
+  // the slot the page works out from the file's aspect ratio.
+  logoScale,
   "images": images[] ${IMAGE}
 }`;
 
@@ -309,6 +312,10 @@ export function getSettings(lang: LocaleId) {
       copyright,
       ${styled('tagline')},
       contactEmail,
+      // The organiser block at the foot of about -> contact (#13).
+      ${styled('organiserText')},
+      "organiserLink": organiserLink ${LINK},
+      postalAddress,
       newsletterUrl,
       instagramUrl,
       linkedinUrl,
@@ -328,6 +335,8 @@ export function getSettings(lang: LocaleId) {
         "access": practicalInfo.access[]{ _key, ${styled('mode')}, ${styled('text')} },
         ${styled('accessibility', 'practicalInfo.accessibility')},
         "hotelDeal": {
+          // The panel's bold line, split off from the paragraph (#16).
+          ${styled('rate', 'practicalInfo.hotelDeal.rate')},
           ${styled('text', 'practicalInfo.hotelDeal.text')},
           "url": practicalInfo.hotelDeal.url,
           "partner": practicalInfo.hotelDeal.partner->{ _id, name, url, logo ${IMAGE}, "images": images[] ${IMAGE} }
@@ -781,6 +790,8 @@ const PAGE = `{
   "sections": ${SECTIONS},
   "images": images[] ${IMAGE},
   cover ${IMAGE},
+  // The cover as a slideshow (#12); the single cover stays for pages with one.
+  "heroImages": heroImages[] ${IMAGE},
   "slugs": { "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current },
   "seo": ${SEO}
 }`;
@@ -850,7 +861,12 @@ export function getProgramme(lang: LocaleId) {
       ${styled('description')},
       ${styled('speakersText')},
       "speakers": speakers[]->{ _id, _type, name, "slug": slug.current },
-      image ${IMAGE}
+      // "everyday - 11:00 / 16:00" in place of the formatted time (#15).
+      ${styled('whenText')},
+      image ${IMAGE},
+      // Several pictures per event (#9) and the row's own pill (#14).
+      "images": images[] ${IMAGE},
+      "link": link ${LINK}
     }`,
     { lang },
   );

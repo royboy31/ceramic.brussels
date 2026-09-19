@@ -47,6 +47,20 @@ export const partner = defineType({
       description: 'Years this partner took part. Leave empty for a permanent partner.',
     }),
     defineField({ name: 'logo', title: 'Logo', type: 'figure' }),
+    // The logos arrive at every shape and with whitespace baked in, so a row
+    // of them reads unevenly however the page normalises it (request #11).
+    // The page sizes the slot from the file's own aspect ratio and then
+    // multiplies by this, so the editor's correction is the last word. A
+    // percentage rather than a list of sizes: the corrections are small and
+    // particular, and a number needs no entry in stegaFilter's PLAIN_KEYS.
+    defineField({
+      name: 'logoScale',
+      title: 'Logo size (%)',
+      type: 'number',
+      initialValue: 100,
+      description: 'Nudges this logo against the others: 100 is the size the page works out for it, 80 smaller, 130 larger.',
+      validation: (rule) => rule.min(50).max(150),
+    }),
     defineField({
       name: 'images',
       title: 'Slideshow',

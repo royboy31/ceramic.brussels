@@ -22,18 +22,19 @@ export type PageField =
   | 'order'
   | 'intro'
   | 'cover'
+  | 'heroImages'
   | 'sections'
   | 'body'
   | 'images'
   | 'seo';
 
 /** A standalone page (no hub) is drawn from all of it. */
-const STANDALONE: PageField[] = ['title', 'slug', 'order', 'navLabel', 'intro', 'cover', 'sections', 'body', 'images', 'seo'];
+const STANDALONE: PageField[] = ['title', 'slug', 'order', 'navLabel', 'intro', 'cover', 'heroImages', 'sections', 'body', 'images', 'seo'];
 
 /** Every hub tab: its name, the pill label, the hub it belongs to (read-only), SEO. */
 const TAB: PageField[] = ['title', 'tabLabel', 'section', 'seo'];
 
-const FULL: PageField[] = ['intro', 'cover', 'sections', 'body', 'images'];
+const FULL: PageField[] = ['intro', 'cover', 'heroImages', 'sections', 'body', 'images'];
 const TEXT: PageField[] = ['intro', 'sections', 'body', 'images'];
 
 /** What each hub tab adds to TAB. `*` covers every tab of the hub. */

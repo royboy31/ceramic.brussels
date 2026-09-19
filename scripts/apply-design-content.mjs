@@ -110,8 +110,9 @@ async function nav() {
     {
       _key: 'navItem3', _type: 'navItem', kind: 'route', route: 'programme', label: L('programme', 'programme', 'programma'),
       children: [
-        route('navChild0', 'programme', 'la-cambre', L('ceramic brussels x La Cambre')),
-        route('navChild1', 'programme', 'talks', L('talks', 'talks', 'talks')),
+        route('navChild0', 'programme', 'talks', L('talks', 'talks', 'talks')),
+        route('navChild1', 'programme', 'awards', L('award ceremony', 'remise des prix', 'prijsuitreiking')),
+        route('navChild2', 'programme', 'la-cambre', L('ceramic brussels x La Cambre')),
       ],
     },
     {
@@ -119,6 +120,21 @@ async function nav() {
       children: [
         route('navChild0', 'partners', 'institutions', L('institutions', 'institutions', 'instellingen')),
         route('navChild1', 'partners', 'hotel', L('hotel', 'hôtel', 'hotel')),
+      ],
+    },
+    // The VIP hub (#18). It sits after partners, as the design's menu draws
+    // it. It belongs here and not only in the Studio: this step replaces the
+    // whole `items` array, so a row added by hand disappears the next time
+    // `--only=nav` runs. Its four pills are the hub's tabs; three of them are
+    // behind the code, and the menu links to them all the same - the gate
+    // sends a visitor without a session to the access page.
+    {
+      _key: 'navItemVip', _type: 'navItem', kind: 'route', route: 'vip', label: L('VIP', 'VIP', 'VIP'),
+      children: [
+        route('navChild0', 'vip', 'about', L('about', 'à propos', 'over')),
+        route('navChild1', 'vip', 'programme', L('VIP programme', 'programme VIP', 'VIP-programma')),
+        route('navChild2', 'vip', 'lounge', L('VIP lounge', 'lounge VIP', 'VIP-lounge')),
+        route('navChild3', 'vip', 'hotel-deal', L('hotel deal', 'offre hôtel', 'hoteldeal')),
       ],
     },
     {
