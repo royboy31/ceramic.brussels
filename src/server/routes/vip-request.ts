@@ -3,20 +3,26 @@ import { getSecret } from 'astro:env/server';
 import { sanityClient } from 'sanity:client';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { localePath } from '../../lib/i18n';
+import { codePepper, vipEnv } from '../vip';
+import { createGuest } from '../vipGuests';
 
 /**
  * POST /api/vip/request - the "not a VIP yet?" form on the VIP access page.
  *
  * The gallery application form's pattern (apply.ts), with the VIP hub's
- * five fields: checks them, turns away bots and repeats, and sends the
- * request to the VIP team through Brevo, plus a confirmation to the
- * requester when Site settings → VIP has one. Nothing is stored: the
- * dataset is public, and the emails are the record. The team decides, adds
- * the guest to the list (scripts/vip-guests.mjs) and sends the code.
+ * five fields: checks them, turns away bots and repeats, and **files the
+ * request in the guest list as a pending row** - in D1, never in Sanity,
+ * whose dataset is public. A Sanity administrator grants or denies it in
+ * the Studio's VIP tool; a pending row's code opens nothing (vip.ts
+ * findGuestByCode). Someone already in the list, whatever their state, is
+ * left as they are: asking twice changes nothing.
  *
- * Until BREVO_API_KEY is set this answers 503 and the form shows its
- * failure state with the VIP address - never a false "sent" - except on a
- * branch preview, where APPLY_DRY_RUN=1 logs the request instead.
+ * The emails through Brevo - the request to the VIP team, a confirmation to
+ * the requester when Site settings → VIP has one - are a notification now,
+ * not the record, so a request filed without them still counts as received.
+ * Only when it could be neither filed nor mailed does this answer 503 and
+ * the form show its failure state with the VIP address - never a false
+ * "sent". On a branch preview APPLY_DRY_RUN=1 logs the mail instead.
  */
 export const prerender = false;
 
@@ -98,6 +104,24 @@ async function isRepeat(email: string): Promise<boolean> {
   const cache = await caches.open('vip-request');
   if (await cache.match(key)) return true;
   await cache.put(key, new Response('1', { headers: { 'cache-control': `max-age=${DUPLICATE_WINDOW_SECONDS}` } }));
+  return false;
+}
+
+/**
+ * A request is a row in the guest list now, so one address may not file them
+ * without end: ten an hour, counted per colo in the Cache API like the code
+ * box's failures. A real visitor sends one.
+ */
+const REQUEST_LIMIT = 10;
+async function tooManyRequests(request: Request): Promise<boolean> {
+  if (typeof caches === 'undefined') return false;
+  const ip = request.headers.get('cf-connecting-ip') ?? 'unknown';
+  const key = new Request(`https://vip-request-ip.invalid/${encodeURIComponent(ip)}`);
+  const cache = await caches.open('vip-request');
+  const hit = await cache.match(key);
+  const count = hit ? Number(await hit.text()) || 0 : 0;
+  if (count >= REQUEST_LIMIT) return true;
+  await cache.put(key, new Response(String(count + 1), { headers: { 'cache-control': 'max-age=3600' } }));
   return false;
 }
 
@@ -184,18 +208,42 @@ export const POST: APIRoute = async ({ request }) => {
   const cfg = await settings(lang);
   const apiKey = getSecret('BREVO_API_KEY');
   const dryRun = !apiKey && getSecret('APPLY_DRY_RUN') === '1';
-  if (!apiKey && !dryRun) {
-    console.error('[vip] request: BREVO_API_KEY is not set; request not delivered');
+  const env = await vipEnv();
+  const pepper = codePepper();
+  if (!(env && pepper) && !apiKey && !dryRun) {
+    console.error('[vip] request: no guest list and no BREVO_API_KEY on this deployment; request not received');
     return answer(503, 'unconfigured', 'Not available yet', `The form is not connected yet. Please write to ${cfg.contactEmail || 'the VIP team'}.`);
   }
 
+  if (await tooManyRequests(request)) return answer(429, 'throttled', 'Too many requests', 'Please try again later.');
   if (await isRepeat(submission.email)) return answer(409, 'duplicate', 'Already received', 'We already have a request from this address.');
 
+  // The record: a pending row for the Studio's VIP tool.
+  let filed = false;
+  if (env && pepper) {
+    try {
+      await createGuest(
+        env.VIP_DB,
+        pepper,
+        { firstName: submission.firstName, lastName: submission.lastName, email: submission.email, institution: submission.institution, function: submission.jobTitle },
+        'pending',
+        null,
+      );
+      filed = true;
+    } catch (error) {
+      console.error('[vip] request could not be filed:', error instanceof Error ? error.message : error);
+    }
+  }
+
+  // The notification. Its failure only matters when nothing was filed.
   try {
-    if (dryRun) console.warn('[vip] APPLY_DRY_RUN: request not delivered', JSON.stringify({ ...submission, to: cfg.recipient, cc: cfg.cc }));
-    else await deliver(apiKey!, submission, cfg);
+    if (apiKey) await deliver(apiKey, submission, cfg);
+    else if (dryRun) console.warn('[vip] APPLY_DRY_RUN: request not mailed', JSON.stringify({ ...submission, to: cfg.recipient, cc: cfg.cc }));
   } catch (error) {
     console.error('[vip] request delivery failed:', error instanceof Error ? error.message : error);
+    if (!filed) return answer(502, 'delivery', 'Could not send', `Your request could not be sent. Please write to ${cfg.contactEmail || 'the VIP team'}.`);
+  }
+  if (!filed && !apiKey && !dryRun) {
     return answer(502, 'delivery', 'Could not send', `Your request could not be sent. Please write to ${cfg.contactEmail || 'the VIP team'}.`);
   }
 

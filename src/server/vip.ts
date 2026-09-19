@@ -16,14 +16,16 @@ import { sanityClient } from 'sanity:client';
  * fight the DOM lib the pages compile against.
  */
 
+export interface D1Statement {
+  first<T = Record<string, unknown>>(): Promise<T | null>;
+  run(): Promise<unknown>;
+  all<T = Record<string, unknown>>(): Promise<{ results: T[] }>;
+}
+
 export interface D1Like {
-  prepare(query: string): {
-    bind(...values: unknown[]): {
-      first<T = Record<string, unknown>>(): Promise<T | null>;
-      run(): Promise<unknown>;
-      all<T = Record<string, unknown>>(): Promise<{ results: T[] }>;
-    };
-  };
+  prepare(query: string): { bind(...values: unknown[]): D1Statement };
+  /** Several statements in one round trip and one transaction. */
+  batch(statements: D1Statement[]): Promise<unknown[]>;
 }
 
 export interface KVLike {
@@ -72,8 +74,17 @@ export interface Guest {
   revoked: number;
 }
 
+/**
+ * Approved guests only. A request filed through the "not a VIP yet?" form is
+ * a row like any other, and its code can be worked out from its email the
+ * moment it exists - so a pending or denied row must never match here, or
+ * asking for access would be the same as having it.
+ */
 export async function findGuestByCode(db: D1Like, hash: string): Promise<Guest | null> {
-  return db.prepare('SELECT id, first_name, last_name, revoked FROM guests WHERE code_hash = ?').bind(hash).first<Guest>();
+  return db
+    .prepare("SELECT id, first_name, last_name, revoked FROM guests WHERE code_hash = ? AND status = 'approved'")
+    .bind(hash)
+    .first<Guest>();
 }
 
 export async function recordEntry(db: D1Like, id: string): Promise<void> {

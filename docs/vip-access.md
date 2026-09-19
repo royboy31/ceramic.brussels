@@ -170,6 +170,52 @@ apply. Revoking `SANITY_STUDIO_TOKEN` at sanity.io/manage and deleting
 that Pages secret are still to do by hand - the database itself is no
 longer to be deleted.
 
+## The guest list in the Studio (2026-09-19)
+
+A Sanity **administrator** manages the guests under **VIP guests** in the
+Studio's top bar (`src/sanity/components/VipTool.tsx`): the requests the
+site's form files, add, edit, delete, approve, deny, revoke, restore, a new
+code, CSV import and CSV export with codes. An editor's seat opens the
+Studio and not this. The gate, the codes and the sessions are exactly as
+above; the tool only edits rows.
+
+- **Still D1, never Sanity.** The dataset is public; the list is names and
+  emails. The tool is a screen in the Studio, not content in it.
+- **Who gets in** is decided on the Worker, not in the browser. Every call
+  to `POST /api/vip/admin/` carries the Studio's own token in
+  `x-sanity-token`; `src/server/sanityIdentity.ts` asks Sanity who that is
+  (`/users/me`) and whether they are an administrator of this project
+  (`/projects/<id>`), then throws the token away - never stored, never
+  logged, cached for a minute by fingerprint only. No cookie takes part.
+  This is the half of the site accounts removed on 2026-09-15 that was
+  never the problem: what went was a second kind of account and one shared
+  token in every browser. Here each administrator proves themselves with
+  their own, which is also what writes a name into `decided_by`.
+- **A guest has a `status`** (migration `0003`): `approved`, `pending` or
+  `denied`. Existing rows defaulted to `approved`. **Only an approved
+  guest's code opens anything** - `findGuestByCode` in `vip.ts` says so,
+  and it has to: a code is derived from the email, so a pending row's code
+  exists the moment the row does.
+- **The "not a VIP yet?" form files a pending row** (`vip-request.ts`) and
+  mails the team as a notification when Brevo is connected. It therefore
+  works before Brevo exists. Someone already in the list, in any state, is
+  left alone: asking twice changes nothing, and a denied guest cannot ask
+  their way back to pending. Ten requests an hour per address.
+- **Codes are the same function on both sides.** `makeCode` in
+  `src/server/vipGuests.ts` is the script's, on WebCrypto; checked against
+  the test guest's code. Change one and change both.
+- **Approving shows the code; it does not mail it.** The invitation mailing
+  is the team's, from the export.
+- **Editing a first name changes the code**, because the name is part of it;
+  the tool says so and shows the new one. The email cannot be edited - it is
+  the guest's identity: delete and add again.
+- The import goes up 300 rows a call and the export comes down 500 a call,
+  each one read and one batch: a Worker may make only so many database
+  calls per request.
+- The tool shows only on a build with the Worker (`PUBLIC_PREVIEW_ENABLED`),
+  like Preview. On `astro dev` there is no database.
+- The CLI has the same verbs: `--add`, `--pending`, `--approve`, `--deny`.
+
 ## Status, 2026-09-19
 
 Lilanga's five pages are in (`kamindu`, merged from `lilanga` 7af7e33): the

@@ -8,6 +8,7 @@ import { TAB_TEMPLATE_PREFIX, templates } from './src/sanity/templates';
 import { applyTemplateAction, saveAsTemplateAction } from './src/sanity/components/TemplateActions';
 import { PreviewLauncher, PreviewIcon } from './src/sanity/components/PreviewLauncher';
 import { openPreviewAction } from './src/sanity/components/OpenPreviewAction';
+import { VipTool, VipToolIcon } from './src/sanity/components/VipTool';
 import { PREVIEWABLE_TYPES } from './src/sanity/previewPaths';
 
 // Singletons must not be creatable or deletable from the Studio.
@@ -37,6 +38,13 @@ export default defineConfig({
      * beside the page in a frame) on 2026-09-11. See PreviewLauncher.tsx.
      */
     ...(PREVIEW ? [{ name: 'preview', title: 'Preview', icon: PreviewIcon, component: PreviewLauncher }] : []),
+    /**
+     * VIP guests: the requests the site's "not a VIP yet?" form files, and
+     * the guest list behind the VIP hub's codes - in Cloudflare D1, never in
+     * this public dataset. Sanity administrators only; the API checks, not
+     * this list. It needs the Worker, like Preview. See VipTool.tsx.
+     */
+    ...(PREVIEW ? [{ name: 'vip', title: 'VIP guests', icon: VipToolIcon, component: VipTool }] : []),
   ],
 
   // Language selector lives in the Studio chrome, so one choice applies to

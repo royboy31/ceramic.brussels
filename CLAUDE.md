@@ -599,7 +599,12 @@ questions.
   `previewContext.ts`, which makes `run()` skip the build memo - a Worker
   isolate lives long enough to otherwise serve stale content. `astro dev`
   has no Worker: the locked tabs open without a code there, and the gate is
-  tried on a branch preview. KV's free tier allows 1,000 writes a day, one
+  tried on a branch preview. The guest list is managed by a Sanity
+  **administrator** under "VIP guests" in the Studio's top bar
+  (`VipTool.tsx` → `/api/vip/admin`, which checks the Studio's own token
+  against Sanity and keeps nothing) - still in D1, never in the public
+  dataset. A guest is `approved`, `pending` (filed by the "not a VIP yet?"
+  form) or `denied`, and only an approved guest's code opens anything. KV's free tier allows 1,000 writes a day, one
   per code entry: Workers Paid before the mailing. The whole design is in
   `docs/vip-access.md`.
 - **The gallery application form is a page-builder block.** `applicationFormSection`

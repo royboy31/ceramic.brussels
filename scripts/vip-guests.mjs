@@ -12,12 +12,26 @@
  *       already in the list keeps their code.
  *   npm run vip -- --export [--out guests-with-codes.csv]
  *       The whole list with codes, as it stands.
+ *   npm run vip -- --add a@b.c --first Ada --last Lovelace [--institution X] [--function Y]
+ *       One guest, approved, and their code.
+ *   npm run vip -- --pending           the requests the site's form has filed
+ *   npm run vip -- --approve a@b.c     grants a request, prints the code
+ *   npm run vip -- --deny a@b.c        refuses it; asking again changes nothing
  *   npm run vip -- --revoke a@b.c      the code stops working, sessions end
  *   npm run vip -- --restore a@b.c     the same code works again
  *   npm run vip -- --reissue a@b.c     a new code; the old one stops working
  *   npm run vip -- --set hotel_code=CERAMIC27   a value the site reads from D1
  *   npm run vip -- --get hotel_code
  *   npm run vip -- --stats             counts, entries, last entries
+ *
+ * A Sanity administrator does all of this in the Studio too ("VIP guests" in
+ * the top bar, src/sanity/components/VipTool.tsx -> /api/vip/admin), with the
+ * same functions on the Worker (src/server/vipGuests.ts). `makeCode` there
+ * and here must stay the same function.
+ *
+ * A guest has a `status`: `approved` (their code works), `pending` (a request
+ * from the "not a VIP yet?" form, waiting) or `denied`. Only an approved
+ * guest's code opens anything. The import approves whoever it lists.
  *
  * How a code is made. The code is never stored: the database holds the
  * SHA-256 of `<pepper>:<code>`, where the pepper is VIP_CODE_PEPPER in
@@ -141,7 +155,7 @@ const rows = (out) => out?.[0]?.results ?? [];
 function allGuests() {
   return rows(
     d1(
-      'SELECT id, code_version, first_name, last_name, email, institution, function, revoked, entries, last_entry_at, created_at FROM guests ORDER BY last_name, first_name',
+      'SELECT id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, created_at FROM guests ORDER BY last_name, first_name',
     ),
   );
 }
@@ -255,9 +269,12 @@ function importSheet(file) {
     const version = existing.get(id)?.code_version ?? 1;
     const code = makeCode(g.firstName, g.email, version);
     statements.push(
-      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, created_at, updated_at)
-       VALUES (${q(id)}, ${q(codeHash(code))}, ${version}, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(g.institution || null)}, ${q(g.function || null)}, ${q(stamp)}, ${q(stamp)})
-       ON CONFLICT(id) DO UPDATE SET first_name = excluded.first_name, last_name = excluded.last_name, institution = excluded.institution, function = excluded.function, updated_at = excluded.updated_at;`,
+      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at)
+       VALUES (${q(id)}, ${q(codeHash(code))}, ${version}, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(g.institution || null)}, ${q(g.function || null)}, 'approved', ${q(stamp)}, 'import', ${q(stamp)}, ${q(stamp)})
+       ON CONFLICT(id) DO UPDATE SET first_name = excluded.first_name, last_name = excluded.last_name, institution = excluded.institution, function = excluded.function, updated_at = excluded.updated_at,
+         decided_at = CASE WHEN guests.status = 'pending' THEN excluded.decided_at ELSE guests.decided_at END,
+         decided_by = CASE WHEN guests.status = 'pending' THEN 'import' ELSE guests.decided_by END,
+         status = CASE WHEN guests.status = 'pending' THEN 'approved' ELSE guests.status END;`,
     );
     existing.has(id) ? updated++ : created++;
     out.push([g.firstName, g.lastName, g.email, g.institution, g.function, code]);
@@ -276,14 +293,15 @@ function exportList() {
   fs.writeFileSync(
     outFile,
     toCsv(
-      ['first name', 'last name', 'email', 'institution', 'function', 'code', 'revoked', 'entries', 'last entry'],
+      ['first name', 'last name', 'email', 'institution', 'function', 'code', 'status', 'revoked', 'entries', 'last entry'],
       guests.map((g) => [
         g.first_name,
         g.last_name,
         g.email,
         g.institution,
         g.function,
-        g.revoked ? '' : makeCode(g.first_name, g.email, g.code_version),
+        g.revoked || g.status !== 'approved' ? '' : makeCode(g.first_name, g.email, g.code_version),
+        g.status,
         g.revoked ? 'yes' : '',
         g.entries,
         g.last_entry_at ?? '',
@@ -295,7 +313,7 @@ function exportList() {
 
 function findGuest(email) {
   const id = guestId(email);
-  const [g] = rows(d1(`SELECT id, code_version, first_name, last_name, email, revoked FROM guests WHERE id = ${q(id)}`));
+  const [g] = rows(d1(`SELECT id, code_version, first_name, last_name, email, status, revoked FROM guests WHERE id = ${q(id)}`));
   if (!g) {
     console.error(`No guest with the email ${email}.`);
     process.exit(1);
@@ -319,6 +337,32 @@ function reissue(email) {
   console.log(`${g.first_name} ${g.last_name}: new code ${code} (${ended} session(s) ended). The old one no longer works.`);
 }
 
+function addGuest(email) {
+  const g = { email: email.trim().toLowerCase(), firstName: value('first')?.trim(), lastName: value('last')?.trim() };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g.email) || !g.firstName || !g.lastName) throw new Error('--add needs an email, --first and --last');
+  const id = guestId(g.email);
+  if (rows(d1(`SELECT id FROM guests WHERE id = ${q(id)}`)).length) throw new Error(`${g.email} is already in the list (--approve, --restore or --reissue).`);
+  const code = makeCode(g.firstName, g.email, 1);
+  const stamp = now();
+  d1(`INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at)
+      VALUES (${q(id)}, ${q(codeHash(code))}, 1, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(value('institution') || null)}, ${q(value('function') || null)}, 'approved', ${q(stamp)}, 'cli', ${q(stamp)}, ${q(stamp)});`);
+  console.log(`${g.firstName} ${g.lastName} added. Code: ${code}`);
+}
+
+function decide(email, status) {
+  const g = findGuest(email);
+  d1(`UPDATE guests SET status = ${q(status)}, decided_at = ${q(now())}, decided_by = 'cli', updated_at = ${q(now())} WHERE id = ${q(g.id)};`);
+  if (status === 'approved') console.log(`${g.first_name} ${g.last_name}: approved. Code: ${makeCode(g.first_name, g.email, g.code_version)}`);
+  else console.log(`${g.first_name} ${g.last_name}: denied, ${endSessions(g.id)} session(s) ended.`);
+}
+
+function pending() {
+  const list = rows(d1(`SELECT first_name, last_name, email, institution, function, requested_at FROM guests WHERE status = 'pending' ORDER BY requested_at`));
+  if (!list.length) return console.log('No requests waiting.');
+  for (const g of list) console.log(`${g.requested_at ?? ''}  ${g.first_name} ${g.last_name} <${g.email}>  ${[g.institution, g.function].filter(Boolean).join(', ')}`);
+  console.log(`${list.length} request(s) waiting: --approve email | --deny email`);
+}
+
 function setSetting(pair) {
   const at = pair.indexOf('=');
   if (at <= 0) throw new Error('--set needs key=value');
@@ -336,10 +380,10 @@ function getSetting(key) {
 function stats() {
   const [s] = rows(
     d1(
-      `SELECT COUNT(*) AS guests, SUM(revoked) AS revoked, SUM(CASE WHEN entries > 0 THEN 1 ELSE 0 END) AS entered, SUM(entries) AS entries, MAX(last_entry_at) AS last_entry FROM guests`,
+      `SELECT COUNT(*) AS guests, SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending, SUM(CASE WHEN status = 'denied' THEN 1 ELSE 0 END) AS denied, SUM(revoked) AS revoked, SUM(CASE WHEN entries > 0 THEN 1 ELSE 0 END) AS entered, SUM(entries) AS entries, MAX(last_entry_at) AS last_entry FROM guests`,
     ),
   );
-  console.log(`${s.guests} guest(s), ${s.revoked ?? 0} revoked, ${s.entered ?? 0} have entered a code (${s.entries ?? 0} entries in all), last entry ${s.last_entry ?? 'never'}.`);
+  console.log(`${s.guests} guest(s), ${s.pending ?? 0} request(s) waiting, ${s.denied ?? 0} denied, ${s.revoked ?? 0} revoked, ${s.entered ?? 0} have entered a code (${s.entries ?? 0} entries in all), last entry ${s.last_entry ?? 'never'}.`);
 }
 
 /* ---------------------------------------------------------------- main */
@@ -347,6 +391,10 @@ function stats() {
 try {
   if (value('import')) importSheet(value('import'));
   else if (flag('export')) exportList();
+  else if (value('add')) addGuest(value('add'));
+  else if (flag('pending')) pending();
+  else if (value('approve')) decide(value('approve'), 'approved');
+  else if (value('deny')) decide(value('deny'), 'denied');
   else if (value('revoke')) revoke(value('revoke'), true);
   else if (value('restore')) revoke(value('restore'), false);
   else if (value('reissue')) reissue(value('reissue'));
@@ -354,7 +402,7 @@ try {
   else if (value('get')) getSetting(value('get'));
   else if (flag('stats')) stats();
   else {
-    console.log('Usage: npm run vip -- --import guests.csv | --export | --revoke email | --restore email | --reissue email | --set key=value | --get key | --stats');
+    console.log('Usage: npm run vip -- --import guests.csv | --export | --add email --first X --last Y | --pending | --approve email | --deny email | --revoke email | --restore email | --reissue email | --set key=value | --get key | --stats');
     process.exit(1);
   }
 } catch (error) {

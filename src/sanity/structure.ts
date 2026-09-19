@@ -261,8 +261,9 @@ export const structure: StructureResolver = async (S, context) => {
 
       // The VIP hub (docs/vip-access.md): the about page is public, the
       // programme, lounge and hotel deal tabs open with a code. The guest
-      // list and the codes are not in Sanity - they live in Cloudflare and
-      // are managed with `npm run vip` (Kamindu).
+      // list and the codes are not in Sanity - they live in Cloudflare, and
+      // a Sanity administrator manages them under "VIP guests" in the top
+      // bar (VipTool.tsx), or with `npm run vip` from a laptop.
       folder('vip', 'VIP', [
         mainPage('vip', 'VIP page (about, public)'),
         tabIntros('vip', 'about', 'Tab intros (programme, lounge, hotel deal) and the access page'),

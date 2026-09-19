@@ -29,6 +29,8 @@ export function vipRoutes({ onDemand = false } = {}) {
         injectRoute({ pattern: '/api/vip/enter', entrypoint: './src/server/routes/vip-enter.ts', prerender: false });
         injectRoute({ pattern: '/api/vip/leave', entrypoint: './src/server/routes/vip-leave.ts', prerender: false });
         injectRoute({ pattern: '/api/vip/request', entrypoint: './src/server/routes/vip-request.ts', prerender: false });
+        // The guest list, for the Studio's VIP tool (Sanity administrators only).
+        injectRoute({ pattern: '/api/vip/admin', entrypoint: './src/server/routes/vip-admin.ts', prerender: false });
         logger.info('VIP locked tabs mounted on request at /[lang]/vip/[tab], plus /api/vip/');
       },
       'astro:build:done': ({ logger }) => {
