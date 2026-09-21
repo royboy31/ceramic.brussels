@@ -428,3 +428,47 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 `tabs.vipLounge`, `tabs.hotelDeal`).
 
 ---
+
+## #19 · open · 2026-09-22 · press & media as a hub of its own, with its leads
+
+**Page / component:** `src/components/PressMedia.astro`, mounted by `src/components/hubs/About.astro` on the `press` tab
+**Figma frame:** the press & media hand-off of 2026-09-21 (`ceramic-brussels-press-media-html-2026-09-21-v2.zip`, previews in `press-and -media/`)
+**The design shows:** "press & media" as a hub title with four tabs - **stories**, **press**, **photos & videos**, **media partners** - each its own page. Every view opens with a lead paragraph (two on stories and press, one per section): "Because the fair is a collective effort…", "Discover a selection of articles…", "Benefiting from strong international visibility…", "ceramic brussels unfolds over five days of discovery…", "The strong commitment of leading media outlets…".
+**The code says today:** press & media is one tab of the about hub (`/[lang]/about/press`), one `page` document (`demo-page-about-press`), whose one `intro` ("Press clips, press kit and contacts…") the design has no place for.
+**Rendered meanwhile:** the four views on the one tab, under the design's "press & media" band. The pills switch between them in place and put the view in the hash (`/en/about/press/#photos-videos`). A view with no content has no pill. The leads are not rendered and neither is the page's `intro`. Each view is a `<section data-view-panel>` that moves to its own tab unchanged.
+**Asked for:** a hub (or a second tab level, whichever you prefer) with the four tabs and translated segments, and somewhere for the leads - a `page` per tab would carry one `intro` each, which leaves stories and press one short (the second heading's lead). The old `/about/press` addresses need a target: the new hub root or the press tab. **Question for the designer:** the photos view's "search by media ↓" pill - what does it search? It is not built.
+
+---
+
+## #20 · open · 2026-09-22 · a cover image on a press clipping
+
+**Page / component:** `PressMedia.astro`, press view, "as seen in the press"
+**Figma frame:** press & media hand-off, "press" page
+**The design shows:** three cards a row, each led by the magazine's cover (portrait, roughly 3:4), then the date (01.12.2025), the article title, the outlet and "read the article ↗", with "load more ↓" underneath.
+**The query returns today:** `getPressClips()` → `title, outlet, publishedAt, language, url, pdfUrl`. No image. (And no clippings exist yet: the dataset has 0 `pressClip` documents, so the section is not shown at all.)
+**Rendered meanwhile:** the cards without a cover: date, title, outlet, link; six, then six more per "load more".
+**Asked for:** a `cover` (`figure`) on `pressClip`, returned as `cover ${IMAGE}` by `getPressClips`. The import of the 230+ legacy articles would fill the section.
+
+---
+
+## #21 · open · 2026-09-22 · stories: interviews and collectors' voices
+
+**Page / component:** `PressMedia.astro`, stories view (markup built, fed empty arrays)
+**Figma frame:** press & media hand-off, "stories" page
+**The design shows:** two lists. **Interviews**: three cards a row, picture, name ("Marion Verboom"), the role they speak in, in capitals ("guest of honour", "main partner", "media partner"), a short text, "read the interview →"; "load more ↓". **Collectors' voices**: a lead with a "discover Ceramics Now ↗" pill beside it, then rows of picture (half) + a dated rule ("DEC. 2026"), title, text, "read the interview →".
+**The query returns today:** nothing of the kind. `newsItem` has no interview category and no "role" line.
+**Rendered meanwhile:** no stories pill; the view appears as soon as either list has an item. The component expects per item `image` (figure), `title`, `role` (interviews), `date` (collectors), `text`, `url`.
+**Asked for:** your call on the shape: two new `newsItem` categories (`interview`, `collector`) plus a localised `role` line would give each story a page of its own, which "read the interview →" suggests; or a small `story` document if they link out (Ceramics Now hosts the collectors' series). Plus the Ceramics Now link (a Site settings field or the partner document's `url`).
+
+---
+
+## #22 · open · 2026-09-22 · press releases: their edition, and a file per language
+
+**Page / component:** `PressMedia.astro`, press view, "press releases"
+**Figma frame:** press & media hand-off, "press" page
+**The design shows:** "SORT BY:" pills per edition ("2027 edition", "3rd edition"…), then each release: a dated rule ("SEPT. 2026"), the title, and "read in EN → / read in FR → / read in NL →".
+**The query returns today:** `getNews` → `NEWS_CARD`, which has `category` (so `press-release` items can be picked out) but not `edition`, although the field exists (hidden) on `newsItem`. No press-release item exists yet.
+**Rendered meanwhile:** releases are the `press-release` news items; the three "read in" pills are the item's news page in each language. The edition is worked out from the date - a release belongs to the first edition that ends after it was published.
+**Asked for:** `"edition": edition->year` in `NEWS_CARD` (and the field shown again for this category). If the releases are PDFs rather than pages, say so: then a `file` per language on the item, and the pills link those.
+
+---
