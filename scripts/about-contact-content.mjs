@@ -62,8 +62,19 @@ const CHANGES = {
   siteSettings: {
     'organiserText.en': 'ceramic brussels is initiated and organized jointly by studio emosi and ceramic brussels ASBL.',
     postalAddress: 'Rue Franz Merjay 148C\n1050 Ixelles\nBrussels, BELGIUM',
-    // organiserLink ("discover studio emosi's projects ↗") is left to the
-    // Studio: the design shows the pill, not the address it goes to.
+    // The design shows the pill, not where it goes: studio-emosi.com is the
+    // studio's own site (it lists ceramic brussels among its projects).
+    organiserLink: {
+      _type: 'link',
+      kind: 'external',
+      external: 'https://studio-emosi.com/',
+      label: {
+        _type: 'localeString',
+        en: 'discover studio emosi’s projects',
+        fr: 'découvrir les projets de studio emosi',
+        nl: 'ontdek de projecten van studio emosi',
+      },
+    },
   },
   'demo-person-gilles-parmentier': {
     ...DIRECTOR,
@@ -99,7 +110,13 @@ const PARENT_TYPES = { intro: 'localeText', organiserText: 'localeText', role: '
 const at = (doc, p) => p.split('.').reduce((v, k) => v?.[k], doc);
 const show = (v) => (Array.isArray(v) ? `[${v.length} paragraphs] ${v[0]?.children?.[0]?.text?.slice(0, 50)}…` : JSON.stringify(v));
 /** Compare on what is read, not on keys. */
-const plain = (v) => (Array.isArray(v) ? v.map((b) => b.children?.map((c) => c.text).join('')).join('\n') : v);
+const plain = (v) =>
+  Array.isArray(v) ? v.map((b) => b.children?.map((c) => c.text).join('')).join('\n') : v && typeof v === 'object' ? stable(v) : v;
+/** An object as the API returns it has its keys in another order. */
+function stable(v) {
+  if (!v || typeof v !== 'object') return JSON.stringify(v);
+  return `{${Object.keys(v).sort().map((k) => `${k}:${stable(v[k])}`).join(',')}}`;
+}
 
 let writes = 0;
 for (const [baseId, fields] of Object.entries(CHANGES)) {
