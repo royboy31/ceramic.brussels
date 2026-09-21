@@ -6,6 +6,7 @@ import PageSections from '../../components/PageSections.astro';
 import SanityImage from '../../components/SanityImage.astro';
 import PortableText from '../../components/PortableText.astro';
 import PersonCard from '../../components/PersonCard.astro';
+import LinkPill from '../../components/LinkPill.astro';
 import Slideshow from '../../components/Slideshow.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations, formatDate } from '../../lib/i18n';
@@ -46,6 +47,8 @@ const team = tab === 'team' ? await getPeople(lang, 'team') : [];
 const directors = team.filter((p: any) => /direct/i.test(p.role ?? ''));
 const staff = team.filter((p: any) => !directors.includes(p));
 const [clips, settings] = await Promise.all([tab === 'press' ? getPressClips() : [], getSettings(lang)]);
+const hasContactBlock =
+  settings?.organiserText || settings?.organiserLink || settings?.postalAddress || settings?.contactEmail;
 // Newest first, grouped by year, which is how a press list is actually read.
 const years = [...new Set(clips.map((c: any) => c.publishedAt?.slice(0, 4)))]
   .filter(Boolean)
@@ -191,20 +194,31 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
             {staff.map((p: any) => (
               <PersonCard lang={lang} person={p} variant="team" />
             ))}
-            {/* BACKEND-REQUEST #13: the design opens this block with "ceramic
-                brussels is initiated and organized jointly by studio emosi and
-                ceramic brussels ASBL", a "discover studio emosi's projects ↗"
-                pill and the ASBL's postal address. None of the three is in
-                `getSettings` (`practicalInfo.address` is the fair's venue), so
-                the block carries the contact address alone until they exist. */}
-            {settings?.contactEmail && (
+            {/* The design's closing block: the organiser line, the "discover
+                studio emosi's projects ↗" pill, the ASBL's postal address and
+                the contact address, all from Site settings → Contact (#13).
+                Each shows only once an editor has filled it. */}
+            {hasContactBlock && (
               <section class="contact-block">
                 <h2 class="team-title">{t('nav.contact').toLowerCase()}</h2>
-                <p class="body-24">
-                  <a class="text-link" href={`mailto:${settings.contactEmail}`}>
-                    {settings.contactEmail}
-                  </a>
-                </p>
+                {settings.organiserText && (
+                  <p class="body-24" {...styleAttrs(settings.organiserTextStyle)}>
+                    {settings.organiserText}
+                  </p>
+                )}
+                {settings.organiserLink && (
+                  <p class="organiser-link">
+                    <LinkPill lang={lang} link={settings.organiserLink} />
+                  </p>
+                )}
+                {settings.postalAddress && <p class="body-24 postal">{settings.postalAddress}</p>}
+                {settings.contactEmail && (
+                  <p class="body-24">
+                    <a class="text-link" href={`mailto:${settings.contactEmail}`}>
+                      {`${settings.contactEmail}\u00a0↗`}
+                    </a>
+                  </p>
+                )}
               </section>
             )}
           </div>
@@ -212,13 +226,6 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
       )
     }
     {tab === 'team' && team.length === 0 && <p class="empty">{t('about.peopleEmpty')}</p>}
-    {/* BACKEND-REQUEST #13: the design closes this tab with a "contact" block -
-        the "initiated and organized jointly by studio emosi and ceramic
-        brussels ASBL" line, a "discover studio emosi's projects ↗" pill and
-        the ASBL's postal address. `getSettings` carries none of the three
-        (`practicalInfo.address` is the fair's venue, not the office), so the
-        block is left to the page's own section stack below until the fields
-        exist. */}
 
     {/* ------------------------------------------------------------- press */}
     {
@@ -544,8 +551,13 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
   .contact-block .team-title {
     margin-top: 0;
   }
-  .contact-block .body-24 {
+  .contact-block .body-24,
+  .contact-block .organiser-link {
     margin-top: 20px;
+  }
+  /* The address is typed on three lines in the Studio. */
+  .contact-block .postal {
+    white-space: pre-line;
   }
   .people.team-grid {
     gap: 45px 40px;

@@ -45,7 +45,9 @@ const contactLines = !board && (person.email || person.phone);
         person.portrait?.asset ? (
           <SanityImage image={person.portrait} widths={[200, 400]} sizes="197px" aspect={197 / 270} />
         ) : (
-          <div class="no-portrait" aria-hidden="true" />
+          // The team list has people and studios with no portrait at all: the
+          // column stays, so the text lines up, but no grey box is drawn.
+          !team && <div class="no-portrait" aria-hidden="true" />
         )
       }
       {credit && <figcaption>© {credit}</figcaption>}
