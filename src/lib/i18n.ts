@@ -151,6 +151,23 @@ const STRINGS = {
     'news.category.press-release': 'press release',
     'press.contacts': 'Press contacts',
     'press.clips': 'Press clips',
+    // The press & media views (about → press, design of 2026-09-21).
+    'press.stories': 'stories',
+    'press.photosVideos': 'photos & videos',
+    'press.mediaPartners': 'media partners',
+    'press.interviews': 'interviews',
+    'press.collectorsVoices': 'collectors’ voices',
+    'press.readInterview': 'read the interview',
+    'press.asSeen': 'as seen in the press',
+    'press.readTheArticle': 'read the article',
+    'press.room': 'press room',
+    'press.releases': 'press releases',
+    'press.reviews': 'press reviews',
+    'press.agencies': 'press agencies',
+    'press.relations': '{region} public & press relations',
+    'press.sortBy': 'sort by',
+    'press.readIn': 'read in',
+    'press.loadMore': 'load more',
     'nav.contact': 'Contact',
     'contact.team': 'the team',
     'contact.follow': 'follow us!',
@@ -411,6 +428,22 @@ const STRINGS = {
     'news.category.press-release': 'communiqué de presse',
     'press.contacts': 'Contacts presse',
     'press.clips': 'Revue de presse',
+    'press.stories': 'récits',
+    'press.photosVideos': 'photos & vidéos',
+    'press.mediaPartners': 'partenaires médias',
+    'press.interviews': 'entretiens',
+    'press.collectorsVoices': 'paroles de collectionneurs',
+    'press.readInterview': 'lire l’entretien',
+    'press.asSeen': 'vu dans la presse',
+    'press.readTheArticle': 'lire l’article',
+    'press.room': 'espace presse',
+    'press.releases': 'communiqués de presse',
+    'press.reviews': 'revues de presse',
+    'press.agencies': 'agences de presse',
+    'press.relations': 'relations publiques & presse {region}',
+    'press.sortBy': 'trier par',
+    'press.readIn': 'lire en',
+    'press.loadMore': 'voir plus',
     'nav.contact': 'Contact',
     'contact.team': 'l’équipe',
     'contact.follow': 'suivez-nous !',
@@ -671,6 +704,22 @@ const STRINGS = {
     'news.category.press-release': 'persbericht',
     'press.contacts': 'Perscontacten',
     'press.clips': 'Persoverzicht',
+    'press.stories': 'verhalen',
+    'press.photosVideos': 'foto’s & video’s',
+    'press.mediaPartners': 'mediapartners',
+    'press.interviews': 'interviews',
+    'press.collectorsVoices': 'stemmen van verzamelaars',
+    'press.readInterview': 'lees het interview',
+    'press.asSeen': 'gezien in de pers',
+    'press.readTheArticle': 'lees het artikel',
+    'press.room': 'persruimte',
+    'press.releases': 'persberichten',
+    'press.reviews': 'persoverzichten',
+    'press.agencies': 'persagentschappen',
+    'press.relations': 'pr & persrelaties {region}',
+    'press.sortBy': 'sorteer op',
+    'press.readIn': 'lees in',
+    'press.loadMore': 'meer laden',
     'nav.contact': 'Contact',
     'contact.team': 'het team',
     'contact.follow': 'volg ons!',
@@ -853,6 +902,29 @@ export function formatDate(value: string | undefined, lang: LocaleId): string {
     year: 'numeric',
     timeZone: TIME_ZONE,
   }).format(new Date(value));
+}
+
+/** "01.12.2025" - the press clippings' date line. */
+export function formatDateNumeric(value: string | undefined, lang: LocaleId): string {
+  if (!value) return '';
+  const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
+  const parts = new Intl.DateTimeFormat(locale, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: TIME_ZONE,
+  }).formatToParts(new Date(value));
+  const part = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+  return `${part('day')}.${part('month')}.${part('year')}`;
+}
+
+/** "sept. 2026" - the dated rule over a press release or a collector's story. */
+export function formatMonthYear(value: string | undefined, lang: LocaleId): string {
+  if (!value) return '';
+  const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
+  return new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric', timeZone: TIME_ZONE }).format(
+    new Date(value),
+  );
 }
 
 export function formatDateRange(start: string, end: string, lang: LocaleId): string {

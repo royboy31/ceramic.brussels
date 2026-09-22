@@ -23,9 +23,16 @@ interface Props {
   /** The acid pages fill the active tab black instead of acid. */
   dark?: boolean;
   class?: string;
+  /**
+   * A band of its own inside a hub tab: a title and pills that are not the
+   * hub's. About → press & media draws its four views this way until they
+   * are tabs of their own (BACKEND-REQUEST #19); `href` is used as given.
+   */
+  title?: string;
+  items?: { slug: string; label: string; href: string }[];
 }
 
-const { lang, route, active, pages = [], dark = false, class: className } = Astro.props;
+const { lang, route, active, pages = [], dark = false, class: className, title, items } = Astro.props;
 const t = useTranslations(lang);
 const hub = HUBS[route];
 
@@ -35,25 +42,28 @@ const hub = HUBS[route];
 // a locked one is not for crawlers to follow (docs/vip-access.md).
 // `tabLabel` is the editor's own label in this language or nothing (request
 // #6), so the translated label is what a pill reads unless one was set.
-const tabs = hub.tabs
-  .filter((tab) => !tab.hidden)
-  .map((tab) => {
-    const page = tab.link ? null : pages.find((p) => p?.slugs?.en === tab.slug);
-    return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label), href: hubTabHref(route, tab, lang), link: !!tab.link, locked: !!tab.locked };
-  });
+const tabs = items
+  ? items.map((item) => ({ ...item, link: false, locked: false, own: true }))
+  : hub.tabs
+      .filter((tab) => !tab.hidden)
+      .map((tab) => {
+        const page = tab.link ? null : pages.find((p) => p?.slugs?.en === tab.slug);
+        return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label), href: hubTabHref(route, tab, lang), link: !!tab.link, locked: !!tab.locked, own: false };
+      });
 ---
 
 <div class:list={['section-head', 'page-grid', 'title-band', className]}>
-  <h1>{t(hub.title)}</h1>
+  <h1>{title ?? t(hub.title)}</h1>
   {
     tabs.length > 1 && (
-      <nav aria-label={t(hub.title)}>
+      <nav aria-label={title ?? t(hub.title)}>
         {tabs.map((tab) => {
           const current = !tab.link && tab.slug === active;
           return (
             <a
               class:list={[{ active: current, dark: current && dark }]}
-              href={localePath(lang, tab.href)}
+              href={tab.own ? tab.href : localePath(lang, tab.href)}
+              data-view={tab.own ? tab.slug : undefined}
               aria-current={current ? 'page' : undefined}
               rel={tab.locked ? 'nofollow' : undefined}
             >
