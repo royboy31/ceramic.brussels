@@ -299,15 +299,31 @@ export const structure: StructureResolver = async (S, context) => {
 
       folder('about', 'About', [
         mainPage('about', 'About page (the fair)'),
-        tabIntros('about', 'the-fair', 'Tab intros (advisory board, contact; press and images are built without a pill)'),
+        tabIntros('about', 'the-fair', 'Tab intros (advisory board, contact; press & media is a hub of its own)'),
         list('people-board', 'Advisory board', 'person', `"advisory-board" in groups && ${PEOPLE_NOW}`, {}, byOrder),
         list('people-team', 'Team and collaborators', 'person', `("team" in groups || "collaborator" in groups) && ${PEOPLE_NOW}`, {}, byOrder),
-        list('press', 'Press clippings', 'pressClip', 'true', {}, [{ field: 'publishedAt', direction: 'desc' }]),
+      ]),
+
+      // Press & media (request #19): the about hub's pill leads here. Each
+      // tab's page carries its lead(s); the lists are the documents below.
+      folder('press-media', 'Press & media', [
+        mainPage('press-media', 'Press & media page (stories)'),
+        tabIntros('press-media', 'stories', 'Tab intros (press, photos & videos, media partners)'),
+        list('stories-interviews', 'Stories: interviews', 'story', 'kind == "interview"', {}, byOrder),
+        list('stories-collectors', 'Stories: collectors’ voices', 'story', 'kind == "collectors-voice"', {}, [
+          { field: 'publishedAt', direction: 'desc' },
+        ]),
+        list('press', 'Press: as seen in the press (clippings)', 'pressClip', 'true', {}, [{ field: 'publishedAt', direction: 'desc' }]),
+        list('press-releases', 'Press: press releases (news)', 'newsItem', 'category == "press-release"', {}, [
+          { field: 'publishedAt', direction: 'desc' },
+        ]),
         S.listItem()
-          .id('about-photos')
-          .title('Photos (the gallery on each edition)')
+          .id('press-photos')
+          .title('Photos & videos (the gallery and film on each edition)')
           .schemaType('edition')
-          .child(S.documentTypeList('edition').title('Editions')),
+          .child(S.documentTypeList('edition').title('Editions').defaultOrdering([{ field: 'year', direction: 'desc' }])),
+        list('partners-media-hub', 'Media partners', 'partner', 'tier == "media"', {}, byOrder),
+        siteSettings('Press kit, agencies, collectors’ voices link (Site settings)', 'press-settings'),
       ]),
 
       folder('news', 'News', [

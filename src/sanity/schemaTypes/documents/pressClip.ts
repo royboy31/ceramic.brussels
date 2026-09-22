@@ -1,6 +1,10 @@
 import { defineField, defineType } from 'sanity';
 
-/** The press archive - the current site references 230+ articles. */
+/**
+ * The press archive: "as seen in the press" on press & media → press. The
+ * old site only linked a flipbook of clippings per edition (`pressClipsUrl`
+ * on the edition), so these are made by editors, one per article.
+ */
 export const pressClip = defineType({
   name: 'pressClip',
   title: 'Press clipping',
@@ -23,6 +27,13 @@ export const pressClip = defineType({
       title: 'Published',
       type: 'date',
       validation: (rule) => rule.required(),
+    }),
+    // The design leads each card with the magazine's cover (request #20).
+    defineField({
+      name: 'cover',
+      title: 'Cover',
+      type: 'figure',
+      description: 'The magazine cover or the article’s picture, portrait (about 3:4).',
     }),
     defineField({
       name: 'language',

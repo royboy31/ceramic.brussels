@@ -429,7 +429,9 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 
 ---
 
-## #19 · open · 2026-09-22 · press & media as a hub of its own, with its leads
+## #19 · done · 2026-09-22 · press & media as a hub of its own, with its leads
+
+**Done (Kamindu, 2026-09-22):** a `press-media` hub in `src/lib/hubs.ts` - `/en/press-media` (stories, the root), `/press-media/press`, `/press-media/photos-videos`, `/press-media/media-partners`; French `presse-medias/recits|presse|photos-videos|partenaires-medias`, Dutch `pers-media/verhalen|pers|fotos-videos|mediapartners`. The about hub keeps its "press & media" pill as a link tab onto the press tab; its hidden `images` tab is gone (the gallery is photos & videos now). `hubs/PressMedia.astro` mounts your `PressMedia.astro` per tab: it takes `tab`, `page`, `pages`, `settings`, draws the band with `route="press-media"` and the one view, and the hash script went. Leads: each tab's `page` has `intro` (first heading) and, on stories and press, `intro2` (second heading: collectors' voices, press room) - rendered inside `.section-intro` / `.top-section` as `p.lead`, or as `.intro-large.lead-top` on the two tabs without headings; styled minimally, yours to restyle. Empty states per tab (`press.storiesEmpty`, `press.empty`, `about.imagesEmpty`, `press.partnersEmpty`). Redirects: `/about/press` and `/about/images` in every language in `public/_redirects`, the old site's `press`, `photos`, `aftermovie` in `scripts/legacy-redirects.mjs`. Studio: a "Press & media" folder (page, tab intros, stories, clippings, releases, editions, media partners, Site settings → Press), `pageKinds.ts` shows the two leads. The designer's "search by media" question stays open. `scripts/press-media-content.mjs` seeds the four pages, the leads and the first story.
 
 **Page / component:** `src/components/PressMedia.astro`, mounted by `src/components/hubs/About.astro` on the `press` tab
 **Figma frame:** the press & media hand-off of 2026-09-21 (`ceramic-brussels-press-media-html-2026-09-21-v2.zip`, previews in `press-and -media/`)
@@ -440,7 +442,9 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 
 ---
 
-## #20 · open · 2026-09-22 · a cover image on a press clipping
+## #20 · done · 2026-09-22 · a cover image on a press clipping
+
+**Done (Kamindu, 2026-09-22):** `pressClip.cover` (`figure`), returned as `cover` by `getPressClips`, drawn at the top of each press card as `img.cover` (3:4). There are no legacy articles to import: the old site never had article records, only a flipbook of clippings per edition (the edition's `pressClipsUrl`, listed under "press reviews"), so the clippings are editors' entries - Press & media → "Press: as seen in the press" in the Studio.
 
 **Page / component:** `PressMedia.astro`, press view, "as seen in the press"
 **Figma frame:** press & media hand-off, "press" page
@@ -451,7 +455,9 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 
 ---
 
-## #21 · open · 2026-09-22 · stories: interviews and collectors' voices
+## #21 · done · 2026-09-22 · stories: interviews and collectors' voices
+
+**Done (Kamindu, 2026-09-22):** a `story` document (`src/sanity/schemaTypes/documents/story.ts`): `kind` (interview / collectors-voice), `title` (name or title), `role` (interviews), `publishedAt`, `image`, `text`, `link` (the site `link` object: a news item, a page of this site, or an external address) and `order`. `getStories(lang)` returns them; the component maps each to `{ image, title, role, date, text, url, arrow, external }` through `resolveLink`, so "read the interview" carries → or ↗ with the link. A story is a card, not a page: an interview published here is a news item the story links to; the guest of honour's story links to the guest-of-honour interview tab. The Ceramics Now pill is Site settings → Press → "Collectors’ voices: series link" (`collectorsVoicesLink`, a `link` with its own label), drawn beside the collectors' lead. Studio: Press & media → "Stories: interviews" and "Stories: collectors’ voices".
 
 **Page / component:** `PressMedia.astro`, stories view (markup built, fed empty arrays)
 **Figma frame:** press & media hand-off, "stories" page
@@ -462,7 +468,9 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 
 ---
 
-## #22 · open · 2026-09-22 · press releases: their edition, and a file per language
+## #22 · done · 2026-09-22 · press releases: their edition, and a file per language
+
+**Done (Kamindu, 2026-09-22):** `"edition": edition->year` in `NEWS_CARD`; the field shows on a news item whose category is "press release" (hidden otherwise), and the component uses it before the date rule. Releases stay news items with a page per language, as you built them; Studio: Press & media → "Press: press releases (news)". Files per language are not added: nothing says the releases are PDFs - if the client's are, ask again and it is a `file` per language on the item.
 
 **Page / component:** `PressMedia.astro`, press view, "press releases"
 **Figma frame:** press & media hand-off, "press" page

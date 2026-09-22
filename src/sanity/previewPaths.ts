@@ -74,7 +74,8 @@ const TIER_PAGES: Record<string, PreviewLocation> = {
   event: { title: 'Partners – event partners', href: '/partners/event' },
   supplier: { title: 'Partners – event partners', href: '/partners/event' },
   'exhibition-pass': { title: 'Partners – event partners', href: '/partners/event' },
-  media: { title: 'Partners – media', href: '/partners/media' },
+  // Listed on press & media since request #10; the partners tab has no pill.
+  media: { title: 'Press & media – media partners', href: '/press-media/media-partners' },
   'food-drinks': { title: 'Visitors info – food & drinks', href: '/visit/food-drinks' },
   'art-prize': { title: 'Art prize', href: '/art-prize' },
 };
@@ -103,6 +104,7 @@ export const PREVIEWABLE_TYPES = new Set([
   'laureate',
   'award',
   'pressClip',
+  'story',
 ]);
 
 /**
@@ -128,7 +130,8 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
         loc('Visitors info', '/visit'),
         loc('Visitors info – FAQ', '/visit/faq'),
         loc('Contact', '/contact'),
-        loc('About – press', '/about/press'),
+        loc('Press & media – press', '/press-media/press'),
+        loc('Press & media – stories', '/press-media'),
         loc('VIP – access page', '/vip/access'),
         loc('Footer (homepage)', ''),
       ];
@@ -138,7 +141,7 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
         : [
             ...(d.ownYear ? [loc(`Edition ${d.ownYear}`, `/editions/${d.ownYear}`)] : []),
             loc('Past editions', '/editions'),
-            loc('About – images', '/about/images'),
+            loc('Press & media – photos & videos', '/press-media/photos-videos'),
             ...(d.ownYear ? [loc(`Exhibitors ${d.ownYear}`, `/exhibitors/${d.ownYear}`)] : []),
           ];
     case 'person': {
@@ -166,7 +169,9 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
     case 'award':
       return d.family === 'art-prize' ? [loc('Art prize – awards', '/art-prize/awards')] : [];
     case 'pressClip':
-      return [loc('About – press', '/about/press')];
+      return [loc('Press & media – press', '/press-media/press')];
+    case 'story':
+      return [loc('Press & media – stories', '/press-media')];
     case 'artist':
       return d.slug ? [loc(d.name ?? 'Artist', `/artists/${d.slug}`)] : [];
     case 'exhibitor': {

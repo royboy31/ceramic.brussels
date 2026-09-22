@@ -92,6 +92,16 @@ export const page = defineType({
       description: 'The large text at the top of the page.',
       hidden: pageHides('intro'),
     }),
+    // Press & media → stories and press have two headings, each with a lead
+    // (request #19): the first is `intro`, this is the second's.
+    defineField({
+      name: 'intro2',
+      title: 'Second lead paragraph',
+      type: 'localeText',
+      group: 'main',
+      description: 'Stories: the text under "collectors’ voices". Press: the text under "press room". The lead paragraph above is the first heading’s.',
+      hidden: pageHides('intro2'),
+    }),
     defineField({
       name: 'cover',
       title: 'Cover image',

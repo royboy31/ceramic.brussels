@@ -168,6 +168,15 @@ export const siteSettings = defineType({
     }),
     defineField({ name: 'pressKitUrl', title: 'Press kit URL', type: 'url', group: 'press' }),
     defineField({ name: 'pressEmail', title: 'Press email', type: 'string', group: 'press' }),
+    // The pill beside the collectors' voices lead on press & media → stories
+    // ("discover Ceramics Now ↗", request #21): the series lives elsewhere.
+    defineField({
+      name: 'collectorsVoicesLink',
+      title: 'Collectors’ voices: series link',
+      type: 'link',
+      group: 'press',
+      description: 'Shown beside the collectors’ voices lead on press & media → stories, e.g. "discover Ceramics Now".',
+    }),
 
     /**
      * The gallery application form (the "Application form" block). One form

@@ -4,54 +4,59 @@ import SanityImage from './SanityImage.astro';
 import VideoEmbed from './VideoEmbed.astro';
 import { LOCALE_IDS, type LocaleId } from '../lib/locales';
 import { useTranslations, localePath, formatDateNumeric, formatMonthYear } from '../lib/i18n';
-import { instagramUrl } from '../lib/links';
+import { instagramUrl, resolveLink } from '../lib/links';
 import { styleAttrs } from '../lib/textStyle';
-import { getPressClips, getNews, getEditions, getPartners } from '../lib/queries';
+import { getPressClips, getNews, getEditions, getPartners, getStories } from '../lib/queries';
 import { urlFor } from '../sanity/image';
 
 /**
- * About → press & media, as the designer's press & media hand-off of
- * 2026-09-21 draws it: a "press & media" title band with four pills -
- * stories, press, photos & videos, media partners - each its own page.
- *
- * BACKEND-REQUEST #19: the four are meant to be tabs of a hub of their own,
- * with an address each. Until `hubs.ts` has one, they are four views of
- * this one tab: the pills switch between them in place and write the view
- * into the hash (`#photos-videos`), so a view can be linked to. Without
- * script every view shows, one under the other. Each view is a <section>
- * that moves onto its own tab unchanged once the hub exists.
- *
- * A view with nothing to show has no pill, and the first one that does is
- * the one that opens: today that is press (the agencies and the press
- * reviews are in), since no story exists yet.
+ * Press & media, as the designer's hand-off of 2026-09-21 draws it: a
+ * "press & media" title band with four pills - stories, press, photos &
+ * videos, media partners - each its own page. Since backend request #19
+ * they are the tabs of a hub of their own (`src/lib/hubs.ts`, mounted by
+ * `hubs/PressMedia.astro`): this renders the band and the one view for
+ * `tab`. A view opens with the lead(s) of its page document - `intro`
+ * under the first heading, `intro2` under the second on stories and press.
  */
 interface Props {
   lang: LocaleId;
+  tab: string;
+  /** The tab's page document (leads, tab label), once an editor has made one. */
+  page: any;
+  /** Every page of the hub, for the pill labels. */
+  pages: any[];
   settings: any;
 }
 
-const { lang, settings } = Astro.props;
+const { lang, tab, page, pages, settings } = Astro.props;
 const t = useTranslations(lang);
 const external = { target: '_blank', rel: 'noopener noreferrer' };
 
-const [clips, news, editions, partners] = await Promise.all([
-  getPressClips(),
-  getNews(lang),
-  getEditions(lang),
-  getPartners(lang),
+// Only what the tab draws.
+const [clips, news, editions, partners, stories] = await Promise.all([
+  tab === 'press' ? getPressClips() : [],
+  tab === 'press' ? getNews(lang) : [],
+  tab === 'press' || tab === 'photos-videos' ? getEditions(lang) : [],
+  tab === 'media-partners' ? getPartners(lang) : [],
+  tab === 'stories' ? getStories(lang) : [],
 ]);
 
 /* ---------------------------------------------------------------- stories */
 /*
- * BACKEND-REQUEST #21: interviews (portrait, name, the role they speak in -
- * guest of honour, main partner, media partner - a short text and a link)
- * and the collectors' voices series (date, picture, title, text, link, and
- * the "discover Ceramics Now ↗" link beside its intro). No document carries
- * either, so the view has nothing to render and no pill.
+ * Interviews and the collectors' voices series are `story` documents (#21):
+ * a card each, whose link says where "read the interview" goes - a news
+ * item, a page of this site, or the site that hosts the series - so the
+ * arrow follows the link. The "discover Ceramics Now" pill beside the
+ * collectors' lead is Site settings → Press → Collectors' voices link.
  */
-const interviews: any[] = [];
-const collectors: any[] = [];
+const card = (s: any) => {
+  const link = resolveLink(lang, s.link);
+  return { ...s, date: s.publishedAt, url: link?.href, arrow: link?.arrow ?? '→', external: link?.external ?? false };
+};
+const interviews = stories.filter((s: any) => s.kind === 'interview').map(card);
+const collectors = stories.filter((s: any) => s.kind === 'collectors-voice').map(card);
 const hasStories = interviews.length > 0 || collectors.length > 0;
+const seriesLink = resolveLink(lang, settings?.collectorsVoicesLink);
 
 /* ------------------------------------------------------------------ press */
 const CLIPS_FIRST = 6;
@@ -61,20 +66,19 @@ const CLIPS_FIRST = 6;
  * already published in all three languages - so the design's "read in EN /
  * FR / NL" pills are the item's page in each language.
  *
- * BACKEND-REQUEST #22: the "sort by" pills are editions, and `NEWS_CARD`
- * does not return the item's edition (the field exists, hidden). Meanwhile
- * a release belongs to the first edition that ends after it was published -
- * the fair is in January, so a release from February 2026 on is about 2027.
+ * The "sort by" pills are editions: the item's own (#22), or failing that
+ * the first edition that ends after it was published - the fair is in
+ * January, so a release from February 2026 on is about 2027.
  */
 const releases = news.filter((n: any) => n.category === 'press-release');
 const byEnd = [...editions].filter((e: any) => e.endDate).sort((a: any, b: any) => a.endDate.localeCompare(b.endDate));
-const editionOf = (date: string) =>
-  (byEnd.find((e: any) => e.endDate >= date.slice(0, 10)) ?? byEnd[byEnd.length - 1])?.year;
+const editionOf = (r: any) =>
+  r.edition ?? (byEnd.find((e: any) => e.endDate >= r.publishedAt.slice(0, 10)) ?? byEnd[byEnd.length - 1])?.year;
 const releaseGroups = editions
   .map((e: any) => ({
     year: e.year,
     label: e.ordinal ?? String(e.year),
-    items: releases.filter((r: any) => r.publishedAt && editionOf(r.publishedAt) === e.year),
+    items: releases.filter((r: any) => r.publishedAt && editionOf(r) === e.year),
   }))
   .filter((g: any) => g.items.length > 0);
 
@@ -129,31 +133,31 @@ const logoHeight = (p: any) => {
   const base = !ar || !Number.isFinite(ar) || ar <= 0 ? 80 : Math.min(110, Math.max(44, 118 / Math.pow(ar, 0.45)));
   return Math.round(base * ((p.logoScale ?? 100) / 100));
 };
-
-/* ----------------------------------------------------------------- views */
-const views = [
-  { slug: 'stories', label: t('press.stories'), show: hasStories },
-  { slug: 'press', label: t('tabs.press'), show: hasPress },
-  { slug: 'photos-videos', label: t('press.photosVideos'), show: hasPhotos },
-  { slug: 'media-partners', label: t('press.mediaPartners'), show: hasPartners },
-].filter((v) => v.show);
-const items = views.map((v) => ({ slug: v.slug, label: v.label, href: `#${v.slug}` }));
-const first = views[0]?.slug;
 ---
 
-<HubNav lang={lang} route="about" active={first ?? ''} title={t('tabs.pressMedia')} items={items} class="press-band" />
+<HubNav lang={lang} route="press-media" active={tab} pages={pages} class="press-band" />
 
-<div class="press-media" data-press-media data-first={first}>
-  {views.length === 0 && <p class="empty">{t('press.empty')}</p>}
+<div class="press-media">
 
   {/* ------------------------------------------------------------ stories */}
   {
-    hasStories && (
+    tab === 'stories' && (
       <section class="view" data-view-panel="stories">
+        {!hasStories && page?.intro && (
+          <p class="intro-large lead-top" {...styleAttrs(page.introStyle)}>
+            {page.intro}
+          </p>
+        )}
+        {!hasStories && <p class="empty">{t('press.storiesEmpty')}</p>}
         {interviews.length > 0 && (
           <>
             <div class="section-intro">
               <h2>{t('press.interviews')}</h2>
+              {page?.intro && (
+                <p class="lead" {...styleAttrs(page.introStyle)}>
+                  {page.intro}
+                </p>
+              )}
             </div>
             <div class="interview-grid" data-more-list>
               {interviews.map((story: any) => (
@@ -165,8 +169,8 @@ const first = views[0]?.slug;
                   {story.role && <strong>{story.role}</strong>}
                   {story.text && <p>{story.text}</p>}
                   {story.url && (
-                    <a class="small-pill" href={story.url}>
-                      {t('press.readInterview')} →
+                    <a class="small-pill" href={story.url} {...(story.external ? external : {})}>
+                      {t('press.readInterview')} {story.arrow}
                     </a>
                   )}
                 </article>
@@ -178,6 +182,20 @@ const first = views[0]?.slug;
           <>
             <div class="section-intro collectors">
               <h2>{t('press.collectorsVoices')}</h2>
+              {(page?.intro2 || seriesLink) && (
+                <div class="lead-row">
+                  {page?.intro2 && (
+                    <p class="lead" {...styleAttrs(page.intro2Style)}>
+                      {page.intro2}
+                    </p>
+                  )}
+                  {seriesLink && (
+                    <a class="small-pill" href={seriesLink.href} {...(seriesLink.external ? external : {})}>
+                      {seriesLink.label} {seriesLink.arrow}
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
             <div class="collector-list">
               {collectors.map((story: any) => (
@@ -192,8 +210,8 @@ const first = views[0]?.slug;
                     <h3>{story.title}</h3>
                     {story.text && <p>{story.text}</p>}
                     {story.url && (
-                      <a class="small-pill" href={story.url}>
-                        {t('press.readInterview')} →
+                      <a class="small-pill" href={story.url} {...(story.external ? external : {})}>
+                        {t('press.readInterview')} {story.arrow}
                       </a>
                     )}
                   </div>
@@ -208,22 +226,27 @@ const first = views[0]?.slug;
 
   {/* -------------------------------------------------------------- press */}
   {
-    hasPress && (
+    tab === 'press' && (
       <section class="view" data-view-panel="press">
+        {!hasPress && <p class="empty">{t('press.empty')}</p>}
         {clips.length > 0 && (
           <>
             <div class="top-section">
               <h2>{t('press.asSeen')}</h2>
-              {/* BACKEND-REQUEST #19: the frame's lead under this heading ("Discover a
-                  selection of articles…") is copy, and has no field. */}
+              {page?.intro && (
+                <p class="lead" {...styleAttrs(page.introStyle)}>
+                  {page.intro}
+                </p>
+              )}
             </div>
             <div class="press-cards" data-more-list data-more-step={CLIPS_FIRST}>
               {clips.map((clip: any, i: number) => {
                 const href = clip.url ?? clip.pdfUrl;
                 return (
                   <a class="press-card" href={href} hidden={i >= CLIPS_FIRST} {...(href ? external : {})}>
-                    {/* BACKEND-REQUEST #20: the design leads each card with the
-                        magazine's cover; `pressClip` has no image field. */}
+                    {clip.cover?.asset && (
+                      <SanityImage image={clip.cover} aspect={3 / 4} widths={[400, 600, 800]} sizes="(max-width: 800px) 100vw, 33vw" class="cover" />
+                    )}
                     <div class="card-body">
                       <p class="dated small">
                         <time datetime={clip.publishedAt}>{formatDateNumeric(clip.publishedAt, lang)}</time>
@@ -250,8 +273,11 @@ const first = views[0]?.slug;
           <>
             <div class="top-section">
               <h2>{t('press.room')}</h2>
-              {/* BACKEND-REQUEST #19: the frame's lead ("Benefiting from strong
-                  international visibility…") is copy, and has no field. */}
+              {page?.intro2 && (
+                <p class="lead" {...styleAttrs(page.intro2Style)}>
+                  {page.intro2}
+                </p>
+              )}
               {settings?.pressKitUrl && (
                 <p class="kit">
                   <a class="small-pill" href={settings.pressKitUrl} {...external}>
@@ -351,11 +377,16 @@ const first = views[0]?.slug;
 
   {/* ---------------------------------------------------- photos & videos */}
   {
-    hasPhotos && (
+    tab === 'photos-videos' && (
       <section class="view" data-view-panel="photos-videos">
-        {/* BACKEND-REQUEST #19: the frame's lead ("ceramic brussels unfolds over
-            five days of discovery…") is copy, and has no field. The frame's
-            "search by media ↓" pill is not built: nothing says what it searches. */}
+        {page?.intro && (
+          <p class="intro-large lead-top" {...styleAttrs(page.introStyle)}>
+            {page.intro}
+          </p>
+        )}
+        {!hasPhotos && <p class="empty">{t('about.imagesEmpty')}</p>}
+        {/* The frame's "search by media ↓" pill is not built: nothing says
+            what it searches (question for the designer, request #19). */}
         {galleries.length > 1 && (
           <div class="sort filters" data-filter-bar="photos">
             <b>{t('faq.filters')}:</b>
@@ -400,10 +431,14 @@ const first = views[0]?.slug;
 
   {/* ----------------------------------------------------- media partners */}
   {
-    hasPartners && (
+    tab === 'media-partners' && (
       <section class="view" data-view-panel="media-partners">
-        {/* BACKEND-REQUEST #19: the frame's lead ("The strong commitment of
-            leading media outlets…") is copy, and has no field. */}
+        {page?.intro && (
+          <p class="intro-large lead-top" {...styleAttrs(page.introStyle)}>
+            {page.intro}
+          </p>
+        )}
+        {!hasPartners && <p class="empty">{t('press.partnersEmpty')}</p>}
         <ul class="logo-grid">
           {mediaPartners.map((p: any) => {
             const inner = p.logo?.asset ? (
@@ -482,6 +517,36 @@ const first = views[0]?.slug;
   }
   .top-section .kit {
     margin-top: 24px;
+  }
+  /* The leads (request #19): under a heading, or at the top of a view that
+     has none. Wired by Kamindu on 2026-09-22; Lilanga to restyle. */
+  .lead {
+    max-width: 62ch;
+    margin-top: 24px;
+    font-size: 24px;
+    line-height: 1.25;
+  }
+  .lead-row {
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 24px 40px;
+    display: flex;
+  }
+  .lead-row .lead {
+    flex: 1 1 40ch;
+  }
+  .lead-row .small-pill {
+    margin-top: 24px;
+  }
+  .lead-top {
+    margin-bottom: 40px;
+  }
+  /* The magazine cover leading a press card (request #20). */
+  .press-card :global(img.cover) {
+    width: 100%;
+    height: auto;
+    margin-bottom: 16px;
+    display: block;
   }
   .press-cards + .top-section,
   .load-more + .top-section,
@@ -875,34 +940,8 @@ const first = views[0]?.slug;
 </style>
 
 <script>
-  // The four views: one at a time, named in the hash so a view can be linked
-  // to. The panels carry no id of the same name on purpose: the browser
-  // would scroll to it and take the title band off the screen. Without this
-  // script every view shows, one under the other.
-  const root = document.querySelector<HTMLElement>('[data-press-media]');
-  const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-view-panel]'));
-  const pills = Array.from(document.querySelectorAll<HTMLAnchorElement>('.press-band a[data-view]'));
-  if (root && panels.length > 1) {
-    const show = (name: string | undefined) => {
-      const target = panels.find((p) => p.dataset.viewPanel === name) ?? panels[0];
-      for (const panel of panels) panel.hidden = panel !== target;
-      for (const pill of pills) {
-        const on = pill.dataset.view === target.dataset.viewPanel;
-        pill.classList.toggle('active', on);
-        if (on) pill.setAttribute('aria-current', 'page');
-        else pill.removeAttribute('aria-current');
-      }
-    };
-    show(location.hash.slice(1) || root.dataset.first);
-    for (const pill of pills) {
-      pill.addEventListener('click', (event) => {
-        event.preventDefault();
-        history.replaceState(null, '', `#${pill.dataset.view}`);
-        show(pill.dataset.view);
-      });
-    }
-    addEventListener('hashchange', () => show(location.hash.slice(1)));
-  }
+  // The views are tabs of their own since request #19; nothing switches
+  // them here any more.
 
   // Year and edition pills: one group at a time.
   for (const bar of document.querySelectorAll<HTMLElement>('[data-filter-bar]')) {

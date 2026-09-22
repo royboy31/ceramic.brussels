@@ -102,6 +102,8 @@ const PARTNER_IS_LISTED = `(!defined(editions) || count(editions) == 0 || count(
 
 const NEWS_CARD = `{
   _id, publishedAt, category,
+  // A press release's edition, for the "sort by" pills on press & media (#22).
+  "edition": edition->year,
   "slug": slug.current,
   ${styled('title')},
   ${styled('excerpt')},
@@ -325,6 +327,8 @@ export function getSettings(lang: LocaleId) {
       pressEmail,
       pressKitUrl,
       "pressContacts": pressContacts[]{ _key, name, email, url, instagram, ${styled('region')} },
+      // The pill beside the collectors' voices lead (#21).
+      "collectorsVoicesLink": collectorsVoicesLink ${LINK},
       "faq": faq[]{ _key, category, ${styled('question')}, ${styled('answer')} },
       "practicalInfo": {
         "venueName": practicalInfo.venueName,
@@ -786,6 +790,8 @@ const PAGE = `{
   // the French and Dutch pills. Absent, the pill reads STRINGS.
   "tabLabel": tabLabel[$lang],
   ${styled('intro')},
+  // The second heading's lead on press & media → stories and press (#19).
+  ${styled('intro2')},
   ${styled('body')},
   "sections": ${SECTIONS},
   "images": images[] ${IMAGE},
@@ -906,7 +912,29 @@ export function getPressClips() {
   return run<any[]>(
     `*[_type == "pressClip"] | order(publishedAt desc){
       _id, title, outlet, publishedAt, language, url,
+      // The magazine's cover on the card (#20).
+      cover ${IMAGE},
       "pdfUrl": pdf.asset->url
     }`,
+  );
+}
+
+/**
+ * Press & media → stories (#21): the interviews and the collectors' voices,
+ * in the editor's order, newest first among equals. Each story is a card
+ * that points somewhere - a news item, a page of this site, or the site
+ * that hosts the series - through its `link`.
+ */
+export function getStories(lang: LocaleId) {
+  return run<any[]>(
+    `*[_type == "story"] | order(order asc, publishedAt desc){
+      _id, kind, publishedAt, order,
+      ${styled('title')},
+      ${styled('role')},
+      ${styled('text')},
+      image ${IMAGE},
+      "link": link ${LINK}
+    }`,
+    { lang },
   );
 }

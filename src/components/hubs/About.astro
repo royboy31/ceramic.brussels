@@ -8,10 +8,9 @@ import PortableText from '../../components/PortableText.astro';
 import PersonCard from '../../components/PersonCard.astro';
 import LinkPill from '../../components/LinkPill.astro';
 import Slideshow from '../../components/Slideshow.astro';
-import PressMedia from '../../components/PressMedia.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations } from '../../lib/i18n';
-import { getHubPages, getPeople, getSettings, getEditions } from '../../lib/queries';
+import { getHubPages, getPeople, getSettings } from '../../lib/queries';
 import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
 import { styleAttrs } from '../../lib/textStyle';
 
@@ -21,10 +20,10 @@ import { styleAttrs } from '../../lib/textStyle';
  * two a row, the closing strip of photos. Advisory board: the intro and
  * the two-column people grid. Team (the design's "contact" page): the
  * intro, the directors as people cards with e-mail and phone, then the
- * team as smaller cards in the same grid. Press & media has a component
- * of its own (`PressMedia.astro`), band included. Images has no design page
- * and follows the same patterns. Markup and rules are Lilanga's build
- * of the frames.
+ * team as smaller cards in the same grid. The press & media pill leads to
+ * the hub of that name (`hubs/PressMedia.astro`, backend request #19),
+ * which also took over the photo gallery. Markup and rules are Lilanga's
+ * build of the frames.
  */
 const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const t = useTranslations(lang);
@@ -50,8 +49,6 @@ const staff = team.filter((p: any) => !directors.includes(p));
 const settings = await getSettings(lang);
 const hasContactBlock =
   settings?.organiserText || settings?.organiserLink || settings?.postalAddress || settings?.contactEmail;
-
-const editions = tab === 'images' ? (await getEditions(lang)).filter((e: any) => e.images?.some((img: any) => img?.asset)) : [];
 
 // The fair: the first text section sits beside the hero, the rest two a
 // row, as the design's about page lays them out.
@@ -87,9 +84,7 @@ const ownTitle = seoTitle?.toLowerCase().endsWith(` — ${siteName}`.toLowerCase
   : seoTitle;
 const path = hubTabPath('about', tab, lang);
 const altPaths = hubAltPaths('about', tab);
-const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-page', press: 'press', images: 'images' }[tab] ?? '';
-
-const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Boolean).length > 0 || img.credit;
+const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-page' }[tab] ?? '';
 ---
 
 <Base
@@ -103,13 +98,11 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
   editId={page?._id}
   editType={page?._type}
 >
-  {tab === 'press' ? <PressMedia lang={lang} settings={settings} /> : <HubNav lang={lang} route="about" active={tab} pages={pages} />}
+  <HubNav lang={lang} route="about" active={tab} pages={pages} />
 
   <div class:list={wrap === 'team-page' ? [wrap] : ['content-wrap', wrap]}>
     {
-      /* Press & media has no lead of its own in the design: each view has
-         its own (BACKEND-REQUEST #19). */
-      page?.intro && tab !== 'press' && (
+      page?.intro && (
         <p class="intro-large" {...styleAttrs(page.introStyle)}>
           {page.intro}
         </p>
@@ -225,42 +218,6 @@ const captionOf = (img: any) => [img.caption, img.workTitle, img.year].filter(Bo
       )
     }
     {tab === 'team' && team.length === 0 && <p class="empty">{t('about.peopleEmpty')}</p>}
-
-    {/* ------------------------------------------------------------ images */}
-    {
-      tab === 'images' &&
-        (editions.length ? (
-          editions.map((e: any) => (
-            <section class="gallery">
-              <h2 class="panel-title">{e.title ?? `ceramic brussels ${e.year}`}</h2>
-              <div class="strip photos">
-                {e.images
-                  .filter((img: any) => img?.asset)
-                  .map((img: any) => (
-                    <figure>
-                      <SanityImage image={img} aspect={1.5} widths={[440, 660, 880]} sizes="(max-width: 700px) 100vw, 33vw" />
-                      {captionOf(img) && (
-                        <figcaption>
-                          {img.caption}
-                          {img.workTitle && (
-                            <>
-                              {img.caption ? ', ' : ''}
-                              <em>{img.workTitle}</em>
-                            </>
-                          )}
-                          {img.year && `, ${img.year}`}
-                          {img.credit && <span class="credit"> © {img.credit}</span>}
-                        </figcaption>
-                      )}
-                    </figure>
-                  ))}
-              </div>
-            </section>
-          ))
-        ) : (
-          <p class="empty">{t('about.imagesEmpty')}</p>
-        ))
-    }
 
     {/* ------------------------------ page text on the tabs that carry one */}
     {page && tab !== 'the-fair' && <PageSections lang={lang} sections={page.sections} />}

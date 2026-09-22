@@ -50,8 +50,10 @@ const PAGES = {
   'advisory-board-3': 'about/advisory-board',
   founders: 'about/team',
   team: 'about/team',
-  photos: 'about/images',
-  aftermovie: 'about/images',
+  // The photo gallery and the film are press & media → photos & videos since
+  // the hand-off of 2026-09-21 (request #19).
+  photos: 'press-media/photos-videos',
+  aftermovie: 'press-media/photos-videos',
   // gallery applications, and the "application" page with its 2026 overview
   'gallery-applications-2': 'gallery-applications',
   application: 'gallery-applications',
@@ -120,7 +122,8 @@ const ALIASES = {
   'awards-2': 'art-prize/awards',
   'jury-2': 'art-prize/jury',
   contact: 'contact',
-  press: 'about/press',
+  // Press contacts and clippings: the press tab of press & media (#19).
+  press: 'press-media/press',
   pasteditions: 'editions',
   // Linked from the old sitemap and a 2024 programme entry; only the /pasteditions/ form ever worked.
   awards: 'editions/2025',
@@ -140,7 +143,7 @@ const UNPREFIXED = {
   awards: 'editions/2025',
   'visitors-info': 'visit',
   contact: 'contact',
-  press: 'about/press',
+  press: 'press-media/press',
 };
 
 /** Old files still referenced by cached pages and bookmarks. */

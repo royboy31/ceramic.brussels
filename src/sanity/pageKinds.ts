@@ -21,6 +21,7 @@ export type PageField =
   | 'section'
   | 'order'
   | 'intro'
+  | 'intro2'
   | 'cover'
   | 'heroImages'
   | 'sections'
@@ -40,6 +41,11 @@ const TEXT: PageField[] = ['intro', 'sections', 'body', 'images'];
 /** What each hub tab adds to TAB. `*` covers every tab of the hub. */
 const HUB_TABS: Record<string, Record<string, PageField[]>> = {
   about: { 'the-fair': FULL, '*': TEXT },
+  // Press & media (request #19): every tab is a list the code draws under a
+  // lead. Stories and press have two headings, each with a lead of its own
+  // (interviews / collectors' voices, as seen in the press / press room),
+  // so those two pages carry a second lead paragraph.
+  'press-media': { stories: ['intro', 'intro2'], press: ['intro', 'intro2'], '*': ['intro'] },
   'art-prize': { about: FULL, laureates: ['intro'], awards: ['intro'], jury: ['intro'] },
   // Talks lists events; only La Cambre draws the closing images.
   programme: { 'la-cambre': FULL, '*': TEXT },

@@ -16,3 +16,18 @@
 /fr/programme/vip    /fr/vip/programme/   301
 /nl/programma/vip/   /nl/vip/programma/   301
 /nl/programma/vip    /nl/vip/programma/   301
+
+# Press & media left the about hub for a hub of its own on 2026-09-22
+# (backend request #19); the photo gallery went with it.
+/en/about/press/     /en/press-media/press/              301
+/en/about/press      /en/press-media/press/              301
+/fr/a-propos/presse/ /fr/presse-medias/presse/           301
+/fr/a-propos/presse  /fr/presse-medias/presse/           301
+/nl/over/pers/       /nl/pers-media/pers/                301
+/nl/over/pers        /nl/pers-media/pers/                301
+/en/about/images/    /en/press-media/photos-videos/      301
+/en/about/images     /en/press-media/photos-videos/      301
+/fr/a-propos/images/ /fr/presse-medias/photos-videos/    301
+/fr/a-propos/images  /fr/presse-medias/photos-videos/    301
+/nl/over/beelden/    /nl/pers-media/fotos-videos/        301
+/nl/over/beelden     /nl/pers-media/fotos-videos/        301

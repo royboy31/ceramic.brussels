@@ -1,0 +1,49 @@
+---
+import Base from '../../layouts/Base.astro';
+import PressMedia from '../../components/PressMedia.astro';
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import { getHubPages, getSettings } from '../../lib/queries';
+import { HUBS, hubTabPath, pageForTab, hubAltPaths } from '../../lib/hubs';
+
+/**
+ * The press & media hub (the designer's hand-off of 2026-09-21, backend
+ * request #19): stories, press, photos & videos, media partners, one tab
+ * each. The page document of a tab carries its lead(s) and SEO; the lists
+ * come from their own documents. The views themselves are Lilanga's
+ * `PressMedia.astro`, band included; this file only wraps the one for the
+ * tab in the layout, the way the other hubs do.
+ */
+const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
+const t = useTranslations(lang);
+
+const [pages, settings] = await Promise.all([getHubPages(lang, 'press-media'), getSettings(lang)]);
+const page = pageForTab(pages, tab);
+const hubTab = HUBS['press-media'].tabs.find((x) => x.slug === tab);
+const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
+
+// As in About.astro: the first tab is the hub itself, and an SEO title an
+// editor ended with the site name would carry it twice.
+const isHubRoot = HUBS['press-media'].tabs[0]?.slug === tab;
+const siteName = settings?.siteName ?? 'ceramic brussels';
+const seoTitle = page?.seo?.title;
+const ownTitle = seoTitle?.toLowerCase().endsWith(` — ${siteName}`.toLowerCase())
+  ? seoTitle.slice(0, -` — ${siteName}`.length)
+  : seoTitle;
+const path = hubTabPath('press-media', tab, lang);
+const altPaths = hubAltPaths('press-media', tab);
+---
+
+<Base
+  lang={lang}
+  title={ownTitle || (isHubRoot ? t('tabs.pressMedia') : `${t('tabs.pressMedia')} — ${tabLabel}`)}
+  description={page?.seo?.description ?? page?.intro}
+  noIndex={page?.seo?.noIndex}
+  image={page?.seo?.ogImage ?? page?.cover}
+  path={path}
+  altPaths={altPaths}
+  editId={page?._id}
+  editType={page?._type}
+>
+  <PressMedia lang={lang} tab={tab} page={page} pages={pages} settings={settings} />
+</Base>

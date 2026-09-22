@@ -55,6 +55,9 @@ export function partnerPath(partner: { tier?: string | null }, lang?: LocaleId):
   const tier = partner.tier ?? '';
   if (tier === 'food-drinks') return hubTabPath('visit', 'food-drinks', lang);
   if (tier === 'art-prize') return hubTabPath('art-prize', undefined, lang);
+  // Media partners are listed on press & media (request #10); the partners
+  // hub's media tab is only built for the old site's redirects.
+  if (tier === 'media') return hubTabPath('press-media', 'media-partners', lang);
   const tab = Object.keys(PARTNER_TABS).find((key) => PARTNER_TABS[key].includes(tier));
   return hubTabPath('partners', tab, lang);
 }

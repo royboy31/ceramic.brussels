@@ -165,7 +165,7 @@ comment saying so in `astro.config.mjs`. Don't "fix" this by turning it on.
 
 The site is a set of **hubs with tabs**, mirroring the Figma menu. Each hub
 is a `[...tab].astro` route: `guest-of-honour`, `art-prize`, `programme`,
-`partners`, `visit`, `about`. The tab list, its stable English slugs and
+`vip`, `partners`, `visit`, `about`, `press-media`. The tab list, its stable English slugs and
 its label keys live in `src/lib/hubs.ts`; the first tab is the hub root
 (`/en/art-prize`), the others are `/en/art-prize/laureates` and so on. A
 `page` document with a matching `section` and English slug supplies a tab's

@@ -17,6 +17,7 @@ export const BUILT_IN_ROUTES = [
   { title: 'Partners', value: 'partners' },
   { title: 'Visitors info', value: 'visit' },
   { title: 'About', value: 'about' },
+  { title: 'Press & media', value: 'press-media' },
   { title: 'News', value: 'news' },
   { title: 'Past editions', value: 'editions' },
   { title: 'Contact', value: 'contact' },
@@ -34,6 +35,7 @@ export type RouteValue = (typeof BUILT_IN_ROUTES)[number]['value'];
  */
 export const PAGE_SECTIONS = [
   { title: 'About', value: 'about' },
+  { title: 'Press & media', value: 'press-media' },
   { title: 'Art prize', value: 'art-prize' },
   { title: 'Programme', value: 'programme' },
   { title: 'VIP', value: 'vip' },

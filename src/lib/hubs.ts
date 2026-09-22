@@ -198,12 +198,31 @@ export const HUBS: Record<string, Hub> = {
       // directors and the team. Slug and address stay `team`, which the page
       // document and the old site's redirects use.
       { slug: 'team', segment: { fr: 'equipe' }, label: 'tabs.contact' },
-      // Back as a pill, and renamed: the media partners the partners hub no
-      // longer lists are shown here (backend request #10). The address stays
-      // `press`, which the page document and the old site's redirects use.
-      { slug: 'press', segment: { fr: 'presse', nl: 'pers' }, label: 'tabs.pressMedia' },
-      // Not in the design's tabs; still built for the redirects onto it.
-      { slug: 'images', segment: { nl: 'beelden' }, label: 'tabs.images', hidden: true },
+      // The press & media pill stays on this hub, as the design draws it,
+      // but leads to the press & media hub (backend request #19). The old
+      // `about/press` and `about/images` addresses redirect there
+      // (public/_redirects); the old site's own press URLs go straight to
+      // the new hub (scripts/legacy-redirects.mjs).
+      { slug: 'press', label: 'tabs.pressMedia', link: { route: 'press-media', tab: 'press' } },
+    ],
+  },
+  /**
+   * Press & media (the designer's hand-off of 2026-09-21, backend request
+   * #19): stories, press, photos & videos, media partners, each a tab with
+   * a page document for its lead(s). The old site never had these pages,
+   * so the segments are simply translated; `press` keeps the old site's
+   * French and Dutch press slugs. The media partners the partners hub no
+   * longer lists (request #10) are the last tab.
+   */
+  'press-media': {
+    route: 'press-media',
+    segment: { fr: 'presse-medias', nl: 'pers-media' },
+    title: 'tabs.pressMedia',
+    tabs: [
+      { slug: 'stories', segment: { fr: 'recits', nl: 'verhalen' }, label: 'press.stories' },
+      { slug: 'press', segment: { fr: 'presse', nl: 'pers' }, label: 'tabs.press' },
+      { slug: 'photos-videos', segment: { nl: 'fotos-videos' }, label: 'press.photosVideos' },
+      { slug: 'media-partners', segment: { fr: 'partenaires-medias', nl: 'mediapartners' }, label: 'press.mediaPartners' },
     ],
   },
 };

@@ -39,8 +39,10 @@ export const newsItem = defineType({
       title: 'Edition',
       type: 'reference',
       to: [{ type: 'edition' }],
-      // Not read by any page; hidden rather than removed so existing values stay.
-      hidden: true,
+      // Read for press releases only: press & media → press sorts them by
+      // edition (request #22). Hidden elsewhere; existing values stay.
+      description: 'The edition this release is about. Without one, the first edition that ends after the release date.',
+      hidden: ({ document }) => document?.category !== 'press-release',
     }),
     defineField({ name: 'excerpt', title: 'Excerpt', type: 'localeText' }),
     defineField({ name: 'cover', title: 'Cover image', type: 'figure' }),

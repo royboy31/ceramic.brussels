@@ -31,6 +31,7 @@ import { pageTemplate } from './documents/pageTemplate';
 import { programmeEvent } from './documents/programmeEvent';
 import { partner } from './documents/partner';
 import { pressClip } from './documents/pressClip';
+import { story } from './documents/story';
 import { homepage } from './documents/homepage';
 import { siteSettings } from './documents/siteSettings';
 import { navigation } from './documents/navigation';
@@ -73,6 +74,7 @@ export const documentTypes: SchemaTypeDefinition[] = [
   programmeEvent,
   partner,
   pressClip,
+  story,
   homepage,
   siteSettings,
   navigation,
