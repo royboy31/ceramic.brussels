@@ -76,8 +76,10 @@ export const artist = defineType({
       title: 'Represented by',
       type: 'string',
       group: 'main',
-      description:
-        'Free text, e.g. "Galerie Lelong, Paris". Shown as "shown by" on the artist’s page when no exhibitor lists the artist.',
+      description: 'Free text, e.g. "Galerie Lelong, Paris".',
+      // Was "shown by" on the artist's page; no page reads it since the
+      // artist pages went (client, 2026-09-22). Hidden, the values stay.
+      hidden: true,
     }),
 
     /* --- feature page ------------------------------------------------------ */

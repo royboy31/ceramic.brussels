@@ -395,8 +395,6 @@ const rate = {
                   <article class="row row-half">
                     <Slideshow
                       images={e.image?.asset ? [e.image] : []}
-                      pool="fair"
-                      seed={e.slug ?? e._id}
                       aspect={3 / 2}
                       id={`vip-on-${e._id}`}
                       label={e.title}
@@ -478,8 +476,6 @@ const rate = {
                         </div>
                         <Slideshow
                           images={e.image?.asset ? [e.image] : []}
-                          pool="fair"
-                          seed={e.slug ?? e._id}
                           aspect={3 / 2}
                           id={`vip-off-${e._id}`}
                           label={e.title}

@@ -10,7 +10,7 @@ import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations, localePath } from '../../lib/i18n';
 import { getHubPages, getLaureates, getAwards, getPeople } from '../../lib/queries';
 import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
-import { instagramUrl } from '../../lib/links';
+import { instagramUrl, artistHref } from '../../lib/links';
 import { styleAttrs } from '../../lib/textStyle';
 
 /**
@@ -237,7 +237,8 @@ const captionOf = (img: any, fallback?: string) => ({
                 <section>
                   <div class="name">
                     <h2 {...styleAttrs(artist.nameStyle)}>
-                      {artist.slug ? <a href={localePath(lang, `artists/${artist.slug}`)}>{artist.name}</a> : artist.name}
+                      {/* A laureate's name leads to the gallery presenting them, when one does (client, 2026-09-22). */}
+                      {artistHref(lang, artist) ? <a href={artistHref(lang, artist)}>{artist.name}</a> : artist.name}
                     </h2>
                     {instagram && (
                       <a class="pill" href={instagram} target="_blank" rel="noopener noreferrer">
@@ -281,7 +282,7 @@ const captionOf = (img: any, fallback?: string) => ({
                     {(a.laureates ?? []).map((l: any, i: number) => (
                       <>
                         {joiner(i, a.laureates.length)}
-                        {l.slug ? <a href={localePath(lang, `artists/${l.slug}`)}>{l.name}</a> : l.name}
+                        {artistHref(lang, l) ? <a href={artistHref(lang, l)}>{l.name}</a> : l.name}
                       </>
                     ))}
                     {a.laureates?.length > 0 && a.outcome && ' '}

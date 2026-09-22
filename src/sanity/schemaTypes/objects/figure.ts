@@ -10,8 +10,14 @@ export const figure = defineType({
   name: 'figure',
   title: 'Image',
   type: 'image',
-  // Editors reframe per usage instead of re-uploading the same asset.
+  // Editors reframe per usage instead of re-uploading the same asset. The
+  // site crops around the hotspot wherever a slot has a fixed shape (the
+  // laureates' 2:3, the cards' 3:4), so the dialog is the crop preview the
+  // client asked for on 2026-09-22 - and "Preview" in the top bar shows the
+  // page itself from the draft.
   options: { hotspot: true },
+  description:
+    'To choose how a picture is cropped, open its menu (⋯) → "Edit hotspot and crop": the site crops around the hotspot wherever the picture has a fixed shape. "Preview" in the top bar shows the page before you publish.',
   fields: [
     defineField({
       name: 'alt',

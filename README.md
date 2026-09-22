@@ -104,7 +104,7 @@ document instead of duplicating it per language.
 | :-- | :-- | :-- |
 | `edition` | home, visitors info, past editions | Anchors everything dated. Exactly one is `isCurrent`. Holds the dates mark, opening hours, tickets, key figures, film and photo gallery of that year. |
 | `exhibitor` | `/exhibitors`, `/exhibitors/[slug]` | One document per participation. `kind` (gallery / publisher / jury-prize / tribute), `soloShow` and `inCountryFocus` drive the filter pills and badges. |
-| `artist` | `/artists/[slug]`, guest of honour, laureates | One per person, reused across years. The "Feature page" group (lead, sections, carousel, video, interview) is what the guest-of-honour page renders. |
+| `artist` | `/artists` (A–Z list), guest of honour, laureates | One per person, reused across years. No page of their own since 2026-09-22: a name leads to the gallery presenting the artist. The "Feature page" group (lead, sections, carousel, video, interview) is what the guest-of-honour page renders. |
 | `laureate` | art prize → laureates | Links an artist to the edition they were selected for, with a slideshow and optional statement. |
 | `award` | art prize → awards, past editions | `family` is `art-prize` (jury prize, partner residencies) or `fair` (best booth…). "→ Marie Pic will present a solo show" is `laureates` + `outcome`. |
 | `person` | about → advisory board / team, art prize → jury | `groups` says where they appear; `edition` scopes jury and team by year. |

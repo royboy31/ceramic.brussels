@@ -1,7 +1,5 @@
 ---
 import SanityImage from './SanityImage.astro';
-import Figure from './Figure.astro';
-import type { PoolName } from '../lib/placeholders';
 
 /**
  * The design's image carousel: one frame, dots on the picture, and a caption
@@ -21,9 +19,6 @@ interface Props {
   aspect?: number;
   sizes?: string;
   widths?: number[];
-  /** Placeholder pool and seed, used when the document has no images yet. */
-  pool?: PoolName;
-  seed?: string;
   /** Accessible name for the dots group - usually the document's title. */
   label?: string;
   /** Prefix for the slide ids the dots link to. One slideshow per page needs no change. */
@@ -36,8 +31,6 @@ const {
   aspect,
   sizes = '(max-width: 640px) 100vw, 33vw',
   widths = [400, 600, 900, 1200],
-  pool,
-  seed = '',
   label,
   id = 'slideshow',
   class: className,
@@ -101,11 +94,8 @@ const slideId = (i: number) => `${id}-${i + 1}`;
         </div>
       )}
     </div>
-  ) : pool ? (
-    <div class:list={['slideshow', 'slideshow-empty', className]}>
-      <Figure image={null} pool={pool} seed={seed} aspect={aspect} sizes={sizes} widths={widths} loading="eager" />
-    </div>
   ) : null
+  /* No pictures, nothing drawn: the stand-in pools went on 2026-09-22 (see Figure.astro). */
 }
 
 <style>

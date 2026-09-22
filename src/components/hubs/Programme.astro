@@ -10,6 +10,7 @@ import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { hasString, useTranslations, formatDayLong, formatTime, localePath } from '../../lib/i18n';
 import { getHubPages, getProgramme } from '../../lib/queries';
 import { HUBS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
+import { artistHref } from '../../lib/links';
 import { styleAttrs } from '../../lib/textStyle';
 
 /**
@@ -44,8 +45,8 @@ const listed = events.filter((e: any) => e.section === section && e.startsAt);
 const days = [...new Set(listed.map((e: any) => e.startsAt.slice(0, 10)))] as string[];
 const onDay = (day: string) => listed.filter((e: any) => e.startsAt.startsWith(day));
 
-/** Artists link to their page; other speaker types have no route. */
-const speakerHref = (s: any) => (s?._type === 'artist' && s.slug ? localePath(lang, `artists/${s.slug}`) : undefined);
+/** An artist links to the gallery presenting them (client, 2026-09-22); other speaker types have no route. */
+const speakerHref = (s: any) => (s?._type === 'artist' ? artistHref(lang, s) : undefined);
 
 /**
  * The line under the title, "FR / with A, B & C": the languages, then the
@@ -155,8 +156,6 @@ const altPaths = hubAltPaths('programme', tab);
           <aside class="ceremony-images">
             <Slideshow
               images={page?.images}
-              pool="fair"
-              seed={`hub-${tab}-aside`}
               aspect={670 / 447}
               sizes="(max-width: 900px) 100vw, 670px"
               widths={[670, 1340]}
@@ -287,8 +286,6 @@ const altPaths = hubAltPaths('programme', tab);
                     <div class="picture">
                       <Slideshow
                         images={e.image?.asset ? [e.image] : []}
-                        pool="fair"
-                        seed={e.slug ?? e._id}
                         aspect={460 / 289}
                         sizes="(max-width: 700px) 100vw, 440px"
                         widths={[460, 920, 1380]}

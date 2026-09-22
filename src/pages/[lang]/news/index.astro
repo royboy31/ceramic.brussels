@@ -50,11 +50,8 @@ const [lead, ...rest] = news;
           <div class="shot">
             <Figure
               image={lead.cover}
-              pool="fair"
-              seed={lead.slug}
               aspect={1.6}
               loading="eager"
-              priority
               sizes="(max-width: 900px) 100vw, 60vw"
               widths={[600, 900, 1200, 1600]}
             />
@@ -79,8 +76,6 @@ const [lead, ...rest] = news;
                   <div class="shot">
                     <Figure
                       image={item.cover}
-                      pool="fair"
-                      seed={item.slug}
                       aspect={1.5}
                       sizes="(max-width: 640px) 100vw, 33vw"
                       widths={[400, 600, 900]}

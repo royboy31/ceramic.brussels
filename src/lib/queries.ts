@@ -44,6 +44,19 @@ const SEO = `{
 }`;
 
 /** What links.ts needs to know where a linked document lives. */
+/**
+ * The gallery an artist's name leads to, since artists have no page of their
+ * own (client feedback, 2026-09-22): the exhibitor presenting them at the
+ * current edition, or failing that the most recent one, with what
+ * `exhibitorPath` needs. Null for an artist no exhibitor lists - a laureate
+ * or a past guest of honour - whose name is then plain text.
+ * `^` is the artist being projected, so this goes inside an artist projection.
+ */
+const ARTIST_GALLERY = `"gallery": *[_type == "exhibitor" && references(^._id)]
+  | order(coalesce(edition->isCurrent, false) desc, edition->year desc)[0]{
+    _id, name, "slug": slug.current, "year": edition->year, "current": edition->isCurrent == true
+  }`;
+
 const LINK_TARGET = `{
   _id,
   _type,
@@ -54,7 +67,9 @@ const LINK_TARGET = `{
   "tab": slug.${DEFAULT_LOCALE}.current,
   tier,
   "year": edition->year,
-  "current": edition->isCurrent == true
+  "current": edition->isCurrent == true,
+  // A link to an artist lands on their gallery.
+  _type == "artist" => { ${ARTIST_GALLERY} }
 }`;
 
 /** A `link` object resolved to something a template can render directly. */
@@ -495,11 +510,11 @@ export function getEditionArchive(lang: LocaleId, year: number) {
       "images": images[] ${IMAGE},
       "exhibitorCount": count(*[_type == "exhibitor" && references(^._id)]),
       "laureates": *[_type == "laureate" && references(^._id)] | order(order asc){
-        _id, "artist": artist->{ name, "slug": slug.current, ${styled('nationality')} }
+        _id, "artist": artist->{ name, "slug": slug.current, ${styled('nationality')}, ${ARTIST_GALLERY} }
       },
       "awards": *[_type == "award" && family == "art-prize" && references(^._id)] | order(order asc){
         _id, ${styled('name')}, ${styled('outcome')},
-        "laureates": laureates[]->{ _id, name, "slug": slug.current }
+        "laureates": laureates[]->{ _id, name, "slug": slug.current, ${ARTIST_GALLERY} }
       },
       "jury": *[_type == "person" && "jury" in groups && references(^._id)] | order(order asc, name asc){
         _id, name, ${styled('role')}
@@ -508,7 +523,7 @@ export function getEditionArchive(lang: LocaleId, year: number) {
         | order(order asc, name asc){ _id, name, ${styled('role')} },
       "events": *[_type == "programmeEvent" && references(^._id) && defined(startsAt)] | order(startsAt asc){
         _id, startsAt, ${styled('title')}, ${styled('speakersText')},
-        "speakers": speakers[]->{ _id, _type, name, "slug": slug.current }
+        "speakers": speakers[]->{ _id, _type, name, "slug": slug.current, _type == "artist" => { ${ARTIST_GALLERY} } }
       }
     }`,
     { lang, year },
@@ -605,12 +620,13 @@ export async function getExhibitor(lang: LocaleId, slug: string, year?: number) 
 /* --------------------------------------------------------------- artists */
 
 const ARTIST_CARD = `
-  _id, name, birthYear, countryCode, website, instagram, gallery,
+  _id, name, birthYear, countryCode, website, instagram,
   ${styled('nationality')},
   ${styled('basedIn')},
   "slug": slug.current,
   portrait ${IMAGE},
-  "isGuestOfHonour": count(*[_type == "edition" && guestOfHonour._ref == ^._id]) > 0
+  "isGuestOfHonour": count(*[_type == "edition" && guestOfHonour._ref == ^._id]) > 0,
+  ${ARTIST_GALLERY}
 `;
 
 export function getArtists(lang: LocaleId) {
@@ -631,12 +647,12 @@ export function getArtists(lang: LocaleId) {
   );
 }
 
-export function getArtistSlugs() {
-  return run<{ slug: string }[]>(
-    `*[_type == "artist" && defined(slug.current)]{ "slug": slug.current }`,
-  );
-}
-
+/*
+ * There is no `getArtist`: artists have no page of their own since
+ * 2026-09-22 (client feedback) - a name leads to the gallery presenting
+ * the artist (`ARTIST_GALLERY`, `artistHref` in links.ts). The feature
+ * page below is read for one artist only, the guest of honour.
+ */
 const ARTIST_FULL = `
   ${ARTIST_CARD},
   _type,
@@ -656,18 +672,6 @@ const ARTIST_FULL = `
   },
   "seo": ${SEO}
 `;
-
-/** One artist. A build fetches them all once per language, as for exhibitors. */
-export async function getArtist(lang: LocaleId, slug: string) {
-  if (building()) {
-    const all = await run<any[]>(`*[_type == "artist" && defined(slug.current)]{ ${ARTIST_FULL} }`, { lang });
-    return all.find((a) => a.slug === slug) ?? null;
-  }
-  return run<any>(`*[_type == "artist" && slug.current == $slug][0]{ ${ARTIST_FULL} }`, {
-    lang,
-    slug,
-  });
-}
 
 /**
  * The current edition's guest of honour with the full feature page, plus the
@@ -717,8 +721,8 @@ export function getAwards(lang: LocaleId) {
       ${styled('description')},
       ${styled('citation')},
       "partner": partner->{ _id, name, url, logo ${IMAGE} },
-      "laureates": laureates[]->{ _id, name, "slug": slug.current },
-      "artist": laureates[0]->{ name, "slug": slug.current },
+      "laureates": laureates[]->{ _id, name, "slug": slug.current, ${ARTIST_GALLERY} },
+      "artist": laureates[0]->{ name, "slug": slug.current, ${ARTIST_GALLERY} },
       // The winning gallery with what the exhibitor awards page shows of it:
       // its city, its edition (for exhibitorPath) and its pictures, which
       // stand in when the award has no image of its own.
@@ -866,7 +870,7 @@ export function getProgramme(lang: LocaleId) {
       ${styled('location')},
       ${styled('description')},
       ${styled('speakersText')},
-      "speakers": speakers[]->{ _id, _type, name, "slug": slug.current },
+      "speakers": speakers[]->{ _id, _type, name, "slug": slug.current, _type == "artist" => { ${ARTIST_GALLERY} } },
       // "everyday - 11:00 / 16:00" in place of the formatted time (#15).
       ${styled('whenText')},
       image ${IMAGE},

@@ -72,7 +72,8 @@ export function pageOptions(pastYears: number[]): SiteLinkOption[] {
 
 /** The documents the box lists: those with a page, less a hub's own tab pages (listed above as paths). */
 export const DOCUMENTS_QUERY = `{
-  "docs": *[_type in ["page", "exhibitor", "artist", "newsItem", "partner"]
+  // No artists: they have no page since 2026-09-22 - link the gallery instead.
+  "docs": *[_type in ["page", "exhibitor", "newsItem", "partner"]
     && !(_id in path("drafts.**"))
     && !(_type == "page" && defined(section))]{
     _id,
@@ -87,7 +88,6 @@ export const DOCUMENTS_QUERY = `{
 }`;
 
 const DOC_GROUPS: Record<string, string> = {
-  artist: 'Artist',
   exhibitor: 'Exhibitor',
   newsItem: 'News',
   page: 'Page',
@@ -106,8 +106,6 @@ export function documentOption(doc: any): SiteLinkOption | null {
   if (doc._type === 'partner') return option(`/${partnerPath(doc)}`);
   if (!doc.slug) return null;
   switch (doc._type) {
-    case 'artist':
-      return option(`/artists/${doc.slug}`);
     case 'exhibitor':
       return option(`/${exhibitorPath(doc)}`, doc.year ? `Exhibitor ${doc.year}` : 'Exhibitor');
     case 'newsItem':

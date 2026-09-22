@@ -5,6 +5,7 @@ import LinkPill from '../../../components/LinkPill.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath, formatDateRange, formatDay, formatTime } from '../../../lib/i18n';
 import { getEditionArchive, getPastEditionYears } from '../../../lib/queries';
+import { artistHref } from '../../../lib/links';
 import { styleAttrs } from '../../../lib/textStyle';
 
 /**
@@ -80,7 +81,8 @@ const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ` ${t('co
           <div>
             <dt>{t('artists.guestOfHonour')}</dt>
             <dd>
-              {e.guestOfHonour.slug ? <a href={localePath(lang, `artists/${e.guestOfHonour.slug}`)}>{e.guestOfHonour.name}</a> : e.guestOfHonour.name}
+              {/* A past guest of honour has no page of their own since 2026-09-22. */}
+              {e.guestOfHonour.name}
             </dd>
           </div>
         )
@@ -121,7 +123,7 @@ const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ` ${t('co
           </h2>
           <ul class="names">
             {e.laureates.map((l: any) => (
-              <li>{l.artist?.slug ? <a href={localePath(lang, `artists/${l.artist.slug}`)}>{l.artist.name}</a> : l.artist?.name}</li>
+              <li>{artistHref(lang, l.artist) ? <a href={artistHref(lang, l.artist)}>{l.artist.name}</a> : l.artist?.name}</li>
             ))}
           </ul>
         </section>
@@ -142,7 +144,7 @@ const joiner = (i: number, n: number) => (i === 0 ? '' : i === n - 1 ? ` ${t('co
                     {(a.laureates ?? []).map((l: any, i: number) => (
                       <>
                         {joiner(i, a.laureates.length)}
-                        {l.slug ? <a href={localePath(lang, `artists/${l.slug}`)}>{l.name}</a> : l.name}
+                        {artistHref(lang, l) ? <a href={artistHref(lang, l)}>{l.name}</a> : l.name}
                       </>
                     ))}
                     {a.laureates?.length > 0 && a.outcome && ' '}

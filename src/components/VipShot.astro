@@ -1,7 +1,5 @@
 ---
 import type { VipImage } from './vipContent';
-import Figure from './Figure.astro';
-import type { PoolName } from '../lib/placeholders';
 
 /**
  * One of the VIP frames' own pictures, from `public/assets/vip/`: the design
@@ -10,23 +8,20 @@ import type { PoolName } from '../lib/placeholders';
  *
  * It draws the caption line the design puts under every picture - the credit
  * at the right - so a fallback picture and a slideshow slide read the same.
- * With no image it falls through to the shared placeholder pool, which is
- * what the one row of the frame with no export gets.
+ * With no image it leaves an empty box of the same aspect (the stand-in
+ * pools went on 2026-09-22, see Figure.astro).
  *
  * Goes when the VIP tabs are in Sanity (see src/components/vipContent.ts).
  */
 interface Props {
   image?: VipImage;
-  /** Placeholder pool and seed, for a row the export has no picture for. */
-  pool?: PoolName;
-  seed?: string;
   aspect?: number;
   sizes?: string;
   loading?: 'eager' | 'lazy';
   class?: string;
 }
 
-const { image, pool = 'fair', seed = '', aspect = 3 / 2, sizes, loading = 'lazy', class: className } = Astro.props;
+const { image, aspect = 3 / 2, sizes, loading = 'lazy', class: className } = Astro.props;
 ---
 
 {
@@ -49,9 +44,7 @@ const { image, pool = 'fair', seed = '', aspect = 3 / 2, sizes, loading = 'lazy'
       )}
     </figure>
   ) : (
-    <div class:list={['vip-shot', 'vip-shot-empty', className]}>
-      <Figure image={null} pool={pool} seed={seed} aspect={aspect} sizes={sizes} loading={loading} />
-    </div>
+    <div class:list={['vip-shot', 'vip-shot-empty', className]} aria-hidden="true" style={`aspect-ratio: ${aspect}`} />
   )
 }
 

@@ -173,7 +173,8 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
     case 'story':
       return [loc('Press & media – stories', '/press-media')];
     case 'artist':
-      return d.slug ? [loc(d.name ?? 'Artist', `/artists/${d.slug}`)] : [];
+      // No page of their own since 2026-09-22: the A–Z list, where the name leads to the gallery.
+      return [loc('Artists (A–Z list)', '/artists')];
     case 'exhibitor': {
       if (!d.slug) return [];
       const name = d.name ?? 'Exhibitor';

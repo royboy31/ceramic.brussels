@@ -147,7 +147,8 @@ const bioRight = bio.slice(split);
                   ? presenting.map((a: any, i: number) => (
                       <>
                         {i > 0 && ', '}
-                        {a.slug ? <a href={localePath(lang, `artists/${a.slug}`)}>{a.name}</a> : a.name}
+                        {/* Plain names: the artists' page is this gallery's (client, 2026-09-22). */}
+                        {a.name}
                       </>
                     ))
                   : exhibitor.artistsText}

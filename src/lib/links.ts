@@ -16,7 +16,8 @@ export interface ResolvedLink {
 
 const DOC_ROUTES: Record<string, string> = {
   exhibitor: 'exhibitors',
-  artist: 'artists',
+  // An artist has no page of their own: a link to one lands on their gallery (artistPath).
+  artist: 'exhibitors',
   newsItem: 'news',
   page: '',
   partner: 'partners',
@@ -30,6 +31,24 @@ const LISTINGS = ['exhibitors', 'artists', 'news', 'contact'];
  */
 export function exhibitorPath(ex: { slug?: string; year?: number; current?: boolean }): string {
   return ex.current || !ex.year ? `exhibitors/${ex.slug}` : `exhibitors/${ex.year}/${ex.slug}`;
+}
+
+/**
+ * Where an artist's name leads: the page of the gallery presenting them
+ * (client feedback, 2026-09-22 - the artist pages are gone). `gallery` is the
+ * `ARTIST_GALLERY` projection in queries.ts: the current edition's exhibitor
+ * or the most recent one. Null when no exhibitor lists the artist, and the
+ * name stays plain text.
+ */
+export function artistPath(artist: { gallery?: { slug?: string; year?: number; current?: boolean } | null } | null | undefined): string | null {
+  const gallery = artist?.gallery;
+  return gallery?.slug ? exhibitorPath(gallery) : null;
+}
+
+/** `artistPath` as an href in `lang`, or undefined for a plain name. */
+export function artistHref(lang: LocaleId, artist: Parameters<typeof artistPath>[0]): string | undefined {
+  const path = artistPath(artist);
+  return path ? localePath(lang, path) : undefined;
 }
 
 /**
@@ -76,14 +95,18 @@ export function resolveLink(lang: LocaleId, link: any): ResolvedLink | null {
     if (!doc) return null;
     const base = DOC_ROUTES[doc._type];
     if (base === undefined) return null;
+    // An artist no gallery lists has nowhere to go: no link rather than a 404.
+    if (doc._type === 'artist' && !artistPath(doc)) return null;
     const path =
       doc._type === 'partner'
         ? partnerPath(doc, lang)
         : doc._type === 'exhibitor'
           ? exhibitorPath(doc)
-          : doc._type === 'page'
-            ? pagePath(doc, lang)
-            : [base, doc.slug].filter(Boolean).join('/');
+          : doc._type === 'artist'
+            ? (artistPath(doc) as string)
+            : doc._type === 'page'
+              ? pagePath(doc, lang)
+              : [base, doc.slug].filter(Boolean).join('/');
     return { href: localePath(lang, path), label, external: false, arrow: '→' };
   }
 

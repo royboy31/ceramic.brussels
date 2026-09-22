@@ -7,6 +7,7 @@ import PortableText from '../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations, formatDateRange, localePath } from '../../lib/i18n';
 import { getEditions } from '../../lib/queries';
+import { hubTabPath } from '../../lib/hubs';
 import { styleAttrs } from '../../lib/textStyle';
 
 /**
@@ -46,8 +47,6 @@ const list = past.length ? past : editions;
                 <div class="shot">
                   <Figure
                     image={edition.cover}
-                    pool="fair"
-                    seed={String(edition.year ?? '')}
                     aspect={1.5}
                     sizes="(max-width: 700px) 100vw, 40vw"
                     widths={[400, 600, 900, 1200]}
@@ -97,8 +96,9 @@ const list = past.length ? past : editions;
                       <div>
                         <dt>{t('artists.guestOfHonour')}</dt>
                         <dd>
-                          {edition.guestOfHonour.slug ? (
-                            <a href={localePath(lang, `artists/${edition.guestOfHonour.slug}`)}>{edition.guestOfHonour.name}</a>
+                          {/* No artist pages since 2026-09-22: the current guest has the guest-of-honour hub, a past one is a name. */}
+                          {edition.isCurrent ? (
+                            <a href={localePath(lang, hubTabPath('guest-of-honour', undefined, lang))}>{edition.guestOfHonour.name}</a>
                           ) : (
                             edition.guestOfHonour.name
                           )}

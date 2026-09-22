@@ -5,6 +5,7 @@ import PageSections from '../../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
 import { getArtists, getMainPage, getCurrentEdition } from '../../../lib/queries';
+import { artistHref } from '../../../lib/links';
 import { styleAttrs } from '../../../lib/textStyle';
 
 /**
@@ -122,7 +123,9 @@ for (const letter of letters) {
                       const ex = showingNow(a);
                       return (
                         <li data-filters={rowFilters(a)}>
-                          <a href={localePath(lang, `artists/${a.slug}`)}>
+                          {/* The name leads to the gallery presenting the artist (client, 2026-09-22);
+                              an artist no gallery lists is a plain row. */}
+                          <a href={artistHref(lang, a)}>
                             <span class="name">
                               {a.name}
                               {a.countryCode && <sup>{a.countryCode}</sup>}

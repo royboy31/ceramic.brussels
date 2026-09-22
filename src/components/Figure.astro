@@ -1,82 +1,39 @@
 ---
 import SanityImage from './SanityImage.astro';
-import { placeholder, type PoolName, type Placeholder } from '../lib/placeholders';
 
 /**
  * One image slot. Renders the Sanity image when the document has one, and
- * otherwise a placeholder from the design hand-off, picked deterministically
- * so a given record keeps the same picture between builds.
+ * otherwise an empty box of the slot's aspect - never a picture of someone
+ * or something else.
  *
- * Editor images always win, so nothing here has to be unpicked later.
+ * It used to draw a stand-in from the design hand-off (`src/lib/placeholders.ts`,
+ * `/assets/ph/`) so demo pages looked finished. That put another artist's
+ * face on an artist made without a portrait, which the client caught on
+ * 2026-09-22; the pools went with it. An empty slot now looks empty.
  */
 interface Props {
   image?: any;
-  /** Which set of stand-ins to draw from when there is no Sanity image. */
-  pool: PoolName;
-  /** Usually the slug - keeps this record on one picture. */
-  seed?: string;
-  /** Overrides the pool entirely, for a slot with one obvious stand-in. */
-  fallback?: Placeholder;
   aspect?: number;
   sizes?: string;
   widths?: number[];
   loading?: 'lazy' | 'eager';
-  priority?: boolean;
-  alt?: string;
   class?: string;
 }
 
-const {
-  image,
-  pool,
-  seed = '',
-  fallback,
-  aspect,
-  sizes = '100vw',
-  widths,
-  loading = 'lazy',
-  priority = false,
-  alt = '',
-  class: className,
-} = Astro.props;
-
-const stand = fallback ?? placeholder(pool, seed);
-
-// Match the placeholder to the slot's aspect so it crops rather than distorts.
-const height = aspect ? Math.round(stand.width / aspect) : stand.height;
+const { image, aspect, sizes = '100vw', widths, loading = 'lazy', class: className } = Astro.props;
 ---
 
 {
   image?.asset ? (
-    <SanityImage
-      image={image}
-      aspect={aspect}
-      sizes={sizes}
-      widths={widths}
-      loading={loading}
-      class={className}
-    />
+    <SanityImage image={image} aspect={aspect} sizes={sizes} widths={widths} loading={loading} class={className} />
   ) : (
-    <img
-      class:list={['ph', className]}
-      src={stand.src}
-      srcset={stand.srcset}
-      sizes={sizes}
-      alt={alt}
-      width={stand.width}
-      height={height}
-      loading={priority ? 'eager' : loading}
-      decoding="async"
-      style={aspect ? `aspect-ratio: ${aspect}` : undefined}
-      {...(priority ? { fetchpriority: 'high' } : {})}
-    />
+    <div class:list={['empty-slot', className]} aria-hidden="true" style={aspect ? `aspect-ratio: ${aspect}` : undefined} />
   )
 }
 
 <style>
-  .ph {
+  .empty-slot {
     width: 100%;
-    height: auto;
-    object-fit: cover;
+    background: var(--surface-2, #eee);
   }
 </style>
