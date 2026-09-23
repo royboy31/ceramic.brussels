@@ -279,16 +279,19 @@ const altPaths = hubAltPaths('programme', tab);
                       )}
                     </div>
                   );
+                  // The event's picture and its further pictures (#9) - the
+                  // speakers' portraits - as one slideshow, each file once.
+                  const pictures = [e.image, ...(e.images ?? [])].filter(
+                    (img: any, k: number, all: any[]) =>
+                      img?.asset && all.findIndex((o: any) => o?.asset?._ref === img.asset._ref) === k,
+                  );
                   const picture = (
-                    /* BACKEND-REQUEST #9: the client wants every event's pictures as a
-                       slideshow. `getProgramme` returns one `image`, so this is a
-                       one-slide slideshow until `images[]` lands on `programmeEvent`. */
                     <div class="picture">
                       <Slideshow
-                        images={e.image?.asset ? [e.image] : []}
-                        aspect={460 / 289}
-                        sizes="(max-width: 700px) 100vw, 440px"
-                        widths={[460, 920, 1380]}
+                        images={pictures}
+                        aspect={11 / 10}
+                        sizes="(max-width: 700px) 100vw, 220px"
+                        widths={[240, 480, 720]}
                         label={e.title}
                         id={`ev-${String(e._id).replace(/[^\w-]+/g, '-')}`}
                       />
@@ -481,9 +484,12 @@ const altPaths = hubAltPaths('programme', tab);
     padding-bottom: 50px;
     display: grid;
   }
-  /* Every picture at the left, whatever the row (client feedback, 2026-09-17). */
+  /* Every picture at the left, whatever the row (client feedback,
+     2026-09-17): the page's width as six columns, the slideshow on the
+     first and the text on the other five (2026-09-23: the text no longer
+     runs the full width, the picture is half what it was). */
   .events article {
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 1fr 5fr;
     gap: 40px;
     display: grid;
   }
@@ -491,7 +497,7 @@ const altPaths = hubAltPaths('programme', tab);
     object-fit: cover;
     width: 100%;
     height: auto;
-    aspect-ratio: 460 / 289;
+    aspect-ratio: 11 / 10;
   }
   /* One picture has nothing to count: the design draws no line under it.
      The counter and caption come back as soon as there are several. */
@@ -526,12 +532,14 @@ const altPaths = hubAltPaths('programme', tab);
     font-weight: 400;
     line-height: 1.2;
   }
+  /* Language and speakers at the body text's size (client feedback,
+     2026-09-23), as .body-24. */
   .events p {
     letter-spacing: -0.03em;
     grid-column: 1 / -1;
     margin-top: 16px;
-    font-size: 20px;
-    line-height: 1.3;
+    font-size: 24px;
+    line-height: 1.25;
   }
   .empty {
     margin-top: 40px;
@@ -546,6 +554,9 @@ const altPaths = hubAltPaths('programme', tab);
     }
     .events article {
       grid-template-columns: 1fr;
+    }
+    .events .picture {
+      max-width: 260px;
     }
     .events b,
     .events time {
