@@ -277,11 +277,12 @@ const logoHeight = (image: any, max = 78, base = 92) => {
    * this scopes the slimmer set to the partners tabs, where the pill sits
    * under 24px body text.
    */
+  /* Since 2026-09-23 the site's one pill size (Base.astro). */
   .pill {
-    padding: 1px 13px 0;
-    font-size: 20px;
-    line-height: 1.5;
-    letter-spacing: -0.02em;
+    padding: var(--pill-pad);
+    font-size: var(--pill-size);
+    line-height: var(--pill-lh);
+    letter-spacing: var(--pill-ls);
   }
 
   .image-row {
@@ -305,9 +306,6 @@ const logoHeight = (image: any, max = 78, base = 92) => {
     }
     .hotel {
       grid-template-columns: 1fr;
-    }
-    .pill {
-      font-size: 16px;
     }
     .image-row {
       grid-template-columns: 1fr;

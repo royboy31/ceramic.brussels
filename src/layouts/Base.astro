@@ -590,6 +590,30 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
      2026-09-17: "it should always be everywhere"), so the title band pins
      under it rather than behind it. --header-h mirrors the header heights in
      design.css; keep the two in step. */
+  /* One size for every outline pill - "learn more →", "instagram ↗",
+     "website ↗" - site-wide: the VIP pages' size, which the client liked,
+     with tighter letter-spacing (client feedback, 2026-09-23: "harmonise by
+     using this size of buttons everywhere"). The pills read these; the
+     big call-to-action buttons, the footer pills and the title-band tabs
+     keep their own. */
+  :root {
+    --pill-size: 22px;
+    --pill-pad: 3px 20px;
+    --pill-lh: 1.3;
+    --pill-ls: -0.035em;
+  }
+  @media (width<=700px) {
+    :root {
+      --pill-size: 18px;
+      --pill-pad: 2px 14px;
+    }
+  }
+  .pill {
+    padding: var(--pill-pad);
+    font-size: var(--pill-size);
+    line-height: var(--pill-lh);
+    letter-spacing: var(--pill-ls);
+  }
   :root {
     /* Measured, not the 159px rule in design.css: a later rule overrides it. */
     --header-h: 149px;

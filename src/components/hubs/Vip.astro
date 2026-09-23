@@ -568,10 +568,13 @@ const rate = {
 <style>
   /* The frames' body size: a step under .body-24, which the design keeps for
      the lead paragraphs. */
+  /* The class kept its name, but since 2026-09-23 it is the site's body
+     size, .body-24 (client feedback: the VIP text "feels smaller" than the
+     rest of the website and than the text in its buttons). */
   .body-20 {
-    font-size: 20px;
-    line-height: 1.3;
-    letter-spacing: -0.02em;
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: -0.03em;
   }
   .body-20 :global(p + p) {
     margin-top: 1em;
@@ -600,13 +603,15 @@ const rate = {
   .group {
     margin-top: 56px;
   }
+  /* "programme overview": the guest of honour's name style, "Marion
+     Verboom" (client feedback, 2026-09-23). */
   .group-title {
     border-top: 1px solid;
     padding-top: 14px;
-    letter-spacing: -0.04em;
-    font-size: clamp(30px, 3.2vw, 44px);
+    letter-spacing: -0.06em;
+    font-size: clamp(38px, 4.3vw, 62px);
     font-weight: 400;
-    line-height: 1.05;
+    line-height: 1;
     text-transform: lowercase;
   }
   /* "at the fair", "beyond the fair": ruled under itself, over the copy
@@ -614,24 +619,28 @@ const rate = {
   .subgroup {
     margin-top: 36px;
   }
+  /* "at the fair", "beyond the fair": the food & drinks titles' style
+     (client feedback, 2026-09-23). */
   .subgroup-title {
     border-bottom: 1px solid;
     padding-bottom: 6px;
     max-width: 66%;
-    letter-spacing: -0.03em;
-    font-size: clamp(22px, 2vw, 28px);
+    letter-spacing: -0.04em;
+    font-size: clamp(26px, 2.5vw, 36px);
     font-weight: 600;
-    line-height: 1.15;
+    line-height: 1.2;
   }
   .overview-row {
     margin-top: 30px;
   }
+  /* "VIP LOUNGE", "DISCOVERY TOURS": the site's other bold capitals, the
+     board and jury roles (client feedback, 2026-09-23). */
   .eyebrow-strong {
     margin-bottom: 10px;
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.01em;
+    line-height: 1.25;
+    letter-spacing: 0;
     text-transform: uppercase;
   }
   .closing {
@@ -819,7 +828,8 @@ const rate = {
     }
     .body-20,
     .event-when,
-    .event-line {
+    .event-line,
+    .eyebrow-strong {
       font-size: 18px;
     }
     .rate-label {

@@ -160,10 +160,11 @@ const logoRow = withLogo.length > 0 ? withLogo : partners;
      footer pills as the reference. */
   .institutions .pill {
     margin-top: 24px;
-    padding: 1px 13px 0;
-    font-size: 20px;
-    line-height: 1.5;
-    letter-spacing: -0.02em;
+    /* The site's one pill size (Base.astro, client feedback 2026-09-23). */
+    padding: var(--pill-pad);
+    font-size: var(--pill-size);
+    line-height: var(--pill-lh);
+    letter-spacing: var(--pill-ls);
   }
   @media (width<=700px) {
     .institutions {
@@ -175,9 +176,6 @@ const logoRow = withLogo.length > 0 ? withLogo : partners;
     }
     .institutions article :global(p) {
       font-size: 18px;
-    }
-    .institutions .pill {
-      font-size: 16px;
     }
     .logos {
       flex-wrap: wrap;
