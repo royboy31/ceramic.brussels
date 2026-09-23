@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
-import { getSecret } from 'astro:env/server';
 import { sanityClient } from 'sanity:client';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { localePath } from '../../lib/i18n';
+import { brevoKey, fill, mailDryRun, paragraphs, rowsHtml, sendMail, senderFor } from '../mail';
 
 /**
  * POST /api/apply - the gallery application form (ApplicationForm.astro).
@@ -15,11 +15,11 @@ import { localePath } from '../../lib/i18n';
  * application document would publish the applicant's email, and the
  * private database went with the site accounts. The emails are the record.
  *
- * Until BREVO_API_KEY is set as a Pages secret and the sender domain is
- * verified in Brevo, this answers 503 and the form shows its failure state
- * with the contact address - never a false "sent". The one exception is a
- * branch preview, where APPLY_DRY_RUN=1 (wrangler.toml) lets the flow be
- * tried end to end with the emails logged instead of sent.
+ * Without the BREVO_API_KEY Pages secret (mail.ts) this answers 503 and the
+ * form shows its failure state with the contact address - never a false
+ * "sent". The one exception is a branch preview, where APPLY_DRY_RUN=1
+ * (wrangler.toml) lets the flow be tried end to end with the emails logged
+ * instead of sent.
  */
 export const prerender = false;
 
@@ -106,54 +106,40 @@ async function isRepeat(email: string): Promise<boolean> {
   return false;
 }
 
-const escape = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
-
 async function deliver(apiKey: string, s: Submission, cfg: FormSettings): Promise<void> {
-  const sender = { name: cfg.senderName || cfg.siteName || 'ceramic brussels', email: cfg.senderEmail || cfg.recipient || cfg.contactEmail || '' };
+  const sender = senderFor(cfg.senderName || cfg.siteName, cfg.senderEmail);
   const to = cfg.recipient || cfg.contactEmail;
-  if (!sender.email || !to) throw new Error('No recipient or sender configured in Site settings → Applications.');
+  if (!to) throw new Error('No recipient configured in Site settings → Applications.');
 
-  const send = (message: Record<string, unknown>) =>
-    fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: { 'api-key': apiKey, 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify(message),
-    }).then(async (r) => {
-      if (!r.ok) throw new Error(`Brevo ${r.status}: ${(await r.text()).slice(0, 300)}`);
-    });
-
-  const rows = [
+  const rows: [string, string][] = [
     ['First name', s.firstName],
     ['Last name', s.lastName],
     ['Gallery', s.gallery],
     ['Email', s.email],
     ['Language', s.lang],
   ];
-  await send({
+  await sendMail(apiKey, {
     sender,
     to: [{ email: to }],
     ...(cfg.cc ? { cc: [{ email: cfg.cc }] } : {}),
     replyTo: { email: s.email, name: `${s.firstName} ${s.lastName}` },
     subject: `Gallery application: ${s.gallery}`,
-    htmlContent: `<p>A gallery asked for the application pack through the website.</p><table>${rows
-      .map(([k, v]) => `<tr><th align="left" style="padding:2px 12px 2px 0">${k}</th><td>${escape(v)}</td></tr>`)
-      .join('')}</table>`,
+    html: `<p>A gallery asked for the application pack through the website.</p>${rowsHtml(rows)}`,
   });
 
-  const fill = (text: string) =>
-    text.replace(/\{(firstName|lastName|gallery|email)\}/g, (_, k: keyof Submission) => String(s[k] ?? ''));
-  const subject = fill(cfg.confirmationSubject || 'Your application to ceramic brussels');
+  const values = { firstName: s.firstName, lastName: s.lastName, gallery: s.gallery, email: s.email };
   const text = fill(
     cfg.confirmationText ||
       'Dear {firstName},\n\nThank you for your interest in ceramic brussels. We have received your request and will be in touch with the application form and all the relevant information shortly.\n\nThe ceramic brussels team',
+    values,
   );
-  await send({
+  await sendMail(apiKey, {
     sender,
     to: [{ email: s.email, name: `${s.firstName} ${s.lastName}` }],
     replyTo: { email: to },
-    subject,
-    textContent: text,
-    htmlContent: text.split(/\n{2,}/).map((p) => `<p>${escape(p).replace(/\n/g, '<br>')}</p>`).join(''),
+    subject: fill(cfg.confirmationSubject || 'Your application to ceramic brussels', values),
+    text,
+    html: paragraphs(text),
   });
 }
 
@@ -185,12 +171,12 @@ export const POST: APIRoute = async ({ request }) => {
   const cfg = await settings(lang);
   if (cfg.open === false) return answer(403, 'closed', 'Applications are closed', 'Applications are not open at the moment.');
 
-  const apiKey = getSecret('BREVO_API_KEY');
+  const apiKey = brevoKey();
   // Branch previews (wrangler.toml [env.preview.vars]) may run the whole flow
   // without an email service: the submission goes to the log and the browser
   // on to the thank-you page. Production never has APPLY_DRY_RUN, so there a
   // missing key still refuses rather than pretend.
-  const dryRun = !apiKey && getSecret('APPLY_DRY_RUN') === '1';
+  const dryRun = mailDryRun();
   if (!apiKey && !dryRun) {
     console.error('[apply] BREVO_API_KEY is not set; submission not delivered');
     return answer(503, 'unconfigured', 'Not available yet', `The form is not connected yet. Please write to ${cfg.recipient || cfg.contactEmail || 'the team'}.`);

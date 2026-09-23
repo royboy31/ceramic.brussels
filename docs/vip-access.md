@@ -157,7 +157,7 @@ Four layers, because each one alone has a hole:
 | KV namespace `VIP_SESSIONS` (to create) | sessions, expiring by themselves |
 | Workers Paid plan ($5/month) | lifts KV's 1,000 writes a day; on before the mailing |
 | Pages secret `VIP_CODE_PEPPER` | hashes the codes; changing it invalidates every code |
-| Pages secret `BREVO_API_KEY` | already planned; the request form |
+| Pages secret `BREVO_API_KEY` | the request form and the code emails (`src/server/mail.ts`); production only, previews keep `APPLY_DRY_RUN` |
 | `wrangler.toml` / `wrangler.worker.toml` | `[[d1_databases]] binding = "VIP_DB"` and `[[kv_namespaces]] binding = "VIP_SESSIONS"`, both files, plus `[env.preview]` |
 | Cloudflare rate limiting rule | `/api/vip/enter/`, e.g. 10 per minute per IP |
 | `scripts/pages-worker.mjs` | `_routes.json` gains the locked tabs' paths |
@@ -204,8 +204,15 @@ above; the tool only edits rows.
 - **Codes are the same function on both sides.** `makeCode` in
   `src/server/vipGuests.ts` is the script's, on WebCrypto; checked against
   the test guest's code. Change one and change both.
-- **Approving shows the code; it does not mail it.** The invitation mailing
-  is the team's, from the export.
+- **Approving shows the code and emails it** (since 2026-09-23,
+  `src/server/vipMail.ts`), as does adding a guest, giving them a new code
+  or renaming them so the code moved; the tool says whether the email went
+  ("Emailed to …" or "Not emailed: … send it yourself") and has "Send by
+  email" on any shown code. The text is Site settings → VIP → "Code
+  email", with `{firstName}`, `{lastName}`, `{code}`, `{link}` (the access
+  page on `PUBLIC_SITE_URL`) and `{contact}` filled in, stock English when
+  empty. An import mails nobody: the invitation mailing of ~3,000 guests is
+  the team's, from the export.
 - **Editing a first name changes the code**, because the name is part of it;
   the tool says so and shows the new one. The email cannot be edited - it is
   the guest's identity: delete and add again.
@@ -237,7 +244,10 @@ creating the documents switches a tab over for good, one at a time.
 Still to do, none of it code:
 
 - **Roy:** the Workers Paid plan before the mailing; a rate limiting rule on
-  `/api/vip/enter/`; the Brevo key for the request form.
+  `/api/vip/enter/`. The Brevo side is done (2026-09-23): the key is in
+  `.env`, the sender ceramic brussels <info@ceramic.brussels> exists on the
+  verified domain, and the key goes into Pages as `BREVO_API_KEY`
+  (production).
 - **The dataset:** `node scripts/apply-design-content.mjs --only=nav` has not been run, so the
   live menu still has no VIP row (request #18 put it in the script).
 - **Editors, two fields that change what the page prints today:** Site

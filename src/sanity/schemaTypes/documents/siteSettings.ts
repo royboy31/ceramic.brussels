@@ -222,7 +222,7 @@ export const siteSettings = defineType({
           name: 'senderEmail',
           title: 'Sender address',
           type: 'string',
-          description: 'Must be on the domain verified with the email service. Defaults to the recipient.',
+          description: 'Must be on ceramic.brussels, the domain verified with the email service. Defaults to info@ceramic.brussels.',
           validation: (rule) => rule.email(),
         }),
         defineField({
@@ -302,7 +302,7 @@ export const siteSettings = defineType({
           name: 'senderEmail',
           title: 'Sender address',
           type: 'string',
-          description: 'Must be on the domain verified with the email service. Defaults to the recipient.',
+          description: 'Must be on ceramic.brussels, the domain verified with the email service. Defaults to info@ceramic.brussels.',
           validation: (rule) => rule.email(),
         }),
         defineField({
@@ -317,6 +317,24 @@ export const siteSettings = defineType({
           type: 'localeText',
           rows: 6,
           description: 'Plain text; a blank line starts a new paragraph. {firstName}, {lastName}, {institution} are filled in.',
+        }),
+        // The code a VIP gets, sent from the Studio's VIP guests tool when
+        // they are added, approved or given a new code (src/server/vipMail.ts).
+        // One language: the guest list keeps none, and the stock text is
+        // English.
+        defineField({
+          name: 'codeSubject',
+          title: 'Code email: subject',
+          type: 'string',
+          description: 'Sent to a guest with their code from the VIP guests tool. {firstName}, {lastName}, {code} are filled in. Empty: a stock English subject.',
+        }),
+        defineField({
+          name: 'codeText',
+          title: 'Code email: text',
+          type: 'text',
+          rows: 10,
+          description:
+            'Plain text; a blank line starts a new paragraph. {firstName}, {lastName}, {code}, {link} (the access page) and {contact} (the VIP team address) are filled in. Empty: a stock English text.',
         }),
         defineField({
           name: 'successPage',

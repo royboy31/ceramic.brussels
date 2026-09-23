@@ -619,12 +619,25 @@ questions.
   injected by `preview-routes.mjs` like the preview door), which validates,
   drops bots on a honeypot, refuses a repeat from the same address within
   fifteen minutes, and sends two emails through Brevo - to the team and to
-  the applicant. Nothing is stored: the dataset is public. Until the
-  `BREVO_API_KEY` Pages secret exists the route answers 503 and the page
+  the applicant. Nothing is stored: the dataset is public. Without the
+  `BREVO_API_KEY` Pages secret the route answers 503 and the page
   shows its failure state with the contact address, never a false "sent" -
   except on branch previews, where `APPLY_DRY_RUN = "1"` in `wrangler.toml`
   logs the submission instead and still goes on to the thank-you page, so
-  the flow can be tried before Brevo is connected.
+  the flow can be tried without sending anyone anything.
+- **All email goes through `src/server/mail.ts`**: the application form,
+  the VIP request form and the VIP code emails call its `sendMail`, which
+  posts to Brevo's transactional API with the `BREVO_API_KEY` Pages secret
+  (production only; previews keep the dry run). The sender is
+  **ceramic brussels <info@ceramic.brussels>**, made in Brevo on 2026-09-23
+  on the authenticated `ceramic.brussels` domain of Roy's Perelweb account
+  (the same account sends for his other sites; the plan is metered per
+  month). A form's "Sender address" in Site settings overrides it but must
+  stay on that domain, or Brevo refuses the message. The Studio's VIP
+  guests tool mails a guest their code when they are added, approved or
+  given a new code, and has "Send by email" for the rest; the text is Site
+  settings → VIP → "Code email", stock English when empty
+  (`src/server/vipMail.ts`). An import mails nobody.
 - **Preview renders read the page to the end inside the store.** Astro
   streams responses, so the frontmatter (and its queries) runs when the body
   is pulled. `src/middleware.ts` awaits `response.text()` inside

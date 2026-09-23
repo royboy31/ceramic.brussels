@@ -1,10 +1,10 @@
 import type { APIRoute } from 'astro';
-import { getSecret } from 'astro:env/server';
 import { sanityClient } from 'sanity:client';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { localePath } from '../../lib/i18n';
 import { codePepper, vipEnv } from '../vip';
 import { createGuest } from '../vipGuests';
+import { brevoKey, fill, mailDryRun, paragraphs, rowsHtml, sendMail, senderFor } from '../mail';
 
 /**
  * POST /api/vip/request - the "not a VIP yet?" form on the VIP access page.
@@ -125,23 +125,12 @@ async function tooManyRequests(request: Request): Promise<boolean> {
   return false;
 }
 
-const escape = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
-
 async function deliver(apiKey: string, s: Submission, cfg: FormSettings): Promise<void> {
-  const sender = { name: cfg.senderName || cfg.siteName || 'ceramic brussels', email: cfg.senderEmail || cfg.recipient || cfg.contactEmail || '' };
+  const sender = senderFor(cfg.senderName || cfg.siteName, cfg.senderEmail);
   const to = cfg.recipient || cfg.contactEmail;
-  if (!sender.email || !to) throw new Error('No recipient or sender configured in Site settings → VIP.');
+  if (!to) throw new Error('No recipient configured in Site settings → VIP.');
 
-  const send = (message: Record<string, unknown>) =>
-    fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: { 'api-key': apiKey, 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify(message),
-    }).then(async (r) => {
-      if (!r.ok) throw new Error(`Brevo ${r.status}: ${(await r.text()).slice(0, 300)}`);
-    });
-
-  const rows = [
+  const rows: [string, string][] = [
     ['First name', s.firstName],
     ['Last name', s.lastName],
     ['Institution', s.institution],
@@ -149,33 +138,31 @@ async function deliver(apiKey: string, s: Submission, cfg: FormSettings): Promis
     ['Email', s.email],
     ['Language', s.lang],
   ];
-  await send({
+  await sendMail(apiKey, {
     sender,
     to: [{ email: to }],
     ...(cfg.cc ? { cc: [{ email: cfg.cc }] } : {}),
     replyTo: { email: s.email, name: `${s.firstName} ${s.lastName}` },
     subject: `VIP access request: ${s.firstName} ${s.lastName}, ${s.institution}`,
-    htmlContent: `<p>Someone asked for VIP access through the website.</p><table>${rows
-      .map(([k, v]) => `<tr><th align="left" style="padding:2px 12px 2px 0">${k}</th><td>${escape(v)}</td></tr>`)
-      .join('')}</table>`,
+    html: `<p>Someone asked for VIP access through the website. It waits under Requests in the Studio's VIP guests tool.</p>${rowsHtml(rows)}`,
   });
 
   // A confirmation only when the team wrote one: a VIP request is a judgement
   // call, and a stock "we have received it" can read as a yes.
   if (!cfg.confirmationSubject && !cfg.confirmationText) return;
-  const fill = (text: string) =>
-    text.replace(/\{(firstName|lastName|institution|email)\}/g, (_, k: keyof Submission) => String(s[k] ?? ''));
+  const values = { firstName: s.firstName, lastName: s.lastName, institution: s.institution, email: s.email };
   const text = fill(
     cfg.confirmationText ||
       'Dear {firstName},\n\nThank you for your request. The ceramic brussels VIP team will get back to you.\n\nThe ceramic brussels team',
+    values,
   );
-  await send({
+  await sendMail(apiKey, {
     sender,
     to: [{ email: s.email, name: `${s.firstName} ${s.lastName}` }],
     replyTo: { email: to },
-    subject: fill(cfg.confirmationSubject || 'Your VIP request to ceramic brussels'),
-    textContent: text,
-    htmlContent: text.split(/\n{2,}/).map((p) => `<p>${escape(p).replace(/\n/g, '<br>')}</p>`).join(''),
+    subject: fill(cfg.confirmationSubject || 'Your VIP request to ceramic brussels', values),
+    text,
+    html: paragraphs(text),
   });
 }
 
@@ -206,8 +193,8 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const cfg = await settings(lang);
-  const apiKey = getSecret('BREVO_API_KEY');
-  const dryRun = !apiKey && getSecret('APPLY_DRY_RUN') === '1';
+  const apiKey = brevoKey();
+  const dryRun = mailDryRun();
   const env = await vipEnv();
   const pepper = codePepper();
   if (!(env && pepper) && !apiKey && !dryRun) {

@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { codePepper, vipEnv } from '../vip';
 import { verifySanityAdmin } from '../sanityIdentity';
+import { mailVipCode } from '../vipMail';
 import {
   cleanEmail,
   codeFor,
@@ -32,6 +33,12 @@ import {
  * What it can do is what scripts/vip-guests.mjs does from a laptop: add,
  * edit, delete, approve, deny, revoke, restore, reissue, import and export.
  * The gate, the codes and the sessions are untouched; this only edits rows.
+ *
+ * A code that comes into being here - a guest added, approved, given a new
+ * code, or renamed so the code moved - is mailed to the guest (vipMail.ts),
+ * and `mail` sends it again on request. The answer always carries the
+ * outcome, so the tool can say "emailed" or "send it yourself". An import
+ * mails nobody: the invitation mailing is the team's, from the export.
  */
 export const prerender = false;
 
@@ -92,6 +99,12 @@ export const POST: APIRoute = async ({ request }) => {
   const db = env.VIP_DB;
   const id = clean(body.id, 64);
   const found = async () => (/^[a-f0-9]{8,64}$/.test(id) ? getGuest(db, id) : null);
+  const site = new URL(request.url).origin;
+  /** The guest's working code and, when there is one, the outcome of mailing it. */
+  const withMail = async (guest: GuestRow) => {
+    const code = await codeFor(pepper, guest);
+    return { code, ...(code ? { mail: await mailVipCode(guest, code, site) } : {}) };
+  };
 
   switch (body.action) {
     case 'list':
@@ -103,7 +116,7 @@ export const POST: APIRoute = async ({ request }) => {
       if (!isEmail(input.email)) return fail(400, 'A valid email address is required.');
       const guest = await createGuest(db, pepper, input, 'approved', admin.name);
       if (!guest) return fail(409, 'A guest with that email is already in the list.');
-      return json(200, { ok: true, guest: view(guest), code: await codeFor(pepper, guest) });
+      return json(200, { ok: true, guest: view(guest), ...(await withMail(guest)) });
     }
 
     case 'update': {
@@ -112,7 +125,8 @@ export const POST: APIRoute = async ({ request }) => {
       const input = readGuest({ ...body, email: guest.email });
       if (typeof input === 'string') return fail(400, input);
       const result = await updateGuest(db, pepper, guest.id, input);
-      return json(200, { ok: true, guest: view(result!.guest), codeChanged: result!.codeChanged, code: await codeFor(pepper, result!.guest) });
+      const mailed = result!.codeChanged ? await withMail(result!.guest) : { code: await codeFor(pepper, result!.guest) };
+      return json(200, { ok: true, guest: view(result!.guest), codeChanged: result!.codeChanged, ...mailed });
     }
 
     case 'approve':
@@ -122,7 +136,7 @@ export const POST: APIRoute = async ({ request }) => {
       const decided = await decideGuest(db, guest.id, body.action === 'approve' ? 'approved' : 'denied', admin.name);
       // A denial ends what an earlier approval may have opened.
       const ended = body.action === 'deny' ? await endSessions(env.VIP_SESSIONS, guest.id) : 0;
-      return json(200, { ok: true, guest: view(decided!), code: await codeFor(pepper, decided!), ended });
+      return json(200, { ok: true, guest: view(decided!), ...(await withMail(decided!)), ended });
     }
 
     case 'revoke':
@@ -139,7 +153,7 @@ export const POST: APIRoute = async ({ request }) => {
       if (!guest) return fail(404, 'No such guest.');
       const result = await reissueGuest(db, pepper, guest.id);
       const ended = await endSessions(env.VIP_SESSIONS, guest.id);
-      return json(200, { ok: true, guest: view(result!.guest), code: result!.guest.status === 'approved' ? result!.code : null, ended });
+      return json(200, { ok: true, guest: view(result!.guest), ...(await withMail(result!.guest)), ended });
     }
 
     case 'delete': {
@@ -153,6 +167,15 @@ export const POST: APIRoute = async ({ request }) => {
       const guest = await found();
       if (!guest) return fail(404, 'No such guest.');
       return json(200, { ok: true, code: await codeFor(pepper, guest) });
+    }
+
+    // The code, mailed again - for a guest who lost it or an import row.
+    case 'mail': {
+      const guest = await found();
+      if (!guest) return fail(404, 'No such guest.');
+      const code = await codeFor(pepper, guest);
+      if (!code) return fail(409, 'This guest has no working code to send.');
+      return json(200, { ok: true, code, mail: await mailVipCode(guest, code, site) });
     }
 
     // The spreadsheet, parsed by the tool and sent a few hundred rows at a

@@ -55,6 +55,18 @@ interface Guest {
 }
 
 type Filter = 'pending' | 'approved' | 'denied' | 'revoked' | 'all';
+
+/** What became of mailing a code (src/server/vipMail.ts). */
+type Mail = { sent: true; to: string } | { sent: false; to: string; reason: 'unconfigured' | 'dry-run' | 'failed'; detail?: string };
+type Coded = { guest: Guest; code: string | null; mail?: Mail };
+
+function mailLine(mail: Mail | undefined): string {
+  if (!mail) return 'Not emailed.';
+  if (mail.sent) return `Emailed to ${mail.to}.`;
+  if (mail.reason === 'unconfigured') return 'Not emailed: the site has no email service connected (BREVO_API_KEY). Send it yourself.';
+  if (mail.reason === 'dry-run') return 'Not emailed: this preview only logs email. Send it yourself.';
+  return `Not emailed: ${mail.detail ?? 'the email service refused it'}. Send it yourself, or try again below.`;
+}
 type Fields = Pick<Guest, 'firstName' | 'lastName' | 'email' | 'institution' | 'function'>;
 
 const NEWLINE = String.fromCharCode(10);
@@ -201,7 +213,7 @@ export function VipTool() {
   const [filter, setFilter] = useState<Filter>('pending');
   const [search, setSearch] = useState('');
   const [editing, setEditing] = useState<Guest | 'new' | null>(null);
-  const [shown, setShown] = useState<{ guest: Guest; code: string; note?: string } | null>(null);
+  const [shown, setShown] = useState<{ guest: Guest; code: string; note?: string; mail?: Mail } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
@@ -255,12 +267,11 @@ export function VipTool() {
   }, [guests, filter, search]);
 
   const decide = (guest: Guest, action: 'approve' | 'deny') =>
-    run(
-      () => api<{ guest: Guest; code: string | null }>({ action, id: guest.id }),
-      action === 'approve' ? undefined : `${guest.firstName} ${guest.lastName}: request denied.`,
-    ).then((result) => {
-      if (action === 'approve' && result?.code) setShown({ guest: result.guest, code: result.code, note: 'Approved. This is the code to send them.' });
-    });
+    run(() => api<Coded>({ action, id: guest.id }), action === 'approve' ? undefined : `${guest.firstName} ${guest.lastName}: request denied.`).then(
+      (result) => {
+        if (action === 'approve' && result?.code) setShown({ guest: result.guest, code: result.code, note: `Approved. ${mailLine(result.mail)}`, mail: result.mail });
+      },
+    );
 
   const showCode = (guest: Guest) =>
     run(() => api<{ code: string | null }>({ action: 'code', id: guest.id })).then((result) => {
@@ -269,10 +280,17 @@ export function VipTool() {
 
   const reissue = (guest: Guest) => {
     if (!window.confirm(`Give ${guest.firstName} ${guest.lastName} a new code? The one they have stops working, and they are signed out.`)) return;
-    void run(() => api<{ guest: Guest; code: string | null }>({ action: 'reissue', id: guest.id })).then((result) => {
-      if (result?.code) setShown({ guest: result.guest, code: result.code, note: 'New code. The old one no longer works.' });
+    void run(() => api<Coded>({ action: 'reissue', id: guest.id })).then((result) => {
+      if (result?.code) setShown({ guest: result.guest, code: result.code, note: `New code; the old one no longer works. ${mailLine(result.mail)}`, mail: result.mail });
     });
   };
+
+  const mailCode = (guest: Guest) =>
+    run(() => api<Coded>({ action: 'mail', id: guest.id })).then((result) => {
+      if (!result) return;
+      say(result.mail?.sent ? 'success' : 'error', mailLine(result.mail));
+      setShown((s) => (s && s.guest.id === guest.id ? { ...s, note: undefined, mail: result.mail } : s));
+    });
 
   const remove = (guest: Guest) => {
     if (!window.confirm(`Delete ${guest.firstName} ${guest.lastName} from the guest list? Their code stops working. This cannot be undone.`)) return;
@@ -383,8 +401,10 @@ export function VipTool() {
         <Card padding={3} radius={2} tone="primary" border>
           <Text size={1}>
             A request from the site's "not a VIP yet?" form waits under Requests until you approve or deny it; its code
-            opens nothing before that. Approving shows the code to send. A spreadsheet needs the columns first name, last
-            name and email (institution and function are optional).
+            opens nothing before that. Approving a guest, adding one or giving them a new code shows the code and emails
+            it to them (the text is Site settings → VIP). An import emails nobody: the invitation mailing is yours, from
+            the export, and "Send by email" mails one guest's code at a time. A spreadsheet needs the columns first name,
+            last name and email (institution and function are optional).
           </Text>
         </Card>
 
@@ -498,14 +518,19 @@ export function VipTool() {
             const target = editing;
             setEditing(null);
             if (target === 'new') {
-              void run(() => api<{ guest: Guest; code: string | null }>({ action: 'add', ...fields })).then((result) => {
-                if (result?.code) setShown({ guest: result.guest, code: result.code, note: 'Added. This is the code to send them.' });
+              void run(() => api<Coded>({ action: 'add', ...fields })).then((result) => {
+                if (result?.code) setShown({ guest: result.guest, code: result.code, note: `Added. ${mailLine(result.mail)}`, mail: result.mail });
               });
             } else {
-              void run(() => api<{ guest: Guest; code: string | null; codeChanged: boolean }>({ action: 'update', id: target.id, ...fields }), 'Saved.').then(
+              void run(() => api<Coded & { codeChanged: boolean }>({ action: 'update', id: target.id, ...fields }), 'Saved.').then(
                 (result) => {
                   if (result?.codeChanged && result.code) {
-                    setShown({ guest: result.guest, code: result.code, note: 'The first name is part of the code, so the code changed with it. The old one no longer works.' });
+                    setShown({
+                      guest: result.guest,
+                      code: result.code,
+                      note: `The first name is part of the code, so the code changed with it; the old one no longer works. ${mailLine(result.mail)}`,
+                      mail: result.mail,
+                    });
                   }
                 },
               );
@@ -526,6 +551,7 @@ export function VipTool() {
               </Card>
               <Text size={1} muted>
                 {shown.guest.email}. Typed in any case, with or without the hyphens.
+                {shown.mail && !shown.note ? ` ${mailLine(shown.mail)}` : ''}
               </Text>
               <Flex gap={2}>
                 <Button
@@ -533,6 +559,7 @@ export function VipTool() {
                   tone="primary"
                   onClick={() => navigator.clipboard.writeText(shown.code).then(() => say('success', 'Code copied.'), () => say('error', 'Could not copy.'))}
                 />
+                <Button text={shown.mail?.sent ? 'Send again' : 'Send by email'} mode="ghost" disabled={busy} onClick={() => void mailCode(shown.guest)} />
                 <Button text="Close" mode="ghost" onClick={() => setShown(null)} />
               </Flex>
             </Stack>
@@ -596,7 +623,7 @@ function GuestDialog({
           </Grid>
           {!guest && (
             <Text size={1} muted>
-              Added as approved: their code works straight away, and is shown next.
+              Added as approved: their code works straight away, is shown next and is emailed to them.
             </Text>
           )}
           <Flex gap={2}>
