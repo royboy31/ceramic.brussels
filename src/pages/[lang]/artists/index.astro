@@ -235,10 +235,11 @@ for (const letter of letters) {
     position: relative;
   }
   /* The rule starts a little in from the letter, which sits over its end. */
-  /* A heavier rule beside the letter (client feedback, 2026-09-16). */
+  /* A heavier rule beside the letter (client feedback, 2026-09-16), eased
+     back from 3px on 2026-09-23 ("line less thick here"). */
   .artist-list section::before {
     content: '';
-    border-top: 3px solid;
+    border-top: 2px solid;
     position: absolute;
     top: 0;
     left: 12%;
@@ -289,9 +290,10 @@ for (const letter of letters) {
   .artist-list a:focus-visible {
     background: var(--color-acid);
   }
+  /* Bigger than it was (client feedback, 2026-09-23). */
   .artist-list sup {
     margin-left: 0.3em;
-    font-size: 0.5em;
+    font-size: 0.62em;
     letter-spacing: 0;
     line-height: 1;
     vertical-align: top;

@@ -129,20 +129,25 @@ const mark = activeLetter.toUpperCase();
   }
   nav {
     flex-wrap: wrap;
-    gap: 28px;
+    gap: 12px;
     display: flex;
   }
   .alphabet {
     flex-wrap: nowrap;
   }
-  /* 50px tall, 28px apart, as in the Figma exhibitors frames. */
+  /* The same pills as every other title band (HubNav): the Figma
+     exhibitors frames drew them 50px tall, 135px wide and 28px apart, which
+     read as oversized next to the rest of the site (client feedback,
+     2026-09-23). Sizes come from the shared --band-pill tokens, so the
+     scrolled state shrinks them the same way. */
   .exhibitor-head__top a {
     text-align: center;
+    white-space: nowrap;
     border: 1px solid #000;
-    min-width: 135px;
-    padding: var(--band-pill-pad, 10px 24px);
-    font-size: var(--band-pill, 28px);
-    line-height: 1;
+    padding: var(--band-pill-pad, 7px 15px);
+    font-size: var(--band-pill, 24px);
+    line-height: 30px;
+    letter-spacing: -0.045em;
     transition:
       color 0.18s,
       background-color 0.18s;
@@ -211,9 +216,9 @@ const mark = activeLetter.toUpperCase();
       gap: 8px;
     }
     .exhibitor-head__top a {
-      min-width: auto;
-      padding: 7px 14px;
+      padding: 5px 12px;
       font-size: 20px;
+      line-height: 26px;
     }
     .alphabet {
       flex-wrap: nowrap;

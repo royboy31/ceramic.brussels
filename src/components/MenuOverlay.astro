@@ -39,7 +39,7 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   <div class="menu-panel">
     <div class="menu-top">
       <span aria-hidden="true"></span>
-      <button data-menu-close autofocus aria-label={t('nav.closeMenu')}><span aria-hidden="true">×</span></button>
+      <button data-menu-close aria-label={t('nav.closeMenu')}><span aria-hidden="true">×</span></button>
     </div>
     <nav aria-label={t('nav.menu')} class="menu-stack">
       {
@@ -85,6 +85,12 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   let savedOverflow = '';
 
   const expand = (row: Element, open: boolean) => row.classList.toggle('expanded', open);
+  const panel = dialog?.querySelector<HTMLElement>('.menu-panel');
+  const closeButton = dialog?.querySelector<HTMLButtonElement>('[data-menu-close]');
+  // The panel scrolls up and down only; nothing may shift it sideways.
+  panel?.addEventListener('scroll', () => {
+    if (panel.scrollLeft) panel.scrollLeft = 0;
+  });
 
   // The rows are collapsed sheets, as on the live site: each shows only its
   // top strip, the next sheet lying over the rest. A row grows to its full
@@ -96,11 +102,16 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
       if (sheet) row.style.setProperty('--full', `${sheet.scrollHeight}px`);
     });
 
+  // The rows leave as they came, one after the other: the dialog closes
+  // once the last one is out.
+  const rows = dialog?.querySelectorAll('.menu-row').length ?? 0;
+  dialog?.style.setProperty('--rows', String(rows));
   const close = () => {
     if (!dialog?.open || closing) return;
     closing = true;
     dialog.classList.remove('is-open');
-    window.setTimeout(() => dialog.close(), reduced.matches ? 0 : 450);
+    dialog.classList.add('is-closing');
+    window.setTimeout(() => dialog.close(), reduced.matches ? 0 : 300 + (rows + 1) * 22);
   };
 
   openers.forEach((btn) =>
@@ -110,6 +121,12 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
       savedOverflow = document.documentElement.style.overflow;
       document.documentElement.style.overflow = 'hidden';
       dialog.showModal();
+      // Focus the × without scrolling to it: it is still off to the right
+      // while the rows slide in, and scrolling it into view dragged the whole
+      // panel sideways - the rows landed out of place or all at once,
+      // differently per browser (client feedback, 2026-09-23).
+      panel && (panel.scrollLeft = 0);
+      closeButton?.focus({ preventScroll: true });
       openers.forEach((b) => b.setAttribute('aria-expanded', 'true'));
       measure();
       requestAnimationFrame(() =>
@@ -130,7 +147,7 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   });
   dialog?.addEventListener('close', () => {
     closing = false;
-    dialog.classList.remove('is-open');
+    dialog.classList.remove('is-open', 'is-closing');
     document.documentElement.style.overflow = savedOverflow;
     openers.forEach((b) => b.setAttribute('aria-expanded', 'false'));
     dialog.querySelectorAll('.menu-row').forEach((row) => expand(row, false));
@@ -163,15 +180,19 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
    * slide down. The last row has nothing over it and stays whole. The panel,
    * its slide-in and the top bar are the design's, from design.css.
    */
-  /* The panel comes in as one piece (the design slid every sheet in on its
-     own delay, which with overlapping sheets looked broken up). */
+  /* The "sliding stairs" (client feedback, 2026-09-23): the top bar, then
+     each sheet in turn, slides in from the right, a beat after the one above
+     it, and they leave the same way. Keyframe animations rather than
+     transitions: an animation starts the moment the dialog opens, where a
+     transition needed a frame with the closed state painted first, which
+     Safari and Chrome did not agree on - the menu "just appeared". The
+     panel itself stays put; only its shadow fades in. */
   .menu-panel {
-    transform: translate(101%);
-    transition: transform 0.43s cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform;
-  }
-  :global(.is-open) .menu-panel {
     transform: none;
+    transition: none;
+  }
+  :global(dialog[open]) .menu-panel {
+    animation: menu-shadow-in 0.45s ease both;
   }
   .menu-stack .menu-sheet,
   .menu-panel .menu-top {
@@ -180,9 +201,50 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
       translate 0.22s cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 0.22s;
   }
+  :global(dialog[open]) .menu-top,
+  :global(dialog[open]) .menu-sheet {
+    animation: menu-stair-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc((var(--row, -1) + 1) * 45ms);
+  }
+  :global(dialog.is-closing) .menu-top,
+  :global(dialog.is-closing) .menu-sheet {
+    animation: menu-stair-out 0.3s cubic-bezier(0.55, 0, 0.8, 0.2) both;
+    animation-delay: calc((var(--row, -1) + 1) * 22ms);
+  }
+  :global(dialog.is-closing) .menu-panel {
+    animation: menu-shadow-out 0.3s ease both;
+    animation-delay: calc(var(--rows, 10) * 22ms);
+  }
+  @keyframes menu-stair-in {
+    from {
+      transform: translateX(101%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes menu-stair-out {
+    from {
+      transform: none;
+    }
+    to {
+      transform: translateX(101%);
+    }
+  }
+  @keyframes menu-shadow-in {
+    from {
+      box-shadow: -16px 0 42px #0000;
+    }
+  }
+  @keyframes menu-shadow-out {
+    to {
+      box-shadow: -16px 0 42px #0000;
+    }
+  }
   .menu-row {
-    /* The title sits centred in its 55px strip; only its descenders go under the next sheet. */
-    --strip: 52px;
+    /* The title sits centred in its strip; only its descenders go under the
+       next sheet. 58px since 2026-09-23 ("each tab a tiny bit thicker"). */
+    --strip: 58px;
     /* How far an open row rides up over the one above it (client feedback, 2026-09-15: like the live site). */
     --lift: 24px;
     /* A block, not the design's grid: the sheet keeps its full height and
@@ -214,23 +276,29 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   .menu-row:last-child.expanded {
     height: auto;
   }
-  /* A deeper, more gradual acid band than the design's 2rem fade, closer to
-     the live site's menu (client feedback, 2026-09-16). */
+  /* A gradual acid band, closer to the live site's menu (client feedback,
+     2026-09-16), reaching white higher up since 2026-09-23 ("leave more
+     white in the gradients"). */
   .menu-sheet {
     background: linear-gradient(
       var(--color-acid) 0,
-      var(--color-acid) 0.4rem,
-      color-mix(in srgb, var(--color-acid) 55%, #fff) 1.75rem,
-      #fff 3.75rem
+      var(--color-acid) 0.3rem,
+      color-mix(in srgb, var(--color-acid) 50%, #fff) 1.2rem,
+      #fff 2.6rem
     );
+  }
+  :global(.menu-heading) {
+    min-height: calc(var(--strip) + 3px);
   }
   /* Tighter sub-links and heavier underlines (client feedback, 2026-09-16). */
   .submenu a {
     letter-spacing: -0.03em;
   }
+  /* The underline close under the letters (client feedback, 2026-09-23). */
   @media (hover: hover) {
     .menu-heading > a:hover,
     .submenu a:hover {
+      text-underline-offset: 0.07em;
       text-decoration-thickness: 2px;
     }
     .menu-heading > a:hover {
@@ -240,7 +308,7 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   .menu-heading > a:focus-visible,
   .submenu a:focus-visible {
     text-decoration: underline;
-    text-underline-offset: 0.15em;
+    text-underline-offset: 0.07em;
     text-decoration-thickness: 2px;
   }
   /* Up over the previous sheet, not off to the left (client feedback): the
@@ -273,12 +341,16 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   }
   @media (width<=640px) {
     .menu-row {
-      --strip: 48px;
+      --strip: 52px;
     }
   }
   @media (prefers-reduced-motion: reduce) {
     .menu-row {
       transition: none;
+    }
+    :global(dialog[open]) :is(.menu-panel, .menu-top, .menu-sheet),
+    :global(dialog.is-closing) :is(.menu-panel, .menu-top, .menu-sheet) {
+      animation: none;
     }
   }
 </style>

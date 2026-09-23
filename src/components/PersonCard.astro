@@ -38,7 +38,15 @@ const contactLines = !board && (person.email || person.phone);
 ---
 
 <article class:list={[className, `is-${variant}`]}>
-  {!team && <h2>{person.name}</h2>}
+  {
+    !team && (
+      <h2>
+        {person.name}
+        {/* The nationality, exponent style (client feedback, 2026-09-23). */}
+        {person.countryCode && <sup class="nationality">{person.countryCode}</sup>}
+      </h2>
+    )
+  }
   <div class="row">
     <figure>
       {
@@ -120,6 +128,16 @@ const contactLines = !board && (person.email || person.phone);
     font-size: 36px;
     font-weight: 600;
     line-height: 1.2;
+  }
+  .nationality {
+    margin-left: 0.3em;
+    font-size: 0.55em;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1;
+    vertical-align: top;
+    position: relative;
+    top: 0.12em;
   }
   /* The portrait column: a fixed 197px here, a share of the card where a
      page packs the cards tighter (the advisory board's three a row). */

@@ -313,11 +313,14 @@ const captionOf = (img: any, fallback?: string) => ({
           <div class="people">
             {jury.map((p: any) => (
               <article>
-                <h2>{p.name}</h2>
+                <h2>
+                  {p.name}
+                  {p.countryCode && <sup class="nationality">{p.countryCode}</sup>}
+                </h2>
                 <div>
                   {p.portrait?.asset ? <SanityImage image={p.portrait} sizes="197px" widths={[197, 394, 600]} /> : <div class="placeholder" />}
                   <section>
-                    {p.role && <strong {...styleAttrs(p.roleStyle)}>{p.role}</strong>}
+                    {p.role && <p class="role" {...styleAttrs(p.roleStyle)}>{p.role}</p>}
                     {p.bio && <PortableText value={p.bio} fieldStyle={p.bioStyle} />}
                     {(p.instagram || p.website) && (
                       <p class="links">
@@ -505,13 +508,19 @@ const captionOf = (img: any, fallback?: string) => ({
   .bio :global(p + p) {
     margin-top: 1.3em;
   }
-  /* The instagram pill of the gallery pages. */
-  .laureates .pill {
+  /* The instagram pill, the size of the partners' "website" pill (client
+     feedback, 2026-09-23: "ideal size for the Instagram button"); the
+     jury's pills too. */
+  .laureates .pill,
+  .people .pill {
     flex: none;
-    margin-top: 10px;
-    padding: 4px 15px;
-    font-size: 19px;
+    padding: 1px 13px 0;
+    font-size: 20px;
     line-height: 1.5;
+    letter-spacing: -0.02em;
+  }
+  .laureates .pill {
+    margin-top: 10px;
   }
 
   .awards-page .intro-large {
@@ -592,6 +601,28 @@ const captionOf = (img: any, fallback?: string) => ({
   }
   .people section :global(p) {
     margin-top: 16px;
+  }
+  /* The role as the advisory board sets it (PersonCard): capitals, Bold
+     not Black (client feedback, 2026-09-23). */
+  .people .role {
+    margin-top: 0;
+    white-space: pre-line;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 30px;
+  }
+  /* The nationality after the name, as the artists list sets the country. */
+  .nationality {
+    margin-left: 0.3em;
+    font-size: 0.55em;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1;
+    vertical-align: top;
+    position: relative;
+    top: 0.12em;
   }
   .links {
     gap: 14px;

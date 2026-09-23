@@ -482,11 +482,17 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     background: var(--acid);
     --band-bg: var(--acid);
   }
-  /* The art prize header fades from white at the top into the acid, with a
-     fine black rule under it (client feedback, 2026-09-16). */
+  /* The art prize header fades from white at the top into the acid. The
+     fine black rule under it (2026-09-16) came off again on 2026-09-23. */
   body.acid-page .site-header.acid-wash {
     background: linear-gradient(#fff 0%, var(--acid) 62%);
-    border-bottom: 1px solid var(--ink);
+  }
+
+  /* design.css hovers every pill to white on black; the stroke follows the
+     text colour, so it turned white and drew a white ring round the black
+     pill on a coloured page (client feedback, 2026-09-23). It stays black. */
+  :where(.pill, .section-head a, .subnav a, [data-filter], .home-quicklinks a, .home-image-cta, .home-final-cta, footer a):hover {
+    border-color: #050505 !important;
   }
 
   /* Whole-page black, used by the three locked VIP tabs (Figma VIP frames,
@@ -536,6 +542,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   body.dark-page .section-head a.active:hover {
     color: #050505 !important;
     background-color: #fff !important;
+    border-color: #fff !important;
   }
   body.dark-page .section-head a.active {
     color: #050505;
@@ -645,7 +652,8 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   body[data-scrolled] {
     --band-h1: 44px;
     --band-pill: 20px;
-    --band-pill-pad: 4px 14px;
+    /* Close round the text once scrolled (client feedback, 2026-09-23). */
+    --band-pill-pad: 1px 9px;
     --band-pad-top: 14px;
     --band-pad-bottom: 12px;
   }
@@ -667,7 +675,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     body[data-scrolled] {
       --band-h1: 30px;
       --band-pill: 16px;
-      --band-pill-pad: 3px 10px;
+      --band-pill-pad: 1px 8px;
       --band-pad-top: 10px;
       --band-pad-bottom: 8px;
     }
@@ -681,7 +689,15 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     transition: top 0.28s var(--motion-ease);
     background: var(--band-bg, #fff);
   }
-  .title-band::after {
+  /* The fade under the pinned bands: the page's ground (white, acid or
+     black) running out to transparent, so text scrolling under them has no
+     hard edge. Under the title band where a page has one, under the header
+     where it does not. It shows once the page is scrolled - at rest it would
+     lie over the top of the content. It used to run on a scroll timeline,
+     which Firefox and older Safari do not have, so some people never saw it
+     (client feedback, 2026-09-23); `data-scrolled` works everywhere. */
+  .title-band::after,
+  .site-header::after {
     content: '';
     position: absolute;
     left: 0;
@@ -690,17 +706,12 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     height: 28px;
     background: linear-gradient(var(--band-bg, #fff), transparent);
     pointer-events: none;
-    /* Only once the page has scrolled: at rest the fade would lie over the
-       top of the content. Without scroll timelines it simply never shows. */
     opacity: 0;
-    animation: title-band-fade linear both;
-    animation-timeline: scroll(root);
-    animation-range: 0 120px;
+    transition: opacity 0.28s var(--motion-ease);
   }
-  @keyframes title-band-fade {
-    to {
-      opacity: 1;
-    }
+  body[data-scrolled] .title-band::after,
+  body[data-scrolled]:not(:has(.title-band)) .site-header::after {
+    opacity: 1;
   }
   body.acid-page footer.acid-wash {
     background: linear-gradient(var(--acid) 0%, #fff 55%);

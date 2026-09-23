@@ -1,17 +1,18 @@
 ---
 import Base from '../../layouts/Base.astro';
 import SanityImage from '../../components/SanityImage.astro';
+import HubNav from '../../components/HubNav.astro';
 import PortableText from '../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { useTranslations, localePath } from '../../lib/i18n';
+import { useTranslations } from '../../lib/i18n';
 import { getGuestOfHonour, getHubPages } from '../../lib/queries';
-import { HUBS, hubTabPath, hubTabHref , hubAltPaths } from '../../lib/hubs';
+import { hubTabPath, hubAltPaths } from '../../lib/hubs';
 import { urlFor } from '../../sanity/image';
 import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * The current edition's guest of honour, as the design's guest-of-honour
- * page draws it: the `.subnav` band (title, about / interview), the portrait
+ * page draws it: the title band (HubNav: about / interview), the portrait
  * on four columns beside the intro (name and "°1983, France" on a rule, the
  * lead, the biography in two columns), two works with their captions, the
  * "sculptural practice" section on the right eight columns, and the film
@@ -21,7 +22,6 @@ import { styleAttrs } from '../../lib/textStyle';
  * sculptural practice), `works`, `video`, `interview`.
  */
 const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
-const hub = HUBS['guest-of-honour'];
 const t = useTranslations(lang);
 
 const [data, pages] = await Promise.all([getGuestOfHonour(lang), getHubPages(lang, 'guest-of-honour')]);
@@ -41,10 +41,6 @@ const video = artist?.video?.url ? artist.video : null;
 const poster = video?.poster?.asset ? video.poster : null;
 const posterSrc = poster ? urlFor(poster).width(1814).height(1208).fit('crop').auto('format').quality(80).url() : null;
 
-const tabs = hub.tabs.map((x) => {
-  const page = pages.find((p: any) => p?.slugs?.en === x.slug);
-  return { slug: x.slug, label: page?.tabLabel ?? t(x.label), href: localePath(lang, hubTabHref('guest-of-honour', x, lang)) };
-});
 /** "Artist, *Title*, year" under a work. */
 const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workTitle ?? work.title, img.year ?? work.year].filter(Boolean);
 ---
@@ -60,18 +56,10 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
   editId={artist?._id}
   editType={artist?._type}
 >
-  <header class="subnav page-grid title-band">
-    <h1>{t(hub.title)}</h1>
-    <nav>
-      {
-        tabs.map((x) => (
-          <a class:list={[{ active: x.slug === tab }]} href={x.href} aria-current={x.slug === tab ? 'page' : undefined}>
-            {x.label}
-          </a>
-        ))
-      }
-    </nav>
-  </header>
+  {/* The shared title band, so its pills and its shrink on scroll are the
+      other hubs' (client feedback, 2026-09-23: they were bigger here, and
+      the band did not shrink). */}
+  <HubNav lang={lang} route="guest-of-honour" active={tab} pages={pages} />
 
   {
     !artist ? (
@@ -144,7 +132,10 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
 
         {/* Up to five works in a row that runs off the right edge; a click on
             the right half slides it one picture on, on the left half one back
-            (client feedback, 2026-09-16). Without JS it scrolls sideways. */}
+            (client feedback, 2026-09-16). With a mouse it moves by clicking
+            only, not by scrolling (2026-09-23); on a touch screen, or without
+            JS, it scrolls sideways. The arrow shows once the row has more
+            than fits, which with two works it does not. */}
         {tab !== 'interview' && works.length > 0 && (
           <section class="gallery col-span-full" data-gallery>
             <div class="gallery-track" data-gallery-track>
@@ -155,7 +146,7 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
                 </figure>
               ))}
             </div>
-            {works.length > 2 && <span class="gallery-arrow" data-gallery-arrow aria-hidden="true" hidden />}
+            {works.length > 1 && <span class="gallery-arrow" data-gallery-arrow aria-hidden="true" hidden />}
           </section>
         )}
 
@@ -184,32 +175,6 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
 
 <style>
   /* From the design's guest-of-honour.css. */
-  .subnav {
-    align-items: center;
-    height: 115px;
-  }
-  .subnav h1 {
-    text-transform: lowercase;
-    letter-spacing: -0.03em;
-    grid-column: span 7;
-    font-size: 70px;
-    font-weight: 600;
-    line-height: 65px;
-  }
-  .subnav nav {
-    grid-column: span 5;
-    justify-content: flex-end;
-    gap: 20px;
-    display: flex;
-  }
-  .subnav a {
-    border: 1px solid;
-    padding: 4px 20px;
-    font-size: 28px;
-  }
-  .subnav a.active {
-    background: var(--color-acid);
-  }
   .guest-page {
     padding-top: 22px;
     padding-bottom: 100px;
@@ -226,7 +191,7 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     margin: 0;
   }
   .portrait-figure figcaption {
-    margin-top: 3px;
+    margin-top: 8px;
     font-size: 16px;
     line-height: 20px;
     text-align: left;
@@ -298,9 +263,10 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     /* Runs out to the window's right edge, so the next picture peeks in. */
     margin-right: calc(-1 * var(--gutter));
   }
+  /* A narrow gap between the works (client feedback, 2026-09-23). */
   .gallery-track {
     display: flex;
-    gap: 30px;
+    gap: 16px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
@@ -309,7 +275,7 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     display: none;
   }
   .gallery figure {
-    flex: 0 0 calc((100% - var(--gutter) - 30px) / 2.25);
+    flex: 0 0 calc((100% - var(--gutter) - 16px) / 2.25);
     margin: 0;
     scroll-snap-align: start;
   }
@@ -324,15 +290,19 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     z-index: 3;
     translate: -50% -50%;
     pointer-events: none;
-    font-size: clamp(56px, 5.5vw, 84px);
+    /* Smaller than it was (client feedback, 2026-09-23), as in Slideshow. */
+    font-size: clamp(40px, 3.8vw, 58px);
     line-height: 1;
   }
   .gallery.arrow-cursor .gallery-track {
     cursor: none;
+    overflow-x: hidden;
   }
+  /* Captions a little further from the picture, as everywhere (client
+     feedback, 2026-09-23). */
   .gallery figcaption {
     text-align: center;
-    margin-top: 3px;
+    margin-top: 8px;
     font-size: 16px;
     line-height: 20px;
   }
@@ -369,23 +339,6 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     padding-top: 40px;
   }
   @media (width<=700px) {
-    .subnav {
-      height: auto;
-      padding-block: 16px;
-    }
-    .subnav h1 {
-      grid-column: 1 / -1;
-      font-size: 42px;
-      line-height: 1;
-    }
-    .subnav nav {
-      grid-column: 1 / -1;
-      justify-content: flex-start;
-      margin-top: 15px;
-    }
-    .subnav a {
-      font-size: 20px;
-    }
     :global(.portrait),
     .portrait-figure,
     .intro,
@@ -448,6 +401,8 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     const track = gallery.querySelector<HTMLElement>('[data-gallery-track]');
     const arrow = gallery.querySelector<HTMLElement>('[data-gallery-arrow]');
     if (!track || !arrow || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    // Nothing to slide to: the works all fit, so no arrow and no clicks.
+    if (track.scrollWidth <= track.clientWidth + 2) return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const items = [...track.children] as HTMLElement[];
     const step = () => (items[1] ? items[1].offsetLeft - items[0].offsetLeft : track.clientWidth);

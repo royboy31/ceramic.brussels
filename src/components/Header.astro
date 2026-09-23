@@ -4,9 +4,11 @@ import { localePath, useTranslations } from '../lib/i18n';
 import { urlFor } from '../sanity/image';
 
 /**
- * Site header, as the 2026-09-14 build draws it: the dates mark and the
- * language switcher on the left, the wordmark centred over the row, the
- * main partner's lockup and the menu button on the right. Markup and
+ * Site header, as the 2026-09-14 build draws it: the dates mark on the
+ * left, the wordmark centred over the row, the main partner's lockup and
+ * the menu button on the right. The language switcher is a drop-down to
+ * the right of the menu button since the client feedback of 2026-09-23:
+ * the current language, with the other two under it when opened. Markup and
  * classes are the design's (html pages); the rules live in
  * src/styles/design.css. The lockups are brand artwork; the dates mark
  * comes from the current edition when it has one, and the partner lockup
@@ -32,6 +34,8 @@ const datesSrc = datesMark?.asset
 const home = localePath(lang);
 const partnerName = mainPartner?.name ?? 'Puilaetco';
 const Lockup = mainPartner?.url ? 'a' : 'div';
+const current = LOCALES.find((l) => l.id === lang)!;
+const others = LOCALES.filter((l) => l.id !== lang);
 ---
 
 <header class="site-header acid-wash">
@@ -40,18 +44,6 @@ const Lockup = mainPartner?.url ? 'a' : 'div';
       <a href={home} aria-label={`${siteName} homepage`} class="site-date">
         <img src={datesSrc} alt={datesMark?.alt ?? ''} width="252" height="61" />
       </a>
-      <nav aria-label={t('common.language')} class="site-languages">
-        {
-          LOCALES.map((l, i) => (
-            <>
-              {i > 0 && ' / '}
-              <a href={localePath(l.id, altPaths?.[l.id] ?? path)} hreflang={l.id} aria-current={l.id === lang ? 'true' : undefined}>
-                {l.id.toUpperCase()}
-              </a>
-            </>
-          ))
-        }
-      </nav>
     </div>
     <a href={home} class="site-wordmark" aria-label={`${siteName} homepage`}>
       <img src="/assets/wordmark.svg" alt={siteName} width="144" height="75" />
@@ -82,6 +74,120 @@ const Lockup = mainPartner?.url ? 'a' : 'div';
       >
         <img src="/assets/menu.svg" alt="" width="56" height="37" />
       </button>
+      <div class="site-lang" data-lang>
+        <button
+          type="button"
+          class="site-lang__current"
+          aria-expanded="false"
+          aria-controls="site-lang-list"
+          aria-label={`${t('common.language')}: ${current.title}`}
+          data-lang-toggle
+        >
+          {current.id.toUpperCase()}<span aria-hidden="true" class="site-lang__caret">▾</span>
+        </button>
+        <ul id="site-lang-list" class="site-lang__list" hidden>
+          {
+            others.map((l) => (
+              <li>
+                <a href={localePath(l.id, altPaths?.[l.id] ?? path)} hreflang={l.id} lang={l.id} aria-label={l.title}>
+                  {l.id.toUpperCase()}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
     </div>
   </div>
 </header>
+
+<script>
+  // The language drop-down: opens on its button, closes on a choice, on
+  // Escape, or on a click anywhere else.
+  document.querySelectorAll<HTMLElement>('[data-lang]').forEach((box) => {
+    const toggle = box.querySelector<HTMLButtonElement>('[data-lang-toggle]');
+    const list = box.querySelector<HTMLElement>('.site-lang__list');
+    if (!toggle || !list) return;
+    const set = (open: boolean) => {
+      list.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+    };
+    toggle.addEventListener('click', () => set(list.hidden));
+    document.addEventListener('click', (e) => {
+      if (!box.contains(e.target as Node)) set(false);
+    });
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !list.hidden) {
+        set(false);
+        toggle.focus();
+      }
+    });
+    box.addEventListener('focusout', (e) => {
+      if (!box.contains(e.relatedTarget as Node)) set(false);
+    });
+  });
+</script>
+
+<style>
+  /* The drop-down in the header's type (the old "EN / FR / NL" line: 22px,
+     tight tracking), its list hanging under it on the page's ground. */
+  .site-lang {
+    position: relative;
+    letter-spacing: -0.05em;
+    font-size: 22px;
+    line-height: 35px;
+  }
+  .site-lang__current {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: opacity 0.18s;
+  }
+  .site-lang__caret {
+    font-size: 0.6em;
+    transition: transform 0.18s;
+  }
+  .site-lang__current[aria-expanded='true'] .site-lang__caret {
+    transform: rotate(180deg);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .site-lang__current:hover {
+      opacity: 0.65;
+    }
+  }
+  .site-lang__list {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: -11px;
+    z-index: 5;
+    min-width: calc(100% + 22px);
+    padding: 4px 0;
+    border: 1px solid currentColor;
+    background: var(--ground);
+  }
+  .site-lang__list a {
+    display: block;
+    padding: 2px 11px;
+  }
+  .site-lang__list a:hover,
+  .site-lang__list a:focus-visible {
+    background: var(--color-acid);
+    color: #050505;
+  }
+  :global(body[data-scrolled]) .site-lang {
+    font-size: 18px;
+    line-height: 28px;
+  }
+  @media (width<=1000px) {
+    .site-lang {
+      font-size: 18px;
+    }
+  }
+  @media (width<=640px) {
+    .site-lang {
+      font-size: 15px;
+      line-height: 24px;
+    }
+  }
+</style>
