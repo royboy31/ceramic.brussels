@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Badge, Box, Button, Card, Dialog, Flex, Grid, Heading, Spinner, Stack, Text, TextInput } from '@sanity/ui';
+import { Badge, Box, Button, Card, Checkbox, Dialog, Flex, Grid, Heading, Spinner, Stack, Text, TextInput } from '@sanity/ui';
 // @sanity/ui v4 splits its entry points; the toast API is its own subpath.
 import { useToast } from '@sanity/ui/toast';
 import { useClient } from 'sanity';
@@ -61,7 +61,7 @@ type Mail = { sent: true; to: string } | { sent: false; to: string; reason: 'unc
 type Coded = { guest: Guest; code: string | null; mail?: Mail };
 
 function mailLine(mail: Mail | undefined): string {
-  if (!mail) return 'Not emailed.';
+  if (!mail) return 'Not emailed; "Email code" sends it when you are ready.';
   if (mail.sent) return `Emailed to ${mail.to}.`;
   if (mail.reason === 'unconfigured') return 'Not emailed: the site has no email service connected (BREVO_API_KEY). Send it yourself.';
   if (mail.reason === 'dry-run') return 'Not emailed: this preview only logs email. Send it yourself.';
@@ -401,10 +401,10 @@ export function VipTool() {
         <Card padding={3} radius={2} tone="primary" border>
           <Text size={1}>
             A request from the site's "not a VIP yet?" form waits under Requests until you approve or deny it; its code
-            opens nothing before that. Approving a guest, adding one or giving them a new code shows the code and emails
-            it to them (the text is Site settings → VIP). An import emails nobody: the invitation mailing is yours, from
-            the export, and "Send by email" mails one guest's code at a time. A spreadsheet needs the columns first name,
-            last name and email (institution and function are optional).
+            opens nothing before that. Approving a guest or giving them a new code shows the code and emails it to them;
+            adding one asks first (the text is Site settings → VIP). An import emails nobody: the invitation mailing is
+            yours, from the export, and "Email code" on a row sends one guest's code at a time. A spreadsheet needs the
+            columns first name, last name and email (institution and function are optional).
           </Text>
         </Card>
 
@@ -474,6 +474,7 @@ export function VipTool() {
                     {g.status === 'approved' && !g.revoked && (
                       <>
                         <Button text="Show code" mode="ghost" fontSize={1} disabled={busy} onClick={() => void showCode(g)} />
+                        <Button text="Email code" mode="ghost" fontSize={1} disabled={busy} onClick={() => void mailCode(g)} />
                         <Button text="New code" mode="ghost" fontSize={1} disabled={busy} onClick={() => reissue(g)} />
                         <Button
                           text="Revoke"
@@ -514,11 +515,11 @@ export function VipTool() {
           guest={editing === 'new' ? null : editing}
           busy={busy}
           onClose={() => setEditing(null)}
-          onSubmit={(fields) => {
+          onSubmit={(fields, mail) => {
             const target = editing;
             setEditing(null);
             if (target === 'new') {
-              void run(() => api<Coded>({ action: 'add', ...fields })).then((result) => {
+              void run(() => api<Coded>({ action: 'add', ...fields, mail })).then((result) => {
                 if (result?.code) setShown({ guest: result.guest, code: result.code, note: `Added. ${mailLine(result.mail)}`, mail: result.mail });
               });
             } else {
@@ -579,8 +580,10 @@ function GuestDialog({
   guest: Guest | null;
   busy: boolean;
   onClose: () => void;
-  onSubmit: (fields: Fields) => void;
+  /** `mail` is the "email them their code" choice, only asked when adding. */
+  onSubmit: (fields: Fields, mail: boolean) => void;
 }) {
+  const [mail, setMail] = useState(true);
   const [fields, setFields] = useState<Fields>({
     firstName: guest?.firstName ?? '',
     lastName: guest?.lastName ?? '',
@@ -622,12 +625,21 @@ function GuestDialog({
             {field('function', 'Function')}
           </Grid>
           {!guest && (
-            <Text size={1} muted>
-              Added as approved: their code works straight away, is shown next and is emailed to them.
-            </Text>
+            <Stack gap={3}>
+              <Flex align="center" gap={2}>
+                <Checkbox id="vip-guest-mail" checked={mail} onChange={(event) => setMail(event.currentTarget.checked)} />
+                <Text size={1} as="label" htmlFor="vip-guest-mail">
+                  Email them their code now
+                </Text>
+              </Flex>
+              <Text size={1} muted>
+                Added as approved: their code works straight away and is shown next. Unticked, nothing is sent; "Email code" on
+                their row sends it later.
+              </Text>
+            </Stack>
           )}
           <Flex gap={2}>
-            <Button text={guest ? 'Save' : 'Add guest'} tone="primary" disabled={busy || !ready} onClick={() => onSubmit(fields)} />
+            <Button text={guest ? 'Save' : 'Add guest'} tone="primary" disabled={busy || !ready} onClick={() => onSubmit(fields, mail)} />
             <Button text="Cancel" mode="ghost" onClick={onClose} />
           </Flex>
         </Stack>

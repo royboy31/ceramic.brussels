@@ -205,10 +205,11 @@ above; the tool only edits rows.
   `src/server/vipGuests.ts` is the script's, on WebCrypto; checked against
   the test guest's code. Change one and change both.
 - **Approving shows the code and emails it** (since 2026-09-23,
-  `src/server/vipMail.ts`), as does adding a guest, giving them a new code
-  or renaming them so the code moved; the tool says whether the email went
-  ("Emailed to …" or "Not emailed: … send it yourself") and has "Send by
-  email" on any shown code. The text is Site settings → VIP → "Code
+  `src/server/vipMail.ts`), as does giving a guest a new code or renaming
+  them so the code moved; adding one by hand asks first ("Email them their
+  code now", ticked by default). The tool says whether the email went
+  ("Emailed to …" or "Not emailed: … send it yourself"), and "Email code"
+  on an approved row, or "Send by email" on a shown code, sends it again. The text is Site settings → VIP → "Code
   email", with `{firstName}`, `{lastName}`, `{code}`, `{link}` (the access
   page on `PUBLIC_SITE_URL`) and `{contact}` filled in, stock English when
   empty. An import mails nobody: the invitation mailing of ~3,000 guests is

@@ -116,7 +116,9 @@ export const POST: APIRoute = async ({ request }) => {
       if (!isEmail(input.email)) return fail(400, 'A valid email address is required.');
       const guest = await createGuest(db, pepper, input, 'approved', admin.name);
       if (!guest) return fail(409, 'A guest with that email is already in the list.');
-      return json(200, { ok: true, guest: view(guest), ...(await withMail(guest)) });
+      // The tool's "email them their code now" box; unticked, the code is only shown.
+      const send = body.mail !== false;
+      return json(200, { ok: true, guest: view(guest), ...(send ? await withMail(guest) : { code: await codeFor(pepper, guest) }) });
     }
 
     case 'update': {

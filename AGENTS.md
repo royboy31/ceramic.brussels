@@ -634,8 +634,9 @@ questions.
   (the same account sends for his other sites; the plan is metered per
   month). A form's "Sender address" in Site settings overrides it but must
   stay on that domain, or Brevo refuses the message. The Studio's VIP
-  guests tool mails a guest their code when they are added, approved or
-  given a new code, and has "Send by email" for the rest; the text is Site
+  guests tool mails a guest their code when they are approved or given a
+  new code, asks when one is added by hand, and has "Email code" on every
+  approved row for the rest; the text is Site
   settings → VIP → "Code email", stock English when empty
   (`src/server/vipMail.ts`). An import mails nobody.
 - **Preview renders read the page to the end inside the store.** Astro
