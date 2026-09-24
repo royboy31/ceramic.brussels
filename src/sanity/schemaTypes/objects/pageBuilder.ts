@@ -12,6 +12,7 @@ import { ImageIcon } from '@sanity/icons/Image';
 import { ImagesIcon } from '@sanity/icons/Images';
 import { LinkIcon } from '@sanity/icons/Link';
 import { PlayIcon } from '@sanity/icons/Play';
+import { SplitVerticalIcon } from '@sanity/icons/SplitVertical';
 import { StackCompactIcon } from '@sanity/icons/StackCompact';
 import { StarIcon } from '@sanity/icons/Star';
 import { TextIcon } from '@sanity/icons/Text';
@@ -402,6 +403,46 @@ export const headingSection = defineType({
   },
 });
 
+/**
+ * Empty vertical space between two blocks. The one thing an editor could
+ * not do before: the page sets every block's own spacing, so the only way
+ * to push a list away from a lead was blank lines, which the page collapses
+ * (Félicie, 2026-09-24, the programme tab). Three fixed sizes rather than a
+ * number, so the rhythm stays the design's; the value name is in
+ * stegaFilter's PLAIN_KEYS already (`size`).
+ */
+export const SPACER_SIZES = [
+  { title: 'Small', value: 'small' },
+  { title: 'Medium', value: 'medium' },
+  { title: 'Large', value: 'large' },
+] as const;
+
+export const spacerSection = defineType({
+  name: 'spacerSection',
+  title: 'Spacer',
+  type: 'object',
+  icon: SplitVerticalIcon,
+  fields: [
+    defineField({
+      name: 'size',
+      title: 'Height',
+      type: 'string',
+      options: { list: [...SPACER_SIZES], layout: 'radio', direction: 'horizontal' },
+      initialValue: 'medium',
+      description: 'Empty space between the block above and the block below. Small ≈ a line of text, medium ≈ a paragraph, large ≈ a section.',
+    }),
+    anchorField(),
+    hiddenField(),
+  ],
+  preview: {
+    select: { size: 'size', hidden: 'hidden' },
+    prepare: ({ size, hidden }) => ({
+      title: 'Spacer',
+      subtitle: sectionSubtitle('Spacer', hidden, `· ${SPACER_SIZES.find((s) => s.value === size)?.title.toLowerCase() ?? 'medium'}`),
+    }),
+  },
+});
+
 /** Questions and answers, each answer folding open. */
 export const faqSection = defineType({
   name: 'faqSection',
@@ -639,6 +680,7 @@ export const PAGE_SECTION_TYPES = [
   'bannerSection',
   'linksSection',
   'headingSection',
+  'spacerSection',
   'peopleSection',
   'partnersSection',
   'keyFiguresSection',
@@ -658,6 +700,7 @@ export const ARTICLE_SECTION_TYPES = [
   'quoteSection',
   'linksSection',
   'headingSection',
+  'spacerSection',
   'embedSection',
 ] as const;
 
@@ -681,7 +724,7 @@ export function sectionsField(
   const { name = 'sections', title = 'Sections', group, description, hidden, types = PAGE_SECTION_TYPES } = overrides;
   const has = (t: string) => types.includes(t);
   const groups = [
-    { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection'] },
+    { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection', 'spacerSection'] },
     { name: 'media', title: 'Images & video', of: ['gallerySection', 'slideshowSection', 'videoSection', 'spotlight'] },
     { name: 'action', title: 'Links & banners', of: ['bannerSection', 'linksSection', 'embedSection', 'applicationFormSection'] },
     { name: 'lists', title: 'From other content', of: ['peopleSection', 'partnersSection', 'keyFiguresSection', 'newsSection'] },
@@ -723,6 +766,7 @@ export const pageBuilderTypes = [
   partnersSection,
   keyFiguresSection,
   headingSection,
+  spacerSection,
   faqSection,
   newsSection,
   linksSection,

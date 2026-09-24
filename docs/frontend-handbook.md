@@ -218,6 +218,7 @@ half-width blocks side by side); everything else is one block, one component.
 | Banner | `bannerSection` | `sections/Banner.astro` | `style`, `text`, `link`, `image` |
 | Buttons | `linksSection` | `sections/Links.astro` | `variant`, `links[]` |
 | Section title | `headingSection` | `sections/Heading.astro` | `title` |
+| Spacer | `spacerSection` | `sections/Spacer.astro` | `size` (`small` / `medium` / `large`) - empty space, the editor's own gap |
 | People | `peopleSection` | `sections/People.astro` | `group`, `heading`, `people[]` (resolved) |
 | Partners | `partnersSection` | `sections/Partners.astro` | `display` (`logos` / `list`), `tier`, `heading`, `body`, `partners[]` (resolved: `name`, `logo`, `url`, `description`) |
 | Key figures | `keyFiguresSection` | `sections/KeyFigures.astro` | `image`, `link`, `edition.keyFigures` (resolved) |

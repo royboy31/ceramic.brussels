@@ -1,0 +1,30 @@
+---
+/**
+ * Empty vertical space between two blocks - the editor's own gap, where every
+ * other distance on the page is fixed in code. Three sizes, scaled down on
+ * phones with everything else. Nothing to read, so it is hidden from
+ * assistive tech; the anchor still works as a scroll target.
+ */
+interface Props {
+  section: any;
+}
+
+const { section } = Astro.props;
+const size = ['small', 'medium', 'large'].includes(section.size) ? section.size : 'medium';
+---
+
+<div class:list={['spacer', `spacer--${size}`]} id={section.anchor || undefined} aria-hidden="true"></div>
+
+<style>
+  /* Small ≈ a line of the body text, medium ≈ a paragraph, large ≈ the
+     ~100px the design leaves between a lead and the list under it. */
+  .spacer--small {
+    height: clamp(20px, 3vw, 36px);
+  }
+  .spacer--medium {
+    height: clamp(40px, 6vw, 72px);
+  }
+  .spacer--large {
+    height: clamp(64px, 10vw, 128px);
+  }
+</style>

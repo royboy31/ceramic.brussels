@@ -239,6 +239,9 @@ const SECTIONS = `sections[hidden != true]{
     ${styled('heading')},
     "items": *[_type == "newsItem" && publishedAt <= now()] | order(publishedAt desc)[0...6] ${NEWS_CARD}
   },
+  _type == "spacerSection" => {
+    size
+  },
   _type == "faqSection" => {
     ${styled('heading')},
     "items": items[]{ _key, category, ${styled('question')}, ${styled('answer')} }

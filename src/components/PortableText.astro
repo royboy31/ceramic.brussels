@@ -66,7 +66,9 @@ function renderSpans(block: any): string {
 
   return (block.children ?? [])
     .map((span: any) => {
-      let html = escapeHtml(span.text ?? '');
+      // Shift+Enter in the editor is a line break inside the paragraph -
+      // "start the next sentence on a new line" without a paragraph's gap.
+      let html = escapeHtml(span.text ?? '').replace(/\n/g, '<br>');
 
       for (const mark of span.marks ?? []) {
         const tag = MARK_TAGS[mark];
