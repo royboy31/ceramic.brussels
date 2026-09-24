@@ -523,8 +523,9 @@ const logoHeight = (p: any) => {
   .lead {
     max-width: 62ch;
     margin-top: 24px;
-    font-size: 24px;
-    line-height: 1.25;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
   .lead-row {
     flex-wrap: wrap;
@@ -612,8 +613,9 @@ const logoHeight = (p: any) => {
   }
   .story-card p {
     margin: 10px 0 20px;
-    font-size: 24px;
-    line-height: 1.25;
+    font-size: var(--body-size);
+    letter-spacing: var(--body-ls);
+    line-height: var(--body-lh);
   }
   .collector-list article {
     grid-template-columns: 1fr 1fr;
@@ -634,8 +636,9 @@ const logoHeight = (p: any) => {
   }
   .collector-list p:not(.dated) {
     margin: 22px 0 28px;
-    font-size: 24px;
-    line-height: 1.25;
+    font-size: var(--body-size);
+    letter-spacing: var(--body-ls);
+    line-height: var(--body-lh);
   }
 
   /* press: the clippings */

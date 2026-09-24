@@ -133,16 +133,7 @@ for (const letter of letters) {
                             {(ex?.soloShow || ex?.booth) && (
                               <span class="tail">
                                 {ex.soloShow && (
-                                  <span class="solo">
-                                    {t('exhibitors.soloShow')
-                                      .split(/\s+/)
-                                      .map((w: string, i: number) => (
-                                        <>
-                                          {i > 0 && <br />}
-                                          {w}
-                                        </>
-                                      ))}
-                                  </span>
+                                  <img class="solo" src="/assets/exhibitors/solo-show.png" alt={t('exhibitors.soloShow')} width="30" height="30" />
                                 )}
                                 {ex.booth && <span class="booth">{ex.booth} ●</span>}
                               </span>
@@ -314,18 +305,11 @@ for (const letter of letters) {
   /* The round black "solo show" badge of the exhibitor cards, at list size:
      30px across - no taller than the name, so the row keeps its pitch - with
      the two words still readable. */
+  /* The designer's solo show disc (2026-09-24). */
   .solo {
-    color: #fff;
-    text-align: center;
-    letter-spacing: -0.02em;
-    border-radius: 50%;
-    place-items: center;
+    flex: none;
     width: 30px;
     height: 30px;
-    font-size: 10.5px;
-    line-height: 0.85;
-    background: #000;
-    display: grid;
   }
   .empty {
     margin: 40px var(--gutter) 0;

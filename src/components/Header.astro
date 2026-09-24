@@ -179,13 +179,15 @@ const others = LOCALES.filter((l) => l.id !== lang);
     right: -11px;
     z-index: 5;
     min-width: calc(100% + 22px);
-    padding: 4px 0;
+    /* No padding: the acid hover runs right up to the stroke, above FR and
+       below NL (client feedback, 2026-09-24). The rows carry the room. */
+    padding: 0;
     border: 1px solid currentColor;
     background: var(--ground);
   }
   .site-lang__list a {
     display: block;
-    padding: 2px 11px;
+    padding: 3px 11px;
   }
   .site-lang__list a:hover,
   .site-lang__list a:focus-visible {

@@ -129,10 +129,11 @@ const contactLines = !board && (person.email || person.phone);
     font-weight: 600;
     line-height: 1.2;
   }
+  /* Bold, as on the jury (client feedback, 2026-09-24). */
   .nationality {
     margin-left: 0.3em;
     font-size: 0.55em;
-    font-weight: 400;
+    font-weight: 600;
     letter-spacing: 0;
     line-height: 1;
     vertical-align: top;
@@ -171,9 +172,9 @@ const contactLines = !board && (person.email || person.phone);
     letter-spacing: -0.02em;
   }
   section {
-    font-size: 24px;
-    line-height: 1.25;
-    letter-spacing: -0.03em;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
   /* Two capital lines ("PRESIDENT / LES AMIS DU MUSÉE…"): an editor's line
      break in the role is kept. */
@@ -193,9 +194,9 @@ const contactLines = !board && (person.email || person.phone);
   /* The biography, at the card's full width under the portrait and the role. */
   .bio {
     margin-top: 26px;
-    font-size: 24px;
-    line-height: 1.25;
-    letter-spacing: -0.03em;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
   /* The small "website ↗" pill of the design, not the 24px site pill. */
   .links {

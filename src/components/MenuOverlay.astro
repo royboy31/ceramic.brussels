@@ -279,13 +279,21 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   /* A gradual acid band, closer to the live site's menu (client feedback,
      2026-09-16), reaching white higher up since 2026-09-23 ("leave more
      white in the gradients"). */
+  /* 2026-09-24: "not enough yellow" - back towards acid, about 70/30 over
+     the strip: solid for the first third, still mostly acid at two thirds,
+     white only by the foot of the strip. */
+  /* The 1px acid edge above each sheet closes the hairline seam between two
+     sheets that showed the page through in some browsers and zoom levels
+     (client video, 2026-09-24): a sheet's top is acid, so the edge is
+     invisible where the sheets meet cleanly. */
   .menu-sheet {
     background: linear-gradient(
       var(--color-acid) 0,
-      var(--color-acid) 0.3rem,
-      color-mix(in srgb, var(--color-acid) 50%, #fff) 1.2rem,
-      #fff 2.6rem
+      var(--color-acid) 1.1rem,
+      color-mix(in srgb, var(--color-acid) 70%, #fff) 2.2rem,
+      #fff 3.6rem
     );
+    box-shadow: 0 -1px 0 var(--color-acid);
   }
   :global(.menu-heading) {
     min-height: calc(var(--strip) + 3px);
@@ -315,7 +323,9 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
      design's -16px nudge and its acid edge are dropped. */
   .menu-row.expanded .menu-sheet {
     translate: 0 calc(-1 * var(--lift));
-    box-shadow: 0 -6px 18px #00000014;
+    box-shadow:
+      0 -1px 0 var(--color-acid),
+      0 -6px 18px #00000014;
   }
   /* A row without sub-links is the design's taller strip, which put its
      title under the next sheet; only the last row, with nothing over it,
@@ -330,7 +340,7 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
   }
   .menu-row.no-links.expanded .menu-sheet {
     translate: 0;
-    box-shadow: none;
+    box-shadow: 0 -1px 0 var(--color-acid);
   }
   /* Nothing above the first row to ride over: it only grows. */
   .menu-row:first-child.expanded {

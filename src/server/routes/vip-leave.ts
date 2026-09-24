@@ -4,8 +4,16 @@ import { localePath } from '../../lib/i18n';
 import { hubTabPath } from '../../lib/hubs';
 import { vipEnv } from '../vip';
 import { clearVipCookie, deleteVipSession } from '../vipSession';
+import { clearPreviewCookie } from '../preview';
 
-/** POST /api/vip/leave - ends the VIP session and returns to the VIP page. */
+/**
+ * POST /api/vip/leave - ends the VIP session and returns to the VIP page.
+ *
+ * It drops the Studio's preview cookie as well (request #27): the gate lets
+ * that cookie in on its own, so an editor who had ever pressed Preview could
+ * "leave" and still open every locked tab. Preview in the Studio issues a
+ * fresh one the next time it is used.
+ */
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
@@ -13,10 +21,10 @@ export const POST: APIRoute = async ({ request }) => {
   const lang = (LOCALE_IDS as string[]).includes(String(data?.get('lang'))) ? (String(data?.get('lang')) as LocaleId) : DEFAULT_LOCALE;
   const env = await vipEnv();
   if (env) await deleteVipSession(env.VIP_SESSIONS, request).catch(() => undefined);
-  return new Response(null, {
-    status: 303,
-    headers: { location: localePath(lang, hubTabPath('vip', undefined, lang)), 'set-cookie': clearVipCookie(), 'cache-control': 'no-store' },
-  });
+  const headers = new Headers({ location: localePath(lang, hubTabPath('vip', undefined, lang)), 'cache-control': 'no-store' });
+  headers.append('set-cookie', clearVipCookie());
+  headers.append('set-cookie', clearPreviewCookie());
+  return new Response(null, { status: 303, headers });
 };
 
 export const GET: APIRoute = () => new Response(null, { status: 405 });

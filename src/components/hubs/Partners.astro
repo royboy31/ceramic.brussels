@@ -10,6 +10,7 @@ import { useTranslations } from '../../lib/i18n';
 import { getHubPages, getPartners } from '../../lib/queries';
 import { HUBS, PARTNER_TABS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
 import { styleAttrs } from '../../lib/textStyle';
+import PartnerName from '../PartnerName.astro';
 
 /**
  * The partners hub, as the design's partners pages draw it. The content
@@ -17,13 +18,13 @@ import { styleAttrs } from '../../lib/textStyle';
  * tab's name (the first HTML build did). Institutions - and the tabs the
  * design has no frame for: main partner, event partners, media - are a
  * two-column grid of entries: the name over a rule, the text, then the
- * "website ↗" pill and the logo side by side. The hotel is one entry: the
- * photo with its slideshow beside the name, the text and the pill. Markup
+ * logo. The hotel is one entry: the photo with its slideshow beside the
+ * name and the text. Markup
  * and rules are Lilanga's build of the Figma partners frames.
  *
- * The name itself is not a link (client feedback of 2026-09-17, with the
- * annotated institutions frame): the pill carries the website, and it is
- * the pill everywhere - institutions, hotel, main, event and media.
+ * The name is the link to the partner's website, with its ↗, as on the
+ * food & drinks tab (client feedback of 2026-09-24, which reverses the
+ * "website ↗" pill of 2026-09-17): no website pill on any partners tab.
  */
 const { lang, tab } = Astro.props as { lang: LocaleId; tab: string };
 const t = useTranslations(lang);
@@ -38,7 +39,6 @@ const listed = partners.filter((p: any) => tiers.includes(p.tier));
 const featured = tab === 'hotel';
 const path = hubTabPath('partners', tab, lang);
 const altPaths = hubAltPaths('partners', tab);
-const external = { target: '_blank', rel: 'noopener noreferrer' };
 
 /*
  * BACKEND-REQUEST #11: a per-partner logo scale on `partner` (see
@@ -104,17 +104,12 @@ const logoHeight = (image: any, max = 78, base = 92) => {
             </figure>
             <section>
               <h2 class="panel-title" {...styleAttrs(p.nameStyle)}>
-                {p.name}
+                <PartnerName partner={p} />
               </h2>
               {p.description && (
                 <div class="body-24">
                   <PortableText value={p.description} fieldStyle={p.descriptionStyle} />
                 </div>
-              )}
-              {p.url && (
-                <a class="pill" href={p.url} {...external}>
-                  {t('common.website')} ↗
-                </a>
               )}
             </section>
           </div>
@@ -123,16 +118,13 @@ const logoHeight = (image: any, max = 78, base = 92) => {
         <div class="institutions">
           {listed.map((p: any) => (
             <article>
-              <h3 {...styleAttrs(p.nameStyle)}>{p.name}</h3>
+              <h3 {...styleAttrs(p.nameStyle)}>
+                <PartnerName partner={p} />
+              </h3>
               <div class="text">
                 {p.description && <PortableText value={p.description} fieldStyle={p.descriptionStyle} />}
               </div>
               <div class="institution-foot">
-                {p.url && (
-                  <a class="pill" href={p.url} {...external}>
-                    {t('common.website')} ↗
-                  </a>
-                )}
                 {p.logo?.asset && (
                   /* BACKEND-REQUEST #11: slot height from the file's aspect ratio, see `logoHeight` above. */
                   <span class="logo-slot" style={`--logo-h:${logoHeight(p.logo)}px`}>
@@ -198,9 +190,9 @@ const logoHeight = (image: any, max = 78, base = 92) => {
   }
   .institutions .text :global(p) {
     white-space: pre-line;
-    font-size: 24px;
-    line-height: 1.25;
-    letter-spacing: -0.03em;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
   .institutions .text :global(p + p) {
     margin-top: 1em;
@@ -212,9 +204,6 @@ const logoHeight = (image: any, max = 78, base = 92) => {
     min-height: 78px;
     display: flex;
   }
-  .institution-foot .pill {
-    flex: none;
-  }
   /*
    * The design's logo slot is a 250px-wide block against the right edge of the
    * card, and its two examples are set text of about the same size. The real
@@ -222,16 +211,14 @@ const logoHeight = (image: any, max = 78, base = 92) => {
    * near-square marks, several with transparent padding baked in - so the slot
    * is fixed and the file is fitted into it, right-aligned. Sizing each file to
    * its own bounds instead is what left one logo stranded mid-card and the next
-   * twice its size. `margin-left: auto` keeps the logo right when the partner
-   * has no website and it is the only thing in the row; `--logo-h` is set per
+   * twice its size. `margin-left: auto` keeps the logo right, alone in its
+   * row now the website is on the name; `--logo-h` is set per
    * partner in the frontmatter (see `logoHeight`) so a square mark and a wide
    * wordmark carry about the same weight.
    */
   .logo-slot {
     flex: 1 1 auto;
-    /* A replaced element will not shrink past its own width without this, so
-       in a narrow column the pill is what gives, and it collapses into a
-       three-line oval. The logo gives instead, and stays right-aligned. */
+    /* A replaced element will not shrink past its own width without this. */
     min-width: 0;
     max-width: 250px;
     margin-left: auto;
@@ -264,25 +251,6 @@ const logoHeight = (image: any, max = 78, base = 92) => {
   .hotel-placeholder {
     aspect-ratio: 3 / 2;
     background: #f0efed;
-  }
-  .hotel .pill {
-    margin-top: 35px;
-  }
-
-  /*
-   * Client feedback of 2026-09-17: "make the website buttons less thick,
-   * harmonise everywhere", with the footer pills as the reference - a 1px
-   * stroke close to the text, tight letter-spacing, no tall oval. The global
-   * `.pill` (design.css) is 24px over a 34px line with 3px/18px of padding;
-   * this scopes the slimmer set to the partners tabs, where the pill sits
-   * under 24px body text.
-   */
-  /* Since 2026-09-23 the site's one pill size (Base.astro). */
-  .pill {
-    padding: var(--pill-pad);
-    font-size: var(--pill-size);
-    line-height: var(--pill-lh);
-    letter-spacing: var(--pill-ls);
   }
 
   .image-row {

@@ -49,6 +49,11 @@ const staff = team.filter((p: any) => !directors.includes(p));
 const settings = await getSettings(lang);
 const hasContactBlock =
   settings?.organiserText || settings?.organiserLink || settings?.postalAddress || settings?.contactEmail;
+const social = [
+  { label: t('common.instagram'), href: settings?.instagramUrl },
+  { label: t('common.linkedin'), href: settings?.linkedinUrl },
+  { label: t('common.facebook'), href: settings?.facebookUrl },
+].filter((link) => link.href);
 
 // The fair: the first text section sits beside the hero, the rest two a
 // row, as the design's about page lays them out.
@@ -168,53 +173,82 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
         ))
     }
 
-    {/* ------------------------------------------------------------- team */}
+    {/* ---------------------------------------------------- contact & team */}
+    {/* One page since 2026-09-24 (client feedback and Figma "about - contact
+        & team"): the old /contact page merged into this tab. "contact" - the
+        address, the postal address, the organiser line and its pill on the
+        left; follow us and the newsletter on the right - then "team": the
+        directors as full cards, the rest of the team two a row. Everything
+        comes from Site settings → Contact & social and the team group. */}
     {
-      tab === 'team' && directors.length > 0 && (
-        <div class="people directors">
-          {directors.map((p: any) => (
-            <PersonCard lang={lang} person={p} variant="contact" />
-          ))}
-        </div>
+      tab === 'team' && (hasContactBlock || social.length > 0 || settings?.newsletterUrl) && (
+        <section class="page-section contact">
+          <h2 class="section-title">{t('nav.contact').toLowerCase()}</h2>
+          <div class="contact-cols">
+            <div>
+              {settings.contactEmail && (
+                <p class="contact-email">
+                  <a class="text-link" href={`mailto:${settings.contactEmail}`}>
+                    {`${settings.contactEmail}\u00a0↗`}
+                  </a>
+                </p>
+              )}
+              {settings.postalAddress && <p class="body-24 postal">{settings.postalAddress}</p>}
+              {settings.organiserText && (
+                <p class="body-24" {...styleAttrs(settings.organiserTextStyle)}>
+                  {settings.organiserText}
+                </p>
+              )}
+              {settings.organiserLink && (
+                <p class="organiser-link">
+                  <LinkPill lang={lang} link={settings.organiserLink} />
+                </p>
+              )}
+            </div>
+            <div>
+              {social.length > 0 && (
+                <>
+                  <h3 class="contact-heading">{t('contact.follow')}</h3>
+                  <p class="pills">
+                    {social.map((link) => (
+                      <a class="pill" href={link.href} target="_blank" rel="noopener noreferrer">
+                        {link.label} ↗
+                      </a>
+                    ))}
+                  </p>
+                </>
+              )}
+              {settings?.newsletterUrl && (
+                <h3 class="contact-heading newsletter">
+                  <a href={settings.newsletterUrl} target="_blank" rel="noopener noreferrer">
+                    {t('contact.newsletter')} ↗
+                  </a>
+                </h3>
+              )}
+            </div>
+          </div>
+        </section>
       )
     }
     {
-      tab === 'team' && staff.length > 0 && (
-        <>
-          <h2 class="team-title">{t('tabs.team').toLowerCase()}</h2>
-          <div class="people team-grid">
-            {staff.map((p: any) => (
-              <PersonCard lang={lang} person={p} variant="team" />
-            ))}
-            {/* The design's closing block: the organiser line, the "discover
-                studio emosi's projects ↗" pill, the ASBL's postal address and
-                the contact address, all from Site settings → Contact (#13).
-                Each shows only once an editor has filled it. */}
-            {hasContactBlock && (
-              <section class="contact-block">
-                <h2 class="team-title">{t('nav.contact').toLowerCase()}</h2>
-                {settings.organiserText && (
-                  <p class="body-24" {...styleAttrs(settings.organiserTextStyle)}>
-                    {settings.organiserText}
-                  </p>
-                )}
-                {settings.organiserLink && (
-                  <p class="organiser-link">
-                    <LinkPill lang={lang} link={settings.organiserLink} />
-                  </p>
-                )}
-                {settings.postalAddress && <p class="body-24 postal">{settings.postalAddress}</p>}
-                {settings.contactEmail && (
-                  <p class="body-24">
-                    <a class="text-link" href={`mailto:${settings.contactEmail}`}>
-                      {`${settings.contactEmail}\u00a0↗`}
-                    </a>
-                  </p>
-                )}
-              </section>
-            )}
-          </div>
-        </>
+      tab === 'team' && team.length > 0 && (
+        <section class="page-section">
+          <h2 class="section-title">{t('tabs.team').toLowerCase()}</h2>
+          {directors.length > 0 && (
+            <div class="people directors">
+              {directors.map((p: any) => (
+                <PersonCard lang={lang} person={p} variant="contact" />
+              ))}
+            </div>
+          )}
+          {staff.length > 0 && (
+            <div class="people team-grid">
+              {staff.map((p: any) => (
+                <PersonCard lang={lang} person={p} variant="team" />
+              ))}
+            </div>
+          )}
+        </section>
       )
     }
     {tab === 'team' && team.length === 0 && <p class="empty">{t('about.peopleEmpty')}</p>}
@@ -352,9 +386,8 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
     font-size: 20px;
     line-height: 26px;
   }
-  .advisory .people :global(.bio) {
-    font-size: 20px;
-  }
+  /* The biography is the site's body size (--body-size, Base.astro) like
+     every other page's (client feedback, 2026-09-24: it was 20px here). */
   .advisory .people :global(.bio .rich-text p + p) {
     margin-top: 24px;
   }
@@ -379,53 +412,88 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
     }
   }
 
-  /* From the design's contact page (the team tab). */
+  /* contact & team (Figma "about - contact & team", 2026-09-24). */
   .team-page {
     padding: 10px var(--gutter) 110px;
   }
   .team-page > .intro-large {
     max-width: 1160px;
+    margin-bottom: 50px;
   }
-  .team-page > .intro-large + .directors {
-    margin-top: 50px;
+  /* "contact", "team": a big regular title under a full-width 2px rule, as
+     "programme overview" on the VIP pages. */
+  .page-section + .page-section {
+    margin-top: 90px;
   }
-  /* The design's small grey "team" label over a hairline rule the width of
-     the page (client feedback, 2026-09-17), not the big black panel title. */
-  /* "team", and the contact block's own heading: the page's title style over
-     a 2px rule (Figma "about - contact", 2026-09-17). */
-  .team-title {
+  .section-title {
+    border-top: 2px solid var(--ink);
+    padding-top: 14px;
+    letter-spacing: -0.06em;
+    font-size: clamp(38px, 4.3vw, 62px);
+    font-weight: 400;
+    line-height: 1;
+  }
+  .contact-cols {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 30px;
+    display: grid;
+  }
+  .contact-email {
     letter-spacing: -0.04em;
+    font-size: clamp(28px, 2.8vw, 40px);
+    line-height: 1.15;
+  }
+  .contact-cols .body-24,
+  .contact-cols .organiser-link {
+    margin-top: 20px;
+  }
+  /* The address is typed on three lines in the Studio. */
+  .postal {
+    white-space: pre-line;
+  }
+  /* "follow us", "subscribe to our newsletter ↗": the panel titles' style. */
+  .contact-heading {
     border-bottom: 2px solid var(--ink);
-    margin-top: 60px;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
+    letter-spacing: -0.04em;
     font-size: 36px;
     font-weight: 600;
     line-height: 1.2;
   }
-  .contact-block .team-title {
-    margin-top: 0;
+  .contact-heading a {
+    text-decoration: none;
   }
-  .contact-block .body-24,
-  .contact-block .organiser-link {
-    margin-top: 20px;
+  .contact-heading.newsletter {
+    margin-top: 50px;
   }
-  /* The address is typed on three lines in the Studio. */
-  .contact-block .postal {
-    white-space: pre-line;
+  .pills {
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    margin-top: 18px;
+    display: flex;
+  }
+  .team-page .directors {
+    margin-top: 36px;
   }
   .people.team-grid {
     gap: 45px 40px;
-    margin-top: 24px;
+    margin-top: 70px;
   }
   .team-page .empty {
     margin-top: 40px;
+  }
+  @media (width<=800px) {
+    .contact-cols {
+      grid-template-columns: 1fr;
+    }
   }
   @media (width<=640px) {
     .team-page > .intro-large {
       font-size: 30px;
     }
-    .team-title {
-      font-size: 24px;
+    .contact-heading {
+      font-size: 26px;
     }
   }
 

@@ -483,9 +483,11 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     --band-bg: var(--acid);
   }
   /* The art prize header fades from white at the top into the acid. The
-     fine black rule under it (2026-09-16) came off again on 2026-09-23. */
+     fine black rule under it (2026-09-16) came off again on 2026-09-23.
+     2026-09-24: "a tiny bit more white" - the white holds a little before
+     the fade starts, and the acid arrives later. */
   body.acid-page .site-header.acid-wash {
-    background: linear-gradient(#fff 0%, var(--acid) 62%);
+    background: linear-gradient(#fff 0%, #fff 12%, var(--acid) 74%);
   }
 
   /* design.css hovers every pill to white on black; the stroke follows the
@@ -493,6 +495,63 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
      pill on a coloured page (client feedback, 2026-09-23). It stays black. */
   :where(.pill, .section-head a, .subnav a, [data-filter], .home-quicklinks a, .home-image-cta, .home-final-cta, footer a):hover {
     border-color: #050505 !important;
+  }
+
+  /* The underlined arrow links - "more on the fair →", "discover her work →",
+     the film's link, the banner's line ("gallery applications are open →"),
+     "leave the VIP area →". Underlined at rest, the line close under the
+     letters; on hover it wipes out to the right while the arrow slides on
+     (client feedback, 2026-09-24: the reverse of the old hover, which drew
+     the line in). The line is a background so it can animate and sit
+     nearer the baseline than text-decoration puts it. `.u-line` is the
+     same line on a span inside the link, for a block whose link is the
+     whole band. */
+  .arrow-link,
+  .u-line {
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-size: 100% 2px;
+    background-position: 100% calc(100% - 0.1em);
+    transition: background-size 0.4s var(--motion-ease, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+  :is(a, button).arrow-link:is(:hover, :focus-visible),
+  a:is(:hover, :focus-visible) > .u-line {
+    background-size: 0 2px;
+  }
+  :is(.arrow-link, .u-line) .link-arrow {
+    transition: transform 0.3s var(--motion-ease, cubic-bezier(0.22, 1, 0.36, 1));
+    display: inline-block;
+  }
+  /* The page script trims the space before a typed arrow; put it back. */
+  .u-line .link-arrow {
+    margin-inline-start: 0.22em;
+  }
+  :is(a, button).arrow-link:is(:hover, :focus-visible) .link-arrow,
+  a:is(:hover, :focus-visible) > .u-line .link-arrow {
+    transform: translate(10px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .arrow-link,
+    .u-line,
+    :is(.arrow-link, .u-line) .link-arrow {
+      transition: none;
+    }
+  }
+
+  /* The underlined text links - the email addresses above all: on hover
+     the underline fades away and the ↗ slides on, as the homepage's links
+     do (client feedback, 2026-09-24). design.css pushed the line down and
+     turned it yellow instead. */
+  a.text-link {
+    text-decoration: underline 1px;
+    text-underline-offset: 0.12em;
+    text-decoration-color: currentColor;
+    transition: text-decoration-color 0.3s var(--motion-ease, ease);
+  }
+  a.text-link:is(:hover, :focus-visible) {
+    text-underline-offset: 0.12em;
+    text-decoration-color: transparent;
   }
 
   /* Whole-page black, used by the three locked VIP tabs (Figma VIP frames,
@@ -576,7 +635,9 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   body.dark-page :is(.consent, dialog) :is(.pill, .footer-pill, button, a) {
     border-color: #050505;
   }
-  body.dark-page :is(.consent, dialog) :where(button, a):hover {
+  /* The banner's buttons only: in the menu this painted every link black
+     on hover on the VIP pages (client feedback, 2026-09-24). */
+  body.dark-page .consent :where(button, a):hover {
     color: #fff !important;
     background-color: #050505 !important;
   }
@@ -590,6 +651,27 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
      2026-09-17: "it should always be everywhere"), so the title band pins
      under it rather than behind it. --header-h mirrors the header heights in
      design.css; keep the two in step. */
+  /* One body size, site-wide: the food & drinks text, which the client
+     chose as the reference (feedback, 2026-09-24: the advisory board, the
+     food & drinks and the gallery pages had three different sizes). Every
+     running-text rule reads these; `.body-24` (design.css) kept its name. */
+  :root {
+    --body-size: 22px;
+    --body-lh: 30px;
+    --body-ls: -0.03em;
+  }
+  @media (width<=700px) {
+    :root {
+      --body-size: 18px;
+      --body-lh: 1.3;
+    }
+  }
+  html .body-24 {
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
+  }
+
   /* One size for every outline pill - "learn more →", "instagram ↗",
      "website ↗" - site-wide: the VIP pages' size, which the client liked,
      with tighter letter-spacing (client feedback, 2026-09-23: "harmonise by

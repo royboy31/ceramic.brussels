@@ -89,7 +89,8 @@ const VIDEO = `{
   poster ${IMAGE}
 }`;
 
-const KEY_FIGURES = `keyFigures[]{ _key, value, ${styled('label')} }`;
+// `link` (request #25): the homepage grid makes a linked figure clickable.
+const KEY_FIGURES = `keyFigures[]{ _key, value, ${styled('label')}, "link": link ${LINK} }`;
 
 const PERSON = `{
   _id, name, groups, countryCode, website, instagram, email, phone, order,

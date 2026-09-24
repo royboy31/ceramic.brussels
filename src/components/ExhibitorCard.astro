@@ -51,6 +51,11 @@ const twoLines = (s: string) => {
   return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
 };
 const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
+/** The designer's lockups (Léonie, 2026-09-24): the solo show disc, and the
+ *  focus words with Spain's outline for "focus España". Another focus
+ *  country keeps the words until it has a lockup of its own. */
+const SOLO_LOGO = '/assets/exhibitors/solo-show.png';
+const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/assets/exhibitors/focus-espana.png' : null;
 ---
 
 <article id={id} data-name={letter} data-letter={letter} data-filters={filters} data-tags={filters} data-country={code}>
@@ -67,9 +72,14 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
         )
       }
       {
-        (ex.soloShow || ex.kind === 'jury-prize') && (
+        ex.soloShow && ex.kind !== 'jury-prize' && (
+          <img class="badge badge--logo" src={SOLO_LOGO} alt={t('exhibitors.soloShow')} width="60" height="60" />
+        )
+      }
+      {
+        ex.kind === 'jury-prize' && (
           <span class="badge badge--black">
-            {twoLines(ex.kind === 'jury-prize' ? t('exhibitors.juryPrize') : t('exhibitors.soloShow')).map((l, i) => (
+            {twoLines(t('exhibitors.juryPrize')).map((l, i) => (
               <>
                 {i > 0 && <br />}
                 {l}
@@ -80,13 +90,21 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
       }
       {
         ex.inCountryFocus && (
-          <span class:list={['focus', { 'focus--beside': ex.soloShow || ex.kind === 'jury-prize' }]}>
-            {/* The frame adds the focus country's outline map after the words;
-                there is no source for it yet (DESIGN-DIFF-PLAN §0.7). */}
-            {twoLines(focusLabel).map((l) => (
-              <span>{l}</span>
-            ))}
-          </span>
+          focusLogo ? (
+            <img
+              class:list={['focus-logo', { 'focus--beside': ex.soloShow || ex.kind === 'jury-prize' }]}
+              src={focusLogo}
+              alt={focusLabel}
+              width="260"
+              height="149"
+            />
+          ) : (
+            <span class:list={['focus', { 'focus--beside': ex.soloShow || ex.kind === 'jury-prize' }]}>
+              {twoLines(focusLabel).map((l) => (
+                <span>{l}</span>
+              ))}
+            </span>
+          )
         )
       }
     </div>
@@ -149,6 +167,34 @@ const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
   .badge--black {
     color: #fff;
     background: #000;
+  }
+  /* The card's photo rules (cover, full size, the hover zoom) are for the
+     photo only; the marks keep their own size and stay still. */
+  .gallery-image > img.badge--logo,
+  .gallery-image > img.focus-logo {
+    object-fit: contain;
+    height: auto;
+    transform: none;
+  }
+  .gallery-image > img.badge--logo {
+    width: 60px;
+    height: 60px;
+  }
+  .gallery-image > img.focus-logo {
+    width: 96px;
+  }
+  /* The "focus España" lockup: the words with the country's outline, black
+     on the picture as the words were, about their size. */
+  .focus-logo {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 96px;
+    height: auto;
+  }
+  .focus-logo.focus--beside {
+    top: 12px;
+    right: 84px;
   }
   /* The country focus is words only, no circle: the first line to the left,
      the second stepped in to the right. Beside a badge it moves left of it. */

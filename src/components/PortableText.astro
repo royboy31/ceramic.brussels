@@ -172,9 +172,13 @@ const grouped = Array.isArray(value) ? group(value.filter(Boolean)) : [];
   }
   /* Editor-chosen styles. Each is a role the design defines, so text stays on
      the type scale and inside the palette however the two get combined. */
+  /* Lead is the body size, not a size of its own: at a fixed 20px it sat a
+     hair under the 22-24px Normal around it, two sizes nobody could tell
+     apart (client feedback, 2026-09-24). It stays a role an editor can
+     pick, so a page can give its lead a different treatment later. */
   .rich-text :global(p.lead) {
-    font-size: 1.25rem;
-    line-height: 1.45;
+    font-size: inherit;
+    line-height: inherit;
     margin: 0 0 1.1rem;
   }
   .rich-text :global(p.small) {
@@ -206,5 +210,6 @@ const grouped = Array.isArray(value) ? group(value.filter(Boolean)) : [];
     font-size: 0.8rem;
     color: var(--ink-3);
     margin-top: 8px;
+    letter-spacing: -0.025em;
   }
 </style>

@@ -245,10 +245,10 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     column-gap: 40px;
   }
   .body-copy {
-    letter-spacing: -0.03em;
+    letter-spacing: var(--body-ls);
     padding-top: 28px;
-    font-size: 24px;
-    line-height: 30px;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
   }
   .body-copy :global(p) {
     break-inside: avoid;

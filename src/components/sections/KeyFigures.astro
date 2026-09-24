@@ -39,13 +39,20 @@ const count = (value: string) => {
         <div class="stats__grid">
           {figures.map((figure: any) => {
             const c = count(figure.value);
+            // A figure with a link (request #25) is a link, turning acid on hover.
+            const to = resolveLink(lang, figure.link);
+            const Cell = to ? 'a' : 'div';
             return (
-              <div>
+              <Cell
+                class:list={['stat-cell', { 'stat-cell--link': !!to }]}
+                href={to?.href}
+                {...(to?.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              >
                 <strong data-count={c?.n} data-count-suffix={c?.suffix || undefined}>
                   {figure.value}
                 </strong>
                 <span {...styleAttrs(figure.labelStyle)}>{figure.label}</span>
-              </div>
+              </Cell>
             );
           })}
         </div>
@@ -95,7 +102,7 @@ const count = (value: string) => {
   }
   /* Bigger figures, centred in the height of their box and still on the
      left (client feedback, 2026-09-16). */
-  .stats__grid > div {
+  .stats__grid > .stat-cell {
     border-bottom: 1px solid #000;
     /* One wrapping line centred in the box, figure and label on a shared baseline. */
     flex-wrap: wrap;
@@ -105,8 +112,15 @@ const count = (value: string) => {
     min-height: 140px;
     padding: 15px 45px;
     display: flex;
+    transition: background-color 0.18s;
   }
-  .stats__grid > div:nth-child(odd) {
+  /* A figure that links somewhere turns acid on hover, as the rows of the
+     artists list do (client feedback, 2026-09-24). */
+  .stat-cell--link:hover,
+  .stat-cell--link:focus-visible {
+    background: var(--color-acid);
+  }
+  .stats__grid > .stat-cell:nth-child(odd) {
     border-right: 1px solid #000;
   }
   .home-stats strong {
@@ -115,9 +129,11 @@ const count = (value: string) => {
     font-weight: 400;
     line-height: 0.85;
   }
+  /* Tighter than the default tracking (client feedback, 2026-09-24). */
   .home-stats span {
     font-size: 43px;
     line-height: 1;
+    letter-spacing: -0.04em;
   }
   .home-stats .stats-link {
     margin: 1.5rem 0 0;
@@ -126,7 +142,7 @@ const count = (value: string) => {
     letter-spacing: -0.05em;
   }
   @media (width<=900px) {
-    .stats__grid > div {
+    .stats__grid > .stat-cell {
       padding-inline: 18px;
     }
     .home-stats strong {
@@ -143,10 +159,10 @@ const count = (value: string) => {
     .stats__grid {
       display: block;
     }
-    .stats__grid > div:nth-child(odd) {
+    .stats__grid > .stat-cell:nth-child(odd) {
       border-right: 0;
     }
-    .stats__grid > div {
+    .stats__grid > .stat-cell {
       justify-content: space-between;
       min-height: 95px;
       padding: 14px 10px;

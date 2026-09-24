@@ -22,9 +22,8 @@ import { styleAttrs } from '../../../lib/textStyle';
  * with the winning gallery - or "NEW THIS YEAR" for an award that has never
  * been given.
  *
- * Data: `award` documents of family "fair". The awards listed are the
- * current edition's once they exist, else the newest edition's; the previous
- * laureate is the last earlier winner of an award with the same name. The intro is the `page` in
+ * Data: `award` documents of family "fair", one row per award name of this
+ * edition or the last (see `awards` below). The intro is the `page` in
  * section "exhibitors" whose English slug is `awards`, when an editor makes
  * one; the list never comes from it. A static segment, so it wins over
  * exhibitors/[slug].astro.
@@ -39,26 +38,42 @@ const t = useTranslations(lang);
 const [allAwards, edition, pages] = await Promise.all([getAwards(lang), getCurrentEdition(lang), getHubPages(lang, 'exhibitors')]);
 const page = pageForTab(pages, 'awards');
 const fair = allAwards.filter((a: any) => a.family === 'fair' && a.year);
-const current = edition?.year;
-const year = fair.some((a: any) => a.year === current) ? current : fair[0]?.year;
 const sameAward = (a: any, b: any) => String(a?.name ?? '').trim().toLowerCase() === String(b?.name ?? '').trim().toLowerCase();
-
-const awards = fair
-  .filter((a: any) => a.year === year)
-  .map((a: any) => {
-    // A current award looks back for an earlier winner; a past edition's
-    // award is itself the latest laureate.
-    const earlier = fair.filter((b: any) => b.year < a.year && sameAward(a, b));
-    const previous = a.year === current ? earlier.find((b: any) => b.gallery) ?? null : a.gallery ? a : null;
-    return { ...a, previous, isNew: a.year === current && earlier.length === 0 };
-  });
+/** The edition the page speaks for: the current one, else the newest with an award. */
+const current: number | undefined = edition?.year ?? fair[0]?.year;
+const year = current;
 
 /**
- * The award's own picture, else its winning gallery's, else the previous laureate's.
- * BACKEND-REQUEST #5: the frame shows three photos per award ("1/3"); `award.image`
- * is a single image, so an award's own pictures are one slide until `award.images[]` exists.
+ * One row per award *name* given in this edition or the one before it, so
+ * the page reads the way the awards are entered: an award may be a document
+ * on this edition, or only last edition's (with its winner) until this
+ * year's is made. The row takes this edition's document when there is one,
+ * else the latest; "previous laureate" is the latest earlier winner of that
+ * name; an award nobody has won yet is "new this year". An older award not
+ * given in either edition (Ceramic Art Andenne, 2025) stays off the page.
+ * Rows follow the documents' Order field.
+ */
+const names: any[] = [];
+for (const a of fair) {
+  if (current && a.year < current - 1) continue;
+  if (!names.some((n) => sameAward(n, a))) names.push(a);
+}
+const awards = names
+  .map((first: any) => {
+    const all = fair.filter((b: any) => sameAward(first, b));
+    const shown = all.find((b: any) => b.year === current) ?? all[0];
+    const previous = all.find((b: any) => b.gallery && (!current || b.year < current)) ?? null;
+    return { ...shown, previous, isNew: !all.some((b: any) => b.gallery) };
+  })
+  .sort((a: any, b: any) => (a.order ?? 100) - (b.order ?? 100));
+
+/**
+ * The award's own slideshow (`images`, request #5), else its single image,
+ * else its winning gallery's pictures, else the previous laureate's.
  */
 const imagesOf = (a: any): any[] => {
+  const slides = (a.images ?? []).filter((img: any) => img?.asset);
+  if (slides.length) return slides;
   if (a.image?.asset) return [a.image];
   const own = (a.gallery?.images ?? []).filter((img: any) => img?.asset);
   return own.length ? own : (a.previous?.gallery?.images ?? []).filter((img: any) => img?.asset);
@@ -180,9 +195,6 @@ const imagesOf = (a: any): any[] => {
     width: 100%;
     background: #f0efed;
   }
-  .awards-list :global(figcaption) {
-    margin-top: 3px;
-  }
   /* The guest of honour page's title: semibold, tight, a 2px rule right under it. */
   .award-copy h2 {
     border-bottom: 2px solid;
@@ -196,9 +208,9 @@ const imagesOf = (a: any): any[] => {
   .award-copy :global(.rich-text) {
     max-width: 640px;
     margin-top: 10px;
-    font-size: clamp(18px, 1.5vw, 22px);
-    line-height: 1.3;
-    letter-spacing: -0.03em;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
   /* "PREVIOUS LAUREATE (2026)" / "NEW THIS YEAR": bold capitals at the
      frame's 22px. Noi Grotesk ships 400/600/900, so 600 is the bold cut. */
@@ -212,16 +224,18 @@ const imagesOf = (a: any): any[] => {
   }
   .laureate {
     margin-top: 26px;
-    font-size: clamp(18px, 1.5vw, 22px);
-    line-height: 1.3;
-    letter-spacing: -0.03em;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
   .laureate .label {
     margin-top: 0;
   }
-  /* Plain text in the frame; the link shows itself on hover. */
+  /* Underlined, as the client's awards frame of 2026-09-24 draws the gallery. */
   .laureate a {
-    text-decoration: none;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.12em;
   }
   .laureate a:hover {
     background: var(--color-acid);

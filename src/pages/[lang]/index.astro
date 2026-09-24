@@ -10,7 +10,7 @@ import { styleAttrs } from '../../lib/textStyle';
 
 /**
  * The homepage, as the design's index.html draws it (2026-09-14 build): the
- * hero figure beside the statement and its arrow link, the down arrow, the
+ * hero figure beside the statement and its arrow link, the
  * four bordered quick links (the last one grey), then the `homepage`
  * document's section stack rendered in its "home" variant - the centred
  * "latest news" title, the feature rows, the film with its poster, the
@@ -47,8 +47,6 @@ const quickLinks: ResolvedLink[] = (home?.quickLinks ?? [])
  * 10.09 demo was confusing. Empty now renders empty.
  */
 const sections: any[] = home?.sections ?? [];
-/** The down arrow under the hero jumps to the first block, by its anchor when it has one. */
-const downTarget = sections[0]?.anchor ? `#${sections[0].anchor}` : '#sections';
 
 const eventSchema = edition
   ? {
@@ -115,14 +113,7 @@ const external = (link: ResolvedLink | null) =>
     </div>
   </section>
 
-  {
-    sections.length > 0 && (
-      <a class="down-arrow" href={downTarget} aria-label={t('home.scrollDown')}>
-        ↓
-      </a>
-    )
-  }
-
+  {/* The down arrow under the hero came off on 2026-09-24 (client feedback). */}
   {
     quickLinks.length > 0 && (
       <nav class="quicklinks" aria-label={t('nav.menu')}>
@@ -168,61 +159,16 @@ const external = (link: ResolvedLink | null) =>
     font-weight: 400;
     line-height: 0.98;
   }
-  /* The underline is a drawn line rather than text-decoration, so on hover
-     it can run out to the right and back in from the left (client
-     feedback, 2026-09-15); the arrow keeps its slide. 2026-09-16: the line
-     is 2px and sits closer to the text, the arrow closer to the label. */
+  /* The underline and its hover are the shared `.arrow-link` rule in Base.astro. */
   .arrow-link {
     align-items: center;
     letter-spacing: -0.03em;
     gap: 0.14em;
     margin-top: 28px;
-    padding-bottom: 0.03em;
     /* The size of the other arrow links on the page (client feedback, 2026-09-16). */
     font-size: clamp(22px, 2.1vw, 30px);
     line-height: 1;
-    text-decoration: none;
-    background-image: linear-gradient(currentColor, currentColor);
-    background-repeat: no-repeat;
-    background-size: 100% 2px;
-    background-position: 0 100%;
     display: inline-flex;
-  }
-  .arrow-link:hover {
-    animation: underline-slide 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  @keyframes underline-slide {
-    0% {
-      background-size: 100% 2px;
-      background-position: 0 100%;
-    }
-    45% {
-      background-size: 0 2px;
-      background-position: 100% 100%;
-    }
-    50% {
-      background-size: 0 2px;
-      background-position: 0 100%;
-    }
-    100% {
-      background-size: 100% 2px;
-      background-position: 0 100%;
-    }
-  }
-  .arrow-link span {
-    transition: transform 0.25s;
-    display: inline-block;
-  }
-  .arrow-link:hover span {
-    transform: translate(10px);
-  }
-  .down-arrow {
-    width: max-content;
-    margin: 8px auto 22px;
-    font-size: 64px;
-    font-weight: 200;
-    line-height: 1;
-    display: block;
   }
   .quicklinks {
     grid-template-columns: repeat(4, 1fr);

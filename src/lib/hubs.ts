@@ -109,8 +109,9 @@ export const HUBS: Record<string, Hub> = {
       { slug: 'about', segment: { fr: 'a-propos', nl: 'over' }, label: 'tabs.about' },
       // French as the old site writes it, inclusive hyphen and all.
       { slug: 'laureates', segment: { fr: 'laureat-es', nl: 'laureaten' }, label: 'tabs.laureates' },
-      { slug: 'awards', segment: { fr: 'prix', nl: 'prijzen' }, label: 'tabs.awards' },
+      // Jury before awards, as the menu lists them (request #26, 2026-09-24).
       { slug: 'jury', label: 'tabs.jury' },
+      { slug: 'awards', segment: { fr: 'prix', nl: 'prijzen' }, label: 'tabs.awards' },
     ],
   },
   programme: {
@@ -194,16 +195,13 @@ export const HUBS: Record<string, Hub> = {
       // The old site's French, superseded by the "comité consultatif" label
       // but still the address people have; its Dutch was never translated.
       { slug: 'advisory-board', segment: { fr: 'comite-strategique', nl: 'adviesraad' }, label: 'tabs.advisoryBoard' },
-      // The design's "contact" tab (Figma about frames, 2026-09-17): the
-      // directors and the team. Slug and address stay `team`, which the page
-      // document and the old site's redirects use.
+      // "contact & team" (client feedback and Figma, 2026-09-24): the old
+      // /contact page merged into the team tab, which /contact now forwards
+      // to. Slug and address stay `team`, which the page document and the
+      // old site's redirects use.
       { slug: 'team', segment: { fr: 'equipe' }, label: 'tabs.contact' },
-      // The press & media pill stays on this hub, as the design draws it,
-      // but leads to the press & media hub (backend request #19). The old
-      // `about/press` and `about/images` addresses redirect there
-      // (public/_redirects); the old site's own press URLs go straight to
-      // the new hub (scripts/legacy-redirects.mjs).
-      { slug: 'press', label: 'tabs.pressMedia', link: { route: 'press-media', tab: 'press' } },
+      // The press & media pill that led from here to its own hub came off on
+      // 2026-09-24 (client feedback); the hub has its own row in the menu.
     ],
   },
   /**

@@ -155,11 +155,12 @@ const mark = activeLetter.toUpperCase();
   .exhibitor-head__top a.active {
     background: var(--color-acid);
   }
-  /* Hover is the acid fill with the outline kept (client feedback, 2026-09-16). */
+  /* Hover is black with white type, as the tabs of every other title band
+     (client feedback, 2026-09-24; it was the acid fill since 2026-09-16). */
   .exhibitor-head__top a:hover,
   .exhibitor-head__top a:focus-visible {
-    color: #050505;
-    background: var(--color-acid);
+    color: #fff;
+    background: #050505;
   }
   /* The letters spread over the whole row, gutter to gutter; hover and the chosen letter are
      Black and underlined (client feedback, 2026-09-16). Each letter is as wide as its
@@ -183,7 +184,8 @@ const mark = activeLetter.toUpperCase();
     /* The letters are lowercase in the design. */
     text-transform: lowercase;
     text-underline-offset: 0.14em;
-    text-decoration-thickness: 2px;
+    /* Heavier, to match the Black letter above it (client feedback, 2026-09-24). */
+    text-decoration-thickness: 4px;
   }
   .alphabet > :is(a, button)::after {
     content: attr(data-glyph);

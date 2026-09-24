@@ -1,0 +1,30 @@
+---
+/**
+ * A partner's name as the title of its entry: a link to its website with
+ * the ↗ that slides on hover when it has one (the partner's Website field),
+ * the plain name when it has none. Food & drinks set it this way first; the
+ * partners tabs followed on 2026-09-24 (client feedback), in place of the
+ * "website ↗" pill.
+ */
+interface Props {
+  partner: { name?: string; url?: string };
+}
+
+const { partner } = Astro.props;
+---
+
+{
+  partner.url ? (
+    <a class="partner-name" href={partner.url} target="_blank" rel="noopener noreferrer">
+      {partner.name} <span class="link-arrow" data-arrow="↗" aria-hidden="true">↗</span>
+    </a>
+  ) : (
+    partner.name
+  )
+}
+
+<style>
+  .partner-name {
+    text-decoration: none;
+  }
+</style>

@@ -32,7 +32,7 @@ const Tag = link ? 'a' : 'div';
       style={bg ? `background-image: url(${bg})` : undefined}
       {...(link ? external : {})}
     >
-      <span {...styleAttrs(section.textStyle)}>
+      <span class:list={[{ 'u-line': !!link }]} {...styleAttrs(section.textStyle)}>
         {section.text} {link?.arrow}
       </span>
     </Tag>
@@ -83,13 +83,6 @@ const Tag = link ? 'a' : 'div';
     letter-spacing: -0.02em;
     font-weight: 600;
   }
-  .cta :global(.link-arrow) {
-    transition: transform 0.25s;
-    display: inline-block;
-  }
-  a.cta:hover :global(.link-arrow) {
-    transform: translate(10px);
-  }
   .cta-outline {
     border-top: 1px solid var(--ink);
     border-bottom: 1px solid var(--ink);
@@ -101,11 +94,8 @@ const Tag = link ? 'a' : 'div';
     text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
     min-height: clamp(160px, 22vw, 320px);
   }
-  a.cta:hover span {
-    text-decoration: underline;
-    text-underline-offset: 0.1em;
-    text-decoration-thickness: 2px;
-  }
+  /* Underlined at rest, the line wiping away on hover: the shared `.u-line`
+     in Base.astro (client feedback, 2026-09-24, the reverse of before). */
 
   @media (max-width: 640px) {
     .cta-gradient {

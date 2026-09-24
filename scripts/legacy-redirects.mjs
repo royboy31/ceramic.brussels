@@ -121,7 +121,8 @@ const ALIASES = {
   'programme-3': 'partners/event',
   'awards-2': 'art-prize/awards',
   'jury-2': 'art-prize/jury',
-  contact: 'contact',
+  // Contact merged into about → contact & team (2026-09-24).
+  contact: 'about/team',
   // Press contacts and clippings: the press tab of press & media (#19).
   press: 'press-media/press',
   pasteditions: 'editions',
@@ -142,7 +143,8 @@ const UNPREFIXED = {
   collaborations: 'editions/2024',
   awards: 'editions/2025',
   'visitors-info': 'visit',
-  contact: 'contact',
+  // Contact merged into about → contact & team (2026-09-24).
+  contact: 'about/team',
   press: 'press-media/press',
 };
 

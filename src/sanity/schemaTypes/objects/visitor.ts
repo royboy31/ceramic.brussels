@@ -27,6 +27,14 @@ export const keyFigure = defineType({
       type: 'localeString',
       validation: (rule) => rule.required(),
     }),
+    // Optional, additive (request #25): the homepage makes a figure with a
+    // link clickable - 19,200 visitors → about, 50k followers → Instagram.
+    defineField({
+      name: 'link',
+      title: 'Link',
+      type: 'link',
+      description: 'Optional. Where the figure leads on the homepage, e.g. "exhibitors" or the Instagram page.',
+    }),
   ],
   preview: {
     select: { value: 'value', label: 'label.en' },

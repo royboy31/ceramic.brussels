@@ -504,3 +504,56 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 **Asked for:** a figure per edition.
 
 ---
+## #25 · done · 2026-09-24 · a link on each key figure
+
+**Done (Lilanga's branch, 2026-09-24 - Kamindu please review):** an optional `link` (the site's `link` object) on `keyFigure` in `objects/visitor.ts`, and `"link": link ${LINK}` in `KEY_FIGURES`. Additive: no migration, nothing changes until an editor sets a link. Studio: Setup → Editions → 2026 → Key figures → each figure's Link.
+
+**Page / component:** `src/components/sections/KeyFigures.astro`, homepage variant
+**Figma frame:** client feedback of 2026-09-24 (`ceramics-new.pdf`, homepage)
+**The design shows:** each figure of the "key 2026 figures" grid as a link, turning acid on hover like the artists list: 19,200 visitors → about → ceramic brussels, 70 exhibitors → exhibitors, 200+ artists → artists, 3,500 VIPs → VIP → about, 230+ press clips → press & media, and a new "50k Instagram followers" (replacing "15 countries", an editor's change on the 2027 edition) → the Instagram account.
+**The query returns today:** `KEY_FIGURES` → `value`, `label`; `keyFigure` has no link.
+**Rendered meanwhile:** the component already reads `figure.link` through `resolveLink` and turns a linked cell into an `<a>` with the acid hover; with no link the cell is plain, as now.
+**Asked for:** an optional `link` (the site's `link` object) on `keyFigure`, selected in `KEY_FIGURES` as `link{ ... }` the way other links are projected.
+
+---
+## #26 · done · 2026-09-24 · art prize tabs: jury before awards
+
+**Done (Lilanga's branch, 2026-09-24 - Kamindu please review):** the two entries swapped in `HUBS['art-prize'].tabs`. Slugs and segments unchanged, so no URL, redirect or page document moves.
+
+**Page / component:** `src/components/HubNav.astro` on the art prize hub
+**Figma frame:** client feedback of 2026-09-24 (`ceramics-new.pdf`, art prize)
+**The design shows:** the tabs in the menu's order - about, laureates, jury, awards - so "awards" is the last button on the page. The menu already lists them that way.
+**The code has today:** `src/lib/hubs.ts` lists `awards` before `jury` in the `art-prize` tabs.
+**Rendered meanwhile:** unchanged order.
+**Asked for:** swap the two entries in `HUBS['art-prize'].tabs`. Neither is the first tab, so no route or URL moves.
+
+---
+## #27 · done · 2026-09-24 · "leave the VIP area" does nothing for an editor
+
+**Done (Lilanga's branch, 2026-09-24 - Kamindu please review):** `/api/vip/leave` now clears the preview cookie along with `cb_vip` (the gate itself is unchanged; Preview in the Studio issues a new cookie when next used). The locked tabs also reload when the browser restores them from its back/forward cache, so Back after leaving asks the gate again instead of showing the page.
+
+**Page / component:** `src/components/hubs/Vip.astro`, the leave form; `src/middleware.ts` (`vipGate`), `src/server/routes/vip-leave.ts`
+**Figma frame:** client feedback of 2026-09-24 ("it works for me … but not for Tiphaine")
+**What happens:** `/api/vip/leave` deletes the KV session and clears `cb_vip`, but `vipGate` lets a request in on the **preview cookie** before it looks at the session. Anyone who has used Preview in the Studio - Tiphaine is an editor - still carries that cookie, so the locked tabs keep opening for them after leaving, and no code is ever asked for.
+**Rendered meanwhile:** the link itself is restyled (centred, arrow, underline wipe); the behaviour is server-side.
+**Asked for:** either honour the preview cookie only under `/preview/` (the published VIP tabs then need a session like everyone's), or have the leave route clear the preview cookie as well. Your call which; the first is what an editor would expect when testing the gate.
+
+---
+## #28 · open · 2026-09-24 · exhibitors → awards: the page's content
+
+**Page / component:** `src/pages/[lang]/exhibitors/awards.astro`
+**Figma frame:** client screenshot in `ceramics-new.pdf` (exhibitors → awards, 2026-09-24)
+**Where it stands:** an editor made the three awards in the Studio on 2026-09-24 (best booth, best solo show, best group show, all on the 2026 edition, with descriptions; best booth has its three fair photos, and SECCI / Galerie Judith Andreae as winners). The page now lists one row per award name of this edition or the last, so that data renders as the frame: "previous laureate (2026)" under best booth and best solo show, "new this year" on best group show, which nobody has won.
+**Still missing (content, editors):**
+- the intro line - a `page` in section "exhibitors" with English slug `awards` and this lead: "Each year, ceramic brussels honors participating galleries for the excellence and quality of their presentation. For this edition, 3 awards valued at €2,000 each will be presented to the winners." If the Studio has no way to create a second page in the exhibitors section, that is the backend part of this request;
+- photos on best solo show and best group show (best solo show shows SECCI's artworks meanwhile, best group show is empty); the frame's captions are "SECCI, ceramic brussels 2026" and "Puls Ceramics, ceramic brussels 2026";
+- **Outcome** on the two winners ("featuring works by German artist Janis Löhrer", "presenting works by Irish artist Kevin Francis Gray");
+- **Order**: best booth is 10, the other two are both 100, so their order is not fixed - 20 for best solo show and 30 for best group show gives the frame's order.
+
+---
+## #29 · done · 2026-09-24 · about: "contact & team", and /contact merged into it
+
+**Done (Lilanga's branch, 2026-09-24 - Kamindu please review):** client feedback and Figma "about - contact & team". In `src/lib/hubs.ts` the about hub's press & media pill is removed and the `team` tab is labelled `tabs.contact` = "contact & team" / "contact & équipe" (slug and segments unchanged). `/[lang]/contact` is now a 301 page to `about/team`, whose tab carries the contact block (Site settings → Contact & social) above the team. In `scripts/legacy-redirects.mjs` the old site's `contact` goes to `about/team`. The FAQ's "contact us" links the tab.
+**Editors:** Setup → Menu and footer → about → rename the "contact" sub-item "contact & team". The tab's lead paragraph (the page document's Intro) is not in the Figma frame; clear it there if it should go.
+
+---

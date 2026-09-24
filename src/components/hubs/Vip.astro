@@ -556,10 +556,22 @@ const rate = {
 
     {
       locked && (
+        <>
         <form class="leave" method="post" action="/api/vip/leave/">
           <input type="hidden" name="lang" value={lang} />
-          <button type="submit" class="text-link">{t('vip.leave')}</button>
+          <button type="submit" class="arrow-link">
+            {t('vip.leave')} <span class="link-arrow" data-arrow="→" aria-hidden="true">→</span>
+          </button>
         </form>
+        <script is:inline>
+          // Back after leaving can bring a locked tab back out of the
+          // browser's page cache without asking the server; reload it so
+          // the gate decides again (request #27).
+          addEventListener('pageshow', (e) => {
+            if (e.persisted) location.reload();
+          });
+        </script>
+        </>
       )
     }
   </div>
@@ -572,9 +584,9 @@ const rate = {
      size, .body-24 (client feedback: the VIP text "feels smaller" than the
      rest of the website and than the text in its buttons). */
   .body-20 {
-    font-size: 24px;
-    line-height: 1.25;
-    letter-spacing: -0.03em;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
   .body-20 :global(p + p) {
     margin-top: 1em;
@@ -605,8 +617,10 @@ const rate = {
   }
   /* "programme overview": the guest of honour's name style, "Marion
      Verboom" (client feedback, 2026-09-23). */
+  /* 2px rules on every VIP title, as on the rest of the site (client
+     feedback, 2026-09-24: the VIP ones read thinner). */
   .group-title {
-    border-top: 1px solid;
+    border-top: 2px solid;
     padding-top: 14px;
     letter-spacing: -0.06em;
     font-size: clamp(38px, 4.3vw, 62px);
@@ -622,7 +636,7 @@ const rate = {
   /* "at the fair", "beyond the fair": the food & drinks titles' style
      (client feedback, 2026-09-23). */
   .subgroup-title {
-    border-bottom: 1px solid;
+    border-bottom: 2px solid;
     padding-bottom: 6px;
     max-width: 66%;
     letter-spacing: -0.04em;
@@ -649,7 +663,6 @@ const rate = {
   .closing .panel-title,
   .lounge-top .panel-title,
   .hotel .panel-title {
-    border-bottom-width: 1px;
     margin-bottom: 18px;
   }
 
@@ -663,14 +676,36 @@ const rate = {
     align-items: start;
   }
   .aperitivos .panel-title {
-    border-bottom: 1px solid;
     margin-bottom: 14px;
   }
 
+  /* The whole frame answers the pointer as a button does: it fills white
+     and the type turns black (client feedback, 2026-09-24), and a click
+     anywhere in it follows its link. */
   .rate {
+    position: relative;
     margin-top: 28px;
     padding: 14px 20px 22px;
     border: 1px solid currentColor;
+    transition:
+      background-color 0.18s,
+      color 0.18s;
+  }
+  .rate:has(.rate-link):hover,
+  .rate:has(.rate-link):focus-within {
+    color: #050505;
+    background-color: #fff;
+  }
+  .rate-link :global(a)::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .rate:hover .rate-link :global(a),
+  .rate:focus-within .rate-link :global(a) {
+    color: #fff !important;
+    background-color: #050505 !important;
+    border-color: #050505 !important;
   }
   .rate-label {
     text-align: right;
@@ -696,13 +731,16 @@ const rate = {
   .day {
     margin-top: 44px;
   }
+  /* The day headings and the on-site titles take the lounge's
+     "scenography by MAD Brussels" (.panel-title) style: one title style on
+     the VIP pages (client feedback, 2026-09-24). */
   .day-title {
-    border-bottom: 1px solid;
-    padding-bottom: 8px;
+    border-bottom: 2px solid;
+    padding-bottom: 4px;
     max-width: 66%;
-    letter-spacing: -0.03em;
-    font-size: clamp(24px, 2.2vw, 30px);
-    font-weight: 400;
+    letter-spacing: -0.04em;
+    font-size: clamp(28px, 2.8vw, 40px);
+    font-weight: 600;
     line-height: 1.15;
   }
   .rows {
@@ -745,10 +783,14 @@ const rate = {
     font-weight: 400;
     line-height: 1.15;
   }
-  /* The on-site entry's title is ruled under, as the frame draws it. */
+  /* The on-site entry's title is ruled under, as the frame draws it, in
+     the .panel-title style (see .day-title). */
   .event-title.ruled {
-    border-bottom: 1px solid;
-    padding-bottom: 8px;
+    border-bottom: 2px solid;
+    padding-bottom: 4px;
+    letter-spacing: -0.04em;
+    font-size: clamp(28px, 2.8vw, 40px);
+    font-weight: 600;
   }
   .event-when,
   .event-line {
@@ -786,16 +828,20 @@ const rate = {
     align-items: start;
     margin-top: 40px;
   }
+  /* Centred on the page, with its arrow, tighter, and the homepage links'
+     underline that wipes away on hover (client feedback, 2026-09-24). */
   .leave {
     margin-top: 72px;
+    text-align: center;
   }
   .leave button {
     cursor: pointer;
-    font-size: 20px;
-    background: none;
+    font-size: 24px;
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    background-color: transparent;
     border: 0;
     padding: 0;
-    text-transform: lowercase;
   }
 
   @media (width<=900px) {
