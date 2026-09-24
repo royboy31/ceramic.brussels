@@ -2,6 +2,7 @@
 import { LOCALES, type LocaleId } from '../lib/locales';
 import { localePath, useTranslations } from '../lib/i18n';
 import { urlFor } from '../sanity/image';
+import SanityImage from './SanityImage.astro';
 
 /**
  * Site header, as the 2026-09-14 build draws it: the dates mark on the
@@ -10,9 +11,11 @@ import { urlFor } from '../sanity/image';
  * the right of the menu button since the client feedback of 2026-09-23:
  * the current language, with the other two under it when opened. Markup and
  * classes are the design's (html pages); the rules live in
- * src/styles/design.css. The lockups are brand artwork; the dates mark
- * comes from the current edition when it has one, and the partner lockup
- * links to the main partner's site when Sanity names one.
+ * src/styles/design.css. The wordmark is brand artwork; the dates mark
+ * comes from the current edition and the partner lockup from the main
+ * partner's "Header lockup" field (one wide image), each with the shipped
+ * file as the fallback, and the lockup links to the partner's site when
+ * Sanity names one.
  */
 interface Props {
   lang: LocaleId;
@@ -22,8 +25,8 @@ interface Props {
   altPaths?: Partial<Record<LocaleId, string>>;
   /** The current edition's dates mark from Sanity; the shipped PNG is the fallback. */
   datesMark?: any;
-  /** The partner of tier "main", for the lockup's link and name. */
-  mainPartner?: { name?: string; url?: string } | null;
+  /** The partner of tier "main", for the lockup's link, name and artwork. */
+  mainPartner?: { name?: string; url?: string; headerLockup?: any } | null;
 }
 
 const { lang, siteName, path = '', altPaths, datesMark, mainPartner } = Astro.props;
@@ -55,14 +58,28 @@ const others = LOCALES.filter((l) => l.id !== lang);
         {...(mainPartner?.url ? { href: mainPartner.url, target: '_blank', rel: 'noopener noreferrer' } : {})}
       >
         <span>{t('partners.main')}</span>
-        {/* The design's lockup: the mark, then the name over the tagline. Its files are named the other way round; kept as the build pairs them. */}
-        <div class="partner-lockup" aria-hidden="true">
-          <img class="partner-mark" src="/assets/puilaetco-mark.svg" alt="" width="26" height="27" />
-          <div>
-            <img class="partner-name" src="/assets/puilaetco-tagline.svg" alt="" width="128" height="11" />
-            <img class="partner-tagline" src="/assets/puilaetco-name.svg" alt="" width="116" height="5" />
-          </div>
-        </div>
+        {
+          mainPartner?.headerLockup?.asset ? (
+            /* The partner's own lockup from Sanity: one wide image, fitted to the design's 29px row. */
+            <SanityImage
+              image={mainPartner.headerLockup}
+              widths={[322, 483, 644]}
+              sizes="161px"
+              loading="eager"
+              placeholder={false}
+              class="partner-lockup partner-lockup--image"
+            />
+          ) : (
+            /* The design's lockup: the mark, then the name over the tagline. Its files are named the other way round; kept as the build pairs them. */
+            <div class="partner-lockup" aria-hidden="true">
+              <img class="partner-mark" src="/assets/puilaetco-mark.svg" alt="" width="26" height="27" />
+              <div>
+                <img class="partner-name" src="/assets/puilaetco-tagline.svg" alt="" width="128" height="11" />
+                <img class="partner-tagline" src="/assets/puilaetco-name.svg" alt="" width="116" height="5" />
+              </div>
+            </div>
+          )
+        }
       </Lockup>
       <button
         type="button"
@@ -189,5 +206,15 @@ const others = LOCALES.filter((l) => l.id !== lang);
       font-size: 15px;
       line-height: 24px;
     }
+  }
+  /* A Sanity lockup is one image in the design's 161 × 29 slot (design.css
+     sizes the three-file version), fitted whatever its shape. */
+  :global(.partner-lockup--image) {
+    display: block;
+    width: auto;
+    max-width: 161px;
+    height: 29px;
+    object-fit: contain;
+    object-position: left center;
   }
 </style>

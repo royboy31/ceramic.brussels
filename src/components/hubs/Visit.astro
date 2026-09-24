@@ -215,18 +215,30 @@ const altPaths = hubAltPaths('visit', tab);
                   {info.accessibility && <p {...styleAttrs(info.accessibilityStyle)}>{info.accessibility}</p>}
                 </div>
               )}
-              {/* The designer's site diagram (2026-09-17), under the access
-                  modes as the design places it. It is artwork, not content:
-                  a new edition in another hall needs a new file here. */}
-              <img
-                class="venue-map"
-                src="/assets/venue-map.png"
-                width="760"
-                height="536"
-                loading="lazy"
-                decoding="async"
-                alt={t('visit.mapAlt')}
-              />
+              {/* The site diagram under the access modes, as the design
+                  places it: the current edition's "Venue map" when it has
+                  one, else the designer's 2027 drawing shipped with the
+                  site (2026-09-17). */}
+              {
+                edition?.venueMap?.asset ? (
+                  <SanityImage
+                    image={{ ...edition.venueMap, alt: edition.venueMap.alt || t('visit.mapAlt') }}
+                    widths={[760, 1140, 1520]}
+                    sizes="(max-width: 900px) 100vw, 760px"
+                    class="venue-map"
+                  />
+                ) : (
+                  <img
+                    class="venue-map"
+                    src="/assets/venue-map.png"
+                    width="760"
+                    height="536"
+                    loading="lazy"
+                    decoding="async"
+                    alt={t('visit.mapAlt')}
+                  />
+                )
+              }
             </div>
           </section>
         </div>
@@ -454,7 +466,8 @@ const altPaths = hubAltPaths('visit', tab);
     letter-spacing: 0;
     font-weight: 600;
   }
-  .venue-map {
+  /* :global - the Sanity version is SanityImage's own <img>, outside this scope. */
+  :global(.venue-map) {
     width: 100%;
     height: auto;
     margin-top: 35px;

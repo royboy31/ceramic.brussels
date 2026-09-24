@@ -126,6 +126,17 @@ export const edition = defineType({
       description: 'Small print under the table: on-site sales, refunds, cloakroom…',
     }),
     defineField({ name: 'fairMap', title: 'Floor plan (PDF)', type: 'file', group: 'visit' }),
+    // The designer's site diagram under the access modes on visitors info →
+    // practical info. Per edition because it draws the hall; without one the
+    // shipped 2027 drawing stays (Visit.astro).
+    defineField({
+      name: 'venueMap',
+      title: 'Venue map',
+      type: 'figure',
+      group: 'visit',
+      description:
+        'The site diagram drawn under "how to get there" on practical info: the hall, its entrances and the transport around it. PNG or SVG, about 760 × 536. Alt text describes it for screen readers.',
+    }),
 
     /* --- figures & archive ---------------------------------------------- */
     defineField({

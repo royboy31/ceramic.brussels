@@ -106,6 +106,9 @@ const PARTNER = `{
   ${styled('currentExhibition')},
   "editions": editions[]->year,
   logo ${IMAGE},
+  // The wide mark the header draws beside "main partner"; only the main
+  // partner has one (Header.astro falls back to the shipped artwork).
+  headerLockup ${IMAGE},
   // The editor's own correction to this logo's size (#11), applied on top of
   // the slot the page works out from the file's aspect ratio.
   logoScale,
@@ -449,6 +452,7 @@ const EDITION_CORE = `
   ${styled('intro')},
   cover ${IMAGE},
   datesMark ${IMAGE},
+  venueMap ${IMAGE},
   "guestOfHonour": guestOfHonour->{ _id, name, "slug": slug.current, portrait ${IMAGE} },
   "keyFigures": ${KEY_FIGURES}
 `;

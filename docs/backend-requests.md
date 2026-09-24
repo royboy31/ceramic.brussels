@@ -480,3 +480,25 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 **Asked for:** `"edition": edition->year` in `NEWS_CARD` (and the field shown again for this category). If the releases are PDFs rather than pages, say so: then a `file` per language on the item, and the pills link those.
 
 ---
+## #23 · done · 2026-09-24 · the header's main-partner lockup as a field
+
+**Done (Kamindu, 2026-09-24):** `headerLockup` (figure) on `partner`, shown only when the tier is "main"; `headerLockup ${IMAGE}` in `PARTNER`. `Header.astro` draws it as one image fitted to the design's 161 × 29 slot and falls back to the shipped Puilaetco files when the main partner has none, so nothing changes until an editor uploads one. Studio: Partners → Puilaetco → Header lockup.
+
+**Page / component:** `src/components/Header.astro`, the lockup beside "main partner"
+**Figma frame:** the header, every frame
+**The design shows:** the main partner's mark, name and tagline as one lockup.
+**The query returned before:** `PARTNER` had `name`, `tier`, `url` and the partners-page `logo`, nothing for the header, so the three SVGs in `public/assets/` were fixed in the markup - a change of main partner meant a code change.
+**Asked for:** one wide image on the main partner for the header.
+
+---
+## #24 · done · 2026-09-24 · the venue map on practical info as a field
+
+**Done (Kamindu, 2026-09-24):** `venueMap` (figure) on `edition`, group "Hours & tickets", and `venueMap ${IMAGE}` in `EDITION_CORE`. `Visit.astro` draws the current edition's map under the access modes and falls back to `public/assets/venue-map.png` (the designer's 2027 drawing) when the edition has none. Alt text is the figure's, else `visit.mapAlt`. Studio: Setup → Editions → 2027 → Hours & tickets → Venue map.
+
+**Page / component:** `src/components/hubs/Visit.astro`, practical info, under "how to get there"
+**Figma frame:** visitors info, practical info (2026-09-17)
+**The design shows:** the site diagram of the hall with its entrances and the transport around it.
+**The query returned before:** nothing - the PNG was fixed in the markup, and a new edition in another hall meant a code change.
+**Asked for:** a figure per edition.
+
+---

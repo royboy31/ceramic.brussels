@@ -47,6 +47,19 @@ export const partner = defineType({
       description: 'Years this partner took part. Leave empty for a permanent partner.',
     }),
     defineField({ name: 'logo', title: 'Logo', type: 'figure' }),
+    // The header's lockup beside "main partner" is a wide, 29px-high mark
+    // (Puilaetco's is its emblem, name and tagline as one) and nothing like
+    // the square-ish logo the partners tab shows, so it is its own file.
+    // Only the main partner is drawn there; without one the shipped
+    // Puilaetco artwork stays (Header.astro).
+    defineField({
+      name: 'headerLockup',
+      title: 'Header lockup',
+      type: 'figure',
+      description:
+        'The mark shown beside "main partner" in the site header: one wide file, about 6:1, transparent background, SVG or PNG. Not the logo above - that is for the partners page.',
+      hidden: ({ parent }) => parent?.tier !== 'main',
+    }),
     // The logos arrive at every shape and with whitespace baked in, so a row
     // of them reads unevenly however the page normalises it (request #11).
     // The page sizes the slot from the file's own aspect ratio and then
