@@ -50,8 +50,17 @@ const HUB_TABS: Record<string, Record<string, PageField[]>> = {
   // Talks lists events; only La Cambre draws the closing images.
   programme: { 'la-cambre': FULL, '*': TEXT },
   // The about tab is the public page; programme lists VIP events under its
-  // text; the access page is the locked state (its forms are code).
-  vip: { about: FULL, programme: TEXT, access: ['intro', 'sections'], '*': TEXT },
+  // text; lounge and hotel deal draw their cover as the picture at the top
+  // (Vip.astro reads page.cover there, so the field must show); the access
+  // page is the locked state (its forms are code).
+  vip: {
+    about: FULL,
+    programme: TEXT,
+    lounge: ['intro', 'cover', 'sections', 'body', 'images'],
+    'hotel-deal': ['intro', 'cover', 'sections', 'body', 'images'],
+    access: ['intro', 'sections'],
+    '*': TEXT,
+  },
   partners: { '*': TEXT },
   visit: {
     'practical-info': ['intro', 'images'],
