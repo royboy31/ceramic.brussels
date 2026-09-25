@@ -146,6 +146,12 @@ const others = LOCALES.filter((l) => l.id !== lang);
 </script>
 
 <style>
+  /* The wordmark keeps its own proportions whatever its box does - the box
+     shrinks on scroll and between breakpoints, and a squashed logo is what
+     the client saw on a phone (feedback, 2026-09-25). */
+  .site-wordmark img {
+    object-fit: contain;
+  }
   /* The drop-down in the header's type (the old "EN / FR / NL" line: 22px,
      tight tracking), its list hanging under it on the page's ground. */
   .site-lang {

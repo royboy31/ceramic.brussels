@@ -512,7 +512,9 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     background-image: linear-gradient(currentColor, currentColor);
     background-repeat: no-repeat;
     background-size: 100% 2px;
-    background-position: 100% calc(100% - 0.1em);
+    /* A little air between the letters and the line (client feedback,
+       2026-09-25: they touched). */
+    background-position: 100% 100%;
     transition: background-size 0.4s var(--motion-ease, cubic-bezier(0.22, 1, 0.36, 1));
   }
   :is(a, button).arrow-link:is(:hover, :focus-visible),
@@ -552,6 +554,40 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   a.text-link:is(:hover, :focus-visible) {
     text-underline-offset: 0.12em;
     text-decoration-color: transparent;
+  }
+
+  /* Links an editor puts in text, everywhere (client feedback, 2026-09-25):
+     underlined at rest, and on hover an acid highlight sweeps in behind the
+     words - the awards tab's gallery links. On the acid art prize pages the
+     highlight is black and the words turn white; on the black VIP pages it
+     stays acid, the words black. The arrow links, pills and the contact
+     page's addresses keep their own hovers. */
+  :where(.rich-text) a:not(.pill, .arrow-link, .text-link),
+  a.hl-link {
+    --hl: var(--acid);
+    --hl-ink: #050505;
+    text-decoration: underline 1px;
+    text-underline-offset: 0.12em;
+    background: linear-gradient(var(--hl), var(--hl)) no-repeat 0 0 / 0 100%;
+    transition:
+      background-size 0.35s var(--motion-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+      color 0.2s;
+  }
+  :where(.rich-text) a:not(.pill, .arrow-link, .text-link):is(:hover, :focus-visible),
+  a.hl-link:is(:hover, :focus-visible) {
+    background-size: 100% 100%;
+    color: var(--hl-ink);
+  }
+  body.acid-page :where(.rich-text) a:not(.pill, .arrow-link, .text-link),
+  body.acid-page a.hl-link {
+    --hl: #050505;
+    --hl-ink: #fff;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :where(.rich-text) a,
+    a.hl-link {
+      transition: none;
+    }
   }
 
   /* Whole-page black, used by the three locked VIP tabs (Figma VIP frames,

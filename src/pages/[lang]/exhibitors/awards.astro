@@ -126,7 +126,7 @@ const imagesOf = (a: any): any[] => {
                     <p class="label">{t('exhibitors.previousLaureate', { year: prev.year })}</p>
                     <p>
                       {gallery.slug ? (
-                        <a href={localePath(lang, exhibitorPath(gallery))}>
+                        <a class="hl-link" href={localePath(lang, exhibitorPath(gallery))}>
                           {gallery.name}
                           {code && ` (${code})`}
                         </a>
@@ -236,9 +236,6 @@ const imagesOf = (a: any): any[] => {
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.12em;
-  }
-  .laureate a:hover {
-    background: var(--color-acid);
   }
   .empty {
     padding: 45px var(--gutter) 90px;
