@@ -1,0 +1,1459 @@
+{
+  "exhibitor-2026-a-iynedjian-fine-art-aifa": {
+    "name": "A. Iynedjian Fine Art (AIFA)",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [
+      "Shinya Tanoue"
+    ],
+    "artists": []
+  },
+  "exhibitor-2026-analora": {
+    "name": "ANALORA",
+    "city": "",
+    "cityCandidates": [
+      "Paris"
+    ],
+    "linkedAlready": [
+      "Frédérique Fleury"
+    ],
+    "artists": []
+  },
+  "exhibitor-2026-anna-laudel-tr": {
+    "name": "ANNA LAUDEL (tr)",
+    "city": "",
+    "cityCandidates": [
+      "Beyoglu",
+      "Düsseldorf"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Ertugrul Güngör",
+        "from": "caption",
+        "create": "artist-ertugrul-gungor"
+      },
+      {
+        "name": "Faruk Ertekin",
+        "from": "caption",
+        "create": "artist-faruk-ertekin"
+      },
+      {
+        "name": "Anke Eilergerhard",
+        "from": "caption",
+        "create": "artist-anke-eilergerhard"
+      }
+    ]
+  },
+  "exhibitor-2026-al-tiba9-gallery": {
+    "name": "Al-Tiba9 Gallery",
+    "city": "",
+    "cityCandidates": [
+      "Barcelona"
+    ],
+    "linkedAlready": [
+      "Barry Wolfryd"
+    ],
+    "artists": []
+  },
+  "exhibitor-2026-arnoldsche-art-publishers": {
+    "name": "Arnoldsche Art Publishers",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Shozo Michikawa Kohiki",
+        "from": "caption?",
+        "create": "artist-shozo-michikawa-kohiki"
+      },
+      {
+        "name": "Irene Nordli Trouble",
+        "from": "caption?",
+        "create": "artist-irene-nordli-trouble"
+      },
+      {
+        "name": "Ute-Kathrin Beck Sputnik",
+        "from": "caption?",
+        "create": "artist-ute-kathrin-beck-sputnik"
+      },
+      {
+        "name": "Philsoo Heo Weightnessness",
+        "from": "caption?",
+        "create": "artist-philsoo-heo-weightnessness"
+      }
+    ]
+  },
+  "exhibitor-2026-barrera-baldan-galeria": {
+    "name": "Barrera Baldán Galería",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Miki Leal",
+        "from": "caption",
+        "create": "artist-miki-leal"
+      },
+      {
+        "name": "Ruth Morán",
+        "from": "caption",
+        "create": "artist-ruth-moran"
+      },
+      {
+        "name": "Victoira Maldonado",
+        "from": "caption",
+        "create": "artist-victoira-maldonado"
+      },
+      {
+        "name": "Raquel Eidem",
+        "from": "caption",
+        "create": "artist-raquel-eidem"
+      }
+    ]
+  },
+  "exhibitor-2026-bernard-jordan-gallery": {
+    "name": "Bernard Jordan Gallery",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [
+      "Elmar Trenkwalder"
+    ],
+    "artists": [
+      {
+        "name": "Robert Motherwell",
+        "from": "prose?",
+        "create": "artist-robert-motherwell"
+      }
+    ]
+  },
+  "exhibitor-2026-brazil-modernist-pereira-matis": {
+    "name": "Brazil Modernist / Pereira & Matis",
+    "city": "",
+    "cityCandidates": [
+      "Paris"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "André Ferri",
+        "from": "caption",
+        "create": "artist-andre-ferri"
+      },
+      {
+        "name": "Nicole Toldi",
+        "from": "caption",
+        "create": "artist-nicole-toldi"
+      }
+    ]
+  },
+  "exhibitor-2026-chaxartxrtm": {
+    "name": "CHAxARTxRTM",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [
+      "Tong Xindi & Shen Ting"
+    ],
+    "artists": [
+      {
+        "name": "Xu Qun",
+        "from": "caption",
+        "create": "artist-xu-qun"
+      },
+      {
+        "name": "Xu Chaoqi",
+        "from": "caption",
+        "create": "artist-xu-chaoqi"
+      },
+      {
+        "name": "Tong Xindi",
+        "from": "caption",
+        "create": "artist-tong-xindi"
+      },
+      {
+        "name": "Shen Ting",
+        "from": "caption",
+        "create": "artist-shen-ting"
+      },
+      {
+        "name": "Dong Quanbin",
+        "from": "caption",
+        "create": "artist-dong-quanbin"
+      },
+      {
+        "name": "Liu Langqing",
+        "from": "caption",
+        "create": "artist-liu-langqing"
+      },
+      {
+        "name": "Xin Yaoyao",
+        "from": "caption",
+        "create": "artist-xin-yaoyao"
+      }
+    ]
+  },
+  "exhibitor-2026-deletaille-gallery": {
+    "name": "Deletaille Gallery",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Johan Van Mullem",
+        "from": "caption?+prose?",
+        "create": "artist-johan-van-mullem"
+      }
+    ]
+  },
+  "exhibitor-2026-esther-verhaeghe": {
+    "name": "Esther Verhaeghe",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Atsushi Mannami",
+        "from": "caption?",
+        "create": "artist-atsushi-mannami"
+      },
+      {
+        "name": "Martina Geccelli",
+        "from": "caption",
+        "create": "artist-martina-geccelli"
+      }
+    ]
+  },
+  "exhibitor-2026-format-oslo": {
+    "name": "Format Oslo",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [
+      "Heidi Bjørgan"
+    ],
+    "artists": [
+      {
+        "name": "Nils Martin",
+        "from": "caption",
+        "create": "artist-nils-martin"
+      },
+      {
+        "name": "Irene Nordli",
+        "from": "caption",
+        "create": "artist-irene-nordli"
+      }
+    ]
+  },
+  "exhibitor-2026-galerist": {
+    "name": "GALERIST",
+    "city": "",
+    "cityCandidates": [
+      "Passage Petits-Champs"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Hera Buyuktascyan",
+        "from": "caption",
+        "create": "artist-hera-buyuktascyan"
+      },
+      {
+        "name": "Elif Uras",
+        "from": "caption",
+        "create": "artist-elif-uras"
+      },
+      {
+        "name": "Lara Ogel",
+        "from": "caption",
+        "create": "artist-lara-ogel"
+      }
+    ]
+  },
+  "exhibitor-2026-galeri-nev": {
+    "name": "Galeri NEV",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Alev Ebüzziya Siesbye",
+        "from": "caption?+prose?",
+        "create": "artist-alev-ebuzziya-siesbye"
+      },
+      {
+        "name": "Mehtap Baydu",
+        "from": "caption?+prose?",
+        "create": "artist-mehtap-baydu"
+      },
+      {
+        "name": "Nermin Kura",
+        "from": "caption?+prose?",
+        "create": "artist-nermin-kura"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-anne-sarah-benichou": {
+    "name": "Galerie Anne-Sarah Bénichou",
+    "city": "",
+    "cityCandidates": [
+      "Paris"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Juliette Minchin",
+        "from": "caption+prose?",
+        "create": "artist-juliette-minchin"
+      },
+      {
+        "name": "Léonore Chastagner",
+        "from": "caption",
+        "reuse": "demo-artist-leonore-chastagner"
+      },
+      {
+        "name": "Léonore Chastagnier",
+        "from": "prose?",
+        "maybeSameAs": "Léonore Chastagner",
+        "create": "artist-leonore-chastagnier"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-aurelien-gendras": {
+    "name": "Galerie Aurélien Gendras",
+    "city": "",
+    "cityCandidates": [
+      "Saint-Ouen"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Michel Lanos",
+        "from": "caption?+prose?",
+        "create": "artist-michel-lanos"
+      },
+      {
+        "name": "Georges Martin",
+        "from": "prose?",
+        "create": "artist-georges-martin"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-capazza": {
+    "name": "Galerie Capazza",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Mia Llauder",
+        "from": "caption+prose?",
+        "create": "artist-mia-llauder"
+      },
+      {
+        "name": "Joan Serra",
+        "from": "caption+prose?",
+        "create": "artist-joan-serra"
+      },
+      {
+        "name": "Claudi Casanovas",
+        "from": "caption",
+        "create": "artist-claudi-casanovas"
+      },
+      {
+        "name": "Claude Casanovas",
+        "from": "prose?",
+        "maybeSameAs": "Claudi Casanovas",
+        "create": "artist-claude-casanovas"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-christine-colon": {
+    "name": "Galerie Christine Colon",
+    "city": "",
+    "cityCandidates": [
+      "Liège"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Daphné Corregan",
+        "from": "caption+prose?",
+        "create": "artist-daphne-corregan"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-fontana-nl": {
+    "name": "Galerie Fontana (nl)",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Carolein Smit",
+        "from": "caption+prose?",
+        "create": "artist-carolein-smit"
+      },
+      {
+        "name": "Asya Marakulina",
+        "from": "caption+prose?",
+        "reuse": "artist-asya-marakulina"
+      },
+      {
+        "name": "Babs Haenen",
+        "from": "caption+prose?",
+        "create": "artist-babs-haenen"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-hioco": {
+    "name": "Galerie Hioco",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": []
+  },
+  "exhibitor-2026-galerie-judith-andreae": {
+    "name": "Galerie Judith Andreae",
+    "city": "",
+    "cityCandidates": [
+      "Bonn"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Janis Löhrer",
+        "from": "caption+prose?",
+        "reuse": "demo-artist-janis-lohrer"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-metzger": {
+    "name": "Galerie Metzger",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Norbert Prangenberg",
+        "from": "caption+caption?+prose?",
+        "create": "artist-norbert-prangenberg"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-michel-giraud-fr": {
+    "name": "Galerie Michel Giraud (fr)",
+    "city": "",
+    "cityCandidates": [
+      "Paris"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Fabienne Loyens",
+        "from": "caption",
+        "create": "artist-fabienne-loyens"
+      },
+      {
+        "name": "Joana Vasconcelos",
+        "from": "caption",
+        "create": "artist-joana-vasconcelos"
+      },
+      {
+        "name": "Francis Dufey",
+        "from": "caption?",
+        "create": "artist-francis-dufey"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-pauline-renard": {
+    "name": "Galerie Pauline Renard",
+    "city": "",
+    "cityCandidates": [
+      "Old Lille"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Juliette Clovis",
+        "from": "caption",
+        "create": "artist-juliette-clovis"
+      },
+      {
+        "name": "Aurelien Veyrat",
+        "from": "caption",
+        "create": "artist-aurelien-veyrat"
+      },
+      {
+        "name": "Davide Monaldi",
+        "from": "caption",
+        "create": "artist-davide-monaldi"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-sylvain-courbois": {
+    "name": "Galerie Sylvain Courbois",
+    "city": "",
+    "cityCandidates": [
+      "Lille"
+    ],
+    "linkedAlready": [],
+    "artists": []
+  },
+  "exhibitor-2026-galerie-vallois": {
+    "name": "Galerie Vallois",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Antonio Segui",
+        "from": "caption+prose?",
+        "create": "artist-antonio-segui"
+      },
+      {
+        "name": "Lee Hoffman",
+        "from": "caption?+prose?",
+        "create": "artist-lee-hoffman"
+      },
+      {
+        "name": "Paloma Chang",
+        "from": "caption+prose?",
+        "create": "artist-paloma-chang"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-du-don": {
+    "name": "Galerie du Don",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Akiko Hirai",
+        "from": "caption?+prose?",
+        "create": "artist-akiko-hirai"
+      },
+      {
+        "name": "Pekka Paikkari",
+        "from": "caption?+prose?",
+        "create": "artist-pekka-paikkari"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-du-passage": {
+    "name": "Galerie du Passage",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Janina Myronova",
+        "from": "caption?",
+        "create": "artist-janina-myronova"
+      },
+      {
+        "name": "Muriel Persil",
+        "from": "caption",
+        "create": "artist-muriel-persil"
+      },
+      {
+        "name": "Etienne Potier",
+        "from": "caption?",
+        "create": "artist-etienne-potier"
+      }
+    ]
+  },
+  "exhibitor-2026-galerie-dudokdegroot": {
+    "name": "Galerie dudokdegroot",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Delphine Courtillot",
+        "from": "caption+prose?",
+        "create": "artist-delphine-courtillot"
+      }
+    ]
+  },
+  "exhibitor-2026-galleria-anna-marra": {
+    "name": "Galleria Anna Marra",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Andrés Anza",
+        "from": "caption+prose?",
+        "create": "artist-andres-anza"
+      },
+      {
+        "name": "Dana Zvulun",
+        "from": "caption+prose?",
+        "create": "artist-dana-zvulun"
+      },
+      {
+        "name": "South America",
+        "from": "prose?",
+        "create": "artist-south-america"
+      }
+    ]
+  },
+  "exhibitor-2026-galleria-antonella-villanova": {
+    "name": "Galleria Antonella Villanova",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Nora Arrieta",
+        "from": "caption+prose?",
+        "create": "artist-nora-arrieta"
+      },
+      {
+        "name": "Daniel Kruger",
+        "from": "caption+prose?",
+        "create": "artist-daniel-kruger"
+      },
+      {
+        "name": "Pol Polloniato",
+        "from": "caption+prose?",
+        "create": "artist-pol-polloniato"
+      },
+      {
+        "name": "Keiyona Costanze Stumpf",
+        "from": "caption+prose?",
+        "create": "artist-keiyona-costanze-stumpf"
+      }
+    ]
+  },
+  "exhibitor-2026-han-collection": {
+    "name": "Han Collection",
+    "city": "",
+    "cityCandidates": [
+      "London"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Shin Sang-ho",
+        "from": "caption+prose?",
+        "create": "artist-shin-sang-ho"
+      },
+      {
+        "name": "Park Young-ho",
+        "from": "caption+prose?",
+        "create": "artist-park-young-ho"
+      },
+      {
+        "name": "Park Seon-Min",
+        "from": "caption+prose?",
+        "create": "artist-park-seon-min"
+      },
+      {
+        "name": "Kim Dong-baik",
+        "from": "caption+prose?",
+        "create": "artist-kim-dong-baik"
+      },
+      {
+        "name": "Kim Sang-man",
+        "from": "caption+prose?",
+        "create": "artist-kim-sang-man"
+      },
+      {
+        "name": "Shin Su-yeon",
+        "from": "caption+prose?",
+        "create": "artist-shin-su-yeon"
+      },
+      {
+        "name": "Lee Nam-mu",
+        "from": "caption+prose?",
+        "create": "artist-lee-nam-mu"
+      }
+    ]
+  },
+  "exhibitor-2026-jarmuschek-partner": {
+    "name": "Jarmuschek + Partner",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Helena Hafemann",
+        "from": "caption+prose?",
+        "create": "artist-helena-hafemann"
+      },
+      {
+        "name": "Malwine Stauss",
+        "from": "caption+prose?",
+        "create": "artist-malwine-stauss"
+      }
+    ]
+  },
+  "exhibitor-2026-jonathan-kugel": {
+    "name": "Jonathan Kugel",
+    "city": "",
+    "cityCandidates": [
+      "Brussels’ Sablon"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Onno Themen",
+        "from": "caption",
+        "create": "artist-onno-themen"
+      },
+      {
+        "name": "Claire Curneen",
+        "from": "caption",
+        "create": "artist-claire-curneen"
+      },
+      {
+        "name": "Carolein Smit",
+        "from": "caption",
+        "create": "artist-carolein-smit"
+      },
+      {
+        "name": "James B Webster",
+        "from": "caption",
+        "create": "artist-james-b-webster"
+      }
+    ]
+  },
+  "exhibitor-2026-k-ppe-contemporary-objects": {
+    "name": "Køppe Contemporary Objects",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Morten Klitgaard",
+        "from": "caption",
+        "create": "artist-morten-klitgaard"
+      },
+      {
+        "name": "Michael Geertsen",
+        "from": "caption",
+        "create": "artist-michael-geertsen"
+      },
+      {
+        "name": "Lone Skov Madsen",
+        "from": "caption",
+        "create": "artist-lone-skov-madsen"
+      },
+      {
+        "name": "Bodil Manz",
+        "from": "caption",
+        "create": "artist-bodil-manz"
+      }
+    ]
+  },
+  "exhibitor-2026-la-peau-de-l-ours": {
+    "name": "La peau de l'ours",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Réjean Peytavin",
+        "from": "caption+prose?",
+        "create": "artist-rejean-peytavin"
+      },
+      {
+        "name": "Mon Rêve",
+        "from": "caption",
+        "create": "artist-mon-reve"
+      }
+    ]
+  },
+  "exhibitor-2026-latvian-centre-for-contemporary-ceramic": {
+    "name": "Latvian Centre for Contemporary Ceramic",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": []
+  },
+  "exhibitor-2026-laurentin-gallery-be": {
+    "name": "Laurentin gallery (be)",
+    "city": "",
+    "cityCandidates": [
+      "Brussels"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Lionel Sabatté",
+        "from": "caption",
+        "create": "artist-lionel-sabatte"
+      }
+    ]
+  },
+  "exhibitor-2026-lefebvre-fils": {
+    "name": "Lefebvre & Fils",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Isolina Minjeong",
+        "from": "caption?+prose?",
+        "create": "artist-isolina-minjeong"
+      }
+    ]
+  },
+  "exhibitor-2026-leonore-chastagner": {
+    "name": "Léonore Chastagner",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Léonore Chastagner",
+        "from": "caption",
+        "reuse": "demo-artist-leonore-chastagner"
+      }
+    ]
+  },
+  "exhibitor-2026-mala-gallery": {
+    "name": "MALA Gallery",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Pablo Picasso",
+        "from": "caption+prose?",
+        "create": "artist-pablo-picasso"
+      }
+    ]
+  },
+  "exhibitor-2026-mba-fine-arts": {
+    "name": "MBA Fine Arts",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Ryoji Koie",
+        "from": "caption+prose?",
+        "create": "artist-ryoji-koie"
+      },
+      {
+        "name": "Nakashima Hiroshi",
+        "from": "caption",
+        "create": "artist-nakashima-hiroshi"
+      },
+      {
+        "name": "Jinnai Sakata",
+        "from": "caption+prose?",
+        "create": "artist-jinnai-sakata"
+      },
+      {
+        "name": "Kazuhiko Sato",
+        "from": "caption+prose?",
+        "create": "artist-kazuhiko-sato"
+      },
+      {
+        "name": "Akira Yamada",
+        "from": "caption+prose?",
+        "create": "artist-akira-yamada"
+      },
+      {
+        "name": "Nakashima Hirosh",
+        "from": "prose?",
+        "maybeSameAs": "Nakashima Hiroshi",
+        "create": "artist-nakashima-hirosh"
+      }
+    ]
+  },
+  "exhibitor-2026-metro": {
+    "name": "METRO",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Manuel Barreiro Paparolo",
+        "from": "caption",
+        "create": "artist-manuel-barreiro-paparolo"
+      },
+      {
+        "name": "Montse Rego",
+        "from": "caption",
+        "create": "artist-montse-rego"
+      }
+    ]
+  },
+  "exhibitor-2026-mercatorfonds": {
+    "name": "Mercatorfonds",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": []
+  },
+  "exhibitor-2026-nika-project-space-ae": {
+    "name": "NIKA Project Space (ae)",
+    "city": "",
+    "cityCandidates": [
+      "Al Khayat Avenue"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Mirna Bamieh",
+        "from": "caption",
+        "create": "artist-mirna-bamieh"
+      },
+      {
+        "name": "Nika Neelova",
+        "from": "caption",
+        "create": "artist-nika-neelova"
+      }
+    ]
+  },
+  "exhibitor-2026-nec-nilsson-et-chiglien": {
+    "name": "NeC nilsson et chiglien",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Wouter Dam",
+        "from": "caption+prose?",
+        "create": "artist-wouter-dam"
+      },
+      {
+        "name": "Louise Hindsgavl",
+        "from": "caption+prose?",
+        "create": "artist-louise-hindsgavl"
+      },
+      {
+        "name": "Carl Richard Soderström",
+        "from": "caption+prose?",
+        "create": "artist-carl-richard-soderstrom"
+      }
+    ]
+  },
+  "exhibitor-2026-osnova": {
+    "name": "Osnova",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Maya Hottarek",
+        "from": "caption",
+        "create": "artist-maya-hottarek"
+      },
+      {
+        "name": "Arina Antonova",
+        "from": "caption",
+        "create": "artist-arina-antonova"
+      }
+    ]
+  },
+  "exhibitor-2026-peach-corner": {
+    "name": "Peach Corner",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Martin Bodilsen Kaldahl",
+        "from": "caption+prose?",
+        "create": "artist-martin-bodilsen-kaldahl"
+      },
+      {
+        "name": "Bente Skjøttgaard",
+        "from": "caption+prose?",
+        "create": "artist-bente-skj-ttgaard"
+      },
+      {
+        "name": "Turi Heisselberg Pedersen",
+        "from": "caption+prose?",
+        "create": "artist-turi-heisselberg-pedersen"
+      },
+      {
+        "name": "Gitte Jungersen",
+        "from": "caption+prose?",
+        "create": "artist-gitte-jungersen"
+      },
+      {
+        "name": "Karen Bennicke",
+        "from": "caption+prose?",
+        "create": "artist-karen-bennicke"
+      }
+    ]
+  },
+  "exhibitor-2026-ponce-robles-and-jorge-lopez-galeria": {
+    "name": "Ponce+Robles and Jorge López Galería",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Chiqui García",
+        "from": "caption",
+        "create": "artist-chiqui-garcia"
+      },
+      {
+        "name": "Javier Bravo de Rueda",
+        "from": "caption",
+        "create": "artist-javier-bravo-de-rueda"
+      },
+      {
+        "name": "Patricia Camet",
+        "from": "caption",
+        "create": "artist-patricia-camet"
+      },
+      {
+        "name": "María García Ibáñez",
+        "from": "caption",
+        "create": "artist-maria-garcia-ibanez"
+      }
+    ]
+  },
+  "exhibitor-2026-puls-ceramics": {
+    "name": "Puls ceramics",
+    "city": "",
+    "cityCandidates": [
+      "Brussels"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Turi Heisselberg Pedersen",
+        "from": "caption?+prose?",
+        "create": "artist-turi-heisselberg-pedersen"
+      },
+      {
+        "name": "Rikke Elgaard",
+        "from": "caption?+prose?",
+        "create": "artist-rikke-elgaard"
+      },
+      {
+        "name": "Pippin Drysdale",
+        "from": "caption?+prose?",
+        "create": "artist-pippin-drysdale"
+      },
+      {
+        "name": "Michael Rice",
+        "from": "caption?+prose?",
+        "create": "artist-michael-rice"
+      },
+      {
+        "name": "Taneta Regel",
+        "from": "caption?",
+        "create": "artist-taneta-regel"
+      },
+      {
+        "name": "Anders Borgese",
+        "from": "caption?",
+        "create": "artist-anders-borgese"
+      },
+      {
+        "name": "Anders Borgesen",
+        "from": "prose?",
+        "maybeSameAs": "Anders Borgese",
+        "create": "artist-anders-borgesen"
+      },
+      {
+        "name": "Gurli Elbækgaard",
+        "from": "prose?",
+        "create": "artist-gurli-elb-kgaard"
+      },
+      {
+        "name": "Morten Klitgaard",
+        "from": "prose?",
+        "create": "artist-morten-klitgaard"
+      },
+      {
+        "name": "Aneta Regel",
+        "from": "prose?",
+        "maybeSameAs": "Taneta Regel",
+        "create": "artist-aneta-regel"
+      },
+      {
+        "name": "Antonino Spoto",
+        "from": "prose?",
+        "create": "artist-antonino-spoto"
+      }
+    ]
+  },
+  "exhibitor-2026-qb-gallery": {
+    "name": "QB Gallery",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Andrea Scholze",
+        "from": "caption+prose?",
+        "create": "artist-andrea-scholze"
+      }
+    ]
+  },
+  "exhibitor-2026-rademakers-gallery": {
+    "name": "Rademakers Gallery",
+    "city": "",
+    "cityCandidates": [
+      "Amsterdam"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Chris Rijk",
+        "from": "caption+prose?",
+        "create": "artist-chris-rijk"
+      }
+    ]
+  },
+  "exhibitor-2026-secci": {
+    "name": "SECCI",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [
+      "Kevin Francis Gray"
+    ],
+    "artists": []
+  },
+  "exhibitor-2026-spax-projects": {
+    "name": "SPAX Projects",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Sachi Moskowitz",
+        "from": "caption?",
+        "create": "artist-sachi-moskowitz"
+      },
+      {
+        "name": "Hermann Grueneberg",
+        "from": "caption?",
+        "create": "artist-hermann-grueneberg"
+      },
+      {
+        "name": "Nathalie Campion",
+        "from": "caption?",
+        "create": "artist-nathalie-campion"
+      }
+    ]
+  },
+  "exhibitor-2026-school-gallery": {
+    "name": "School Gallery",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": []
+  },
+  "exhibitor-2026-sealed-earth": {
+    "name": "Sealed Earth",
+    "city": "",
+    "cityCandidates": [
+      "Athens"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Maggy Ioannou",
+        "from": "caption",
+        "create": "artist-maggy-ioannou"
+      }
+    ]
+  },
+  "exhibitor-2026-skog-art-space": {
+    "name": "Skog Art Space",
+    "city": "",
+    "cityCandidates": [
+      "Galgeberg"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Daniela Bergschneider",
+        "from": "caption?",
+        "create": "artist-daniela-bergschneider"
+      },
+      {
+        "name": "Ebbe Arneberg",
+        "from": "caption",
+        "create": "artist-ebbe-arneberg"
+      },
+      {
+        "name": "Eirik Gjedrem",
+        "from": "caption",
+        "create": "artist-eirik-gjedrem"
+      },
+      {
+        "name": "Linda Morell",
+        "from": "caption",
+        "create": "artist-linda-morell"
+      },
+      {
+        "name": "Nina Malterud",
+        "from": "caption",
+        "create": "artist-nina-malterud"
+      }
+    ]
+  },
+  "exhibitor-2026-sorry-we-re-closed": {
+    "name": "Sorry We're Closed",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Julia Isidrez",
+        "from": "caption+prose?",
+        "create": "artist-julia-isidrez"
+      }
+    ]
+  },
+  "exhibitor-2026-spazio-nobile": {
+    "name": "Spazio Nobile",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "François Azambourg",
+        "from": "prose?",
+        "create": "artist-francois-azambourg"
+      },
+      {
+        "name": "Marie Corbin",
+        "from": "prose?",
+        "create": "artist-marie-corbin"
+      },
+      {
+        "name": "Foyer Brisé",
+        "from": "prose?",
+        "create": "artist-foyer-brise"
+      },
+      {
+        "name": "Eirik Gjedrem",
+        "from": "prose?",
+        "create": "artist-eirik-gjedrem"
+      },
+      {
+        "name": "Matsubayashi Hosai XVI",
+        "from": "prose?",
+        "create": "artist-matsubayashi-hosai-xvi"
+      },
+      {
+        "name": "Katherine Huskie",
+        "from": "prose?",
+        "create": "artist-katherine-huskie"
+      },
+      {
+        "name": "Åsa Jungnelius",
+        "from": "prose?",
+        "create": "artist-asa-jungnelius"
+      },
+      {
+        "name": "Liu-Chien Kuang",
+        "from": "prose?",
+        "create": "artist-liu-chien-kuang"
+      },
+      {
+        "name": "Laura Laine",
+        "from": "prose?",
+        "create": "artist-laura-laine"
+      },
+      {
+        "name": "Isaac Monté",
+        "from": "prose?",
+        "create": "artist-isaac-monte"
+      },
+      {
+        "name": "Päivi Rintaniemi",
+        "from": "prose?",
+        "create": "artist-paivi-rintaniemi"
+      },
+      {
+        "name": "Bela Silva",
+        "from": "prose?",
+        "create": "artist-bela-silva"
+      },
+      {
+        "name": "Piet Stockmans",
+        "from": "prose?",
+        "create": "artist-piet-stockmans"
+      },
+      {
+        "name": "Ann Beate Tempelhaug",
+        "from": "prose?",
+        "create": "artist-ann-beate-tempelhaug"
+      },
+      {
+        "name": "Kiki van Eijk",
+        "from": "prose?",
+        "create": "artist-kiki-van-eijk"
+      },
+      {
+        "name": "Philipp Weber",
+        "from": "prose?",
+        "create": "artist-philipp-weber"
+      }
+    ]
+  },
+  "exhibitor-2026-the-delville-collection-be": {
+    "name": "The Delville Collection (be)",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Hori Hichiro Shino",
+        "from": "caption",
+        "create": "artist-hori-hichiro-shino"
+      },
+      {
+        "name": "Jiana Kim",
+        "from": "caption",
+        "create": "artist-jiana-kim"
+      },
+      {
+        "name": "Kakekurezaki Ryuichi",
+        "from": "caption",
+        "create": "artist-kakekurezaki-ryuichi"
+      },
+      {
+        "name": "Kato Mami",
+        "from": "caption",
+        "create": "artist-kato-mami"
+      },
+      {
+        "name": "Minegishi Seiko",
+        "from": "caption",
+        "create": "artist-minegishi-seiko"
+      }
+    ]
+  },
+  "exhibitor-2026-thomas-fritsch": {
+    "name": "Thomas Fritsch",
+    "city": "",
+    "cityCandidates": [
+      "French Decorative Arts"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Pol Chambost",
+        "from": "caption",
+        "create": "artist-pol-chambost"
+      },
+      {
+        "name": "Jean Derval",
+        "from": "caption",
+        "create": "artist-jean-derval"
+      },
+      {
+        "name": "Jacques Blin",
+        "from": "caption",
+        "create": "artist-jacques-blin"
+      }
+    ]
+  },
+  "exhibitor-2026-tramuntana-gallery": {
+    "name": "Tramuntana Gallery",
+    "city": "",
+    "cityCandidates": [
+      "March"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Berta Blanca T. Ivanow",
+        "from": "caption",
+        "create": "artist-berta-blanca-t-ivanow"
+      },
+      {
+        "name": "Claudi Casanovas",
+        "from": "caption",
+        "create": "artist-claudi-casanovas"
+      }
+    ]
+  },
+  "exhibitor-2026-yod-gallery": {
+    "name": "YOD Gallery",
+    "city": "",
+    "cityCandidates": [
+      "Omotesando"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Aya Murata",
+        "from": "caption",
+        "reuse": "e370f871-0b3f-4a95-9ddc-09b48bd070ad"
+      },
+      {
+        "name": "Fabienne Withofs",
+        "from": "caption",
+        "reuse": "eab66bda-28d1-418b-b7f6-6739c8a03831"
+      },
+      {
+        "name": "Manami Okayasu",
+        "from": "caption",
+        "reuse": "a4a50a52-70fe-47f9-add7-1cc9e32751f5"
+      },
+      {
+        "name": "Kouzo Takeuchi",
+        "from": "caption",
+        "reuse": "2986f154-9637-4377-ab9c-001de5925413"
+      },
+      {
+        "name": "Kunihiro Akiniga",
+        "from": "caption",
+        "create": "artist-kunihiro-akiniga"
+      },
+      {
+        "name": "Rie Aizawa",
+        "from": "caption",
+        "create": "artist-rie-aizawa"
+      }
+    ]
+  },
+  "exhibitor-2026-yvonne-hohner-contemporary": {
+    "name": "YVONNE HOHNER CONTEMPORARY",
+    "city": "",
+    "cityCandidates": [
+      "Karlsruhe"
+    ],
+    "linkedAlready": [],
+    "artists": [
+      {
+        "name": "Fahar Al-Salih",
+        "from": "caption?",
+        "create": "artist-fahar-al-salih"
+      },
+      {
+        "name": "Maya Fenderl",
+        "from": "caption?",
+        "reuse": "b54ba7f9-8f69-4104-b2cd-c8281eea9c52"
+      }
+    ]
+  },
+  "exhibitor-2026-arsenic-galerie": {
+    "name": "arsenic galerie",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": []
+  },
+  "exhibitor-2026-tribute-to-enric-mestre-1936-2025": {
+    "name": "tribute to Enric Mestre (1936 - 2025)",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": []
+  },
+  "exhibitor-2026-editions-ateliers-d-art-de-france": {
+    "name": "Éditions Ateliers d’Art de France",
+    "city": "",
+    "cityCandidates": [],
+    "linkedAlready": [],
+    "artists": []
+  }
+}
