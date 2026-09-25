@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import SanityImage from '../../components/SanityImage.astro';
 import HubNav from '../../components/HubNav.astro';
+import GuestInterview from '../../components/GuestInterview.astro';
 import PortableText from '../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations } from '../../lib/i18n';
@@ -16,8 +17,8 @@ import { styleAttrs } from '../../lib/textStyle';
  * on four columns beside the intro (name and "°1983, France" on a rule, the
  * lead, the biography in two columns), two works with their captions, the
  * "sculptural practice" section on the right eight columns, and the film
- * still with its play button. The interview tab shows the interview text in
- * the intro column instead of the biography. Everything comes from the artist
+ * still with its play button. The interview tab is the interview frame of its
+ * own (GuestInterview.astro). Everything comes from the artist
  * document the edition points at: `intro`, the `sections` stack (biography,
  * sculptural practice), `works`, `video`, `interview`.
  */
@@ -64,6 +65,8 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
   {
     !artist ? (
       <p class="empty content-wrap">{t('artists.empty')}</p>
+    ) : tab === 'interview' ? (
+      <GuestInterview lang={lang} artist={artist} />
     ) : (
       <div id={tab} class="guest-page page-grid">
         {artist.portrait?.asset ? (
@@ -94,39 +97,27 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
             {origin && <p>{origin}</p>}
           </div>
 
-          {tab === 'interview' ? (
-            artist.interview ? (
-              <div class="lead interview">
-                <PortableText value={artist.interview} fieldStyle={artist.interviewStyle} />
-              </div>
-            ) : (
-              <p class="lead">{t('artists.interviewSoon')}</p>
-            )
-          ) : (
+          {artist.intro && (
+            <div class="lead">
+              <PortableText value={artist.intro} fieldStyle={artist.introStyle} />
+            </div>
+          )}
+          {biography ? (
             <>
-              {artist.intro && (
-                <div class="lead">
-                  <PortableText value={artist.intro} fieldStyle={artist.introStyle} />
-                </div>
-              )}
-              {biography ? (
-                <>
-                  <h3 {...styleAttrs(biography.headingStyle)}>{biography.heading ?? t('artists.biography')}</h3>
-                  <div class="columns body-copy">
-                    <PortableText value={biography.body} fieldStyle={biography.bodyStyle} />
-                  </div>
-                </>
-              ) : (
-                artist.bio && (
-                  <>
-                    <h3>{t('artists.biography')}</h3>
-                    <div class="columns body-copy">
-                      <PortableText value={artist.bio} fieldStyle={artist.bioStyle} />
-                    </div>
-                  </>
-                )
-              )}
+              <h3 {...styleAttrs(biography.headingStyle)}>{biography.heading ?? t('artists.biography')}</h3>
+              <div class="columns body-copy">
+                <PortableText value={biography.body} fieldStyle={biography.bodyStyle} />
+              </div>
             </>
+          ) : (
+            artist.bio && (
+              <>
+                <h3>{t('artists.biography')}</h3>
+                <div class="columns body-copy">
+                  <PortableText value={artist.bio} fieldStyle={artist.bioStyle} />
+                </div>
+              </>
+            )
           )}
         </section>
 
@@ -136,7 +127,7 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
             only, not by scrolling (2026-09-23); on a touch screen, or without
             JS, it scrolls sideways. The arrow shows once the row has more
             than fits, which with two works it does not. */}
-        {tab !== 'interview' && works.length > 0 && (
+        {works.length > 0 && (
           <section class="gallery col-span-full" data-gallery>
             <div class="gallery-track" data-gallery-track>
               {works.slice(0, 5).map((w: any) => (
@@ -150,8 +141,7 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
           </section>
         )}
 
-        {tab !== 'interview' &&
-          rest.map((s: any) => (
+        {rest.map((s: any) => (
             <section class="practice col-start-5 col-span-8" id={s.anchor || undefined}>
               <h3 {...styleAttrs(s.headingStyle)}>{s.heading}</h3>
               <div class="columns body-copy">

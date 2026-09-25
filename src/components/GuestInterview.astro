@@ -1,0 +1,303 @@
+---
+import SanityImage from './SanityImage.astro';
+import PortableText from './PortableText.astro';
+import type { LocaleId } from '../lib/locales';
+import { useTranslations } from '../lib/i18n';
+
+/**
+ * The guest-of-honour interview tab, as the 2027 interview frame draws it:
+ * the pull quote with the artist's name under it, the introduction on the
+ * right eight columns, the "interview" title on its rule, then the questions
+ * and the pictures on three columns.
+ *
+ * All of it is the artist's one Interview text, read by the roles an editor
+ * already has - nothing is a field of its own:
+ *
+ * - before the first Heading: a Quote is the pull quote, anything else the
+ *   introduction;
+ * - the first Heading is the title on the rule ("interview" when there is none);
+ * - after it, a question is a Subheading, a Minor heading or a paragraph that
+ *   is bold throughout, and the paragraphs that follow are its answer - the
+ *   speaker's initials ("MV") in bold at their start;
+ * - an image is a picture of its own: two columns wide when it is landscape,
+ *   one when it is not. Its caption line is Work title, year, Caption (the
+ *   materials) and © Photo credit.
+ *
+ * The questions and pictures fill rows of three columns in text order. A
+ * picture two columns wide takes the question after it underneath itself,
+ * beside a question that runs down both - the frame's first row.
+ */
+interface Props {
+  lang: LocaleId;
+  artist: any;
+}
+
+const { lang, artist } = Astro.props;
+const t = useTranslations(lang);
+const blocks: any[] = (artist?.interview ?? []).filter(Boolean);
+
+const isText = (b: any) => b?._type === 'block';
+const isFigure = (b: any) => b?._type === 'figure' && b.asset;
+const isTitle = (b: any) => isText(b) && (b.style === 'h1' || b.style === 'h2');
+const spans = (b: any) => (b.children ?? []).filter((c: any) => (c.text ?? '').trim());
+const isQuestion = (b: any) =>
+  isText(b) &&
+  !b.listItem &&
+  (b.style === 'h3' ||
+    b.style === 'h4' ||
+    ((b.style ?? 'normal') === 'normal' && spans(b).length > 0 && spans(b).every((c: any) => c.marks?.includes('strong'))));
+
+// Header, title and body. Without a Heading the body starts at the first
+// question or picture, so a text written without one still lays out.
+const titleAt = blocks.findIndex(isTitle);
+const bodyAt = titleAt >= 0 ? titleAt + 1 : Math.max(0, blocks.findIndex((b) => isQuestion(b) || isFigure(b)));
+const head = blocks.slice(0, titleAt >= 0 ? titleAt : bodyAt);
+const title = titleAt >= 0 ? blocks[titleAt] : null;
+// Rendered as ordinary paragraphs: the role decided the place, the place
+// decides the look.
+const plain = (b: any) => ({ ...b, style: 'normal' });
+const quotes = head.filter((b) => isText(b) && b.style === 'blockquote').map(plain);
+const intro = head.filter((b) => !(isText(b) && b.style === 'blockquote'));
+
+type Item = { kind: 'qa'; question?: any; answer: any[] } | { kind: 'figure'; image: any; wide: boolean };
+const items: Item[] = [];
+for (const b of blocks.slice(bodyAt)) {
+  if (isFigure(b)) {
+    // image-<hash>-<w>x<h>-<ext>: the ref carries the size, the query does not.
+    const [w, h] = (b.asset._ref?.split('-')[2] ?? '').split('x').map(Number);
+    const aspect = w && h ? w / h : 1;
+    items.push({ kind: 'figure', image: { ...b, dimensions: { aspectRatio: aspect } }, wide: aspect > 1.2 });
+  } else if (isQuestion(b)) items.push({ kind: 'qa', question: plain(b), answer: [] });
+  else if (isText(b)) {
+    const last = items[items.length - 1];
+    if (last?.kind === 'qa') last.answer.push(b);
+    else items.push({ kind: 'qa', answer: [b] });
+  }
+}
+
+// Rows of three columns. Each cell carries its place as custom properties,
+// which the grid reads above the phone width and ignores below it.
+type Cell = Item & { col: number; span: number; row: number; rows: number };
+const rows: Cell[][] = [];
+for (let i = 0; i < items.length; i++) {
+  let row = rows[rows.length - 1];
+  const span = items[i].kind === 'figure' && (items[i] as any).wide ? 2 : 1;
+  const used = row ? row.filter((c) => c.row === 1).reduce((n, c) => n + c.span, 0) : 3;
+  if (!row || used + span > 3) rows.push((row = []));
+  const col = (row.length ? used : 0) + 1;
+  row.push({ ...items[i], col, span, row: 1, rows: 1 });
+  const next = items[i + 1];
+  if (span === 2 && next?.kind === 'qa') {
+    // A wide picture keeps the next question under it, and what stands
+    // beside the picture runs down both rows.
+    row.forEach((c) => c !== row[row.length - 1] && (c.rows = 2));
+    row.push({ ...next, col, span: 1, row: 2, rows: 1 });
+    i++;
+    // Once a question sits under it, the row is closed.
+    rows.push([]);
+  }
+}
+const filled = rows.filter((r) => r.length);
+/** "*Work title*, year, materials © credit": the work first, since the artist is the page. */
+const details = (img: any) => [img.year, img.caption].filter(Boolean).join(', ');
+const hasCaption = (img: any) => !!(img.workTitle || details(img) || img.credit);
+const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--rows:${c.rows}`;
+---
+
+<article class="guest-interview page-grid">
+  {
+    quotes.length > 0 && (
+      <header class="quote col-span-full">
+        <div class="pull">
+          <PortableText value={quotes} lang={lang} />
+        </div>
+        <p class="who">{artist.name}</p>
+      </header>
+    )
+  }
+
+  {
+    intro.length > 0 && (
+      <div class="intro col-start-5 col-span-8">
+        <PortableText value={intro} lang={lang} />
+      </div>
+    )
+  }
+
+  <h2 class="panel-title col-span-full">
+    {title ? (title.children ?? []).map((c: any) => c.text ?? '').join('') : t('tabs.interview')}
+  </h2>
+
+  {
+    filled.length > 0 ? (
+      filled.map((row) => (
+        <div class:list={['row col-span-full', { stacked: row.some((c) => c.row === 2) }]}>
+          {row.map((c) =>
+            c.kind === 'figure' ? (
+              <figure class:list={['cell', { wide: c.span === 2 }]} style={place(c)}>
+                <SanityImage
+                  image={c.image}
+                  aspect={c.image.dimensions.aspectRatio}
+                  widths={c.span === 2 ? [700, 1000, 1400, 1814] : [450, 700, 900]}
+                  sizes={c.span === 2 ? '(max-width: 700px) 100vw, 64vw' : '(max-width: 700px) 100vw, 31vw'}
+                />
+                {hasCaption(c.image) && (
+                  <figcaption>
+                    {c.image.workTitle && <em>{c.image.workTitle}</em>}
+                    {c.image.workTitle && details(c.image) && ', '}
+                    {details(c.image)}
+                    {c.image.credit && ` © ${c.image.credit}`}
+                  </figcaption>
+                )}
+              </figure>
+            ) : (
+              <div class="cell qa" style={place(c)}>
+                {c.question && (
+                  <div class="question">
+                    <PortableText value={[c.question]} lang={lang} />
+                  </div>
+                )}
+                {c.answer.length > 0 && (
+                  <div class="answer">
+                    <PortableText value={c.answer} lang={lang} />
+                  </div>
+                )}
+              </div>
+            ),
+          )}
+        </div>
+      ))
+    ) : (
+      <p class="soon col-span-full">{t('artists.interviewSoon')}</p>
+    )
+  }
+</article>
+
+<style>
+  /* Measured off the 1440px interview frame. */
+  .guest-interview {
+    padding-top: 22px;
+    padding-bottom: 100px;
+  }
+  .pull {
+    letter-spacing: -0.03em;
+    font-size: 40px;
+    line-height: 48px;
+  }
+  .who {
+    margin-top: 4px;
+    font-size: 30px;
+    line-height: 38px;
+  }
+  .intro {
+    letter-spacing: -0.03em;
+    margin-top: 28px;
+    font-size: 30px;
+    line-height: 38px;
+  }
+  .intro :global(p + p) {
+    margin-top: 20px;
+  }
+  .panel-title {
+    margin: 60px 0 0;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 36px 40px;
+    align-items: start;
+    margin-top: 38px;
+  }
+  /* The two rows beside a wide picture: the picture's, then whatever is
+     left, so the picture's row stays as tall as the picture. */
+  .row.stacked {
+    grid-template-rows: auto 1fr;
+  }
+  .row + .row {
+    margin-top: 90px;
+  }
+  .cell {
+    grid-column: var(--col) / span var(--span);
+    grid-row: var(--row) / span var(--rows);
+    margin: 0;
+  }
+  /* A size above the site's body text: the frame sets the interview at 24px. */
+  .qa {
+    letter-spacing: -0.03em;
+    font-size: 24px;
+    line-height: 30px;
+  }
+  /* Questions and the speaker's initials in the semibold, untracked: the
+     frame's bold is a weight the site does not ship, and 600 wraps its
+     lines exactly where the frame does. "Bold" on its own would pick 900. */
+  .question,
+  .qa :global(strong) {
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  .answer {
+    margin-top: 24px;
+  }
+  .answer :global(p + p) {
+    margin-top: 30px;
+  }
+  /* The speaker's initials, set off from the answer as the frame does. */
+  .answer :global(p > strong:first-child) {
+    margin-right: 1.5em;
+  }
+  figure :global(img) {
+    width: 100%;
+    height: auto;
+  }
+  figcaption {
+    letter-spacing: -0.03em;
+    text-align: center;
+    margin-top: 8px;
+    font-size: 16px;
+    line-height: 20px;
+  }
+  .soon {
+    margin-top: 38px;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+  }
+  @media (width<=900px) {
+    .row {
+      gap: 30px 16px;
+    }
+  }
+  @media (width<=700px) {
+    .pull {
+      font-size: 27px;
+      line-height: 1.15;
+    }
+    .who,
+    .intro {
+      font-size: 20px;
+      line-height: 1.3;
+    }
+    .qa {
+      font-size: 18px;
+      line-height: 1.3;
+    }
+    .intro {
+      grid-column: 1 / -1;
+    }
+    .panel-title {
+      margin-top: 44px;
+    }
+    .row {
+      grid-template-columns: 1fr;
+    }
+    .row.stacked {
+      grid-template-rows: none;
+    }
+    .row + .row {
+      margin-top: 44px;
+    }
+    .cell {
+      grid-column: 1;
+      grid-row: auto;
+    }
+  }
+</style>
