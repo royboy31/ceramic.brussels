@@ -132,10 +132,17 @@ const tabs = items
     .section-head nav {
       grid-column: 1 / -1;
     }
+    /* The tabs wrap onto further lines rather than running off the edge to
+       be scrolled to, as the exhibitors' filters do (client feedback,
+       2026-09-25). */
     .section-head nav {
+      flex-wrap: wrap;
       justify-content: flex-start;
+      gap: 8px;
       padding-top: 18px;
-      overflow-x: auto;
+    }
+    .section-head a {
+      white-space: normal;
     }
     .section-head h1 {
       white-space: normal;
