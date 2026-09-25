@@ -616,6 +616,11 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   body.dark-page :is(.site-header, footer).acid-wash {
     background: var(--dark-ground);
   }
+  /* The black page and the black footer are one field; a thin white rule
+     marks where the footer starts (client feedback, 2026-09-25). */
+  body.dark-page footer.site-footer {
+    border-top: 1px solid currentColor;
+  }
   body.dark-page .site-header {
     border-bottom: 1px solid #fff;
   }

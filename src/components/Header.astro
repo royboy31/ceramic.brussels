@@ -200,6 +200,11 @@ const others = LOCALES.filter((l) => l.id !== lang);
     background: var(--color-acid);
     color: #050505;
   }
+  /* White on the black VIP pages (client feedback, 2026-09-25). */
+  :global(body.dark-page) .site-lang__list a:hover,
+  :global(body.dark-page) .site-lang__list a:focus-visible {
+    background: #fff;
+  }
   :global(body[data-scrolled]) .site-lang {
     font-size: 18px;
     line-height: 28px;
