@@ -187,7 +187,7 @@ templates - are under **Setup**. Every page has one entry; the few items
 that open a shared document from a second place name it ("… (Site
 settings)"). For a hub the section's page is the first tab's page: the hub
 URL *is* the first tab, so `/en/about` and the "the fair" document are one
-page. For a listing route (exhibitors, artists, news, contact) it is the
+page. For a listing route (exhibitors, artists, news) it is the
 one `page` in that section, whose lead paragraph, SEO and section stack
 wrap the list the route generates (`getMainPage` in `queries.ts`). A section
 with no page yet opens a fresh document with a fixed id (`main-<section>`)
