@@ -336,9 +336,6 @@ const altPaths = hubAltPaths('visit', tab);
                 {groups.length > 1 && (
                   <div class="filters" id="faq-filters">
                     <span>{t('faq.filters')}:</span>
-                    <button type="button" data-filter="" aria-pressed="true">
-                      {t('faq.all')}
-                    </button>
                     {groups.map((g) => (
                       <button type="button" data-filter={g.value} aria-pressed="false">
                         {g.label}
@@ -580,20 +577,32 @@ const altPaths = hubAltPaths('visit', tab);
     margin-bottom: 40px;
     display: flex;
   }
+  /* The exhibitors' filter row (ExhibitorsListing.astro), pill for pill,
+     × and all (client feedback, 2026-09-25). */
   .filters span {
-    margin-right: 8px;
+    margin-right: 6px;
     text-transform: uppercase;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -0.05em;
   }
   .filters button {
     border: 1px solid;
     border-radius: 999px;
-    padding: 5px 16px;
+    padding: 1px 12px 0;
     font-size: 18px;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
     background: #fff;
     cursor: pointer;
     transition:
       color 0.18s,
-      background 0.18s;
+      background-color 0.18s;
+  }
+  /* A chosen pill says it can be undone: a × before its label. */
+  .filters button[aria-pressed='true']::before {
+    content: '×';
+    margin-right: 0.3em;
   }
   .filters button[aria-pressed='true'],
   .filters button:hover {
@@ -610,14 +619,17 @@ const altPaths = hubAltPaths('visit', tab);
     break-inside: avoid;
     margin-bottom: clamp(40px, 4vw, 64px);
   }
+  /* The awards page's titles (client feedback, 2026-09-25): semibold, not
+     the Black a 700 fell through to, and on the site's 2px rule. */
   .faq-group h2 {
-    letter-spacing: -0.03em;
-    border-bottom: 1px solid;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+    border-bottom: 2px solid;
     margin: 0;
-    padding-bottom: 10px;
-    font-size: clamp(22px, 2vw, 29px);
-    font-weight: 700;
-    line-height: 1.1;
+    padding-bottom: 4px;
+    font-size: clamp(28px, 2.5vw, 36px);
+    font-weight: 600;
+    line-height: 1.2;
   }
   .faq {
     border-bottom: 1px solid;
@@ -700,15 +712,16 @@ const altPaths = hubAltPaths('visit', tab);
 </style>
 
 <script>
-  // FAQ filter pills: one category at a time, "all" showing every group.
+  // FAQ filter pills: one category at a time; the chosen pill, pressed
+  // again (its ×), clears the filter and every group shows.
   const bar = document.getElementById('faq-filters');
   const groups = Array.from(document.querySelectorAll<HTMLElement>('#faq-groups .faq-group'));
   if (bar && groups.length) {
     const buttons = Array.from(bar.querySelectorAll<HTMLButtonElement>('button[data-filter]'));
     for (const button of buttons) {
       button.addEventListener('click', () => {
-        const value = button.dataset.filter ?? '';
-        for (const b of buttons) b.setAttribute('aria-pressed', String(b === button));
+        const value = button.getAttribute('aria-pressed') === 'true' ? '' : (button.dataset.filter ?? '');
+        for (const b of buttons) b.setAttribute('aria-pressed', String(!!value && b === button));
         for (const group of groups) group.hidden = !!value && group.dataset.category !== value;
       });
     }
