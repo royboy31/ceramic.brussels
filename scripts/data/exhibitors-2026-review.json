@@ -1,27 +1,29 @@
 {
   "exhibitor-2026-a-iynedjian-fine-art-aifa": {
     "name": "A. Iynedjian Fine Art (AIFA)",
-    "city": "",
+    "city": "Verbier",
     "cityCandidates": [],
     "linkedAlready": [
       "Shinya Tanoue"
     ],
-    "artists": []
+    "artists": [],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-analora": {
     "name": "ANALORA",
-    "city": "",
+    "city": "Paris",
     "cityCandidates": [
       "Paris"
     ],
     "linkedAlready": [
       "Frédérique Fleury"
     ],
-    "artists": []
+    "artists": [],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-anna-laudel-tr": {
     "name": "ANNA LAUDEL (tr)",
-    "city": "",
+    "city": "Istanbul",
     "cityCandidates": [
       "Beyoglu",
       "Düsseldorf"
@@ -43,18 +45,20 @@
         "from": "caption",
         "create": "artist-anke-eilergerhard"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-al-tiba9-gallery": {
     "name": "Al-Tiba9 Gallery",
-    "city": "",
+    "city": "Barcelona",
     "cityCandidates": [
       "Barcelona"
     ],
     "linkedAlready": [
       "Barry Wolfryd"
     ],
-    "artists": []
+    "artists": [],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-arnoldsche-art-publishers": {
     "name": "Arnoldsche Art Publishers",
@@ -65,22 +69,30 @@
       {
         "name": "Shozo Michikawa Kohiki",
         "from": "caption?",
-        "create": "artist-shozo-michikawa-kohiki"
+        "create": "artist-shozo-michikawa-kohiki",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Irene Nordli Trouble",
         "from": "caption?",
-        "create": "artist-irene-nordli-trouble"
+        "create": "artist-irene-nordli-trouble",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Ute-Kathrin Beck Sputnik",
         "from": "caption?",
-        "create": "artist-ute-kathrin-beck-sputnik"
+        "create": "artist-ute-kathrin-beck-sputnik",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Philsoo Heo Weightnessness",
         "from": "caption?",
-        "create": "artist-philsoo-heo-weightnessness"
+        "create": "artist-philsoo-heo-weightnessness",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
@@ -123,13 +135,15 @@
       {
         "name": "Robert Motherwell",
         "from": "prose?",
-        "create": "artist-robert-motherwell"
+        "create": "artist-robert-motherwell",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
   "exhibitor-2026-brazil-modernist-pereira-matis": {
     "name": "Brazil Modernist / Pereira & Matis",
-    "city": "",
+    "city": "Paris",
     "cityCandidates": [
       "Paris"
     ],
@@ -145,7 +159,8 @@
         "from": "caption",
         "create": "artist-nicole-toldi"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-chaxartxrtm": {
     "name": "CHAxARTxRTM",
@@ -201,7 +216,9 @@
       {
         "name": "Johan Van Mullem",
         "from": "caption?+prose?",
-        "create": "artist-johan-van-mullem"
+        "create": "artist-johan-van-mullem",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
@@ -214,7 +231,9 @@
       {
         "name": "Atsushi Mannami",
         "from": "caption?",
-        "create": "artist-atsushi-mannami"
+        "create": "artist-atsushi-mannami",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Martina Geccelli",
@@ -245,7 +264,7 @@
   },
   "exhibitor-2026-galerist": {
     "name": "GALERIST",
-    "city": "",
+    "city": "Istanbul",
     "cityCandidates": [
       "Passage Petits-Champs"
     ],
@@ -266,7 +285,8 @@
         "from": "caption",
         "create": "artist-lara-ogel"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-galeri-nev": {
     "name": "Galeri NEV",
@@ -277,23 +297,29 @@
       {
         "name": "Alev Ebüzziya Siesbye",
         "from": "caption?+prose?",
-        "create": "artist-alev-ebuzziya-siesbye"
+        "create": "artist-alev-ebuzziya-siesbye",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Mehtap Baydu",
         "from": "caption?+prose?",
-        "create": "artist-mehtap-baydu"
+        "create": "artist-mehtap-baydu",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Nermin Kura",
         "from": "caption?+prose?",
-        "create": "artist-nermin-kura"
+        "create": "artist-nermin-kura",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
   "exhibitor-2026-galerie-anne-sarah-benichou": {
     "name": "Galerie Anne-Sarah Bénichou",
-    "city": "",
+    "city": "Paris",
     "cityCandidates": [
       "Paris"
     ],
@@ -313,13 +339,16 @@
         "name": "Léonore Chastagnier",
         "from": "prose?",
         "maybeSameAs": "Léonore Chastagner",
-        "create": "artist-leonore-chastagnier"
+        "create": "artist-leonore-chastagnier",
+        "skip": true,
+        "why": "unsure source"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-galerie-aurelien-gendras": {
     "name": "Galerie Aurélien Gendras",
-    "city": "",
+    "city": "Saint-Ouen",
     "cityCandidates": [
       "Saint-Ouen"
     ],
@@ -328,14 +357,19 @@
       {
         "name": "Michel Lanos",
         "from": "caption?+prose?",
-        "create": "artist-michel-lanos"
+        "create": "artist-michel-lanos",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Georges Martin",
         "from": "prose?",
-        "create": "artist-georges-martin"
+        "create": "artist-georges-martin",
+        "skip": true,
+        "why": "unsure source"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-galerie-capazza": {
     "name": "Galerie Capazza",
@@ -362,13 +396,15 @@
         "name": "Claude Casanovas",
         "from": "prose?",
         "maybeSameAs": "Claudi Casanovas",
-        "create": "artist-claude-casanovas"
+        "create": "artist-claude-casanovas",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
   "exhibitor-2026-galerie-christine-colon": {
     "name": "Galerie Christine Colon",
-    "city": "",
+    "city": "Liège",
     "cityCandidates": [
       "Liège"
     ],
@@ -379,7 +415,8 @@
         "from": "caption+prose?",
         "create": "artist-daphne-corregan"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-galerie-fontana-nl": {
     "name": "Galerie Fontana (nl)",
@@ -413,7 +450,7 @@
   },
   "exhibitor-2026-galerie-judith-andreae": {
     "name": "Galerie Judith Andreae",
-    "city": "",
+    "city": "Bonn",
     "cityCandidates": [
       "Bonn"
     ],
@@ -424,7 +461,8 @@
         "from": "caption+prose?",
         "reuse": "demo-artist-janis-lohrer"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-galerie-metzger": {
     "name": "Galerie Metzger",
@@ -441,7 +479,7 @@
   },
   "exhibitor-2026-galerie-michel-giraud-fr": {
     "name": "Galerie Michel Giraud (fr)",
-    "city": "",
+    "city": "Paris",
     "cityCandidates": [
       "Paris"
     ],
@@ -460,13 +498,16 @@
       {
         "name": "Francis Dufey",
         "from": "caption?",
-        "create": "artist-francis-dufey"
+        "create": "artist-francis-dufey",
+        "skip": true,
+        "why": "unsure source"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-galerie-pauline-renard": {
     "name": "Galerie Pauline Renard",
-    "city": "",
+    "city": "Lille",
     "cityCandidates": [
       "Old Lille"
     ],
@@ -487,16 +528,18 @@
         "from": "caption",
         "create": "artist-davide-monaldi"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-galerie-sylvain-courbois": {
     "name": "Galerie Sylvain Courbois",
-    "city": "",
+    "city": "Lille",
     "cityCandidates": [
       "Lille"
     ],
     "linkedAlready": [],
-    "artists": []
+    "artists": [],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-galerie-vallois": {
     "name": "Galerie Vallois",
@@ -512,7 +555,9 @@
       {
         "name": "Lee Hoffman",
         "from": "caption?+prose?",
-        "create": "artist-lee-hoffman"
+        "create": "artist-lee-hoffman",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Paloma Chang",
@@ -530,12 +575,16 @@
       {
         "name": "Akiko Hirai",
         "from": "caption?+prose?",
-        "create": "artist-akiko-hirai"
+        "create": "artist-akiko-hirai",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Pekka Paikkari",
         "from": "caption?+prose?",
-        "create": "artist-pekka-paikkari"
+        "create": "artist-pekka-paikkari",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
@@ -548,7 +597,9 @@
       {
         "name": "Janina Myronova",
         "from": "caption?",
-        "create": "artist-janina-myronova"
+        "create": "artist-janina-myronova",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Muriel Persil",
@@ -558,7 +609,9 @@
       {
         "name": "Etienne Potier",
         "from": "caption?",
-        "create": "artist-etienne-potier"
+        "create": "artist-etienne-potier",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
@@ -594,7 +647,9 @@
       {
         "name": "South America",
         "from": "prose?",
-        "create": "artist-south-america"
+        "create": "artist-south-america",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
@@ -628,7 +683,7 @@
   },
   "exhibitor-2026-han-collection": {
     "name": "Han Collection",
-    "city": "",
+    "city": "London",
     "cityCandidates": [
       "London"
     ],
@@ -669,7 +724,8 @@
         "from": "caption+prose?",
         "create": "artist-lee-nam-mu"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-jarmuschek-partner": {
     "name": "Jarmuschek + Partner",
@@ -691,7 +747,7 @@
   },
   "exhibitor-2026-jonathan-kugel": {
     "name": "Jonathan Kugel",
-    "city": "",
+    "city": "Brussels",
     "cityCandidates": [
       "Brussels’ Sablon"
     ],
@@ -717,7 +773,8 @@
         "from": "caption",
         "create": "artist-james-b-webster"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-k-ppe-contemporary-objects": {
     "name": "Køppe Contemporary Objects",
@@ -774,7 +831,7 @@
   },
   "exhibitor-2026-laurentin-gallery-be": {
     "name": "Laurentin gallery (be)",
-    "city": "",
+    "city": "Brussels",
     "cityCandidates": [
       "Brussels"
     ],
@@ -785,7 +842,8 @@
         "from": "caption",
         "create": "artist-lionel-sabatte"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-lefebvre-fils": {
     "name": "Lefebvre & Fils",
@@ -796,7 +854,9 @@
       {
         "name": "Isolina Minjeong",
         "from": "caption?+prose?",
-        "create": "artist-isolina-minjeong"
+        "create": "artist-isolina-minjeong",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
@@ -861,7 +921,9 @@
         "name": "Nakashima Hirosh",
         "from": "prose?",
         "maybeSameAs": "Nakashima Hiroshi",
-        "create": "artist-nakashima-hirosh"
+        "create": "artist-nakashima-hirosh",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
@@ -892,7 +954,7 @@
   },
   "exhibitor-2026-nika-project-space-ae": {
     "name": "NIKA Project Space (ae)",
-    "city": "",
+    "city": "Dubai",
     "cityCandidates": [
       "Al Khayat Avenue"
     ],
@@ -908,7 +970,8 @@
         "from": "caption",
         "create": "artist-nika-neelova"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-nec-nilsson-et-chiglien": {
     "name": "NeC nilsson et chiglien",
@@ -1014,7 +1077,7 @@
   },
   "exhibitor-2026-puls-ceramics": {
     "name": "Puls ceramics",
-    "city": "",
+    "city": "Brussels",
     "cityCandidates": [
       "Brussels"
     ],
@@ -1023,61 +1086,84 @@
       {
         "name": "Turi Heisselberg Pedersen",
         "from": "caption?+prose?",
-        "create": "artist-turi-heisselberg-pedersen"
+        "create": "artist-turi-heisselberg-pedersen",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Rikke Elgaard",
         "from": "caption?+prose?",
-        "create": "artist-rikke-elgaard"
+        "create": "artist-rikke-elgaard",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Pippin Drysdale",
         "from": "caption?+prose?",
-        "create": "artist-pippin-drysdale"
+        "create": "artist-pippin-drysdale",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Michael Rice",
         "from": "caption?+prose?",
-        "create": "artist-michael-rice"
+        "create": "artist-michael-rice",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Taneta Regel",
         "from": "caption?",
-        "create": "artist-taneta-regel"
+        "create": "artist-taneta-regel",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Anders Borgese",
         "from": "caption?",
-        "create": "artist-anders-borgese"
+        "create": "artist-anders-borgese",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Anders Borgesen",
         "from": "prose?",
         "maybeSameAs": "Anders Borgese",
-        "create": "artist-anders-borgesen"
+        "create": "artist-anders-borgesen",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Gurli Elbækgaard",
         "from": "prose?",
-        "create": "artist-gurli-elb-kgaard"
+        "create": "artist-gurli-elb-kgaard",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Morten Klitgaard",
         "from": "prose?",
-        "create": "artist-morten-klitgaard"
+        "create": "artist-morten-klitgaard",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Aneta Regel",
         "from": "prose?",
         "maybeSameAs": "Taneta Regel",
-        "create": "artist-aneta-regel"
+        "create": "artist-aneta-regel",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Antonino Spoto",
         "from": "prose?",
-        "create": "artist-antonino-spoto"
+        "create": "artist-antonino-spoto",
+        "skip": true,
+        "why": "unsure source"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-qb-gallery": {
     "name": "QB Gallery",
@@ -1094,7 +1180,7 @@
   },
   "exhibitor-2026-rademakers-gallery": {
     "name": "Rademakers Gallery",
-    "city": "",
+    "city": "Amsterdam",
     "cityCandidates": [
       "Amsterdam"
     ],
@@ -1105,7 +1191,8 @@
         "from": "caption+prose?",
         "create": "artist-chris-rijk"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-secci": {
     "name": "SECCI",
@@ -1125,17 +1212,23 @@
       {
         "name": "Sachi Moskowitz",
         "from": "caption?",
-        "create": "artist-sachi-moskowitz"
+        "create": "artist-sachi-moskowitz",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Hermann Grueneberg",
         "from": "caption?",
-        "create": "artist-hermann-grueneberg"
+        "create": "artist-hermann-grueneberg",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Nathalie Campion",
         "from": "caption?",
-        "create": "artist-nathalie-campion"
+        "create": "artist-nathalie-campion",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
@@ -1148,7 +1241,7 @@
   },
   "exhibitor-2026-sealed-earth": {
     "name": "Sealed Earth",
-    "city": "",
+    "city": "Athens",
     "cityCandidates": [
       "Athens"
     ],
@@ -1159,11 +1252,12 @@
         "from": "caption",
         "create": "artist-maggy-ioannou"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-skog-art-space": {
     "name": "Skog Art Space",
-    "city": "",
+    "city": "Oslo",
     "cityCandidates": [
       "Galgeberg"
     ],
@@ -1172,7 +1266,9 @@
       {
         "name": "Daniela Bergschneider",
         "from": "caption?",
-        "create": "artist-daniela-bergschneider"
+        "create": "artist-daniela-bergschneider",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Ebbe Arneberg",
@@ -1194,7 +1290,8 @@
         "from": "caption",
         "create": "artist-nina-malterud"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-sorry-we-re-closed": {
     "name": "Sorry We're Closed",
@@ -1218,82 +1315,114 @@
       {
         "name": "François Azambourg",
         "from": "prose?",
-        "create": "artist-francois-azambourg"
+        "create": "artist-francois-azambourg",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Marie Corbin",
         "from": "prose?",
-        "create": "artist-marie-corbin"
+        "create": "artist-marie-corbin",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Foyer Brisé",
         "from": "prose?",
-        "create": "artist-foyer-brise"
+        "create": "artist-foyer-brise",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Eirik Gjedrem",
         "from": "prose?",
-        "create": "artist-eirik-gjedrem"
+        "create": "artist-eirik-gjedrem",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Matsubayashi Hosai XVI",
         "from": "prose?",
-        "create": "artist-matsubayashi-hosai-xvi"
+        "create": "artist-matsubayashi-hosai-xvi",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Katherine Huskie",
         "from": "prose?",
-        "create": "artist-katherine-huskie"
+        "create": "artist-katherine-huskie",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Åsa Jungnelius",
         "from": "prose?",
-        "create": "artist-asa-jungnelius"
+        "create": "artist-asa-jungnelius",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Liu-Chien Kuang",
         "from": "prose?",
-        "create": "artist-liu-chien-kuang"
+        "create": "artist-liu-chien-kuang",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Laura Laine",
         "from": "prose?",
-        "create": "artist-laura-laine"
+        "create": "artist-laura-laine",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Isaac Monté",
         "from": "prose?",
-        "create": "artist-isaac-monte"
+        "create": "artist-isaac-monte",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Päivi Rintaniemi",
         "from": "prose?",
-        "create": "artist-paivi-rintaniemi"
+        "create": "artist-paivi-rintaniemi",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Bela Silva",
         "from": "prose?",
-        "create": "artist-bela-silva"
+        "create": "artist-bela-silva",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Piet Stockmans",
         "from": "prose?",
-        "create": "artist-piet-stockmans"
+        "create": "artist-piet-stockmans",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Ann Beate Tempelhaug",
         "from": "prose?",
-        "create": "artist-ann-beate-tempelhaug"
+        "create": "artist-ann-beate-tempelhaug",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Kiki van Eijk",
         "from": "prose?",
-        "create": "artist-kiki-van-eijk"
+        "create": "artist-kiki-van-eijk",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Philipp Weber",
         "from": "prose?",
-        "create": "artist-philipp-weber"
+        "create": "artist-philipp-weber",
+        "skip": true,
+        "why": "unsure source"
       }
     ]
   },
@@ -1377,7 +1506,7 @@
   },
   "exhibitor-2026-yod-gallery": {
     "name": "YOD Gallery",
-    "city": "",
+    "city": "Tokyo",
     "cityCandidates": [
       "Omotesando"
     ],
@@ -1413,11 +1542,12 @@
         "from": "caption",
         "create": "artist-rie-aizawa"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-yvonne-hohner-contemporary": {
     "name": "YVONNE HOHNER CONTEMPORARY",
-    "city": "",
+    "city": "Karlsruhe",
     "cityCandidates": [
       "Karlsruhe"
     ],
@@ -1426,14 +1556,19 @@
       {
         "name": "Fahar Al-Salih",
         "from": "caption?",
-        "create": "artist-fahar-al-salih"
+        "create": "artist-fahar-al-salih",
+        "skip": true,
+        "why": "unsure source"
       },
       {
         "name": "Maya Fenderl",
         "from": "caption?",
-        "reuse": "b54ba7f9-8f69-4104-b2cd-c8281eea9c52"
+        "reuse": "b54ba7f9-8f69-4104-b2cd-c8281eea9c52",
+        "skip": true,
+        "why": "unsure source"
       }
-    ]
+    ],
+    "cityFrom": "prose guess, 2026-09-25 - please check"
   },
   "exhibitor-2026-arsenic-galerie": {
     "name": "arsenic galerie",
