@@ -4,7 +4,7 @@ import ExhibitorHead from '../../../components/ExhibitorHead.astro';
 import PageSections from '../../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
-import { getArtists, getMainPage, getCurrentEdition } from '../../../lib/queries';
+import { getArtists, getMainPage, getCurrentEdition, getEditions } from '../../../lib/queries';
 import { artistHref } from '../../../lib/links';
 import { styleAttrs } from '../../../lib/textStyle';
 
@@ -26,7 +26,12 @@ const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 // The main page document (Studio → Artists → Artists page): lead, SEO and
 // blocks around the list. The list itself never comes from it.
-const [artists, page, edition] = await Promise.all([getArtists(lang), getMainPage(lang, 'artists'), getCurrentEdition(lang)]);
+const [artists, page, edition, editions] = await Promise.all([
+  getArtists(lang),
+  getMainPage(lang, 'artists'),
+  getCurrentEdition(lang),
+  getEditions(lang),
+]);
 
 /** Files an artist under the first letter of their name, accents folded. */
 const initial = (name: string) =>
@@ -40,11 +45,23 @@ const initial = (name: string) =>
 const letters = [...new Set(artists.map((a: any) => initial(a.name)))].sort() as string[];
 const byLetter = (letter: string) => artists.filter((a: any) => initial(a.name) === letter);
 /**
- * The exhibitor presenting the artist at this edition - for the booth and the
- * solo-show badge. Past editions' exhibitors are linked too, so without the
- * `current` flag the list could show an old booth (backend request #1).
+ * The exhibitor the row stands for - the one its name links to (artistPath):
+ * this edition's, or else the most recent. Its booth, solo show and focus are
+ * the row's, so a 2026 gallery's artist shows the 2026 booth rather than
+ * nothing (client feedback, 2026-09-25: "I can't see the booth number" -
+ * the 2027 galleries have none yet).
  */
-const showingNow = (a: any) => a.exhibitors?.find((ex: any) => ex.current);
+const showingNow = (a: any) =>
+  a.exhibitors?.find((ex: any) => ex.current) ??
+  [...(a.exhibitors ?? [])].sort((x: any, y: any) => (y.year ?? 0) - (x.year ?? 0))[0];
+
+/**
+ * The focus España mark beside a gallery in that year's focus (client
+ * feedback, 2026-09-25), from its edition's focus label as on the exhibitor
+ * cards. Another country's focus has no mark of its own and shows nothing.
+ */
+const focusOf = new Map(editions.map((e: any) => [e.year, e.countryFocus]));
+const inSpainFocus = (ex: any) => !!ex?.inCountryFocus && /espa(ñ|n)a|spain|espagne|spanje/i.test(focusOf.get(ex.year) ?? '');
 
 /**
  * The FILTERS row of the frame: solo show, focus, publishers, jury prize,
@@ -130,10 +147,19 @@ for (const letter of letters) {
                               {a.name}
                               {a.countryCode && <sup>{a.countryCode}</sup>}
                             </span>
-                            {(ex?.soloShow || ex?.booth) && (
+                            {(ex?.soloShow || ex?.booth || inSpainFocus(ex)) && (
                               <span class="tail">
+                                {inSpainFocus(ex) && (
+                                  <img
+                                    class="focus"
+                                    src="/assets/exhibitors/focus-espana.png"
+                                    alt={focusOf.get(ex.year) ?? t('exhibitors.countryFocus')}
+                                    width="260"
+                                    height="149"
+                                  />
+                                )}
                                 {ex.soloShow && (
-                                  <img class="solo" src="/assets/exhibitors/solo-show.png" alt={t('exhibitors.soloShow')} width="30" height="30" />
+                                  <img class="solo" src="/assets/exhibitors/solo-show.png" alt={t('exhibitors.soloShow')} width="40" height="40" />
                                 )}
                                 {ex.booth && <span class="booth">{ex.booth} ●</span>}
                               </span>
@@ -305,11 +331,20 @@ for (const letter of letters) {
   /* The round black "solo show" badge of the exhibitor cards, at list size:
      30px across - no taller than the name, so the row keeps its pitch - with
      the two words still readable. */
-  /* The designer's solo show disc (2026-09-24). */
-  .solo {
+  /* The designer's solo show disc (2026-09-24), a size up (2026-09-25),
+     and the focus España mark beside it at the same height. The negative
+     margin lets them stand taller than the name without opening the row. */
+  .solo,
+  .focus {
     flex: none;
-    width: 30px;
-    height: 30px;
+    height: 40px;
+    margin-block: -5px;
+  }
+  .solo {
+    width: 40px;
+  }
+  .focus {
+    width: auto;
   }
   .empty {
     margin: 40px var(--gutter) 0;
@@ -327,12 +362,22 @@ for (const letter of letters) {
       display: contents;
     }
   }
+  /* The capital clear of its rule, and the names a little further in
+     (client feedback, 2026-09-25: the letter ran into the line). */
   @media (width<=640px) {
     .artist-list section {
-      grid-template-columns: 56px 1fr;
+      grid-template-columns: 76px 1fr;
     }
     .artist-list section::before {
-      left: 24px;
+      left: 52px;
+    }
+    .solo,
+    .focus {
+      height: 32px;
+      margin-block: -4px;
+    }
+    .solo {
+      width: 32px;
     }
     .artist-list h2 {
       font-size: 42px;

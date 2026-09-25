@@ -222,13 +222,19 @@ const mark = activeLetter.toUpperCase();
       font-size: 20px;
       line-height: 26px;
     }
+    /* On two lines rather than off the edge (client feedback, 2026-09-25:
+       the letters had to be scrolled to). */
     .alphabet {
-      flex-wrap: nowrap;
+      display: grid;
+      grid-template-columns: repeat(13, auto);
+      justify-content: space-between;
+      row-gap: 4px;
       margin-top: 16px;
-      overflow: auto;
     }
-    .alphabet {
-      justify-content: flex-start;
+    /* Two even rows of thirteen; a row must not open on a dash, so the
+       letters stand spaced instead. */
+    .alphabet .sep {
+      display: none;
     }
     .alphabet {
       font-size: 26px;
