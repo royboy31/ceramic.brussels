@@ -218,12 +218,14 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
                   </p>
                 </>
               )}
+              {/* A pill like the ones above, its arrow pointing on rather
+                  than out (client feedback, 2026-09-25). */}
               {settings?.newsletterUrl && (
-                <h3 class="contact-heading newsletter">
-                  <a href={settings.newsletterUrl} target="_blank" rel="noopener noreferrer">
-                    {t('contact.newsletter')} ↗
+                <p class="pills newsletter">
+                  <a class="pill" href={settings.newsletterUrl} target="_blank" rel="noopener noreferrer">
+                    {t('contact.newsletter')} →
                   </a>
-                </h3>
+                </p>
               )}
             </div>
           </div>
@@ -452,7 +454,7 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
   .postal {
     white-space: pre-line;
   }
-  /* "follow us", "subscribe to our newsletter ↗": the panel titles' style. */
+  /* "follow us": the panel titles' style. */
   .contact-heading {
     border-bottom: 2px solid var(--ink);
     padding-bottom: 6px;
@@ -464,8 +466,8 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
   .contact-heading a {
     text-decoration: none;
   }
-  .contact-heading.newsletter {
-    margin-top: 50px;
+  .pills.newsletter {
+    margin-top: 28px;
   }
   .pills {
     flex-wrap: wrap;
