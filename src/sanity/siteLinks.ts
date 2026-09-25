@@ -57,7 +57,6 @@ export function pageOptions(pastYears: number[]): SiteLinkOption[] {
     pathOption('artists', t('nav.artists')),
     pathOption('news', t('nav.news')),
     pathOption('editions', t('nav.editions')),
-    pathOption('contact', t('nav.contact')),
   );
 
   for (const year of pastYears) {

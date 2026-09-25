@@ -23,7 +23,7 @@ const DOC_ROUTES: Record<string, string> = {
   partner: 'partners',
 };
 
-const LISTINGS = ['exhibitors', 'artists', 'news', 'contact'];
+const LISTINGS = ['exhibitors', 'artists', 'news'];
 
 /**
  * Where an exhibitor's page is: the current edition's at /exhibitors/<slug>,

@@ -20,7 +20,9 @@ export const BUILT_IN_ROUTES = [
   { title: 'Press & media', value: 'press-media' },
   { title: 'News', value: 'news' },
   { title: 'Past editions', value: 'editions' },
-  { title: 'Contact', value: 'contact' },
+  // No "Contact" since 2026-09-24: /contact merged into about → "contact &
+  // team" and 301s there, so an older link that still says `contact` lands
+  // right (links.ts); it is just no longer offered.
 ] as const;
 
 export type RouteValue = (typeof BUILT_IN_ROUTES)[number]['value'];
@@ -45,11 +47,7 @@ export const PAGE_SECTIONS = [
   { title: 'Exhibitors', value: 'exhibitors' },
   { title: 'Artists', value: 'artists' },
   { title: 'News', value: 'news' },
-  { title: 'Contact', value: 'contact' },
 ] as const;
 
-/**
- * The listing routes: no tabs, one page per section, the list itself is code.
- * Contact's "list" is the addresses: Site settings and the team's emails.
- */
-export const LISTING_SECTIONS = ['exhibitors', 'artists', 'news', 'contact'] as const;
+/** The listing routes: no tabs, one page per section, the list itself is code. */
+export const LISTING_SECTIONS = ['exhibitors', 'artists', 'news'] as const;

@@ -31,3 +31,13 @@
 /fr/a-propos/images  /fr/presse-medias/photos-videos/    301
 /nl/over/beelden/    /nl/pers-media/fotos-videos/        301
 /nl/over/beelden     /nl/pers-media/fotos-videos/        301
+
+# Contact merged into about → "contact & team" on 2026-09-24 (client
+# feedback, backend request #29); the /contact route is gone. The old site's
+# own /contact addresses are in the generated block below.
+/en/contact/         /en/about/team/                     301
+/en/contact          /en/about/team/                     301
+/fr/contact/         /fr/a-propos/equipe/                301
+/fr/contact          /fr/a-propos/equipe/                301
+/nl/contact/         /nl/over/team/                      301
+/nl/contact          /nl/over/team/                      301

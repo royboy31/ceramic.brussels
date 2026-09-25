@@ -299,9 +299,12 @@ export const structure: StructureResolver = async (S, context) => {
 
       folder('about', 'About', [
         mainPage('about', 'About page (the fair)'),
-        tabIntros('about', 'the-fair', 'Tab intros (advisory board, contact; press & media is a hub of its own)'),
+        tabIntros('about', 'the-fair', 'Tab intros (advisory board, contact & team)'),
         list('people-board', 'Advisory board', 'person', `"advisory-board" in groups && ${PEOPLE_NOW}`, {}, byOrder),
         list('people-team', 'Team and collaborators', 'person', `("team" in groups || "collaborator" in groups) && ${PEOPLE_NOW}`, {}, byOrder),
+        // The contact block at the top of "contact & team" (the old /contact
+        // page, merged into the tab on 2026-09-24).
+        siteSettings('Email, address, social links, newsletter (Site settings)', 'contact-settings'),
       ]),
 
       // Press & media (request #19): the about hub's pill leads here. Each
@@ -329,11 +332,6 @@ export const structure: StructureResolver = async (S, context) => {
       folder('news', 'News', [
         mainPage('news', 'News page'),
         list('news-all', 'Articles', 'newsItem', 'true', {}, [{ field: 'publishedAt', direction: 'desc' }]),
-      ]),
-
-      folder('contact', 'Contact', [
-        mainPage('contact', 'Contact page'),
-        siteSettings('Email, social links, newsletter (Site settings)', 'contact-settings'),
       ]),
 
       S.listItem()

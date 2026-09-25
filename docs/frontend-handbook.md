@@ -170,7 +170,7 @@ exactly which fields you have; the projection is the contract.
 | Artists A–Z (no frame; the detail page went on 2026-09-22 - a name leads to the gallery, `artistHref` in `links.ts`) | `src/pages/[lang]/artists/index.astro` | `getArtists` | `artist` |
 | News list and article (no frame) | `src/pages/[lang]/news/index.astro`, `news/[slug].astro` | `getNews`, `getNewsItem` | `newsItem` |
 | Past editions (no frame) | `src/pages/[lang]/editions.astro` | `getEditions` | `edition` |
-| Contact (no frame) | `src/pages/[lang]/contact.astro` | `getMainPage('contact')`, `getSettings`, `getPeople('team')` | `page` (section `contact`), `siteSettings` (address, social, newsletter), `person` (team members with an email) |
+| Contact & team ("about - contact & team") | the about hub's `team` tab, `src/components/hubs/About.astro` | `getSettings`, `getPeople('team')` | `siteSettings` (address, social, newsletter), `person` (directors and team). `/contact` 301s here since 2026-09-24 (`public/_redirects`) |
 | Standalone page (no frame) | `src/pages/[lang]/[...slug].astro` | `getPage` | `page` without a `section`, slug per locale |
 
 Frames marked "no frame" have no Figma yet. Build them from the closest frame

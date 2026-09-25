@@ -29,7 +29,7 @@ export interface MainPage {
 }
 
 /** Sidebar order: the site's own, as the menu reads. */
-const ORDER = ['exhibitors', 'artists', 'guest-of-honour', 'art-prize', 'programme', 'vip', 'partners', 'visit', 'about', 'press-media', 'news', 'contact'];
+const ORDER = ['exhibitors', 'artists', 'guest-of-honour', 'art-prize', 'programme', 'vip', 'partners', 'visit', 'about', 'press-media', 'news'];
 
 export const MAIN_PAGES: MainPage[] = ORDER.map((section) => {
   const entry = PAGE_SECTIONS.find((s) => s.value === section);

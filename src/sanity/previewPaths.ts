@@ -129,7 +129,7 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
       return [
         loc('Visitors info', '/visit'),
         loc('Visitors info – FAQ', '/visit/faq'),
-        loc('Contact', '/contact'),
+        loc('About – contact & team', '/about/team'),
         loc('Press & media – press', '/press-media/press'),
         loc('Press & media – stories', '/press-media'),
         loc('VIP – access page', '/vip/access'),
@@ -149,8 +149,7 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
       const groups = d.groups ?? [];
       return [
         ...(groups.includes('advisory-board') ? [loc('About – advisory board', '/about/advisory-board')] : []),
-        ...(groups.includes('team') || groups.includes('collaborator') ? [loc('About – team', '/about/team')] : []),
-        ...(groups.includes('team') ? [loc('Contact', '/contact')] : []),
+        ...(groups.includes('team') || groups.includes('collaborator') ? [loc('About – contact & team', '/about/team')] : []),
         ...(groups.includes('jury') ? [loc('Art prize – jury', '/art-prize/jury')] : []),
       ];
     }

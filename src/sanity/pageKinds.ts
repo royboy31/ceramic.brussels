@@ -4,7 +4,7 @@ import { HUBS } from '../lib/hubs';
  * Which fields of a `page` document the site reads, by the kind of page it is.
  *
  * One `page` type serves three roles - a hub tab, the main page behind a
- * listing (exhibitors, artists, news, contact), a standalone page - and each
+ * listing (exhibitors, artists, news), a standalone page - and each
  * route reads a different part of it: the exhibitors page never shows Body, a
  * laureates tab shows only its lead paragraph, a guest-of-honour tab only its
  * label and slug. The page form hides every field the page being edited does not read
@@ -74,7 +74,7 @@ const LISTING: Record<string, PageField[]> = {
   exhibitors: ['title', 'section', 'intro', 'sections', 'seo'],
   artists: ['title', 'section', 'intro', 'sections', 'seo'],
   news: ['title', 'section', 'intro', 'sections', 'seo'],
-  contact: ['title', 'section', 'intro', 'sections', 'body', 'seo'],
+  // No contact: /contact merged into about → "contact & team" on 2026-09-24.
 };
 
 export function pageFields(section?: string | null, slug?: string | null): Set<PageField> {
