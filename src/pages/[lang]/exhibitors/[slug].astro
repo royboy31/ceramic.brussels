@@ -30,7 +30,8 @@ const slug = Astro.params.slug as string;
 const t = useTranslations(lang);
 const year = /^\d{4}$/.test(slug) ? Number(slug) : undefined;
 
-let listing: { exhibitors: any[]; edition: any; currentYear?: number } | null = null;
+let listing: { exhibitors: any[]; edition: any; currentYear?: number; years: { year: number; current: boolean }[] } | null =
+  null;
 let exhibitor: any = null;
 let edition: any = null;
 
@@ -40,6 +41,9 @@ if (year) {
     exhibitors,
     edition: editions.find((e: any) => e.year === year) ?? null,
     currentYear: editions.find((e: any) => e.isCurrent)?.year,
+    years: editions
+      .filter((e: any) => e.exhibitorCount > 0)
+      .map((e: any) => ({ year: e.year, current: e.isCurrent === true })),
   };
 } else {
   [exhibitor, edition] = await Promise.all([getExhibitor(lang, slug), getCurrentEdition(lang)]);
@@ -63,6 +67,7 @@ const orgSchema = exhibitor && {
         edition={listing.edition}
         year={year}
         currentYear={listing.currentYear}
+        years={listing.years}
       />
     </Base>
   ) : (

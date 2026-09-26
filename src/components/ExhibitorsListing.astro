@@ -29,11 +29,18 @@ interface Props {
   /** Set on a past edition's list. */
   year?: number;
   currentYear?: number;
+  /**
+   * Every edition with exhibitors, newest first, for the year row the old
+   * site had ("→ 2026 → 2025 → 2024"): the list being read is a filled pill,
+   * the others link to their year, this year's to /exhibitors (client
+   * feedback, 2026-09-25: 2026 was only reachable through the artists).
+   */
+  years?: { year: number; current: boolean }[];
   /** `_id`s of the exhibitors that won one of the fair's awards, for the "awards" filter. */
   awarded?: Set<string>;
 }
 
-const { lang, exhibitors, edition, page, year, currentYear, awarded = new Set<string>() } = Astro.props;
+const { lang, exhibitors, edition, page, year, currentYear, years = [], awarded = new Set<string>() } = Astro.props;
 const t = useTranslations(lang);
 
 /** First letter of the sort name, folded so "Éclat" files under E. */
@@ -72,21 +79,34 @@ const links = (year ? [] : [
   edition?.overviewUrl && { href: edition.overviewUrl, label: t('editions.overview') },
   edition?.fairMapUrl && { href: edition.fairMapUrl, label: t('tabs.floorPlan') },
 ]).filter(Boolean) as { href: string; label: string }[];
+
+/** The year row: only when there is more than one year to choose from. */
+const viewedYear = year ?? edition?.year;
+const yearRow = years.length > 1 ? years : [];
 ---
 
 <ExhibitorHead lang={lang} active="galleries" edition={edition} year={year} alphabet={exhibitors.length > 0} />
 
 {
-  (page?.intro || links.length > 0 || (year && currentYear)) && (
+  (page?.intro || links.length > 0 || yearRow.length > 0 || (year && currentYear)) && (
     <div class="exhibitor-intro">
       {page?.intro && (
         <p class="intro-large" {...styleAttrs(page.introStyle)}>
           {page.intro}
         </p>
       )}
-      {(links.length > 0 || (year && currentYear)) && (
+      {(links.length > 0 || yearRow.length > 0 || (year && currentYear)) && (
         <p class="edition-links">
-          {year && currentYear && (
+          {yearRow.map((y) =>
+            y.year === viewedYear ? (
+              <span class="edition-links__year" aria-current="page">
+                {y.year}
+              </span>
+            ) : (
+              <a href={localePath(lang, y.current ? 'exhibitors' : `exhibitors/${y.year}`)}>{y.year} →</a>
+            ),
+          )}
+          {yearRow.length === 0 && year && currentYear && (
             <a href={localePath(lang, 'exhibitors')}>
               {t('nav.exhibitors').toLowerCase()} {currentYear} →
             </a>
@@ -229,11 +249,16 @@ const links = (year ? [] : [
     margin-top: 18px;
     font-size: clamp(1rem, 2vw, 1.75rem);
   }
-  .edition-links a {
+  .edition-links a,
+  .edition-links__year {
     border: 1px solid;
     border-radius: 999px;
     padding: 3px 18px;
     text-decoration: none;
+  }
+  /* The year being read: filled like the active tab above it. */
+  .edition-links__year {
+    background: var(--color-acid);
   }
   @media (width<=900px) {
     .gallery-grid {
