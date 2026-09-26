@@ -4,7 +4,7 @@ import ExhibitorHead from './ExhibitorHead.astro';
 import PageSections from './PageSections.astro';
 import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
-import { countryCode } from '../lib/countries';
+import { countryCode, countryName } from '../lib/countries';
 import { styleAttrs } from '../lib/textStyle';
 
 /**
@@ -58,15 +58,20 @@ const filters = [
   { id: 'publishers', label: t('exhibitors.publishers'), has: (ex: any) => ex.kind === 'publisher' },
 ].filter((f) => exhibitors.some(f.has));
 
-/** The countries in the list, by code, for the "search by country" menu. */
+/** The countries in the list for the "search by country" menu: filtered by code, named in full, A–Z by name. */
 const codeOf = (ex: any) => countryCode(ex.countryCode ?? ex.country);
-const countries = [...new Set(exhibitors.map(codeOf).filter(Boolean))].sort() as string[];
+const countries = ([...new Set(exhibitors.map(codeOf).filter(Boolean))] as string[])
+  .map((code) => ({ code, name: countryName(code, lang) }))
+  .sort((a, b) => a.name.localeCompare(b.name, lang));
 
-/** The edition's overview and floor plan, as the old site's year pages linked them. */
-const links = [
+/**
+ * The edition's overview and floor plan - on this year's list only. A past
+ * year's list shows neither (client feedback, 2026-09-25, on 2026's).
+ */
+const links = (year ? [] : [
   edition?.overviewUrl && { href: edition.overviewUrl, label: t('editions.overview') },
   edition?.fairMapUrl && { href: edition.fairMapUrl, label: t('tabs.floorPlan') },
-].filter(Boolean) as { href: string; label: string }[];
+]).filter(Boolean) as { href: string; label: string }[];
 ---
 
 <ExhibitorHead lang={lang} active="galleries" edition={edition} year={year} alphabet={exhibitors.length > 0} />
@@ -106,7 +111,7 @@ const links = [
           <select data-country aria-label={t('exhibitors.searchByCountry')}>
             <option value="">{t('exhibitors.searchByCountry')} ↓</option>
             {countries.map((c) => (
-              <option value={c}>{c}</option>
+              <option value={c.code}>{c.name}</option>
             ))}
           </select>
         )}

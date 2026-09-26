@@ -379,9 +379,11 @@ const captionOf = (img: any, fallback?: string) => ({
     width: 12px;
     height: 12px;
   }
+  /* 8px under the picture, as every caption on the site (client feedback,
+     2026-09-25: the laureates' sat lower than the exhibitors'). */
   figcaption {
     justify-content: space-between;
-    padding-top: 3px;
+    padding-top: 8px;
     display: flex;
     /* Tighter captions, everywhere (client feedback, 2026-09-24). */
     letter-spacing: -0.025em;
@@ -405,7 +407,6 @@ const captionOf = (img: any, fallback?: string) => ({
   }
   .hero figcaption {
     align-items: baseline;
-    padding-top: 6px;
   }
   .dots i:not(.active) {
     opacity: 0.5;
@@ -472,7 +473,7 @@ const captionOf = (img: any, fallback?: string) => ({
   }
   .image :global(figcaption) {
     gap: 14px;
-    padding-top: 3px;
+    padding-top: 0;
     font-size: 15px;
   }
   .name {

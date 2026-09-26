@@ -15,3 +15,19 @@ export function countryCode(value?: string): string | undefined {
   if (/^[A-Za-z]{2}$/.test(value)) return value.toUpperCase();
   return ISO[value.trim().toLowerCase()] ?? value;
 }
+
+const DISPLAY_LOCALE: Record<string, string> = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' };
+
+/**
+ * A country code as the reader's language names it - "Spain", "Espagne",
+ * "Spanje" - for the "search by country" menu, where a bare "ES" said little
+ * (client feedback, 2026-09-25). Anything that is not a code is returned as is.
+ */
+export function countryName(code: string, lang: string): string {
+  if (!/^[A-Z]{2}$/.test(code)) return code;
+  try {
+    return new Intl.DisplayNames([DISPLAY_LOCALE[lang] ?? lang], { type: 'region' }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}

@@ -635,14 +635,17 @@ const rate = {
   }
   /* "at the fair", "beyond the fair": the food & drinks titles' style
      (client feedback, 2026-09-23). */
+  /* Its line box is the .panel-title's (1.15, no padding), so its letters
+     stand as far above the rule as "The Hoxton…" does below them (client
+     feedback, 2026-09-25: this one sat higher). */
   .subgroup-title {
     border-bottom: 2px solid;
-    padding-bottom: 6px;
+    padding-bottom: 0;
     max-width: 66%;
     letter-spacing: -0.04em;
     font-size: clamp(26px, 2.5vw, 36px);
     font-weight: 600;
-    line-height: 1.2;
+    line-height: 1.15;
   }
   .overview-row {
     margin-top: 30px;
@@ -691,10 +694,12 @@ const rate = {
       background-color 0.18s,
       color 0.18s;
   }
+  /* Light grey rather than white, which glared on the black page (client
+     feedback, 2026-09-25). */
   .rate:has(.rate-link):hover,
   .rate:has(.rate-link):focus-within {
     color: #050505;
-    background-color: #fff;
+    background-color: #d4d4d4;
   }
   .rate-link :global(a)::after {
     content: '';
@@ -800,6 +805,14 @@ const rate = {
     letter-spacing: -0.02em;
     text-transform: uppercase;
   }
+  /* An off-programme activity's title is set as practical info's venue
+     line ("TOUR & TAXIS — SHEDS 1 & 2BIS"): body size, untracked (client
+     feedback, 2026-09-25: it looked small beside it). */
+  .event-line {
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: 0;
+  }
   .event-when {
     margin-top: 10px;
   }
@@ -874,7 +887,6 @@ const rate = {
     }
     .body-20,
     .event-when,
-    .event-line,
     .eyebrow-strong {
       font-size: 18px;
     }
