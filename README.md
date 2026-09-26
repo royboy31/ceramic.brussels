@@ -90,8 +90,9 @@ PUBLIC_SANITY_DATASET=production
 
 `SANITY_API_WRITE_TOKEN` is **not** needed to build — the `production` dataset is
 ACL-public, so reads are unauthenticated. Keep it out of your host's build
-environment. It is only used locally, by `scripts/create-deploy-webhook.mjs` and
-by any future write path (migrations, form submissions, draft preview).
+environment. It is only used locally, by the import and migration scripts and
+by the content scripts under `scripts/content/` (each developer has their own
+Editor token, so a write is attributed and revocable on its own).
 
 ## Content types
 

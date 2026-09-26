@@ -31,7 +31,10 @@ Anything the design needs that the data does not carry goes in
 `docs/backend-requests.md` as a numbered request rather than into the schema;
 `npm run boundary` lists files a branch changes outside the frontend half.
 `docs/frontend-kickoff.md` is the first-session script for his Claude Code
-("read docs/frontend-kickoff.md and follow it").
+("read docs/frontend-kickoff.md and follow it"). **`docs/project-handbook.md`
+is the whole project, 0 to 100** - setup, keys, Studio-to-page wiring
+recipes, migrations, server, Brevo, VIP, Git, Cloudflare, cutover - and
+since 2026-09-23 the guide for working across both halves.
 
 ## Getting set up
 

@@ -67,7 +67,10 @@ PUBLIC_SANITY_DATASET=production
 PUBLIC_SITE_URL=https://www.ceramic.brussels
 ```
 
-No token is needed. The dataset is public, so reads work without one.
+No token is needed to run or build: the dataset is public, so reads work
+without one. To write content into Sanity from a script you need a write
+token, `SANITY_API_WRITE_TOKEN=sk...` in `.env` (Kamindu issues one to you;
+the handbook's "Writing content into Sanity" says how such a script works).
 Never commit `.env`.
 
 ## Step 3 — run and verify

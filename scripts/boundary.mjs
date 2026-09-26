@@ -6,8 +6,9 @@
  *
  * The frontend half is what docs/frontend-handbook.md says Lilanga owns:
  * pages, layouts, components, UI strings, placeholders, static assets and
- * the two hand-off documents. Anything else on the branch - schemas,
- * queries, hub/locale lists, deployment, scripts - belongs to the backend
+ * the two hand-off documents, plus one-off content scripts under
+ * scripts/content/. Anything else on the branch - schemas, queries,
+ * hub/locale lists, deployment, the other scripts - belongs to the backend
  * and should be a request in docs/backend-requests.md instead. Exits 1 when
  * such files exist, so it can guard a commit or a PR.
  */
@@ -23,6 +24,7 @@ const ALLOWED = [
   /^docs\/frontend-handbook\.md$/,
   /^docs\/backend-requests\.md$/,
   /^\.claude\/skills\//,
+  /^scripts\/content\//,
 ];
 
 const baseArg = process.argv.find((a) => a.startsWith('--base='));
