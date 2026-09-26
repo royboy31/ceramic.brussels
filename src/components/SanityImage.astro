@@ -40,14 +40,39 @@ const build = (w: number) => {
 };
 
 const dims = image?.dimensions;
-const width = widths[widths.length - 1];
+
+/**
+ * The ladder a caller passes is tuned to its box at 1x. A Retina screen
+ * needs twice that, and most ladders stopped short of it (Léonie,
+ * 2026-09-23: "the photos appear low resolution, mainly on photos &
+ * videos"), so the top step is doubled here, capped at 2560 - the widest
+ * the old site ever served, and above the 2500 the imports hold. And no
+ * step asks for more than the file has: the CDN upscales a crop request
+ * rather than refuse it, which is bandwidth for a blur.
+ */
+const RETINA_CAP = 2560;
+const top = Math.max(...widths);
+let ladder = [...widths, Math.min(top * 2, RETINA_CAP)];
+const native = dims?.width
+  ? aspect && dims.height
+    ? Math.min(dims.width, Math.floor(dims.height * aspect))
+    : dims.width
+  : undefined;
+if (native) {
+  const fits = ladder.filter((w) => w <= native);
+  // The file's own width as the top step, unless a step already comes within 5% of it.
+  if (fits.length < ladder.length && native > (fits[fits.length - 1] ?? 0) * 1.05) fits.push(native);
+  ladder = fits;
+}
+ladder = [...new Set(ladder)].filter((w) => w > 0).sort((a, b) => a - b);
+const width = ladder[ladder.length - 1];
 const height = aspect
   ? Math.round(width / aspect)
   : dims?.aspectRatio
     ? Math.round(width / dims.aspectRatio)
     : undefined;
 
-const srcset = hasAsset ? widths.map((w) => `${build(w)} ${w}w`).join(', ') : '';
+const srcset = hasAsset ? ladder.map((w) => `${build(w)} ${w}w`).join(', ') : '';
 const lqip = placeholder ? image?.lqip : undefined;
 // Set only in a preview render (previewImages.ts): tells the editing overlay which field this is.
 const editAttr = typeof image?._sanity === 'string' ? image._sanity : undefined;
