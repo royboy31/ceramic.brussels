@@ -1,4 +1,4 @@
-import { defineField, defineType } from 'sanity';
+import { defineField, defineType, type SlugIsUniqueValidator } from 'sanity';
 import { LOCALES, DEFAULT_LOCALE } from '../../../lib/locales';
 import { LocaleInput } from '../../components/LocaleInput';
 import { richTextBlock } from './richText';
@@ -89,13 +89,42 @@ export const localeBlock = defineType({
   },
 });
 
+/**
+ * A slug is unique within its hub, not across the dataset. Hub tabs share
+ * their English slugs by design - the art prize and the VIP hub both have an
+ * `about` tab, found by section + slug - and Sanity's default check compared
+ * every page, so the second hub's page could never be published ("Slug is
+ * already in use"; Tiphaine could not publish the art prize page from
+ * 2026-09-24, when the VIP tab pages were seeded). Standalone pages (no
+ * section) share one namespace, /<lang>/<slug>, and stay unique among
+ * themselves. A document's own draft and published version never clash.
+ */
+const uniqueInSection: SlugIsUniqueValidator = async (slug, context) => {
+  const { document, path, getClient } = context;
+  if (!document?._id || !path?.length) return true;
+  const id = document._id.replace(/^drafts\./, '');
+  const field = path.filter((p): p is string => typeof p === 'string').join('.');
+  const clash = await getClient({ apiVersion: '2024-01-01' }).fetch(
+    `defined(*[_type == $type && !(_id in [$id, $draft]) && ${field}.current == $slug
+        && coalesce(section, "") == $section][0]._id)`,
+    {
+      type: document._type,
+      id,
+      draft: `drafts.${id}`,
+      slug,
+      section: (document as { section?: string }).section ?? '',
+    },
+  );
+  return !clash;
+};
+
 /** Per-language URL segment, switched by the same language selector. */
 export const localeSlug = defineType({
   name: 'localeSlug',
   title: 'Slug',
   type: 'object',
   components: { input: LocaleInput },
-  fields: localeFields('slug', { options: { maxLength: 96 } }),
+  fields: localeFields('slug', { options: { maxLength: 96, isUnique: uniqueInSection } }),
   preview: {
     select: { en: 'en', fr: 'fr', nl: 'nl' },
     prepare: (value: Record<string, any>) => ({

@@ -51,7 +51,7 @@ Owner: L = Lilanga (frontend), K = Kamindu (CMS, queries, content).
 | 27 | Menu label "contact & team" | open | editors | Menu and footer in the Studio |
 | 28 | 2026 exhibitors: 47 cities still "Brussels", 56 unsure artist names | waiting | Tiphaine | `scripts/data/exhibitors-2026-review.json`; re-run `scripts/fix-exhibitors-2026.mjs --apply` after her review |
 | 29 | Léonie's "first text" and ABOUT feedback | open | L | Only in the PDF `ceramics-new.pdf` Lilanga has; never posted to the group |
-| 30 | Tiphaine's art prize question (which page to edit) | done | K | Answered 2026-09-25 12:42: "Art prize page", first entry of the Art prize folder |
+| 30 | Tiphaine's art prize question (which page to edit) and "unable to publish the changes in Art prize page even after having fixed all the issues" (2026-09-24 15:01) | done | K | Which page: answered 2026-09-25 12:42 ("Art prize page", first entry of the Art prize folder). The "tab intros → about (copy)" she also edited is a Duplicate made on 2026-09-09 with no slug: no route reads it, hence "modifying one doesn't change the other". **The publish block (found 2026-09-27):** "Slug is already in use" - Sanity's default check made English slugs unique across all pages, and the VIP tab pages seeded as drafts on 2026-09-24 07:54 UTC (`page-vip-about`, then an empty `main-vip`) also say `about`. `localeSlug` now checks within the page's own hub (`uniqueInSection` in `src/sanity/schemaTypes/objects/localeString.ts`). Her draft still ends its lead with "test test"; the copy holds nothing the draft lacks |
 
 ## Shipped on 2026-09-25 for Léonie's 24 Sept round
 
