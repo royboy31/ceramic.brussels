@@ -133,6 +133,17 @@ export const exhibitor = defineType({
     }),
 
     /* --- images ----------------------------------------------------------- */
+    // The card's own picture (Tiphaine, 2026-09-25, backend request #30): the
+    // list reads it before the slideshow's first image, so leaving it empty
+    // keeps the card as it was.
+    defineField({
+      name: 'listImage',
+      title: 'List image',
+      type: 'figure',
+      group: 'media',
+      description:
+        'The picture on this gallery’s card in the exhibitor list. Leave empty to use the first slideshow image.',
+    }),
     defineField({
       name: 'images',
       title: 'Slideshow',
@@ -141,7 +152,7 @@ export const exhibitor = defineType({
       of: [defineArrayMember({ type: 'figure' })],
       options: { layout: 'grid' },
       description:
-        'The first image is the card in the exhibitor list; all of them make the slideshow on the gallery’s page. Fill caption, work title and year on each.',
+        'All of them make the slideshow on the gallery’s page; the first is also the card in the exhibitor list unless a List image is set. Fill caption, work title and year on each.',
     }),
     defineField({
       name: 'importNote',
@@ -166,9 +177,10 @@ export const exhibitor = defineType({
       year: 'edition.year',
       kind: 'kind',
       solo: 'soloShow',
-      media: 'images.0',
+      listImage: 'listImage',
+      firstImage: 'images.0',
     },
-    prepare: ({ title, booth, country, year, kind, solo, media }) => ({
+    prepare: ({ title, booth, country, year, kind, solo, listImage, firstImage }) => ({
       title,
       subtitle: [
         booth,
@@ -179,7 +191,7 @@ export const exhibitor = defineType({
       ]
         .filter(Boolean)
         .join(' · '),
-      media,
+      media: listImage?.asset ? listImage : firstImage,
     }),
   },
 });

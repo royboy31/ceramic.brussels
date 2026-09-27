@@ -559,3 +559,11 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 **Studio side done (Kamindu, 2026-09-25):** the `/contact` route is gone (`src/pages/[lang]/contact.astro` deleted) and `public/_redirects` sends `/en|fr|nl/contact/` to the tab with a real 301, where the page could only manage a meta refresh. Contact is no longer a listing section: the sidebar's Contact folder is removed and its Site settings entry ("Email, address, social links, newsletter") sits in the About folder; `mainPages.ts`, `pageKinds.ts`, `routes.ts` (`BUILT_IN_ROUTES`, `PAGE_SECTIONS`, `LISTING_SECTIONS`), `links.ts` `LISTINGS`, `siteLinks.ts` and `previewPaths.ts` no longer know it. No `page` document ever had section "contact", so nothing is orphaned; a link that still says route `contact` resolves to `/contact` and 301s.
 
 ---
+## #30 · done · 2026-09-27 · exhibitors: a list image of its own
+
+**Page / component:** `src/components/ExhibitorCard.astro`, on `/exhibitors` and `/exhibitors/<year>`
+**Asked by:** Tiphaine, WhatsApp 2026-09-25 ("a separate preview image when in the full list of galleries, rather than automatically using the first slideshow photo"); `docs/client-feedback-2026-09-25.md` row 20
+**The query returned:** `"image": images[0]` in `EXHIBITOR_CARD` - the card was always the slideshow's first picture.
+**Done (Kamindu):** new optional `figure` field `listImage` ("List image", Images tab of the exhibitor, above the slideshow). `EXHIBITOR_CARD` now selects `"image": coalesce(listImage, images[0])`, so the card reads the same `image` prop as before and **needs no frontend change**; a gallery without a list image looks exactly as it did, so there is no migration. The Studio list thumbnail follows the same rule. The detail page's slideshow is untouched.
+
+---

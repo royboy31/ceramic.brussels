@@ -547,7 +547,7 @@ const EXHIBITOR_CARD = `{
   "year": edition->year,
   "current": edition->isCurrent == true,
   ${styled('countryFocusLabel', 'edition->countryFocus')},
-  "image": images[0] ${IMAGE},
+  "image": coalesce(listImage, images[0]) ${IMAGE},
   "artists": artists[]->{ _id, name, "slug": slug.current },
   ${styled('artistsText')}
 }`;
