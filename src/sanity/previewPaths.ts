@@ -158,8 +158,8 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
       return page ? [loc(page.title, page.href)] : [];
     }
     case 'programmeEvent': {
-      // Any year: until the current edition has a programme, the tabs show
-      // the newest edition's (getProgramme), so a past event can be the one shown.
+      // Any year: the tab only lists the current edition's events
+      // (getProgramme), but a past event still previews on its tab.
       const tab = d.section ? EVENT_TABS[d.section] : undefined;
       return tab && d.startsAt ? [loc(tab.title, tab.href)] : [];
     }
