@@ -861,20 +861,18 @@ export function getMainPage(lang: LocaleId, section: string) {
 /* ------------------------------------------------- programme / partners / press */
 
 /**
- * The programme: the current edition's events, and until it has any dated
- * ones, the newest edition's that does - the old site kept showing its last
- * programme until the next was out, and the design's talks are 2026's.
+ * The programme: the current edition's published events, and nothing else.
+ * There used to be a fallback to the newest edition with events, but it
+ * brought back an older year's programme whenever an editor unpublished the
+ * current one's last event (Roy, 2026-09-28: what an editor unpublishes stays
+ * off the site). With no events, the tab shows `programme.empty`.
  * Group by day and `section` in the page.
  */
 export function getProgramme(lang: LocaleId) {
   return run<any[]>(
-    `*[_type == "programmeEvent" && edition._ref == coalesce(
-        *[_type == "edition" && isCurrent == true
-          && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt)]) > 0][0]._id,
-        *[_type == "edition"
-          && count(*[_type == "programmeEvent" && references(^._id) && defined(startsAt) && section in ["talks", "awards", "vip", "project"]]) > 0]
-          | order(year desc)[0]._id
-      )] | order(startsAt asc){
+    `*[_type == "programmeEvent"
+        && edition._ref == *[_type == "edition" && isCurrent == true][0]._id
+      ] | order(startsAt asc){
       _id, startsAt, endsAt, kind, section, venue, languages, moderator, invitationOnly,
       "slug": slug.current,
       ${styled('title')},
