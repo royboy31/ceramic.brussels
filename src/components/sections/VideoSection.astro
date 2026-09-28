@@ -29,6 +29,8 @@ const title: string = video?.title ?? t('home.watch');
 /** Titles are written with line breaks in the Studio; keep them. */
 const lines = title.split(/\r?\n/);
 const credit = video?.poster?.credit;
+/** The block's own text (client feedback, 2026-09-16), line breaks kept. */
+const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) : [];
 ---
 
 {
@@ -50,6 +52,16 @@ const credit = video?.poster?.credit;
               </>
             ))}
           </p>
+          {textLines.length > 0 && (
+            <h3 {...styleAttrs(section.textStyle)}>
+              {textLines.map((line, i) => (
+                <>
+                  {i > 0 && <br />}
+                  {line}
+                </>
+              ))}
+            </h3>
+          )}
           <a class="arrow-link" href={video.url} target="_blank" rel="noopener noreferrer">
             {t('home.watchVideo')}{' '}
             <span class="link-arrow" data-arrow="→" aria-hidden="true">
@@ -64,6 +76,11 @@ const credit = video?.poster?.credit;
           <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
             {section.heading}
           </h2>
+        )}
+        {section.text && (
+          <p class="body-24 video-text" {...styleAttrs(section.textStyle)}>
+            {section.text}
+          </p>
         )}
         <VideoEmbed class="film" url={video.url} poster={poster} label={video.title ?? t('home.watch')} />
       </section>
@@ -107,6 +124,20 @@ const credit = video?.poster?.credit;
     letter-spacing: -0.03em;
     text-transform: uppercase;
   }
+  /* The news rows' text (Feature.astro `.split.feature h3`). */
+  .feature__copy h3 {
+    letter-spacing: -0.04em;
+    max-width: 590px;
+    margin-top: 18px;
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+  .video-text {
+    max-width: var(--measure);
+    margin-bottom: 24px;
+    white-space: pre-line;
+  }
   /* The underline and its hover are the shared `.arrow-link` rule in Base.astro. */
   .arrow-link {
     align-items: center;
@@ -120,6 +151,9 @@ const credit = video?.poster?.credit;
   @media (width<=900px) {
     .split {
       gap: 20px;
+    }
+    .feature__copy h3 {
+      font-size: 32px;
     }
   }
   @media (width<=640px) {
@@ -137,6 +171,9 @@ const credit = video?.poster?.credit;
     }
     .kicker {
       font-size: 22px;
+    }
+    .feature__copy h3 {
+      font-size: 34px;
     }
     .arrow-link {
       font-size: 26px;

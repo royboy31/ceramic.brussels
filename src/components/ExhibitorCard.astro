@@ -71,6 +71,14 @@ const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/asset
           />
         )
       }
+      {/* The hover (client feedback, 2026-09-16): a light white veil over the
+          picture with "discover the gallery →". Before the badges, so they
+          stay on top of it. */}
+      <span class="veil" aria-hidden="true">
+        <span class="veil__label">
+          {t('exhibitors.discoverGallery')} <span class="link-arrow" aria-hidden="true">→</span>
+        </span>
+      </span>
       {
         ex.soloShow && ex.kind !== 'jury-prize' && (
           <img class="badge badge--logo" src={SOLO_LOGO} alt={t('exhibitors.soloShow')} width="60" height="60" />
@@ -131,6 +139,47 @@ const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/asset
   }
   article:hover :global(img) {
     transform: scale(1.025);
+  }
+  .veil {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(255 255 255 / 0.2);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+  /* A white pill, so the words read on a dark photo as on a light one. */
+  .veil__label {
+    padding: 3px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--ink);
+    font-size: 24px;
+    line-height: 34px;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+    translate: 0 6px;
+    transition: translate 0.25s var(--motion-ease, ease);
+  }
+  a:hover .veil,
+  a:focus-visible .veil {
+    opacity: 1;
+  }
+  a:hover .veil__label,
+  a:focus-visible .veil__label {
+    translate: 0 0;
+  }
+  a:hover .veil .link-arrow {
+    transform: translate(0.22em);
+  }
+  @media (hover: none) {
+    .veil {
+      display: none;
+    }
   }
   h2 {
     letter-spacing: -0.045em;

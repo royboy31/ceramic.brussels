@@ -235,6 +235,14 @@ export const videoSection = defineType({
       description:
         'A YouTube link plays in the page; any other link shows the poster and opens the film in a new tab. Leave the URL empty to show the latest edition’s film.',
     }),
+    // The homepage film row's own line under its title, as the news rows
+    // have (client feedback, 2026-09-16). Optional; added, nothing migrated.
+    defineField({
+      name: 'text',
+      title: 'Text',
+      type: 'localeText',
+      description: 'Optional. On the homepage, the line under the film’s title, set like the news rows’ text. Elsewhere, a short text under the heading.',
+    }),
     anchorField(),
     hiddenField(),
   ],

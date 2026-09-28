@@ -378,7 +378,8 @@ const altPaths = hubAltPaths('visit', tab);
           return (
             <p class="faq-contact">
               {before}
-              <a href={localePath(lang, hubTabPath('about', 'team', lang))}>{t('visit.faqContactLink')}</a>
+              {/* The site's in-text link hover (client feedback, 2026-09-25): hl-link in Base.astro. */}
+              <a class="hl-link" href={localePath(lang, hubTabPath('about', 'team', lang))}>{t('visit.faqContactLink')}</a>
               {after}
             </p>
           );

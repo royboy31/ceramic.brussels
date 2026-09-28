@@ -3,7 +3,7 @@ import type { LocaleId } from '../lib/locales';
 import PortableText from './PortableText.astro';
 import SanityImage from './SanityImage.astro';
 import LinkPill from './LinkPill.astro';
-import { styleAttrs } from '../lib/textStyle';
+import { styleAttrs, bodyStyleAttrs } from '../lib/textStyle';
 
 /**
  * Renders a list of `contentSection` objects the way the design draws a hub
@@ -52,7 +52,7 @@ const list = (sections ?? []).filter(
               </h2>
             )}
             {section.body && (
-              <div class="body-24 cs-body" {...styleAttrs(section.bodyStyle)}>
+              <div class="body-24 cs-body" {...bodyStyleAttrs(section.bodyStyle)}>
                 <PortableText value={section.body} fieldStyle={section.bodyStyle} />
               </div>
             )}

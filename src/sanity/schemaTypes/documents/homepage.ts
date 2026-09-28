@@ -27,6 +27,19 @@ export const homepage = defineType({
       type: 'figure',
       group: 'hero',
     }),
+    // The hero as a slideshow that moves by itself (client feedback,
+    // 2026-09-16: "a slideshow of 5 images … slide automatically"). Added
+    // beside heroImage rather than replacing it, so nothing needs migrating.
+    defineField({
+      name: 'heroImages',
+      title: 'More hero pictures',
+      type: 'array',
+      of: [defineArrayMember({ type: 'figure' })],
+      options: { layout: 'grid' },
+      group: 'hero',
+      description:
+        'Optional. Pictures to show after the Hero image: the hero then becomes a slideshow that moves on by itself (the design has five in all). Leave empty for a single picture.',
+    }),
     defineField({
       name: 'heroText',
       title: 'Hero text',

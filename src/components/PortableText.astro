@@ -1,6 +1,6 @@
 ---
 import SanityImage from './SanityImage.astro';
-import { styleAttrs } from '../lib/textStyle';
+import { bodyStyleAttrs } from '../lib/textStyle';
 import { normalizeHref, resolveTextLink } from '../lib/links';
 import { getLinkTargets } from '../lib/queries';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../lib/locales';
@@ -118,7 +118,8 @@ function group(blocks: any[]) {
 const grouped = Array.isArray(value) ? group(value.filter(Boolean)) : [];
 ---
 
-<div class="rich-text" {...styleAttrs(fieldStyle)}>
+{/* Running text at the one body size: a size picked on the field is not drawn (bodyStyleAttrs). */}
+<div class="rich-text" {...bodyStyleAttrs(fieldStyle)}>
   {
     grouped.map((entry) => {
       if (entry.kind === 'list') {

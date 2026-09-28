@@ -167,6 +167,7 @@ const SECTIONS = `sections[hidden != true]{
   },
   _type == "videoSection" => {
     ${styled('heading')},
+    ${styled('text')},
     "video": select(
       defined(video.url) => video ${VIDEO},
       *[_type == "edition" && defined(film.url)] | order(year desc)[0].film ${VIDEO}
@@ -436,6 +437,7 @@ export function getHomepage(lang: LocaleId) {
     `*[_type == "homepage"][0]{
       _id, _type,
       heroImage ${IMAGE},
+      "heroImages": heroImages[] ${IMAGE},
       ${styled('heroText')},
       "heroLink": heroLink ${LINK},
       "quickLinks": quickLinks[] ${LINK},

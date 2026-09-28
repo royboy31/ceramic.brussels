@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import SanityImage from '../../components/SanityImage.astro';
+import Slideshow from '../../components/Slideshow.astro';
 import PageSections from '../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { useTranslations } from '../../lib/i18n';
@@ -31,6 +32,8 @@ const [home, edition] = await Promise.all([getHomepage(lang), getCurrentEdition(
 const headline: string = home?.heroText ?? edition?.title ?? 'ceramic brussels';
 const headlineStyle = home?.heroText ? home?.heroTextStyle : null;
 const heroLink = resolveLink(lang, home?.heroLink);
+/** The hero picture, then "More hero pictures": with more than one, a slideshow that moves by itself (client, 2026-09-16). */
+const heroPictures = [home?.heroImage, ...(home?.heroImages ?? [])].filter((img: any) => img?.asset);
 /** The statement is written with line breaks in the Studio; keep them. */
 const lines = headline.split(/\r?\n/);
 
@@ -80,7 +83,17 @@ const external = (link: ResolvedLink | null) =>
   <section class="hero">
     {/* No stand-in: an empty Hero image reads as empty, so it can be found and filled. */}
     {
-      home?.heroImage?.asset && (
+      heroPictures.length > 1 ? (
+        <Slideshow
+          images={heroPictures}
+          aspect={887 / 591}
+          autoplay={4500}
+          widths={[800, 1200, 1600, 2000]}
+          sizes="(max-width: 640px) 100vw, 66vw"
+          label={headline}
+          id="home-hero"
+        />
+      ) : home?.heroImage?.asset && (
         <figure>
           <SanityImage
             image={home.heroImage}
