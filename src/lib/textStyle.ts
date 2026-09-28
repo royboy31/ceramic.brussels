@@ -201,3 +201,15 @@ export function styleAttrs(style: TextStyle | null | undefined): { style?: strin
   const css = styleToCss(style);
   return css ? { style: css } : {};
 }
+
+/**
+ * The same for running text, minus its size. Body text is one size
+ * site-wide, `--body-size` (Léonie, 2026-09-24: "make sure there aren't too
+ * many body text variations"), so a size picked on a body field's Style tab,
+ * and the line height that goes with it, is not drawn; colour, weight,
+ * alignment and the rest still are. The Studio's options are unchanged.
+ */
+export function bodyStyleAttrs(style: TextStyle | null | undefined): { style?: string } {
+  if (!style) return {};
+  return styleAttrs({ ...style, size: undefined, customSize: undefined, lineHeight: undefined });
+}

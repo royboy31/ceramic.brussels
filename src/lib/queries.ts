@@ -167,6 +167,7 @@ const SECTIONS = `sections[hidden != true]{
   },
   _type == "videoSection" => {
     ${styled('heading')},
+    ${styled('text')},
     "video": select(
       defined(video.url) => video ${VIDEO},
       *[_type == "edition" && defined(film.url)] | order(year desc)[0].film ${VIDEO}
