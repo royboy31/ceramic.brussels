@@ -201,6 +201,11 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
       translate 0.22s cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 0.22s;
   }
+  /* On the yellow art prize pages the bar with the × is yellow too, not a
+     white strip over the acid page (Tiphaine, 2026-09-27). */
+  :global(body.acid-page) .menu-top {
+    background: var(--acid);
+  }
   :global(dialog[open]) .menu-top,
   :global(dialog[open]) .menu-sheet {
     animation: menu-stair-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;

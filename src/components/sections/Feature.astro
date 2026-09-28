@@ -2,6 +2,7 @@
 import type { LocaleId } from '../../lib/locales';
 import Figure from '../Figure.astro';
 import SanityImage from '../SanityImage.astro';
+import Slideshow from '../Slideshow.astro';
 import { resolveLink } from '../../lib/links';
 import { styleAttrs } from '../../lib/textStyle';
 
@@ -26,13 +27,23 @@ const external = link?.external ? { target: '_blank', rel: 'noopener noreferrer'
 /** Headlines are written with line breaks in the Studio; keep them. */
 const lines: string[] = String(section.headline ?? '').split(/\r?\n/);
 const image = section.image?.asset ? section.image : null;
+/**
+ * The picture, then "More pictures": with more than one the block's picture
+ * is a slideshow that moves on by itself (Tiphaine, 2026-09-24).
+ * `images` is "More pictures" on the block (backend request #31).
+ */
+const pictures = [image, ...(section.images ?? [])].filter((i: any) => i?.asset);
+const slideshowId = `feature-${section._key ?? 'x'}`;
+const AUTOPLAY_MS = 4500;
 ---
 
 {
   variant === 'home' ? (
     <section class:list={['split', 'feature', flip ? 'feature--guest' : 'feature--news']} id={section.anchor || undefined}>
       {flip &&
-        (image ? (
+        (pictures.length > 1 ? (
+          <Slideshow images={pictures} aspect={638 / 428} autoplay={AUTOPLAY_MS} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 50vw" label={lines[0]} id={slideshowId} />
+        ) : image ? (
           <SanityImage image={image} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 50vw" />
         ) : (
           <div class="feature-empty" />
@@ -63,7 +74,9 @@ const image = section.image?.asset ? section.image : null;
         )}
       </div>
       {!flip &&
-        (image ? (
+        (pictures.length > 1 ? (
+          <Slideshow images={pictures} aspect={638 / 428} autoplay={AUTOPLAY_MS} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 60vw" label={lines[0]} id={slideshowId} />
+        ) : image ? (
           <SanityImage image={image} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 60vw" />
         ) : (
           <div class="feature-empty" />
@@ -85,7 +98,11 @@ const image = section.image?.asset ? section.image : null;
         )}
       </div>
       <div class="feature-shot">
-        <Figure image={section.image} sizes="(max-width: 640px) 100vw, 50vw" />
+        {pictures.length > 1 ? (
+          <Slideshow images={pictures} aspect={3 / 2} autoplay={AUTOPLAY_MS} sizes="(max-width: 640px) 100vw, 50vw" label={lines[0]} id={slideshowId} />
+        ) : (
+          <Figure image={section.image} sizes="(max-width: 640px) 100vw, 50vw" />
+        )}
       </div>
     </section>
   )

@@ -180,7 +180,8 @@ const SECTIONS = `sections[hidden != true]{
     ${styled('kicker')},
     ${styled('headline')},
     "link": link ${LINK},
-    image ${IMAGE}
+    image ${IMAGE},
+    "images": images[] ${IMAGE}
   },
   _type == "bannerSection" => {
     style,
