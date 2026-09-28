@@ -33,17 +33,47 @@ const [artists, page, edition, editions] = await Promise.all([
   getEditions(lang),
 ]);
 
-/** Files an artist under the first letter of their name, accents folded. */
-const initial = (name: string) =>
-  (name ?? '')
+/** Accents folded, so "Éclat" files under E. */
+const fold = (s: string) =>
+  (s ?? '')
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
-    .trim()
-    .charAt(0)
-    .toUpperCase();
+    .trim();
+
+/**
+ * Artists are filed by last name, "Antoine Moulinard" under M (client
+ * feedback, 2026-09-16). The last name is the last word of the name, which
+ * holds for most. The exceptions are named here: names written family name
+ * first (as many Korean, Chinese and Japanese artists are entered - "Kim
+ * Sang-man", "Kato Mami"), Spanish double surnames (filed under the first),
+ * and duos or collectives (filed under their own name). A new artist whose
+ * last word is not their surname needs a line here.
+ */
+const FAMILY_NAME_FIRST = new Set([
+  'Dong Quanbin', 'Hori Hichiro Shino', 'Kakekurezaki Ryuichi', 'Kato Mami', 'Kim Dong-baik',
+  'Kim Sang-man', 'Lee Nam-mu', 'Liu Langqing', 'Minegishi Seiko', 'Nakashima Hiroshi',
+  'Park Seon-Min', 'Park Young-ho', 'Shen Ting', 'Shin Sang-ho', 'Shin Su-yeon', 'Tong Xindi',
+  'Tong Xindi & Shen Ting', 'Xin Yaoyao', 'Xu Chaoqi', 'Xu Qun', 'Yura Kaoruko',
+]);
+const SURNAME: Record<string, string> = {
+  'Javier Bravo de Rueda': 'Bravo de Rueda',
+  'María García Ibáñez': 'García Ibáñez',
+  'Manuel Barreiro Paparolo': 'Barreiro Paparolo',
+  'Duo Vertigo: Nitsa Meletopoulos (fr) & Victor Alarçon': 'Vertigo',
+  'Mon Rêve': 'Mon Rêve',
+  'Expanded Eye': 'Expanded Eye',
+};
+const surname = (name: string) => {
+  const n = (name ?? '').trim();
+  const words = n.split(/\s+/);
+  return SURNAME[n] ?? (FAMILY_NAME_FIRST.has(n) ? words[0] : words[words.length - 1]);
+};
+const sortKey = (a: any) => `${fold(surname(a.name))} ${fold(a.name)}`.toLowerCase();
+const initial = (name: string) => fold(surname(name)).charAt(0).toUpperCase();
 
 const letters = [...new Set(artists.map((a: any) => initial(a.name)))].sort() as string[];
-const byLetter = (letter: string) => artists.filter((a: any) => initial(a.name) === letter);
+const byLetter = (letter: string) =>
+  artists.filter((a: any) => initial(a.name) === letter).sort((x: any, y: any) => sortKey(x).localeCompare(sortKey(y)));
 /**
  * The exhibitor the row stands for - the one its name links to (artistPath):
  * this edition's, or else the most recent. Its booth, solo show and focus are

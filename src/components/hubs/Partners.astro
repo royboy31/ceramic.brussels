@@ -57,6 +57,16 @@ const logoHeight = (image: any, max = 78, base = 92) => {
   if (!ar || !Number.isFinite(ar) || ar <= 0) return max;
   return Math.round(Math.min(max, Math.max(38, base / Math.pow(ar, 0.45))));
 };
+/**
+ * The editor's own nudge on top of that (partner → "Logo size (%)", request
+ * #11; client feedback 2026-09-17: "is there a way to keep control of"
+ * logos that come out very small or very big). It scales the slot's height
+ * and its 250px width together, so a wide wordmark grows too.
+ */
+const logoScale = (p: any) => {
+  const pct = Number(p?.logoScale);
+  return Number.isFinite(pct) && pct > 0 ? pct / 100 : 1;
+};
 ---
 
 <Base
@@ -126,8 +136,8 @@ const logoHeight = (image: any, max = 78, base = 92) => {
               </div>
               <div class="institution-foot">
                 {p.logo?.asset && (
-                  /* BACKEND-REQUEST #11: slot height from the file's aspect ratio, see `logoHeight` above. */
-                  <span class="logo-slot" style={`--logo-h:${logoHeight(p.logo)}px`}>
+                  /* Slot height from the file's aspect ratio (`logoHeight`), times the editor's size (`logoScale`). */
+                  <span class="logo-slot" style={`--logo-h:${Math.round(logoHeight(p.logo) * logoScale(p))}px;--logo-s:${logoScale(p)}`}>
                     <SanityImage image={p.logo} widths={[250, 500]} sizes="250px" class="logo" placeholder={false} />
                   </span>
                 )}
@@ -220,7 +230,7 @@ const logoHeight = (image: any, max = 78, base = 92) => {
     flex: 1 1 auto;
     /* A replaced element will not shrink past its own width without this. */
     min-width: 0;
-    max-width: 250px;
+    max-width: calc(250px * var(--logo-s, 1));
     margin-left: auto;
     display: flex;
     justify-content: flex-end;

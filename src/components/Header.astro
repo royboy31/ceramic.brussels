@@ -220,6 +220,11 @@ const others = LOCALES.filter((l) => l.id !== lang);
       line-height: 24px;
     }
   }
+  /* The Puilaetco lockup a little smaller than the design's 161 × 29 (client
+     feedback, 2026-09-16), whichever of the two versions below is drawn. */
+  :global(.site-partner .partner-lockup) {
+    zoom: 0.85;
+  }
   /* A Sanity lockup is one image in the design's 161 × 29 slot (design.css
      sizes the three-file version), fitted whatever its shape. */
   :global(.partner-lockup--image) {

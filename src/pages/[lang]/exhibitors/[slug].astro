@@ -10,6 +10,7 @@ import {
   getExhibitorsByYear,
   getEditions,
   getCurrentEdition,
+  getAwards,
 } from '../../../lib/queries';
 
 /**
@@ -30,13 +31,22 @@ const slug = Astro.params.slug as string;
 const t = useTranslations(lang);
 const year = /^\d{4}$/.test(slug) ? Number(slug) : undefined;
 
-let listing: { exhibitors: any[]; edition: any; currentYear?: number; years: { year: number; current: boolean }[] } | null =
-  null;
+let listing: {
+  exhibitors: any[];
+  edition: any;
+  currentYear?: number;
+  years: { year: number; current: boolean }[];
+  awarded: Set<string>;
+} | null = null;
 let exhibitor: any = null;
 let edition: any = null;
 
 if (year) {
-  const [exhibitors, editions] = await Promise.all([getExhibitorsByYear(lang, year), getEditions(lang)]);
+  const [exhibitors, editions, awards] = await Promise.all([
+    getExhibitorsByYear(lang, year),
+    getEditions(lang),
+    getAwards(lang),
+  ]);
   listing = {
     exhibitors,
     edition: editions.find((e: any) => e.year === year) ?? null,
@@ -44,6 +54,11 @@ if (year) {
     years: editions
       .filter((e: any) => e.exhibitorCount > 0)
       .map((e: any) => ({ year: e.year, current: e.isCurrent === true })),
+    // That year's fair-award winners, for the "awards" filter pill, as the
+    // current list does for its own year: the 2026 list gets 2026's.
+    awarded: new Set<string>(
+      awards.filter((a: any) => a.family === 'fair' && a.year === year && a.gallery?._id).map((a: any) => a.gallery._id),
+    ),
   };
 } else {
   [exhibitor, edition] = await Promise.all([getExhibitor(lang, slug), getCurrentEdition(lang)]);
@@ -68,6 +83,7 @@ const orgSchema = exhibitor && {
         year={year}
         currentYear={listing.currentYear}
         years={listing.years}
+        awarded={listing.awarded}
       />
     </Base>
   ) : (

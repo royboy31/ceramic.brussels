@@ -436,6 +436,7 @@ export function getHomepage(lang: LocaleId) {
     `*[_type == "homepage"][0]{
       _id, _type,
       heroImage ${IMAGE},
+      "heroImages": heroImages[] ${IMAGE},
       ${styled('heroText')},
       "heroLink": heroLink ${LINK},
       "quickLinks": quickLinks[] ${LINK},
