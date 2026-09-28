@@ -17,6 +17,13 @@ import SanityImage from './SanityImage.astro';
 interface Props {
   images: any[] | undefined;
   aspect?: number;
+  /**
+   * 'cover' (default) crops every picture to `aspect`. 'contain' keeps the
+   * frame at `aspect` but draws each picture whole, in its own shape, on the
+   * frame's bottom edge: portrait stays portrait, landscape stays landscape
+   * (Tiphaine, 2026-09-25), and nothing is cropped and blown up.
+   */
+  fit?: 'cover' | 'contain';
   sizes?: string;
   widths?: number[];
   /** Accessible name for the dots group - usually the document's title. */
@@ -29,6 +36,7 @@ interface Props {
 const {
   images = [],
   aspect,
+  fit = 'cover',
   sizes = '(max-width: 640px) 100vw, 33vw',
   widths = [400, 600, 900, 1200],
   label,
@@ -38,12 +46,13 @@ const {
 
 const slides = (images ?? []).filter((img) => img?.asset);
 const slideId = (i: number) => `${id}-${i + 1}`;
+const contain = fit === 'contain' && !!aspect;
 ---
 
 {
   slides.length > 0 ? (
     <div
-      class:list={['slideshow', className, { 'no-aspect': !aspect }]}
+      class:list={['slideshow', className, { 'no-aspect': !aspect, contain }]}
       id={id}
       data-slides={slides.length}
       style={aspect ? `--aspect: ${aspect}` : undefined}
@@ -51,13 +60,25 @@ const slideId = (i: number) => `${id}-${i + 1}`;
       <div class="track" data-track tabindex={slides.length > 1 ? 0 : undefined}>
         {slides.map((img, i) => (
           <figure class="slide" id={slideId(i)} data-slide>
-            <SanityImage
-              image={img}
-              aspect={aspect}
-              sizes={sizes}
-              widths={widths}
-              loading={i === 0 ? 'eager' : 'lazy'}
-            />
+            {contain ? (
+              <div class="frame">
+                <SanityImage
+                  image={img}
+                  sizes={sizes}
+                  widths={widths}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  placeholder={false}
+                />
+              </div>
+            ) : (
+              <SanityImage
+                image={img}
+                aspect={aspect}
+                sizes={sizes}
+                widths={widths}
+                loading={i === 0 ? 'eager' : 'lazy'}
+              />
+            )}
             <figcaption>
               <span class="counter">
                 {i + 1}/{slides.length}
@@ -128,6 +149,15 @@ const slideId = (i: number) => `${id}-${i + 1}`;
   }
   .slide :global(img) {
     width: 100%;
+  }
+  /* fit="contain": every frame the same box, the picture whole inside it. */
+  .frame {
+    aspect-ratio: var(--aspect);
+  }
+  .frame :global(img) {
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
   }
 
   /* Counter left, caption right - the line under the picture in the design. */

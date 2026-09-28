@@ -567,3 +567,12 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 **Done (Kamindu):** new optional `figure` field `listImage` ("List image", Images tab of the exhibitor, above the slideshow). `EXHIBITOR_CARD` now selects `"image": coalesce(listImage, images[0])`, so the card reads the same `image` prop as before and **needs no frontend change**; a gallery without a list image looks exactly as it did, so there is no migration. The Studio list thumbnail follows the same rule. The detail page's slideshow is untouched.
 
 ---
+## #31 · open · 2026-09-28 · feature block: several pictures, for an autoplay slideshow
+
+**Page / component:** `src/components/sections/Feature.astro` (the `spotlight` block), homepage features
+**Asked by:** Tiphaine, WhatsApp 2026-09-24 (homepage features as a slideshow that plays by itself); Roy's follow-up of 2026-09-28, item 3
+**The query returns today:** `_type == "spotlight" => { kicker, headline, link, image }` in `SECTIONS` - one `figure`.
+**Rendered meanwhile:** the one picture, as now.
+**Asked for:** an optional array of `figure` on `spotlight` (e.g. `images`, "More pictures", after `image`), and `"images": images[] ${IMAGE}` in its projection. `image` stays the first picture, so no migration and nothing changes for a block without extras. With more than one picture the frontend draws the block's picture as a slideshow that advances by itself (paused on hover and for reduced motion).
+
+---

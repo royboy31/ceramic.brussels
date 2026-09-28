@@ -45,6 +45,10 @@ const place = [exhibitor.city, code && `(${code})`].filter(Boolean).join(' ');
 /** The written list wins over the references: the design names every artist, not only the ones with a page. */
 const presenting = !exhibitor.artistsText && exhibitor.artists?.length ? exhibitor.artists : null;
 const badge = exhibitor.kind === 'jury-prize' ? t('exhibitors.juryPrize') : exhibitor.soloShow ? t('exhibitors.soloShow') : null;
+/** The "focus España" lockup, as on the cards and the artists list (Tiphaine, 2026-09-25). Another focus has no logo yet. */
+const focusLabel = exhibitor.countryFocusLabel ?? t('exhibitors.countryFocus');
+const focusLogo =
+  exhibitor.inCountryFocus && /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/assets/exhibitors/focus-espana.png' : null;
 
 /** "solo show" → "solo<br>show", the two-line badge of the design. */
 const twoLines = (s: string) => {
@@ -79,6 +83,7 @@ const bioRight = bio.slice(split);
           <Slideshow
             images={images}
             aspect={433 / 541}
+            fit="contain"
             widths={[440, 660, 880, 1320]}
             sizes="(max-width: 900px) 100vw, 433px"
             label={exhibitor.name}
@@ -96,8 +101,9 @@ const bioRight = bio.slice(split);
       <div class="title-row">
         <h2 {...styleAttrs(exhibitor.nameStyle)}>{exhibitor.name}</h2>
         {
-          (badge || exhibitor.booth) && (
+          (badge || focusLogo || exhibitor.booth) && (
             <div class="booth">
+              {focusLogo && <img class="focus-logo" src={focusLogo} alt={focusLabel} width="260" height="149" />}
               {badge && exhibitor.kind !== 'jury-prize' ? (
                 <img class="solo-logo" src="/assets/exhibitors/solo-show.png" alt={badge} width="60" height="60" />
               ) : badge && (
@@ -191,7 +197,9 @@ const bioRight = bio.slice(split);
   .artwork {
     position: relative;
   }
-  .artwork :global(img),
+  /* The pictures keep their own shape inside the 433 × 541 frame
+     (Slideshow fit="contain", Tiphaine 2026-09-25); only the empty
+     stand-in still fills it. */
   .artwork-empty {
     object-fit: cover;
     width: 100%;
@@ -247,6 +255,11 @@ const bioRight = bio.slice(split);
   /* The designer's solo show disc (2026-09-24), the size of the old badge. */
   .solo-logo {
     width: 60px;
+    height: 60px;
+  }
+  /* The Spain outline and its words, as tall as the solo show disc. */
+  .focus-logo {
+    width: auto;
     height: 60px;
   }
   .booth b {
@@ -329,8 +342,10 @@ const bioRight = bio.slice(split);
     margin-top: 32px;
   }
   @media (width<=900px) {
+    /* minmax(0, …): a bare 1fr grows to its widest child's min-content,
+       which pushed a phone page 200px wider than the screen. */
     .detail {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
     .profile {
       margin-top: 20px;
@@ -340,8 +355,12 @@ const bioRight = bio.slice(split);
     .detail {
       padding: 30px var(--gutter) 70px;
     }
+    /* A long name, the focus lockup, the solo disc and the booth do not
+       fit one phone line: the badges drop under the name when they must. */
     .title-row {
       align-items: start;
+      flex-wrap: wrap;
+      row-gap: 12px;
     }
     .title-row h2 {
       font-size: 42px;
@@ -355,6 +374,9 @@ const bioRight = bio.slice(split);
     }
     .solo-logo {
       width: 50px;
+      height: 50px;
+    }
+    .focus-logo {
       height: 50px;
     }
     .booth span {
