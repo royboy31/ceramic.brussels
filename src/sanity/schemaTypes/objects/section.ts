@@ -86,6 +86,15 @@ export const spotlight = defineType({
     }),
     defineField({ name: 'link', title: 'Link', type: 'link' }),
     defineField({ name: 'image', title: 'Image', type: 'figure' }),
+    defineField({
+      name: 'images',
+      title: 'More pictures',
+      type: 'array',
+      of: [{ type: 'figure' }],
+      options: { layout: 'grid' },
+      description:
+        'Optional. Pictures to show after the Image above: the block then becomes a slideshow that moves on by itself. Leave empty for a single picture.',
+    }),
     anchorField(),
     hiddenField(),
   ],

@@ -126,7 +126,7 @@ const captionOf = (img: any, fallback?: string) => ({
                 </span>
               )}
               <figcaption>
-                <span class="counter">1/{heroImages.length}</span>
+                {heroImages.length > 1 && <span class="counter">1/{heroImages.length}</span>}
                 {(page.cover.caption || page.cover.workTitle) && (
                   <span>
                     {captionOf(page.cover).who}

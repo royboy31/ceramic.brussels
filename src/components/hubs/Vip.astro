@@ -668,6 +668,14 @@ const rate = {
   .hotel .panel-title {
     margin-bottom: 18px;
   }
+  /* VIP lounge against Léonie's frame (Félicie, 2026-09-25: the spacing
+     around the titles was off): the letters stand 7px clear of the rule,
+     not touching it, and the copy starts ~38px under it. */
+  .lounge-top .panel-title,
+  .aperitivos .panel-title {
+    padding-bottom: 5px;
+    margin-bottom: 30px;
+  }
 
   .lounge-top,
   .hotel {
@@ -677,9 +685,6 @@ const rate = {
   .aperitivos {
     margin-top: 56px;
     align-items: start;
-  }
-  .aperitivos .panel-title {
-    margin-bottom: 14px;
   }
 
   /* The whole frame answers the pointer as a button does: it fills white
@@ -781,6 +786,29 @@ const rate = {
   .agenda .row {
     grid-template-columns: 4fr 6fr;
     gap: 30px;
+  }
+  /* The lounge's agenda against Léonie's frame (Félicie, 2026-09-25: the
+     spacing between the titles was off). "agenda" is one of the page's
+     titles, "VIP aperitivos" and the rest: ruled under, 7px clear of its
+     letters, not the programme overview's big word under a rule. Each
+     event's title is set at that size too, with more air above its date. */
+  .agenda .group-title {
+    border-top: 0;
+    border-bottom: 2px solid;
+    padding: 0 0 5px;
+    letter-spacing: -0.04em;
+    font-size: clamp(28px, 2.8vw, 40px);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .agenda .rows {
+    margin-top: 44px;
+  }
+  .agenda .event-title {
+    font-size: clamp(28px, 2.8vw, 40px);
+  }
+  .agenda .event-when {
+    margin-top: 18px;
   }
   .event-title {
     letter-spacing: -0.03em;
