@@ -7,8 +7,9 @@ import PressMedia from '../../../components/hubs/PressMedia.astro';
 import Programme from '../../../components/hubs/Programme.astro';
 import Visit from '../../../components/hubs/Visit.astro';
 import Vip from '../../../components/hubs/Vip.astro';
-import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { hubRouteParams, hubFromSegment, tabFromSegment } from '../../../lib/hubs';
+import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../../lib/locales';
+import { HUBS, hubRouteParams, hubFromSegment, tabFromSegment } from '../../../lib/hubs';
+import { getHubPages } from '../../../lib/queries';
 
 /**
  * Every hub, in every language, from one route.
@@ -29,9 +30,17 @@ import { hubRouteParams, hubFromSegment, tabFromSegment } from '../../../lib/hub
  * Astro ranks static segments above dynamic ones, so the listing routes
  * (`exhibitors/`, `artists/`, `news/`, `editions/`) still win over `[hub]`,
  * and `[lang]/[...slug].astro` stays below both. Verified by build.
+ *
+ * A `pageTabs` hub's tab is built only while its page is published, so each
+ * such hub's pages are read here first. Page documents are the same in every
+ * language, and the hub components make the same (memoised) query.
  */
-export function getStaticPaths() {
-  return hubRouteParams(LOCALE_IDS);
+export async function getStaticPaths() {
+  const routes = Object.keys(HUBS).filter((route) => HUBS[route].pageTabs);
+  const pages = Object.fromEntries(
+    await Promise.all(routes.map(async (route) => [route, await getHubPages(DEFAULT_LOCALE, route)])),
+  );
+  return hubRouteParams(LOCALE_IDS, { pages });
 }
 
 const lang = Astro.params.lang as LocaleId;

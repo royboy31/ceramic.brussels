@@ -86,6 +86,15 @@ export interface Hub {
   segment?: Segment;
   title: StringKey;
   tabs: HubTab[];
+  /**
+   * Every tab past the first is a `page` document, so a tab whose page is
+   * not published is neither built nor given a pill: unpublishing a page in
+   * the Studio takes it off the site and keeps its draft (Félicie,
+   * 2026-09-28). The first tab is the hub's own address, which the menu
+   * links to, so it is always built. Hubs whose tabs come from other
+   * documents (guest of honour, partners, VIP) leave this off.
+   */
+  pageTabs?: boolean;
 }
 
 export const HUBS: Record<string, Hub> = {
@@ -105,6 +114,7 @@ export const HUBS: Record<string, Hub> = {
     // The old site published this page as /fr/art-prize and /nl/art-prize; it
     // never translated either, and leaving them be keeps both URLs alive.
     title: 'nav.artPrize',
+    pageTabs: true,
     tabs: [
       { slug: 'about', segment: { fr: 'a-propos', nl: 'over' }, label: 'tabs.about' },
       // French as the old site writes it, inclusive hyphen and all.
@@ -118,6 +128,7 @@ export const HUBS: Record<string, Hub> = {
     route: 'programme',
     segment: { nl: 'programma' },
     title: 'nav.programme',
+    pageTabs: true,
     // The designer's order of 2026-09-17 (backend request #8): talks first,
     // which makes /[lang]/programme the talks page, then the award ceremony,
     // then La Cambre. The old site's /programme was an alias of food & drinks
@@ -178,6 +189,7 @@ export const HUBS: Record<string, Hub> = {
     // Both the old site's own addresses, French translated and Dutch not.
     segment: { fr: 'infos-pratiques', nl: 'visitors-info' },
     title: 'nav.visit',
+    pageTabs: true,
     tabs: [
       { slug: 'practical-info', segment: { fr: 'infos-pratiques', nl: 'visitors-info' }, label: 'tabs.practicalInfo' },
       // "food & drinks" is the label in all three locales; the URL follows it.
@@ -190,6 +202,7 @@ export const HUBS: Record<string, Hub> = {
     route: 'about',
     segment: { fr: 'a-propos', nl: 'over' },
     title: 'nav.about',
+    pageTabs: true,
     tabs: [
       { slug: 'the-fair', label: 'tabs.theFair' },
       // The old site's French, superseded by the "comité consultatif" label
@@ -216,6 +229,7 @@ export const HUBS: Record<string, Hub> = {
     route: 'press-media',
     segment: { fr: 'presse-medias', nl: 'pers-media' },
     title: 'tabs.pressMedia',
+    pageTabs: true,
     tabs: [
       { slug: 'stories', segment: { fr: 'recits', nl: 'verhalen' }, label: 'press.stories' },
       { slug: 'press', segment: { fr: 'presse', nl: 'pers' }, label: 'tabs.press' },
@@ -296,12 +310,19 @@ export function hubTabHref(route: string, tab: HubTab, lang: LocaleId = DEFAULT_
  * served to anyone, gate or no gate. The Worker renders them on request
  * (src/integrations/vip-routes.mjs). `astro dev` has no Worker, so there
  * they are built like any other tab and open without a code.
+ *
+ * `pages` holds each `pageTabs` hub's published pages (getHubPages); a tab
+ * of such a hub whose page is missing from it is not built (`tabHasPage`).
  */
-export function hubRouteParams(locales: readonly LocaleId[], { includeLocked = !import.meta.env.PROD } = {}) {
+export function hubRouteParams(
+  locales: readonly LocaleId[],
+  { includeLocked = !import.meta.env.PROD, pages = {} as Record<string, any[]> } = {},
+) {
   return locales.flatMap((lang) =>
     Object.keys(HUBS).flatMap((route) =>
       HUBS[route].tabs
         .filter((tab) => !tab.link && (includeLocked || !tab.locked))
+        .filter((tab) => tabHasPage(route, tab, pages[route] ?? []))
         .map((tab, i) => ({
           params: {
             lang,
@@ -317,6 +338,17 @@ export function hubRouteParams(locales: readonly LocaleId[], { includeLocked = !
 /** The `page` document that carries a tab's text, matched on its English slug. */
 export function pageForTab(pages: any[], slug: string) {
   return pages.find((p) => p?.slugs?.en === slug) ?? null;
+}
+
+/**
+ * Whether a tab is on the site: always, unless its hub is `pageTabs` and its
+ * page is missing from `pages` - unpublished, since a build only sees
+ * published documents. A preview render reads drafts, so there the tab stays.
+ */
+export function tabHasPage(route: string, tab: HubTab, pages: any[]) {
+  const hub = HUBS[route];
+  if (!hub?.pageTabs || tab.link || tab === hub.tabs[0]) return true;
+  return !!pageForTab(pages, tab.slug);
 }
 
 /* ----------------------------------------------------------------- VIP */
