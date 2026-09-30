@@ -138,8 +138,18 @@ const intro =
       : tab === 'hotel-deal'
         ? C.hotelDeal.intro
         : undefined);
+/**
+ * The hotel panel's rate line from Site settings → Venue & access → Hotel
+ * deal (#16), the frame's own when the field is empty. Its paragraph is not
+ * read yet on purpose: the Studio's "Text" field there holds the hotel's
+ * description, which this page already prints as its intro and body, and not
+ * the "use code …" paragraph the field is for - reading it today would print
+ * the description twice and drop the code. It is one Studio edit away; see
+ * #16 in docs/backend-requests.md.
+ */
 const rate = {
   ...C.hotelDeal.rate,
+  heading: site?.practicalInfo?.hotelDeal?.rate ?? C.hotelDeal.rate.heading,
   text: C.hotelDeal.rate.text.split('{code}').join(String(hotelCode || C.hotelDeal.rate.fallbackCode)),
 };
 ---
@@ -410,15 +420,22 @@ const rate = {
                           </>
                         ))}
                       </h3>
-                      {/* BACKEND-REQUEST #15: the frame dates this "everyday —
-                          11:00 / 16:00"; one datetime cannot say that. */}
-                      <p class="event-when">{formatTime(e.startsAt, lang)}</p>
+                      {/* "everyday — 11:00 / 16:00" as the editor typed it, where one
+                          datetime cannot say it (#15). */}
+                      <p class="event-when">{e.whenText ?? formatTime(e.startsAt, lang)}</p>
                       {e.description && (
                         <div class="event-text body-20">
                           <PortableText value={e.description} fieldStyle={e.descriptionStyle} />
                         </div>
                       )}
-                      {/* BACKEND-REQUEST #14: no link on programmeEvent, so no pill. */}
+                      {/* The pill that ends the row, from the event's Link (#14). The
+                          label is a name as often as not - "discover Puilaetco" - so its
+                          capitals stand. */}
+                      {e.link && (
+                        <p class="links">
+                          <LinkPill lang={lang} link={e.link} preserveCase />
+                        </p>
+                      )}
                     </div>
                   </article>
                 ))
@@ -464,15 +481,20 @@ const rate = {
                       <article class="row">
                         <div class="row-copy">
                           <h4 class="event-line" {...styleAttrs(e.titleStyle)}>
-                            {lines(e.title).join(' ')} — {formatTime(e.startsAt, lang)}
+                            {lines(e.title).join(' ')} — {e.whenText ?? formatTime(e.startsAt, lang)}
                           </h4>
                           {e.description && (
                             <div class="event-text body-20">
                               <PortableText value={e.description} fieldStyle={e.descriptionStyle} />
                             </div>
                           )}
-                          {/* BACKEND-REQUEST #14: the frame ends every row in
-                              "book your visit ↗"; programmeEvent has no link. */}
+                          {/* The pill the frame ends every row in, from the event's
+                              Link (#14). */}
+                          {e.link && (
+                            <p class="links">
+                              <LinkPill lang={lang} link={e.link} preserveCase />
+                            </p>
+                          )}
                         </div>
                         <Slideshow
                           images={e.image?.asset ? [e.image] : []}

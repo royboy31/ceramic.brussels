@@ -9,6 +9,11 @@ import { resolveLink } from '../../lib/links';
  * the "text" style is the gradient band ("ceramic brussels 2026 in images →")
  * under the first feature, the "solid" style the acid band that closes the
  * page.
+ *
+ * The label's own capitals stand. Half of these are names - "discover
+ * Puilaetco", "discover MAD Brussels" on the VIP frames - and the pill's
+ * lowercasing was misspelling them with no way for an editor to stop it
+ * (Léonie, 2026-09-30).
  */
 interface Props {
   lang: LocaleId;
@@ -36,7 +41,7 @@ const band = variant === 'home' && style !== 'pill' && links.length > 0 ? resolv
     links.length > 0 && (
       <p class:list={['links-row', `links-${style}`]} id={section.anchor || undefined}>
         {links.map((link: any) => (
-          <LinkPill lang={lang} link={link} variant={style} />
+          <LinkPill lang={lang} link={link} variant={style} preserveCase />
         ))}
       </p>
     )

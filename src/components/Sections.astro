@@ -65,10 +65,12 @@ const list = (sections ?? []).filter(
                 ))}
               </ul>
             )}
+            {/* The label's capitals stand: these are names as often as not -
+                "discover Puilaetco", "discover The Hoxton" (Léonie, 2026-09-30). */}
             {links.length > 0 && (
               <p class="cs-links">
                 {links.map((link: any) => (
-                  <LinkPill lang={lang} link={link} />
+                  <LinkPill lang={lang} link={link} preserveCase />
                 ))}
               </p>
             )}

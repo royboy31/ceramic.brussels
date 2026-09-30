@@ -266,6 +266,8 @@ is already selected by `getProgramme`).
 
 **Done (Kamindu, 2026-09-19):** `programmeEvent.link`, the shared `link` object, selected as `link` in the `getProgramme` projection. Label, target and internal/external are all the editor's, so "book your visit ↗", "book the party ↗" and "discover Puilaetco →" are one field. `resolveLink` renders it as everywhere else, and `kind`, `route`, `anchor` and `path` are already in `stegaFilter`'s `PLAIN_KEYS`, so it survives a preview render. An event with no link gets no pill - drop the mailto fallback when you wire it.
 
+**Rendered (Kamindu, 2026-09-30):** the pill is drawn on both programme groups, on-site and off-site, with `preserveCase` - the labels the editors typed are names ("discover Puilaetco", "discover Hotel Solvay", "discover MAD Brussels") and the pill's lowercasing was misspelling them. The field had been filled for all eight 2027 VIP events since 29 September and shown nowhere: that was half of the regression Félicie reported on 30 September.
+
 **Page / component:** `src/components/hubs/Vip.astro`, the VIP programme tab
 **Figma frame:** `output.pdf` page 3 (VIP frames, 2026-09-18)
 **The design shows:** every off-site entry ends in a pill - "book your visit ↗"
@@ -293,6 +295,8 @@ with no further work here.
 ## #15 · done · 2026-09-18 · a VIP event that repeats every day
 
 **Done (Kamindu, 2026-09-19):** `programmeEvent.whenText` (localeString, "When (free text)" in the Studio), selected as `whenText` in `getProgramme`. Print it in place of the formatted time when it is set. The recurrence model is deliberately not built: two blocks in the whole design need it.
+
+**Rendered (Kamindu, 2026-09-30):** `whenText` now wins over `formatTime(startsAt)` on both programme groups. The discovery tours event already carried "everyday — 11:00 / 16:00", the frame's own line, and the page was printing "11:00" over it.
 
 **Still content, not schema:** the current edition has two VIP events (Preview, Vernissage), both off-site, against the frame's eight. That is part of #17.
 
@@ -330,6 +334,8 @@ entries of the frame are not in Sanity at all. The tab renders what is there.
 ## #16 · done · 2026-09-18 · the hotel's special rate as its own fields
 
 **Done (Kamindu, 2026-09-19):** `practicalInfo.hotelDeal.rate` (localeString) beside the existing `text`, both selected in `getSettings`. The rate line and the paragraph are two fields now, so the split in `vipContent.ts` can go. Kept on `practicalInfo` rather than made a page-builder block: the panel appears on one tab, and moving it later costs a query line. `{code}` substitution is unchanged and still works in either field.
+
+**Half rendered, and why (Kamindu, 2026-09-30):** the page reads `hotelDeal.rate` for the panel's bold line, the frame's €160 line standing in while the field is empty - which it is. It does **not** read `hotelDeal.text` yet, on purpose: that field holds the hotel's *description* today, which the hotel-deal page already prints as its intro and its body, and not the "use code …" paragraph the field is for. Reading it now would print the description three times and drop the code paragraph. **Content task for Félicie:** put the rate line in "Rate line" and the *use-code* paragraph in "Text"; the page then reads both, and the French and Dutch reach the panel for the first time (the frame's copy is English only).
 
 **Page / component:** `src/components/hubs/Vip.astro`, the hotel deal tab
 **Figma frame:** `output.pdf` page 5
