@@ -209,3 +209,143 @@ export const pressContact = defineType({
     prepare: ({ name, region }) => ({ title: name, subtitle: region }),
   },
 });
+
+/**
+ * A labelled link in the previous editions overview's "highlights" column
+ * (BACKEND-REQUEST #33). The label is the editor's sentence - "10 art prize
+ * laureates" - and the link is usually another tab of the same edition.
+ */
+export const editionHighlight = defineType({
+  name: 'editionHighlight',
+  title: 'Highlight',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'label',
+      title: 'Label',
+      type: 'localeString',
+      validation: (rule) => rule.required(),
+    }),
+    defineField({ name: 'link', title: 'Link', type: 'link' }),
+  ],
+  preview: {
+    select: { label: 'label.en' },
+    prepare: ({ label }) => ({ title: label ?? 'Highlight' }),
+  },
+});
+
+/**
+ * One previous-editions tab's opening paragraph (BACKEND-REQUEST #32). Each
+ * of the seven tabs has its own on the frames, so they are a list keyed by
+ * tab rather than one field per tab.
+ */
+export const editionLead = defineType({
+  name: 'editionLead',
+  title: 'Tab lead',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'tab',
+      title: 'Tab',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Overview', value: 'overview' },
+          { title: 'Guest of honour', value: 'guest-of-honour' },
+          { title: 'Exhibitors', value: 'exhibitors' },
+          { title: 'Art prize', value: 'art-prize' },
+          { title: 'Country focus', value: 'focus' },
+          { title: 'Programme', value: 'programme' },
+          { title: 'Publication', value: 'publication' },
+        ],
+      },
+      validation: (rule) => rule.required(),
+    }),
+    defineField({ name: 'lead', title: 'Lead paragraph', type: 'localeBlock' }),
+  ],
+  preview: {
+    select: { tab: 'tab' },
+    prepare: ({ tab }) => ({ title: tab ?? 'Tab lead' }),
+  },
+});
+
+/**
+ * What the guest of honour showed at that fair (BACKEND-REQUEST #34): the
+ * installation's own title, the text about it and who wrote it, with its
+ * pictures. On the edition and not on the artist, because it belongs to one
+ * year - 2025's guest has been followed by two others since.
+ */
+export const guestInstallation = defineType({
+  name: 'guestInstallation',
+  title: 'Installation',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'title',
+      title: 'Title',
+      type: 'localeString',
+      description: 'e.g. "AT TWILIGHT, ceramic brussels 2025"',
+    }),
+    defineField({ name: 'text', title: 'Text', type: 'localeBlock' }),
+    defineField({ name: 'author', title: 'Written by', type: 'string', description: 'Shown as a signature under the text.' }),
+    defineField({
+      name: 'images',
+      title: 'Pictures',
+      type: 'array',
+      of: [defineArrayMember({ type: 'figure' })],
+      options: { layout: 'grid' },
+    }),
+  ],
+});
+
+/**
+ * The country focus tab (BACKEND-REQUEST #35). The galleries are the
+ * edition's exhibitors flagged "In country focus" - this object only holds
+ * the words and the pictures around them. Its talks are the edition's
+ * programme events with the section "Country focus".
+ */
+export const editionFocus = defineType({
+  name: 'editionFocus',
+  title: 'Country focus',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'lead',
+      title: 'Lead paragraph',
+      type: 'localeBlock',
+      description: 'Shown above the pictures. Links inside it work as anywhere else.',
+    }),
+    defineField({
+      name: 'images',
+      title: 'Pictures',
+      type: 'array',
+      of: [defineArrayMember({ type: 'figure' })],
+      options: { layout: 'grid' },
+    }),
+    defineField({
+      name: 'talkImages',
+      title: 'Talks pictures',
+      type: 'array',
+      of: [defineArrayMember({ type: 'figure' })],
+      options: { layout: 'grid' },
+      description: 'The slideshow beside the talks programme.',
+    }),
+  ],
+});
+
+/** The fair's magazine for that year (BACKEND-REQUEST #36). */
+export const editionPublication = defineType({
+  name: 'editionPublication',
+  title: 'Publication',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'url',
+      title: 'Reader URL',
+      type: 'url',
+      description: 'The page-flip reader, embedded full width, e.g. https://online.fliphtml5.com/qogyd/xffh/',
+    }),
+    defineField({ name: 'title', title: 'Title', type: 'localeString' }),
+    defineField({ name: 'cover', title: 'Cover', type: 'figure' }),
+  ],
+});

@@ -157,6 +157,60 @@ export const edition = defineType({
       description: 'The "ceramic brussels 2026 in images" gallery.',
     }),
     defineField({ name: 'film', title: 'Film', type: 'video', group: 'archive' }),
+
+    /* --- previous editions -----------------------------------------------
+       The section at /[lang]/previous-editions/<year> (Figma, Léonie
+       2026-09-28; docs/previous-editions-plan.md). Every field here is
+       optional and additive: a tab renders what it has, and `tabsFor` in
+       src/lib/previousEditions.ts only gives a year a pill once there is
+       something behind it. Nothing existing was changed to add them. */
+    defineField({
+      name: 'archiveLeads',
+      title: 'Tab lead paragraphs',
+      type: 'array',
+      group: 'archive',
+      of: [defineArrayMember({ type: 'editionLead' })],
+      description: 'The opening paragraph of each previous-editions tab. One entry per tab that has one.',
+    }),
+    defineField({
+      name: 'leadImages',
+      title: 'Overview pictures',
+      type: 'array',
+      group: 'archive',
+      of: [defineArrayMember({ type: 'figure' })],
+      options: { layout: 'grid' },
+      description: 'The pair shown under the lead on the overview tab. The first two are used, side by side, 3:2.',
+    }),
+    defineField({
+      name: 'highlights',
+      title: 'Overview highlights',
+      type: 'array',
+      group: 'archive',
+      of: [defineArrayMember({ type: 'editionHighlight' })],
+      description: 'The linked list beside the key figures on the overview tab.',
+    }),
+    defineField({
+      name: 'guestInstallation',
+      title: 'Guest of honour installation',
+      type: 'guestInstallation',
+      group: 'archive',
+      description: 'What that year\'s guest of honour showed, with its own title, text and pictures.',
+    }),
+    defineField({
+      name: 'focus',
+      title: 'Country focus',
+      type: 'editionFocus',
+      group: 'archive',
+      description:
+        'The focus tab\'s words and pictures. Its galleries are the exhibitors flagged "In country focus"; its talks are the programme events with the section "Country focus".',
+    }),
+    defineField({
+      name: 'publication',
+      title: 'Publication',
+      type: 'editionPublication',
+      group: 'archive',
+      description: 'The fair\'s magazine for that year, embedded on the publication tab.',
+    }),
     defineField({ name: 'catalogueUrl', title: 'Catalogue URL', type: 'url', group: 'archive' }),
     defineField({ name: 'overviewUrl', title: 'Overview / brochure URL', type: 'url', group: 'archive' }),
     defineField({ name: 'pressClipsUrl', title: 'Press clips URL', type: 'url', group: 'archive' }),

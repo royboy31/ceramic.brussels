@@ -38,7 +38,9 @@ const figures: any[] = edition.keyFigures ?? [];
 const highlights = (edition.highlights ?? [])
   .map((h: any) => {
     const link = resolveLink(lang, h?.link);
-    return link && h?.label ? { key: h._key, label: h.label, labelStyle: h.labelStyle, ...link } : null;
+    // `resolveLink` carries a `label` of its own (the link object's, empty
+    // here), so it is spread first and the highlight's own label wins.
+    return link && h?.label ? { ...link, key: h._key, label: h.label, labelStyle: h.labelStyle } : null;
   })
   .filter(Boolean) as { key: string; label: string; labelStyle?: any; href: string; external: boolean; arrow: string }[];
 ---

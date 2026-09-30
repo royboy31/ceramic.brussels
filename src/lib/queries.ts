@@ -560,7 +560,7 @@ export function getEditionArchive(lang: LocaleId, year: number) {
       // BACKEND-REQUEST #35: the country focus tab - its lead, its pictures
       // and the galleries it hosted.
       "focus": focus{
-        ${styled('lead')}, "images": images[] ${IMAGE},
+        ${styled('lead')}, "images": images[] ${IMAGE}, "talkImages": talkImages[] ${IMAGE},
         "galleries": galleries[]->{ _id, name, "slug": slug.current, "year": edition->year, "current": edition->isCurrent == true }
       },
       // The galleries the focus tab lists, when they are flagged on the

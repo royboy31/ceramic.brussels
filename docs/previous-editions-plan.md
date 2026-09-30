@@ -363,7 +363,29 @@ off `/exhibitors/<year>`.
 
 ---
 
-## 6. What the backend has to add — requests #32–#39
+## 6. The content, filled 2026-09-30
+
+Requests #32–#39 are **done**, across the stack: the fields were added to the
+`edition` schema (all optional, all additive — nothing existing was changed)
+and filled from Léonie's frames and `legacy-export/` by
+`scripts/content/previous-editions.mjs`, which is re-runnable and lives in
+`scripts/content/`, the frontend half's own corner.
+
+What went in: the five 2025 tab leads, the overview's picture pair and its
+four highlight links, Elizabeth Jaeger's portrait and real biography with the
+AT TWILIGHT essay and its photograph, the focus tab's lead, pictures,
+galleries and three talks, the 2025 and 2024 publication readers, ten
+laureates' Instagram handles and nationalities, ten jury members' links, and
+the dates for 24 programme events the import had left undated.
+
+Two things are still open, both because they need a decision rather than a
+patch: **#40**, a person can only belong to one edition, so 2025's jury is
+missing Jean-Marc Dimanche; and **#41**, the 2025 exhibitor cards have no
+pictures and the supplied artworks cannot be matched to galleries safely.
+
+### The original requests
+
+## 6b. What the backend had to add — requests #32–#39
 
 Logged in full in `docs/backend-requests.md`:
 

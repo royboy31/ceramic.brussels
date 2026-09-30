@@ -44,6 +44,9 @@ export const PROGRAMME_SECTIONS = [
   { title: 'Awards', value: 'awards' },
   { title: 'VIP programme (VIP hub, behind the code)', value: 'vip' },
   { title: 'La Cambre (partner project)', value: 'project' },
+  // The talks a past edition's country focus co-curated, shown on that
+  // edition's focus tab and nowhere on the current programme (#35).
+  { title: 'Country focus (previous editions)', value: 'focus' },
 ] as const;
 
 /** Where a VIP programme event happens: the filter pills on the VIP programme tab. Labels in STRINGS as `vip.venue.<value>`. */
