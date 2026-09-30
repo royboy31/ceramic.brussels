@@ -17,6 +17,11 @@ import {
   accessMode,
   faqItem,
   pressContact,
+  editionHighlight,
+  editionLead,
+  guestInstallation,
+  editionFocus,
+  editionPublication,
 } from './objects/visitor';
 
 import { edition } from './documents/edition';
@@ -59,6 +64,12 @@ export const objectTypes: SchemaTypeDefinition[] = [
   accessMode,
   faqItem,
   pressContact,
+  // Previous editions (requests #32-#36). All optional, all additive.
+  editionHighlight,
+  editionLead,
+  guestInstallation,
+  editionFocus,
+  editionPublication,
 ];
 
 export const documentTypes: SchemaTypeDefinition[] = [

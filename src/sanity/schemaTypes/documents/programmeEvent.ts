@@ -120,7 +120,14 @@ export const programmeEvent = defineType({
       description:
         'As displayed: "with Christine Germain-Donnat (French Ministry of Culture), Bertrand Mazeirat (Musée Ariana, CH)…"',
     }),
-    defineField({ name: 'moderator', title: 'Moderator', type: 'string', hidden: true }),
+    // Shown again (BACKEND-REQUEST #37): the previous editions' focus tab
+    // prints SPEAKERS and MODERATOR under each talk, as the frame draws it.
+    defineField({
+      name: 'moderator',
+      title: 'Moderator',
+      type: 'string',
+      description: 'Shown under the speakers on a previous edition\'s country focus tab.',
+    }),
     // Shown for VIP events, whose row in the design carries a paragraph;
     // hidden elsewhere, where the programme row has no place for it.
     defineField({

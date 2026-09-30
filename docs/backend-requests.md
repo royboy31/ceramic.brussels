@@ -675,7 +675,7 @@ So nothing is broken, and nothing needs building: the lines she wanted belong in
 Nothing to build unless they want the URL changed too.
 
 ---
-## #38 · open · 2026-09-30 · previous editions: a lead paragraph per tab
+## #38 · done · 2026-09-30 · previous editions: a lead paragraph per tab
 
 **Page / component:** `src/components/editions/*.astro`, every tab of `/[lang]/previous-editions/<year>`
 **Figma frames:** `Previous editions/ceramic brussels — previous editions — 2025 — *.png` (all seven)
@@ -686,8 +686,10 @@ Nothing to build unless they want the URL changed too.
 **Asked for:** a lead per tab on `edition`. Suggested shape: one `archiveLeads` array of an object with `tab` (a string from a fixed list: overview, guest-of-honour, exhibitors, art-prize, focus, programme, publication) and `lead` (`localeBlock`), selected as-is. An object per tab in a fieldset would do as well — what matters is that a tab can be given its own paragraph without the others inheriting it. `intro` stays what it is for `/editions` and the homepage; overview can fall back to it.
 **Source text:** `legacy-export/normalized/pastEditions.json` — the `text-2col` / `text-1col` blocks on `guest-of-honour-3`, `norwegian-focus`, `art-prize-laureates-2`, `magazine-2`, `photos` and their 2024/2026 counterparts.
 
+**Done (Lilanga, 2026-09-30, across the stack per docs/project-handbook.md):** new `archiveLeads` array of `editionLead` (tab + lead) on `edition`, Figures & archive group. The five 2025 leads are in, transcribed from the frames. Filled by `scripts/content/previous-editions.mjs`, which is re-runnable.
+
 ---
-## #39 · open · 2026-09-30 · previous editions: overview highlights and its two images
+## #39 · done · 2026-09-30 · previous editions: overview highlights and its two images
 
 **Page / component:** `src/components/editions/Overview.astro`, `/[lang]/previous-editions/<year>`
 **Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — overview.png`
@@ -700,8 +702,10 @@ Nothing to build unless they want the URL changed too.
 **Asked for:** on `edition`, in the archive group — `leadImages`, an array of `figure` (the overview draws the first two), and `highlights`, an array of an object with a `localeString` label and a `link` (the existing `link` object, so the Studio's site-link search box picks the tab and `sitePath` writes it out in the reading page's language). Both optional; the column and the image row collapse when empty.
 **Note:** `keyFigures` on the same frame is already filled for all three years and **needs no schema change**. It does not match the frame — 2025 holds five figures (`17,840 visitors`, `65 galleries`, `200+ artists`, `14 countries`, `13 talks`) where the frame draws three rows with two figures combined on one line and different numbers — but that is a layout question for the designer (`docs/previous-editions-plan.md` §8.6), not a field.
 
+**Done (Lilanga, 2026-09-30, across the stack per docs/project-handbook.md):** new `leadImages` (array of `figure`) and `highlights` (array of `editionHighlight`: a localeString label + a `link`) on `edition`. 2025 has its pair of pictures and its four highlight links. Filled by `scripts/content/previous-editions.mjs`, which is re-runnable.
+
 ---
-## #40 · open · 2026-09-30 · previous editions: the guest of honour's installation that year
+## #40 · done · 2026-09-30 · previous editions: the guest of honour's installation that year
 
 **Page / component:** `src/components/editions/GuestOfHonour.astro`, `/[lang]/previous-editions/<year>/guest-of-honour`
 **Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — guest of honour.png`
@@ -712,8 +716,10 @@ Nothing to build unless they want the URL changed too.
 **Asked for:** on `edition`, a `guestInstallation` object — `title` (`localeString`, *"AT TWILIGHT, ceramic brussels 2025"*), `text` (`localeBlock`), `author` (`string`, *"Jean-Marc Dimanche"*), `images` (array of `figure`). Edition-scoped, so each year keeps its own; optional, so a year without one draws the biography alone.
 **Source text:** `legacy-export/normalized/pastEditions.json` → `guest-of-honour-3` (2025, blocks `title / text-2col / gallery ×4`), `guest-of-honour-31` (2026), `guest-of-honour` (2024).
 
+**Done (Lilanga, 2026-09-30, across the stack per docs/project-handbook.md):** new `guestInstallation` object on `edition` (title, text, author, images). 2025 carries AT TWILIGHT, its three paragraphs and Jean-Marc Dimanche's signature, with the entrance photograph. Elizabeth Jaeger's real three-paragraph biography and her Mennour portrait replaced the seeded one-liner on the artist. Filled by `scripts/content/previous-editions.mjs`, which is re-runnable.
+
 ---
-## #41 · open · 2026-09-30 · previous editions: the country focus tab
+## #41 · done · 2026-09-30 · previous editions: the country focus tab
 
 **Page / component:** `src/components/editions/Focus.astro`, `/[lang]/previous-editions/<year>/focus`
 **Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — norway focus.png`
@@ -737,8 +743,10 @@ Nothing to build unless they want the URL changed too.
 2. **`section` is set only on 2026 and 2027 events.** Every 2025 and 2024 `programmeEvent` has it empty, so adding a `focus` value to the list is not enough on its own — that year's talks have to be given a section for the focus and programme tabs to divide between them.
 **Source text:** `legacy-export/normalized/pastEditions.json` → `norwegian-focus` (blocks `text-2col / image / accordion ×2 / text-1col / gallery`); the accordions are the talks, with their speakers and moderators.
 
+**Done (Lilanga, 2026-09-30, across the stack per docs/project-handbook.md):** new `focus` object on `edition` (lead, images, talkImages) and a `focus` value in `PROGRAMME_SECTIONS`. The five Norwegian galleries are flagged `inCountryFocus` and their names no longer carry "___ focus Norway"; the three talks are sectioned `focus`, with their moderators, their speakers lifted into `speakersText` and the credit lines stripped out of their descriptions. Filled by `scripts/content/previous-editions.mjs`, which is re-runnable.
+
 ---
-## #42 · open · 2026-09-30 · previous editions: the publication reader
+## #42 · done · 2026-09-30 · previous editions: the publication reader
 
 **Page / component:** `src/components/editions/Publication.astro`, `/[lang]/previous-editions/<year>/publication`
 **Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — publication.png`
@@ -754,8 +762,10 @@ Nothing to build unless they want the URL changed too.
 
 FlipHTML5 serves these in a plain iframe, so `Embed.astro` should cover the rendering.
 
+**Done (Lilanga, 2026-09-30, across the stack per docs/project-handbook.md):** new `publication` object on `edition` (url, title, cover). 2025 and 2024 point at their FlipHTML5 readers. 2026 still has none - ask the client whether one exists. Filled by `scripts/content/previous-editions.mjs`, which is re-runnable.
+
 ---
-## #43 · open · 2026-09-30 · programme events: show the moderator again
+## #43 · done · 2026-09-30 · programme events: show the moderator again
 
 **Page / component:** `src/components/editions/Focus.astro` and `src/components/editions/Programme.astro`; also `src/components/hubs/Programme.astro`
 **Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — norway focus.png`, talks programme
@@ -766,8 +776,10 @@ FlipHTML5 serves these in a plain iframe, so `Embed.astro` should cover the rend
 **Asked for:** unhide `moderator` on `programmeEvent` (under `speakersText`, where it belongs), and select it in `getEditionArchive` alongside the events it already returns.
 **And a backfill.** Checked against `production` 2026-09-30: **only 2026 events have a `moderator` value** — twelve of them. No 2025 or 2024 event has one, so unhiding the field leaves this frame's two `MODERATOR` lines (*"Jorunn Veiteberg"*, *"Marthe Yung Mee Hansen, Norwegian Crafts"*) still empty. The values are in `legacy-export/normalized/pastEditions.json` → `norwegian-focus` and `programme-3`; they were presumably skipped because the field was hidden.
 
+**Done (Lilanga, 2026-09-30, across the stack per docs/project-handbook.md):** `moderator` unhidden on `programmeEvent` and selected in `getEditionArchive`. The 2025 values are in. Filled by `scripts/content/previous-editions.mjs`, which is re-runnable.
+
 ---
-## #44 · open · 2026-09-30 · previous editions: laureate Instagram handles and nationalities
+## #44 · done · 2026-09-30 · previous editions: laureate Instagram handles and nationalities
 
 **Page / component:** `src/components/editions/ArtPrize.astro`, `/[lang]/previous-editions/<year>/art-prize`
 **Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — art prize.png`
@@ -782,6 +794,8 @@ FlipHTML5 serves these in a plain iframe, so `Embed.astro` should cover the rend
     lunaisolab · maelle.dufour · pascale.robertpascale · piamougeot · raphael.emine
 
 `art-prize-laureates` (2024) and `art-prize-2` (2026) hold their years', and the `person` blocks on `art-prize-jury`, `art-prize-jury-2` and `art-prize-2` hold the jury's links. The nationalities are the `(RU)`, `(FR)`, `(IE)`, `(BE)` marks beside each name on those same pages.
+
+**Done (Lilanga, 2026-09-30, across the stack per docs/project-handbook.md):** all ten 2025 laureates have their Instagram handle and nationality; ten of the twelve 2024-2026 jury members have their website, Instagram and country code, read out of the export's person blocks. Wendy Gers (2026) is stored under a name the export writes as "Wendy Gers (fr/za)" and was left alone. Filled by `scripts/content/previous-editions.mjs`, which is re-runnable.
 
 ---
 ## Note · 2026-09-30 · previous editions: what this branch changed in the backend half
@@ -817,7 +831,7 @@ map covers a stale one - so this is tidying, not a break. Worth doing when
 #38–#42 are done.
 
 ---
-## #45 · open · 2026-09-30 · past programme events have no dates
+## #45 · done · 2026-09-30 · past programme events have no dates
 
 **Page / component:** `src/components/editions/Programme.astro`, `/[lang]/previous-editions/<year>/programme`
 **Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — programme.png`
@@ -827,5 +841,27 @@ map covers a stale one - so this is tidying, not a break. Worth doing when
 **Rendered meanwhile:** the two dated events in their day row, and the other sixteen listed under the accordion with no day heading — visible, because hiding five sixths of a programme is worse than a list that is not yet grouped. They move up into their day on their own once dated.
 **Asked for:** set `startsAt` on the past editions' events. The date alone is what this page needs — the time is not rendered here, though the 2027 talks page does use it, so a real time is better than midnight.
 **Where the dates are:** `legacy-export/normalized/pastEditions.json` → `programme-3` (2025), `programme-27` and `programme-2` (2024), `programme-32` (2026). The old pages are built as `title` blocks naming the day followed by the `event` blocks of that day, so the day is the preceding title rather than a field on the event — which is presumably why the import dropped it.
+
+**Done (Lilanga, 2026-09-30, across the stack per docs/project-handbook.md):** the day headings in `legacy-export` were walked to rebuild each event's date: 16 of 16 undated 2025 events and 8 of 9 for 2024. The 2025 programme tab now shows its five real fair days. Filled by `scripts/content/previous-editions.mjs`, which is re-runnable.
+
+---
+## #46 · open · 2026-09-30 · a person can only sit on one edition's jury
+
+**Page / component:** `src/components/editions/ArtPrize.astro`, `/[lang]/previous-editions/2025/art-prize`
+**Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — art prize.png`
+**The design shows:** five jury members for 2025, the third of them **Jean-Marc Dimanche**, "CO-DIRECTOR, CERAMIC BRUSSELS".
+**The query returns today:** four. Jean-Marc Dimanche exists once, as `demo-person-jean-marc-dimanche`, and `person.edition` is a single reference pointing at 2027 — so he is 2027's jury, 2027's team and 2027's collaborator, and cannot also be 2025's juror. The same will be true of anyone who sits on the jury twice, which for this fair is most of them.
+**Rendered meanwhile:** the four whose `edition` is 2025. No placeholder, no gap.
+**Asked for:** your call on the model, which is why this is a request rather than a patch — a second `person` document per year duplicates the human, and an `editions` array or a `juryYears` field changes what `getPeople` means. Whatever you choose, 2025's jury needs Dimanche on it and the export has his bio (`legacy-export/normalized/pastEditions.json` → `art-prize-jury-2`, block 741).
+
+---
+## #47 · open · 2026-09-30 · the 2025 exhibitor cards have no pictures
+
+**Page / component:** `src/components/ExhibitorCard.astro`, `/[lang]/exhibitors/2025`
+**Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — exhibitors.png`
+**The design shows:** a three-column grid of gallery cards, each with an artwork.
+**The query returns today:** `coalesce(listImage, images[0])` — and the 2025 exhibitors have neither, so the grid is 77 grey placeholders. 2026's have pictures; 2025's were never imported.
+**Rendered meanwhile:** the card's frame and the gallery's name, no picture.
+**The pictures exist but are not safely matchable.** Léonie's hand-off carries eleven at `Previous editions/Assets/W26423LEvadeHD *.jpg`, 433 × 289, which are the artworks on that frame's cards. Five are identifiable by eye (3 = acb Galéria, 1 = ANALORA, 11 = Deletaille, 12 = Esther Verhaeghe, 13 = Format Oslo) and the file numbering does not follow the card order, so the other six would be guesswork — and an artwork credited to the wrong gallery is worse than no artwork. Either the designer names them, or the 2025 galleries' own images come across from the old site the way 2026's did.
 
 ---

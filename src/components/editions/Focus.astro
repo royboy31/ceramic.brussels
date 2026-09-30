@@ -45,9 +45,9 @@ const galleries: any[] = (focus?.galleries?.length ? focus.galleries : (edition.
  */
 const talks: any[] = (edition.events ?? []).filter((e: any) => e?.section === 'focus');
 
-const shots: any[] = (focus?.images ?? []).filter((img: any) => img?.asset);
-const talkShots: any[] = shots.length > 5 ? shots.slice(5) : [];
-const leadShots: any[] = shots.length > 5 ? shots.slice(0, 5) : shots;
+/** The pictures beside the lead, and the separate slideshow beside the talks. */
+const leadShots: any[] = (focus?.images ?? []).filter((img: any) => img?.asset);
+const talkShots: any[] = (focus?.talkImages ?? []).filter((img: any) => img?.asset);
 
 /** The speakers line: the typed one if there is one, else the referenced people. */
 const speakersOf = (event: any) =>

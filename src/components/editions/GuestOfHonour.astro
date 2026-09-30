@@ -40,7 +40,8 @@ const credit = captionParts(guest?.portrait)?.credit;
               sizes="(max-width: 900px) 100vw, 32vw"
               widths={[400, 600, 900]}
             />
-            {credit && <figcaption>{credit}</figcaption>}
+            {/* Stored bare, as everywhere else; the © belongs to the rendering. */}
+            {credit && <figcaption>© {credit}</figcaption>}
           </figure>
         )}
 
