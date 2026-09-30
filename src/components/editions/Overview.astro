@@ -48,7 +48,7 @@ const highlights = (edition.highlights ?? [])
 
   {
     images.length > 0 && (
-      <div class:list={['lead-images', { single: images.length === 1 }]}>
+      <div class:list={['ed-split', 'half', 'lead-images', { single: images.length === 1 }]}>
         {images.map((image: any) => (
           <SanityImage image={image} aspect={1.5} sizes="(max-width: 900px) 100vw, 46vw" widths={[600, 900, 1400]} />
         ))}
@@ -56,7 +56,7 @@ const highlights = (edition.highlights ?? [])
     )
   }
 
-  <div class="two-col panels">
+  <div class="ed-split half panels">
     {
       figures.length > 0 && (
         <section class="figures">
@@ -104,21 +104,19 @@ const highlights = (edition.highlights ?? [])
 
 <style>
   .lead {
-    margin: 0 0 48px;
+    margin: 0 0 52px;
   }
   .lead :global(p + p) {
     margin-top: 28px;
   }
 
+  /* 670 x 447 each on the frame - 3:2, side by side, 40px apart. */
   .lead-images {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    margin-bottom: 64px;
+    margin-bottom: 88px;
   }
   .lead-images.single {
-    grid-template-columns: 1fr;
-    max-width: 760px;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 670px;
   }
   .lead-images :global(img) {
     width: 100%;
@@ -126,46 +124,45 @@ const highlights = (edition.highlights ?? [])
     display: block;
   }
 
-  .panels {
-    gap: 30px 40px;
-    align-items: start;
-  }
-
-  /* The ruled figure table of the homepage and /editions: value large, label
-     beside it, a hairline under each row. */
+  /* The frame rules the heading (that is `.panel-title`, 2px) and **nothing
+     else** - the figures under it stand free, about 40px apart, the numeral
+     around 100px and its label around 40px beside it. An earlier pass ruled
+     every row, which the frame does not. */
   .stats {
-    border-top: 1px solid var(--color-ink, #050505);
+    display: grid;
+    gap: 34px;
   }
+  /* 22-29px between the numeral and its label on the frame; in em of the
+     numeral, not of the row, or it collapses to nothing. */
   .stat {
     display: flex;
     align-items: baseline;
-    gap: 0.5em;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--color-ink, #050505);
+    gap: clamp(12px, 1.7vw, 26px);
   }
   .stat strong {
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-size: clamp(3rem, 7vw, 6.25rem);
     font-weight: 400;
-    line-height: 0.9;
+    line-height: 0.78;
     letter-spacing: -0.05em;
   }
   .stat span {
-    font-size: clamp(1.1rem, 2vw, 1.75rem);
-    line-height: 1.1;
+    font-size: clamp(1.25rem, 2.8vw, 2.5rem);
+    line-height: 1;
     letter-spacing: -0.04em;
   }
 
+  /* Four underlined links on a ~40px pitch, as the frame sets them. */
   .highlights ul {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 6px;
+    gap: 10px;
   }
   .highlights a {
-    font-size: clamp(1.1rem, 2vw, 1.75rem);
-    line-height: 1.35;
-    letter-spacing: -0.03em;
+    font-size: clamp(1.15rem, 2.2vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.035em;
     text-decoration: underline;
     text-underline-offset: 0.16em;
   }
@@ -176,9 +173,7 @@ const highlights = (edition.highlights ?? [])
 
   @media (width<=900px) {
     .lead-images {
-      grid-template-columns: 1fr;
-      gap: 20px;
-      margin-bottom: 44px;
+      margin-bottom: 48px;
     }
   }
 </style>

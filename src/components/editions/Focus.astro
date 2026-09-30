@@ -57,7 +57,10 @@ const speakersOf = (event: any) =>
 <div class="content-wrap edition-focus">
   {intro && <div class="intro-large lead"><PortableText value={intro} /></div>}
 
-  <div class="top">
+  {/* Without the slideshow (no focus images yet, #35) the split would drop
+      the galleries list into the wide 907 track. One column then, at the
+      list's own width. */}
+  <div class:list={['top', leadShots.length > 0 ? ['ed-split', 'wide-first'] : 'list-only']}>
     {
       leadShots.length > 0 && (
         <div class="shots">
@@ -94,7 +97,7 @@ const speakersOf = (event: any) =>
     talks.length > 0 && (
       <section class="talks">
         <h2 class="panel-title">{t('prevEd.talks')}</h2>
-        <div class="talk-grid">
+        <div class="ed-split half talk-grid">
           {talks.map((talk: any) => (
             <article class="talk">
               <h3 {...styleAttrs(talk.titleStyle)}>{talk.title}</h3>
@@ -138,18 +141,16 @@ const speakersOf = (event: any) =>
 
 <style>
   .lead {
-    margin: 0 0 48px;
+    margin: 0 0 52px;
   }
   .lead :global(p + p) {
     margin-top: 28px;
   }
 
-  /* The frame gives the slideshow two thirds and the gallery list one. */
-  .top {
-    display: grid;
-    grid-template-columns: 8fr 4fr;
-    gap: 40px;
-    align-items: start;
+  /* The frame gives the slideshow two thirds and the gallery list one:
+     907 / 40 / 433. With no slideshow the list stands on its own. */
+  .top.list-only .galleries {
+    max-width: 433px;
   }
 
   .galleries ul {
@@ -171,16 +172,10 @@ const speakersOf = (event: any) =>
   }
 
   .talks {
-    margin-top: 72px;
+    margin-top: 88px;
   }
-  /* Talks two across; the slideshow takes a cell of the same grid, which is
-     how the frame sets it beside the third talk. */
-  .talk-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    align-items: start;
-  }
+  /* Talks two across on the full 1380; the slideshow takes a cell of the
+     same grid, which is how the frame sets it beside the third talk. */
   .talk h3 {
     margin: 0 0 10px;
     font-size: clamp(1.2rem, 2.1vw, 1.75rem);
@@ -212,11 +207,6 @@ const speakersOf = (event: any) =>
   }
 
   @media (width<=900px) {
-    .top,
-    .talk-grid {
-      grid-template-columns: 1fr;
-      gap: 28px;
-    }
     .talks {
       margin-top: 48px;
     }

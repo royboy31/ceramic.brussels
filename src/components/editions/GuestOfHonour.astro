@@ -31,9 +31,9 @@ const credit = captionParts(guest?.portrait)?.credit;
 
   {
     guest && (
-      <div class="person">
+      <div class="ed-split narrow-first person">
         {guest.portrait?.asset && (
-          <figure class="portrait">
+          <figure class="guest-portrait">
             <SanityImage
               image={guest.portrait}
               aspect={0.8}
@@ -62,7 +62,7 @@ const credit = captionParts(guest?.portrait)?.credit;
     /* BACKEND-REQUEST #34. Renders nothing until the field exists, so the
        tab is the lead, the portrait and the biography meanwhile. */
     installation?.text && (
-      <div class="installation">
+      <div class="ed-split half installation">
         <div class="essay">
           {installation.title && <h2 class="panel-title">{installation.title}</h2>}
           <div class="body-24">
@@ -89,29 +89,29 @@ const credit = captionParts(guest?.portrait)?.credit;
 
 <style>
   .lead {
-    margin: 0 0 48px;
+    margin: 0 0 52px;
   }
   .lead :global(p + p) {
     margin-top: 28px;
   }
 
-  /* Portrait on the narrow column, biography on the wide one, as the frame
-     draws them. */
-  .person {
-    display: grid;
-    grid-template-columns: 4fr 8fr;
-    gap: 30px;
-    align-items: start;
-  }
-  .portrait {
+  /* Portrait on the narrow column, biography on the wide one: the frame's
+     433 / 40 / 907.
+     **Not `.portrait`.** `src/components/hubs/GuestOfHonour.astro` styles
+     that class through `:global(.portrait)`, without a scope attribute, so
+     its `grid-column: span 4; height: 607px` reaches any page in the same
+     bundle - it made this figure span the whole grid and pushed the
+     biography into the first track. The hub's rule is load-bearing there, so
+     the new class steps aside rather than fighting it. */
+  .guest-portrait {
     margin: 0;
   }
-  .portrait :global(img) {
+  .guest-portrait :global(img) {
     width: 100%;
     height: auto;
     display: block;
   }
-  .portrait figcaption {
+  .guest-portrait figcaption {
     margin-top: 8px;
     font-size: 14px;
     text-align: right;
@@ -125,11 +125,7 @@ const credit = captionParts(guest?.portrait)?.credit;
 
   /* The essay and its pictures, the essay on the left as drawn. */
   .installation {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    align-items: start;
-    margin-top: 72px;
+    margin-top: 88px;
   }
   .essay :global(p + p) {
     margin-top: 28px;
@@ -141,15 +137,10 @@ const credit = captionParts(guest?.portrait)?.credit;
   }
 
   @media (width<=900px) {
-    .person,
-    .installation {
-      grid-template-columns: 1fr;
-      gap: 28px;
-    }
     .installation {
       margin-top: 48px;
     }
-    .portrait {
+    .guest-portrait {
       max-width: 420px;
     }
   }

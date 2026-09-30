@@ -403,6 +403,36 @@ Everything in §8 below is still open; everything else here is on the branch.
 | footer pill | ✓ | `← back to <year>` on the section, `previous editions →` on the homepage |
 | `/editions` retired | ✓ | routes deleted, redirect map re-pointed |
 
+### The ground and the grid, measured off the PNGs (2026-09-30)
+
+A first pass built the section on the site's default white-and-acid chrome
+and guessed the columns. Both were wrong. The values below are sampled from
+Léonie's frames, not estimated:
+
+- **The whole page is `#d9d9d9`** — the most common pixel in all seven frames,
+  and the header and footer carry no wash or gradient there. It is a page
+  theme, like the art prize's acid and the VIP's black: `theme="ash"` on
+  `Base.astro`.
+- **Content is 1380 wide between 30px gutters**, not the 45px the rest of the
+  site uses. The header keeps its own 45px — the frame's dates mark starts at
+  x=45 while every body element starts at x=30.
+- **Three column splits, all with a 40px gap**: `670/670` (overview, art
+  prize), `433/907` (guest of honour), `907/433` (country focus). Written as
+  fractions of those numbers, so the proportions hold and the page still grows
+  past 1440 instead of stopping dead at 1380.
+- **The key figures are ruled under the heading and nowhere else.** The first
+  pass drew a hairline under every row; the frame has none. The numeral is
+  about 100px, its label about 40px, 22–29px apart, rows ~34px apart.
+- The year band is 53px tall.
+
+**One latent bug found on the way.** `src/components/hubs/GuestOfHonour.astro`
+styles `:global(.portrait)` with `grid-column: span 4; height: 607px` and no
+scope attribute, so it reaches every page in the same bundle. A new component
+that reused the class name had its portrait span the whole grid and push the
+biography into the first track. The new one is `.guest-portrait`; the hub's
+rule is load-bearing where it is, so it was left alone. Worth narrowing one
+day — `.blocks`, `.cover` and `.venue-map` leak the same way.
+
 Four things the build revealed that the frames could not:
 
 1. **The tabs had to become conditional per year.** 2024 has no country focus

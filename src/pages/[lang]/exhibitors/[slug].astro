@@ -98,6 +98,7 @@ const orgSchema = exhibitor && {
       lang={lang}
       title={`${t('nav.exhibitors')} ${year}`}
       path={listingPath}
+      theme={listing.pastEditions.some((e: any) => e.year === year) ? 'ash' : 'default'}
       backLink={
         listing.pastEditions.some((e: any) => e.year === year) && listing.currentYear
           ? { label: t('prevEd.back', { year: listing.currentYear }), href: localePath(lang), arrow: '←' }

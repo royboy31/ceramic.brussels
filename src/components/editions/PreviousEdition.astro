@@ -117,8 +117,67 @@ if (!Content) return Astro.rewrite('/404');
   editId={edition._id}
   editType={edition._type}
   backLink={backLink}
+  theme="ash"
 >
-  <YearBand lang={lang} editions={editions} active={year} />
-  <HubNav lang={lang} active={tab} title={heading} items={items} />
-  <Content lang={lang} year={year} edition={edition} lead={lead} />
+  <div class="prev-ed">
+    <YearBand lang={lang} editions={editions} active={year} />
+    <HubNav lang={lang} active={tab} title={heading} items={items} />
+    <Content lang={lang} year={year} edition={edition} lead={lead} />
+  </div>
 </Base>
+
+<style is:global>
+  /**
+   * The grid of Léonie's frames, measured off the PNGs rather than guessed
+   * (2026-09-30). At 1440 the content is 1380 wide between 30px gutters - not
+   * the 45px the rest of the site uses - and every split is one of three:
+   *
+   *   670 / 40 / 670     overview, art prize      (half and half)
+   *   433 / 40 / 907     guest of honour          (portrait, then text)
+   *   907 / 40 / 433     country focus            (pictures, then the list)
+   *
+   * They are written as fractions of those same numbers, so the page keeps
+   * the frame's proportions and still grows past 1440 instead of stopping
+   * dead at 1380.
+   */
+  .prev-ed {
+    --ed-gutter: 30px;
+    --ed-gap: 40px;
+  }
+  .prev-ed .content-wrap {
+    padding-inline: var(--ed-gutter);
+  }
+  .prev-ed .ed-split {
+    display: grid;
+    gap: var(--ed-gap);
+    align-items: start;
+  }
+  .prev-ed .ed-split.half {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .prev-ed .ed-split.narrow-first {
+    grid-template-columns: minmax(0, 433fr) minmax(0, 907fr);
+  }
+  .prev-ed .ed-split.wide-first {
+    grid-template-columns: minmax(0, 907fr) minmax(0, 433fr);
+  }
+  /* The title band and the A-Z row take the section's gutter too, so the
+     pills line up with the content under them. */
+  .prev-ed .section-head {
+    --gutter: var(--ed-gutter);
+  }
+
+  @media (width<=900px) {
+    .prev-ed .ed-split.half,
+    .prev-ed .ed-split.narrow-first,
+    .prev-ed .ed-split.wide-first {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 28px;
+    }
+  }
+  @media (width<=640px) {
+    .prev-ed {
+      --ed-gutter: 16px;
+    }
+  }
+</style>

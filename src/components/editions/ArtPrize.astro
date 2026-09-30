@@ -72,7 +72,7 @@ const suffix = (artist: any) => {
 <div class="content-wrap edition-prize">
   {lead && <div class="intro-large lead"><PortableText value={lead} /></div>}
 
-  <div class="top">
+  <div class="ed-split half top">
     {
       images.length > 0 && (
         <div class="shots">
@@ -113,7 +113,7 @@ const suffix = (artist: any) => {
     }
   </div>
 
-  <div class="two-col bottom">
+  <div class="ed-split half bottom">
     {
       jury.length > 0 && (
         <section class="jury">
@@ -163,23 +163,16 @@ const suffix = (artist: any) => {
 
 <style>
   .lead {
-    margin: 0 0 48px;
+    margin: 0 0 52px;
   }
   .lead :global(p + p) {
     margin-top: 28px;
   }
 
-  /* Slideshow left, laureates right, as drawn. */
-  .top {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    align-items: start;
-  }
+  /* Slideshow left, laureates right; jury left, awards right. Both are the
+     frame's 670 / 40 / 670. */
   .bottom {
-    gap: 40px;
-    align-items: start;
-    margin-top: 72px;
+    margin-top: 88px;
   }
 
   .laureates ul {
@@ -246,10 +239,6 @@ const suffix = (artist: any) => {
   }
 
   @media (width<=900px) {
-    .top {
-      grid-template-columns: 1fr;
-      gap: 28px;
-    }
     .bottom {
       margin-top: 48px;
     }
