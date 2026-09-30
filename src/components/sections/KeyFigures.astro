@@ -162,17 +162,24 @@ const count = (value: string) => {
     .stats__grid > .stat-cell:nth-child(odd) {
       border-right: 0;
     }
+    /* "The numbers can be a little bit bigger, and the words on the right
+       can also be bigger and centered within the rectangle (but stay aligned
+       to the right as they are)" - client, 2026-09-30. `align-items: center`
+       is the "centered": the desktop grid sets `baseline`, which on a phone
+       drops the word to the foot of a 64px numeral instead of the middle of
+       its box. Right alignment and the space-between are unchanged. */
     .stats__grid > .stat-cell {
+      align-items: center;
       justify-content: space-between;
       min-height: 95px;
       padding: 14px 10px;
     }
     .home-stats strong {
-      font-size: 56px;
+      font-size: 64px;
     }
     .home-stats span {
       text-align: right;
-      font-size: 22px;
+      font-size: 26px;
     }
   }
 

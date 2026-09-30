@@ -343,9 +343,20 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
     .hero :global(img) {
       height: auto;
     }
+    /* The dots belong to the bottom of the *picture*, the way every other
+       slideshow on the site sets them. `inset: auto 0 16px` measured from
+       the bottom of the slideshow instead, which is below the caption line,
+       so on a phone they sat past the photo's edge - "the little circles
+       seem to weirdly show on my phone, they're too close to the edge of
+       the photo, it's not like this on other slideshows" (client,
+       2026-09-30). The 605px above is the desktop frame's hero height and
+       cannot follow a fluid picture, so the box takes the picture's own
+       ratio here, as `Slideshow`'s base rule does. */
     .hero :global(.slideshow .dots) {
       height: auto;
-      inset: auto 0 16px;
+      inset: 0 0 auto;
+      aspect-ratio: var(--aspect, 3 / 2);
+      padding: 0 0 16px;
     }
     .strip {
       grid-template-columns: 1fr;
