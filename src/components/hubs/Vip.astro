@@ -118,14 +118,19 @@ const altPaths = hubAltPaths('vip', tab);
 const tabLabel = page?.tabLabel ?? t(hubTab.label);
 const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
 /**
- * The lounge frame sets a panel beside the cover - MAD Brussels' scenography
- * - where the other tabs put a picture alone. That panel is the stack's
- * first text block, so it is drawn up there and left out of the run below,
- * and the page reads as the frame does without the editor having to know.
+ * Two frames set a block inside their top row rather than under it: the
+ * lounge's scenography panel beside the cover, and the hotel's "discover The
+ * Hoxton ↗" under the hotel's own paragraph and over the rate panel. Each
+ * is the stack's first block, so it is drawn where the frame has it and left
+ * out of the run below - otherwise it lands at the foot of the page, under
+ * the picture, which is where Félicie found the hotel's pill on
+ * 2026-09-30. The editor keeps editing one block in one place either way.
  */
 const loungeTop =
   tab === 'lounge' && page?.sections?.[0]?._type === 'contentSection' ? page.sections[0] : null;
-const stack = (page?.sections ?? []).slice(loungeTop ? 1 : 0);
+const hotelLinks =
+  tab === 'hotel-deal' && page?.sections?.[0]?._type === 'linksSection' ? page.sections[0] : null;
+const stack = (page?.sections ?? []).slice(loungeTop || hotelLinks ? 1 : 0);
 const hasSections = stack.length > 0;
 /**
  * **The one switch.** No `page` document for this tab yet, so the frames'
@@ -389,8 +394,18 @@ const rate = {
               </>
             )}
 
-            {/* BACKEND-REQUEST #16: the rate line and the paragraph want two
-                fields on Site settings → Hotel deal; they are two here. */}
+            {/* The frame ends the hotel's own column in "discover The Hoxton ↗",
+                over the rate panel - the page's links block, drawn here. */}
+            {hotelLinks && (hotelLinks.links ?? []).filter(Boolean).length > 0 && (
+              <p class="links">
+                {(hotelLinks.links ?? []).filter(Boolean).map((link: any) => (
+                  <LinkPill lang={lang} link={link} preserveCase />
+                ))}
+              </p>
+            )}
+
+            {/* The rate line comes from Site settings → Hotel deal (#16); its
+                paragraph still stands in from the frame, see the request. */}
             <div class="rate">
               <p class="rate-label">{t('vip.specialRate')}</p>
               <h3 class="rate-heading">{rate.heading}</h3>
