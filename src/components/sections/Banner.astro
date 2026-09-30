@@ -101,7 +101,15 @@ const Tag = link ? 'a' : 'div';
     .cta-gradient {
       min-height: 100px;
       padding: 15px;
-      font-size: 30px;
+      /* "There seems to be a bug on the 'subscribe to our newsletter'
+         banner, the underline seems to push the arrow away" (client,
+         2026-09-30). At a flat 30px the label filled the line and the arrow
+         wrapped onto a second one; `.u-line` paints its underline as a
+         background on the span's last line box, so the rule ended up full
+         width *under the arrow*, which is what they are describing.
+         Scaling with the viewport keeps label and arrow on one line from
+         320px up, where the underline sits where it belongs. */
+      font-size: clamp(19px, 6.4vw, 30px);
     }
   }
 </style>
