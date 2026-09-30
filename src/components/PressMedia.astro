@@ -520,12 +520,15 @@ const logoHeight = (p: any) => {
   }
   /* The leads (request #19): under a heading, or at the top of a view that
      has none. Wired by Kamindu on 2026-09-22; Lilanga to restyle. */
+  /* "Can you make the intro texts to each section the same size as the intro
+     text on the guest of honour - interview page?" (client, 2026-09-30):
+     the shared intro token, not the body one. */
   .lead {
     max-width: 62ch;
     margin-top: 24px;
-    font-size: var(--body-size);
-    line-height: var(--body-lh);
-    letter-spacing: var(--body-ls);
+    font-size: var(--intro-size);
+    line-height: var(--intro-lh);
+    letter-spacing: var(--intro-ls);
   }
   .lead-row {
     flex-wrap: wrap;
