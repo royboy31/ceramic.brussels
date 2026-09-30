@@ -366,6 +366,9 @@ export function getSettings(lang: LocaleId) {
           // The panel's bold line, split off from the paragraph (#16).
           ${styled('rate', 'practicalInfo.hotelDeal.rate')},
           ${styled('text', 'practicalInfo.hotelDeal.text')},
+          // The VIP rate paragraph, kept apart from the public description
+          // above: it carries the hotel code.
+          ${styled('rateText', 'practicalInfo.hotelDeal.rateText')},
           "url": practicalInfo.hotelDeal.url,
           "partner": practicalInfo.hotelDeal.partner->{ _id, name, url, logo ${IMAGE}, "images": images[] ${IMAGE} }
         },

@@ -134,10 +134,19 @@ export const siteSettings = defineType({
             }),
             defineField({
               name: 'text',
+              title: 'Hotel description',
+              type: 'localeText',
+              description:
+                'A sentence about the hotel. Shown on Visitors info → practical info, beside the hotel’s name, and it is public - never put the VIP code or "{code}" here.',
+            }),
+            // Separate from the description above because that one is public
+            // (Visitors info prints it) and this one carries the VIP code.
+            defineField({
+              name: 'rateText',
               title: 'Rate paragraph',
               type: 'localeText',
               description:
-                'The paragraph under the rate line, on the VIP hotel deal tab: "Use code … to enjoy a special rate of …". Write "{code}" where the code belongs and the site fills in the hotel’s own. Not the hotel’s description - that is the page’s own lead and body.',
+                'The paragraph under the rate line, on the VIP hotel deal tab only: "Use code … to enjoy a special rate of …". Write "{code}" where the code belongs and the site fills in the hotel’s own.',
             }),
             defineField({ name: 'url', title: 'Booking link', type: 'url' }),
           ],

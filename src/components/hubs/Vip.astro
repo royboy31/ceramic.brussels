@@ -163,14 +163,17 @@ const intro =
         : undefined);
 /**
  * The hotel panel, both lines, from Site settings → Venue and access → Hotel
- * deal (#16): "Rate line" for the bold line and "Text" for the paragraph
- * under it, the frame's own copy standing in for either while it is empty.
- * `{code}` in the paragraph becomes the hotel's code from D1.
+ * deal (#16): "Rate line" for the bold line and "Rate paragraph" under it,
+ * the frame's own copy standing in while either is empty. `{code}` becomes
+ * the hotel's code from D1.
+ *
+ * Deliberately not "Hotel description": that field is printed on Visitors
+ * info, which is a public page, so the code must never reach it.
  */
 const rate = {
   ...C.hotelDeal.rate,
   heading: site?.practicalInfo?.hotelDeal?.rate ?? C.hotelDeal.rate.heading,
-  text: String(site?.practicalInfo?.hotelDeal?.text ?? C.hotelDeal.rate.text)
+  text: String(site?.practicalInfo?.hotelDeal?.rateText ?? C.hotelDeal.rate.text)
     .split('{code}')
     .join(String(hotelCode || C.hotelDeal.rate.fallbackCode)),
 };
