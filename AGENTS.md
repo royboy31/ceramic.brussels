@@ -76,7 +76,8 @@ Manage the background server with `astro dev stop`, `astro dev status`, and
 
 Other scripts: `npm run build` (production build into `dist/`), `npm run
 preview` (serve that build), `npm run content` (report which content exists and
-which translations are missing).
+which translations are missing), `npm run dates` (every date in the dataset,
+checked for one no page can read - see the gotcha below).
 
 ## Git workflow
 
@@ -534,6 +535,25 @@ one-to-one onto the hubs. `legacy-export/MAPPING.md` lists the open
 questions.
 
 ## Gotchas
+
+- **One unreadable date used to cost the site its whole build.** On
+  2026-09-30 a robot token wrote `2024-01-23T18:00 (fr):00.000Z` onto a 2024
+  programme event - a language marker spliced into an ISO string. It passes
+  the queries' `defined(startsAt)` and then throws `RangeError: Invalid time
+  value` out of `formatTime`. `astro build` renders pages one after another,
+  so that single value stopped the build on `/en/editions/2024/` and every
+  page after it: **7 files where a good build writes 774.** Cloudflare
+  deploys nothing from a failed build and keeps serving the last good one,
+  so for several hours nothing an editor published reached the site, with no
+  sign of it anywhere an editor could see - it looks exactly like "the CMS
+  is not saving". Two things now stop that: `readable()` in `src/lib/i18n.ts`,
+  which makes every date helper print nothing for a date it cannot parse
+  rather than throw, and `npm run dates`, which finds one. **Run `npm run
+  dates` after any script that writes to the dataset** - `--fix` removes an
+  injected marker where the value is a real date once it is gone, and
+  reports anything it would have to guess at. It is deliberately not part of
+  `npm run build`: it reads `.env`, which Cloudflare has not got, so it
+  would fail the build it exists to protect.
 
 - **`fixSanityWindowsAlias` in `astro.config.mjs`** works around a Windows path
   bug in `@sanity/astro` 3.5.1. On macOS and Linux it looks like dead code. It

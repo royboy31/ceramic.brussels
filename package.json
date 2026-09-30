@@ -12,6 +12,7 @@
     "astro": "astro",
     "webhook": "node scripts/create-deploy-webhook.mjs",
     "content": "node scripts/content-status.mjs",
+    "dates": "node scripts/check-dates.mjs",
     "seed": "node scripts/seed.mjs",
     "templates": "node scripts/seed-templates.mjs",
     "previews": "node scripts/section-previews.mjs",
