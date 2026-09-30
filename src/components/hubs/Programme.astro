@@ -378,10 +378,13 @@ const altPaths = hubAltPaths('programme', tab);
     font-weight: 600;
     line-height: 1.1;
   }
-  /* The design's boxed hall chip. */
+  /* The design's boxed hall chip. "Push the HALL C rectangle a tiny bit
+     further away from the hour" (client, 2026-09-30) - the header's flex gap
+     is 14px, and this adds 10 on the side the time is on. */
   .ceremony-day .hall {
     text-transform: uppercase;
     border: 1px solid;
+    margin-right: 10px;
     padding: 2px 9px;
     font-size: 17px;
     line-height: 1.2;

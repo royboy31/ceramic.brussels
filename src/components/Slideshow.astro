@@ -287,6 +287,18 @@ const contain = fit === 'contain' && !!aspect;
       margin-top: 6px;
     }
   }
+
+  /* One caption at a time. The track scrolls horizontally, so during a swipe
+     the next slide's caption used to arrive beside the current one and the
+     two read as a single run-on line. Both rules hang off
+     `[data-one-caption]`, which the script sets only once it has marked a
+     slide - so with no JavaScript nothing is hidden. */
+  .slideshow[data-one-caption] .slide figcaption {
+    transition: opacity 0.18s ease;
+  }
+  .slideshow[data-one-caption] .slide:not([data-current]) figcaption {
+    opacity: 0;
+  }
 </style>
 
 <script>
@@ -301,10 +313,25 @@ const contain = fit === 'contain' && !!aspect;
     const dots = [...show.querySelectorAll<HTMLAnchorElement>('[data-dot]')];
     if (!track || slides.length < 2) return;
 
-    const mark = (index: number) =>
+    /* Marks the dot **and the slide**. Each slide carries its own caption, so
+       mid-swipe two of them were on screen at once and read as one run-on
+       line - "when scrolling right & left in the slideshows, it appears the
+       captions are sticking to each other ... it happens everywhere on the
+       website" (client, 2026-09-30). Only the slide in view shows its
+       caption now; the CSS fades the others. */
+    const mark = (index: number) => {
       dots.forEach((dot, i) =>
         i === index ? dot.setAttribute('aria-current', 'true') : dot.removeAttribute('aria-current'),
       );
+      slides.forEach((slide, i) =>
+        i === index ? slide.setAttribute('data-current', '') : slide.removeAttribute('data-current'),
+      );
+    };
+    /* Only now does the one-caption rule apply: the CSS is gated on this
+       attribute, so if the script never runs every caption stays visible
+       rather than all of them disappearing. */
+    mark(Math.round(track.scrollLeft / Math.max(track.clientWidth, 1)) || 0);
+    show.setAttribute('data-one-caption', '');
 
     dots.forEach((dot, i) =>
       dot.addEventListener('click', (event) => {
@@ -344,9 +371,12 @@ const contain = fit === 'contain' && !!aspect;
     if (every > 0 && !reduced) {
       let held = false;
       let visible = true;
+      /* Focus holds it, the pointer does not: "when hovering over the
+         autoplay slideshows, the slideshow autoplay continues rather than
+         stopping" (client, 2026-09-30). Focus stays held so a keyboard user
+         tabbing through the dots does not have the track move under them,
+         and `prefers-reduced-motion` still turns the whole thing off. */
       const hold = (on: boolean) => () => (held = on);
-      show.addEventListener('pointerenter', hold(true));
-      show.addEventListener('pointerleave', hold(false));
       show.addEventListener('focusin', hold(true));
       show.addEventListener('focusout', hold(false));
       if ('IntersectionObserver' in window) {

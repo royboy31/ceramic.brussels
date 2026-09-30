@@ -81,3 +81,65 @@
 main :is(strong, b) {
   font-weight: 600;
 }
+
+/* -------------------------------------------------------------- the menu
+ *
+ * "Make it narrower so that, when open on a slightly shorter window than
+ * full page, the menu doesn't hide the ceramic brussels title" - client,
+ * 2026-09-30. Measured: it hides it at *every* width, not only narrow ones.
+ * design.css sets `clamp(430px, 48.2vw, 694px)`, and the wordmark's right
+ * edge sits at about 0.57 of the viewport:
+ *
+ *     1440  wordmark ends 792, panel started 746
+ *     1280  wordmark ends 712, panel started 663
+ *     1024  wordmark ends 584, panel started 530
+ *
+ * `min(41vw, 600px)` keeps the panel's left edge clear of it all the way
+ * down - 850, 755 and 604 at those three widths.
+ *
+ * Below 900 it goes near-full-width, which is the other half of the same
+ * round ("could the menu always take up the whole width of the page when
+ * looking at it on a smartphone?") and removes the conflict entirely, since
+ * 41vw would be too narrow for the menu's own content down there. That
+ * replaces design.css's 640px breakpoint for the same rule.
+ */
+.menu-panel {
+  width: min(41vw, 600px);
+  max-width: calc(100vw - 24px);
+}
+@media (width <= 900px) {
+  .menu-panel {
+    width: calc(100vw - 16px);
+    max-width: none;
+  }
+  .menu-heading,
+  .menu-top,
+  .submenu > div {
+    padding-inline: 16px;
+  }
+}
+
+/* "When we make the page narrower, the title gets hidden by the buttons on
+ * the right" - client, 2026-09-30. It is a French and Dutch problem: the
+ * label beside the Puilaetco lockup is "main partner" in English but
+ * "partenaire principal" in French, and design.css holds it on one line
+ * (`white-space: nowrap`) with `min-width: 64px`. That pushes
+ * `.site-header__right` wide enough to reach the centred wordmark.
+ *
+ * Scanned 1440 → 940 in 20px steps: English never quite touches (19px clear
+ * at its tightest, 1020), French overlaps it by 13px at the same width. The
+ * lockup hides altogether below 1000, so the window is roughly 1000-1120.
+ *
+ * Letting the label take the two lines its `min-width` already allows for is
+ * enough, and hides nothing.
+ */
+@media (width <= 1200px) {
+  .site-partner > span {
+    white-space: normal;
+    /* `white-space` alone changes nothing: the span is a flex item sizing to
+       max-content, and the header is not short of room until it is too late.
+       The cap is the `min-width: 64px` design.css already declares for it,
+       so the label sets on the two lines that box was always drawn for. */
+    max-width: 72px;
+  }
+}
