@@ -1,0 +1,124 @@
+---
+import Base from '../../layouts/Base.astro';
+import HubNav from '../HubNav.astro';
+import YearBand from './YearBand.astro';
+import Overview from './Overview.astro';
+import GuestOfHonour from './GuestOfHonour.astro';
+import ArtPrize from './ArtPrize.astro';
+import Focus from './Focus.astro';
+import Programme from './Programme.astro';
+import Publication from './Publication.astro';
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations, localePath } from '../../lib/i18n';
+import { getEditionArchive, getPastEditionsIndex, getCurrentEdition } from '../../lib/queries';
+import {
+  TABS,
+  tabsFor,
+  tabLabel,
+  editionTabPath,
+  editionAltPaths,
+  editionTabHref,
+  type EditionSummary,
+} from '../../lib/previousEditions';
+
+/**
+ * One tab of one previous edition (Figma, Léonie 2026-09-28;
+ * `docs/previous-editions-plan.md`). Every frame has the same three bands:
+ * the year switcher, the title band with its pills, and the tab's content.
+ *
+ * The year band and the title band are built here so that the seven tab
+ * components are nothing but their own content - the same division as
+ * `src/components/hubs/`, where each hub component owns its markup and the
+ * chrome is shared.
+ *
+ * **The title band is `HubNav`.** It already had a `title` + `items` escape
+ * hatch for "a band of its own that is not a hub's", which is exactly this;
+ * its `route` became optional at the same time, since previous editions has
+ * no entry in HUBS. `href` is used as given, so the exhibitors pill can point
+ * out of the section.
+ *
+ * One query per year page, not one per tab: `run()` memoises it for the life
+ * of the build, so all seven tabs of a year cost one request.
+ */
+const { lang, year, tab } = Astro.props as { lang: LocaleId; year: number; tab: string };
+const t = useTranslations(lang);
+
+const [edition, editions, current] = await Promise.all([
+  getEditionArchive(lang, year),
+  getPastEditionsIndex(lang),
+  getCurrentEdition(lang),
+]);
+if (!edition) return Astro.rewrite('/404');
+
+/**
+ * Which tabs this year gets. The index query is the cheap summary the band
+ * needs; `tabsFor` reads the same counts, so a year's pills are identical
+ * whether they are worked out here or in `getStaticPaths`.
+ */
+const summary: EditionSummary = editions.find((e: any) => e.year === year) ?? {
+  year,
+  ordinal: edition.ordinal,
+  countryFocus: edition.countryFocus,
+  guestOfHonour: edition.guestOfHonour,
+  publication: edition.publication,
+  exhibitorCount: edition.exhibitorCount,
+  laureateCount: edition.laureates?.length ?? 0,
+  eventCount: edition.events?.length ?? 0,
+};
+const tabs = tabsFor(summary);
+
+const items = tabs.map((x) => ({
+  slug: x.slug,
+  label: tabLabel(x, summary, t),
+  href: localePath(lang, editionTabHref(year, x, lang)),
+}));
+
+/** The title band reads the ordinal as stored ("2nd edition"); the year band spells it out. */
+const heading = edition.ordinal ?? String(year);
+
+/** Each tab's own lead paragraph (BACKEND-REQUEST #32); the overview falls back to the edition intro. */
+const lead =
+  (edition.archiveLeads ?? []).find((l: any) => l?.tab === tab)?.lead ??
+  (tab === 'overview' ? edition.intro : undefined);
+
+const label = tabs.find((x) => x.slug === tab) ?? TABS.find((x) => x.slug === tab);
+const tabName = label ? tabLabel(label, summary, t) : tab;
+const title = `${heading} — ${tabName}`;
+
+const path = editionTabPath(year, tab, lang);
+const altPaths = editionAltPaths(year, tab);
+
+/**
+ * The footer's left-hand pill (Léonie, Figma comment 2026-09-28: *"the 'back
+ * to 2027' button in the footer takes us back to the homepage"*). The year is
+ * the current edition's, never a literal.
+ */
+const backLink = { label: t('prevEd.back', { year: current?.year ?? '' }), href: localePath(lang), arrow: '←' };
+
+const CONTENT: Record<string, any> = {
+  overview: Overview,
+  'guest-of-honour': GuestOfHonour,
+  'art-prize': ArtPrize,
+  focus: Focus,
+  programme: Programme,
+  publication: Publication,
+};
+const Content = CONTENT[tab];
+if (!Content) return Astro.rewrite('/404');
+---
+
+<Base
+  lang={lang}
+  title={title}
+  description={edition.title ? `${edition.title} — ${tabName}` : undefined}
+  path={path}
+  altPaths={altPaths}
+  image={edition.cover}
+  editId={edition._id}
+  editType={edition._type}
+  backLink={backLink}
+>
+  <YearBand lang={lang} editions={editions} active={year} />
+  <HubNav lang={lang} active={tab} title={heading} items={items} />
+  <Content lang={lang} year={year} edition={edition} lead={lead} />
+</Base>

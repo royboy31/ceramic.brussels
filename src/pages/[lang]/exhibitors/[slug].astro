@@ -3,7 +3,7 @@ import Base from '../../../layouts/Base.astro';
 import ExhibitorDetail from '../../../components/ExhibitorDetail.astro';
 import ExhibitorsListing from '../../../components/ExhibitorsListing.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { useTranslations } from '../../../lib/i18n';
+import { useTranslations, localePath } from '../../../lib/i18n';
 import {
   getExhibitor,
   getExhibitorPaths,
@@ -11,6 +11,7 @@ import {
   getEditions,
   getCurrentEdition,
   getAwards,
+  getPastEditionsIndex,
 } from '../../../lib/queries';
 
 /**
@@ -37,18 +38,23 @@ let listing: {
   currentYear?: number;
   years: { year: number; current: boolean }[];
   awarded: Set<string>;
+  pastEditions: any[];
 } | null = null;
 let exhibitor: any = null;
 let edition: any = null;
 
 if (year) {
-  const [exhibitors, editions, awards] = await Promise.all([
+  const [exhibitors, editions, awards, pastEditions] = await Promise.all([
     getExhibitorsByYear(lang, year),
     getEditions(lang),
     getAwards(lang),
+    // A past year's list is the exhibitors tab of the previous-editions
+    // section and wears its year band and pills (Figma, Léonie 2026-09-28).
+    getPastEditionsIndex(lang),
   ]);
   listing = {
     exhibitors,
+    pastEditions,
     edition: editions.find((e: any) => e.year === year) ?? null,
     currentYear: editions.find((e: any) => e.isCurrent)?.year,
     years: editions
@@ -75,7 +81,16 @@ const orgSchema = exhibitor && {
 
 {
   listing ? (
-    <Base lang={lang} title={`${t('nav.exhibitors')} ${year}`} path={`exhibitors/${year}`}>
+    <Base
+      lang={lang}
+      title={`${t('nav.exhibitors')} ${year}`}
+      path={`exhibitors/${year}`}
+      backLink={
+        listing.pastEditions.some((e: any) => e.year === year) && listing.currentYear
+          ? { label: t('prevEd.back', { year: listing.currentYear }), href: localePath(lang), arrow: '←' }
+          : undefined
+      }
+    >
       <ExhibitorsListing
         lang={lang}
         exhibitors={listing.exhibitors}
@@ -84,6 +99,7 @@ const orgSchema = exhibitor && {
         currentYear={listing.currentYear}
         years={listing.years}
         awarded={listing.awarded}
+        pastEditions={listing.pastEditions}
       />
     </Base>
   ) : (

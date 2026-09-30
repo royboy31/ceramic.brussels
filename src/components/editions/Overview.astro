@@ -1,0 +1,184 @@
+---
+import SanityImage from '../SanityImage.astro';
+import PortableText from '../PortableText.astro';
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import { resolveLink } from '../../lib/links';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * A previous edition's overview, its year's own address. The frame: the lead,
+ * two pictures side by side, then `key figures` and `highlights` in two
+ * columns under ruled headings.
+ *
+ * **Key figures do not match the frame, and that is deliberate.** The frame
+ * draws three rows with two figures combined on the middle one; the data holds
+ * five for 2025. So every figure the editor entered is shown, two to a row, in
+ * the ruled table the homepage and `/editions` already use - the design's
+ * numbers were illustrative (docs/previous-editions-plan.md §8.6).
+ */
+const { lang, edition, lead } = Astro.props as { lang: LocaleId; edition: any; lead?: any };
+const t = useTranslations(lang);
+
+/* BACKEND-REQUEST #33: the pair of pictures under the lead. Until the field
+   exists, the cover and the first archive photo stand in, so the row is never
+   half-empty and never a 60-picture gallery. */
+const pair: any[] = ((edition.leadImages ?? []).filter((img: any) => img?.asset) as any[]).slice(0, 2);
+const fallbackPair = [edition.cover, (edition.images ?? []).find((img: any) => img?.asset)].filter(
+  (img: any) => img?.asset,
+);
+const images = pair.length ? pair : fallbackPair;
+
+const figures: any[] = edition.keyFigures ?? [];
+
+/* BACKEND-REQUEST #33: the highlights column - editor-written links, mostly
+   onto this edition's own tabs. `resolveLink` handles every shape a `link`
+   takes and writes an internal one out in the reading page's language. The
+   label beside it is the highlight's own, not the link's. */
+const highlights = (edition.highlights ?? [])
+  .map((h: any) => {
+    const link = resolveLink(lang, h?.link);
+    return link && h?.label ? { key: h._key, label: h.label, labelStyle: h.labelStyle, ...link } : null;
+  })
+  .filter(Boolean) as { key: string; label: string; labelStyle?: any; href: string; external: boolean; arrow: string }[];
+---
+
+<div class="content-wrap edition-overview">
+  {lead && <div class="intro-large lead"><PortableText value={lead} /></div>}
+
+  {
+    images.length > 0 && (
+      <div class:list={['lead-images', { single: images.length === 1 }]}>
+        {images.map((image: any) => (
+          <SanityImage image={image} aspect={1.5} sizes="(max-width: 900px) 100vw, 46vw" widths={[600, 900, 1400]} />
+        ))}
+      </div>
+    )
+  }
+
+  <div class="two-col panels">
+    {
+      figures.length > 0 && (
+        <section class="figures">
+          <h2 class="panel-title">{t('prevEd.keyFigures')}</h2>
+          <div class="stats">
+            {figures.map((figure: any) => (
+              <div class="stat">
+                <strong>{figure.value}</strong>
+                <span {...styleAttrs(figure.labelStyle)}>{figure.label}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      highlights.length > 0 && (
+        <section class="highlights">
+          <h2 class="panel-title">{t('prevEd.highlights')}</h2>
+          <ul>
+            {highlights.map((h) => (
+              <li>
+                <a class="text-link" href={h.href} {...(h.external ? { rel: 'noopener noreferrer' } : {})}>
+                  <span {...styleAttrs(h.labelStyle)}>{h.label}</span>{' '}
+                  <span class="link-arrow" data-arrow={h.arrow}>{h.arrow}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+
+  {
+    /* Nothing entered for this year yet: say so rather than draw empty rules.
+       Every past edition has key figures today, so this is the 2027-becomes-
+       past case, not a normal one. */
+    figures.length === 0 && highlights.length === 0 && images.length === 0 && !lead && (
+      <p class="empty">{t('editions.empty')}</p>
+    )
+  }
+</div>
+
+<style>
+  .lead {
+    margin: 0 0 48px;
+  }
+  .lead :global(p + p) {
+    margin-top: 28px;
+  }
+
+  .lead-images {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 64px;
+  }
+  .lead-images.single {
+    grid-template-columns: 1fr;
+    max-width: 760px;
+  }
+  .lead-images :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .panels {
+    gap: 30px 40px;
+    align-items: start;
+  }
+
+  /* The ruled figure table of the homepage and /editions: value large, label
+     beside it, a hairline under each row. */
+  .stats {
+    border-top: 1px solid var(--color-ink, #050505);
+  }
+  .stat {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5em;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--color-ink, #050505);
+  }
+  .stat strong {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+  }
+  .stat span {
+    font-size: clamp(1.1rem, 2vw, 1.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
+  .highlights ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+  .highlights a {
+    font-size: clamp(1.1rem, 2vw, 1.75rem);
+    line-height: 1.35;
+    letter-spacing: -0.03em;
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
+  }
+
+  .empty {
+    font-size: 24px;
+  }
+
+  @media (width<=900px) {
+    .lead-images {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-bottom: 44px;
+    }
+  }
+</style>

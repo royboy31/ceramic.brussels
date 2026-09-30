@@ -577,3 +577,157 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 **Done (Lilanga, 2026-09-28, working across the stack per docs/project-handbook.md):** `images` ("More pictures", array of `figure`, grid layout) on `spotlight` in `src/sanity/schemaTypes/objects/section.ts`, after `image`; `"images": images[] ${IMAGE}` in the `spotlight` branch of `SECTIONS`. Additive, no migration. `Feature.astro` shows `[image, ...images]` as a `Slideshow` with `autoplay` (4.5 s, held on hover/focus/off screen, off for reduced motion) when there is more than one. **Editors:** homepage → the feature → More pictures.
 
 ---
+## #32 · open · 2026-09-30 · previous editions: a lead paragraph per tab
+
+**Page / component:** `src/components/editions/*.astro`, every tab of `/[lang]/previous-editions/<year>`
+**Figma frames:** `Previous editions/ceramic brussels — previous editions — 2025 — *.png` (all seven)
+**Asked by:** Léonie, Figma comments 2026-09-28 ("NEW SECTION to add to the website: previous editions… the principle and pages stay the same for 2026 and 2024"); `docs/previous-editions-plan.md` §4
+**The design shows:** every one of the seven tabs opens with its own lead paragraph, in the site's large lead type — *"The 2025 edition put Norwegian creation in the spotlight through a dedicated national focus…"* on overview, *"An immersive journey into the heart of emerging ceramic art…"* on art prize, *"A special publication dedicated to the fair…"* on publication, and so on. Seven different paragraphs per year.
+**The query returns today:** `edition.intro` (`localeBlock`), one field for the whole edition — and it is **empty on 2024, 2025 and 2026**. Nothing per tab.
+**Rendered meanwhile:** no lead; each tab starts at its first band.
+**Asked for:** a lead per tab on `edition`. Suggested shape: one `archiveLeads` array of an object with `tab` (a string from a fixed list: overview, guest-of-honour, exhibitors, art-prize, focus, programme, publication) and `lead` (`localeBlock`), selected as-is. An object per tab in a fieldset would do as well — what matters is that a tab can be given its own paragraph without the others inheriting it. `intro` stays what it is for `/editions` and the homepage; overview can fall back to it.
+**Source text:** `legacy-export/normalized/pastEditions.json` — the `text-2col` / `text-1col` blocks on `guest-of-honour-3`, `norwegian-focus`, `art-prize-laureates-2`, `magazine-2`, `photos` and their 2024/2026 counterparts.
+
+---
+## #33 · open · 2026-09-30 · previous editions: overview highlights and its two images
+
+**Page / component:** `src/components/editions/Overview.astro`, `/[lang]/previous-editions/<year>`
+**Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — overview.png`
+**Asked by:** Léonie, Figma 2026-09-28; `docs/previous-editions-plan.md` §4.1
+**The design shows:** two things `edition` has no home for.
+1. **Two images side by side** under the lead, full width, one landscape pair — not a slideshow and not the 60-odd photo gallery.
+2. A **`highlights`** column beside `key figures`: four editor-written links, each a sentence ending in `→` — *"guest of honour: Elizabeth Jaeger (US) →"*, *"10 art prize laureates →"*, *"Focus on the Norwegian ceramic scene →"*, *"Art installation by KRJST studio →"*. Three of the four point at other tabs of the same edition; the fourth (KRJST) is a one-off.
+**The query returns today:** `cover` (one `figure`) and `images` (the archive gallery, 39–68 pictures) — no pair, no highlights.
+**Rendered meanwhile:** `cover` alone, and no highlights column.
+**Asked for:** on `edition`, in the archive group — `leadImages`, an array of `figure` (the overview draws the first two), and `highlights`, an array of an object with a `localeString` label and a `link` (the existing `link` object, so the Studio's site-link search box picks the tab and `sitePath` writes it out in the reading page's language). Both optional; the column and the image row collapse when empty.
+**Note:** `keyFigures` on the same frame is already filled for all three years and **needs no schema change**. It does not match the frame — 2025 holds five figures (`17,840 visitors`, `65 galleries`, `200+ artists`, `14 countries`, `13 talks`) where the frame draws three rows with two figures combined on one line and different numbers — but that is a layout question for the designer (`docs/previous-editions-plan.md` §8.6), not a field.
+
+---
+## #34 · open · 2026-09-30 · previous editions: the guest of honour's installation that year
+
+**Page / component:** `src/components/editions/GuestOfHonour.astro`, `/[lang]/previous-editions/<year>/guest-of-honour`
+**Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — guest of honour.png`
+**Asked by:** Léonie, Figma 2026-09-28; `docs/previous-editions-plan.md` §4.2
+**The design shows:** under the portrait and `biography`, a second run: a titled essay about the work the guest made *for that fair* — **`AT TWILIGHT, ceramic brussels 2025`**, four paragraphs, signed **`Jean-Marc Dimanche`** — with a five-picture slideshow beside it, credited *"© Geoffrey Fritsch, ceramic brussels 2025"*.
+**The query returns today:** `artist.bio`, `artist.portrait`, `artist.nationality` — the person, filled and fine. Nothing about what they showed in a given year. `artist.intro`, `artist.carousel` and `artist.interview` are the *current* guest's feature-page fields and belong to the artist, not to an edition: 2025's guest has since been followed by two others, so putting AT TWILIGHT there would attach it to Elizabeth Jaeger forever rather than to ceramic brussels 2025.
+**Rendered meanwhile:** the lead, portrait and biography; the essay and its slideshow are absent.
+**Asked for:** on `edition`, a `guestInstallation` object — `title` (`localeString`, *"AT TWILIGHT, ceramic brussels 2025"*), `text` (`localeBlock`), `author` (`string`, *"Jean-Marc Dimanche"*), `images` (array of `figure`). Edition-scoped, so each year keeps its own; optional, so a year without one draws the biography alone.
+**Source text:** `legacy-export/normalized/pastEditions.json` → `guest-of-honour-3` (2025, blocks `title / text-2col / gallery ×4`), `guest-of-honour-31` (2026), `guest-of-honour` (2024).
+
+---
+## #35 · open · 2026-09-30 · previous editions: the country focus tab
+
+**Page / component:** `src/components/editions/Focus.astro`, `/[lang]/previous-editions/<year>/focus`
+**Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — norway focus.png`
+**Asked by:** Léonie, Figma 2026-09-28 (and comment on the galleries list: *"these link to the individual gallery pages in exhibitors 2025"*); `docs/previous-editions-plan.md` §4.5
+**The design shows:** a tab per edition that had a country focus — labelled `norway focus` in 2025, and by the same rule `españa focus` in 2026. On it: a lead with an inline external link (*"in collaboration with **Norwegian Crafts**"*), a slideshow, a `galleries` list of the five participating galleries each ending in `↗`, and a `talks programme` of three talks, each with a description, `SPEAKERS` and `MODERATOR`, plus a second slideshow.
+**The query returns today:** `edition.countryFocus`, a `localeString` used as a badge on exhibitor cards (*"focus Norway"*) — the label and nothing else. `exhibitor.inCountryFocus` flags the galleries. `programmeEvent` carries every field a talk needs but nothing says a given event belongs to the focus rather than to the general programme, and the design shows the same year's events split across two tabs.
+**Rendered meanwhile:** the tab is built from `countryFocus` alone — its label and the exhibitors flagged `inCountryFocus`; no lead, no talks.
+**Asked for:** on `edition`, a `focus` object — `lead` (`localeBlock`, carrying its own inline link, so no separate URL field), and `images` (array of `figure`) if the slideshow should not simply reuse the archive gallery. Plus **one way to mark a focus talk**: either a `focus` value in the existing `section` list on `programmeEvent`, or a `talks` array of references on the `focus` object. The first is less to maintain; your call.
+**Two things the data does not have (checked against `production`, 2026-09-30):**
+1. **No 2025 exhibitor is flagged `inCountryFocus`** — but the five are trivially findable, because **the import wrote the marker into their names instead**:
+
+       Format (no) ___ focus Norway
+       Kiosken (no) ___ focus Norway
+       QB Gallery (no) ___ focus Norway
+       RAM galleri (no) ___ focus Norway
+       SKOG Art Space (no) ___ focus Norway
+
+   Those are exactly the five on the frame. So this is one patch: set `inCountryFocus` on them and cut the ` ___ focus Norway` off the name. **The suffix is on the site today** — `/en/exhibitors/2025` prints "Format (no) ___ focus Norway" as a gallery's name, which is worth fixing whatever happens to the focus tab.
+
+   Eight documents do carry the flag and all eight are 2026's España galleries, so **2026's focus tab already lists its galleries** and only 2025 is empty. Once flagged, the list is `getExhibitorsByYear(lang, year)` filtered on the flag and linked through `exhibitorPath()` — no new field. A `galleries` reference array on the `focus` object would do the same job less cheaply. Until one of them is filled, `tabsFor` gives 2025 no focus pill at all, because a pill onto an empty page is worse than no pill.
+2. **`section` is set only on 2026 and 2027 events.** Every 2025 and 2024 `programmeEvent` has it empty, so adding a `focus` value to the list is not enough on its own — that year's talks have to be given a section for the focus and programme tabs to divide between them.
+**Source text:** `legacy-export/normalized/pastEditions.json` → `norwegian-focus` (blocks `text-2col / image / accordion ×2 / text-1col / gallery`); the accordions are the talks, with their speakers and moderators.
+
+---
+## #36 · open · 2026-09-30 · previous editions: the publication reader
+
+**Page / component:** `src/components/editions/Publication.astro`, `/[lang]/previous-editions/<year>/publication`
+**Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — publication.png`
+**Asked by:** Léonie, Figma 2026-09-28; `docs/previous-editions-plan.md` §4.7
+**The design shows:** a lead (*"A special publication dedicated to the fair provides an overview of contemporary ceramic world…"*) over a full-width page-flip reader showing the AMA × ceramic brussels cover, `#366`, with a `1/84` page counter.
+**The query returns today:** `edition.catalogueUrl` and `edition.overviewUrl`, both plain `url`, rendered as pills on `/editions`. Neither is the reader, and nothing says which to embed.
+**Rendered meanwhile:** nothing — the tab is not built without a URL.
+**Asked for:** on `edition`, a `publication` object — `url` (the reader, embedded in an `<iframe>`) and optionally `cover` (`figure`) and `title` (`localeString`) for the link-out and the page's social image. The lead comes from #32.
+**The URLs, found on the live old site 2026-09-30** (`/en/pasteditions/magazine-2` and `/magazine`), so nothing needs hunting:
+- 2025 → `https://online.fliphtml5.com/qogyd/xffh/`
+- 2024 → `https://online.fliphtml5.com/qogyd/ncuf/`
+- 2026 → not on any past-edition page; if there is a 2026 reader, please ask the client for it.
+
+FlipHTML5 serves these in a plain iframe, so `Embed.astro` should cover the rendering.
+
+---
+## #37 · open · 2026-09-30 · programme events: show the moderator again
+
+**Page / component:** `src/components/editions/Focus.astro` and `src/components/editions/Programme.astro`; also `src/components/hubs/Programme.astro`
+**Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — norway focus.png`, talks programme
+**Asked by:** Léonie, Figma 2026-09-28; `docs/previous-editions-plan.md` §4.5
+**The design shows:** each talk lists `SPEAKERS` and, under it, `MODERATOR` — *"Jorunn Veiteberg"* on two of the three 2025 talks, *"Marthe Yung Mee Hansen, Norwegian Crafts"* on the third. Two labelled lines, not one.
+**The query returns today:** `moderator` is selected in `getProgramme` — but the field is `hidden: true` in `src/sanity/schemaTypes/documents/programmeEvent.ts`, so an editor cannot see or fill it. It was hidden under the rule in `CLAUDE.md` that a field no page reads is hidden in its schema with a comment; this page reads it.
+**Rendered meanwhile:** speakers only.
+**Asked for:** unhide `moderator` on `programmeEvent` (under `speakersText`, where it belongs), and select it in `getEditionArchive` alongside the events it already returns.
+**And a backfill.** Checked against `production` 2026-09-30: **only 2026 events have a `moderator` value** — twelve of them. No 2025 or 2024 event has one, so unhiding the field leaves this frame's two `MODERATOR` lines (*"Jorunn Veiteberg"*, *"Marthe Yung Mee Hansen, Norwegian Crafts"*) still empty. The values are in `legacy-export/normalized/pastEditions.json` → `norwegian-focus` and `programme-3`; they were presumably skipped because the field was hidden.
+
+---
+## #38 · open · 2026-09-30 · previous editions: laureate Instagram handles and nationalities
+
+**Page / component:** `src/components/editions/ArtPrize.astro`, `/[lang]/previous-editions/<year>/art-prize`
+**Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — art prize.png`
+**Asked by:** Léonie, Figma comment 2026-09-28 on the laureates list: *"These link directly to the laureates' Instagrams"*
+**The design shows:** each laureate as `Asya Marakulina (RU) ↗` — the name, the country in brackets, and an external arrow, the whole line linking to that artist's Instagram. The jury below it shows `instagram ↗` and `website ↗` pills under each member.
+**The query returns today:** `artist.instagram`, `artist.nationality`, `artist.website` and `person.countryCode / instagram / website` are all selected — and all empty for the past editions. Checked 2026-09-30: **none of the 10 laureates of 2025 has an instagram, a nationality or a website**, and none of the four jury members has a country code, an instagram or a website. Four artists in the whole dataset have an instagram. The art prize hub works around this by lifting a trailing `@handle` paragraph out of the laureate's bio (`liftInstagram` in `src/components/hubs/ArtPrize.astro`); past laureates have no bio at all, so there is nothing to lift.
+**Rendered meanwhile:** the laureate's name as plain text, with no bracket and no arrow; the jury member's name and role with no pills. Both light up field by field, so a partial import is worth having.
+**Asked for:** fill `instagram` and `nationality` on the past laureates' `artist` documents, and `countryCode` / `instagram` / `website` on the past jury `person` documents. No schema change — every field already exists and is already selected.
+**The handles are in the export, so this is an import pass, not research.** `legacy-export/normalized/pastEditions.json` → `art-prize-laureates-2` carries all ten of 2025's:
+
+    asya_marakulina · beatriceguilleman · camilla.hanney · CONCRETEELEONORE · leonorechas
+    lunaisolab · maelle.dufour · pascale.robertpascale · piamougeot · raphael.emine
+
+`art-prize-laureates` (2024) and `art-prize-2` (2026) hold their years', and the `person` blocks on `art-prize-jury`, `art-prize-jury-2` and `art-prize-2` hold the jury's links. The nationalities are the `(RU)`, `(FR)`, `(IE)`, `(BE)` marks beside each name on those same pages.
+
+---
+## Note · 2026-09-30 · previous editions: what this branch changed in the backend half
+
+Not a request - a record, so `npm run boundary` has an answer in the PR.
+Following #31 and `docs/project-handbook.md`, which is the guide for working
+across both halves since 2026-09-23.
+
+**Changed by Lilanga, outside the frontend half:**
+
+- **`src/lib/previousEditions.ts`** (new) - the section's tabs, segments, paths
+  and `tabsFor`. The analogue of `hubs.ts` for a route whose tabs are not a
+  constant. No schema, no query.
+- **`src/lib/queries.ts`** - `getEditionArchive` extended (it already existed
+  for the undesigned `/editions/<year>` archive, which this branch replaces)
+  and `getPastEditionsIndex` added, which is the cheap summary the year band
+  and `tabsFor` read. The extension **asks for the fields of #32–#36 before
+  they exist**; GROQ returns them undefined, so nothing breaks and each tab
+  lights up the moment a field lands. One query per year page, memoised by
+  `run()`, so seven tabs cost one request - the build makes 136 in total.
+- **`src/lib/links.ts`** - `sitePath` and `routePath` now read `editions` and
+  `editions/<year>` as the new section, so every `link` an editor has already
+  made with the route "Past editions" keeps landing on a real page.
+- **`scripts/legacy-redirects.mjs`** - `pastEditionPath()` returns
+  `previous-editions/<year>`, and the literal year targets follow. 486 rules,
+  135 of them `/pasteditions/`.
+
+**Still Kamindu's, and not touched:** `src/sanity/siteLinks.ts` still offers
+`editions` and `editions/<year>` in the Studio's site-link search box, and
+`src/sanity/schemaTypes/objects/routes.ts` still lists "Past editions" as
+`editions`. Both keep working - `links.ts` translates them and the redirect
+map covers a stale one - so this is tidying, not a break. Worth doing when
+#32–#36 are done.
+
+---
+## #39 · open · 2026-09-30 · past programme events have no dates
+
+**Page / component:** `src/components/editions/Programme.astro`, `/[lang]/previous-editions/<year>/programme`
+**Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — programme.png`
+**Asked by:** Léonie, Figma comment 2026-09-28: *"same layout than the 2027 talks programme, but without the time, only the title"*
+**The design shows:** one folding row per day of the fair — `Thursday 22 January 2025 ↓`, `Friday 23 January 2025 ↓`, `Saturday 24 January 2025 ↓` — the events of that day inside. The time is dropped, but the **day** is the whole structure of the page.
+**The query returns today:** `startsAt` on every `programmeEvent`, as it always has. Checked against `production` 2026-09-30: **16 of 2025's 18 events have no `startsAt` at all.** Only `preview` and `vernissage` are dated. 2024 and 2026 are the same shape — the import brought the talks across with their titles, speakers and descriptions but not their times, so there is nothing to group by.
+**Rendered meanwhile:** the two dated events in their day row, and the other sixteen listed under the accordion with no day heading — visible, because hiding five sixths of a programme is worse than a list that is not yet grouped. They move up into their day on their own once dated.
+**Asked for:** set `startsAt` on the past editions' events. The date alone is what this page needs — the time is not rendered here, though the 2027 talks page does use it, so a real time is better than midnight.
+**Where the dates are:** `legacy-export/normalized/pastEditions.json` → `programme-3` (2025), `programme-27` and `programme-2` (2024), `programme-32` (2026). The old pages are built as `title` blocks naming the day followed by the `event` blocks of that day, so the day is the preceding title rather than a field on the event — which is presumably why the import dropped it.
+
+---

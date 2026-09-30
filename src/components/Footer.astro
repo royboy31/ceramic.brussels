@@ -13,13 +13,34 @@ interface Props {
   copyright?: string;
   /** Label of the pill that reopens the cookie banner; absent when no tracker is in use. */
   consentLabel?: string;
+  /**
+   * A pill at the left of the band, before the credit (Léonie, Figma comment
+   * 2026-09-28): "← back to 2027" on a previous-editions page, "previous
+   * editions →" on the homepage. When it is there the credit moves to the
+   * middle of the band rather than disappearing (Lilanga, 2026-09-30).
+   */
+  backLink?: { label: string; href: string; arrow?: string };
 }
 
-const { siteName, links, copyright, consentLabel } = Astro.props;
+const { siteName, links, copyright, consentLabel, backLink } = Astro.props;
 const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
 ---
 
-<footer class="site-footer acid-wash flex min-h-20 flex-wrap items-center justify-between gap-4 px-[clamp(16px,2vw,30px)] py-5">
+<footer
+  class:list={[
+    'site-footer acid-wash flex min-h-20 flex-wrap items-center justify-between gap-4 px-[clamp(16px,2vw,30px)] py-5',
+    { 'has-back': !!backLink },
+  ]}
+>
+  {
+    backLink && (
+      <a class="footer-pill footer-back" href={backLink.href}>
+        {backLink.arrow === '←' && <span class="link-arrow" data-arrow="←">←</span>}
+        {backLink.label}
+        {backLink.arrow !== '←' && <span class="link-arrow">{backLink.arrow ?? '→'}</span>}
+      </a>
+    )
+  }
   <p class="footer-credit">{line}</p>
   {
     (links.length > 0 || consentLabel) && (
@@ -64,5 +85,30 @@ const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
   .footer-pill:focus-visible {
     color: #fff;
     background-color: #050505;
+  }
+  /* With a back pill on the left the credit is centred between the two
+     groups rather than dropped (Lilanga, 2026-09-30). `flex: 1` on the
+     credit and a matching basis on the pill groups keeps it on the band's
+     centre line, not merely between its neighbours. */
+  .site-footer.has-back .footer-credit {
+    flex: 1;
+    text-align: center;
+  }
+  .footer-back {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25em;
+    white-space: nowrap;
+  }
+  @media (width<=700px) {
+    /* Three groups do not sit on one line on a phone: the pill takes the
+       first row, the credit and the links follow, all left-aligned. */
+    .site-footer.has-back {
+      justify-content: flex-start;
+    }
+    .site-footer.has-back .footer-credit {
+      flex: 1 0 100%;
+      text-align: left;
+    }
   }
 </style>
