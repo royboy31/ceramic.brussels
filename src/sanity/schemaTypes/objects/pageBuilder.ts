@@ -402,12 +402,32 @@ export const headingSection = defineType({
   icon: TextIcon,
   fields: [
     defineField({ name: 'title', title: 'Title', type: 'localeString', validation: (rule) => rule.required() }),
+    // The design has two of these, and had no way to say which: the VIP
+    // about tab sets "programme overview" over "at the fair" and "beyond the
+    // fair", which came out the same size once the page was built from
+    // blocks (Léonie, 2026-09-23).
+    defineField({
+      name: 'level',
+      title: 'Size',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Big - opens a part of the page', value: 'group' },
+          { title: 'Smaller - a heading inside it', value: 'subgroup' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'group',
+    }),
     anchorField(),
     hiddenField(),
   ],
   preview: {
-    select: { title: 'title.en', hidden: 'hidden' },
-    prepare: ({ title, hidden }) => ({ title: title ?? '(section title)', subtitle: sectionSubtitle('Section title', hidden) }),
+    select: { title: 'title.en', level: 'level', hidden: 'hidden' },
+    prepare: ({ title, level, hidden }) => ({
+      title: title ?? '(section title)',
+      subtitle: sectionSubtitle(level === 'subgroup' ? 'Section title, smaller' : 'Section title', hidden),
+    }),
   },
 });
 

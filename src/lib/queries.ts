@@ -195,7 +195,9 @@ const SECTIONS = `sections[hidden != true]{
     "links": links[] ${LINK}
   },
   _type == "headingSection" => {
-    ${styled('title')}
+    ${styled('title')},
+    // Big or smaller, as the frame has two of them.
+    level
   },
   _type == "applicationFormSection" => {
     ${styled('heading')},

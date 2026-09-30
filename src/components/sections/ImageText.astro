@@ -34,6 +34,7 @@ const hasImage = !!section.image?.asset;
       flip: section.imageSide === 'right',
       'no-image': !hasImage,
       vip: variant === 'vip' || variant === 'vip-panel',
+      'vip-rows': variant === 'vip',
       'vip-panel': variant === 'vip-panel',
     },
   ]}
@@ -115,7 +116,7 @@ const hasImage = !!section.image?.asset;
   }
   /* The about tab's "programme overview" rows: the heading is the design's
      bold capitals over the paragraph - "DISCOVERY TOURS", "VIP LOUNGE". */
-  .vip .panel-title {
+  .vip-rows .panel-title {
     margin-bottom: 10px;
     font-size: 24px;
     font-weight: 600;
@@ -131,14 +132,12 @@ const hasImage = !!section.image?.asset;
   .vip-panel {
     margin-top: 56px;
   }
+  /* Spacing only. The panel title's own 40px comes from design.css, and
+     overriding it here with `inherit` took the lounge's headings down to
+     body size (Félicie, 2026-10-01). */
   .vip-panel .panel-title {
     margin-bottom: 30px;
     padding-bottom: 5px;
-    font-size: inherit;
-    font-weight: inherit;
-    line-height: inherit;
-    letter-spacing: inherit;
-    text-transform: none;
   }
   .body :global(p) {
     margin: 0 0 1.25rem;

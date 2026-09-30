@@ -23,7 +23,11 @@ const { section, variant = 'default' } = Astro.props;
         {section.title}
       </h2>
     ) : (
-      <h2 class="group-title" id={section.anchor || undefined} {...styleAttrs(section.titleStyle)}>
+      <h2
+        class:list={['group-title', { subgroup: section.level === 'subgroup' }]}
+        id={section.anchor || undefined}
+        {...styleAttrs(section.titleStyle)}
+      >
         {section.title}
       </h2>
     ))
@@ -42,6 +46,28 @@ const { section, variant = 'default' } = Astro.props;
   }
   .group-title:first-child {
     margin-top: 0;
+  }
+
+  /* The heading inside a part of the page - "at the fair", "beyond the
+     fair" under "programme overview" - ruled under itself rather than over,
+     and over the copy column only, as the VIP frame draws it (Léonie,
+     2026-09-23). */
+  .group-title.subgroup {
+    margin: 2.25rem 0 0;
+    padding: 0 0 0.1rem;
+    border-top: 0;
+    border-bottom: 2px solid var(--ink);
+    max-width: 66%;
+    font-size: clamp(1.625rem, 2.5vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    text-transform: none;
+  }
+  @media (max-width: 900px) {
+    .group-title.subgroup {
+      max-width: none;
+    }
   }
 
   /* From the design's index.css (2026-09-14 build): the centred "latest news". */
