@@ -108,8 +108,12 @@ main :is(strong, b) {
   max-width: calc(100vw - 24px);
 }
 @media (width <= 900px) {
+  /* The whole screen, not design.css's 16px-short strip: "could the menu
+     always take up the whole width of the page when looking at it on a
+     smartphone? (see screenshot where there currently is a weird margin on
+     the left)" - client, 2026-09-30. */
   .menu-panel {
-    width: calc(100vw - 16px);
+    width: 100vw;
     max-width: none;
   }
   .menu-heading,
@@ -117,6 +121,31 @@ main :is(strong, b) {
   .submenu > div {
     padding-inline: 16px;
   }
+  /* "The tab words ... seem too small inside each rectangle, could you make
+     them bigger? Keep the same kind of text/rectangle ratio as for the
+     desktop version. Same for the submenu words." The clamps in design.css
+     bottom out at 30 and 18 on a phone while the rows stay full height;
+     these are the top of each clamp's range instead. */
+  .menu-heading > a {
+    font-size: 38px;
+  }
+  .submenu a {
+    font-size: 22px;
+  }
+  /* NOT changed: "the gradient looks different (more yellow), could you make
+     sure it stays the same in the mobile version?" It already is the same.
+     design.css gives every sheet `#fff → #fffbd3 52% → acid 100%`, and those
+     stops are percentages, so the ramp scales with the row and renders
+     identically at any height - a tall phone row is the desktop row
+     enlarged, not a yellower one.
+     What actually changed is how much of the screen it covers: the panel is
+     a narrow column beside the page on desktop and the whole screen on a
+     phone (more so now that the 16px margin is gone, above), so there is
+     simply more yellow in view. Pinning the ramp to a fixed height off the
+     bottom was tried and made it worse - white band, then solid acid.
+     If it should be lighter on a phone that is a design decision, not a
+     bug: the lever is the middle stop, 52% → about 70%, and it is Léonie's
+     to make. */
 }
 
 /* "When we make the page narrower, the title gets hidden by the buttons on
