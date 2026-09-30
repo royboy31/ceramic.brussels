@@ -592,7 +592,7 @@ const rateLink =
     {/* The editor's stack, in the frames' own proportions - these tabs render
         from Sanity the moment their page exists, and the generic full-width
         blocks are not this design (Félicie, 2026-09-30). */}
-    {hasSections && <PageSections lang={lang} sections={stack} variant="vip" />}
+    {hasSections && <PageSections lang={lang} sections={stack} variant={tab === 'about' ? 'vip' : 'vip-panel'} />}
 
     {
       page?.body && tab !== 'about' && tab !== 'hotel-deal' && (

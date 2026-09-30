@@ -18,7 +18,7 @@ import { styleAttrs, bodyStyleAttrs } from '../../lib/textStyle';
 interface Props {
   lang: LocaleId;
   section: any;
-  variant?: 'default' | 'home' | 'vip';
+  variant?: 'default' | 'home' | 'vip' | 'vip-panel';
 }
 
 const { lang, section, variant = 'default' } = Astro.props;
@@ -30,7 +30,12 @@ const hasImage = !!section.image?.asset;
   class:list={[
     'page-grid',
     'image-text',
-    { flip: section.imageSide === 'right', 'no-image': !hasImage, vip: variant === 'vip' },
+    {
+      flip: section.imageSide === 'right',
+      'no-image': !hasImage,
+      vip: variant === 'vip' || variant === 'vip-panel',
+      'vip-panel': variant === 'vip-panel',
+    },
   ]}
   id={section.anchor || undefined}
 >
@@ -108,6 +113,8 @@ const hasImage = !!section.image?.asset;
   .vip .copy {
     grid-column: span 8;
   }
+  /* The about tab's "programme overview" rows: the heading is the design's
+     bold capitals over the paragraph - "DISCOVERY TOURS", "VIP LOUNGE". */
   .vip .panel-title {
     margin-bottom: 10px;
     font-size: 24px;
@@ -115,6 +122,23 @@ const hasImage = !!section.image?.asset;
     line-height: 1.25;
     letter-spacing: 0;
     text-transform: uppercase;
+  }
+  /* The lounge and hotel frames head their blocks with a panel title instead,
+     ruled and standing clear of the copy: the spacing `.aperitivos
+     .panel-title` gives it in Vip.astro, which a block rendered from Sanity
+     never sat inside (Félicie, 2026-10-01). The blocks are set apart the way
+     `.aperitivos` is, too. */
+  .vip-panel {
+    margin-top: 56px;
+  }
+  .vip-panel .panel-title {
+    margin-bottom: 30px;
+    padding-bottom: 5px;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    text-transform: none;
   }
   .body :global(p) {
     margin: 0 0 1.25rem;
