@@ -26,6 +26,7 @@ export type PageField =
   | 'heroImages'
   | 'sections'
   | 'body'
+  | 'links'
   | 'images'
   | 'seo';
 
@@ -57,7 +58,9 @@ const HUB_TABS: Record<string, Record<string, PageField[]>> = {
     about: FULL,
     programme: TEXT,
     lounge: ['intro', 'cover', 'sections', 'body', 'images'],
-    'hotel-deal': ['intro', 'cover', 'sections', 'body', 'images'],
+    // `links` is the pill the hotel column ends in (Vip.astro), a field
+    // rather than a block so it sits under the text it belongs to.
+    'hotel-deal': ['intro', 'cover', 'sections', 'body', 'links', 'images'],
     access: ['intro', 'sections'],
     '*': TEXT,
   },

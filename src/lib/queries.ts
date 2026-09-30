@@ -808,6 +808,8 @@ const PAGE = `{
   // The second heading's lead on press & media → stories and press (#19).
   ${styled('intro2')},
   ${styled('body')},
+  // The pills under the body, the page's own rather than a block (VIP hotel).
+  "links": links[] ${LINK},
   "sections": ${SECTIONS},
   "images": images[] ${IMAGE},
   cover ${IMAGE},

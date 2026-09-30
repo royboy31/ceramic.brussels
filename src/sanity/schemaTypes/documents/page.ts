@@ -133,6 +133,19 @@ export const page = defineType({
       description: 'Plain rich text, after the blocks.',
       hidden: pageHides('body'),
     }),
+    // Under the body, where the page's own pills belong: the VIP hotel tab
+    // ends its column in "discover The Hoxton ↗". A links *block* would sit
+    // in the stack above the text and render at the foot of the page, which
+    // is neither where the editor looks nor where the design puts it.
+    defineField({
+      name: 'links',
+      title: 'Buttons',
+      type: 'array',
+      group: 'main',
+      of: [defineArrayMember({ type: 'link' })],
+      description: 'The pills under the text.',
+      hidden: pageHides('links'),
+    }),
     defineField({
       name: 'images',
       title: 'Closing images',
