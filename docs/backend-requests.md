@@ -865,3 +865,75 @@ map covers a stale one - so this is tidying, not a break. Worth doing when
 **The pictures exist but are not safely matchable.** Léonie's hand-off carries eleven at `Previous editions/Assets/W26423LEvadeHD *.jpg`, 433 × 289, which are the artworks on that frame's cards. Five are identifiable by eye (3 = acb Galéria, 1 = ANALORA, 11 = Deletaille, 12 = Esther Verhaeghe, 13 = Format Oslo) and the file numbering does not follow the card order, so the other six would be guesswork — and an artwork credited to the wrong gallery is worse than no artwork. Either the designer names them, or the 2025 galleries' own images come across from the old site the way 2026's did.
 
 ---
+
+---
+## #42 · open · 2026-10-01 · programme: the exhibition pass tab and what it lists
+
+**Page / component:** a fourth tab on the programme hub; component is Lilanga's
+**Figma frame:** `screenshot/ceramic brussels — programme — exhibition pass.png` (Léonie, sent with the comments of 2026-09-30)
+**Asked by:** the client's comments of 2026-09-30, last line: "I have created a new « exhibition pass » page in Figma (inside the « programme » section)!"
+
+**The design shows:** a lead ("Each ticket to the fair includes free access to partner institutions' exhibitions."), then one row per partner institution, alternating picture-left / picture-right. Each row: the institution's name as a ruled heading ("BPS22 — Art Museum of the Province of Hainaut"), the artist's name and the exhibition title in italic on the next line ("Emmanuel Van der Auwera / *Juggernaut*"), a boxed chip at the right with postcode and city ("6000 Charleroi"), a bold-caps date line ("30 JAN. → 9 MAY 2027", and on the second row just "→ 18 APR. 2027", so the start is optional), a paragraph, a "discover the exhibition →" pill, and a slideshow of three pictures with the usual caption line.
+
+**The query returns today:** nothing. There is no document type for a partner institution's exhibition, and `src/lib/hubs.ts` deliberately leaves the tab out — its own comment says "The design's fourth pill, 'exhibition pass (coming up)', is deliberately not here: a tab with no content is a pill onto an empty page." That is no longer true.
+
+**Rendered meanwhile:** nothing; the tab does not exist.
+
+**Asked for:**
+1. A tab `{ slug: 'exhibition-pass', … }` **fourth** in the programme hub in `src/lib/hubs.ts`. Note the frame draws the pills in a different order (La Cambre first), but talks is the hub root — `/[lang]/programme` *is* the talks page and `programme-69` redirects onto it — so the order is deliberately unchanged and only the new pill is added. Say if you disagree; it costs a URL.
+2. A document type (working name `exhibition`) with: `institution` (localeString), `artist` (string, optional — the CID row has none), `exhibitionTitle` (localeString, rendered italic), `city` (string, the "6000 Charleroi" chip), `startDate` (date, **optional**), `endDate` (date), `description` (localeText), `link` (`link`), `images` (array of `figure`), `edition` (reference), `order` (number).
+3. Its projection, and the lead from the tab's own `page` document as the other programme tabs do.
+
+Reusing `programmeEvent` was considered and looks wrong: these are months-long exhibitions at other venues, with no time, no venue-on-site and no programme section, and they would pollute `getProgramme`. Your call.
+
+---
+## #43 · open · 2026-10-01 · the photographs are pixelated: the sources are small
+
+**Page / component:** everywhere; reported on photos & videos and the gallery pages
+**Asked by:** the client's comments of 2026-09-30, "The picture are still pixelated" — "still", after the retina ladder fix of 2026-09-23
+
+**Not a frontend bug, and that is the point of this entry.** Traced end to end on localhost: a picture asking the CDN for `w=600` is delivered at 600 natural, 1.19× at DPR 2. `SanityImage` already doubles its top step and caps at the asset's own width. The ladder is doing its job; there are not enough pixels in the source.
+
+**The numbers,** photographs only (`image/jp*`, so logos and PNGs are excluded), of 1,416:
+
+| width | count |
+| :-- | :-- |
+| under 600px | 9 |
+| 600–1000px | 63 |
+| 1000–1500px | 249 |
+| **under 1500px** | **321 (23%)** |
+
+By the document that uses them: **149 unreferenced** (dead weight from the import), **135 exhibitor**, 11 person, 10 edition, 7 partner, 3 page, 2 artist, 2 programmeEvent, 1 laureate, 1 homepage. So the live problem is about **172 pictures, concentrated in the exhibitor galleries**.
+
+The worst are clearly legacy imports — `969.jpg` at 300×225 on the person Vincent Lieber, `2481.jpg` at 473×473 on The Hoxton, `961.jpg` at 479×640 on Florence Reckinger Taddeï. `CLAUDE.md` records why: the old site's resizer answered 500 for `?w=2500` on some 350 files and for any size above roughly 50 megapixels, and the importer falls back to the original when the resized fetch fails.
+
+**Asked for:** a judgement on what is recoverable. Three questions: can the 350 that failed at 2500 be re-fetched at an intermediate width rather than falling back to the original; are the 149 unreferenced ones safe to delete; and for the rest, do we go back to the galleries and the photographers. A displayed-vs-natural report per page can be produced on request.
+
+---
+## #44 · open · 2026-10-01 · the Studio still offers "Past editions" as `editions`
+
+**Page / component:** `src/sanity/siteLinks.ts`, `src/sanity/schemaTypes/objects/routes.ts`
+
+**The state today:** the section moved to `/[lang]/previous-editions/<year>` and the note of 2026-09-30 at the bottom of this file flagged this as tidying "worth doing when #32–#36 are done". They are done. The Studio's site-link search box still offers `editions` and `editions/<year>`, and the route list still calls it "Past editions".
+
+**Nothing is broken:** `sitePath` and `routePath` in `links.ts` translate both, and `scripts/legacy-redirects.mjs` covers a stale one. This is so an editor picking a link does not see a name the site no longer uses.
+
+**Asked for:** rename the entry to "Previous editions" and the value to `previous-editions`, keeping the old value readable so existing links do not break.
+
+---
+## #45 · open · 2026-10-01 · `npm run boundary` flags `src/styles/`
+
+**Page / component:** `scripts/boundary.mjs`
+
+`ALLOWED` lists `src/pages`, `src/layouts`, `src/components`, two `src/lib` files and `public/`, but not `src/styles/`. `CLAUDE.md` gives Lilanga "everything under `src/pages/`, `src/layouts/`, `src/components/`, **and the styling throughout**", and `src/styles/design.css` — the design build's stylesheet — already lives there and predates the script.
+
+The branch adds `src/styles/site.css`, which is where the cross-cutting rules of the 2026-09-30 round live (the mobile full-bleed utility, caption sizes, the `strong` weight, the menu overrides). `npm run boundary` therefore exits 1 on a branch that is entirely inside the frontend half.
+
+**Asked for:** `/^src\/styles\//` in `ALLOWED`.
+
+---
+## #46 · open · 2026-10-01 · 2024 and 2025 galleries: the data the 2026 ones have
+
+**Asked by:** the client's comments of 2026-09-30, galleries: "Is it possible to do the same for 2024 and 2025 as was done to 2026 for the galleries: automatize the instagram and website buttons, create the artists pages, caption all pictures, put the correct city (**not done in 2026 either**). This would make us win a lot of time if possible."
+
+Relayed, not specified — this is an import job and the scope is yours. The client frames it as a time-saver rather than a must, so an estimate first would help us tell them what to expect. Note their aside that the city is wrong on 2026 as well, which is a smaller and separate fix.
