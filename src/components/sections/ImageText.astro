@@ -107,9 +107,12 @@ const hasImage = !!section.image?.asset;
   /* The VIP frames' row: copy on eight, picture on four at its right
      (`.split-8-4` in Vip.astro), and the heading in the site's bold
      capitals, as "DISCOVERY TOURS" and "VIP LOUNGE" are drawn. */
+  /* Width only. Which side the picture takes is the block's own Image side
+     setting, through `.flip` - forcing it here put the lounge's agenda rows
+     on the wrong side of their copy, against both the frame and what the
+     editor had chosen (Kamindu, 2026-10-01). */
   .vip .shot {
     grid-column: span 4;
-    order: 2;
   }
   .vip .copy {
     grid-column: span 8;
@@ -158,8 +161,7 @@ const hasImage = !!section.image?.asset;
     .copy {
       grid-column: 1 / -1;
     }
-    .flip .shot,
-    .vip .shot {
+    .flip .shot {
       order: 0;
     }
     .copy {
