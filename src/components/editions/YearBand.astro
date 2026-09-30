@@ -81,6 +81,11 @@ const t = useTranslations(lang);
   }
   .year-cell:hover,
   .year-cell:focus-visible {
+    color: #050505;
+    background: var(--ed-fill);
+  }
+  .year-cell.active:hover,
+  .year-cell.active:focus-visible {
     color: #fff;
     background: #050505;
   }
@@ -101,6 +106,78 @@ const t = useTranslations(lang);
     .year-cell + .year-cell {
       border-top: 1px solid var(--color-ink, #050505);
       border-left: 0;
+    }
+  }
+</style>
+
+<style is:global>
+  /**
+   * The previous-editions title band, wherever it appears - on a tab of the
+   * section and on `/exhibitors/<year>`, which is one of its tabs but a route
+   * of its own. `.ed-band` goes on the `HubNav` in both places.
+   *
+   * **The pills are fixed in size here on purpose.** `body[data-scrolled]`
+   * shrinks every other band's pills from 24px to 20px as the page scrolls;
+   * this band is already at the frame's 20px, so following that rule made the
+   * pills jump on the exhibitors page - larger at rest, smaller once moved.
+   * They now read the same at any scroll position.
+   *
+   * The band carries **seven** pills where a hub carries three or four, which
+   * is the other reason for the smaller size: measured off the frames, the
+   * seven span x497-1408 beside a 333px "2nd edition".
+   */
+  :root {
+    /* The fill behind the tab you are on, and behind any tab under the
+       pointer. Sampled from the frames (#9f9f9f) and set to the designer's
+       own value. Not the acid the hubs use. */
+    --ed-fill: #a09f9f;
+  }
+  /**
+   * The section's gutter is 30px where the rest of the site uses 45 - the
+   * frames put every body element at x=30, including the exhibitors one.
+   * Keyed off the year band so the exhibitors year list gets it too without
+   * knowing anything about the section; the shared header keeps its own 45,
+   * which is hard-coded in design.css and untouched. Desktop only: below
+   * 900px design.css steps the gutter to 16 and then 10, and those stand.
+   */
+  @media (width>900px) {
+    body:has(.year-band) {
+      --gutter: 30px;
+    }
+  }
+  .section-head.ed-band,
+  body[data-scrolled] .section-head.ed-band {
+    --band-pill: 20px;
+    --band-pill-pad: 4px 13px;
+  }
+  .section-head.ed-band nav {
+    gap: 17px;
+  }
+  .section-head.ed-band a {
+    line-height: 26px;
+  }
+  /* design.css hovers every pill to white on black with `!important`, and
+     fills the active one acid; this band does neither. The stroke stays
+     black throughout, as the frames draw it. */
+  .section-head.ed-band a.active,
+  .section-head.ed-band a:hover,
+  .section-head.ed-band a:focus-visible,
+  .section-head.ed-band a.active:hover,
+  .section-head.ed-band a.active:focus-visible {
+    color: #050505 !important;
+    background-color: var(--ed-fill) !important;
+    border-color: #050505 !important;
+  }
+  /* Below about 1180 the row cannot hold the title and seven pills; they
+     wrap under it rather than climbing over it. */
+  @media (width<=1180px) {
+    .section-head.ed-band {
+      display: block;
+    }
+    .section-head.ed-band nav {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      padding-top: 16px;
     }
   }
 </style>

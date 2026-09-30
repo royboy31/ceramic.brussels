@@ -121,7 +121,7 @@ if (!Content) return Astro.rewrite('/404');
 >
   <div class="prev-ed">
     <YearBand lang={lang} editions={editions} active={year} />
-    <HubNav lang={lang} active={tab} title={heading} items={items} />
+    <HubNav lang={lang} active={tab} title={heading} items={items} class="ed-band" />
     <Content lang={lang} year={year} edition={edition} lead={lead} />
   </div>
 </Base>
@@ -141,11 +141,7 @@ if (!Content) return Astro.rewrite('/404');
    * dead at 1380.
    */
   .prev-ed {
-    --ed-gutter: 30px;
     --ed-gap: 40px;
-  }
-  .prev-ed .content-wrap {
-    padding-inline: var(--ed-gutter);
   }
   .prev-ed .ed-split {
     display: grid;
@@ -161,47 +157,12 @@ if (!Content) return Astro.rewrite('/404');
   .prev-ed .ed-split.wide-first {
     grid-template-columns: minmax(0, 907fr) minmax(0, 433fr);
   }
-  /* The title band takes the section's gutter, so the pills line up with the
-     content under them. It also carries **seven** pills where a hub carries
-     three or four, so they are set at the frame's size - about 20px in a 36px
-     box, 17px apart - instead of the hub's 24px, which ran them into the
-     title at 1440. Measured off the frames: the seven span x497-1408 beside a
-     333px "2nd edition". */
-  .prev-ed .section-head {
-    --gutter: var(--ed-gutter);
-    --band-pill: 20px;
-    --band-pill-pad: 4px 13px;
-  }
-  .prev-ed .section-head nav {
-    gap: 17px;
-  }
-  .prev-ed .section-head a {
-    line-height: 26px;
-  }
-  /* Below about 1180 the row cannot hold both; the pills wrap under the
-     title rather than climbing over it. */
-  @media (width<=1180px) {
-    .prev-ed .section-head {
-      display: block;
-    }
-    .prev-ed .section-head nav {
-      justify-content: flex-start;
-      flex-wrap: wrap;
-      padding-top: 16px;
-    }
-  }
-
   @media (width<=900px) {
     .prev-ed .ed-split.half,
     .prev-ed .ed-split.narrow-first,
     .prev-ed .ed-split.wide-first {
       grid-template-columns: minmax(0, 1fr);
       gap: 28px;
-    }
-  }
-  @media (width<=640px) {
-    .prev-ed {
-      --ed-gutter: 16px;
     }
   }
 </style>

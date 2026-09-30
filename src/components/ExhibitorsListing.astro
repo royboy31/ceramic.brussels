@@ -121,7 +121,7 @@ const yearRow = years.length > 1 && !inSection ? years : [];
 ---
 
 {inSection && <YearBand lang={lang} editions={pastEditions} active={year as number} />}
-{inSection && <HubNav lang={lang} active="exhibitors" title={summary?.ordinal ?? String(year)} items={sectionItems} />}
+{inSection && <HubNav lang={lang} active="exhibitors" title={summary?.ordinal ?? String(year)} items={sectionItems} class="ed-band" />}
 
 <ExhibitorHead
   lang={lang}
