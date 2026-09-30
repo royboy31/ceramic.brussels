@@ -17,6 +17,7 @@ import { HUBS, hubTabPath, hubAltPaths, pageForTab } from '../../lib/hubs';
 import { styleAttrs } from '../../lib/textStyle';
 import { VIP_CONTENT, type VipLink, type VipRow } from '../vipContent';
 import { vipEnv, vipSetting } from '../../server/vip';
+import { stegaClean } from '@sanity/client/stega';
 
 /**
  * The VIP hub (Figma VIP frames of 2026-09-18, docs/vip-access.md). Five
@@ -68,7 +69,14 @@ const contact = settings?.contact || site?.contactEmail || 'vip@ceramic.brussels
  * the VIP team, the address the contact block gives for exactly that, until
  * the venues' own links arrive (request #14).
  */
-const partnerUrl = (name: string) => partners.find((p: any) => p?.name === name)?.url ?? null;
+/**
+ * `stegaClean` because a preview render appends invisible characters to every
+ * string an editor can click into, so an encoded "The Hoxton" is not "The
+ * Hoxton" and the pill silently vanished in preview while the published page
+ * kept it (Félicie, 2026-09-30). Comparing the plain text is the fix; the
+ * name itself stays clickable.
+ */
+const partnerUrl = (name: string) => partners.find((p: any) => stegaClean(p?.name) === name)?.url ?? null;
 function resolveVipLink(link: VipLink) {
   switch (link.kind) {
     case 'tab':
@@ -167,6 +175,14 @@ const rate = {
   heading: site?.practicalInfo?.hotelDeal?.rate ?? C.hotelDeal.rate.heading,
   text: C.hotelDeal.rate.text.split('{code}').join(String(hotelCode || C.hotelDeal.rate.fallbackCode)),
 };
+/**
+ * "book your stay ↗" on the rate panel: Site settings → Venue and access →
+ * Hotel deal → Booking link, which is the field #16 made for it, with the
+ * hotel partner's own address behind it. The label is a UI string, so it is
+ * in French and Dutch rather than the frame's English everywhere.
+ */
+const rateLink =
+  site?.practicalInfo?.hotelDeal?.url ?? partnerUrl(stegaClean(site?.practicalInfo?.hotelDeal?.partner?.name) ?? '');
 ---
 
 <Base
@@ -410,11 +426,11 @@ const rate = {
               <p class="rate-label">{t('vip.specialRate')}</p>
               <h3 class="rate-heading">{rate.heading}</h3>
               <p class="rate-body body-20">{rate.text}</p>
-              {vipLinks([rate.link]).map((l) => (
+              {rateLink && (
                 <p class="rate-link">
-                  <LinkPill lang={lang} href={l.href} label={l.label} external={l.external} preserveCase={l.caps} />
+                  <LinkPill lang={lang} href={rateLink} label={t('vip.bookStay')} external preserveCase />
                 </p>
-              ))}
+              )}
             </div>
           </div>
         </div>
