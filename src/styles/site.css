@@ -1,0 +1,63 @@
+/*
+ * Our own cross-cutting rules, loaded after `design.css`.
+ *
+ * `design.css` is the design build's compiled stylesheet, copied verbatim so
+ * the design markup pastes into the components as is. This file is the other
+ * half: rules that are ours, that apply across many components, and that
+ * would otherwise have to be repeated in a dozen scoped `<style>` blocks.
+ *
+ * Keep it small. Anything that belongs to one component still belongs in that
+ * component's scoped block; this is only for what genuinely crosses them.
+ */
+
+/* ------------------------------------------------------- full-bleed photos
+ *
+ * "On the smartphone, every time there's a photo, there's always a margin on
+ * the left and right of the photo, could you systematically make these
+ * photos/slideshows the whole width of the page? (…) basically everywhere
+ * apart from the jury & advisory board pages" - client, 2026-09-30.
+ *
+ * `.content-wrap` carries `padding-inline: var(--gutter)`, so a photo inside
+ * it stops short of the screen. This pulls it back out by exactly that much.
+ * Jury and advisory board portraits are `PersonCard` → `SanityImage`, which
+ * never opts in, so they keep their inset without needing an exception.
+ */
+@media (width <= 700px) {
+  .bleed-m {
+    margin-inline: calc(var(--gutter) * -1);
+    width: calc(100% + var(--gutter) * 2);
+    max-width: none;
+  }
+  /* The picture goes to the edge; its caption does not follow it there. */
+  .bleed-m > figcaption,
+  .bleed-m figure > figcaption {
+    padding-inline: var(--gutter);
+  }
+}
+
+/* ---------------------------------------------------------- caption sizing
+ *
+ * "I feel like the captions are a bit too visible: they should be more
+ * discreet. Could you make them smaller everywhere, both the slideshow mark
+ * (so 1/3, 2/3, etc.) and the text on the bottom right of every
+ * photo/slideshow?" - client, 2026-09-30.
+ *
+ * Captions are drawn in fourteen components, each with its own scoped block,
+ * and several parents reach into a child's caption: `ArtPrize.astro` has
+ * `.image :global(figcaption)`, specificity (0,2,1), which beat `Slideshow`'s
+ * own scoped rule when that was tried first. Rather than chase every one of
+ * those, sizing lives here, once, with `!important` confined to this mobile
+ * query. `Slideshow.astro` keeps only its spacing.
+ */
+@media (width <= 700px) {
+  main figcaption {
+    font-size: 12px !important;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+  }
+  /* The mark stays the larger of the two, as it is on the frames; only the
+     pair steps down together. */
+  main .slideshow .counter {
+    font-size: 15px !important;
+  }
+}

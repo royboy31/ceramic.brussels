@@ -36,6 +36,16 @@ interface Props {
   label?: string;
   /** Prefix for the slide ids the dots link to. One slideshow per page needs no change. */
   id?: string;
+  /**
+   * Below 700px the picture runs to both screen edges, out through
+   * `.content-wrap`'s gutter (client, 2026-09-30: "make these
+   * photos/slideshows the whole width of the page"). On by default: a
+   * slideshow is always an editorial photograph. The one exception the
+   * client named - jury and advisory board - draws its portraits with
+   * `PersonCard`, not this, so it needs no opt-out. `bleed={false}` is
+   * there for a slideshow that must keep the gutter.
+   */
+  bleed?: boolean;
   class?: string;
 }
 
@@ -48,6 +58,7 @@ const {
   widths = [400, 600, 900, 1200],
   label,
   id = 'slideshow',
+  bleed = true,
   class: className,
 } = Astro.props;
 
@@ -59,7 +70,7 @@ const contain = fit === 'contain' && !!aspect;
 {
   slides.length > 0 ? (
     <div
-      class:list={['slideshow', className, { 'no-aspect': !aspect, contain }]}
+      class:list={['slideshow', className, { 'no-aspect': !aspect, contain, 'bleed-m': bleed }]}
       id={id}
       data-slides={slides.length}
       data-autoplay={autoplay && slides.length > 1 ? autoplay : undefined}
@@ -266,6 +277,15 @@ const contain = fit === 'contain' && !!aspect;
   }
   .slideshow.arrow-cursor .track {
     cursor: none;
+  }
+
+  /* Tighter to the picture on a phone. The caption and mark *sizes* are set
+     once in src/styles/site.css - parents reach into this component's
+     figcaption with higher specificity, so they cannot live here. */
+  @media (width <= 700px) {
+    figcaption {
+      margin-top: 6px;
+    }
   }
 </style>
 
