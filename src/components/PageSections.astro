@@ -40,10 +40,11 @@ interface Props {
   /**
    * 'home' renders the blocks the way the design's homepage draws them
    * (centred "latest news", the feature rows, the acid image bands, the
-   * edge-to-edge film, the key figures table); the default is the hub page
-   * treatment.
+   * edge-to-edge film, the key figures table); 'vip' the way the VIP frames
+   * draw their rows (text on eight columns, the picture on four, at its
+   * right); the default is the hub page treatment.
    */
-  variant?: 'default' | 'home';
+  variant?: 'default' | 'home' | 'vip';
   class?: string;
 }
 
@@ -85,7 +86,7 @@ for (const section of (sections ?? []).filter(Boolean)) {
         const s = g.section;
         switch (s._type) {
           case 'imageTextSection':
-            return <ImageText lang={lang} section={s} />;
+            return <ImageText lang={lang} section={s} variant={variant} />;
           case 'gallerySection':
             return <Gallery lang={lang} section={s} />;
           case 'slideshowSection':

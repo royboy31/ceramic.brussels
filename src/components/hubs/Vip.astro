@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import HubNav from '../../components/HubNav.astro';
 import PageSections from '../../components/PageSections.astro';
+import Sections from '../../components/Sections.astro';
 import SanityImage from '../../components/SanityImage.astro';
 import PortableText from '../../components/PortableText.astro';
 import Slideshow from '../../components/Slideshow.astro';
@@ -116,7 +117,16 @@ const path = hubTabPath('vip', tab, lang);
 const altPaths = hubAltPaths('vip', tab);
 const tabLabel = page?.tabLabel ?? t(hubTab.label);
 const closingImages = (page?.images ?? []).filter((img: any) => img?.asset);
-const hasSections = (page?.sections ?? []).length > 0;
+/**
+ * The lounge frame sets a panel beside the cover - MAD Brussels' scenography
+ * - where the other tabs put a picture alone. That panel is the stack's
+ * first text block, so it is drawn up there and left out of the run below,
+ * and the page reads as the frame does without the editor having to know.
+ */
+const loungeTop =
+  tab === 'lounge' && page?.sections?.[0]?._type === 'contentSection' ? page.sections[0] : null;
+const stack = (page?.sections ?? []).slice(loungeTop ? 1 : 0);
+const hasSections = stack.length > 0;
 /**
  * **The one switch.** No `page` document for this tab yet, so the frames'
  * own copy and pictures stand in for all of it - including the programme,
@@ -285,7 +295,7 @@ const rate = {
           ) : (
             <VipShot image={C.lounge.cover} aspect={3 / 2} loading="eager" sizes="(max-width: 900px) 100vw, 46vw" />
           )}
-          {fromDesign && (
+          {fromDesign ? (
             <div>
               <h2 class="panel-title">{C.lounge.scenography.title}</h2>
               <p class="body-20">{C.lounge.scenography.text}</p>
@@ -297,6 +307,8 @@ const rate = {
                 </p>
               )}
             </div>
+          ) : (
+            loungeTop && <Sections lang={lang} sections={[loungeTop]} />
           )}
         </div>
       )
@@ -544,7 +556,10 @@ const rate = {
     }
 
     {/* The editor's own blocks, once a page carries them. */}
-    {hasSections && <PageSections lang={lang} sections={page.sections} />}
+    {/* The editor's stack, in the frames' own proportions - these tabs render
+        from Sanity the moment their page exists, and the generic full-width
+        blocks are not this design (Félicie, 2026-09-30). */}
+    {hasSections && <PageSections lang={lang} sections={stack} variant="vip" />}
 
     {
       page?.body && tab !== 'about' && tab !== 'hotel-deal' && (

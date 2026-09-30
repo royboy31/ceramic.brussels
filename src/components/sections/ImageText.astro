@@ -8,18 +8,32 @@ import { styleAttrs, bodyStyleAttrs } from '../../lib/textStyle';
 /**
  * Image on eight columns, text on four - the unit at the top of the about
  * page (hero + "the fair"). `imageSide` flips it.
+ *
+ * `variant="vip"` turns it around for the VIP frames, whose rows put the
+ * copy on eight columns and the picture on four at its right, with the
+ * heading as the design's bold capitals rather than a panel title. The VIP
+ * tabs render the same blocks as every other page; only these proportions
+ * are theirs.
  */
 interface Props {
   lang: LocaleId;
   section: any;
+  variant?: 'default' | 'home' | 'vip';
 }
 
-const { lang, section } = Astro.props;
+const { lang, section, variant = 'default' } = Astro.props;
 const links = (section.links ?? []).filter(Boolean);
 const hasImage = !!section.image?.asset;
 ---
 
-<section class:list={['page-grid', 'image-text', { flip: section.imageSide === 'right', 'no-image': !hasImage }]} id={section.anchor || undefined}>
+<section
+  class:list={[
+    'page-grid',
+    'image-text',
+    { flip: section.imageSide === 'right', 'no-image': !hasImage, vip: variant === 'vip' },
+  ]}
+  id={section.anchor || undefined}
+>
   {
     hasImage && (
       <figure class="shot">
@@ -83,6 +97,25 @@ const hasImage = !!section.image?.asset;
   .no-image .copy {
     grid-column: 1 / -1;
   }
+
+  /* The VIP frames' row: copy on eight, picture on four at its right
+     (`.split-8-4` in Vip.astro), and the heading in the site's bold
+     capitals, as "DISCOVERY TOURS" and "VIP LOUNGE" are drawn. */
+  .vip .shot {
+    grid-column: span 4;
+    order: 2;
+  }
+  .vip .copy {
+    grid-column: span 8;
+  }
+  .vip .panel-title {
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
   .body :global(p) {
     margin: 0 0 1.25rem;
   }
@@ -102,7 +135,8 @@ const hasImage = !!section.image?.asset;
     .copy {
       grid-column: 1 / -1;
     }
-    .flip .shot {
+    .flip .shot,
+    .vip .shot {
       order: 0;
     }
     .copy {
