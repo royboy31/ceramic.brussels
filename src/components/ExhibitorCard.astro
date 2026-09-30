@@ -3,6 +3,7 @@ import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
 import SanityImage from './SanityImage.astro';
 import { exhibitorPath } from '../lib/links';
+import { focusLockup, juryPrizeLockup, SOLO_SHOW_LOCKUP } from './exhibitorBadges';
 
 /**
  * A card in the exhibitor grid, as the design's exhibitors/index.html draws
@@ -51,11 +52,12 @@ const twoLines = (s: string) => {
   return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
 };
 const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
-/** The designer's lockups (Léonie, 2026-09-24): the solo show disc, and the
- *  focus words with Spain's outline for "focus España". Another focus
- *  country keeps the words until it has a lockup of its own. */
-const SOLO_LOGO = '/assets/exhibitors/solo-show.png';
-const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/assets/exhibitors/focus-espana.png' : null;
+/** The designer's lockups, from `exhibitorBadges.ts`: the solo show disc, the
+ *  focus words with their country's outline, and the jury prize oval for the
+ *  year this card belongs to. Anything without artwork keeps its words. */
+const SOLO_LOGO = SOLO_SHOW_LOCKUP;
+const focusLogo = focusLockup(focusLabel);
+const juryLogo = ex.kind === 'jury-prize' ? juryPrizeLockup(ex.year) : null;
 ---
 
 <article id={id} data-name={letter} data-letter={letter} data-filters={filters} data-tags={filters} data-country={code}>
@@ -88,16 +90,25 @@ const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/asset
         )
       }
       {
-        ex.kind === 'jury-prize' && (
-          <span class="badge badge--black">
-            {twoLines(t('exhibitors.juryPrize')).map((l, i) => (
-              <>
-                {i > 0 && <br />}
-                {l}
-              </>
-            ))}
-          </span>
-        )
+        ex.kind === 'jury-prize' &&
+          (juryLogo ? (
+            <img
+              class="badge badge--oval"
+              src={juryLogo}
+              alt={`${t('exhibitors.juryPrize')} ${ex.year}`}
+              width="120"
+              height="56"
+            />
+          ) : (
+            <span class="badge badge--black">
+              {twoLines(t('exhibitors.juryPrize')).map((l, i) => (
+                <>
+                  {i > 0 && <br />}
+                  {l}
+                </>
+              ))}
+            </span>
+          ))
       }
       {
         ex.inCountryFocus && (
@@ -231,6 +242,14 @@ const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/asset
   .gallery-image > img.badge--logo {
     width: 60px;
     height: 60px;
+  }
+  /* The jury prize oval is wider than it is tall, so it keeps its own shape
+     rather than the 60px disc the other badges share. Its year is printed on
+     the artwork, which is why there is one file per edition. */
+  .gallery-image > img.badge--oval {
+    border-radius: 0;
+    width: 104px;
+    height: auto;
   }
   .gallery-image > img.focus-logo {
     width: 96px;

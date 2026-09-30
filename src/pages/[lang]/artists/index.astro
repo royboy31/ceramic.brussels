@@ -1,5 +1,6 @@
 ---
 import Base from '../../../layouts/Base.astro';
+import { focusLockup } from '../../../components/exhibitorBadges';
 import ExhibitorHead from '../../../components/ExhibitorHead.astro';
 import PageSections from '../../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
@@ -91,7 +92,9 @@ const showingNow = (a: any) =>
  * cards. Another country's focus has no mark of its own and shows nothing.
  */
 const focusOf = new Map(editions.map((e: any) => [e.year, e.countryFocus]));
-const inSpainFocus = (ex: any) => !!ex?.inCountryFocus && /espa(ñ|n)a|spain|espagne|spanje/i.test(focusOf.get(ex.year) ?? '');
+/** That year's focus lockup for this exhibitor, or null when the country has
+ *  no artwork yet and the row shows nothing (see `exhibitorBadges.ts`). */
+const focusLogoOf = (ex: any) => (ex?.inCountryFocus ? focusLockup(focusOf.get(ex.year) ?? '') : null);
 
 /**
  * The FILTERS row of the frame: solo show, focus, publishers, jury prize,
@@ -177,12 +180,12 @@ for (const letter of letters) {
                               {a.name}
                               {a.countryCode && <sup>{a.countryCode}</sup>}
                             </span>
-                            {(ex?.soloShow || ex?.booth || inSpainFocus(ex)) && (
+                            {(ex?.soloShow || ex?.booth || focusLogoOf(ex)) && (
                               <span class="tail">
-                                {inSpainFocus(ex) && (
+                                {focusLogoOf(ex) && (
                                   <img
                                     class="focus"
-                                    src="/assets/exhibitors/focus-espana.png"
+                                    src={focusLogoOf(ex)}
                                     alt={focusOf.get(ex.year) ?? t('exhibitors.countryFocus')}
                                     width="260"
                                     height="149"
