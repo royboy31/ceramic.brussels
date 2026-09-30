@@ -139,7 +139,7 @@ async function preview(context: Ctx, next: Next): Promise<Response> {
 const PLAIN_KEYS = new Set([
   // fixed lists (schemaTypes: options.list)
   'section', 'tier', 'kind', 'family', 'category', 'groups', 'group', 'languages', 'route', 'appliesTo', 'venue',
-  'imageSide', 'aspect', 'display', 'variant', 'layout',
+  'imageSide', 'aspect', 'display', 'variant', 'layout', 'level',
   // Style tab (objects/textStyle.ts), stored under each field's `style`
   'style', 'size', 'weight', 'transform', 'colour', 'background', 'align', 'marginTop', 'marginBottom',
   'lineHeight', 'letterSpacing', 'customSize', 'customColour', 'customBackground',
