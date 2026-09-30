@@ -876,12 +876,29 @@ export function localePath(lang: LocaleId, path = ''): string {
 const TIME_ZONE = 'Europe/Brussels';
 
 /**
+ * A date these helpers can format, or null. One unparseable value used to
+ * throw `RangeError: Invalid time value` out of the page and stop the whole
+ * build on it - `astro build` renders pages one after another, so a single
+ * bad `startsAt` took every page after it down with it and the site could
+ * not be published at all. A date nobody can read is not worth that: these
+ * print nothing for it, exactly as they do for an empty field, and the rest
+ * of the page goes out. `npm run content` reports the documents holding
+ * one.
+ */
+const readable = (value: string | undefined | null): Date | null => {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+/**
  * A day with its weekday and year, "Thursday 21 January 2026" - the award
  * ceremony's and the talks accordion's heading in the design. `formatDay` is
  * the same without the year.
  */
 export function formatDayLong(value: string | undefined, lang: LocaleId): string {
-  if (!value) return '';
+  const date = readable(value);
+  if (!date) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
   return new Intl.DateTimeFormat(locale, {
     weekday: 'long',
@@ -890,70 +907,78 @@ export function formatDayLong(value: string | undefined, lang: LocaleId): string
     year: 'numeric',
     timeZone: TIME_ZONE,
   })
-    .format(new Date(value))
+    .format(date)
     // en-GB writes "Thursday, 21 January"; the design has no comma, and
     // neither fr-BE nor nl-BE puts one there.
     .replace(/,/g, '');
 }
 
 export function formatDate(value: string | undefined, lang: LocaleId): string {
-  if (!value) return '';
+  const date = readable(value);
+  if (!date) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
   return new Intl.DateTimeFormat(locale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     timeZone: TIME_ZONE,
-  }).format(new Date(value));
+  }).format(date);
 }
 
 /** "01.12.2025" - the press clippings' date line. */
 export function formatDateNumeric(value: string | undefined, lang: LocaleId): string {
-  if (!value) return '';
+  const date = readable(value);
+  if (!date) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
   const parts = new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     timeZone: TIME_ZONE,
-  }).formatToParts(new Date(value));
+  }).formatToParts(date);
   const part = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
   return `${part('day')}.${part('month')}.${part('year')}`;
 }
 
 /** "sept. 2026" - the dated rule over a press release or a collector's story. */
 export function formatMonthYear(value: string | undefined, lang: LocaleId): string {
-  if (!value) return '';
+  const date = readable(value);
+  if (!date) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
   return new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric', timeZone: TIME_ZONE }).format(
-    new Date(value),
+    date,
   );
 }
 
 export function formatDateRange(start: string, end: string, lang: LocaleId): string {
   if (!start || !end) return '';
+  const from = readable(start);
+  const to = readable(end);
+  if (!from || !to) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
   return new Intl.DateTimeFormat(locale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     timeZone: TIME_ZONE,
-  }).formatRange(new Date(start), new Date(end));
+  }).formatRange(from, to);
 }
 
 export function formatTime(value: string | undefined, lang: LocaleId): string {
-  if (!value) return '';
+  const date = readable(value);
+  if (!date) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
   return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone: TIME_ZONE }).format(
-    new Date(value),
+    date,
   );
 }
 
 /** "Thursday 21 January" - the day headings of the programme. */
 export function formatDay(value: string | undefined, lang: LocaleId): string {
-  if (!value) return '';
+  const date = readable(value);
+  if (!date) return '';
   const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
   return new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', timeZone: TIME_ZONE }).format(
-    new Date(value),
+    date,
   );
 }
