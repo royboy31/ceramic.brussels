@@ -195,12 +195,14 @@ const juryLogo = ex.kind === 'jury-prize' ? juryPrizeLockup(ex.year) : null;
       display: none;
     }
   }
+  /* The gallery name, and the site's "name" size (tokens in Base.astro):
+     the Stories titles are set from the same ones. */
   h2 {
-    letter-spacing: -0.045em;
+    letter-spacing: var(--name-ls);
     margin-top: 16px;
-    font-size: 40px;
+    font-size: var(--name-size);
     font-weight: 400;
-    line-height: 1.03;
+    line-height: var(--name-lh);
   }
   /* Bigger, and hung from the top of the capitals rather than raised off
      the baseline (client feedback, 2026-09-16). */
@@ -286,9 +288,5 @@ const juryLogo = ex.kind === 'jury-prize' ? juryPrizeLockup(ex.year) : null;
     top: 18px;
     right: 90px;
   }
-  @media (width<=900px) {
-    h2 {
-      font-size: 28px;
-    }
-  }
+  /* `h2` keeps the token, which steps to 32 below 900. */
 </style>
