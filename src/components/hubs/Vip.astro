@@ -418,7 +418,8 @@ const rate = {
                           <PortableText value={e.description} fieldStyle={e.descriptionStyle} />
                         </div>
                       )}
-                      {/* BACKEND-REQUEST #14: no link on programmeEvent, so no pill. */}
+                      {/* The row's own pill, as on the off-site rows below. */}
+                      <LinkPill lang={lang} link={e.link} class="row-pill" />
                     </div>
                   </article>
                 ))
@@ -471,8 +472,16 @@ const rate = {
                               <PortableText value={e.description} fieldStyle={e.descriptionStyle} />
                             </div>
                           )}
-                          {/* BACKEND-REQUEST #14: the frame ends every row in
-                              "book your visit ↗"; programmeEvent has no link. */}
+                          {/* The row's own pill. #14 made the field and put
+                              `"link": link` in the projection; the component
+                              never drew it, which #17 listed as a frontend
+                              leftover and which is half of why the client's
+                              "discover xx" buttons vanished from preview on
+                              2026-09-30 (the other half is that the links
+                              have a label and no URL). `LinkPill` keeps the
+                              editor's capitals now, so "discover Puilaetco"
+                              stays as typed. */}
+                          <LinkPill lang={lang} link={e.link} class="row-pill" />
                         </div>
                         <Slideshow
                           images={e.image?.asset ? [e.image] : []}
@@ -921,5 +930,13 @@ const rate = {
     .rate-label {
       font-size: 24px;
     }
+  }
+
+  /* The event rows' pill, under the text as the frame draws it. `LinkPill`
+     renders nothing at all when the link has no URL, so a row whose booking
+     link the editors have not filled simply has no button - which is the
+     state most of them are in today. */
+  .row-pill {
+    margin-top: 18px;
   }
 </style>
