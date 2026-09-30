@@ -583,3 +583,64 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 **Done (Lilanga, 2026-09-28, working across the stack per docs/project-handbook.md):** `images` ("More pictures", array of `figure`, grid layout) on `spotlight` in `src/sanity/schemaTypes/objects/section.ts`, after `image`; `"images": images[] ${IMAGE}` in the `spotlight` branch of `SECTIONS`. Additive, no migration. `Feature.astro` shows `[image, ...images]` as a `Slideshow` with `autoplay` (4.5 s, held on hover/focus/off screen, off for reduced motion) when there is more than one. **Editors:** homepage → the feature → More pictures.
 
 ---
+
+---
+## #32 · open · 2026-09-30 · the artists page lists art prize laureates
+
+**Asked:** "Remove the art prize laureates from the artists page" (Tiphaine, WhatsApp 2026-09-30 20:01).
+
+**Why it happens:** `getArtists` selects `*[_type == "artist"]`, every artist document. A laureate is a `laureate` that references an artist, so an artist who is only ever a laureate still appears in the galleries' artists list beside the exhibitors' ones.
+
+**Asked for:** the list to hold the artists an exhibitor presents. `getArtists` already returns each artist's `exhibitors`; the filter belongs in the query rather than the page, so the count in the heading matches the list.
+
+**Page / component:** `src/pages/[lang]/artists/index.astro`, `getArtists` in `src/lib/queries.ts`
+
+---
+## #33 · open · 2026-09-30 · /exhibitors should open on 2026, not 2027
+
+**Asked:** "Make it so that the 2027 galleries are not visible yet. First page when we click on galleries should be 2026 and buttons for 2025-2024." (Tiphaine, 2026-09-30 20:01).
+
+**The catch, and it needs a decision.** `/exhibitors` renders `getCurrentEdition`, which is 2027. Moving `isCurrent` to 2026 would do it and break everything else: the flag also picks the programme, the VIP events, the partners and the key figures. Two ways that do not:
+
+ - **a flag per edition** - "show this edition's exhibitors" - so the listing lands on the newest edition that has it on. One field, and the editors keep control;
+ - **or the listing finds the newest edition that has exhibitors**, and 2027 appears the day its first gallery is published. No field, no control.
+
+The year row and `/exhibitors/<year>` already work for the past editions, so only the landing page is in question either way.
+
+**Page / component:** `src/pages/[lang]/exhibitors/index.astro`
+
+---
+## #34 · open · 2026-09-30 · 2024 and 2025 exhibitors, filled in as 2026 was
+
+**Asked:** "Is it possible to do the same for 2024 and 2025 as was done to 2026 for the galleries: automatize the instagram and website buttons, create the artists pages, caption all pictures, put the correct city (not done in 2026 either). This would make us win a lot of time if possible." (Tiphaine, 2026-09-30 20:01).
+
+**Shape of the work:** data, not schema - the same pass `scripts/fix-exhibitors-2026.mjs` made, over the 2024 and 2025 records. Her aside is the part to read twice: **2026's cities are not done either**, and the 47 that need a human decision are already waiting in `scripts/data/exhibitors-2026-review.json`, along with 56 artists whose gallery is unsure. That file wants her before any of it is worth re-running.
+
+---
+## #35 · open · 2026-09-30 · art prize awards: a new line cannot be typed
+
+**Asked:** "In awards, it is impossible to start a new line." (Tiphaine, 2026-09-30 20:01).
+
+**Not yet diagnosed, and worth doing before promising anything.** `award.description` is a `localeBlock`, which takes paragraphs, so either the field she is typing in is a plain string (the award's `name`, or an intro somewhere else on the tab) or the awards tab flattens the blocks when it renders them. Ask her which box she was in, or watch the tab render a two-paragraph description.
+
+**Page / component:** the art prize hub's awards tab, `src/components/hubs/ArtPrize.astro`, `src/sanity/schemaTypes/documents/award.ts`
+
+---
+## #36 · open · 2026-09-30 · "exhibition pass", a new tab under programme
+
+**Asked:** "I have created a new « exhibition pass » page in Figma (inside the « programme » section)" (Léonie, 2026-09-30 20:46).
+
+**Shape of the work:** a hub tab is code - its slug, its per-language segment and its label live in `src/lib/hubs.ts`, and only a tab listed there gets a route. So this is a tab in `hubs.ts`, a `page` document to carry the text, the fields it reads in `pageKinds.ts`, and whatever blocks the frame needs. The frame is in Figma under programme; read it before sizing the job.
+
+---
+## #37 · answered · 2026-09-30 · can the editors rename a menu button themselves?
+
+**Asked:** "is it possible for us to change the name of the buttons (sub-sections) in the menu and on the buttons themselves? For example, we would like to change ceramic brussels x La Cambre to La Cambre 100th and we wanted to know if we had to go through you?" (Tiphaine, 2026-09-30 20:01).
+
+**The answer is yes, twice, and no once - worth sending in those words:**
+
+ - **the menu entry** is a `navigation` document (Setup → Menu and footer), so its label is theirs;
+ - **the pill on the hub** is the page's own **Tab label** field, shown on every hub tab (`TAB` in `pageKinds.ts`), so "ceramic brussels x La Cambre" → "La Cambre 100th" is one edit;
+ - **the address** (`/en/programme/la-cambre`) is fixed in `src/lib/hubs.ts`. Changing it is ours, and it needs a redirect from the old one, so it should be asked for rather than done quietly.
+
+Nothing to build unless they want the URL changed too.
