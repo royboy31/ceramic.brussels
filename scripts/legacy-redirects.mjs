@@ -110,8 +110,8 @@ const PAGES = {
   'exhibition-pass': 'partners/event',
   faq: 'visit/faq',
   // earlier editions' one-offs, on their year's archive page
-  'focus-espana': 'editions/2026',
-  'ideat-special-prize': 'editions/2025',
+  'focus-espana': 'previous-editions/2026',
+  'ideat-special-prize': 'previous-editions/2025',
 };
 
 /** Old URLs under /{lang}/ that the export does not carry: routes and aliases from the inventory. */
@@ -123,7 +123,7 @@ const ALIASES = {
   'exhibitors/2026': 'exhibitors/2026',
   'exhibitors/2025': 'exhibitors/2025',
   'exhibitors/2024': 'exhibitors/2024',
-  'exhibitors/2023': 'editions',
+  'exhibitors/2023': 'previous-editions/2024',
   'news-and-collab': 'visit/food-drinks',
   programme: 'programme',
   'programme-2': 'partners/institutions',
@@ -134,12 +134,18 @@ const ALIASES = {
   contact: 'about/team',
   // Press contacts and clippings: the press tab of press & media (#19).
   press: 'press-media/press',
-  pasteditions: 'editions',
+  pasteditions: 'previous-editions/2026',
   // Linked from the old sitemap and a 2024 programme entry; only the /pasteditions/ form ever worked.
-  awards: 'editions/2025',
-  collaborations: 'editions/2024',
-  magazine: 'editions/2024',
-  '1st-edition': 'editions/2024',
+  awards: 'previous-editions/2025',
+  collaborations: 'previous-editions/2024',
+  magazine: 'previous-editions/2024',
+  '1st-edition': 'previous-editions/2024',
+  // The undesigned archive this build shipped before the section was drawn.
+  // Never an address the old site had, but branch previews served it.
+  editions: 'previous-editions/2026',
+  'editions/2026': 'previous-editions/2026',
+  'editions/2025': 'previous-editions/2025',
+  'editions/2024': 'previous-editions/2024',
 };
 
 /** Language-less URLs the old sitemap listed. */
@@ -149,8 +155,8 @@ const UNPREFIXED = {
   'guest-of-honour': 'guest-of-honour',
   programme: 'programme',
   'art-prize': 'art-prize',
-  collaborations: 'editions/2024',
-  awards: 'editions/2025',
+  collaborations: 'previous-editions/2024',
+  awards: 'previous-editions/2025',
   'visitors-info': 'visit',
   // Contact merged into about → contact & team (2026-09-24).
   contact: 'about/team',
@@ -229,13 +235,19 @@ function generate() {
   );
 }
 
-/** The year archive a past-edition record belongs to: its root record's slug is the year. */
+/**
+ * The year page a past-edition record belongs to: its root record's slug is
+ * the year. The section moved from `editions` to `previous-editions` on
+ * 2026-09-30, when it was designed (docs/previous-editions-plan.md §1) - one
+ * line here rewrites every /pasteditions/ rule, and the FR/NL targets come
+ * from each built page's own hreflang, so nothing else moves.
+ */
 function pastEditionPath(page) {
   const raw = JSON.parse(fs.readFileSync(path.resolve('legacy-export/normalized/pastEditions.json'), 'utf8'));
   const list = Array.isArray(raw) ? raw : Object.values(raw);
   const root = page.parentId ? list.find((r) => r.id === page.parentId) : page;
   const year = String(root?.slug?.en ?? root?.slug ?? '');
-  return /^\d{4}$/.test(year) ? `editions/${year}` : 'editions';
+  return /^\d{4}$/.test(year) ? `previous-editions/${year}` : 'previous-editions/2026';
 }
 
 function slugsOf(page) {

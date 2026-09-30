@@ -1,0 +1,163 @@
+---
+import PortableText from '../PortableText.astro';
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations, formatDayLong } from '../../lib/i18n';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * A previous edition's programme: one folding row per day of the fair.
+ *
+ * Léonie, Figma comment 2026-09-28: *"same layout than the 2027 talks
+ * programme, but without the time, only the title"* - so this is the `.days`
+ * accordion of `src/components/hubs/Programme.astro` with the time column,
+ * the pictures and the category brace left out. The rules, the 50px day
+ * headings and the arrow that turns over are the same; only the row inside is
+ * shorter.
+ *
+ * Days come from the events themselves, so a year with no events has no tab
+ * (`tabsFor` in `src/lib/previousEditions.ts`) and this never renders empty.
+ *
+ * **Most past events have no date.** Checked 2026-09-30: 16 of 2025's 18 carry
+ * no `startsAt` at all - the import brought the talks over without their times
+ * (BACKEND-REQUEST #39). Grouping by day alone would therefore hide almost the
+ * whole programme, so the undated events are listed under the day rows rather
+ * than dropped. When the dates land they move up into their day by themselves
+ * and the list below empties out.
+ */
+const { lang, edition, lead } = Astro.props as { lang: LocaleId; edition: any; lead?: any };
+const t = useTranslations(lang);
+
+const events: any[] = (edition.events ?? []).filter((e: any) => e?.title);
+const dated = events.filter((e: any) => e.startsAt);
+const undated = events.filter((e: any) => !e.startsAt);
+const days = [...new Set(dated.map((e: any) => e.startsAt.slice(0, 10)))] as string[];
+const onDay = (day: string) => dated.filter((e: any) => e.startsAt.startsWith(day));
+
+/** The speakers line: the typed one if there is one, else the referenced people. */
+const speakersOf = (event: any) =>
+  event.speakersText ?? (event.speakers ?? []).map((s: any) => s?.name).filter(Boolean).join(', ');
+---
+
+<div class="content-wrap edition-programme">
+  {lead && <div class="intro-large lead"><PortableText value={lead} /></div>}
+
+  {
+    days.length > 0 && (
+      <div class="days">
+        {days.map((day, i) => (
+          <details open={i === 0}>
+            <summary>
+              {formatDayLong(day, lang)} <i aria-hidden="true">↓</i>
+            </summary>
+            <ul class="events">
+              {onDay(day).map((e: any) => (
+                <li>
+                  <h2 {...styleAttrs(e.titleStyle)}>{e.title}</h2>
+                  {speakersOf(e) && <p class="who">{speakersOf(e)}</p>}
+                </li>
+              ))}
+            </ul>
+          </details>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    /* BACKEND-REQUEST #39: the events the import left undated. Listed rather
+       than hidden, under no day heading, because inventing one would be a
+       guess. */
+    undated.length > 0 && (
+      <ul class="events loose">
+        {undated.map((e: any) => (
+          <li>
+            <h2 {...styleAttrs(e.titleStyle)}>{e.title}</h2>
+            {speakersOf(e) && <p class="who">{speakersOf(e)}</p>}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</div>
+
+<style>
+  .lead {
+    margin: 0 0 8px;
+  }
+  .lead :global(p + p) {
+    margin-top: 28px;
+  }
+
+  /* 2px rules and 50px day headings, as the talks programme sets them. */
+  .days {
+    border-bottom: 2px solid;
+    margin-top: 52px;
+  }
+  .days details {
+    border-top: 2px solid;
+  }
+  .days summary {
+    cursor: pointer;
+    letter-spacing: -0.04em;
+    justify-content: space-between;
+    align-items: center;
+    padding: 17px 0 18px;
+    font-size: clamp(34px, 3.5vw, 50px);
+    line-height: 1.15;
+    list-style: none;
+    display: flex;
+  }
+  .days summary::-webkit-details-marker {
+    display: none;
+  }
+  /* The arrow turns over as the row folds open, like the FAQ's and the
+     talks programme's. */
+  .days summary i {
+    flex: none;
+    font-size: 1.15em;
+    font-style: normal;
+    line-height: 1;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .days details[open] summary i {
+    transform: rotate(180deg);
+  }
+
+  .events {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 40px;
+    display: grid;
+    gap: 22px;
+    /* The title column stops short of the rule, as the frame draws it. */
+    max-width: 62ch;
+  }
+  .events h2 {
+    margin: 0;
+    font-size: clamp(1.2rem, 2.2vw, 1.75rem);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+  .events .who {
+    margin: 4px 0 0;
+    font-size: 18px;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+  }
+
+  /* The undated events sit under the accordion, with the same rhythm but no
+     day rule above them. */
+  .events.loose {
+    padding-top: 34px;
+  }
+  .days + .events.loose {
+    padding-top: 40px;
+  }
+
+  @media (width<=700px) {
+    .days {
+      margin-top: 36px;
+    }
+  }
+</style>

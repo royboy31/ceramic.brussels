@@ -42,6 +42,12 @@ interface Props {
   /** Document this page renders, so the Edit button can deep-link to it. */
   editId?: string;
   editType?: string;
+  /**
+   * A pill at the left of the footer band: "← back to 2027" on a
+   * previous-editions page, "previous editions →" on the homepage (Léonie,
+   * Figma comment 2026-09-28). Absent everywhere else.
+   */
+  backLink?: { label: string; href: string; arrow?: string };
 }
 
 const {
@@ -56,6 +62,7 @@ const {
   image,
   editId,
   editType,
+  backLink,
 } = Astro.props;
 const acid = theme === 'acid' || tone === 'brand';
 const dark = theme === 'dark';
@@ -223,6 +230,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
       links={footerNav}
       copyright={copyright}
       consentLabel={!preview && categoriesInUse().length > 0 ? t('consent.settings') : undefined}
+      backLink={backLink}
     />
     {!preview && <CookieConsent lang={lang} />}
 

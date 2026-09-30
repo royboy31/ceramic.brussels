@@ -2,8 +2,11 @@
 import ExhibitorCard from './ExhibitorCard.astro';
 import ExhibitorHead from './ExhibitorHead.astro';
 import PageSections from './PageSections.astro';
+import YearBand from './editions/YearBand.astro';
+import HubNav from './HubNav.astro';
 import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
+import { tabsFor, tabLabel, editionTabHref, type EditionSummary } from '../lib/previousEditions';
 import { countryCode, countryName } from '../lib/countries';
 import { styleAttrs } from '../lib/textStyle';
 
@@ -38,9 +41,16 @@ interface Props {
   years?: { year: number; current: boolean }[];
   /** `_id`s of the exhibitors that won one of the fair's awards, for the "awards" filter. */
   awarded?: Set<string>;
+  /**
+   * Every past edition, newest first (getPastEditionsIndex). Set on a past
+   * year's list, which the design draws as the exhibitors tab of the
+   * previous-editions section: it wears that section's year band and pills in
+   * place of its own title band (Figma, Léonie 2026-09-28).
+   */
+  pastEditions?: EditionSummary[];
 }
 
-const { lang, exhibitors, edition, page, year, currentYear, years = [], awarded = new Set<string>() } = Astro.props;
+const { lang, exhibitors, edition, page, year, currentYear, years = [], awarded = new Set<string>(), pastEditions = [] } = Astro.props;
 const t = useTranslations(lang);
 
 /** First letter of the sort name, folded so "Éclat" files under E. */
@@ -52,18 +62,26 @@ const initial = (ex: any) =>
     .charAt(0)
     .toUpperCase();
 
-/** In the client's order (2026-09-16): awards right after solo show, publishers last. */
-const filters = [
-  { id: 'solo-show', label: t('exhibitors.soloShow'), has: (ex: any) => ex.soloShow },
-  { id: 'awards', label: t('nav.awards').toLowerCase(), has: (ex: any) => awarded.has(ex._id) },
-  { id: 'country-focus', label: edition?.countryFocus ?? t('exhibitors.countryFocus'), has: (ex: any) => ex.inCountryFocus },
-  {
-    id: 'jury-prize',
+/**
+ * In the client's order (2026-09-16): awards right after solo show,
+ * publishers last. A past year's list follows the previous-editions frame
+ * instead (Léonie, 2026-09-28), which puts the focus third, publishers
+ * fourth, the jury prize fifth and awards last.
+ */
+const FILTERS = {
+  'solo-show': { label: t('exhibitors.soloShow'), has: (ex: any) => ex.soloShow },
+  awards: { label: t('nav.awards').toLowerCase(), has: (ex: any) => awarded.has(ex._id) },
+  'country-focus': { label: edition?.countryFocus ?? t('exhibitors.countryFocus'), has: (ex: any) => ex.inCountryFocus },
+  'jury-prize': {
     label: `${t('exhibitors.juryPrize')}${edition?.year ? ` ${edition.year - 1}` : ''}`,
     has: (ex: any) => ex.kind === 'jury-prize',
   },
-  { id: 'publishers', label: t('exhibitors.publishers'), has: (ex: any) => ex.kind === 'publisher' },
-].filter((f) => exhibitors.some(f.has));
+  publishers: { label: t('exhibitors.publishers'), has: (ex: any) => ex.kind === 'publisher' },
+} as const;
+const FILTER_ORDER = year
+  ? (['solo-show', 'country-focus', 'publishers', 'jury-prize', 'awards'] as const)
+  : (['solo-show', 'awards', 'country-focus', 'jury-prize', 'publishers'] as const);
+const filters = FILTER_ORDER.map((id) => ({ id, ...FILTERS[id] })).filter((f) => exhibitors.some(f.has));
 
 /** The countries in the list for the "search by country" menu: filtered by code, named in full, A–Z by name. */
 const codeOf = (ex: any) => countryCode(ex.countryCode ?? ex.country);
@@ -80,22 +98,49 @@ const links = (year ? [] : [
   edition?.fairMapUrl && { href: edition.fairMapUrl, label: t('tabs.floorPlan') },
 ]).filter(Boolean) as { href: string; label: string }[];
 
-/** The year row: only when there is more than one year to choose from. */
+/**
+ * A past year's list is the previous-editions section's exhibitors tab, so it
+ * takes that section's chrome: the year band and the edition's pills, with
+ * "exhibitors" filled. `summary` is this year's row of the index.
+ */
+const summary = pastEditions.find((e) => e.year === year);
+const inSection = !!year && !!summary && pastEditions.length > 0;
+const sectionTabs = summary ? tabsFor(summary) : [];
+const sectionItems = sectionTabs.map((x) => ({
+  slug: x.slug,
+  label: tabLabel(x, summary as EditionSummary, t),
+  href: localePath(lang, editionTabHref(year as number, x, lang)),
+}));
+
+/**
+ * The year row: only when there is more than one year to choose from - and
+ * never inside the section, where the year band already does that job.
+ */
 const viewedYear = year ?? edition?.year;
-const yearRow = years.length > 1 ? years : [];
+const yearRow = years.length > 1 && !inSection ? years : [];
 ---
 
-<ExhibitorHead lang={lang} active="galleries" edition={edition} year={year} alphabet={exhibitors.length > 0} />
+{inSection && <YearBand lang={lang} editions={pastEditions} active={year as number} />}
+{inSection && <HubNav lang={lang} active="exhibitors" title={summary?.ordinal ?? String(year)} items={sectionItems} />}
+
+<ExhibitorHead
+  lang={lang}
+  active="galleries"
+  edition={edition}
+  year={year}
+  alphabet={exhibitors.length > 0}
+  bandless={inSection}
+/>
 
 {
-  (page?.intro || links.length > 0 || yearRow.length > 0 || (year && currentYear)) && (
+  (page?.intro || links.length > 0 || yearRow.length > 0 || (year && currentYear && !inSection)) && (
     <div class="exhibitor-intro">
       {page?.intro && (
         <p class="intro-large" {...styleAttrs(page.introStyle)}>
           {page.intro}
         </p>
       )}
-      {(links.length > 0 || yearRow.length > 0 || (year && currentYear)) && (
+      {(links.length > 0 || yearRow.length > 0 || (year && currentYear && !inSection)) && (
         <p class="edition-links">
           {yearRow.map((y) =>
             y.year === viewedYear ? (
@@ -106,7 +151,7 @@ const yearRow = years.length > 1 ? years : [];
               <a href={localePath(lang, y.current ? 'exhibitors' : `exhibitors/${y.year}`)}>{y.year} →</a>
             ),
           )}
-          {yearRow.length === 0 && year && currentYear && (
+          {yearRow.length === 0 && year && currentYear && !inSection && (
             <a href={localePath(lang, 'exhibitors')}>
               {t('nav.exhibitors').toLowerCase()} {currentYear} →
             </a>

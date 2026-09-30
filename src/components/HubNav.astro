@@ -16,7 +16,12 @@ import { HUBS, hubTabHref, tabHasPage } from '../lib/hubs';
  */
 interface Props {
   lang: LocaleId;
-  route: string;
+  /**
+   * The hub whose tabs to draw. Optional, and only optional, when `title` and
+   * `items` supply a band of their own - previous editions passes its own
+   * pills and has no entry in HUBS (`src/lib/previousEditions.ts`).
+   */
+  route?: string;
   active: string;
   /** Hub pages from getHubPages, for label overrides. */
   pages?: any[];
@@ -34,7 +39,8 @@ interface Props {
 
 const { lang, route, active, pages = [], dark = false, class: className, title, items } = Astro.props;
 const t = useTranslations(lang);
-const hub = HUBS[route];
+const hub = route ? HUBS[route] : undefined;
+const heading = title ?? (hub ? t(hub.title) : '');
 
 // Only the tabs in hubs.ts: they are the ones with a route. A pill for any
 // other page of the hub led to a 404.
@@ -45,19 +51,19 @@ const hub = HUBS[route];
 // #6), so the translated label is what a pill reads unless one was set.
 const tabs = items
   ? items.map((item) => ({ ...item, link: false, locked: false, own: true }))
-  : hub.tabs
-      .filter((tab) => !tab.hidden && tabHasPage(route, tab, pages))
+  : (hub?.tabs ?? [])
+      .filter((tab) => !tab.hidden && tabHasPage(route!, tab, pages))
       .map((tab) => {
         const page = tab.link ? null : pages.find((p) => p?.slugs?.en === tab.slug);
-        return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label), href: hubTabHref(route, tab, lang), link: !!tab.link, locked: !!tab.locked, own: false };
+        return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label), href: hubTabHref(route!, tab, lang), link: !!tab.link, locked: !!tab.locked, own: false };
       });
 ---
 
 <div class:list={['section-head', 'page-grid', 'title-band', className]}>
-  <h1>{title ?? t(hub.title)}</h1>
+  <h1>{heading}</h1>
   {
     tabs.length > 1 && (
-      <nav aria-label={title ?? t(hub.title)}>
+      <nav aria-label={heading}>
         {tabs.map((tab) => {
           const current = !tab.link && tab.slug === active;
           return (

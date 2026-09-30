@@ -4,8 +4,9 @@ import SanityImage from '../../components/SanityImage.astro';
 import Slideshow from '../../components/Slideshow.astro';
 import PageSections from '../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
-import { useTranslations } from '../../lib/i18n';
-import { getHomepage, getCurrentEdition } from '../../lib/queries';
+import { useTranslations, localePath } from '../../lib/i18n';
+import { getHomepage, getCurrentEdition, getPastEditionsIndex } from '../../lib/queries';
+import { editionTabPath } from '../../lib/previousEditions';
 import { resolveLink, type ResolvedLink } from '../../lib/links';
 import { styleAttrs } from '../../lib/textStyle';
 
@@ -27,7 +28,23 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 
-const [home, edition] = await Promise.all([getHomepage(lang), getCurrentEdition(lang)]);
+const [home, edition, pastEditions] = await Promise.all([
+  getHomepage(lang),
+  getCurrentEdition(lang),
+  getPastEditionsIndex(lang),
+]);
+
+/**
+ * The footer's left-hand pill, the other half of the one on a
+ * previous-editions page (Léonie, Figma comment 2026-09-28: *"when back on
+ * the homepage, this button changes to 'previous editions →'"*). It leads to
+ * the newest past edition, since the section has no index of its own; absent
+ * while there is no past edition to lead to.
+ */
+const newestPast = pastEditions[0]?.year;
+const backLink = newestPast
+  ? { label: t('prevEd.section'), href: localePath(lang, editionTabPath(newestPast, undefined, lang)), arrow: '→' }
+  : undefined;
 
 const headline: string = home?.heroText ?? edition?.title ?? 'ceramic brussels';
 const headlineStyle = home?.heroText ? home?.heroTextStyle : null;
@@ -77,6 +94,7 @@ const external = (link: ResolvedLink | null) =>
   image={home?.seo?.ogImage?.asset ? home.seo.ogImage : home?.heroImage}
   editId="homepage"
   editType="homepage"
+  backLink={backLink}
 >
   {eventSchema && <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} slot="head" />}
 

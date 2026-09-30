@@ -559,10 +559,21 @@ export function getPastEditionYears() {
 }
 
 /**
- * One past edition with everything its year page shows, as the old site's
- * past-editions pages had it: the facts, the art prize (laureates, awards,
- * jury), the programme, the team and the photos - all read from the records
- * that point at the edition.
+ * One past edition with everything its year pages show: the facts, the art
+ * prize (laureates, awards, jury), the programme, the team, the photos and
+ * the country focus - all read from the records that point at the edition,
+ * so nothing is typed twice.
+ *
+ * This is the query behind `/[lang]/previous-editions/<year>` and all of its
+ * tabs (`docs/previous-editions-plan.md`). One query per year page, not one
+ * per tab: `run()` memoises it for the life of the build, so the seven tabs
+ * of one year cost one request.
+ *
+ * Fields that do not exist yet are requested all the same and come back
+ * undefined, so each tab renders what it has and lights up when the content
+ * lands: `leadImages` and `highlights` (#33), `guestInstallation` (#34),
+ * `focus` (#35), `publication` (#36). `archiveLeads` (#32) carries each tab's
+ * own lead paragraph.
  */
 export function getEditionArchive(lang: LocaleId, year: number) {
   return run<any>(
@@ -572,24 +583,84 @@ export function getEditionArchive(lang: LocaleId, year: number) {
       "film": film ${VIDEO},
       "images": images[] ${IMAGE},
       "exhibitorCount": count(*[_type == "exhibitor" && references(^._id)]),
+      // BACKEND-REQUEST #32: a lead paragraph per tab.
+      "archiveLeads": archiveLeads[]{ tab, ${styled('lead')} },
+      // BACKEND-REQUEST #33: the overview's image pair and its highlights.
+      "leadImages": leadImages[] ${IMAGE},
+      "highlights": highlights[]{ _key, ${styled('label')}, "link": link ${LINK} },
+      // BACKEND-REQUEST #34: what the guest of honour showed that year.
+      "guestInstallation": guestInstallation{
+        ${styled('title')}, ${styled('text')}, author, "images": images[] ${IMAGE}
+      },
+      // BACKEND-REQUEST #36: the publication reader.
+      "publication": publication{ url, ${styled('title')}, cover ${IMAGE} },
+      "guest": guestOfHonour->{
+        _id, name, countryCode, "slug": slug.current, ${styled('nationality')}, ${styled('bio')}, portrait ${IMAGE}
+      },
       "laureates": *[_type == "laureate" && references(^._id)] | order(order asc){
-        _id, "artist": artist->{ name, "slug": slug.current, ${styled('nationality')}, ${ARTIST_GALLERY} }
+        _id, "artist": artist->{ name, instagram, ${styled('nationality')}, "slug": slug.current, ${ARTIST_GALLERY} }
       },
       "awards": *[_type == "award" && family == "art-prize" && references(^._id)] | order(order asc){
-        _id, ${styled('name')}, ${styled('outcome')},
+        _id, ${styled('name')}, ${styled('outcome')}, ${styled('description')},
         "laureates": laureates[]->{ _id, name, "slug": slug.current, ${ARTIST_GALLERY} }
       },
       "jury": *[_type == "person" && "jury" in groups && references(^._id)] | order(order asc, name asc){
-        _id, name, ${styled('role')}
+        _id, name, countryCode, website, instagram, ${styled('role')}
       },
       "people": *[_type == "person" && references(^._id) && count(groups[@ in ["team", "collaborator", "advisory-board"]]) > 0]
         | order(order asc, name asc){ _id, name, ${styled('role')} },
-      "events": *[_type == "programmeEvent" && references(^._id) && defined(startsAt)] | order(startsAt asc){
-        _id, startsAt, ${styled('title')}, ${styled('speakersText')},
+      // BACKEND-REQUEST #35: the country focus tab - its lead, its pictures
+      // and the galleries it hosted.
+      "focus": focus{
+        ${styled('lead')}, "images": images[] ${IMAGE},
+        "galleries": galleries[]->{ _id, name, "slug": slug.current, "year": edition->year, "current": edition->isCurrent == true }
+      },
+      // The galleries the focus tab lists, when they are flagged on the
+      // exhibitors rather than referenced from the edition (#35).
+      "focusExhibitors": *[_type == "exhibitor" && references(^._id) && inCountryFocus == true]
+        | order(lower(coalesce(sortName, name)) asc){
+          _id, name, "slug": slug.current, "year": edition->year, "current": edition->isCurrent == true
+        },
+      // Every event, dated or not: 16 of 2025's 18 carry no startsAt
+      // (BACKEND-REQUEST #39), and filtering on it here hid five sixths of
+      // the programme. The undated ones sort last and the page lists them
+      // under the day rows.
+      "events": *[_type == "programmeEvent" && references(^._id)] | order(startsAt asc, lower(title.en) asc){
+        _id, startsAt, section, moderator,
+        ${styled('title')}, ${styled('description')}, ${styled('speakersText')},
         "speakers": speakers[]->{ _id, _type, name, "slug": slug.current, _type == "artist" => { ${ARTIST_GALLERY} } }
       }
     }`,
     { lang, year },
+  );
+}
+
+/**
+ * Every past edition reduced to what the year band and `tabsFor` need: the
+ * year, its ordinal and the counts that decide which tabs exist. One query
+ * for the whole band, made once per build and memoised, rather than four
+ * archive queries on every page.
+ */
+export function getPastEditionsIndex(lang: LocaleId) {
+  return run<any[]>(
+    `*[_type == "edition" && isCurrent != true && defined(year)] | order(year desc){
+      year,
+      ${styled('ordinal')},
+      ${styled('countryFocus')},
+      "guestOfHonour": guestOfHonour->{ name },
+      "publication": publication{ url },
+      "exhibitorCount": count(*[_type == "exhibitor" && references(^._id)]),
+      "laureateCount": count(*[_type == "laureate" && references(^._id)]),
+      "eventCount": count(*[_type == "programmeEvent" && references(^._id)]),
+      // What the focus tab would have to show. A country focus alone is not
+      // enough to earn a pill: no past edition flags its galleries and no
+      // past event has a section, so without this the tab is a pill onto an
+      // empty page (BACKEND-REQUEST #35).
+      "hasFocusLead": defined(focus.lead),
+      "focusCount": count(*[_type == "exhibitor" && references(^._id) && inCountryFocus == true])
+        + count(*[_type == "programmeEvent" && references(^._id) && section == "focus"])
+    }`,
+    { lang },
   );
 }
 

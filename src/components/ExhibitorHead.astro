@@ -31,9 +31,16 @@ interface Props {
   activeLetter?: string;
   /** On a detail page, the list the letters link back to ('exhibitors', 'exhibitors/2025'). */
   letterHref?: string;
+  /**
+   * Draw the A-Z row alone, without the title band. A past edition's list is
+   * a tab of the previous-editions section and wears that section's year band
+   * and pills instead (Figma, Léonie 2026-09-28) - the galleries / artists /
+   * awards tabs are not on that frame.
+   */
+  bandless?: boolean;
 }
 
-const { lang, active, edition, year, alphabet = false, activeLetter = '', letterHref } = Astro.props;
+const { lang, active, edition, year, alphabet = false, activeLetter = '', letterHref, bandless = false } = Astro.props;
 const t = useTranslations(lang);
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -47,6 +54,7 @@ const tabs = [
 const mark = activeLetter.toUpperCase();
 ---
 
+{!bandless && (
 <header class="exhibitor-head title-band">
   <div class="exhibitor-head__top">
     <h1>
@@ -69,6 +77,7 @@ const mark = activeLetter.toUpperCase();
     </nav>
   </div>
 </header>
+)}
 {
   /* The letters sit under the band, outside it, so only the band stays pinned. */
   alphabet && (
