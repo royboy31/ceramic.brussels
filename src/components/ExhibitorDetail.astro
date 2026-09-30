@@ -1,5 +1,6 @@
 ---
 import ExhibitorHead from './ExhibitorHead.astro';
+import { focusLockup } from './exhibitorBadges';
 import Slideshow from './Slideshow.astro';
 import PortableText from './PortableText.astro';
 import type { LocaleId } from '../lib/locales';
@@ -45,10 +46,11 @@ const place = [exhibitor.city, code && `(${code})`].filter(Boolean).join(' ');
 /** The written list wins over the references: the design names every artist, not only the ones with a page. */
 const presenting = !exhibitor.artistsText && exhibitor.artists?.length ? exhibitor.artists : null;
 const badge = exhibitor.kind === 'jury-prize' ? t('exhibitors.juryPrize') : exhibitor.soloShow ? t('exhibitors.soloShow') : null;
-/** The "focus España" lockup, as on the cards and the artists list (Tiphaine, 2026-09-25). Another focus has no logo yet. */
+/** The focus lockup, as on the cards and the artists list (Tiphaine,
+ *  2026-09-25). A country without artwork keeps its words - see
+ *  `exhibitorBadges.ts`. */
 const focusLabel = exhibitor.countryFocusLabel ?? t('exhibitors.countryFocus');
-const focusLogo =
-  exhibitor.inCountryFocus && /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/assets/exhibitors/focus-espana.png' : null;
+const focusLogo = exhibitor.inCountryFocus ? focusLockup(focusLabel) : null;
 
 /** "solo show" → "solo<br>show", the two-line badge of the design. */
 const twoLines = (s: string) => {
