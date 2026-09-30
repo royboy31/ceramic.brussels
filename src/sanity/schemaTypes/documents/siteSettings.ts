@@ -134,9 +134,10 @@ export const siteSettings = defineType({
             }),
             defineField({
               name: 'text',
-              title: 'Text',
+              title: 'Rate paragraph',
               type: 'localeText',
-              description: 'The paragraph under the rate. "{code}" is replaced with the hotel code.',
+              description:
+                'The paragraph under the rate line, on the VIP hotel deal tab: "Use code … to enjoy a special rate of …". Write "{code}" where the code belongs and the site fills in the hotel’s own. Not the hotel’s description - that is the page’s own lead and body.',
             }),
             defineField({ name: 'url', title: 'Booking link', type: 'url' }),
           ],

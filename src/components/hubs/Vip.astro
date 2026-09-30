@@ -162,18 +162,17 @@ const intro =
         ? C.hotelDeal.intro
         : undefined);
 /**
- * The hotel panel's rate line from Site settings → Venue & access → Hotel
- * deal (#16), the frame's own when the field is empty. Its paragraph is not
- * read yet on purpose: the Studio's "Text" field there holds the hotel's
- * description, which this page already prints as its intro and body, and not
- * the "use code …" paragraph the field is for - reading it today would print
- * the description twice and drop the code. It is one Studio edit away; see
- * #16 in docs/backend-requests.md.
+ * The hotel panel, both lines, from Site settings → Venue and access → Hotel
+ * deal (#16): "Rate line" for the bold line and "Text" for the paragraph
+ * under it, the frame's own copy standing in for either while it is empty.
+ * `{code}` in the paragraph becomes the hotel's code from D1.
  */
 const rate = {
   ...C.hotelDeal.rate,
   heading: site?.practicalInfo?.hotelDeal?.rate ?? C.hotelDeal.rate.heading,
-  text: C.hotelDeal.rate.text.split('{code}').join(String(hotelCode || C.hotelDeal.rate.fallbackCode)),
+  text: String(site?.practicalInfo?.hotelDeal?.text ?? C.hotelDeal.rate.text)
+    .split('{code}')
+    .join(String(hotelCode || C.hotelDeal.rate.fallbackCode)),
 };
 /**
  * "book your stay ↗" on the rate panel: Site settings → Venue and access →
