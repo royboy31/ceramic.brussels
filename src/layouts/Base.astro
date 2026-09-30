@@ -33,8 +33,10 @@ interface Props {
   altPaths?: Partial<Record<LocaleId, string>>;
   noIndex?: boolean;
   /** 'acid' paints the whole page yellow, as the art prize section is;
-   *  'dark' knocks it out in black, as the locked VIP tabs are. */
-  theme?: 'default' | 'acid' | 'dark';
+   *  'dark' knocks it out in black, as the locked VIP tabs are;
+   *  'ash' is the grey ground of the previous-editions frames (#d9d9d9,
+   *  sampled from Léonie's PNGs of 2026-09-28 - header and footer included). */
+  theme?: 'default' | 'acid' | 'dark' | 'ash';
   /** Alias kept for pages written against the skeleton: 'brand' = 'acid'. */
   tone?: 'default' | 'brand';
   /** Social share image for this page. Falls back to the one in Site settings. */
@@ -66,6 +68,7 @@ const {
 } = Astro.props;
 const acid = theme === 'acid' || tone === 'brand';
 const dark = theme === 'dark';
+const ash = theme === 'ash';
 // True inside a /preview/ render: drafts, stega-encoded strings, and the
 // Studio's editing overlay mounted at the end of the body.
 const preview = isPreview();
@@ -202,7 +205,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     <slot name="head" />
   </head>
 
-  <body class:list={[{ 'acid-page': acid, 'dark-page': dark }]}>
+  <body class:list={[{ 'acid-page': acid, 'dark-page': dark, 'ash-page': ash }]}>
     <a class="skip" href="#main">{t('common.skip')}</a>
 
     <Header
@@ -490,6 +493,27 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     background: var(--acid);
     --band-bg: var(--acid);
   }
+  /* The previous-editions ground: one flat grey over the whole page, the
+     header and the footer with it. Sampled from every one of Léonie's seven
+     frames (2026-09-28) - #d9d9d9 is the most common pixel in all of them,
+     and the header and footer carry no wash and no gradient there. */
+  body.ash-page {
+    background: var(--ash-ground);
+    --ash-ground: #d9d9d9;
+    --ground: var(--ash-ground);
+    --band-bg: var(--ash-ground);
+    --surface: #cfcfcf;
+    --surface-2: #c6c6c6;
+  }
+  body.ash-page :is(.site-header, footer).acid-wash {
+    background: var(--ash-ground);
+  }
+  /* A hairline where the footer starts, as the black page has one: without
+     it the footer band and the page are one undivided field. */
+  body.ash-page footer.site-footer {
+    border-top: 1px solid var(--color-ink, #050505);
+  }
+
   /* The art prize header fades from white at the top into the acid. The
      fine black rule under it (2026-09-16) came off again on 2026-09-23.
      2026-09-24: "a tiny bit more white" - the white holds a little before
