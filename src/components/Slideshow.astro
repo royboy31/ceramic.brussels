@@ -19,9 +19,10 @@ interface Props {
   aspect?: number;
   /**
    * 'cover' (default) crops every picture to `aspect`. 'contain' keeps the
-   * frame at `aspect` but draws each picture whole, in its own shape, on the
-   * frame's bottom edge: portrait stays portrait, landscape stays landscape
-   * (Tiphaine, 2026-09-25), and nothing is cropped and blown up.
+   * frame at `aspect` but draws each picture whole, in its own shape, hung
+   * from the frame's top edge: portrait stays portrait, landscape stays
+   * landscape (Tiphaine, 2026-09-25), nothing is cropped and blown up, and
+   * every slide starts at the same height (client, 2026-09-30).
    */
   fit?: 'cover' | 'contain';
   /**
@@ -173,10 +174,16 @@ const contain = fit === 'contain' && !!aspect;
   .frame {
     aspect-ratio: var(--aspect);
   }
+  /* Top, not bottom: "can you align the pictures on the galleries pages so
+     that they align 'to the top' and not to the bottom? So that when you go
+     through the slideshow they all start at the same place?" (client,
+     2026-09-30). This reverses Tiphaine's 2026-09-25 note, which asked for
+     the frame's bottom edge - the pictures still keep their own shape and
+     are still never cropped, they just hang from the top now. */
   .frame :global(img) {
     height: 100%;
     object-fit: contain;
-    object-position: center bottom;
+    object-position: center top;
   }
 
   /* Counter left, caption right - the line under the picture in the design. */

@@ -54,10 +54,18 @@ Worth knowing before you chase them:
   has a link filled.
 - **"Add the photo next to each collectors' voices interview"** — `story.image`
   exists and `PressMedia.astro` already renders it. Neither story has one.
-- **The VIP "discover xx" buttons** — label typed, `url` null on all eight.
+- **The advisory board's "website" buttons** — `person.website` is in the
+  schema *and* in the `PERSON` projection, and `PersonCard` already renders
+  the pill. None of the seven has one filled.
 
-I am filling these in the Studio. The pattern is the same three times, and it
-is worth one message to the client rather than three bug reports.
+I am filling these in the Studio.
+
+**Struck from this list on 2026-10-01: the VIP "discover xx" buttons.** I
+reported those as label-without-URL; that was my query reading `link.url`
+when the schema stores an external address in `link.external`. The links were
+complete all along, and the buttons were missing only because `Vip.astro`
+drew no pill from `event.link` - now written. See the correction in
+`vip-regression-2026-09-30.md`.
 
 ## 4. What is on `lilanga` and not yet on `dev`
 

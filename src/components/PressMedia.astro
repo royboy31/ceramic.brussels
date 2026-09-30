@@ -659,10 +659,20 @@ const logoHeight = (p: any) => {
   }
 
   /* press: the clippings */
+  /* Four a row, not the frame's three: "each press article in the 'as seen
+     in the press' section appears really big on the screen, so I was
+     wondering if, for this section exceptionally, you could work with 4
+     columns" (client, 2026-09-30) - their own override of the Figma, and
+     only here. Two a row on a tablet, one on a phone. */
   .press-cards {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 40px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
     display: grid;
+  }
+  @media (width<=1100px) {
+    .press-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
   .press-card {
     border: 1px solid;

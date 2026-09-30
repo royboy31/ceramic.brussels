@@ -85,14 +85,19 @@ const contactLines = !board && (person.email || person.phone);
       {
         pills && (
           <p class="links">
-            {person.instagram && (
-              <a class="pill" href={instagramUrl(person.instagram)} target="_blank" rel="noopener noreferrer">
-                {t('common.instagram')} ↗
-              </a>
-            )}
+            {/* Website first, then instagram, "same placement as for art
+                prize jury members" (client, 2026-09-30) - that is the order
+                the jury tab draws them in. The pills themselves already
+                existed and already read `person.website`; no advisory board
+                member has one filled yet, which is why none show. */}
             {person.website && (
               <a class="pill" href={person.website} target="_blank" rel="noopener noreferrer">
                 {t('common.website')} ↗
+              </a>
+            )}
+            {person.instagram && (
+              <a class="pill" href={instagramUrl(person.instagram)} target="_blank" rel="noopener noreferrer">
+                {t('common.instagram')} ↗
               </a>
             )}
             {board && person.email && (
