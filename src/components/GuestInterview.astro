@@ -179,21 +179,29 @@ const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--row
     padding-top: 22px;
     padding-bottom: 100px;
   }
+  /* "Could you try making the quote text bigger?" (client, 2026-09-30). */
   .pull {
     letter-spacing: -0.03em;
-    font-size: 40px;
-    line-height: 48px;
+    font-size: 48px;
+    line-height: 56px;
   }
+  /* "'Marion Verboom' should be the same size as the intro text, and same
+     letter-spacing" (client, 2026-09-30) - so it reads the same token, and
+     tracks with it. It had no letter-spacing of its own before. */
   .who {
     margin-top: 4px;
-    font-size: 30px;
-    line-height: 38px;
+    font-size: var(--intro-size);
+    line-height: var(--intro-lh);
+    letter-spacing: var(--intro-ls);
   }
+  /* The site's intro size (tokens in Base.astro). This is the introduction
+     the client made the reference for guest of honour "about" and the
+     Stories sections, so the number lives in one place. */
   .intro {
-    letter-spacing: -0.03em;
+    letter-spacing: var(--intro-ls);
     margin-top: 28px;
-    font-size: 30px;
-    line-height: 38px;
+    font-size: var(--intro-size);
+    line-height: var(--intro-lh);
   }
   .intro :global(p + p) {
     margin-top: 20px;
@@ -213,8 +221,10 @@ const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--row
   .row.stacked {
     grid-template-rows: auto 1fr;
   }
+  /* "Reduce the gap between each part of the interview a notch"
+     (client, 2026-09-30): 90 → 64. */
   .row + .row {
-    margin-top: 90px;
+    margin-top: 64px;
   }
   .cell {
     grid-column: var(--col) / span var(--span);
@@ -227,13 +237,19 @@ const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--row
     font-size: 24px;
     line-height: 30px;
   }
-  /* Questions and the speaker's initials in the semibold, untracked: the
-     frame's bold is a weight the site does not ship, and 600 wraps its
-     lines exactly where the frame does. "Bold" on its own would pick 900. */
+  /* Questions and the speaker's initials in the semibold: the frame's bold
+     is a weight the site does not ship, and "bold" on its own would pick
+     900. They were untracked; the client asked on 2026-09-30 to "reduce
+     letter-spacing a bit, and change the style to Italic (but keep the same
+     weight)", so 600 stays and the tracking comes in to -0.02em.
+     Noi Grotesk ships no italic face, so this is a synthesised oblique. */
   .question,
   .qa :global(strong) {
-    letter-spacing: 0;
+    letter-spacing: -0.02em;
     font-weight: 600;
+  }
+  .question {
+    font-style: italic;
   }
   .answer {
     margin-top: 24px;
@@ -271,8 +287,8 @@ const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--row
       font-size: 27px;
       line-height: 1.15;
     }
-    .who,
-    .intro {
+    /* `.intro` keeps the token, which steps to 24 on a phone. */
+    .who {
       font-size: 20px;
       line-height: 1.3;
     }

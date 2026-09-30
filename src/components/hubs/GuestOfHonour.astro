@@ -208,11 +208,14 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     font-size: 40px;
     line-height: 42px;
   }
+  /* "Can you make the intro text smaller, the same size as the intro text on
+     the interview page?" (client, 2026-09-30) - 40/50 down to the shared
+     intro token. */
   .lead {
-    letter-spacing: -0.04em;
+    letter-spacing: var(--intro-ls);
     margin-top: 38px;
-    font-size: 40px;
-    line-height: 50px;
+    font-size: var(--intro-size);
+    line-height: var(--intro-lh);
   }
   .lead :global(p + p) {
     margin-top: 28px;
@@ -350,10 +353,8 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
       font-size: 22px;
       line-height: 1;
     }
-    .lead {
-      font-size: 27px;
-      line-height: 1.1;
-    }
+    /* `.lead` keeps the shared intro token on a phone too, so it stays level
+       with the interview's introduction at every width. */
     .intro h3,
     .practice h3 {
       margin-top: 48px;
