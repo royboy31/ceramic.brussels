@@ -60,7 +60,10 @@ const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/asset
 
 <article id={id} data-name={letter} data-letter={letter} data-filters={filters} data-tags={filters} data-country={code}>
   <a href={localePath(lang, exhibitorPath(ex))}>
-    <div class="gallery-image">
+    {/* `bleed-m`: edge to edge below 700px (client, 2026-09-30, "same in the
+        galleries list"). On the container, not the picture, so the hover veil
+        and the badges laid over it move with it. */}
+    <div class="gallery-image bleed-m">
       {
         ex.image?.asset && (
           <SanityImage

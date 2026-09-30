@@ -19,6 +19,14 @@ interface Props {
    * goes away, because the background stays behind the loaded PNG.
    */
   placeholder?: boolean;
+  /**
+   * Below 700px the picture runs to both screen edges, out through
+   * `.content-wrap`'s gutter (client, 2026-09-30). **Opt-in**, unlike
+   * `Slideshow`: this component draws logos and portraits as well as
+   * photographs, and the jury and advisory board portraits are the one
+   * place the client asked to leave inset.
+   */
+  bleed?: boolean;
 }
 
 const {
@@ -29,6 +37,7 @@ const {
   loading = 'lazy',
   class: className,
   placeholder = true,
+  bleed = false,
 } = Astro.props;
 
 const hasAsset = !!image?.asset;
@@ -89,12 +98,12 @@ const editAttr = typeof image?._sanity === 'string' ? image._sanity : undefined;
       alt={image.alt ?? ''}
       loading={loading}
       decoding="async"
-      class={className}
+      class:list={[className, { 'bleed-m': bleed }]}
       data-sanity={editAttr}
       style={lqip ? `background-image:url(${lqip});background-size:cover;background-position:center;` : undefined}
     />
   ) : (
-    <div class:list={['img-placeholder', className]} aria-hidden="true" />
+    <div class:list={['img-placeholder', className, { 'bleed-m': bleed }]} aria-hidden="true" />
   )
 }
 
