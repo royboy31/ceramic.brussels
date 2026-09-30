@@ -272,6 +272,9 @@ export const structure: StructureResolver = async (S, context) => {
         ]),
         byYear('events-vip-past', 'VIP programme, past years', 'programmeEvent', 'section == "vip"', [{ field: 'startsAt', direction: 'asc' }]),
         siteSettings('Access requests form (Site settings)', 'vip-settings'),
+        // The hotel tab's rate panel lives here, not on the page: Visitors
+        // info prints the same hotel deal (#16).
+        siteSettings('Hotel rate and booking link (Site settings)', 'vip-hotel-settings'),
       ]),
 
       folder('partners', 'Partners', [

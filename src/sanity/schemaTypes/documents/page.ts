@@ -1,6 +1,7 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { PAGE_SECTIONS } from '../objects/routes';
 import { sectionsField } from '../objects/pageBuilder';
+import { SettingsPointer } from '../../components/SettingsPointer';
 import { pageHides } from '../../pageKinds';
 
 /**
@@ -145,6 +146,26 @@ export const page = defineType({
       of: [defineArrayMember({ type: 'link' })],
       description: 'The pills under the text.',
       hidden: pageHides('links'),
+    }),
+    // Not everything a page prints is on the page. The VIP hotel tab's
+    // "special rate" panel is on Site settings, because Visitors info prints
+    // the same hotel deal and the two must not drift - so the page says so,
+    // and links there, rather than leaving an editor to hunt for it.
+    defineField({
+      name: 'settingsPointer',
+      title: ' ',
+      type: 'string',
+      group: 'main',
+      readOnly: true,
+      hidden: pageHides('settingsPointer'),
+      components: {
+        input: () =>
+          SettingsPointer({
+            href: '/studio/#/structure/visit;visit-settings',
+            title: 'Open Site settings → Venue & access → Hotel deal',
+            note: 'The "special rate" panel on this page - the rate line, the rate paragraph and the booking link - is edited in Site settings, because Visitors info shows the same hotel deal.',
+          }),
+      },
     }),
     defineField({
       name: 'images',
