@@ -61,3 +61,23 @@
     font-size: 15px !important;
   }
 }
+
+/* ------------------------------------------------------------ bold in text
+ *
+ * "Inside the accordions, sometimes there are parts of the text that is set
+ * in what looks like the Black weight. Could you make this default Bold state
+ * less Bold by maybe using the weight just under the Black, so the true Bold
+ * or the Semi Bold? It currently looks a bit intense." - client, 2026-09-30.
+ *
+ * They are reading it right. Noi Grotesk is loaded at three weights only -
+ * 400, 600 and 900 (`Base.astro`) - and the browser's own rule for `strong`
+ * is 700. CSS matching for 700 looks upwards first, finds no 700 and no 800,
+ * and lands on **900, the Black face**. Nothing in the repo asks for it: there
+ * is not one `font-weight: 700` or `bold` in `src/`, so this is the UA default
+ * falling through, everywhere rich text has a bold word - not only the FAQ.
+ *
+ * 600 is the real Semi Bold, which is the weight they asked for.
+ */
+main :is(strong, b) {
+  font-weight: 600;
+}
