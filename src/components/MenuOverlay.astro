@@ -38,7 +38,14 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
 <dialog id="site-menu" data-menu aria-label={t('nav.menu')}>
   <div class="menu-panel">
     <div class="menu-top">
-      <span aria-hidden="true"></span>
+      {/* The wordmark in the bar with the ×, on a phone only: "so that when
+          the menu is open, the logo still is visible" (client, 2026-09-30).
+          On desktop the header's own wordmark is never covered - the panel
+          is narrow enough - so the slot stays the empty spacer it was, and
+          `space-between` keeps the × at the right either way. */}
+      <span class="menu-mark" aria-hidden="true">
+        <img src="/assets/wordmark.svg" alt="" width="144" height="75" />
+      </span>
       <button data-menu-close aria-label={t('nav.closeMenu')}><span aria-hidden="true">×</span></button>
     </div>
     <nav aria-label={t('nav.menu')} class="menu-stack">
@@ -368,4 +375,23 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } :
       animation: none;
     }
   }
+
+  /* The wordmark slot is empty above 900: the panel clears the header's own
+     wordmark there, so a second one would be a duplicate. */
+  .menu-mark {
+    display: none;
+  }
+  .menu-mark img {
+    width: 62px;
+    height: auto;
+    display: block;
+  }
+  @media (width <= 900px) {
+    .menu-mark {
+      display: block;
+    }
+  }
+  /* The panel's width and the menu's type sizes are design.css rules, so
+     they are overridden once in src/styles/site.css rather than reached into
+     from here with :global() - two owners for one rule is how they drift. */
 </style>
