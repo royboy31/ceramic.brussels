@@ -61,7 +61,16 @@ export const edition = defineType({
       type: 'boolean',
       group: 'main',
       description:
-        'Exactly one edition should be current. It drives the homepage, the exhibitor list and visitors info.',
+        'Exactly one edition should be current. It drives the homepage, the programme, VIP, the partners and the key figures. Which editions’ galleries the site shows is the field below.',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'showExhibitors',
+      title: 'Show this edition’s galleries',
+      type: 'boolean',
+      group: 'main',
+      description:
+        'Off while the gallery list is still being typed in. The galleries page opens on the newest edition that has this on, and the year buttons under it offer the others; an edition with it off has no gallery pages at all. Separate from Current edition on purpose - that flag also drives the programme, VIP, the partners and the key figures, so an edition can be the current one before its galleries are announced.',
       initialValue: false,
     }),
     defineField({
