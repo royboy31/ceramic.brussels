@@ -22,7 +22,7 @@ ceramic-brussels.pages.dev). The round itself is written up in
 | "I have created a new « exhibition pass » page in Figma (inside the « programme » section)!" | ✅ built and live 1 Oct (#48, #36 merged in): `/en/programme/exhibition-pass/`, BPS22 + CID in as working examples. **Waiting on her real content and photographs** — Studio → Programme → Exhibition pass 2027 |
 | mobile: photos full width, smaller captions, bigger gallery names | ✅ done (Lilanga, batches 1–4, on main) |
 | gallery hover pill · press in four columns · press releases section · stories typography · mobile title sizes | ✅ done (Lilanga, batches 3–6, on main) |
-| the photo beside each collectors' voices interview | code ✅ — **content: 1 of 6 stories has an image** |
+| the photo beside each collectors' voices interview | ✅ done — code renders it, and all 6 stories carry their photo (checked 1 Oct, filled by Lilanga) |
 | award pictures resizable / the empty award row | ⏳ Lilanga's queue |
 | the two logos — best solo show, best booth | ⏳ **waiting on Léonie**, never sent |
 
@@ -47,8 +47,7 @@ is in the group's hands:
    They cost nothing and unblock the most.
 2. **Tiphaine:** the 2026 review file (blocks #34); fill the six key-figure
    links.
-3. **Léonie:** exhibition-pass content and photographs; the two award logos;
-   the five missing story images.
+3. **Léonie:** exhibition-pass content and photographs; the two award logos.
 4. **Lilanga:** award picture sizing and the empty award row; the
    exhibition-pass type-level finish.
 
