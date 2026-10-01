@@ -122,7 +122,7 @@ const altPaths = hubAltPaths('programme', tab);
   editId={page?._id}
   editType={page?._type}
 >
-  <HubNav lang={lang} route="programme" active={tab} pages={pages} />
+  <HubNav lang={lang} route="programme" active={tab} pages={pages} has={{ 'programme/exhibition-pass': exhibitions.length > 0 }} />
 
   <div class:list={['content-wrap', { talks: !isPage && !isPass, 'talks-tab': !isPage && !isAwards && !isPass }]}>
     {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
