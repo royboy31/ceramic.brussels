@@ -176,15 +176,18 @@ const hasImage = !!section.image?.asset;
   }
 
   /* The picture to both screen edges on a phone (Léonie, 2026-10-01).
-     Here rather than in site.css: the sweep there pulled by 50vw, which
-     assumes a viewport-centred box and drags the scrollbar into the sum -
-     the row sits exactly one gutter in at this width, so the gutter is the
-     exact pull. The caption-less shot has no text to keep aligned. */
+     Here rather than in site.css so the cascade is certain, and by 50vw
+     rather than the gutter: the row renders at different depths - alone,
+     or inside a content-wrap that adds a second gutter - so no constant
+     knows the inset, while the stack fix above leaves the grid area
+     centred on the viewport, which is all this formula asks. (A classic
+     desktop scrollbar still leans it a few px, as everywhere the sweep
+     uses it; phones have none.) */
   @media (width <= 700px) {
     .shot {
-      width: calc(100% + 2 * var(--gutter));
+      width: 100vw;
       max-width: none;
-      margin-inline: calc(-1 * var(--gutter));
+      margin-inline: calc(50% - 50vw);
     }
   }
 </style>
