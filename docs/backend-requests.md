@@ -910,7 +910,7 @@ Reusing `programmeEvent` was considered and looks wrong: these are months-long e
 **What is left, and it is Lilanga's:** the rows render in the frame's structure and proportions - picture alternating sides, the ruled institution heading, artist / *title*, the city chip, the date line, the paragraph, the pill and the slideshow - but this is not a measured match of its type sizes and spacing. **And there is no content yet:** the tab shows its empty line until the institutions' exhibitions are typed in, which is the client's (BPS22, CID and the others on the frame).
 
 ---
-## #49 · open · 2026-10-01 · the photographs are pixelated: the sources are small
+## #49 · done · 2026-10-01 · the photographs are pixelated: the sources are small
 
 **Page / component:** everywhere; reported on photos & videos and the gallery pages
 **Asked by:** the client's comments of 2026-09-30, "The picture are still pixelated" — "still", after the retina ladder fix of 2026-09-23
@@ -931,6 +931,13 @@ By the document that uses them: **149 unreferenced** (dead weight from the impor
 The worst are clearly legacy imports — `969.jpg` at 300×225 on the person Vincent Lieber, `2481.jpg` at 473×473 on The Hoxton, `961.jpg` at 479×640 on Florence Reckinger Taddeï. `CLAUDE.md` records why: the old site's resizer answered 500 for `?w=2500` on some 350 files and for any size above roughly 50 megapixels, and the importer falls back to the original when the resized fetch fails.
 
 **Asked for:** a judgement on what is recoverable. Three questions: can the 350 that failed at 2500 be re-fetched at an intermediate width rather than falling back to the original; are the 149 unreferenced ones safe to delete; and for the rest, do we go back to the galleries and the photographers. A displayed-vs-natural report per page can be produced on request.
+
+**Judged and executed (Kamindu, 2026-10-01), all three questions:**
+
+1. **Re-fetching is exhausted.** The recoverable portraits - the ~150 files where the old site held a larger original than the resizer delivered - were already re-fetched on **2026-09-26** (`scripts/refetch-images.mjs`, min-width 1600; its report ended with zero candidates). Today's run at the wider 2500 bar found **four** more, all exhibitor pictures, re-fetched and re-pointed (backup in `legacy-export/backups/`, 7 API requests, dates clean). Beyond that the old site holds nothing bigger: **the 172 small photos on live pages are small at the source**, which is what the script's own header predicted.
+2. **The unreferenced assets are safe to delete - checked against drafts.** The public API counts 213; with a token, which sees draft references, **209 assets / 259 MB**. The four-asset difference is exactly why the drafts check exists. Deletion is irreversible and waits on a word; nothing on any page changes either way.
+3. **The rest is the galleries' to supply**, and the chase list exists: **`docs/small-images-2026-10-01.md`** - all 172 photographs grouped by the document that shows them (135 exhibitor, 11 person, 10 edition, 7 partner…), each with its filename and true size, ready for Tiphaine to send out. Anything 1500px or wider needs nothing.
+
 
 ---
 ## #50 · done · 2026-10-01 · the Studio still offers "Past editions" as `editions`
