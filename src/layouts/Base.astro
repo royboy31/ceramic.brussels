@@ -1,9 +1,17 @@
 ---
 import { LOCALES, type LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
-import { getSettings, getNavPages, getNavigation, getCurrentEdition, getPartners } from '../lib/queries';
+import {
+  getSettings,
+  getNavPages,
+  getNavigation,
+  getCurrentEdition,
+  getPartners,
+  getPastEditionsIndex,
+} from '../lib/queries';
 import { resolveNavItem } from '../lib/links';
 import { HUBS } from '../lib/hubs';
+import { editionTabPath } from '../lib/previousEditions';
 import { urlFor } from '../sanity/image';
 import EditLink from '../components/EditLink.astro';
 import Header from '../components/Header.astro';
@@ -46,9 +54,12 @@ interface Props {
   editId?: string;
   editType?: string;
   /**
-   * A pill at the left of the footer band: "← back to 2027" on a
-   * previous-editions page, "previous editions →" on the homepage (Léonie,
-   * Figma comment 2026-09-28). Absent everywhere else.
+   * A pill at the left of the footer band. A page that sets one gets it:
+   * "← back to 2027" inside the previous-editions section and on a past
+   * year's gallery list (Léonie, Figma comment 2026-09-28). Every other page
+   * falls back to "previous editions →", the other half of that pair, so the
+   * section is reachable from the footer of the whole site rather than from
+   * the homepage alone.
    */
   backLink?: { label: string; href: string; arrow?: string };
 }
@@ -75,15 +86,33 @@ const ash = theme === 'ash';
 const preview = isPreview();
 const t = useTranslations(lang);
 
-const [settings, navPages, navigation, edition, partners] = await Promise.all([
+const [settings, navPages, navigation, edition, partners, pastEditions] = await Promise.all([
   getSettings(lang),
   getNavPages(lang),
   getNavigation(lang),
   getCurrentEdition(lang),
   getPartners(lang),
+  getPastEditionsIndex(lang),
 ]);
 
 const siteName = settings?.siteName ?? 'ceramic brussels';
+/**
+ * The footer's left-hand pill. A page that passes its own keeps it; everywhere
+ * else it leads to the newest past edition, the same target and label the
+ * homepage uses (the section has no index of its own). Absent while there is
+ * no past edition to lead to - and on the previous-editions pages themselves,
+ * which pass "← back to <current year>" instead.
+ */
+const newestPast = pastEditions[0]?.year;
+const footerBack =
+  backLink ??
+  (newestPast
+    ? {
+        label: t('prevEd.section'),
+        href: localePath(lang, editionTabPath(newestPast, undefined, lang)),
+        arrow: '→',
+      }
+    : undefined);
 /** The header's lockup links to the main partner (tier "main") when there is one. */
 const mainPartner = partners.find((p: any) => p.tier === 'main') ?? null;
 const fullTitle = title === siteName ? siteName : `${title} — ${siteName}`;
@@ -234,7 +263,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
       links={footerNav}
       copyright={copyright}
       consentLabel={!preview && categoriesInUse().length > 0 ? t('consent.settings') : undefined}
-      backLink={backLink}
+      backLink={footerBack}
     />
     {!preview && <CookieConsent lang={lang} />}
 
