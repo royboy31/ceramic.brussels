@@ -1,6 +1,7 @@
 ---
 import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
+import { editionTabPath } from '../lib/previousEditions';
 
 /**
  * The title band of the exhibitor pages, as the design's exhibitors pages
@@ -44,7 +45,9 @@ const { lang, active, edition, year, alphabet = false, activeLetter = '', letter
 const t = useTranslations(lang);
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-const listPath = year ? `exhibitors/${year}` : 'exhibitors';
+// A past year's list is the exhibitors tab of the previous-editions section
+// since 2026-10-01; this year's is /exhibitors.
+const listPath = year ? editionTabPath(year, 'exhibitors', lang) : 'exhibitors';
 const tabs = [
   { key: 'galleries', label: t('exhibitors.galleries'), href: localePath(lang, listPath) },
   { key: 'artists', label: t('nav.artists').toLowerCase(), href: localePath(lang, 'artists') },

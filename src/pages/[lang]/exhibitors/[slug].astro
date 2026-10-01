@@ -1,90 +1,31 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import ExhibitorDetail from '../../../components/ExhibitorDetail.astro';
-import ExhibitorsListing from '../../../components/ExhibitorsListing.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { useTranslations, localePath } from '../../../lib/i18n';
-import {
-  getExhibitor,
-  getExhibitorPaths,
-  getExhibitorsByYear,
-  getEditions,
-  getCurrentEdition,
-  getAwards,
-  exhibitorEditions,
-  getPastEditionsIndex,
-} from '../../../lib/queries';
+import { getExhibitor, getExhibitorPaths, getCurrentEdition } from '../../../lib/queries';
 
 /**
- * /exhibitors/<slug>: a current-edition exhibitor's page.
- * /exhibitors/<year>: a past edition's list, at the address the old site gave
- * it (/en/exhibitors/2025). Both are one path segment, so both are this route;
- * a four-digit segment is a year. A past exhibitor's own page is
- * /exhibitors/<year>/<slug> ([year]/[slug].astro).
+ * /exhibitors/<slug>: a gallery of the edition whose galleries the site opens
+ * on. A past edition's gallery is /exhibitors/<year>/<slug> ([year]/[slug]).
+ *
+ * **A past year's list was here too until 2026-10-01**, at `exhibitors/<year>`
+ * - the address the old site gave it. That list is now the exhibitors tab of
+ * the previous-editions section, so one year's content has one shape of URL;
+ * `scripts/legacy-redirects.mjs` 301s the old addresses onto it.
  */
 export async function getStaticPaths() {
-  const { current, past } = await getExhibitorPaths();
-  const segments = [...new Set([...current, ...past.map((p) => String(p.year))])];
-  return LOCALE_IDS.flatMap((lang) => segments.map((slug) => ({ params: { lang, slug } })));
+  const { current } = await getExhibitorPaths();
+  const slugs = [...new Set(current)];
+  return LOCALE_IDS.flatMap((lang) => slugs.map((slug) => ({ params: { lang, slug } })));
 }
 
 const lang = Astro.params.lang as LocaleId;
 const slug = Astro.params.slug as string;
-const t = useTranslations(lang);
-const year = /^\d{4}$/.test(slug) ? Number(slug) : undefined;
 
-let listing: {
-  exhibitors: any[];
-  edition: any;
-  currentYear?: number;
-  years: { year: number; current: boolean }[];
-  awarded: Set<string>;
-  pastEditions: any[];
-} | null = null;
-let exhibitor: any = null;
-let edition: any = null;
+const [exhibitor, edition] = await Promise.all([getExhibitor(lang, slug), getCurrentEdition(lang)]);
+if (!exhibitor) return Astro.rewrite('/404');
 
-if (year) {
-  const [exhibitors, editions, awards, pastEditions] = await Promise.all([
-    getExhibitorsByYear(lang, year),
-    getEditions(lang),
-    getAwards(lang),
-    // A past year's list is the exhibitors tab of the previous-editions
-    // section and wears its year band and pills (Figma, Léonie 2026-09-28).
-    getPastEditionsIndex(lang),
-  ]);
-  const { landingYear, years } = exhibitorEditions(editions);
-  // An edition whose galleries are off gets no list (request #33). The build
-  // writes no page for it either; this is the preview Worker, which renders
-  // any address on request.
-  if (!years.some((y) => y.year === year)) return Astro.rewrite('/404');
-  listing = {
-    exhibitors,
-    pastEditions,
-    edition: editions.find((e: any) => e.year === year) ?? null,
-    // The year that lives at /exhibitors, for the link back to it.
-    currentYear: landingYear,
-    years,
-    // That year's fair-award winners, for the "awards" filter pill, as the
-    // current list does for its own year: the 2026 list gets 2026's.
-    awarded: new Set<string>(
-      awards.filter((a: any) => a.family === 'fair' && a.year === year && a.gallery?._id).map((a: any) => a.gallery._id),
-    ),
-  };
-} else {
-  [exhibitor, edition] = await Promise.all([getExhibitor(lang, slug), getCurrentEdition(lang)]);
-  if (!exhibitor) return Astro.rewrite('/404');
-}
-
-/**
- * The landing year's list answers at /exhibitors as well as at its own
- * address, so it points its canonical at /exhibitors and the two do not
- * compete. `exhibitors/2026` has to keep answering either way:
- * scripts/legacy-redirects.mjs sends an old-site URL to it.
- */
-const listingPath = listing && year === listing.currentYear ? 'exhibitors' : `exhibitors/${year}`;
-
-const orgSchema = exhibitor && {
+const orgSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: exhibitor.name,
@@ -92,43 +33,16 @@ const orgSchema = exhibitor && {
 };
 ---
 
-{
-  listing ? (
-    <Base
-      lang={lang}
-      title={`${t('nav.exhibitors')} ${year}`}
-      path={listingPath}
-      theme={listing.pastEditions.some((e: any) => e.year === year) ? 'ash' : 'default'}
-      backLink={
-        listing.pastEditions.some((e: any) => e.year === year) && listing.currentYear
-          ? { label: t('prevEd.back', { year: listing.currentYear }), href: localePath(lang), arrow: '←' }
-          : undefined
-      }
-    >
-      <ExhibitorsListing
-        lang={lang}
-        exhibitors={listing.exhibitors}
-        edition={listing.edition}
-        year={year}
-        currentYear={listing.currentYear}
-        years={listing.years}
-        awarded={listing.awarded}
-        pastEditions={listing.pastEditions}
-      />
-    </Base>
-  ) : (
-    <Base
-      lang={lang}
-      title={exhibitor.seo?.title ?? exhibitor.name}
-      description={exhibitor.seo?.description}
-      noIndex={exhibitor.seo?.noIndex}
-      image={exhibitor.seo?.ogImage ?? exhibitor.images?.[0]}
-      path={`exhibitors/${slug}`}
-      editId={exhibitor._id}
-      editType={exhibitor._type}
-    >
-      <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} slot="head" />
-      <ExhibitorDetail lang={lang} exhibitor={exhibitor} listPath="exhibitors" edition={edition} />
-    </Base>
-  )
-}
+<Base
+  lang={lang}
+  title={exhibitor.seo?.title ?? exhibitor.name}
+  description={exhibitor.seo?.description}
+  noIndex={exhibitor.seo?.noIndex}
+  image={exhibitor.seo?.ogImage ?? exhibitor.images?.[0]}
+  path={`exhibitors/${slug}`}
+  editId={exhibitor._id}
+  editType={exhibitor._type}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} slot="head" />
+  <ExhibitorDetail lang={lang} exhibitor={exhibitor} listPath="exhibitors" edition={edition} />
+</Base>

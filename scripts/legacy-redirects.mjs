@@ -119,10 +119,14 @@ const ALIASES = {
   '': '',
   exhibitors: 'exhibitors',
   'exhibitors/2027': 'exhibitors',
-  // The past years' exhibitor lists exist again, at the same addresses.
-  'exhibitors/2026': 'exhibitors/2026',
-  'exhibitors/2025': 'exhibitors/2025',
-  'exhibitors/2024': 'exhibitors/2024',
+  // The past years' exhibitor lists are the exhibitors tab of the
+  // previous-editions section (Kamindu, 2026-10-01). They answered at these
+  // very addresses until then, which is why these are 301s rather than the
+  // self-rules they used to be: `add()` only keeps an old URL's own meaning
+  // while the build still writes a page there.
+  'exhibitors/2026': 'previous-editions/2026/exhibitors',
+  'exhibitors/2025': 'previous-editions/2025/exhibitors',
+  'exhibitors/2024': 'previous-editions/2024/exhibitors',
   'exhibitors/2023': 'previous-editions/2024',
   'news-and-collab': 'visit/food-drinks',
   programme: 'programme',

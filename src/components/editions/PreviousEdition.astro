@@ -8,6 +8,7 @@ import ArtPrize from './ArtPrize.astro';
 import Focus from './Focus.astro';
 import Programme from './Programme.astro';
 import Publication from './Publication.astro';
+import Exhibitors from './Exhibitors.astro';
 import type { LocaleId } from '../../lib/locales';
 import { useTranslations, localePath } from '../../lib/i18n';
 import { getEditionArchive, getPastEditionsIndex, getCurrentEdition } from '../../lib/queries';
@@ -98,6 +99,9 @@ const backLink = { label: t('prevEd.back', { year: current?.year ?? '' }), href:
 const CONTENT: Record<string, any> = {
   overview: Overview,
   'guest-of-honour': GuestOfHonour,
+  // The galleries of that year, moved in from /exhibitors/<year> on
+  // 2026-10-01 so the section holds every tab it shows.
+  exhibitors: Exhibitors,
   'art-prize': ArtPrize,
   focus: Focus,
   programme: Programme,

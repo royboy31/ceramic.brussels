@@ -37,6 +37,11 @@ export interface EditionTab {
    * languages and which `/exhibitors/<year>/<slug>` hangs off, so the pill
    * goes there rather than to a second copy of the list.
    */
+  /**
+   * No tab is external any more - exhibitors was the only one, until its list
+   * moved inside the section. Kept so a future tab can leave the section
+   * without rediscovering `editionRouteParams`' filter.
+   */
   external?: true;
 }
 
@@ -62,7 +67,7 @@ export const TABS: EditionTab[] = [
     segment: { fr: 'invitee-d-honneur' },
     label: 'prevEd.guestOfHonour',
   },
-  { slug: 'exhibitors', segment: { fr: 'exposants', nl: 'exposanten' }, label: 'prevEd.exhibitors', external: true },
+  { slug: 'exhibitors', segment: { fr: 'exposants', nl: 'exposanten' }, label: 'prevEd.exhibitors' },
   { slug: 'art-prize', label: 'prevEd.artPrize' },
   { slug: 'focus', label: 'prevEd.focus' },
   { slug: 'programme', segment: { nl: 'programma' }, label: 'prevEd.programme' },
@@ -114,11 +119,14 @@ export function editionAltPaths(year: number | string, tab?: string): Partial<Re
 }
 
 /**
- * Where a tab's pill points. The exhibitors tab leads out of the section, to
- * the year list at the address the old site gave it.
+ * Where a tab's pill points. Every tab is inside the section now, including
+ * exhibitors: it used to lead out to `exhibitors/<year>`, the address the old
+ * site gave that list, which left two shapes of URL for one year's content and
+ * two sets of year links on the same page (Kamindu, 2026-10-01). The old
+ * addresses 301 onto this one from `scripts/legacy-redirects.mjs`.
  */
 export function editionTabHref(year: number | string, tab: EditionTab, lang: LocaleId = DEFAULT_LOCALE): string {
-  return tab.slug === 'exhibitors' ? `exhibitors/${year}` : editionTabPath(year, tab.slug, lang);
+  return editionTabPath(year, tab.slug, lang);
 }
 
 /* ---------------------------------------------------------------- tabs */
