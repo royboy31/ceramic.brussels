@@ -84,8 +84,7 @@ const bioRight = bio.slice(split);
         images.length ? (
           <Slideshow
             images={images}
-            aspect={433 / 541}
-            fit="contain"
+            fit="width"
             widths={[440, 660, 880, 1320]}
             sizes="(max-width: 900px) 100vw, 433px"
             label={exhibitor.name}
@@ -199,9 +198,9 @@ const bioRight = bio.slice(split);
   .artwork {
     position: relative;
   }
-  /* The pictures keep their own shape inside the 433 × 541 frame
-     (Slideshow fit="contain", Tiphaine 2026-09-25); only the empty
-     stand-in still fills it. */
+  /* The pictures are the column's width and keep their own height
+     (Slideshow fit="width", client 2026-10-01); only the empty stand-in
+     still draws the frames' 433 × 541. */
   .artwork-empty {
     object-fit: cover;
     width: 100%;

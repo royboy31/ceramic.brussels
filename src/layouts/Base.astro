@@ -12,6 +12,7 @@ import {
 import { resolveNavItem } from '../lib/links';
 import { HUBS } from '../lib/hubs';
 import { editionTabPath } from '../lib/previousEditions';
+import { PAST_EDITIONS_PUBLIC } from '../components/launch';
 import { urlFor } from '../sanity/image';
 import EditLink from '../components/EditLink.astro';
 import Header from '../components/Header.astro';
@@ -103,7 +104,7 @@ const siteName = settings?.siteName ?? 'ceramic brussels';
  * no past edition to lead to - and on the previous-editions pages themselves,
  * which pass "← back to <current year>" instead.
  */
-const newestPast = pastEditions[0]?.year;
+const newestPast = PAST_EDITIONS_PUBLIC ? pastEditions[0]?.year : undefined;
 const footerBack =
   backLink ??
   (newestPast
@@ -382,6 +383,11 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
         });
         document.querySelectorAll<HTMLImageElement>('main img').forEach((img) => {
           if (img.complete) return;
+          // Not inside a slideshow: its later slides are lazy, so this
+          // arrival animation played mid-swipe and read as a glitch - one
+          // picture zoomed, the next at rest (client, 2026-10-01). The fade
+          // stays everywhere else.
+          if (img.closest('.slideshow')) return;
           img.classList.add('motion-image');
           img.setAttribute('data-image-pending', '');
           const done = () => img.removeAttribute('data-image-pending');

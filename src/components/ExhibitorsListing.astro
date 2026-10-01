@@ -5,6 +5,7 @@ import PageSections from './PageSections.astro';
 import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
 import { editionTabPath } from '../lib/previousEditions';
+import { PAST_EDITIONS_PUBLIC } from './launch';
 import { countryCode, countryName } from '../lib/countries';
 import { styleAttrs } from '../lib/textStyle';
 
@@ -110,7 +111,9 @@ const links = (year ? [] : [
  * own year band is the year switcher in that context.
  */
 const viewedYear = year ?? edition?.year;
-const yearRow = inSection ? [] : years.length > 1 ? years : [];
+// Off for the launch: with previous editions hidden there is one year to
+// read, so the row would be a single filled pill leading nowhere.
+const yearRow = inSection || !PAST_EDITIONS_PUBLIC ? [] : years.length > 1 ? years : [];
 ---
 
 <ExhibitorHead

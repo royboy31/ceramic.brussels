@@ -8,6 +8,7 @@ import Programme from '../../../components/hubs/Programme.astro';
 import Visit from '../../../components/hubs/Visit.astro';
 import Vip from '../../../components/hubs/Vip.astro';
 import PreviousEdition from '../../../components/editions/PreviousEdition.astro';
+import EditionHidden from '../../../components/editions/EditionHidden.astro';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { HUBS, hubRouteParams, hubFromSegment, tabFromSegment } from '../../../lib/hubs';
 import { getHubPages, getPastEditionsIndex, getExhibitions } from '../../../lib/queries';
@@ -19,6 +20,7 @@ import {
   editionTabPath,
 } from '../../../lib/previousEditions';
 import { localePath } from '../../../lib/i18n';
+import { PAST_EDITIONS_PUBLIC } from '../../../components/launch';
 
 /**
  * Every hub, in every language, from one route.
@@ -85,17 +87,26 @@ const props = Astro.props as {
 const inSection = props.previousEdition || sectionFromSegment(segment, lang);
 const rest = Astro.params.tab as string | undefined;
 
+
 // The section root has no page of its own: it sends the reader to the newest
 // past edition (docs/previous-editions-plan.md §2). Both the old site's
 // `/{lang}/pasteditions` and this build's earlier `/{lang}/editions` land
 // here through the redirect map.
-if (inSection && (props.root || isSectionRoot(rest))) {
-  const newest = (await getPastEditionsIndex(lang))[0]?.year;
-  if (!newest) return Astro.rewrite('/404');
-  return Astro.redirect(localePath(lang, editionTabPath(newest, undefined, lang)), 301);
+const atSectionRoot = inSection && (props.root || isSectionRoot(rest));
+const newestPast = atSectionRoot ? (await getPastEditionsIndex(lang))[0]?.year : undefined;
+if (atSectionRoot) {
+  if (!newestPast) return Astro.rewrite('/404');
+  // Off for the launch, the root is a stub like every other address in the
+  // section - a 301 onto a page that itself moves is two hops and a
+  // permanent redirect that outlives the launch.
+  if (PAST_EDITIONS_PUBLIC) {
+    return Astro.redirect(localePath(lang, editionTabPath(newestPast, undefined, lang)), 301);
+  }
 }
 
-const edition = inSection
+const edition = atSectionRoot
+  ? { year: newestPast as number, tab: undefined as unknown as string }
+  : inSection
   ? props.previousEdition
     ? { year: props.year as number, tab: props.tab as string }
     : editionFromRest(rest, lang)
@@ -122,7 +133,13 @@ if (!edition && !Hub) return Astro.rewrite('/404');
 
 {
   edition ? (
-    <PreviousEdition lang={lang} year={edition.year} tab={edition.tab} />
+    /* Off for the launch: the address keeps answering, its content does not.
+       See EditionHidden and `PAST_EDITIONS_PUBLIC`. */
+    PAST_EDITIONS_PUBLIC ? (
+      <PreviousEdition lang={lang} year={edition.year} tab={edition.tab} />
+    ) : (
+      <EditionHidden lang={lang} year={edition.year} tab={edition.tab} />
+    )
   ) : (
     <Hub lang={lang} tab={tab} />
   )

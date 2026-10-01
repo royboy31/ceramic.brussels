@@ -1,9 +1,10 @@
 ---
 import Base from '../../../../layouts/Base.astro';
 import ExhibitorDetail from '../../../../components/ExhibitorDetail.astro';
-import { LOCALE_IDS, type LocaleId } from '../../../../lib/locales';
-import { getExhibitor, getExhibitorPaths } from '../../../../lib/queries';
+import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../../../lib/locales';
+import { getExhibitor, getExhibitorPaths, getEditions, exhibitorEditions } from '../../../../lib/queries';
 import { editionTabPath } from '../../../../lib/previousEditions';
+import { PAST_EDITIONS_PUBLIC } from '../../../../components/launch';
 
 /**
  * A past edition's exhibitor: /exhibitors/<year>/<slug>. A gallery that came
@@ -11,8 +12,15 @@ import { editionTabPath } from '../../../../lib/previousEditions';
  * gets its own address under that year's list and none hides behind another.
  */
 export async function getStaticPaths() {
-  const { past } = await getExhibitorPaths();
-  const keys = [...new Set(past.map((p) => `${p.year}/${p.slug}`))];
+  const [{ past }, editions] = await Promise.all([getExhibitorPaths(), getEditions(DEFAULT_LOCALE)]);
+  /**
+   * With previous editions off for the launch, only the year `/exhibitors`
+   * opens on keeps its gallery pages - the others would be reachable by
+   * address alone. No legacy redirect points at one, so nothing breaks.
+   */
+  const { landingYear } = exhibitorEditions(editions);
+  const shown = PAST_EDITIONS_PUBLIC ? past : past.filter((p) => p.year === landingYear);
+  const keys = [...new Set(shown.map((p) => `${p.year}/${p.slug}`))];
   return LOCALE_IDS.flatMap((lang) =>
     keys.map((key) => {
       const [year, slug] = key.split('/');
@@ -39,5 +47,5 @@ if (!exhibitor) return Astro.rewrite('/404');
   editId={exhibitor._id}
   editType={exhibitor._type}
 >
-  <ExhibitorDetail lang={lang} exhibitor={exhibitor} listPath={editionTabPath(year, 'exhibitors', lang)} year={year} />
+  <ExhibitorDetail lang={lang} exhibitor={exhibitor} listPath={PAST_EDITIONS_PUBLIC ? editionTabPath(year, 'exhibitors', lang) : 'exhibitors'} year={year} />
 </Base>

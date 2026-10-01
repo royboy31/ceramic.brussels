@@ -2,6 +2,7 @@
 import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
 import { editionTabPath } from '../lib/previousEditions';
+import { PAST_EDITIONS_PUBLIC } from './launch';
 
 /**
  * The title band of the exhibitor pages, as the design's exhibitors pages
@@ -46,8 +47,10 @@ const t = useTranslations(lang);
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 // A past year's list is the exhibitors tab of the previous-editions section
-// since 2026-10-01; this year's is /exhibitors.
-const listPath = year ? editionTabPath(year, 'exhibitors', lang) : 'exhibitors';
+// since 2026-10-01; this year's is /exhibitors. With the section off for the
+// launch there is only this year's, so the tab leads there whatever year the
+// gallery belongs to.
+const listPath = year && PAST_EDITIONS_PUBLIC ? editionTabPath(year, 'exhibitors', lang) : 'exhibitors';
 const tabs = [
   { key: 'galleries', label: t('exhibitors.galleries'), href: localePath(lang, listPath) },
   { key: 'artists', label: t('nav.artists').toLowerCase(), href: localePath(lang, 'artists') },
