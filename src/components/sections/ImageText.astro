@@ -157,8 +157,14 @@ const hasImage = !!section.image?.asset;
   }
 
   @media (max-width: 900px) {
+    /* The .vip pairs too: their span rules are more specific than the two
+       plain selectors and kept eight tracks alive in the four-column phone
+       grid - the shot then centred on its tracks, not the screen (found
+       2026-10-02, VIP about at 390px). */
     .shot,
-    .copy {
+    .copy,
+    .vip .shot,
+    .vip .copy {
       grid-column: 1 / -1;
     }
     .flip .shot {
@@ -166,6 +172,19 @@ const hasImage = !!section.image?.asset;
     }
     .copy {
       margin-top: 1.5rem;
+    }
+  }
+
+  /* The picture to both screen edges on a phone (Léonie, 2026-10-01).
+     Here rather than in site.css: the sweep there pulled by 50vw, which
+     assumes a viewport-centred box and drags the scrollbar into the sum -
+     the row sits exactly one gutter in at this width, so the gutter is the
+     exact pull. The caption-less shot has no text to keep aligned. */
+  @media (width <= 700px) {
+    .shot {
+      width: calc(100% + 2 * var(--gutter));
+      max-width: none;
+      margin-inline: calc(-1 * var(--gutter));
     }
   }
 </style>

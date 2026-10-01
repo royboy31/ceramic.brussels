@@ -775,8 +775,10 @@ const captionOf = (img: any, fallback?: string) => ({
      in at this width, so the gutter is the exact pull, whatever the
      scrollbar. */
   @media (width <= 700px) {
+    /* `.prize-about` on the gallery too: the shorter selector lost to the
+       site.css sweep's and the pictures kept the 50vw pull. */
     .hero figure,
-    .gallery > :global(img) {
+    .prize-about .gallery > :global(img) {
       width: calc(100% + 2 * var(--gutter));
       max-width: none;
       margin-inline: calc(-1 * var(--gutter));
