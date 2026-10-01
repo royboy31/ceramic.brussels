@@ -11,6 +11,7 @@ import { getHubPages, getPartners } from '../../lib/queries';
 import { HUBS, PARTNER_TABS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
 import { styleAttrs } from '../../lib/textStyle';
 import PartnerName from '../PartnerName.astro';
+import LinkPill from '../LinkPill.astro';
 
 /**
  * The partners hub, as the design's partners pages draw it. The content
@@ -121,6 +122,25 @@ const logoScale = (p: any) => {
                   <PortableText value={p.description} fieldStyle={p.descriptionStyle} />
                 </div>
               )}
+              {/* The website button and the hotel's own logo, which this
+                  layout never drew - "the Hoxton logo is in the CMS, but
+                  doesn't appear in the preview nor on the studio website"
+                  (Léonie, 2026-10-01; it is there, `partner.logo`). Same
+                  foot as an institution card: button left, logo right. */}
+              {(p.url || p.logo?.asset) && (
+                <div class="institution-foot partner-foot">
+                  {p.url ? (
+                    <LinkPill lang={lang} href={p.url} label={t('common.website')} external />
+                  ) : (
+                    <span />
+                  )}
+                  {p.logo?.asset && (
+                    <span class="logo-slot" style={`--logo-h:${Math.round(logoHeight(p.logo) * logoScale(p))}px;--logo-s:${logoScale(p)}`}>
+                      <SanityImage image={p.logo} widths={[250, 500]} sizes="250px" class="logo" placeholder={false} />
+                    </span>
+                  )}
+                </div>
+              )}
             </section>
           </div>
         ))
@@ -134,7 +154,17 @@ const logoScale = (p: any) => {
               <div class="text">
                 {p.description && <PortableText value={p.description} fieldStyle={p.descriptionStyle} />}
               </div>
+              {/* "Can you add a website button for each partner under every
+                  body-text, aligned to the left (so facing every logo)?"
+                  - Léonie, 2026-10-01. The partner's name is a link too
+                  (2026-09-25); this is the button of her screenshot, in the
+                  foot opposite the logo. */}
               <div class="institution-foot">
+                {p.url ? (
+                  <LinkPill lang={lang} href={p.url} label={t('common.website')} external />
+                ) : (
+                  <span />
+                )}
                 {p.logo?.asset && (
                   /* Slot height from the file's aspect ratio (`logoHeight`), times the editor's size (`logoScale`). */
                   <span class="logo-slot" style={`--logo-h:${Math.round(logoHeight(p.logo) * logoScale(p))}px;--logo-s:${logoScale(p)}`}>
@@ -206,6 +236,9 @@ const logoScale = (p: any) => {
   }
   .institutions .text :global(p + p) {
     margin-top: 1em;
+  }
+  .partner-foot {
+    margin-top: 28px;
   }
   .institution-foot {
     justify-content: space-between;

@@ -95,10 +95,11 @@ const countries = ([...new Set(exhibitors.map(codeOf).filter(Boolean))] as strin
  * The edition's overview and floor plan - on this year's list only. A past
  * year's list shows neither (client feedback, 2026-09-25, on 2026's).
  */
-const links = (year ? [] : [
-  edition?.overviewUrl && { href: edition.overviewUrl, label: t('editions.overview') },
-  edition?.fairMapUrl && { href: edition.fairMapUrl, label: t('tabs.floorPlan') },
-]).filter(Boolean) as { href: string; label: string }[];
+/* Off for the launch, with the year buttons (Léonie, 2026-10-01: "remove all
+   year buttons + «overview» and «floor plan» buttons on exhibitors page").
+   The floor plan has its own tab under visitors info and the overview is the
+   catalogue, so neither is lost - they are just not on this page. */
+const links = [] as { href: string; label: string }[];
 
 /**
  * The year row, on /exhibitors only. The year being read is a filled pill;

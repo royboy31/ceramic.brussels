@@ -163,9 +163,19 @@ const contactLines = !board && (person.email || person.phone);
     margin-top: 32px;
     display: grid;
   }
-  /* In the text column on desktop, as the frame draws it. */
+  /* In the text column on desktop, as the frame draws it. The type is the
+     site's body, like `.bio` above it: moving the biography out of the text
+     column on 2026-09-30 left it at the browser's 16px, which is what
+     Léonie reported on 2026-10-01 ("body-text has the wrong styling, same
+     as for the art prize jury body text"). */
   .row-bio {
     grid-column: 2;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
+  }
+  .row-bio :global(.rich-text p + p) {
+    margin-top: 24px;
   }
   figure {
     margin: 0;

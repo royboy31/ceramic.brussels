@@ -35,10 +35,20 @@ export function focusLockup(label: string | undefined | null): string | null {
  */
 const JURY_PRIZE_YEARS = [2024, 2025, 2026] as const;
 
-/** The jury prize lockup for an edition year, or null to print the words instead. */
+/**
+ * The jury prize lockup for the edition a winner **exhibits in**, or null to
+ * print the words instead.
+ *
+ * The prize is won one year and shown the next: Léonore Chastagner won in
+ * 2025 and has a stand in 2026, Marie Pic won in 2026 and will show in 2027.
+ * The badge carries the year of the prize, so it is the edition before this
+ * one - "change the «jury prize 2026» logo to «jury prize 2025» logo for
+ * Léonore Chastagner" (Léonie, 2026-10-01).
+ */
 export function juryPrizeLockup(year: number | undefined | null): string | null {
-  return year && (JURY_PRIZE_YEARS as readonly number[]).includes(year)
-    ? `/assets/exhibitors/jury-prize-${year}.png`
+  const prize = year ? year - 1 : null;
+  return prize && (JURY_PRIZE_YEARS as readonly number[]).includes(prize)
+    ? `/assets/exhibitors/jury-prize-${prize}.png`
     : null;
 }
 

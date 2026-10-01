@@ -252,6 +252,13 @@ const widthFit = fit === 'width';
     aspect-ratio: auto;
     margin-top: 14px;
   }
+  /* With a measured height the box is the picture's, whatever shape the
+     picture turns out to be. `--aspect` is the first image's ratio as Sanity
+     reports it, and a picture whose real ratio differs (the about hero: 1.44
+     against an assumed 1.50) made the box 34px wider than the photograph, so
+     the dots sat right of its centre - "the little white circles on the photo
+     ... are not centered on the image" (Léonie, 2026-10-01). The ratio stays
+     as the fallback for a render with no JavaScript. */
   .dots {
     position: absolute;
     top: 0;
@@ -264,6 +271,15 @@ const widthFit = fit === 'width';
     gap: 17px;
     padding-bottom: 16px;
     pointer-events: none;
+  }
+  /* Measured: the box takes the picture's own height and the slideshow's
+     full width, so its centre is the picture's centre. `aspect-ratio` with a
+     definite height drives the width, which is what pushed the dots 17px to
+     the right of the about hero's photograph; freeing it is the fix. Without
+     the script the rule above still draws the box from `--aspect`. */
+  .slideshow[data-measured]:not(.no-aspect) .dots {
+    aspect-ratio: auto;
+    height: var(--media-h);
   }
   .no-aspect .dots {
     position: static;
@@ -362,7 +378,23 @@ const widthFit = fit === 'width';
       slides.forEach((slide, i) =>
         i === index ? slide.setAttribute('data-current', '') : slide.removeAttribute('data-current'),
       );
+      media();
     };
+    /* The picture's height, for the dots that sit on its bottom edge. Read
+       from the slide in view, so it follows a `fit="width"` slideshow where
+       every slide is a different height. */
+    const media = () => {
+      const img = (slides.find((s) => s.hasAttribute('data-current')) ?? slides[0])?.querySelector('img');
+      const height = img?.getBoundingClientRect().height ?? 0;
+      if (height > 0) {
+        show.style.setProperty('--media-h', `${Math.round(height)}px`);
+        show.setAttribute('data-measured', '');
+      }
+    };
+    const remeasure = () => requestAnimationFrame(media);
+    new ResizeObserver(remeasure).observe(show);
+    slides.forEach((slide) => slide.querySelector('img')?.addEventListener('load', remeasure, { once: true }));
+
     /* Only now does the one-caption rule apply: the CSS is gated on this
        attribute, so if the script never runs every caption stays visible
        rather than all of them disappearing. */

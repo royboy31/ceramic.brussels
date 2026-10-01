@@ -267,4 +267,18 @@ const AUTOPLAY_MS = 4500;
       min-height: 220px;
     }
   }
+
+  /* The picture to both screen edges on a phone (Léonie, 2026-10-01: the
+     homepage's Hoxton spotlight and the Bureau Rouge film). The rule lives
+     here rather than in site.css because this component's scoped selectors
+     outrank a global one. */
+  @media (width <= 700px) {
+    .split.feature > :global(img),
+    .split.feature > :global(.video-frame),
+    .split.feature > .feature-empty {
+      width: 100vw;
+      max-width: none;
+      margin-inline: calc(50% - 50vw);
+    }
+  }
 </style>

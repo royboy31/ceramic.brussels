@@ -204,3 +204,100 @@ main .slideshow figure:hover > a > img {
   scale: 1;
   filter: none;
 }
+
+/* The menu's × on a phone: no focus ring after a tap.
+ *
+ * "When the menu is open, can you make sure there is no black square around
+ * the cross?" (Léonie, 2026-10-01, iPhone screenshot). The square is the
+ * site's focus ring - `:focus-visible { outline: 2px solid }` with a 5px
+ * offset. Safari on iOS gives a tapped button `:focus-visible`, which the
+ * spec leaves to the browser and Chrome does not do, so it shows there and
+ * not in our own checks.
+ *
+ * Only the two menu buttons, and only where the pointer is coarse: every
+ * keyboard ring on every other control is untouched.
+ */
+@media (pointer: coarse) {
+  [data-menu-open]:focus-visible,
+  [data-menu-close]:focus-visible {
+    outline: none;
+  }
+}
+
+
+/* The dates mark on a phone: smaller, so it sits beside the wordmark rather
+ * than against it - "reduce a little the size of the 20-24 jan dates on the
+ * left so that they compete less with the ceramic brussels logo" (Léonie,
+ * 2026-10-01). design.css steps it 252 → 210 → 150 → 132; this is the step
+ * below, and the wordmark is 78px at that width.
+ */
+@media (width <= 700px) {
+  .site-date {
+    width: 108px;
+  }
+}
+
+/* Mobile full-bleed, the second pass.
+ *
+ * "Please make sure every photo/slideshow takes up the whole width of the
+ * smartphone screen, it currently is not the case on the following pages"
+ * - Léonie, 2026-10-01, with eight pages named. The first pass (2026-09-30)
+ * gave `Slideshow` and `SanityImage` the `bleed-m` opt-in, which covered the
+ * slideshows; these are the photographs the hub components draw themselves.
+ *
+ * `width: 100vw` with `margin-inline: calc(50% - 50vw)` rather than the
+ * gutter trick `.bleed-m` uses: several of these sit in a grid cell narrower
+ * than the screen, where pulling out by the gutter still leaves an inset.
+ * This reaches the window edge from any depth.
+ *
+ * Only picture blocks are listed. The jury and advisory-board portraits
+ * (`.people`, `PersonCard`) are the exception the client named, and partner
+ * logos keep their slot.
+ */
+@media (width <= 700px) {
+  .u-bleed-m,
+  /* homepage: the partner spotlight's picture and the film */
+  main .feature > img,
+  main .feature > figure,
+  main .feature .video-frame,
+  /* guest of honour: the portrait, the gallery strip, the interview */
+  main .guest-page > .portrait-figure,
+  main .guest-page .gallery-track > figure,
+  main .guest-interview .cell > img,
+  main .guest-interview .cell > figure,
+  /* art prize: the about hero and gallery, the award pictures */
+  main .prize-about .hero > figure,
+  main .prize-about .gallery > img,
+  main .prize-about .gallery figure,
+  main .awards-page .award-grid > article > img,
+  main .awards-page .award-grid > article > figure,
+  /* programme and about: the picture grids */
+  main .gallery .grid li > figure,
+  main .about > .strip,
+  /* visitors info */
+  main .practical .photo-row,
+  main .practical .visit-photo,
+  main .practical .venue-map,
+  main .practical .access img,
+  /* VIP: the picture beside each row */
+  main .vip .image-text > .shot,
+  /* press & media: stories, clippings, photos & videos */
+  main .press-media .story-card > img,
+  main .press-media .story-card > figure,
+  main .press-media .collector-list article > img,
+  main .press-media .collector-list article > figure,
+  main .press-media .press-card > .cover,
+  main .press-media .photo-grid > * {
+    width: 100vw;
+    max-width: none;
+    margin-inline: calc(50% - 50vw);
+  }
+  /* A caption belongs to the text column, not to the picture's new edges. */
+  .u-bleed-m > figcaption,
+  main .feature > figure > figcaption,
+  main .guest-page .gallery-track > figure > figcaption,
+  main .prize-about .hero > figure > figcaption,
+  main .gallery .grid li > figure > figcaption {
+    padding-inline: var(--gutter);
+  }
+}
