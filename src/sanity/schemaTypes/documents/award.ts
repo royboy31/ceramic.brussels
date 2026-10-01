@@ -75,7 +75,7 @@ export const award = defineType({
       title: 'Outcome',
       type: 'localeString',
       description:
-        'What the laureate gets, continuing their name: "will present a solo show during ceramic brussels 2027".',
+        'What the laureate gets, continuing their name: "will present a solo show during ceramic brussels 2027". One line - Enter does nothing here. For more than a sentence use Description below, which takes paragraphs (request #35).',
     }),
     defineField({ name: 'description', title: 'Description', type: 'localeBlock' }),
     defineField({ name: 'citation', title: 'Jury citation', type: 'localeBlock', hidden: true }),
