@@ -581,9 +581,18 @@ const captionOf = (img: any, fallback?: string) => ({
   }
   .people article > div {
     grid-template-columns: 197px minmax(0, 1fr);
-    gap: 40px;
+    gap: 18px 40px;
     margin-top: 28px;
     display: grid;
+  }
+  /* The bio is the grid's second row (so a phone can run it full width), and
+     the first row used to be as tall as the portrait - the bio waited for the
+     portrait's bottom edge, leaving ~200px of nothing between the pills and
+     the text (Kamindu, 2026-10-01). The portrait spans both rows instead:
+     row one is just the role and pills, and the bio starts right under them. */
+  .people article > div > :global(img),
+  .people article > div > .placeholder {
+    grid-row: 1 / 3;
   }
   .people :global(img),
   .people .placeholder {
