@@ -207,7 +207,7 @@ const captionOf = (img: any, fallback?: string) => ({
                           caption: img.caption ?? (img.workTitle ? undefined : artist.name),
                           credit: undefined,
                         }))}
-                        aspect={2 / 3}
+                        fit="width"
                         sizes="(max-width: 640px) 100vw, 433px"
                         widths={[433, 866, 1300]}
                         label={artist.name}
@@ -661,6 +661,16 @@ const captionOf = (img: any, fallback?: string) => ({
      it: the row is two columns, and this puts it back under the pills. */
   .people .jury-bio {
     grid-column: 2;
+    /* The site's body type. The biography moved out of the text column on
+       2026-09-30 and fell back to 16px with it (Léonie, 2026-10-01: "the
+       body text for each jury member is a different size & letter-spacing
+       than the rest of the website ... it wasn't like this before"). */
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
+  }
+  .people .jury-bio :global(.rich-text p + p) {
+    margin-top: 24px;
   }
   @media (width<=800px) {
     .people article > div {

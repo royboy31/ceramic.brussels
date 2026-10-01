@@ -631,10 +631,16 @@ const altPaths = hubAltPaths('programme', tab);
   .pass-text > * + * {
     margin-top: 14px;
   }
+  /* The exhibition's artist and title at the site's intro size - "could the
+     title of each exhibition be bigger, with thinner letter-spacing? Same
+     text-styling as the intro text for the guest of honour about page"
+     (Léonie, 2026-10-01). Those are the `--intro-*` tokens in Base.astro,
+     the ones that set every lead on the site since 2026-09-29. */
   .pass-work {
     margin: 0;
-    font-size: 20px;
-    line-height: 1.3;
+    font-size: var(--intro-size);
+    line-height: var(--intro-lh);
+    letter-spacing: var(--intro-ls);
   }
   .pass-work em {
     font-style: italic;
@@ -651,11 +657,16 @@ const altPaths = hubAltPaths('programme', tab);
   .pass-work em {
     display: block;
   }
+  /* The dates as practical info sets "DAY TICKET": the body size in the
+     semibold, in capitals, with the site's bold-caps tracking rather than
+     the wider one this had (Léonie, 2026-10-01, with that very screenshot). */
   .pass-when {
     margin: 0;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
   }
   .pass-city {
     padding: 3px 10px;
