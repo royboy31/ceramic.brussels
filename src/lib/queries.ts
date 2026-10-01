@@ -139,9 +139,23 @@ const VIDEO = `{
 // `link` (request #25): the homepage grid makes a linked figure clickable.
 const KEY_FIGURES = `keyFigures[]{ _key, value, ${styled('label')}, "link": link ${LINK} }`;
 
+/**
+ * Whether a person serves in a given year (#46). `editions` is the array one
+ * person carries for every year on a jury or team; `edition` is the single
+ * reference it replaced, still read so an unmigrated draft does not silently
+ * drop off a page. A person with neither is year-less - the advisory board.
+ * `year` is a GROQ expression, not a value, so both call sites can pass
+ * their own ("$year", the current edition's).
+ */
+const personInYear = (year: string) =>
+  `((!defined(edition) && count(coalesce(editions, [])) == 0)
+    || edition->year == ${year}
+    || count(editions[@->year == ${year}]) > 0)`;
+
 const PERSON = `{
   _id, name, groups, countryCode, website, instagram, email, phone, order,
-  "year": edition->year,
+  "years": editions[]->year,
+  "year": coalesce(edition->year, editions[0]->year),
   ${styled('role')},
   ${styled('bio')},
   portrait ${IMAGE}
@@ -262,7 +276,7 @@ const SECTIONS = `sections[hidden != true]{
     ${styled('heading')},
     "people": select(
       defined(group) => *[_type == "person" && ^.group in groups
-        && (!defined(edition) || edition->year == ${CURRENT_EDITION}.year)]
+        && ${personInYear(`${CURRENT_EDITION}.year`)}]
         | order(order asc, name asc) ${PERSON},
       people[]-> ${PERSON}
     )
@@ -925,7 +939,7 @@ export function getAwards(lang: LocaleId) {
 export function getPeople(lang: LocaleId, group: string, year?: number) {
   return run<any[]>(
     `*[_type == "person" && $group in groups
-        && (!defined(edition) || edition->year == coalesce($year, ${CURRENT_EDITION}.year))]
+        && ${personInYear(`coalesce($year, ${CURRENT_EDITION}.year)`)}]
       | order(order asc, name asc) ${PERSON}`,
     { lang, group, year: year ?? null },
   );

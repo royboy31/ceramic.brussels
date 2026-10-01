@@ -125,7 +125,9 @@ export const structure: StructureResolver = async (S, context) => {
         S.list()
           .id(id)
           .title(title)
-          .items(years.map((year) => list(`${id}-${year}`, String(year), type, `edition->year == $year && (${filter})`, { year }, ordering))),
+          // A person carries `editions`, an array (#46); events and the rest a
+          // single `edition`. The count clause is false for both when absent.
+          .items(years.map((year) => list(`${id}-${year}`, String(year), type, `(edition->year == $year || count(editions[@->year == $year]) > 0) && (${filter})`, { year }, ordering))),
       );
   };
 
