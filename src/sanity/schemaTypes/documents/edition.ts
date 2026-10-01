@@ -63,6 +63,33 @@ export const edition = defineType({
       description:
         'Exactly one edition should be current. It drives the homepage, the programme, VIP, the partners and the key figures. Which editions’ galleries the site shows is the field below.',
       initialValue: false,
+      /**
+       * Two current editions break the build, and nothing used to say so.
+       * On 2026-10-01 both 2026 and 2027 were ticked: an edition that is
+       * current is no longer a *past* edition, so `/previous-editions/2026/`
+       * stopped being written, the legacy redirect pointing at it had no
+       * target, and `scripts/legacy-redirects.mjs` failed the build - leaving
+       * Cloudflare serving the last good deploy while nothing an editor
+       * published could reach the site. The only signal was a build log.
+       *
+       * A warning rather than an error on purpose: it has to be possible to
+       * fix this state from either document, and a hard error on a condition
+       * that already exists can corner an editor. The message names the other
+       * year so the way out is obvious.
+       */
+      validation: (rule) =>
+        rule.custom<boolean>(async (value, context) => {
+          if (value !== true) return true;
+          const id = (context.document?._id ?? '').replace(/^drafts\./, '');
+          const others = await context
+            .getClient({ apiVersion: '2024-01-01' })
+            .fetch<number[]>(
+              `*[_type == "edition" && isCurrent == true && !(_id in [$id, "drafts." + $id])] | order(year desc).year`,
+              { id },
+            );
+          if (others.length === 0) return true;
+          return `${others.join(' and ')} ${others.length > 1 ? 'are' : 'is'} already the current edition. Only one edition may be current - untick it there first, or the site keeps that year's programme and VIP, and the build fails because this year stops being a past edition.`;
+        }).warning(),
     }),
     defineField({
       name: 'showExhibitors',
@@ -70,7 +97,7 @@ export const edition = defineType({
       type: 'boolean',
       group: 'main',
       description:
-        'Off while the gallery list is still being typed in. The galleries page opens on the newest edition that has this on, and the year buttons under it offer the others; an edition with it off has no gallery pages at all. Separate from Current edition on purpose - that flag also drives the programme, VIP, the partners and the key figures, so an edition can be the current one before its galleries are announced.',
+        'Leave off until this edition’s galleries are announced: the galleries page then skips it and opens on the year before, with year buttons to the earlier ones. Only matters on the current edition - a past edition’s galleries always stay on the site, whatever this says. Separate from Current edition on purpose: that flag also drives the homepage, the programme, VIP, the partners and the key figures, so an edition can be the current one while its gallery list is still being typed in.',
       initialValue: false,
     }),
     defineField({
