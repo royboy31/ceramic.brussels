@@ -1,0 +1,148 @@
+---
+import SanityImage from '../SanityImage.astro';
+import Slideshow from '../Slideshow.astro';
+import PortableText from '../PortableText.astro';
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import { captionParts } from '../../lib/links';
+
+/**
+ * A previous edition's guest of honour. The frame: the lead, then the
+ * portrait beside `biography`, then - on a second run - the installation that
+ * guest made for that fair, its title over the text in one column with a
+ * slideshow beside it, signed by whoever wrote it.
+ *
+ * The person (portrait, biography, nationality) is on the `artist` document
+ * and has been filled for all three past years. The installation is on the
+ * edition (BACKEND-REQUEST #34), because it belongs to that fair and not to
+ * the artist - 2025's guest has been followed by two others since.
+ */
+const { lang, edition, lead } = Astro.props as { lang: LocaleId; edition: any; lead?: any };
+const t = useTranslations(lang);
+
+const guest = edition.guest ?? edition.guestOfHonour;
+const installation = edition.guestInstallation;
+const shots: any[] = (installation?.images ?? []).filter((img: any) => img?.asset);
+const credit = captionParts(guest?.portrait)?.credit;
+---
+
+<div class="content-wrap edition-guest">
+  {lead && <div class="intro-large lead"><PortableText value={lead} /></div>}
+
+  {
+    guest && (
+      <div class="ed-split narrow-first person">
+        {guest.portrait?.asset && (
+          <figure class="guest-portrait">
+            <SanityImage
+              image={guest.portrait}
+              aspect={0.8}
+              sizes="(max-width: 900px) 100vw, 32vw"
+              widths={[400, 600, 900]}
+            />
+            {/* Stored bare, as everywhere else; the © belongs to the rendering. */}
+            {credit && <figcaption>© {credit}</figcaption>}
+          </figure>
+        )}
+
+        <div class="bio">
+          <h2 class="panel-title">{t('prevEd.biography')}</h2>
+          {guest.bio ? (
+            <div class="body-24">
+              <PortableText value={guest.bio} />
+            </div>
+          ) : (
+            <p class="body-24">{guest.name}</p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  {
+    /* BACKEND-REQUEST #34. Renders nothing until the field exists, so the
+       tab is the lead, the portrait and the biography meanwhile. */
+    installation?.text && (
+      <div class="ed-split half installation">
+        <div class="essay">
+          {installation.title && <h2 class="panel-title">{installation.title}</h2>}
+          <div class="body-24">
+            <PortableText value={installation.text} />
+          </div>
+          {installation.author && <p class="signature">{installation.author}</p>}
+        </div>
+
+        {shots.length > 0 && (
+          <div class="shots">
+            <Slideshow
+              images={shots}
+              aspect={1.5}
+              sizes="(max-width: 900px) 100vw, 46vw"
+              label={installation.title ?? guest?.name}
+              id="installation"
+            />
+          </div>
+        )}
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .lead {
+    margin: 0 0 52px;
+  }
+  .lead :global(p + p) {
+    margin-top: 28px;
+  }
+
+  /* Portrait on the narrow column, biography on the wide one: the frame's
+     433 / 40 / 907.
+     **Not `.portrait`.** `src/components/hubs/GuestOfHonour.astro` styles
+     that class through `:global(.portrait)`, without a scope attribute, so
+     its `grid-column: span 4; height: 607px` reaches any page in the same
+     bundle - it made this figure span the whole grid and pushed the
+     biography into the first track. The hub's rule is load-bearing there, so
+     the new class steps aside rather than fighting it. */
+  .guest-portrait {
+    margin: 0;
+  }
+  .guest-portrait :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .guest-portrait figcaption {
+    margin-top: 8px;
+    font-size: 14px;
+    text-align: right;
+    color: var(--color-ink, #050505);
+    opacity: 0.7;
+  }
+
+  .bio :global(p + p) {
+    margin-top: 28px;
+  }
+
+  /* The essay and its pictures, the essay on the left as drawn. */
+  .installation {
+    margin-top: 88px;
+  }
+  .essay :global(p + p) {
+    margin-top: 28px;
+  }
+  .signature {
+    margin-top: 28px;
+    font-size: 24px;
+    letter-spacing: -0.03em;
+  }
+
+  @media (width<=900px) {
+    .installation {
+      margin-top: 48px;
+    }
+    .guest-portrait {
+      max-width: 420px;
+    }
+  }
+</style>

@@ -1,0 +1,56 @@
+---
+import { LOCALES, type LocaleId } from '../../lib/locales';
+import { useTranslations, localePath } from '../../lib/i18n';
+import { editionAltPaths } from '../../lib/previousEditions';
+
+/**
+ * What a previous-editions address answers while the section is off for the
+ * launch (`PAST_EDITIONS_PUBLIC` in `src/components/launch.ts`): a bare page
+ * that sends the reader to the galleries list and tells a crawler not to
+ * keep it.
+ *
+ * It is a page rather than `Astro.redirect` for one reason: a static build
+ * turns a redirect into an HTML file with no `hreflang` tags, and
+ * `scripts/legacy-redirects.mjs` reads those tags to find the French and
+ * Dutch address of every target it rewrites - 61 of the old site's rules
+ * point into this section, and without the tags the build fails on them.
+ * So the three alternates are emitted here, exactly as `Base.astro` writes
+ * them, and the meta refresh does the move. `docs/backend-requests.md` #53
+ * asks for the map to point those rules at /exhibitors/ instead, which would
+ * let this file go.
+ */
+interface Props {
+  lang: LocaleId;
+  year: number;
+  tab?: string;
+}
+
+const { lang, year, tab } = Astro.props;
+const t = useTranslations(lang);
+const site = Astro.site ?? new URL('http://localhost:4321');
+const alts = editionAltPaths(year, tab);
+const target = localePath(lang, 'exhibitors');
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <title>{t('nav.exhibitors')}</title>
+    {
+      LOCALES.map((l) => (
+        <link
+          rel="alternate"
+          hreflang={l.id}
+          href={new URL(localePath(l.id, alts[l.id] ?? `previous-editions/${year}`), site).href}
+        />
+      ))
+    }
+  </head>
+  <body>
+    <p><a href={target}>{t('nav.exhibitors')} →</a></p>
+  </body>
+</html>

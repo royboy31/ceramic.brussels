@@ -520,12 +520,15 @@ const logoHeight = (p: any) => {
   }
   /* The leads (request #19): under a heading, or at the top of a view that
      has none. Wired by Kamindu on 2026-09-22; Lilanga to restyle. */
+  /* "Can you make the intro texts to each section the same size as the intro
+     text on the guest of honour - interview page?" (client, 2026-09-30):
+     the shared intro token, not the body one. */
   .lead {
     max-width: 62ch;
     margin-top: 24px;
-    font-size: var(--body-size);
-    line-height: var(--body-lh);
-    letter-spacing: var(--body-ls);
+    font-size: var(--intro-size);
+    line-height: var(--intro-lh);
+    letter-spacing: var(--intro-ls);
   }
   .lead-row {
     flex-wrap: wrap;
@@ -555,11 +558,14 @@ const logoHeight = (p: any) => {
     margin-top: 80px;
   }
 
+  /* "DEC. 2026" and "NOV. 2026" in the same bold caps as the subtitles
+     (client, 2026-09-30). The weight is on the `strong` inside. */
   .dated {
     text-transform: uppercase;
     align-items: center;
     gap: 12px;
     font-size: 22px;
+    letter-spacing: 0;
     display: flex;
   }
   .dated::after {
@@ -600,15 +606,25 @@ const logoHeight = (p: any) => {
     width: 100%;
     height: 289px;
   }
+  /* "Adapt the 'Marion Verboom', 'Puilaetco' & 'Collect Magazine'
+     font-styling for it to be the same as the galleries names in the
+     galleries list" (client, 2026-09-30) - the shared name token, which also
+     brings the phone size down with it. */
   .story-card h3 {
     margin-top: 8px;
-    font-size: 40px;
-    line-height: 1;
+    font-size: var(--name-size);
+    line-height: var(--name-lh);
+    letter-spacing: var(--name-ls);
+    font-weight: 400;
   }
+  /* The subtitles ("main partner"): the site's bold caps - 600, untracked,
+     as `.eyebrow-strong` sets it (client, 2026-09-30). */
   .story-card strong {
     text-transform: uppercase;
     margin-top: 16px;
     font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 0;
     display: block;
   }
   .story-card p {
@@ -628,11 +644,12 @@ const logoHeight = (p: any) => {
     width: 100%;
     height: 447px;
   }
+  /* Same as the gallery names, on a phone too (client, 2026-09-30). */
   .collector-list h3 {
-    letter-spacing: -0.04em;
+    letter-spacing: var(--name-ls);
     margin-top: 30px;
-    font-size: 40px;
-    line-height: 1.05;
+    font-size: var(--name-size);
+    line-height: var(--name-lh);
   }
   .collector-list p:not(.dated) {
     margin: 22px 0 28px;
@@ -642,10 +659,20 @@ const logoHeight = (p: any) => {
   }
 
   /* press: the clippings */
+  /* Four a row, not the frame's three: "each press article in the 'as seen
+     in the press' section appears really big on the screen, so I was
+     wondering if, for this section exceptionally, you could work with 4
+     columns" (client, 2026-09-30) - their own override of the Figma, and
+     only here. Two a row on a tablet, one on a phone. */
   .press-cards {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 40px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
     display: grid;
+  }
+  @media (width<=1100px) {
+    .press-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
   .press-card {
     border: 1px solid;
@@ -783,15 +810,26 @@ const logoHeight = (p: any) => {
     margin-top: 42px;
     display: grid;
   }
+  /* "The names of the press agencies are too bold, they should be in the
+     Bold caps font-weight, the same that is used in other parts of the
+     website" (client, 2026-09-30): 600 and untracked. They were rendering
+     Black, because the browser's own `strong` is 700 and the site ships no
+     700 face - fixed site-wide in site.css; the tracking is set here. */
   .agency-grid strong {
     text-transform: uppercase;
     font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0;
     display: block;
   }
+  /* "The letter-spacing for 'Sophie Carrée PR' etc. should be set in the
+     body text style" (same note): the body tokens, not a bare 22px. */
   .agency-grid p,
   .agency-grid .mail {
     margin-top: 14px;
-    font-size: 22px;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
   .agency-grid .mail {
     text-underline-offset: 0.12em;

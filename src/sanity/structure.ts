@@ -125,7 +125,9 @@ export const structure: StructureResolver = async (S, context) => {
         S.list()
           .id(id)
           .title(title)
-          .items(years.map((year) => list(`${id}-${year}`, String(year), type, `edition->year == $year && (${filter})`, { year }, ordering))),
+          // A person carries `editions`, an array (#46); events and the rest a
+          // single `edition`. The count clause is false for both when absent.
+          .items(years.map((year) => list(`${id}-${year}`, String(year), type, `(edition->year == $year || count(editions[@->year == $year]) > 0) && (${filter})`, { year }, ordering))),
       );
   };
 
@@ -255,6 +257,10 @@ export const structure: StructureResolver = async (S, context) => {
         list('events-project', `La Cambre ${thisYear}`, 'programmeEvent', `${CURRENT} && section == "project"`, {}, [
           { field: 'startsAt', direction: 'asc' },
         ]),
+        // The exhibition pass tab (#48): partner institutions' exhibitions, a
+        // type of their own, so they are not in the event lists above.
+        list('exhibitions', `Exhibition pass ${thisYear}`, 'exhibition', CURRENT, {}, byOrder),
+        byYear('exhibitions-past', 'Exhibition pass, past years', 'exhibition', 'true', byOrder),
         list('events-hidden', 'Not on the site (no date)', 'programmeEvent', `${CURRENT} && !defined(startsAt)`),
         byYear('events-past', 'Programme, past years', 'programmeEvent', 'true', [{ field: 'startsAt', direction: 'asc' }]),
       ]),

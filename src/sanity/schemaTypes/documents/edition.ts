@@ -63,14 +63,48 @@ export const edition = defineType({
       description:
         'Exactly one edition should be current. It drives the homepage, the programme, VIP, the partners and the key figures. Which editions’ galleries the site shows is the field below.',
       initialValue: false,
+      /**
+       * Two current editions break the build, and nothing used to say so.
+       * On 2026-10-01 both 2026 and 2027 were ticked: an edition that is
+       * current is no longer a *past* edition, so `/previous-editions/2026/`
+       * stopped being written, the legacy redirect pointing at it had no
+       * target, and `scripts/legacy-redirects.mjs` failed the build - leaving
+       * Cloudflare serving the last good deploy while nothing an editor
+       * published could reach the site. The only signal was a build log.
+       *
+       * A warning rather than an error on purpose: it has to be possible to
+       * fix this state from either document, and a hard error on a condition
+       * that already exists can corner an editor. The message names the other
+       * year so the way out is obvious.
+       */
+      validation: (rule) =>
+        rule.custom<boolean>(async (value, context) => {
+          if (value !== true) return true;
+          const id = (context.document?._id ?? '').replace(/^drafts\./, '');
+          const others = await context
+            .getClient({ apiVersion: '2024-01-01' })
+            .fetch<number[]>(
+              `*[_type == "edition" && isCurrent == true && !(_id in [$id, "drafts." + $id])] | order(year desc).year`,
+              { id },
+            );
+          if (others.length === 0) return true;
+          return `${others.join(' and ')} ${others.length > 1 ? 'are' : 'is'} already the current edition. Only one edition may be current - untick it there first, or the site keeps that year's programme and VIP, and the build fails because this year stops being a past edition.`;
+        }).warning(),
     }),
     defineField({
       name: 'showExhibitors',
       title: 'Show this edition’s galleries',
       type: 'boolean',
       group: 'main',
+      /**
+       * Shown on every edition, on Kamindu's say-so (2026-10-01, after it was
+       * briefly hidden everywhere but the current edition). It still only
+       * *acts* on the current edition - a past edition's galleries are always
+       * on the site - and the description carries that, so the box is visible
+       * everywhere and honest about where it does something.
+       */
       description:
-        'Off while the gallery list is still being typed in. The galleries page opens on the newest edition that has this on, and the year buttons under it offer the others; an edition with it off has no gallery pages at all. Separate from Current edition on purpose - that flag also drives the programme, VIP, the partners and the key figures, so an edition can be the current one before its galleries are announced.',
+        'Leave off until this edition’s galleries are announced: the galleries page then skips it and opens on the year before, with year buttons to the earlier ones. Only matters on the current edition - a past edition’s galleries always stay on the site, whatever this says. Separate from Current edition on purpose: that flag also drives the homepage, the programme, VIP, the partners and the key figures, so an edition can be the current one while its gallery list is still being typed in.',
       initialValue: false,
     }),
     defineField({
@@ -166,6 +200,60 @@ export const edition = defineType({
       description: 'The "ceramic brussels 2026 in images" gallery.',
     }),
     defineField({ name: 'film', title: 'Film', type: 'video', group: 'archive' }),
+
+    /* --- previous editions -----------------------------------------------
+       The section at /[lang]/previous-editions/<year> (Figma, Léonie
+       2026-09-28; docs/previous-editions-plan.md). Every field here is
+       optional and additive: a tab renders what it has, and `tabsFor` in
+       src/lib/previousEditions.ts only gives a year a pill once there is
+       something behind it. Nothing existing was changed to add them. */
+    defineField({
+      name: 'archiveLeads',
+      title: 'Tab lead paragraphs',
+      type: 'array',
+      group: 'archive',
+      of: [defineArrayMember({ type: 'editionLead' })],
+      description: 'The opening paragraph of each previous-editions tab. One entry per tab that has one.',
+    }),
+    defineField({
+      name: 'leadImages',
+      title: 'Overview pictures',
+      type: 'array',
+      group: 'archive',
+      of: [defineArrayMember({ type: 'figure' })],
+      options: { layout: 'grid' },
+      description: 'The pair shown under the lead on the overview tab. The first two are used, side by side, 3:2.',
+    }),
+    defineField({
+      name: 'highlights',
+      title: 'Overview highlights',
+      type: 'array',
+      group: 'archive',
+      of: [defineArrayMember({ type: 'editionHighlight' })],
+      description: 'The linked list beside the key figures on the overview tab.',
+    }),
+    defineField({
+      name: 'guestInstallation',
+      title: 'Guest of honour installation',
+      type: 'guestInstallation',
+      group: 'archive',
+      description: 'What that year\'s guest of honour showed, with its own title, text and pictures.',
+    }),
+    defineField({
+      name: 'focus',
+      title: 'Country focus',
+      type: 'editionFocus',
+      group: 'archive',
+      description:
+        'The focus tab\'s words and pictures. Its galleries are the exhibitors flagged "In country focus"; its talks are the programme events with the section "Country focus".',
+    }),
+    defineField({
+      name: 'publication',
+      title: 'Publication',
+      type: 'editionPublication',
+      group: 'archive',
+      description: 'The fair\'s magazine for that year, embedded on the publication tab.',
+    }),
     defineField({ name: 'catalogueUrl', title: 'Catalogue URL', type: 'url', group: 'archive' }),
     defineField({ name: 'overviewUrl', title: 'Overview / brochure URL', type: 'url', group: 'archive' }),
     defineField({ name: 'pressClipsUrl', title: 'Press clips URL', type: 'url', group: 'archive' }),

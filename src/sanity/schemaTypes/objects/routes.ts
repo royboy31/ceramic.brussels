@@ -19,7 +19,11 @@ export const BUILT_IN_ROUTES = [
   { title: 'About', value: 'about' },
   { title: 'Press & media', value: 'press-media' },
   { title: 'News', value: 'news' },
-  { title: 'Past editions', value: 'editions' },
+  // Renamed from "Past editions"/`editions` (#50): the section is
+  // /[lang]/previous-editions/<year>. The old value is still read -
+  // `routePath` and `sitePath` in links.ts translate both - so links
+  // already made keep working; this is only what an editor is offered.
+  { title: 'Previous editions', value: 'previous-editions' },
   // No "Contact" since 2026-09-24: /contact merged into about → "contact &
   // team" and 301s there, so an older link that still says `contact` lands
   // right (links.ts); it is just no longer offered.

@@ -36,11 +36,24 @@ export const person = defineType({
       validation: (rule) => rule.required().min(1),
     }),
     defineField({
+      name: 'editions',
+      title: 'Editions',
+      type: 'array',
+      of: [defineArrayMember({ type: 'reference', to: [{ type: 'edition' }] })],
+      description:
+        'For jury and team: every year this person served. One person, several years - Jean-Marc Dimanche sits on the 2025 and 2027 juries as one record (#46). Leave empty for the advisory board.',
+    }),
+    defineField({
+      // The single reference `editions` replaced (#46): one year per person
+      // meant a returning juror vanished from every year but one. Hidden, not
+      // deleted - scripts/migrate-person-editions.mjs moved each value into
+      // the array, and the queries still read a straggler (an unmigrated
+      // draft) so nothing silently drops.
       name: 'edition',
-      title: 'Edition',
+      title: 'Edition (replaced by Editions)',
       type: 'reference',
       to: [{ type: 'edition' }],
-      description: 'For jury and team: the year this entry applies to. Leave empty for the advisory board.',
+      hidden: true,
     }),
     defineField({
       name: 'role',
@@ -68,10 +81,19 @@ export const person = defineType({
     { title: 'Name', name: 'nameAsc', by: [{ field: 'name', direction: 'asc' }] },
   ],
   preview: {
-    select: { title: 'name', role: 'role.en', groups: 'groups', year: 'edition.year', media: 'portrait' },
-    prepare: ({ title, role, groups, year, media }) => ({
+    select: {
+      title: 'name', role: 'role.en', groups: 'groups', media: 'portrait',
+      // Previews cannot map an array, so the first four years are picked
+      // by index - nobody has served more, and a fifth would only fall
+      // off the subtitle, not the site.
+      y0: 'editions.0.year', y1: 'editions.1.year', y2: 'editions.2.year', y3: 'editions.3.year',
+      year: 'edition.year',
+    },
+    prepare: ({ title, role, groups, year, media, y0, y1, y2, y3 }) => ({
       title,
-      subtitle: [(groups ?? []).join(', '), year, role].filter(Boolean).join(' · '),
+      subtitle: [(groups ?? []).join(', '), [y0, y1, y2, y3, year].filter(Boolean).join('/'), role]
+        .filter(Boolean)
+        .join(' · '),
       media,
     }),
   },

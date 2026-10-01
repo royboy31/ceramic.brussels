@@ -1,0 +1,95 @@
+---
+import PortableText from '../PortableText.astro';
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+
+/**
+ * A previous edition's publication: the lead over the page-flip reader, full
+ * width, as the frame draws it.
+ *
+ * The reader is FlipHTML5 - the 2025 and 2024 issues are still live on the old
+ * site (`online.fliphtml5.com/qogyd/xffh/` and `…/ncuf/`), and the toolbar in
+ * the frame is theirs. It is an ordinary iframe, so nothing here is specific
+ * to them: any reader with an embeddable URL renders the same.
+ *
+ * The URL is BACKEND-REQUEST #36. `tabsFor` only gives a year this tab once
+ * one is set, so this component is never asked to draw an empty frame.
+ */
+const { lang, edition, lead } = Astro.props as { lang: LocaleId; edition: any; lead?: any };
+const t = useTranslations(lang);
+
+const publication = edition.publication;
+const url = publication?.url;
+const label = publication?.title ?? `${edition.title ?? edition.year} — ${t('prevEd.publication')}`;
+---
+
+<div class="content-wrap edition-publication">
+  {lead && <div class="intro-large lead"><PortableText value={lead} /></div>}
+
+  {
+    url && (
+      <div class="reader">
+        <iframe
+          src={url}
+          title={label}
+          loading="lazy"
+          allow="fullscreen"
+          allowfullscreen
+          referrerpolicy="no-referrer-when-downgrade"
+        />
+      </div>
+    )
+  }
+
+  {
+    /* The reader needs a window to be read in; a page that cannot show one
+       still has to lead somewhere. */
+    url && (
+      <p class="away">
+        <a class="pill" href={url} rel="noopener noreferrer" target="_blank">
+          {t('prevEd.publication')} ↗
+        </a>
+      </p>
+    )
+  }
+</div>
+
+<style>
+  .lead {
+    margin: 0 0 52px;
+  }
+  .lead :global(p + p) {
+    margin-top: 28px;
+  }
+
+  /* The frame gives the reader the full page width in a landscape window.
+     A page-flip reader shows two pages side by side, so the ratio is wide;
+     below it the aspect gives way to a fixed height that still fits a phone
+     screen without the toolbar being cut off. */
+  .reader {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    width: 100%;
+    background: #3f3f3f;
+  }
+  .reader iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  .away {
+    margin: 20px 0 0;
+  }
+
+  @media (width<=700px) {
+    .reader {
+      aspect-ratio: auto;
+      height: 70vh;
+      min-height: 380px;
+    }
+  }
+</style>

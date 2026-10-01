@@ -4,6 +4,8 @@ import ExhibitorHead from './ExhibitorHead.astro';
 import PageSections from './PageSections.astro';
 import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
+import { editionTabPath } from '../lib/previousEditions';
+import { PAST_EDITIONS_PUBLIC } from './launch';
 import { countryCode, countryName } from '../lib/countries';
 import { styleAttrs } from '../lib/textStyle';
 
@@ -15,9 +17,14 @@ import { styleAttrs } from '../lib/textStyle';
  * country and the pills all filter the rendered list in place, so the page
  * is complete without JavaScript and costs nothing until clicked.
  *
- * The current edition's list is /exhibitors, wrapped in the Exhibitors main
- * page's lead and blocks. A past edition's is /exhibitors/<year>, the address
- * the old site gave its year lists, with a way back to this year's.
+ * **One list, two places.** /exhibitors is the current edition's, wrapped in
+ * the Exhibitors main page's lead and blocks. A past edition's is a tab of the
+ * previous-editions section, rendered by PreviousEdition.astro, which supplies
+ * that section's year band and pills - so this component draws no chrome of
+ * its own there and no year row: the section already answers "which year".
+ * The year row below belongs to /exhibitors alone, and its past years lead
+ * into the section (Kamindu, 2026-10-01: two shapes of URL for one year's
+ * content put two sets of year links on the same page).
  */
 interface Props {
   lang: LocaleId;
@@ -26,21 +33,26 @@ interface Props {
   edition: any;
   /** The Exhibitors main page - the current edition's list only. */
   page?: any;
-  /** Set on a past edition's list. */
+  /** Set on a past edition's list, which is a tab of the section. */
   year?: number;
-  currentYear?: number;
   /**
-   * Every edition with exhibitors, newest first, for the year row the old
-   * site had ("→ 2026 → 2025 → 2024"): the list being read is a filled pill,
-   * the others link to their year, this year's to /exhibitors (client
+   * Every edition with galleries, newest first, for the year row on
+   * /exhibitors ("→ 2026 → 2025 → 2024"): the year being read is a filled
+   * pill and each other year leads to its previous-editions page (client
    * feedback, 2026-09-25: 2026 was only reachable through the artists).
+   * Left unset on a past year's tab, where the section's year band does this.
    */
   years?: { year: number; current: boolean }[];
   /** `_id`s of the exhibitors that won one of the fair's awards, for the "awards" filter. */
   awarded?: Set<string>;
+  /**
+   * True on a past year's tab: the section route has already drawn the year
+   * band and the pills, so this draws the list and nothing around it.
+   */
+  inSection?: boolean;
 }
 
-const { lang, exhibitors, edition, page, year, currentYear, years = [], awarded = new Set<string>() } = Astro.props;
+const { lang, exhibitors, edition, page, year, years = [], awarded = new Set<string>(), inSection = false } = Astro.props;
 const t = useTranslations(lang);
 
 /** First letter of the sort name, folded so "Éclat" files under E. */
@@ -52,18 +64,26 @@ const initial = (ex: any) =>
     .charAt(0)
     .toUpperCase();
 
-/** In the client's order (2026-09-16): awards right after solo show, publishers last. */
-const filters = [
-  { id: 'solo-show', label: t('exhibitors.soloShow'), has: (ex: any) => ex.soloShow },
-  { id: 'awards', label: t('nav.awards').toLowerCase(), has: (ex: any) => awarded.has(ex._id) },
-  { id: 'country-focus', label: edition?.countryFocus ?? t('exhibitors.countryFocus'), has: (ex: any) => ex.inCountryFocus },
-  {
-    id: 'jury-prize',
+/**
+ * In the client's order (2026-09-16): awards right after solo show,
+ * publishers last. A past year's list follows the previous-editions frame
+ * instead (Léonie, 2026-09-28), which puts the focus third, publishers
+ * fourth, the jury prize fifth and awards last.
+ */
+const FILTERS = {
+  'solo-show': { label: t('exhibitors.soloShow'), has: (ex: any) => ex.soloShow },
+  awards: { label: t('nav.awards').toLowerCase(), has: (ex: any) => awarded.has(ex._id) },
+  'country-focus': { label: edition?.countryFocus ?? t('exhibitors.countryFocus'), has: (ex: any) => ex.inCountryFocus },
+  'jury-prize': {
     label: `${t('exhibitors.juryPrize')}${edition?.year ? ` ${edition.year - 1}` : ''}`,
     has: (ex: any) => ex.kind === 'jury-prize',
   },
-  { id: 'publishers', label: t('exhibitors.publishers'), has: (ex: any) => ex.kind === 'publisher' },
-].filter((f) => exhibitors.some(f.has));
+  publishers: { label: t('exhibitors.publishers'), has: (ex: any) => ex.kind === 'publisher' },
+} as const;
+const FILTER_ORDER = year
+  ? (['solo-show', 'country-focus', 'publishers', 'jury-prize', 'awards'] as const)
+  : (['solo-show', 'awards', 'country-focus', 'jury-prize', 'publishers'] as const);
+const filters = FILTER_ORDER.map((id) => ({ id, ...FILTERS[id] })).filter((f) => exhibitors.some(f.has));
 
 /** The countries in the list for the "search by country" menu: filtered by code, named in full, A–Z by name. */
 const codeOf = (ex: any) => countryCode(ex.countryCode ?? ex.country);
@@ -80,22 +100,40 @@ const links = (year ? [] : [
   edition?.fairMapUrl && { href: edition.fairMapUrl, label: t('tabs.floorPlan') },
 ]).filter(Boolean) as { href: string; label: string }[];
 
-/** The year row: only when there is more than one year to choose from. */
+/**
+ * The year row, on /exhibitors only. The year being read is a filled pill;
+ * every other year leads to **its previous-editions page**, which is where a
+ * past year's content lives - galleries included, as that section's exhibitors
+ * tab. It used to lead to /exhibitors/<year>, a second address for the same
+ * list, which is what put two sets of year links on one page.
+ *
+ * A past year's tab passes no `years`, so nothing renders there: the section's
+ * own year band is the year switcher in that context.
+ */
 const viewedYear = year ?? edition?.year;
-const yearRow = years.length > 1 ? years : [];
+// Off for the launch: with previous editions hidden there is one year to
+// read, so the row would be a single filled pill leading nowhere.
+const yearRow = inSection || !PAST_EDITIONS_PUBLIC ? [] : years.length > 1 ? years : [];
 ---
 
-<ExhibitorHead lang={lang} active="galleries" edition={edition} year={year} alphabet={exhibitors.length > 0} />
+<ExhibitorHead
+  lang={lang}
+  active="galleries"
+  edition={edition}
+  year={year}
+  alphabet={exhibitors.length > 0}
+  bandless={inSection}
+/>
 
 {
-  (page?.intro || links.length > 0 || yearRow.length > 0 || (year && currentYear)) && (
+  (page?.intro || links.length > 0 || yearRow.length > 0) && (
     <div class="exhibitor-intro">
       {page?.intro && (
         <p class="intro-large" {...styleAttrs(page.introStyle)}>
           {page.intro}
         </p>
       )}
-      {(links.length > 0 || yearRow.length > 0 || (year && currentYear)) && (
+      {(links.length > 0 || yearRow.length > 0) && (
         <p class="edition-links">
           {yearRow.map((y) =>
             y.year === viewedYear ? (
@@ -103,13 +141,10 @@ const yearRow = years.length > 1 ? years : [];
                 {y.year}
               </span>
             ) : (
-              <a href={localePath(lang, y.current ? 'exhibitors' : `exhibitors/${y.year}`)}>{y.year} →</a>
+              <a href={localePath(lang, y.current ? 'exhibitors' : editionTabPath(y.year, 'exhibitors', lang))}>
+                {y.year} →
+              </a>
             ),
-          )}
-          {yearRow.length === 0 && year && currentYear && (
-            <a href={localePath(lang, 'exhibitors')}>
-              {t('nav.exhibitors').toLowerCase()} {currentYear} →
-            </a>
           )}
           {links.map((l) => (
             <a href={l.href} target="_blank" rel="noopener noreferrer">

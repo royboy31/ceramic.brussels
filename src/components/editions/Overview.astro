@@ -1,0 +1,241 @@
+---
+import SanityImage from '../SanityImage.astro';
+import PortableText from '../PortableText.astro';
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import { resolveLink } from '../../lib/links';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * A previous edition's overview, its year's own address. The frame: the lead,
+ * two pictures side by side, then `key figures` and `highlights` in two
+ * columns under ruled headings.
+ *
+ * **Key figures flow, they do not stack.** The frame draws three rows with two
+ * figures combined on the middle one, and the data holds five for 2025 with
+ * different numbers - the frame's are illustrative. Both are the same layout:
+ * every figure the editor entered, set on a wrapping line so as many share a
+ * row as fit (docs/previous-editions-plan.md §9.6). Unruled, unlike the ruled
+ * table the homepage and `/editions` use.
+ */
+const { lang, edition, lead } = Astro.props as { lang: LocaleId; edition: any; lead?: any };
+const t = useTranslations(lang);
+
+/* BACKEND-REQUEST #33: the pair of pictures under the lead. Until the field
+   exists, the cover and the first archive photo stand in, so the row is never
+   half-empty and never a 60-picture gallery. */
+const pair: any[] = ((edition.leadImages ?? []).filter((img: any) => img?.asset) as any[]).slice(0, 2);
+const fallbackPair = [edition.cover, (edition.images ?? []).find((img: any) => img?.asset)].filter(
+  (img: any) => img?.asset,
+);
+const images = pair.length ? pair : fallbackPair;
+
+const figures: any[] = edition.keyFigures ?? [];
+
+/**
+ * "17,840" → 17840; "200+" → 200 with a "+" suffix. The numerals count up as
+ * they scroll into view, the same as the homepage's grid: the observer that
+ * drives it is global, in `Base.astro`, and picks up any `[data-count]`, so
+ * emitting the two attributes is the whole of it. A value the parser cannot
+ * read (no digits) gets no attribute and simply stands still.
+ *
+ * Kept here rather than shared with `sections/KeyFigures.astro`, which has
+ * the same four lines: the one place both could live in is `src/lib/`, which
+ * is Kamindu's apart from `i18n.ts` and `placeholders.ts`.
+ */
+const count = (value: string) => {
+  const m = String(value ?? '').match(/^([\d.,\s]+)(.*)$/);
+  if (!m) return null;
+  const n = Number(m[1].replace(/[^\d]/g, ''));
+  return Number.isFinite(n) ? { n, suffix: m[2].trim() } : null;
+};
+
+/* BACKEND-REQUEST #33: the highlights column - editor-written links, mostly
+   onto this edition's own tabs. `resolveLink` handles every shape a `link`
+   takes and writes an internal one out in the reading page's language. The
+   label beside it is the highlight's own, not the link's. */
+const highlights = (edition.highlights ?? [])
+  .map((h: any) => {
+    const link = resolveLink(lang, h?.link);
+    // `resolveLink` carries a `label` of its own (the link object's, empty
+    // here), so it is spread first and the highlight's own label wins.
+    return link && h?.label ? { ...link, key: h._key, label: h.label, labelStyle: h.labelStyle } : null;
+  })
+  .filter(Boolean) as { key: string; label: string; labelStyle?: any; href: string; external: boolean; arrow: string }[];
+---
+
+<div class="content-wrap edition-overview">
+  {lead && <div class="intro-large lead"><PortableText value={lead} /></div>}
+
+  {
+    images.length > 0 && (
+      <div class:list={['ed-split', 'half', 'lead-images', { single: images.length === 1 }]}>
+        {images.map((image: any) => (
+          <SanityImage image={image} aspect={1.5} sizes="(max-width: 900px) 100vw, 46vw" widths={[600, 900, 1400]} />
+        ))}
+      </div>
+    )
+  }
+
+  <div class="ed-split half panels">
+    {
+      figures.length > 0 && (
+        <section class="figures">
+          <h2 class="panel-title">{t('prevEd.keyFigures')}</h2>
+          <div class="stats">
+            {figures.map((figure: any) => {
+              const c = count(figure.value);
+              return (
+                <div class="stat">
+                  <strong>
+                    {/* An invisible copy of the finished value holds the
+                        numeral's width open while it counts. Without it the
+                        row is a wrapping line, so `0` growing into `17,840`
+                        would drag every figure after it across the column and
+                        re-wrap the block on the way. */}
+                    <span class="sizer" aria-hidden="true">{figure.value}</span>
+                    <span class="value" data-count={c?.n} data-count-suffix={c?.suffix || undefined}>
+                      {figure.value}
+                    </span>
+                  </strong>
+                  <span {...styleAttrs(figure.labelStyle)}>{figure.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      highlights.length > 0 && (
+        <section class="highlights">
+          <h2 class="panel-title">{t('prevEd.highlights')}</h2>
+          <ul>
+            {highlights.map((h) => (
+              <li>
+                <a class="text-link" href={h.href} {...(h.external ? { rel: 'noopener noreferrer' } : {})}>
+                  <span {...styleAttrs(h.labelStyle)}>{h.label}</span>{' '}
+                  <span class="link-arrow" data-arrow={h.arrow}>{h.arrow}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+
+  {
+    /* Nothing entered for this year yet: say so rather than draw empty rules.
+       Every past edition has key figures today, so this is the 2027-becomes-
+       past case, not a normal one. */
+    figures.length === 0 && highlights.length === 0 && images.length === 0 && !lead && (
+      <p class="empty">{t('editions.empty')}</p>
+    )
+  }
+</div>
+
+<style>
+  .lead {
+    margin: 0 0 52px;
+  }
+  .lead :global(p + p) {
+    margin-top: 28px;
+  }
+
+  /* 670 x 447 each on the frame - 3:2, side by side, 40px apart. */
+  .lead-images {
+    margin-bottom: 88px;
+  }
+  .lead-images.single {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 670px;
+  }
+  .lead-images :global(img) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* The frame rules the heading (that is `.panel-title`, 2px) and **nothing
+     else** - the figures under it stand free, about 40px apart, the numeral
+     around 100px and its label around 40px beside it. An earlier pass ruled
+     every row, which the frame does not.
+
+     And they are a **wrapping line, not a stack**. On the frame `13,000
+     visitors` fills the first row, `65 exhibitors from` and `13 countries`
+     share the second, `200 artists` starts the third. Nothing in the data
+     pairs them: each figure is only as wide as its own number and label, and
+     the next joins it when the column has room. So flex-wrap, and the five
+     figures 2025 actually holds settle into the frame's three rows by
+     themselves - which is what the frame's illustrative numbers were showing
+     (docs/previous-editions-plan.md §9.6). */
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 34px;
+    /* Between two figures on one row. The frame sets it about level with the
+       gap inside a pair, so the row reads as one line. */
+    column-gap: clamp(14px, 1.9vw, 28px);
+  }
+  /* 22-29px between the numeral and its label on the frame; in em of the
+     numeral, not of the row, or it collapses to nothing. */
+  .stat {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(12px, 1.7vw, 26px);
+  }
+  /* `inline-grid` so the sizer and the live numeral share one cell, and the
+     numeral is as wide as its finished self from the first frame. */
+  .stat strong {
+    display: inline-grid;
+    font-size: clamp(3rem, 7vw, 6.25rem);
+    font-weight: 400;
+    line-height: 0.78;
+    letter-spacing: -0.05em;
+  }
+  .stat .sizer,
+  .stat .value {
+    grid-area: 1 / 1;
+    text-align: left;
+  }
+  /* `aria-hidden` keeps it out of the accessibility tree; `user-select` keeps
+     it out of a copied selection, which would otherwise read "17,84017,840". */
+  .stat .sizer {
+    visibility: hidden;
+    user-select: none;
+  }
+  /* The label only - `.stat span` would catch the two spans inside `strong`. */
+  .stat > span {
+    font-size: clamp(1.25rem, 2.8vw, 2.5rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  /* Four underlined links on a ~40px pitch, as the frame sets them. */
+  .highlights ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .highlights a {
+    font-size: clamp(1.15rem, 2.2vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
+  }
+
+  .empty {
+    font-size: 24px;
+  }
+
+  @media (width<=900px) {
+    .lead-images {
+      margin-bottom: 48px;
+    }
+  }
+</style>

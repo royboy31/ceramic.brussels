@@ -118,10 +118,13 @@ const AUTOPLAY_MS = 4500;
   }
   /* Copy and picture in two equal halves, 40px apart, both ways round
      (homepage frame: a 655px picture either side). */
+  /* "Could you leave less of a gap in between each news?" (client,
+     2026-09-30): 44 → 30. Only the news rows move - the guest feature (82)
+     and the video (80) set their own, deliberately larger. */
   .split.feature {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
-    margin-top: 44px;
+    margin-top: 30px;
   }
   .split.feature > :global(img),
   .feature-empty {
@@ -176,9 +179,19 @@ const AUTOPLAY_MS = 4500;
       margin: 15px var(--gutter) 40px;
       display: flex;
     }
-    .feature--news > :global(img),
-    .feature--news > .feature-empty {
-      order: -1;
+    /* Picture first, then its text, on **every** feature row: "each news
+       should appear with the photo first, then with the corresponding news
+       text ... see screenshot where there are two consecutive slideshows on
+       the page" (client, 2026-09-30).
+
+       The old rule ordered `.feature--news > img`, which misses two cases:
+       a news item with several pictures renders a `.slideshow`, not an
+       `img`, so its copy stayed on top - and a guest row draws its picture
+       first in the DOM anyway. Between them you got a news slideshow
+       followed by a guest picture, which is the two-in-a-row they saw.
+       Ordering the copy instead covers every picture element there is. */
+    .split.feature > .feature__copy {
+      order: 1;
     }
     .kicker {
       font-size: 22px;

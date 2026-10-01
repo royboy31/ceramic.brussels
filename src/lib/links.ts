@@ -1,6 +1,13 @@
 import { LOCALE_IDS, type LocaleId } from './locales';
 import { localePath } from './i18n';
 import { HUBS, PARTNER_TABS, hubFromSegment, hubTabPath, tabFromSegment } from './hubs';
+import {
+  sectionSegment as edSectionSegment,
+  tabSegment as edTabSegment,
+  tabFromSegment as edTabFromSegment,
+  editionTabPath as edTabPath,
+  TABS as ED_TABS,
+} from './previousEditions';
 
 /**
  * Turns a `link` object from Sanity (see src/sanity/schemaTypes/objects/link.ts)
@@ -155,6 +162,24 @@ export function sitePath(input: string | undefined, lang: LocaleId): string | nu
   if ((LOCALE_IDS as readonly string[]).includes(segments[0])) segments.shift();
 
   const [first, second, ...rest] = segments;
+
+  // Previous editions, in whichever language it is written and under the
+  // `editions` word this build used before the section was designed
+  // (2026-09-30). The second segment is the year and the third the tab, so
+  // both are read back to identifiers and put out in `lang` - the same
+  // treatment a hub's segments get below.
+  if (first && (first === 'editions' || LOCALE_IDS.some((l) => edSectionSegment(l) === first))) {
+    const [, , third] = segments;
+    const year = /^\d{4}$/.test(second ?? '') ? second : null;
+    // No year: the section root, which the route redirects onto the newest
+    // past edition - there is no index page (docs/previous-editions-plan.md).
+    if (!year) return localePath(lang, edSectionSegment(lang)) + hash;
+    const tab = third
+      ? LOCALE_IDS.map((l) => edTabFromSegment(third, l)).find((t) => ED_TABS.some((x) => x.slug === t))
+      : undefined;
+    return localePath(lang, edTabPath(year, tab, lang)) + hash;
+  }
+
   const hub = first && (HUBS[first] ? first : LOCALE_IDS.map((l) => hubFromSegment(first, l)).find(Boolean));
   let path = segments.join('/');
   if (hub) {
@@ -173,6 +198,15 @@ export function sitePath(input: string | undefined, lang: LocaleId): string | nu
  */
 function routePath(route: string, anchor?: string, lang?: LocaleId): string {
   if (HUBS[route]) return hubTabPath(route, anchor, lang);
+  // "Previous editions" + a year is the year page. The Studio offers
+  // `previous-editions` since #50 and offered `editions` before it, so both
+  // are read and links already made keep working
+  // (docs/previous-editions-plan.md §1).
+  if (route === 'editions' || route === 'previous-editions') {
+    return /^\d{4}$/.test(anchor ?? '')
+      ? edTabPath(anchor as string, undefined, lang)
+      : edSectionSegment(lang);
+  }
   if (!anchor) return route;
   return `${route}/${anchor}`;
 }

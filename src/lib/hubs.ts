@@ -65,6 +65,14 @@ export interface HubTab {
    */
   link?: { route: string; tab?: string };
   /**
+   * A tab whose content is documents of its own rather than a `page`: the
+   * exhibition pass, which lists `exhibition` records (#48). A `pageTabs` hub
+   * normally drops a tab with no published page, which is right when the page
+   * *is* the content and wrong here. Such a tab is on the site when it has
+   * either - `has` in `hubRouteParams`.
+   */
+  ownContent?: true;
+  /**
    * Behind the VIP gate (docs/vip-access.md). A locked tab is never
    * prerendered: the Worker renders it on request once src/middleware.ts has
    * found a VIP session, and sends everyone else to the hub's access page.
@@ -135,8 +143,16 @@ export const HUBS: Record<string, Hub> = {
     // and already redirects onto this hub root, so the move costs no URL; the
     // 2026 talks page (`programme-69`) is re-pointed at the root in
     // scripts/legacy-redirects.mjs, and src/sanity/previewPaths.ts follows.
-    // The design's fourth pill, "exhibition pass (coming up)", is deliberately
-    // not here: a tab with no content is a pill onto an empty page.
+    // The fourth pill is the exhibition pass (backend request #48, merged with
+    // #36; Léonie's frame of 2026-09-30). It was left out while there was
+    // nothing behind it - a tab with no content is a pill onto an empty page -
+    // and the `exhibition` document type is what changed that.
+    //
+    // The frame draws the pills in a different order, La Cambre first. Not
+    // followed: talks is the hub root, so /[lang]/programme *is* the talks
+    // page and `programme-69` redirects onto it. Reordering would move a URL
+    // and need a redirect for no gain the client asked for (Lilanga raised it,
+    // Kamindu agreed, 2026-10-01).
     tabs: [
       { slug: 'talks', segment: { fr: 'conferences' }, label: 'tabs.talks' },
       // The award ceremony: a tab of its own since the client's mock-up of
@@ -145,6 +161,12 @@ export const HUBS: Record<string, Hub> = {
       // had this page, so the segments are simply translated.
       { slug: 'awards', segment: { fr: 'remise-des-prix', nl: 'prijsuitreiking' }, label: 'tabs.awardCeremony' },
       { slug: 'la-cambre', label: 'tabs.laCambre' },
+      {
+        slug: 'exhibition-pass',
+        segment: { fr: 'pass-expositions', nl: 'tentoonstellingspas' },
+        label: 'tabs.exhibitionPass',
+        ownContent: true,
+      },
       // VIP left this hub for one of its own (Figma VIP frames, 2026-09-17).
     ],
   },
@@ -316,13 +338,17 @@ export function hubTabHref(route: string, tab: HubTab, lang: LocaleId = DEFAULT_
  */
 export function hubRouteParams(
   locales: readonly LocaleId[],
-  { includeLocked = !import.meta.env.PROD, pages = {} as Record<string, any[]> } = {},
+  {
+    includeLocked = !import.meta.env.PROD,
+    pages = {} as Record<string, any[]>,
+    has = {} as Record<string, boolean>,
+  } = {},
 ) {
   return locales.flatMap((lang) =>
     Object.keys(HUBS).flatMap((route) =>
       HUBS[route].tabs
         .filter((tab) => !tab.link && (includeLocked || !tab.locked))
-        .filter((tab) => tabHasPage(route, tab, pages[route] ?? []))
+        .filter((tab) => tabHasPage(route, tab, pages[route] ?? [], has))
         .map((tab, i) => ({
           params: {
             lang,
@@ -345,9 +371,12 @@ export function pageForTab(pages: any[], slug: string) {
  * page is missing from `pages` - unpublished, since a build only sees
  * published documents. A preview render reads drafts, so there the tab stays.
  */
-export function tabHasPage(route: string, tab: HubTab, pages: any[]) {
+export function tabHasPage(route: string, tab: HubTab, pages: any[], has: Record<string, boolean> = {}) {
   const hub = HUBS[route];
   if (!hub?.pageTabs || tab.link || tab === hub.tabs[0]) return true;
+  // A tab that carries its own documents is on the site once it has either
+  // them or a page - its lead is a page field, its list is not (#48).
+  if (tab.ownContent && has[`${route}/${tab.slug}`]) return true;
   return !!pageForTab(pages, tab.slug);
 }
 

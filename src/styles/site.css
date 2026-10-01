@@ -1,0 +1,206 @@
+/*
+ * Our own cross-cutting rules, loaded after `design.css`.
+ *
+ * `design.css` is the design build's compiled stylesheet, copied verbatim so
+ * the design markup pastes into the components as is. This file is the other
+ * half: rules that are ours, that apply across many components, and that
+ * would otherwise have to be repeated in a dozen scoped `<style>` blocks.
+ *
+ * Keep it small. Anything that belongs to one component still belongs in that
+ * component's scoped block; this is only for what genuinely crosses them.
+ */
+
+/* ------------------------------------------------------- full-bleed photos
+ *
+ * "On the smartphone, every time there's a photo, there's always a margin on
+ * the left and right of the photo, could you systematically make these
+ * photos/slideshows the whole width of the page? (…) basically everywhere
+ * apart from the jury & advisory board pages" - client, 2026-09-30.
+ *
+ * `.content-wrap` carries `padding-inline: var(--gutter)`, so a photo inside
+ * it stops short of the screen. This pulls it back out by exactly that much.
+ * Jury and advisory board portraits are `PersonCard` → `SanityImage`, which
+ * never opts in, so they keep their inset without needing an exception.
+ */
+@media (width <= 700px) {
+  .bleed-m {
+    margin-inline: calc(var(--gutter) * -1);
+    width: calc(100% + var(--gutter) * 2);
+    max-width: none;
+  }
+  /* The picture goes to the edge; its caption does not follow it there. */
+  .bleed-m > figcaption,
+  .bleed-m figure > figcaption {
+    padding-inline: var(--gutter);
+  }
+}
+
+/* ---------------------------------------------------------- caption sizing
+ *
+ * "I feel like the captions are a bit too visible: they should be more
+ * discreet. Could you make them smaller everywhere, both the slideshow mark
+ * (so 1/3, 2/3, etc.) and the text on the bottom right of every
+ * photo/slideshow?" - client, 2026-09-30.
+ *
+ * Captions are drawn in fourteen components, each with its own scoped block,
+ * and several parents reach into a child's caption: `ArtPrize.astro` has
+ * `.image :global(figcaption)`, specificity (0,2,1), which beat `Slideshow`'s
+ * own scoped rule when that was tried first. Rather than chase every one of
+ * those, sizing lives here, once, with `!important` confined to this mobile
+ * query. `Slideshow.astro` keeps only its spacing.
+ */
+@media (width <= 700px) {
+  main figcaption {
+    font-size: 12px !important;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+  }
+  /* The mark stays the larger of the two, as it is on the frames; only the
+     pair steps down together. */
+  main .slideshow .counter {
+    font-size: 15px !important;
+  }
+}
+
+/* ------------------------------------------------------------ bold in text
+ *
+ * "Inside the accordions, sometimes there are parts of the text that is set
+ * in what looks like the Black weight. Could you make this default Bold state
+ * less Bold by maybe using the weight just under the Black, so the true Bold
+ * or the Semi Bold? It currently looks a bit intense." - client, 2026-09-30.
+ *
+ * They are reading it right. Noi Grotesk is loaded at three weights only -
+ * 400, 600 and 900 (`Base.astro`) - and the browser's own rule for `strong`
+ * is 700. CSS matching for 700 looks upwards first, finds no 700 and no 800,
+ * and lands on **900, the Black face**. Nothing in the repo asks for it: there
+ * is not one `font-weight: 700` or `bold` in `src/`, so this is the UA default
+ * falling through, everywhere rich text has a bold word - not only the FAQ.
+ *
+ * 600 is the real Semi Bold, which is the weight they asked for.
+ */
+main :is(strong, b) {
+  font-weight: 600;
+}
+
+/* -------------------------------------------------------------- the menu
+ *
+ * "Make it narrower so that, when open on a slightly shorter window than
+ * full page, the menu doesn't hide the ceramic brussels title" - client,
+ * 2026-09-30. Measured: it hides it at *every* width, not only narrow ones.
+ * design.css sets `clamp(430px, 48.2vw, 694px)`, and the wordmark's right
+ * edge sits at about 0.57 of the viewport:
+ *
+ *     1440  wordmark ends 792, panel started 746
+ *     1280  wordmark ends 712, panel started 663
+ *     1024  wordmark ends 584, panel started 530
+ *
+ * `min(41vw, 600px)` keeps the panel's left edge clear of it all the way
+ * down - 850, 755 and 604 at those three widths.
+ *
+ * Below 900 it goes near-full-width, which is the other half of the same
+ * round ("could the menu always take up the whole width of the page when
+ * looking at it on a smartphone?") and removes the conflict entirely, since
+ * 41vw would be too narrow for the menu's own content down there. That
+ * replaces design.css's 640px breakpoint for the same rule.
+ */
+.menu-panel {
+  width: min(41vw, 600px);
+  max-width: calc(100vw - 24px);
+}
+@media (width <= 900px) {
+  /* The whole screen, not design.css's 16px-short strip: "could the menu
+     always take up the whole width of the page when looking at it on a
+     smartphone? (see screenshot where there currently is a weird margin on
+     the left)" - client, 2026-09-30. */
+  .menu-panel {
+    width: 100vw;
+    max-width: none;
+  }
+  .menu-heading,
+  .menu-top,
+  .submenu > div {
+    padding-inline: 16px;
+  }
+  /* "The tab words ... seem too small inside each rectangle, could you make
+     them bigger? Keep the same kind of text/rectangle ratio as for the
+     desktop version. Same for the submenu words." The clamps in design.css
+     bottom out at 30 and 18 on a phone while the rows stay full height;
+     these are the top of each clamp's range instead. */
+  .menu-heading > a {
+    font-size: 38px;
+  }
+  .submenu a {
+    font-size: 22px;
+  }
+  /* NOT changed: "the gradient looks different (more yellow), could you make
+     sure it stays the same in the mobile version?" It already is the same.
+     design.css gives every sheet `#fff → #fffbd3 52% → acid 100%`, and those
+     stops are percentages, so the ramp scales with the row and renders
+     identically at any height - a tall phone row is the desktop row
+     enlarged, not a yellower one.
+     What actually changed is how much of the screen it covers: the panel is
+     a narrow column beside the page on desktop and the whole screen on a
+     phone (more so now that the 16px margin is gone, above), so there is
+     simply more yellow in view. Pinning the ramp to a fixed height off the
+     bottom was tried and made it worse - white band, then solid acid.
+     If it should be lighter on a phone that is a design decision, not a
+     bug: the lever is the middle stop, 52% → about 70%, and it is Léonie's
+     to make. */
+}
+
+/* "When we make the page narrower, the title gets hidden by the buttons on
+ * the right" - client, 2026-09-30. It is a French and Dutch problem: the
+ * label beside the Puilaetco lockup is "main partner" in English but
+ * "partenaire principal" in French, and design.css holds it on one line
+ * (`white-space: nowrap`) with `min-width: 64px`. That pushes
+ * `.site-header__right` wide enough to reach the centred wordmark.
+ *
+ * Scanned 1440 → 940 in 20px steps: English never quite touches (19px clear
+ * at its tightest, 1020), French overlaps it by 13px at the same width. The
+ * lockup hides altogether below 1000, so the window is roughly 1000-1120.
+ *
+ * Letting the label take the two lines its `min-width` already allows for is
+ * enough, and hides nothing.
+ */
+@media (width <= 1200px) {
+  .site-partner > span {
+    white-space: normal;
+    /* `white-space` alone changes nothing: the span is a flex item sizing to
+       max-content, and the header is not short of room until it is too late.
+       The cap is the `min-width: 64px` design.css already declares for it,
+       so the label sets on the two lines that box was always drawn for. */
+    max-width: 72px;
+  }
+}
+
+/* A slideshow does not zoom, on hover or on arrival - client, 2026-10-01:
+ * *"the current transition can look like a visual glitch because one image is
+ * zoomed while the next starts at normal scale … maintain the same zoom
+ * state/behaviour across slides"*.
+ *
+ * Two rules in design.css put the two scales on a carousel, and neither was
+ * written with one in mind:
+ *
+ * - `main :where(a, figure, …):hover > img { scale: 1.018 }` - a slide is a
+ *   `<figure>`, so the picture under the pointer grew while the one sliding
+ *   in behind it did not. That zoom belongs to a card or a link, which a
+ *   slide is not: it leads nowhere, and the pointer over it is already the
+ *   arrow that moves the slideshow;
+ * - `.motion-image[data-image-pending] { scale: 1.015; filter: blur(8px) }`,
+ *   the arrival animation Base.astro hangs on every picture that has not
+ *   loaded yet. The first slide is eager and the rest are lazy, so the next
+ *   picture played that animation *as it came into view* - mid-swipe,
+ *   against a current slide that had long finished it. Base.astro now leaves
+ *   the pictures inside a slideshow out of it; this rule covers the ones
+ *   whose markup is already in the page.
+ *
+ * Everything outside a slideshow keeps both.
+ */
+main .slideshow figure:hover > img,
+main .slideshow figure:hover > a > img {
+  scale: 1;
+}
+.slideshow img.motion-image[data-image-pending] {
+  scale: 1;
+  filter: none;
+}

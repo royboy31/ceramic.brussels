@@ -1,0 +1,246 @@
+---
+import Slideshow from '../Slideshow.astro';
+import PortableText from '../PortableText.astro';
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import { instagramUrl } from '../../lib/links';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * A previous edition's art prize. The frame: the lead, then a slideshow beside
+ * the `laureates` list, then `jury` and `awards` in two columns.
+ *
+ * **The laureate names lead to Instagram, not to a page.** Léonie, Figma
+ * comment 2026-09-28: *"These link directly to the laureates' Instagrams"* -
+ * so they carry the external "↗", and a laureate with no handle stays plain
+ * text rather than becoming a dead link.
+ *
+ * 2024 has no awards at all, so that column collapses rather than drawing a
+ * heading over nothing.
+ *
+ * **An award is its name and one line about who won it.** The frame writes a
+ * single sentence under each heading - *"Léonore Chastagner was awarded the
+ * ceramic brussels jury prize."* `description` is the awarding institution's
+ * own three or four paragraphs, and printing it turned the column into an
+ * essay; it stays on the art prize hub, where the design asks for it.
+ *
+ * That sentence is `outcome` - except that the import left `outcome` empty on
+ * five of 2025's six awards and put the sentence at the **end of the
+ * description** instead ("Raphaël Emine is the winner of the …"). Every one of
+ * the six ends that way, so `winnerLine` reads `outcome` first and falls back
+ * to the description's last paragraph. Same treatment as `liftInstagram` on
+ * the art prize hub, and for the same reason.
+ */
+const { lang, edition, lead } = Astro.props as { lang: LocaleId; edition: any; lead?: any };
+const t = useTranslations(lang);
+
+const laureates: any[] = (edition.laureates ?? []).filter((l: any) => l?.artist?.name);
+const jury: any[] = edition.jury ?? [];
+const awards: any[] = edition.awards ?? [];
+const images: any[] = (edition.images ?? []).filter((img: any) => img?.asset).slice(0, 5);
+
+/**
+ * The one line an award gets: its `outcome`, or the last paragraph of its
+ * description, which is where the import put the winner sentence.
+ */
+const winnerLine = (award: any): string | null => {
+  if (award.outcome) return award.outcome;
+  const blocks = Array.isArray(award.description) ? award.description : [];
+  const last = blocks[blocks.length - 1];
+  if (last?._type !== 'block') return null;
+  const text = (last.children ?? []).map((c: any) => c?.text ?? '').join('').trim();
+  return text || null;
+};
+
+/** "PL" → "Poland" / "Pologne" / "Polen", in the page's language. */
+const regions = new Intl.DisplayNames([lang], { type: 'region' });
+const regionName = (code?: string) => {
+  if (!code || !/^[A-Za-z]{2}$/.test(code)) return code ?? '';
+  try {
+    return regions.of(code.toUpperCase()) ?? code;
+  } catch {
+    return code;
+  }
+};
+/** The frame writes the country as a bare code in brackets: "Asya Marakulina (RU)". */
+const suffix = (artist: any) => {
+  const code = artist?.nationality ?? artist?.countryCode;
+  return code ? ` (${String(code).toUpperCase()})` : '';
+};
+---
+
+<div class="content-wrap edition-prize">
+  {lead && <div class="intro-large lead"><PortableText value={lead} /></div>}
+
+  <div class="ed-split half top">
+    {
+      images.length > 0 && (
+        <div class="shots">
+          <Slideshow
+            images={images}
+            aspect={1.35}
+            sizes="(max-width: 900px) 100vw, 46vw"
+            label={t('nav.artPrize')}
+            id="prize"
+          />
+        </div>
+      )
+    }
+
+    {
+      laureates.length > 0 && (
+        <section class="laureates">
+          <h2 class="panel-title">{t('tabs.laureates')}</h2>
+          <ul>
+            {laureates.map((l: any) => {
+              const href = instagramUrl(l.artist.instagram);
+              const name = `${l.artist.name}${suffix(l.artist)}`;
+              return (
+                <li>
+                  {href ? (
+                    <a class="text-link" href={href} rel="noopener noreferrer">
+                      {name} <span class="link-arrow" data-arrow="↗">↗</span>
+                    </a>
+                  ) : (
+                    name
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+
+  <div class="ed-split half bottom">
+    {
+      jury.length > 0 && (
+        <section class="jury">
+          <h2 class="panel-title">{t('tabs.jury')}</h2>
+          {jury.map((p: any) => (
+            <article class="member">
+              <h3>
+                {p.name}
+                {p.countryCode && <sup>{String(p.countryCode).toUpperCase()}</sup>}
+              </h3>
+              {p.role && <p class="role" {...styleAttrs(p.roleStyle)}>{p.role}</p>}
+              {(p.instagram || p.website) && (
+                <p class="pills">
+                  {instagramUrl(p.instagram) && (
+                    <a class="pill" href={instagramUrl(p.instagram)} rel="noopener noreferrer">
+                      {t('common.instagram')} ↗
+                    </a>
+                  )}
+                  {p.website && (
+                    <a class="pill" href={p.website} rel="noopener noreferrer">
+                      {t('common.website')} ↗
+                    </a>
+                  )}
+                </p>
+              )}
+            </article>
+          ))}
+        </section>
+      )
+    }
+
+    {
+      awards.length > 0 && (
+        <section class="awards">
+          <h2 class="panel-title">{t('tabs.awards')}</h2>
+          {awards.map((a: any) => (
+            <article class="award">
+              <h3 {...styleAttrs(a.nameStyle)}>{a.name}</h3>
+              {winnerLine(a) && <p class="outcome">{winnerLine(a)}</p>}
+            </article>
+          ))}
+        </section>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .lead {
+    margin: 0 0 52px;
+  }
+  .lead :global(p + p) {
+    margin-top: 28px;
+  }
+
+  /* Slideshow left, laureates right; jury left, awards right. Both are the
+     frame's 670 / 40 / 670. */
+  .bottom {
+    margin-top: 88px;
+  }
+
+  .laureates ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+  }
+  .laureates li,
+  .laureates a {
+    font-size: clamp(1.35rem, 2.6vw, 2.25rem);
+    line-height: 1.3;
+    letter-spacing: -0.04em;
+  }
+  .laureates a {
+    text-decoration: underline;
+    text-underline-offset: 0.14em;
+  }
+
+  .member,
+  .award {
+    margin-bottom: 32px;
+  }
+  .member h3,
+  .award h3 {
+    margin: 0;
+    font-size: clamp(1.35rem, 2.4vw, 2rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+  }
+  .member h3 sup {
+    margin-left: 0.15em;
+    font-size: 0.5em;
+    vertical-align: super;
+  }
+  /* The frame sets a jury member's role in small caps under the name. */
+  .role {
+    margin: 6px 0 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 0;
+  }
+  .pills .pill {
+    padding: 1px 11px 0;
+    border-radius: 999px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .award .outcome {
+    margin: 6px 0 0;
+    font-size: 18px;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+  }
+
+  @media (width<=900px) {
+    .bottom {
+      margin-top: 48px;
+    }
+  }
+</style>

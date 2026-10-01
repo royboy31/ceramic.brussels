@@ -36,11 +36,16 @@ const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
 
 const board = tab === 'advisory-board' ? await getPeople(lang, 'advisory-board') : [];
 const team = tab === 'team' ? await getPeople(lang, 'team') : [];
+/* The collaborators band at the foot of contact & team (Léonie,
+   `screenshot/ceramic brussels —about — contact-collaborators.png`, sent with
+   the comments of 2026-09-30). `person` already had a "Collaborator" group
+   and a `website` field, so this needed no schema work. */
+const collaborators = tab === 'team' ? await getPeople(lang, 'collaborator') : [];
 /**
  * The team page, drawn as the design's "contact" page: the directors as
  * advisory-board cards with their e-mail and phone, then the rest of the
- * team two a row, name, role, e-mail and phone beside the portrait. The
- * design has no collaborators list, so that group is not shown here.
+ * team two a row, name, role, e-mail and phone beside the portrait, and
+ * since 2026-09-30 the collaborators band under them.
  * Who is a director is read from the role ("co-director", "directrice"…),
  * the one thing the person record says about it.
  */
@@ -249,6 +254,28 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
         </section>
       )
     }
+    {
+      /* Collaborators: the name in the site's bold caps, what they do under
+         it, and their own "website ↗". No portraits - the frame draws none. */
+      tab === 'team' && collaborators.length > 0 && (
+        <section class="page-section collaborators">
+          <h2 class="section-title">{t('about.collaborators')}</h2>
+          <ul class="collab-grid">
+            {collaborators.map((p: any) => (
+              <li>
+                <strong>{p.name}</strong>
+                {p.role && <p {...styleAttrs(p.roleStyle)}>{p.role}</p>}
+                {p.website && (
+                  <a class="pill" href={p.website} target="_blank" rel="noopener noreferrer">
+                    {t('common.website')} ↗
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
     {tab === 'team' && team.length === 0 && <p class="empty">{t('about.peopleEmpty')}</p>}
 
     {/* ------------------------------ page text on the tabs that carry one */}
@@ -343,9 +370,20 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
     .hero :global(img) {
       height: auto;
     }
+    /* The dots belong to the bottom of the *picture*, the way every other
+       slideshow on the site sets them. `inset: auto 0 16px` measured from
+       the bottom of the slideshow instead, which is below the caption line,
+       so on a phone they sat past the photo's edge - "the little circles
+       seem to weirdly show on my phone, they're too close to the edge of
+       the photo, it's not like this on other slideshows" (client,
+       2026-09-30). The 605px above is the desktop frame's hero height and
+       cannot follow a fluid picture, so the box takes the picture's own
+       ratio here, as `Slideshow`'s base rule does. */
     .hero :global(.slideshow .dots) {
       height: auto;
-      inset: auto 0 16px;
+      inset: 0 0 auto;
+      aspect-ratio: var(--aspect, 3 / 2);
+      padding: 0 0 16px;
     }
     .strip {
       grid-template-columns: 1fr;
@@ -477,6 +515,48 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
   .people.team-grid {
     gap: 45px 40px;
     margin-top: 70px;
+  }
+  /* Three a row on the frame, the name in bold caps over its line of text
+     and the pill under both. */
+  .collaborators {
+    margin-top: 90px;
+  }
+  .collab-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 44px 40px;
+    margin: 56px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .collab-grid strong {
+    display: block;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0;
+    font-size: 22px;
+    line-height: 1.2;
+  }
+  .collab-grid p {
+    margin: 6px 0 0;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
+  }
+  .collab-grid .pill {
+    margin-top: 14px;
+  }
+  @media (width<=900px) {
+    .collab-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 34px 24px;
+      margin-top: 40px;
+    }
+  }
+  @media (width<=560px) {
+    .collab-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
   .team-page .empty {
     margin-top: 40px;

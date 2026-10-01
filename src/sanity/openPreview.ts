@@ -42,10 +42,15 @@ export async function resolvePreviewHref(
 ): Promise<string | null> {
   const first = firstPreview(type, doc, lang);
   if (!first) return null;
-  const ref = doc.edition?._ref;
-  if (!ref) return first.href;
-  const edition = await client.fetch<{ year?: number; isCurrent?: boolean } | null>(`*[_id == $ref][0]{ year, isCurrent }`, { ref });
-  return previewLocations(type, { ...previewFields(doc), year: edition?.year, current: edition?.isCurrent }, lang)[0]?.href ?? null;
+  // One reference on most types; a person carries an array (#46). A person on
+  // several years previews as current when any of them is - their newest page
+  // is the one an editor means.
+  const refs = [doc.edition?._ref, ...(doc.editions ?? []).map((e: { _ref?: string }) => e?._ref)].filter(Boolean);
+  if (refs.length === 0) return first.href;
+  const editions = await client.fetch<{ year?: number; isCurrent?: boolean }[]>(`*[_id in $refs]{ year, isCurrent }`, { refs });
+  const year = editions.map((e) => e.year ?? 0).reduce((a, b) => Math.max(a, b), 0) || undefined;
+  const current = editions.some((e) => e.isCurrent);
+  return previewLocations(type, { ...previewFields(doc), year, current }, lang)[0]?.href ?? null;
 }
 
 /**

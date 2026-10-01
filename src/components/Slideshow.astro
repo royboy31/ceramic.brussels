@@ -19,11 +19,21 @@ interface Props {
   aspect?: number;
   /**
    * 'cover' (default) crops every picture to `aspect`. 'contain' keeps the
-   * frame at `aspect` but draws each picture whole, in its own shape, on the
-   * frame's bottom edge: portrait stays portrait, landscape stays landscape
-   * (Tiphaine, 2026-09-25), and nothing is cropped and blown up.
+   * frame at `aspect` but draws each picture whole, in its own shape, hung
+   * from the frame's top edge: portrait stays portrait, landscape stays
+   * landscape (Tiphaine, 2026-09-25), nothing is cropped and blown up, and
+   * every slide starts at the same height (client, 2026-09-30).
+   *
+   * 'width' drops the frame altogether: every picture is the column's width
+   * and keeps its own height, so the caption sits directly under the
+   * picture rather than under a box the picture only half fills (client,
+   * 2026-10-01: *"standardize image width across slides while allowing
+   * different heights, keep artwork number/name directly beneath the
+   * image"*). `aspect` is not read in this mode, and the dots go under the
+   * line rather than on a picture whose bottom edge moves from slide to
+   * slide.
    */
-  fit?: 'cover' | 'contain';
+  fit?: 'cover' | 'contain' | 'width';
   /**
    * Milliseconds between slides for a slideshow that moves by itself
    * (homepage features, Tiphaine 2026-09-24). It waits while the pointer or
@@ -36,6 +46,16 @@ interface Props {
   label?: string;
   /** Prefix for the slide ids the dots link to. One slideshow per page needs no change. */
   id?: string;
+  /**
+   * Below 700px the picture runs to both screen edges, out through
+   * `.content-wrap`'s gutter (client, 2026-09-30: "make these
+   * photos/slideshows the whole width of the page"). On by default: a
+   * slideshow is always an editorial photograph. The one exception the
+   * client named - jury and advisory board - draws its portraits with
+   * `PersonCard`, not this, so it needs no opt-out. `bleed={false}` is
+   * there for a slideshow that must keep the gutter.
+   */
+  bleed?: boolean;
   class?: string;
 }
 
@@ -48,22 +68,24 @@ const {
   widths = [400, 600, 900, 1200],
   label,
   id = 'slideshow',
+  bleed = true,
   class: className,
 } = Astro.props;
 
 const slides = (images ?? []).filter((img) => img?.asset);
 const slideId = (i: number) => `${id}-${i + 1}`;
 const contain = fit === 'contain' && !!aspect;
+const widthFit = fit === 'width';
 ---
 
 {
   slides.length > 0 ? (
     <div
-      class:list={['slideshow', className, { 'no-aspect': !aspect, contain }]}
+      class:list={['slideshow', className, { 'no-aspect': !aspect || widthFit, contain, 'fit-width': widthFit, 'bleed-m': bleed }]}
       id={id}
       data-slides={slides.length}
       data-autoplay={autoplay && slides.length > 1 ? autoplay : undefined}
-      style={aspect ? `--aspect: ${aspect}` : undefined}
+      style={aspect && !widthFit ? `--aspect: ${aspect}` : undefined}
     >
       <div class="track" data-track tabindex={slides.length > 1 ? 0 : undefined}>
         {slides.map((img, i) => (
@@ -81,7 +103,7 @@ const contain = fit === 'contain' && !!aspect;
             ) : (
               <SanityImage
                 image={img}
-                aspect={aspect}
+                aspect={widthFit ? undefined : aspect}
                 sizes={sizes}
                 widths={widths}
                 loading={i === 0 ? 'eager' : 'lazy'}
@@ -162,10 +184,27 @@ const contain = fit === 'contain' && !!aspect;
   .frame {
     aspect-ratio: var(--aspect);
   }
+
+  /* fit="width": one width, each picture its own height. The slides no longer
+     stretch to the tallest one, so every caption sits 8px under its own
+     picture instead of under a frame's empty bottom half. */
+  .fit-width .track {
+    align-items: flex-start;
+  }
+  .fit-width .slide :global(img) {
+    width: 100%;
+    height: auto;
+  }
+  /* Top, not bottom: "can you align the pictures on the galleries pages so
+     that they align 'to the top' and not to the bottom? So that when you go
+     through the slideshow they all start at the same place?" (client,
+     2026-09-30). This reverses Tiphaine's 2026-09-25 note, which asked for
+     the frame's bottom edge - the pictures still keep their own shape and
+     are still never cropped, they just hang from the top now. */
   .frame :global(img) {
     height: 100%;
     object-fit: contain;
-    object-position: center bottom;
+    object-position: center top;
   }
 
   /* Counter left, caption right - the line under the picture in the design. */
@@ -205,6 +244,14 @@ const contain = fit === 'contain' && !!aspect;
   /* The dots sit on the picture. A box with the same aspect as the image,
      laid over the top of the slideshow, puts them at the picture's bottom
      edge without knowing how tall the caption below it is. */
+  /* fit="width": the picture's bottom edge is a different height on every
+     slide, so there is no line to hang the dots on - they go under the
+     caption, centred, where they belong to the whole row. */
+  .fit-width .dots {
+    position: static;
+    aspect-ratio: auto;
+    margin-top: 14px;
+  }
   .dots {
     position: absolute;
     top: 0;
@@ -267,6 +314,27 @@ const contain = fit === 'contain' && !!aspect;
   .slideshow.arrow-cursor .track {
     cursor: none;
   }
+
+  /* Tighter to the picture on a phone. The caption and mark *sizes* are set
+     once in src/styles/site.css - parents reach into this component's
+     figcaption with higher specificity, so they cannot live here. */
+  @media (width <= 700px) {
+    figcaption {
+      margin-top: 6px;
+    }
+  }
+
+  /* One caption at a time. The track scrolls horizontally, so during a swipe
+     the next slide's caption used to arrive beside the current one and the
+     two read as a single run-on line. Both rules hang off
+     `[data-one-caption]`, which the script sets only once it has marked a
+     slide - so with no JavaScript nothing is hidden. */
+  .slideshow[data-one-caption] .slide figcaption {
+    transition: opacity 0.18s ease;
+  }
+  .slideshow[data-one-caption] .slide:not([data-current]) figcaption {
+    opacity: 0;
+  }
 </style>
 
 <script>
@@ -281,10 +349,25 @@ const contain = fit === 'contain' && !!aspect;
     const dots = [...show.querySelectorAll<HTMLAnchorElement>('[data-dot]')];
     if (!track || slides.length < 2) return;
 
-    const mark = (index: number) =>
+    /* Marks the dot **and the slide**. Each slide carries its own caption, so
+       mid-swipe two of them were on screen at once and read as one run-on
+       line - "when scrolling right & left in the slideshows, it appears the
+       captions are sticking to each other ... it happens everywhere on the
+       website" (client, 2026-09-30). Only the slide in view shows its
+       caption now; the CSS fades the others. */
+    const mark = (index: number) => {
       dots.forEach((dot, i) =>
         i === index ? dot.setAttribute('aria-current', 'true') : dot.removeAttribute('aria-current'),
       );
+      slides.forEach((slide, i) =>
+        i === index ? slide.setAttribute('data-current', '') : slide.removeAttribute('data-current'),
+      );
+    };
+    /* Only now does the one-caption rule apply: the CSS is gated on this
+       attribute, so if the script never runs every caption stays visible
+       rather than all of them disappearing. */
+    mark(Math.round(track.scrollLeft / Math.max(track.clientWidth, 1)) || 0);
+    show.setAttribute('data-one-caption', '');
 
     dots.forEach((dot, i) =>
       dot.addEventListener('click', (event) => {
@@ -324,9 +407,12 @@ const contain = fit === 'contain' && !!aspect;
     if (every > 0 && !reduced) {
       let held = false;
       let visible = true;
+      /* Focus holds it, the pointer does not: "when hovering over the
+         autoplay slideshows, the slideshow autoplay continues rather than
+         stopping" (client, 2026-09-30). Focus stays held so a keyboard user
+         tabbing through the dots does not have the track move under them,
+         and `prefers-reduced-motion` still turns the whole thing off. */
       const hold = (on: boolean) => () => (held = on);
-      show.addEventListener('pointerenter', hold(true));
-      show.addEventListener('pointerleave', hold(false));
       show.addEventListener('focusin', hold(true));
       show.addEventListener('focusout', hold(false));
       if ('IntersectionObserver' in window) {

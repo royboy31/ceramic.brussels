@@ -1,6 +1,7 @@
 import { HUBS } from '../lib/hubs';
 import type { LocaleId } from '../lib/locales';
 import { LISTING_SECTIONS } from './schemaTypes/objects/routes';
+import { editionTabPath, sectionSegment } from '../lib/previousEditions';
 
 /**
  * Which `/preview/…` pages show a given document.
@@ -139,10 +140,10 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
       return d.isCurrent
         ? [loc('Homepage', ''), loc('Visitors info', '/visit'), loc('Floor plan', '/visit/floor-plan'), loc('Exhibitors', '/exhibitors')]
         : [
-            ...(d.ownYear ? [loc(`Edition ${d.ownYear}`, `/editions/${d.ownYear}`)] : []),
-            loc('Past editions', '/editions'),
+            ...(d.ownYear ? [loc(`Edition ${d.ownYear}`, `/${editionTabPath(d.ownYear)}`)] : []),
+            loc('Previous editions', `/${sectionSegment()}`),
             loc('Press & media – photos & videos', '/press-media/photos-videos'),
-            ...(d.ownYear ? [loc(`Exhibitors ${d.ownYear}`, `/exhibitors/${d.ownYear}`)] : []),
+            ...(d.ownYear ? [loc(`Exhibitors ${d.ownYear}`, `/${editionTabPath(d.ownYear, 'exhibitors')}`)] : []),
           ];
     case 'person': {
       if (past) return [];
@@ -178,7 +179,10 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
       if (!d.slug) return [];
       const name = d.name ?? 'Exhibitor';
       return past
-        ? [loc(`${name} (${d.year})`, `/exhibitors/${d.year}/${d.slug}`), loc(`Exhibitors ${d.year}`, `/exhibitors/${d.year}`)]
+        ? [
+            loc(`${name} (${d.year})`, `/exhibitors/${d.year}/${d.slug}`),
+            loc(`Exhibitors ${d.year}`, `/${editionTabPath(d.year, 'exhibitors')}`),
+          ]
         : [loc(name, `/exhibitors/${d.slug}`), loc('Exhibitors', '/exhibitors')];
     }
     case 'newsItem':

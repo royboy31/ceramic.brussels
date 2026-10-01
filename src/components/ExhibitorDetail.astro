@@ -1,5 +1,6 @@
 ---
 import ExhibitorHead from './ExhibitorHead.astro';
+import { focusLockup } from './exhibitorBadges';
 import Slideshow from './Slideshow.astro';
 import PortableText from './PortableText.astro';
 import type { LocaleId } from '../lib/locales';
@@ -45,10 +46,11 @@ const place = [exhibitor.city, code && `(${code})`].filter(Boolean).join(' ');
 /** The written list wins over the references: the design names every artist, not only the ones with a page. */
 const presenting = !exhibitor.artistsText && exhibitor.artists?.length ? exhibitor.artists : null;
 const badge = exhibitor.kind === 'jury-prize' ? t('exhibitors.juryPrize') : exhibitor.soloShow ? t('exhibitors.soloShow') : null;
-/** The "focus España" lockup, as on the cards and the artists list (Tiphaine, 2026-09-25). Another focus has no logo yet. */
+/** The focus lockup, as on the cards and the artists list (Tiphaine,
+ *  2026-09-25). A country without artwork keeps its words - see
+ *  `exhibitorBadges.ts`. */
 const focusLabel = exhibitor.countryFocusLabel ?? t('exhibitors.countryFocus');
-const focusLogo =
-  exhibitor.inCountryFocus && /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/assets/exhibitors/focus-espana.png' : null;
+const focusLogo = exhibitor.inCountryFocus ? focusLockup(focusLabel) : null;
 
 /** "solo show" → "solo<br>show", the two-line badge of the design. */
 const twoLines = (s: string) => {
@@ -82,8 +84,7 @@ const bioRight = bio.slice(split);
         images.length ? (
           <Slideshow
             images={images}
-            aspect={433 / 541}
-            fit="contain"
+            fit="width"
             widths={[440, 660, 880, 1320]}
             sizes="(max-width: 900px) 100vw, 433px"
             label={exhibitor.name}
@@ -197,9 +198,9 @@ const bioRight = bio.slice(split);
   .artwork {
     position: relative;
   }
-  /* The pictures keep their own shape inside the 433 × 541 frame
-     (Slideshow fit="contain", Tiphaine 2026-09-25); only the empty
-     stand-in still fills it. */
+  /* The pictures are the column's width and keep their own height
+     (Slideshow fit="width", client 2026-10-01); only the empty stand-in
+     still draws the frames' 433 × 541. */
   .artwork-empty {
     object-fit: cover;
     width: 100%;

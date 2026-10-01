@@ -69,7 +69,7 @@ const contactLines = !board && (person.email || person.phone);
           </p>
         )
       }
-      {!team && !board && person.bio && <PortableText value={person.bio} fieldStyle={person.bioStyle} />}
+
       {
         contactLines && (
           <p class="contact">
@@ -85,14 +85,19 @@ const contactLines = !board && (person.email || person.phone);
       {
         pills && (
           <p class="links">
-            {person.instagram && (
-              <a class="pill" href={instagramUrl(person.instagram)} target="_blank" rel="noopener noreferrer">
-                {t('common.instagram')} ↗
-              </a>
-            )}
+            {/* Website first, then instagram, "same placement as for art
+                prize jury members" (client, 2026-09-30) - that is the order
+                the jury tab draws them in. The pills themselves already
+                existed and already read `person.website`; no advisory board
+                member has one filled yet, which is why none show. */}
             {person.website && (
               <a class="pill" href={person.website} target="_blank" rel="noopener noreferrer">
                 {t('common.website')} ↗
+              </a>
+            )}
+            {person.instagram && (
+              <a class="pill" href={instagramUrl(person.instagram)} target="_blank" rel="noopener noreferrer">
+                {t('common.instagram')} ↗
               </a>
             )}
             {board && person.email && (
@@ -109,6 +114,16 @@ const contactLines = !board && (person.email || person.phone);
         )
       }
     </section>
+    {/* The contact & team biography is a child of the row, not of the text
+        column, so on a phone it can take the card's full width under the
+        portrait - "could you make the body text placement the same as for
+        the advisory board members?" (client, 2026-09-30). Above 800 it
+        stays in the text column, where the frame draws it. */}
+    {!team && !board && person.bio && (
+      <div class="row-bio">
+        <PortableText value={person.bio} fieldStyle={person.bioStyle} />
+      </div>
+    )}
   </div>
   {
     board && person.bio && (
@@ -147,6 +162,10 @@ const contactLines = !board && (person.email || person.phone);
     gap: var(--portrait-gap, 40px);
     margin-top: 32px;
     display: grid;
+  }
+  /* In the text column on desktop, as the frame draws it. */
+  .row-bio {
+    grid-column: 2;
   }
   figure {
     margin: 0;
@@ -254,6 +273,11 @@ const contactLines = !board && (person.email || person.phone);
     article > .row {
       grid-template-columns: var(--portrait-col, 120px) 1fr;
       gap: var(--portrait-gap, 18px);
+    }
+    /* Full width under the portrait on a phone, like the advisory board. */
+    .row-bio {
+      grid-column: 1 / -1;
+      margin-top: 18px;
     }
     h2 {
       font-size: 28px;

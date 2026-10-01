@@ -1,9 +1,18 @@
 ---
 import { LOCALES, type LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
-import { getSettings, getNavPages, getNavigation, getCurrentEdition, getPartners } from '../lib/queries';
+import {
+  getSettings,
+  getNavPages,
+  getNavigation,
+  getCurrentEdition,
+  getPartners,
+  getPastEditionsIndex,
+} from '../lib/queries';
 import { resolveNavItem } from '../lib/links';
 import { HUBS } from '../lib/hubs';
+import { editionTabPath } from '../lib/previousEditions';
+import { PAST_EDITIONS_PUBLIC } from '../components/launch';
 import { urlFor } from '../sanity/image';
 import EditLink from '../components/EditLink.astro';
 import Header from '../components/Header.astro';
@@ -15,6 +24,7 @@ import { VisualEditing } from '@sanity/astro/visual-editing';
 import PreviewEditLinks from '../components/PreviewEditLinks.astro';
 import { isPreview } from '../lib/previewContext';
 import '../styles/design.css';
+import '../styles/site.css';
 
 /**
  * The frame around every page: the design's header (dates mark, wordmark,
@@ -33,8 +43,10 @@ interface Props {
   altPaths?: Partial<Record<LocaleId, string>>;
   noIndex?: boolean;
   /** 'acid' paints the whole page yellow, as the art prize section is;
-   *  'dark' knocks it out in black, as the locked VIP tabs are. */
-  theme?: 'default' | 'acid' | 'dark';
+   *  'dark' knocks it out in black, as the locked VIP tabs are;
+   *  'ash' is the grey ground of the previous-editions frames (#d9d9d9,
+   *  sampled from Léonie's PNGs of 2026-09-28 - header and footer included). */
+  theme?: 'default' | 'acid' | 'dark' | 'ash';
   /** Alias kept for pages written against the skeleton: 'brand' = 'acid'. */
   tone?: 'default' | 'brand';
   /** Social share image for this page. Falls back to the one in Site settings. */
@@ -42,6 +54,15 @@ interface Props {
   /** Document this page renders, so the Edit button can deep-link to it. */
   editId?: string;
   editType?: string;
+  /**
+   * A pill at the left of the footer band. A page that sets one gets it:
+   * "← back to 2027" inside the previous-editions section and on a past
+   * year's gallery list (Léonie, Figma comment 2026-09-28). Every other page
+   * falls back to "previous editions →", the other half of that pair, so the
+   * section is reachable from the footer of the whole site rather than from
+   * the homepage alone.
+   */
+  backLink?: { label: string; href: string; arrow?: string };
 }
 
 const {
@@ -56,23 +77,43 @@ const {
   image,
   editId,
   editType,
+  backLink,
 } = Astro.props;
 const acid = theme === 'acid' || tone === 'brand';
 const dark = theme === 'dark';
+const ash = theme === 'ash';
 // True inside a /preview/ render: drafts, stega-encoded strings, and the
 // Studio's editing overlay mounted at the end of the body.
 const preview = isPreview();
 const t = useTranslations(lang);
 
-const [settings, navPages, navigation, edition, partners] = await Promise.all([
+const [settings, navPages, navigation, edition, partners, pastEditions] = await Promise.all([
   getSettings(lang),
   getNavPages(lang),
   getNavigation(lang),
   getCurrentEdition(lang),
   getPartners(lang),
+  getPastEditionsIndex(lang),
 ]);
 
 const siteName = settings?.siteName ?? 'ceramic brussels';
+/**
+ * The footer's left-hand pill. A page that passes its own keeps it; everywhere
+ * else it leads to the newest past edition, the same target and label the
+ * homepage uses (the section has no index of its own). Absent while there is
+ * no past edition to lead to - and on the previous-editions pages themselves,
+ * which pass "← back to <current year>" instead.
+ */
+const newestPast = PAST_EDITIONS_PUBLIC ? pastEditions[0]?.year : undefined;
+const footerBack =
+  backLink ??
+  (newestPast
+    ? {
+        label: t('prevEd.section'),
+        href: localePath(lang, editionTabPath(newestPast, undefined, lang)),
+        arrow: '→',
+      }
+    : undefined);
 /** The header's lockup links to the main partner (tier "main") when there is one. */
 const mainPartner = partners.find((p: any) => p.tier === 'main') ?? null;
 const fullTitle = title === siteName ? siteName : `${title} — ${siteName}`;
@@ -195,7 +236,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     <slot name="head" />
   </head>
 
-  <body class:list={[{ 'acid-page': acid, 'dark-page': dark }]}>
+  <body class:list={[{ 'acid-page': acid, 'dark-page': dark, 'ash-page': ash }]}>
     <a class="skip" href="#main">{t('common.skip')}</a>
 
     <Header
@@ -223,6 +264,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
       links={footerNav}
       copyright={copyright}
       consentLabel={!preview && categoriesInUse().length > 0 ? t('consent.settings') : undefined}
+      backLink={footerBack}
     />
     {!preview && <CookieConsent lang={lang} />}
 
@@ -341,6 +383,11 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
         });
         document.querySelectorAll<HTMLImageElement>('main img').forEach((img) => {
           if (img.complete) return;
+          // Not inside a slideshow: its later slides are lazy, so this
+          // arrival animation played mid-swipe and read as a glitch - one
+          // picture zoomed, the next at rest (client, 2026-10-01). The fade
+          // stays everywhere else.
+          if (img.closest('.slideshow')) return;
           img.classList.add('motion-image');
           img.setAttribute('data-image-pending', '');
           const done = () => img.removeAttribute('data-image-pending');
@@ -482,6 +529,27 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     background: var(--acid);
     --band-bg: var(--acid);
   }
+  /* The previous-editions ground: one flat grey over the whole page, the
+     header and the footer with it. Sampled from every one of Léonie's seven
+     frames (2026-09-28) - #d9d9d9 is the most common pixel in all of them,
+     and the header and footer carry no wash and no gradient there. */
+  body.ash-page {
+    background: var(--ash-ground);
+    --ash-ground: #d9d9d9;
+    --ground: var(--ash-ground);
+    --band-bg: var(--ash-ground);
+    --surface: #cfcfcf;
+    --surface-2: #c6c6c6;
+  }
+  body.ash-page :is(.site-header, footer).acid-wash {
+    background: var(--ash-ground);
+  }
+  /* A hairline where the footer starts, as the black page has one: without
+     it the footer band and the page are one undivided field. */
+  body.ash-page footer.site-footer {
+    border-top: 1px solid var(--color-ink, #050505);
+  }
+
   /* The art prize header fades from white at the top into the acid. The
      fine black rule under it (2026-09-16) came off again on 2026-09-23.
      2026-09-24: "a tiny bit more white" - the white holds a little before
@@ -705,6 +773,39 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     :root {
       --body-size: 18px;
       --body-lh: 1.3;
+    }
+  }
+  /* One intro size, the same way. The client made the guest of honour
+     interview's introduction the reference (2026-09-30: guest of honour
+     "about" and every Stories section intro should match it), so it is a
+     token rather than the same three numbers in three components. On a phone
+     it steps to 24, not the 20 the interview had - "its current size when on
+     smartphone looks too close to the body-text size", and the body is 18. */
+  :root {
+    --intro-size: 30px;
+    --intro-lh: 38px;
+    --intro-ls: -0.03em;
+  }
+  @media (width<=700px) {
+    :root {
+      --intro-size: 24px;
+      --intro-lh: 1.3;
+    }
+  }
+  /* One "name" size: the galleries list's own, which the client made the
+     reference for the Stories titles too (2026-09-30, twice - the interview
+     names and, on a phone, the interview and collectors' voices titles
+     "should correspond with the font-styling of the galleries' names").
+     A phone gets 32, up from the 28 the cards had: "could the name of each
+     gallery be a bit bigger?". */
+  :root {
+    --name-size: 40px;
+    --name-lh: 1.03;
+    --name-ls: -0.045em;
+  }
+  @media (width<=900px) {
+    :root {
+      --name-size: 32px;
     }
   }
   html .body-24 {

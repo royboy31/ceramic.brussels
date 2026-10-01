@@ -3,6 +3,7 @@ import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
 import SanityImage from './SanityImage.astro';
 import { exhibitorPath } from '../lib/links';
+import { focusLockup, juryPrizeLockup, SOLO_SHOW_LOCKUP } from './exhibitorBadges';
 
 /**
  * A card in the exhibitor grid, as the design's exhibitors/index.html draws
@@ -51,16 +52,20 @@ const twoLines = (s: string) => {
   return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
 };
 const focusLabel = ex.countryFocusLabel ?? t('exhibitors.countryFocus');
-/** The designer's lockups (Léonie, 2026-09-24): the solo show disc, and the
- *  focus words with Spain's outline for "focus España". Another focus
- *  country keeps the words until it has a lockup of its own. */
-const SOLO_LOGO = '/assets/exhibitors/solo-show.png';
-const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/assets/exhibitors/focus-espana.png' : null;
+/** The designer's lockups, from `exhibitorBadges.ts`: the solo show disc, the
+ *  focus words with their country's outline, and the jury prize oval for the
+ *  year this card belongs to. Anything without artwork keeps its words. */
+const SOLO_LOGO = SOLO_SHOW_LOCKUP;
+const focusLogo = focusLockup(focusLabel);
+const juryLogo = ex.kind === 'jury-prize' ? juryPrizeLockup(ex.year) : null;
 ---
 
 <article id={id} data-name={letter} data-letter={letter} data-filters={filters} data-tags={filters} data-country={code}>
   <a href={localePath(lang, exhibitorPath(ex))}>
-    <div class="gallery-image">
+    {/* `bleed-m`: edge to edge below 700px (client, 2026-09-30, "same in the
+        galleries list"). On the container, not the picture, so the hover veil
+        and the badges laid over it move with it. */}
+    <div class="gallery-image bleed-m">
       {
         ex.image?.asset && (
           <SanityImage
@@ -85,16 +90,25 @@ const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/asset
         )
       }
       {
-        ex.kind === 'jury-prize' && (
-          <span class="badge badge--black">
-            {twoLines(t('exhibitors.juryPrize')).map((l, i) => (
-              <>
-                {i > 0 && <br />}
-                {l}
-              </>
-            ))}
-          </span>
-        )
+        ex.kind === 'jury-prize' &&
+          (juryLogo ? (
+            <img
+              class="badge badge--oval"
+              src={juryLogo}
+              alt={`${t('exhibitors.juryPrize')} ${ex.year}`}
+              width="120"
+              height="56"
+            />
+          ) : (
+            <span class="badge badge--black">
+              {twoLines(t('exhibitors.juryPrize')).map((l, i) => (
+                <>
+                  {i > 0 && <br />}
+                  {l}
+                </>
+              ))}
+            </span>
+          ))
       }
       {
         ex.inCountryFocus && (
@@ -151,13 +165,18 @@ const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/asset
     transition: opacity 0.25s ease;
     pointer-events: none;
   }
-  /* A white pill, so the words read on a dark photo as on a light one. */
+  /* "Could we try making it not changing the white background colour inside
+     the pill shape to transparent, so only keep the stroke around it and
+     make the text and the stroke white (so that it feels less present on
+     the photo)" - client, 2026-09-30. The 20% white veil under it is what
+     keeps the words legible on a dark photograph now that the pill itself
+     carries no fill. */
   .veil__label {
     padding: 3px 18px;
-    border: 1px solid var(--ink);
+    border: 1px solid #fff;
     border-radius: 999px;
-    background: #fff;
-    color: var(--ink);
+    background: transparent;
+    color: #fff;
     font-size: 24px;
     line-height: 34px;
     letter-spacing: -0.03em;
@@ -181,12 +200,14 @@ const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/asset
       display: none;
     }
   }
+  /* The gallery name, and the site's "name" size (tokens in Base.astro):
+     the Stories titles are set from the same ones. */
   h2 {
-    letter-spacing: -0.045em;
+    letter-spacing: var(--name-ls);
     margin-top: 16px;
-    font-size: 40px;
+    font-size: var(--name-size);
     font-weight: 400;
-    line-height: 1.03;
+    line-height: var(--name-lh);
   }
   /* Bigger, and hung from the top of the capitals rather than raised off
      the baseline (client feedback, 2026-09-16). */
@@ -229,6 +250,14 @@ const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/asset
     width: 60px;
     height: 60px;
   }
+  /* The jury prize oval is wider than it is tall, so it keeps its own shape
+     rather than the 60px disc the other badges share. Its year is printed on
+     the artwork, which is why there is one file per edition. */
+  .gallery-image > img.badge--oval {
+    border-radius: 0;
+    width: 104px;
+    height: auto;
+  }
   .gallery-image > img.focus-logo {
     width: 96px;
   }
@@ -264,9 +293,5 @@ const focusLogo = /espa(ñ|n)a|spain|espagne|spanje/i.test(focusLabel) ? '/asset
     top: 18px;
     right: 90px;
   }
-  @media (width<=900px) {
-    h2 {
-      font-size: 28px;
-    }
-  }
+  /* `h2` keeps the token, which steps to 32 below 900. */
 </style>

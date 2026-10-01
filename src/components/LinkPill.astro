@@ -19,12 +19,22 @@ interface Props {
    * Keep the label's own capitals. The design sets pill labels lowercase,
    * but not where the label is a name - "discover The Hoxton ↗", "discover
    * MAD Brussels ↗" on the VIP frames.
+   *
+   * **Defaults to whether the label is the editor's.** A `link` object's
+   * label is typed in the Studio, so it keeps its capitals; a `label` passed
+   * by a component is one of ours from `STRINGS`, written with a capital
+   * ("Website", "View all") and lowercased by the design. Félicie could not
+   * capitalise "discover Puilaetco" or "discover MAD Brussels" because every
+   * pill was forced down (client, 2026-09-30). Pass it explicitly to
+   * override either way.
    */
   preserveCase?: boolean;
   class?: string;
 }
 
-const { lang, link, href, label, external, variant = 'pill', preserveCase = false, class: className } = Astro.props;
+const { lang, link, href, label, external, variant = 'pill', preserveCase, class: className } = Astro.props;
+/** The editor's text keeps its case; ours takes the design's lowercase. */
+const keepCase = preserveCase ?? !!link;
 
 const resolved: ResolvedLink | null = link
   ? resolveLink(lang, link)
@@ -36,7 +46,7 @@ const resolved: ResolvedLink | null = link
 {
   resolved && (
     <a
-      class:list={['link', variant, { caps: preserveCase }, className]}
+      class:list={['link', variant, { caps: keepCase }, className]}
       href={resolved.href}
       {...(resolved.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
     >

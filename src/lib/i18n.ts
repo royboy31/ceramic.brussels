@@ -33,6 +33,7 @@ const STRINGS = {
     'news.empty': 'No news published yet.',
     'news.readMore': 'Read more',
     'programme.empty': 'The programme has not been announced yet.',
+    'exhibitionPass.empty': 'The partner exhibitions have not been announced yet.',
     'programme.speakers': 'With',
     'programme.exhibitorAwards': 'see all exhibitors awards',
     'programme.artPrizeAwards': 'see all art prize awards',
@@ -63,6 +64,7 @@ const STRINGS = {
     'tabs.awardCeremony': 'award ceremony',
     'tabs.jury': 'jury',
     'tabs.laCambre': 'ceramic brussels x La Cambre',
+    'tabs.exhibitionPass': 'exhibition pass',
     'tabs.talks': 'talks',
     'tabs.vip': 'VIP',
     'nav.vip': 'VIP',
@@ -135,6 +137,24 @@ const STRINGS = {
     'about.pageEmpty': 'This page has no content yet.',
     'editions.film': 'film',
     'editions.empty': 'No editions published yet.',
+    /* previous editions (Figma, Léonie 2026-09-28; docs/previous-editions-plan.md) */
+    'prevEd.section': 'previous editions',
+    'prevEd.overview': 'overview',
+    'prevEd.guestOfHonour': 'guest of honour',
+    'prevEd.exhibitors': 'exhibitors',
+    'prevEd.artPrize': 'art prize',
+    'prevEd.programme': 'programme',
+    'prevEd.focus': 'focus',
+    'prevEd.publication': 'publication',
+    'prevEd.highlights': 'highlights',
+    'prevEd.keyFigures': 'key figures',
+    'prevEd.biography': 'biography',
+    'prevEd.galleries': 'galleries',
+    'prevEd.talks': 'talks programme',
+    'prevEd.speakers': 'speakers',
+    'prevEd.moderator': 'moderator',
+    'prevEd.back': 'back to {year}',
+    'prevEd.editionNo': '{word} edition',
     'programme.kind.artist-talk': 'Artist Talk',
     'programme.kind.roundtable': 'Roundtable',
     'programme.kind.talk': 'Talk',
@@ -311,6 +331,7 @@ const STRINGS = {
     'news.empty': 'Aucune actualité publiée pour le moment.',
     'news.readMore': 'Lire la suite',
     'programme.empty': 'Le programme n’a pas encore été annoncé.',
+    'exhibitionPass.empty': 'Les expositions partenaires n’ont pas encore été annoncées.',
     'programme.speakers': 'Avec',
     'programme.exhibitorAwards': 'voir tous les awards des exposants',
     'programme.artPrizeAwards': 'voir tous les awards de l’art prize',
@@ -341,6 +362,7 @@ const STRINGS = {
     'tabs.awardCeremony': 'cérémonie de remise des prix',
     'tabs.jury': 'jury',
     'tabs.laCambre': 'ceramic brussels x La Cambre',
+    'tabs.exhibitionPass': 'pass expositions',
     'tabs.talks': 'conférences',
     'tabs.vip': 'VIP',
     'nav.vip': 'VIP',
@@ -413,6 +435,24 @@ const STRINGS = {
     'about.pageEmpty': 'Cette page n’a pas encore de contenu.',
     'editions.film': 'film',
     'editions.empty': 'Aucune édition publiée pour le moment.',
+    /* éditions précédentes */
+    'prevEd.section': 'éditions précédentes',
+    'prevEd.overview': 'aperçu',
+    'prevEd.guestOfHonour': 'invitée d’honneur',
+    'prevEd.exhibitors': 'exposants',
+    'prevEd.artPrize': 'art prize',
+    'prevEd.programme': 'programme',
+    'prevEd.focus': 'focus',
+    'prevEd.publication': 'publication',
+    'prevEd.highlights': 'temps forts',
+    'prevEd.keyFigures': 'chiffres clés',
+    'prevEd.biography': 'biographie',
+    'prevEd.galleries': 'galeries',
+    'prevEd.talks': 'programme de conférences',
+    'prevEd.speakers': 'intervenants',
+    'prevEd.moderator': 'modération',
+    'prevEd.back': 'retour à {year}',
+    'prevEd.editionNo': '{word} édition',
     'programme.kind.artist-talk': 'Rencontre avec l’artiste',
     'programme.kind.roundtable': 'Table ronde',
     'programme.kind.talk': 'Conférence',
@@ -588,6 +628,7 @@ const STRINGS = {
     'news.empty': 'Nog geen nieuws gepubliceerd.',
     'news.readMore': 'Lees meer',
     'programme.empty': 'Het programma is nog niet bekendgemaakt.',
+    'exhibitionPass.empty': 'De tentoonstellingen van de partners zijn nog niet bekendgemaakt.',
     'programme.speakers': 'Met',
     'programme.exhibitorAwards': 'alle exposanten-awards bekijken',
     'programme.artPrizeAwards': 'alle art prize-awards bekijken',
@@ -618,6 +659,7 @@ const STRINGS = {
     'tabs.awardCeremony': 'prijsuitreiking',
     'tabs.jury': 'jury',
     'tabs.laCambre': 'ceramic brussels x La Cambre',
+    'tabs.exhibitionPass': 'tentoonstellingspas',
     'tabs.talks': 'talks',
     'tabs.vip': 'VIP',
     'nav.vip': 'VIP',
@@ -690,6 +732,24 @@ const STRINGS = {
     'about.pageEmpty': 'Deze pagina heeft nog geen inhoud.',
     'editions.film': 'film',
     'editions.empty': 'Nog geen edities gepubliceerd.',
+    /* vorige edities */
+    'prevEd.section': 'vorige edities',
+    'prevEd.overview': 'overzicht',
+    'prevEd.guestOfHonour': 'eregast',
+    'prevEd.exhibitors': 'exposanten',
+    'prevEd.artPrize': 'art prize',
+    'prevEd.programme': 'programma',
+    'prevEd.focus': 'focus',
+    'prevEd.publication': 'publicatie',
+    'prevEd.highlights': 'hoogtepunten',
+    'prevEd.keyFigures': 'kerncijfers',
+    'prevEd.biography': 'biografie',
+    'prevEd.galleries': 'galerieën',
+    'prevEd.talks': 'lezingenprogramma',
+    'prevEd.speakers': 'sprekers',
+    'prevEd.moderator': 'moderator',
+    'prevEd.back': 'terug naar {year}',
+    'prevEd.editionNo': '{word} editie',
     'programme.kind.artist-talk': 'Artist talk',
     'programme.kind.roundtable': 'Rondetafelgesprek',
     'programme.kind.talk': 'Lezing',
@@ -948,6 +1008,34 @@ export function formatMonthYear(value: string | undefined, lang: LocaleId): stri
   return new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric', timeZone: TIME_ZONE }).format(
     date,
   );
+}
+
+/**
+ * An exhibition-pass row's date line (#48): "30 Jan. → 9 May 2027", and with
+ * no first day "→ 18 Apr. 2027", which is how the frame draws a show that
+ * opened before the fair. The year is on the end only - both dates carry it
+ * when they fall in different years.
+ *
+ * The month is the locale's own abbreviation, and the frame's capitals are
+ * CSS, not content, so restyling never needs the string changed. Like every
+ * date helper here it goes through `readable()`, so a value no one can parse
+ * prints nothing instead of throwing a page - and a build - away.
+ */
+export function formatExhibitionDates(
+  start: string | undefined,
+  end: string | undefined,
+  lang: LocaleId,
+): string {
+  const to = readable(end);
+  if (!to) return '';
+  const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
+  const opts = { day: 'numeric', month: 'short', timeZone: TIME_ZONE } as const;
+  const tail = new Intl.DateTimeFormat(locale, { ...opts, year: 'numeric' }).format(to);
+  const from = readable(start);
+  if (!from) return `→ ${tail}`;
+  const sameYear = from.getUTCFullYear() === to.getUTCFullYear();
+  const head = new Intl.DateTimeFormat(locale, sameYear ? opts : { ...opts, year: 'numeric' }).format(from);
+  return `${head} → ${tail}`;
 }
 
 export function formatDateRange(start: string, end: string, lang: LocaleId): string {

@@ -44,26 +44,50 @@ const SEO = `{
 }`;
 
 /**
+ * The current edition - the one and only place the site decides which that is.
+ *
+ * Exactly one edition should carry `isCurrent`, and nothing in the dataset
+ * enforces it. On 2026-10-01 two did, and the seven queries that each ran
+ * their own `*[isCurrent == true][0]` **with no ordering** could have
+ * disagreed: GROQ gives no guaranteed order there, so the homepage, the
+ * programme, VIP, the partners and the key figures were each free to pick a
+ * different year. Ordering by year makes a second current edition merely wrong
+ * instead of unpredictable - the newest wins, consistently, everywhere - and
+ * the Studio now warns on the field itself (`edition.ts`), which is where the
+ * mistake is actually made.
+ */
+const CURRENT_EDITION = `*[_type == "edition" && isCurrent == true] | order(year desc)[0]`;
+
+/**
  * Whether an exhibitor's edition has its galleries on the site (request #33,
  * Tiphaine 2026-09-30: "the 2027 galleries are not visible yet").
  * `showExhibitors` is the editors' switch, and it is deliberately not
  * `isCurrent`: that flag also drives the homepage, the programme, VIP, the
  * partners and the key figures, so 2027 stays the current edition while its
- * gallery list is still being typed in. While no edition has the switch on at
- * all the clause is true of every edition, so the field is inert until
- * somebody ticks a box and nothing about the site changes on deploy.
+ * gallery list is still being typed in.
+ *
+ * **A past edition is always shown; only the current one can be held back.**
+ * The first version of this read "shown if any edition has the switch on and
+ * this one does", which had a cliff in it: ticking 2026 alone un-built 2025's
+ * and 2024's gallery pages and collapsed the year row to a single year. The
+ * switch exists to keep an edition private *before* its fair, which is only
+ * ever the current one, so that is all it governs. Nothing an editor does to a
+ * past edition can take its galleries off the site.
+ *
  * Goes inside an exhibitor filter; `edition` is the exhibitor's own.
  */
-const EXHIBITOR_SHOWN = `(count(*[_type == "edition" && showExhibitors == true]) == 0
-  || edition->showExhibitors == true)`;
+const EXHIBITOR_SHOWN = `(edition->showExhibitors == true || edition->isCurrent != true)`;
+
+/** The same rule, for filtering edition documents rather than exhibitors. */
+const EDITION_SHOWN = `(showExhibitors == true || isCurrent != true)`;
 
 /**
  * The year /exhibitors opens on: the newest edition whose galleries are shown,
  * or the current one while none is. The year row offers the rest.
  */
 const LANDING_YEAR = `coalesce(
-  (*[_type == "edition" && showExhibitors == true && defined(year)] | order(year desc)[0].year),
-  (*[_type == "edition" && isCurrent == true][0].year)
+  (*[_type == "edition" && ${EDITION_SHOWN} && defined(year)] | order(year desc)[0].year),
+  (${CURRENT_EDITION}.year)
 )`;
 
 /** What links.ts needs to know where a linked document lives. */
@@ -115,9 +139,23 @@ const VIDEO = `{
 // `link` (request #25): the homepage grid makes a linked figure clickable.
 const KEY_FIGURES = `keyFigures[]{ _key, value, ${styled('label')}, "link": link ${LINK} }`;
 
+/**
+ * Whether a person serves in a given year (#46). `editions` is the array one
+ * person carries for every year on a jury or team; `edition` is the single
+ * reference it replaced, still read so an unmigrated draft does not silently
+ * drop off a page. A person with neither is year-less - the advisory board.
+ * `year` is a GROQ expression, not a value, so both call sites can pass
+ * their own ("$year", the current edition's).
+ */
+const personInYear = (year: string) =>
+  `((!defined(edition) && count(coalesce(editions, [])) == 0)
+    || edition->year == ${year}
+    || count(editions[@->year == ${year}]) > 0)`;
+
 const PERSON = `{
   _id, name, groups, countryCode, website, instagram, email, phone, order,
-  "year": edition->year,
+  "years": editions[]->year,
+  "year": coalesce(edition->year, editions[0]->year),
   ${styled('role')},
   ${styled('bio')},
   portrait ${IMAGE}
@@ -238,7 +276,7 @@ const SECTIONS = `sections[hidden != true]{
     ${styled('heading')},
     "people": select(
       defined(group) => *[_type == "person" && ^.group in groups
-        && (!defined(edition) || edition->year == *[_type == "edition" && isCurrent == true][0].year)]
+        && ${personInYear(`${CURRENT_EDITION}.year`)}]
         | order(order asc, name asc) ${PERSON},
       people[]-> ${PERSON}
     )
@@ -498,7 +536,7 @@ const EDITION_CORE = `
  */
 export function getCurrentEdition(lang: LocaleId) {
   return run<any>(
-    `*[_type == "edition" && isCurrent == true][0]{
+    `${CURRENT_EDITION}{
       ${EDITION_CORE},
       ${styled('lastEntry')},
       ${styled('ticketsNote')},
@@ -540,11 +578,11 @@ export function getEditions(lang: LocaleId) {
  * /exhibitors rather than /exhibitors/<year>.
  */
 export function exhibitorEditions(editions: any[]) {
-  const shown = editions.filter((e: any) => e.showExhibitors === true);
-  // Until an editor ticks a box, every edition is shown and the listing opens
-  // on the current one - exactly what the site did before the field existed.
-  const visible = shown.length > 0 ? shown : editions;
-  const landingYear: number | undefined = (shown.length > 0 ? shown : editions.filter((e: any) => e.isCurrent))[0]?.year;
+  // `EXHIBITOR_SHOWN` in JS: a past edition always counts, the current one
+  // only once its switch is on. `getEditions` returns newest first.
+  const visible = editions.filter((e: any) => e.showExhibitors === true || e.isCurrent !== true);
+  const landingYear: number | undefined =
+    visible[0]?.year ?? editions.find((e: any) => e.isCurrent)?.year;
   return {
     landingYear,
     years: visible
@@ -559,10 +597,21 @@ export function getPastEditionYears() {
 }
 
 /**
- * One past edition with everything its year page shows, as the old site's
- * past-editions pages had it: the facts, the art prize (laureates, awards,
- * jury), the programme, the team and the photos - all read from the records
- * that point at the edition.
+ * One past edition with everything its year pages show: the facts, the art
+ * prize (laureates, awards, jury), the programme, the team, the photos and
+ * the country focus - all read from the records that point at the edition,
+ * so nothing is typed twice.
+ *
+ * This is the query behind `/[lang]/previous-editions/<year>` and all of its
+ * tabs (`docs/previous-editions-plan.md`). One query per year page, not one
+ * per tab: `run()` memoises it for the life of the build, so the seven tabs
+ * of one year cost one request.
+ *
+ * Fields that do not exist yet are requested all the same and come back
+ * undefined, so each tab renders what it has and lights up when the content
+ * lands: `leadImages` and `highlights` (#33), `guestInstallation` (#34),
+ * `focus` (#35), `publication` (#36). `archiveLeads` (#32) carries each tab's
+ * own lead paragraph.
  */
 export function getEditionArchive(lang: LocaleId, year: number) {
   return run<any>(
@@ -572,24 +621,84 @@ export function getEditionArchive(lang: LocaleId, year: number) {
       "film": film ${VIDEO},
       "images": images[] ${IMAGE},
       "exhibitorCount": count(*[_type == "exhibitor" && references(^._id)]),
+      // BACKEND-REQUEST #32: a lead paragraph per tab.
+      "archiveLeads": archiveLeads[]{ tab, ${styled('lead')} },
+      // BACKEND-REQUEST #33: the overview's image pair and its highlights.
+      "leadImages": leadImages[] ${IMAGE},
+      "highlights": highlights[]{ _key, ${styled('label')}, "link": link ${LINK} },
+      // BACKEND-REQUEST #34: what the guest of honour showed that year.
+      "guestInstallation": guestInstallation{
+        ${styled('title')}, ${styled('text')}, author, "images": images[] ${IMAGE}
+      },
+      // BACKEND-REQUEST #36: the publication reader.
+      "publication": publication{ url, ${styled('title')}, cover ${IMAGE} },
+      "guest": guestOfHonour->{
+        _id, name, countryCode, "slug": slug.current, ${styled('nationality')}, ${styled('bio')}, portrait ${IMAGE}
+      },
       "laureates": *[_type == "laureate" && references(^._id)] | order(order asc){
-        _id, "artist": artist->{ name, "slug": slug.current, ${styled('nationality')}, ${ARTIST_GALLERY} }
+        _id, "artist": artist->{ name, instagram, ${styled('nationality')}, "slug": slug.current, ${ARTIST_GALLERY} }
       },
       "awards": *[_type == "award" && family == "art-prize" && references(^._id)] | order(order asc){
-        _id, ${styled('name')}, ${styled('outcome')},
+        _id, ${styled('name')}, ${styled('outcome')}, ${styled('description')},
         "laureates": laureates[]->{ _id, name, "slug": slug.current, ${ARTIST_GALLERY} }
       },
       "jury": *[_type == "person" && "jury" in groups && references(^._id)] | order(order asc, name asc){
-        _id, name, ${styled('role')}
+        _id, name, countryCode, website, instagram, ${styled('role')}
       },
       "people": *[_type == "person" && references(^._id) && count(groups[@ in ["team", "collaborator", "advisory-board"]]) > 0]
         | order(order asc, name asc){ _id, name, ${styled('role')} },
-      "events": *[_type == "programmeEvent" && references(^._id) && defined(startsAt)] | order(startsAt asc){
-        _id, startsAt, ${styled('title')}, ${styled('speakersText')},
+      // BACKEND-REQUEST #35: the country focus tab - its lead, its pictures
+      // and the galleries it hosted.
+      "focus": focus{
+        ${styled('lead')}, "images": images[] ${IMAGE}, "talkImages": talkImages[] ${IMAGE},
+        "galleries": galleries[]->{ _id, name, "slug": slug.current, "year": edition->year, "current": edition->isCurrent == true }
+      },
+      // The galleries the focus tab lists, when they are flagged on the
+      // exhibitors rather than referenced from the edition (#35).
+      "focusExhibitors": *[_type == "exhibitor" && references(^._id) && inCountryFocus == true]
+        | order(lower(coalesce(sortName, name)) asc){
+          _id, name, "slug": slug.current, "year": edition->year, "current": edition->isCurrent == true
+        },
+      // Every event, dated or not: 16 of 2025's 18 carry no startsAt
+      // (BACKEND-REQUEST #39), and filtering on it here hid five sixths of
+      // the programme. The undated ones sort last and the page lists them
+      // under the day rows.
+      "events": *[_type == "programmeEvent" && references(^._id)] | order(startsAt asc, lower(title.en) asc){
+        _id, startsAt, section, moderator,
+        ${styled('title')}, ${styled('description')}, ${styled('speakersText')},
         "speakers": speakers[]->{ _id, _type, name, "slug": slug.current, _type == "artist" => { ${ARTIST_GALLERY} } }
       }
     }`,
     { lang, year },
+  );
+}
+
+/**
+ * Every past edition reduced to what the year band and `tabsFor` need: the
+ * year, its ordinal and the counts that decide which tabs exist. One query
+ * for the whole band, made once per build and memoised, rather than four
+ * archive queries on every page.
+ */
+export function getPastEditionsIndex(lang: LocaleId) {
+  return run<any[]>(
+    `*[_type == "edition" && isCurrent != true && defined(year)] | order(year desc){
+      year,
+      ${styled('ordinal')},
+      ${styled('countryFocus')},
+      "guestOfHonour": guestOfHonour->{ name },
+      "publication": publication{ url },
+      "exhibitorCount": count(*[_type == "exhibitor" && references(^._id)]),
+      "laureateCount": count(*[_type == "laureate" && references(^._id)]),
+      "eventCount": count(*[_type == "programmeEvent" && references(^._id)]),
+      // What the focus tab would have to show. A country focus alone is not
+      // enough to earn a pill: no past edition flags its galleries and no
+      // past event has a section, so without this the tab is a pill onto an
+      // empty page (BACKEND-REQUEST #35).
+      "hasFocusLead": defined(focus.lead),
+      "focusCount": count(*[_type == "exhibitor" && references(^._id) && inCountryFocus == true])
+        + count(*[_type == "programmeEvent" && references(^._id) && section == "focus"])
+    }`,
+    { lang },
   );
 }
 
@@ -759,8 +868,8 @@ const ARTIST_FULL = `
 export function getGuestOfHonour(lang: LocaleId) {
   return run<any>(
     `{
-      "edition": *[_type == "edition" && isCurrent == true][0]{ year, ${styled('title')} },
-      "artist": *[_type == "edition" && isCurrent == true][0].guestOfHonour->{ ${ARTIST_FULL} },
+      "edition": ${CURRENT_EDITION}{ year, ${styled('title')} },
+      "artist": ${CURRENT_EDITION}.guestOfHonour->{ ${ARTIST_FULL} },
       "previous": *[_type == "edition" && isCurrent != true && defined(guestOfHonour)] | order(year desc){
         year,
         "artist": guestOfHonour->{ _id, name, countryCode, "slug": slug.current, portrait ${IMAGE} }
@@ -830,7 +939,7 @@ export function getAwards(lang: LocaleId) {
 export function getPeople(lang: LocaleId, group: string, year?: number) {
   return run<any[]>(
     `*[_type == "person" && $group in groups
-        && (!defined(edition) || edition->year == coalesce($year, *[_type == "edition" && isCurrent == true][0].year))]
+        && ${personInYear(`coalesce($year, ${CURRENT_EDITION}.year)`)}]
       | order(order asc, name asc) ${PERSON}`,
     { lang, group, year: year ?? null },
   );
@@ -944,7 +1053,7 @@ export function getMainPage(lang: LocaleId, section: string) {
 export function getProgramme(lang: LocaleId) {
   return run<any[]>(
     `*[_type == "programmeEvent"
-        && edition._ref == *[_type == "edition" && isCurrent == true][0]._id
+        && edition._ref == ${CURRENT_EDITION}._id
       ] | order(startsAt asc){
       _id, startsAt, endsAt, kind, section, venue, languages, moderator, invitationOnly,
       "slug": slug.current,
@@ -959,6 +1068,30 @@ export function getProgramme(lang: LocaleId) {
       // Several pictures per event (#9) and the row's own pill (#14).
       "images": images[] ${IMAGE},
       "link": link ${LINK}
+    }`,
+    { lang },
+  );
+}
+
+/**
+ * The exhibition pass: the partner institutions' exhibitions a fair ticket
+ * gets you into, for the programme hub's fourth tab (request #48, merged with
+ * #36). The current edition's, in the editors' order then by institution.
+ *
+ * Its own type rather than `programmeEvent` - see `exhibition.ts` for why -
+ * so `getProgramme` is untouched and the talks tab, the VIP programme and the
+ * archives cannot accidentally list a museum show.
+ */
+export function getExhibitions(lang: LocaleId) {
+  return run<any[]>(
+    `*[_type == "exhibition" && edition._ref == ${CURRENT_EDITION}._id]
+      | order(order asc, institution.${DEFAULT_LOCALE} asc){
+      _id, _type, artist, city, startDate, endDate, order,
+      ${styled('institution')},
+      ${styled('exhibitionTitle')},
+      ${styled('description')},
+      "link": link ${LINK},
+      "images": images[] ${IMAGE}
     }`,
     { lang },
   );

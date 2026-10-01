@@ -1,0 +1,214 @@
+---
+import Slideshow from '../Slideshow.astro';
+import PortableText from '../PortableText.astro';
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations, localePath } from '../../lib/i18n';
+import { exhibitorPath } from '../../lib/links';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * A previous edition's country focus - "norway focus" in 2025, "españa focus"
+ * in 2026, nothing in 2024. The frame: the lead with its inline link, a
+ * slideshow beside the `galleries` list, then `talks programme` - the talks
+ * two across, each with its description, speakers and moderator - and a
+ * second slideshow.
+ *
+ * **The galleries are internal links.** Léonie, Figma comment 2026-09-28:
+ * *"these link to the individual gallery pages in exhibitors 2025"* - so
+ * `exhibitorPath()`, onto `/exhibitors/<year>/<slug>`. The frame draws them
+ * with "↗", which is this site's mark for an external link; drawn as "→" here
+ * until that is settled (docs/previous-editions-plan.md §8.3).
+ *
+ * BACKEND-REQUEST #35 covers the lead, the pictures and which events are the
+ * focus talks; #37 the moderator. Until they land the tab shows the galleries,
+ * which are real today, and nothing it cannot fill.
+ */
+const { lang, edition, lead } = Astro.props as { lang: LocaleId; edition: any; lead?: any };
+const t = useTranslations(lang);
+
+const focus = edition.focus;
+const intro = lead ?? focus?.lead;
+
+/**
+ * The participating galleries. Either the edition names them (#35) or they
+ * are its exhibitors flagged `inCountryFocus` - the flag is set on no past
+ * edition today, so this is empty until one or the other is filled.
+ */
+const galleries: any[] = (focus?.galleries?.length ? focus.galleries : (edition.focusExhibitors ?? [])).filter(
+  (g: any) => g?.name,
+);
+
+/**
+ * The focus talks. `section == "focus"` is what #35 asks for; no 2025 or 2024
+ * event carries a section at all today, so nothing is shown rather than the
+ * whole programme being repeated under the wrong heading.
+ */
+const talks: any[] = (edition.events ?? []).filter((e: any) => e?.section === 'focus');
+
+/** The pictures beside the lead, and the separate slideshow beside the talks. */
+const leadShots: any[] = (focus?.images ?? []).filter((img: any) => img?.asset);
+const talkShots: any[] = (focus?.talkImages ?? []).filter((img: any) => img?.asset);
+
+/** The speakers line: the typed one if there is one, else the referenced people. */
+const speakersOf = (event: any) =>
+  event.speakersText ?? (event.speakers ?? []).map((s: any) => s?.name).filter(Boolean).join(', ');
+---
+
+<div class="content-wrap edition-focus">
+  {intro && <div class="intro-large lead"><PortableText value={intro} /></div>}
+
+  {/* Without the slideshow (no focus images yet, #35) the split would drop
+      the galleries list into the wide 907 track. One column then, at the
+      list's own width. */}
+  <div class:list={['top', leadShots.length > 0 ? ['ed-split', 'wide-first'] : 'list-only']}>
+    {
+      leadShots.length > 0 && (
+        <div class="shots">
+          <Slideshow
+            images={leadShots}
+            aspect={1.35}
+            sizes="(max-width: 900px) 100vw, 60vw"
+            label={edition.countryFocus ?? t('prevEd.focus')}
+            id="focus"
+          />
+        </div>
+      )
+    }
+
+    {
+      galleries.length > 0 && (
+        <section class="galleries">
+          <h2 class="panel-title">{t('prevEd.galleries')}</h2>
+          <ul>
+            {galleries.map((g: any) => (
+              <li>
+                <a class="text-link" href={localePath(lang, exhibitorPath(g))}>
+                  {g.name} <span class="link-arrow" data-arrow="→">→</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+
+  {
+    talks.length > 0 && (
+      <section class="talks">
+        <h2 class="panel-title">{t('prevEd.talks')}</h2>
+        <div class="ed-split half talk-grid">
+          {talks.map((talk: any) => (
+            <article class="talk">
+              <h3 {...styleAttrs(talk.titleStyle)}>{talk.title}</h3>
+              {talk.description && (
+                <div class="body">
+                  <PortableText value={talk.description} />
+                </div>
+              )}
+              {speakersOf(talk) && (
+                <>
+                  <p class="tag">{t('prevEd.speakers')}</p>
+                  <p class="who">{speakersOf(talk)}</p>
+                </>
+              )}
+              {/* BACKEND-REQUEST #37: hidden in the schema, and filled on 2026 events only. */}
+              {talk.moderator && (
+                <>
+                  <p class="tag">{t('prevEd.moderator')}</p>
+                  <p class="who">{talk.moderator}</p>
+                </>
+              )}
+            </article>
+          ))}
+
+          {talkShots.length > 0 && (
+            <div class="talk-shots">
+              <Slideshow
+                images={talkShots}
+                aspect={1.35}
+                sizes="(max-width: 900px) 100vw, 46vw"
+                label={t('prevEd.talks')}
+                id="focus-talks"
+              />
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
+</div>
+
+<style>
+  .lead {
+    margin: 0 0 52px;
+  }
+  .lead :global(p + p) {
+    margin-top: 28px;
+  }
+
+  /* The frame gives the slideshow two thirds and the gallery list one:
+     907 / 40 / 433. With no slideshow the list stands on its own. */
+  .top.list-only .galleries {
+    max-width: 433px;
+  }
+
+  .galleries ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+  }
+  .galleries li,
+  .galleries a {
+    font-size: clamp(1.35rem, 2.6vw, 2.25rem);
+    line-height: 1.3;
+    letter-spacing: -0.04em;
+  }
+  .galleries a {
+    text-decoration: underline;
+    text-underline-offset: 0.14em;
+  }
+
+  .talks {
+    margin-top: 88px;
+  }
+  /* Talks two across on the full 1380; the slideshow takes a cell of the
+     same grid, which is how the frame sets it beside the third talk. */
+  .talk h3 {
+    margin: 0 0 10px;
+    font-size: clamp(1.2rem, 2.1vw, 1.75rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+  }
+  .talk .body {
+    font-size: 18px;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+  }
+  .talk .body :global(p + p) {
+    margin-top: 16px;
+  }
+  /* SPEAKERS / MODERATOR, small caps over the names, as the frame sets them. */
+  .tag {
+    margin: 18px 0 2px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .who {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+  }
+
+  @media (width<=900px) {
+    .talks {
+      margin-top: 48px;
+    }
+  }
+</style>

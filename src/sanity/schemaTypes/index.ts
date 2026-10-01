@@ -17,6 +17,11 @@ import {
   accessMode,
   faqItem,
   pressContact,
+  editionHighlight,
+  editionLead,
+  guestInstallation,
+  editionFocus,
+  editionPublication,
 } from './objects/visitor';
 
 import { edition } from './documents/edition';
@@ -29,6 +34,7 @@ import { newsItem } from './documents/newsItem';
 import { page } from './documents/page';
 import { pageTemplate } from './documents/pageTemplate';
 import { programmeEvent } from './documents/programmeEvent';
+import { exhibition } from './documents/exhibition';
 import { partner } from './documents/partner';
 import { pressClip } from './documents/pressClip';
 import { story } from './documents/story';
@@ -59,6 +65,12 @@ export const objectTypes: SchemaTypeDefinition[] = [
   accessMode,
   faqItem,
   pressContact,
+  // Previous editions (requests #32-#36). All optional, all additive.
+  editionHighlight,
+  editionLead,
+  guestInstallation,
+  editionFocus,
+  editionPublication,
 ];
 
 export const documentTypes: SchemaTypeDefinition[] = [
@@ -72,6 +84,7 @@ export const documentTypes: SchemaTypeDefinition[] = [
   page,
   pageTemplate,
   programmeEvent,
+  exhibition,
   partner,
   pressClip,
   story,

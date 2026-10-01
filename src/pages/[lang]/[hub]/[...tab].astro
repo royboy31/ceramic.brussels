@@ -7,9 +7,20 @@ import PressMedia from '../../../components/hubs/PressMedia.astro';
 import Programme from '../../../components/hubs/Programme.astro';
 import Visit from '../../../components/hubs/Visit.astro';
 import Vip from '../../../components/hubs/Vip.astro';
+import PreviousEdition from '../../../components/editions/PreviousEdition.astro';
+import EditionHidden from '../../../components/editions/EditionHidden.astro';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { HUBS, hubRouteParams, hubFromSegment, tabFromSegment } from '../../../lib/hubs';
-import { getHubPages } from '../../../lib/queries';
+import { getHubPages, getPastEditionsIndex, getExhibitions } from '../../../lib/queries';
+import {
+  editionRouteParams,
+  editionFromRest,
+  sectionFromSegment,
+  isSectionRoot,
+  editionTabPath,
+} from '../../../lib/previousEditions';
+import { localePath } from '../../../lib/i18n';
+import { PAST_EDITIONS_PUBLIC } from '../../../components/launch';
 
 /**
  * Every hub, in every language, from one route.
@@ -34,23 +45,77 @@ import { getHubPages } from '../../../lib/queries';
  * A `pageTabs` hub's tab is built only while its page is published, so each
  * such hub's pages are read here first. Page documents are the same in every
  * language, and the hub components make the same (memoised) query.
+ *
+ * **Previous editions rides on this route too** (`src/lib/previousEditions.ts`,
+ * `docs/previous-editions-plan.md`). It is not a hub - its pills change from
+ * one year to the next - but it has the hubs' one binding constraint: its
+ * segment is translated (`/fr/editions-precedentes/2025`), so it cannot be a
+ * folder on disk, and two dynamic siblings cannot both sit under `[lang]`.
+ * `[...tab]` is a rest param, so it carries `2025/art-prize` without any
+ * change to the route's shape.
  */
 export async function getStaticPaths() {
   const routes = Object.keys(HUBS).filter((route) => HUBS[route].pageTabs);
-  const pages = Object.fromEntries(
-    await Promise.all(routes.map(async (route) => [route, await getHubPages(DEFAULT_LOCALE, route)])),
-  );
-  return hubRouteParams(LOCALE_IDS, { pages });
+  const [pageEntries, editions, exhibitions] = await Promise.all([
+    Promise.all(routes.map(async (route) => [route, await getHubPages(DEFAULT_LOCALE, route)])),
+    getPastEditionsIndex(DEFAULT_LOCALE),
+    // What an `ownContent` tab has of its own: the exhibition pass lists
+    // `exhibition` documents, so it earns its pill from those rather than
+    // from a published `page` (#48).
+    getExhibitions(DEFAULT_LOCALE),
+  ]);
+  const pages = Object.fromEntries(pageEntries);
+  const has = { 'programme/exhibition-pass': exhibitions.length > 0 };
+  return [...hubRouteParams(LOCALE_IDS, { pages, has }), ...editionRouteParams(LOCALE_IDS, editions)];
 }
 
 const lang = Astro.params.lang as LocaleId;
 const segment = Astro.params.hub as string;
-const props = Astro.props as { route?: string; tab?: string };
+const props = Astro.props as {
+  route?: string;
+  tab?: string;
+  previousEdition?: boolean;
+  root?: boolean;
+  year?: number;
+};
 
-const route = props.route ?? hubFromSegment(segment, lang);
-if (!route) return Astro.rewrite('/404');
+// Previous editions is decided first: its segment is its own and is never a
+// hub's, so this branch cannot shadow one. `edition` stays null for a hub,
+// and the template below picks between the two. The rest param is parsed when
+// there are no static props - the preview runtime renders this file on
+// request.
+const inSection = props.previousEdition || sectionFromSegment(segment, lang);
+const rest = Astro.params.tab as string | undefined;
 
-const tab = props.tab ?? tabFromSegment(route, Astro.params.tab as string | undefined, lang);
+
+// The section root has no page of its own: it sends the reader to the newest
+// past edition (docs/previous-editions-plan.md §2). Both the old site's
+// `/{lang}/pasteditions` and this build's earlier `/{lang}/editions` land
+// here through the redirect map.
+const atSectionRoot = inSection && (props.root || isSectionRoot(rest));
+const newestPast = atSectionRoot ? (await getPastEditionsIndex(lang))[0]?.year : undefined;
+if (atSectionRoot) {
+  if (!newestPast) return Astro.rewrite('/404');
+  // Off for the launch, the root is a stub like every other address in the
+  // section - a 301 onto a page that itself moves is two hops and a
+  // permanent redirect that outlives the launch.
+  if (PAST_EDITIONS_PUBLIC) {
+    return Astro.redirect(localePath(lang, editionTabPath(newestPast, undefined, lang)), 301);
+  }
+}
+
+const edition = atSectionRoot
+  ? { year: newestPast as number, tab: undefined as unknown as string }
+  : inSection
+  ? props.previousEdition
+    ? { year: props.year as number, tab: props.tab as string }
+    : editionFromRest(rest, lang)
+  : null;
+
+const route = edition ? null : (props.route ?? hubFromSegment(segment, lang));
+if (!edition && !route) return Astro.rewrite('/404');
+
+const tab = route ? (props.tab ?? tabFromSegment(route, Astro.params.tab as string | undefined, lang)) : null;
 
 const HUB_COMPONENTS: Record<string, any> = {
   about: About,
@@ -62,8 +127,20 @@ const HUB_COMPONENTS: Record<string, any> = {
   visit: Visit,
   vip: Vip,
 };
-const Hub = HUB_COMPONENTS[route];
-if (!Hub) return Astro.rewrite('/404');
+const Hub = route ? HUB_COMPONENTS[route] : null;
+if (!edition && !Hub) return Astro.rewrite('/404');
 ---
 
-<Hub lang={lang} tab={tab} />
+{
+  edition ? (
+    /* Off for the launch: the address keeps answering, its content does not.
+       See EditionHidden and `PAST_EDITIONS_PUBLIC`. */
+    PAST_EDITIONS_PUBLIC ? (
+      <PreviousEdition lang={lang} year={edition.year} tab={edition.tab} />
+    ) : (
+      <EditionHidden lang={lang} year={edition.year} tab={edition.tab} />
+    )
+  ) : (
+    <Hub lang={lang} tab={tab} />
+  )
+}
