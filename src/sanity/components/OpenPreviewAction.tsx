@@ -22,15 +22,21 @@ export const openPreviewAction: DocumentActionComponent = (props) => {
   const lang = useEditingLocale();
   const [busy, setBusy] = useState(false);
 
-  const doc = (draft ?? published) as Record<string, any> | null;
+  /**
+   * A brand-new document has neither draft nor published yet. It is still
+   * the one the editor has open, so it is reported all the same (empty) -
+   * before 2026-10-02 it was not, and the top bar's Preview answered
+   * "Nothing open to preview" with the editor looking straight at the
+   * document (the meeting's "inconsistent linking", 2026-10-01). With the
+   * empty doc the launcher resolves no page and says *why* instead.
+   */
+  const doc = (draft ?? published ?? {}) as Record<string, any>;
   const target = firstPreview(type, doc, lang);
 
   useEffect(() => {
-    if (doc) reportOpen(id, type, doc);
+    reportOpen(id, type, doc);
   }, [id, type, doc]);
   useEffect(() => () => reportClosed(id), [id]);
-
-  if (!doc) return null;
 
   return {
     label: busy ? 'Opening preview…' : 'Open preview',
