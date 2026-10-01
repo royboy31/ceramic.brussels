@@ -851,7 +851,7 @@ map covers a stale one - so this is tidying, not a break. Worth doing when
 **Done (Lilanga, 2026-09-30, across the stack per docs/project-handbook.md):** the day headings in `legacy-export` were walked to rebuild each event's date: 16 of 16 undated 2025 events and 8 of 9 for 2024. The 2025 programme tab now shows its five real fair days. Filled by `scripts/content/previous-editions.mjs`, which is re-runnable.
 
 ---
-## #46 · open · 2026-09-30 · a person can only sit on one edition's jury
+## #46 · done · 2026-09-30 · a person can only sit on one edition's jury
 
 **Page / component:** `src/components/editions/ArtPrize.astro`, `/[lang]/previous-editions/2025/art-prize`
 **Figma frame:** `Previous editions/ceramic brussels — previous editions — 2025 — art prize.png`
@@ -859,6 +859,12 @@ map covers a stale one - so this is tidying, not a break. Worth doing when
 **The query returns today:** four. Jean-Marc Dimanche exists once, as `demo-person-jean-marc-dimanche`, and `person.edition` is a single reference pointing at 2027 — so he is 2027's jury, 2027's team and 2027's collaborator, and cannot also be 2025's juror. The same will be true of anyone who sits on the jury twice, which for this fair is most of them.
 **Rendered meanwhile:** the four whose `edition` is 2025. No placeholder, no gap.
 **Asked for:** your call on the model, which is why this is a request rather than a patch — a second `person` document per year duplicates the human, and an `editions` array or a `juryYears` field changes what `getPeople` means. Whatever you choose, 2025's jury needs Dimanche on it and the export has his bio (`legacy-export/normalized/pastEditions.json` → `art-prize-jury-2`, block 741).
+
+**Done (Kamindu, 2026-10-01): `editions`, an array** - the shape `partner` already uses for the same idea, so the model stays of one mind. One person, every year they served; `personInYear()` in `queries.ts` is the single clause both people queries share, and it still reads the old single `edition` so an unmigrated draft cannot silently drop. The advisory board stays year-less (neither field). The Studio's year folders and "Open preview" read the array; the old field is hidden with the reason, not deleted; the document preview joins the years ("jury · 2025/2027 · …").
+
+`scripts/migrate-person-editions.mjs` (dry-run by default) moved all 41 values - drafts included - unset the single so the two can never disagree, and put **Jean-Marc Dimanche on the 2025 jury**. Verified built and in the dataset: the 2025 art prize page lists its five jurors as the frame draws them, the 2027 tab keeps its five with Dimanche on both as one record, team and advisory board unchanged.
+
+One pre-existing find, not a regression: **Johan Creten** sits in the advisory-board group with `editions: [2024]`, so the current-year clause drops him from the page - exactly as the old single reference already did. Whether he belongs there is the same editors' question as the mis-tagged collaborators (his year cleared = listed; left as is = not). His per-year *bio* is the one thing this model does not hold: a person has one bio, and if 2025's text should differ from 2027's, that is the memberships-array upgrade, not taken until someone needs it.
 
 ---
 ## #47 · open · 2026-09-30 · the 2025 exhibitor cards have no pictures
