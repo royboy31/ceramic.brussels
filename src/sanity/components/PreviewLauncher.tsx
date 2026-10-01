@@ -94,7 +94,7 @@ export function PreviewLauncher() {
     },
     nopage: {
       title: 'No page shows this document',
-      body: 'It has no address yet (no slug), or it belongs to an edition the site does not show.',
+      body: 'It has no address yet — a new document gets one once its content (and slug, where it has one) is filled in — or it belongs to an edition the site does not show.',
       actions: <Button text="Back to editing" mode="ghost" onClick={back} />,
     },
   };
