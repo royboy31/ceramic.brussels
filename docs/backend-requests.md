@@ -867,7 +867,7 @@ map covers a stale one - so this is tidying, not a break. Worth doing when
 ---
 
 ---
-## #42 · open · 2026-10-01 · programme: the exhibition pass tab and what it lists
+## #48 · open · 2026-10-01 · programme: the exhibition pass tab and what it lists
 
 **Page / component:** a fourth tab on the programme hub; component is Lilanga's
 **Figma frame:** `screenshot/ceramic brussels — programme — exhibition pass.png` (Léonie, sent with the comments of 2026-09-30)
@@ -887,7 +887,7 @@ map covers a stale one - so this is tidying, not a break. Worth doing when
 Reusing `programmeEvent` was considered and looks wrong: these are months-long exhibitions at other venues, with no time, no venue-on-site and no programme section, and they would pollute `getProgramme`. Your call.
 
 ---
-## #43 · open · 2026-10-01 · the photographs are pixelated: the sources are small
+## #49 · open · 2026-10-01 · the photographs are pixelated: the sources are small
 
 **Page / component:** everywhere; reported on photos & videos and the gallery pages
 **Asked by:** the client's comments of 2026-09-30, "The picture are still pixelated" — "still", after the retina ladder fix of 2026-09-23
@@ -910,7 +910,7 @@ The worst are clearly legacy imports — `969.jpg` at 300×225 on the person Vin
 **Asked for:** a judgement on what is recoverable. Three questions: can the 350 that failed at 2500 be re-fetched at an intermediate width rather than falling back to the original; are the 149 unreferenced ones safe to delete; and for the rest, do we go back to the galleries and the photographers. A displayed-vs-natural report per page can be produced on request.
 
 ---
-## #44 · open · 2026-10-01 · the Studio still offers "Past editions" as `editions`
+## #50 · open · 2026-10-01 · the Studio still offers "Past editions" as `editions`
 
 **Page / component:** `src/sanity/siteLinks.ts`, `src/sanity/schemaTypes/objects/routes.ts`
 
@@ -921,7 +921,7 @@ The worst are clearly legacy imports — `969.jpg` at 300×225 on the person Vin
 **Asked for:** rename the entry to "Previous editions" and the value to `previous-editions`, keeping the old value readable so existing links do not break.
 
 ---
-## #45 · open · 2026-10-01 · `npm run boundary` flags `src/styles/`
+## #51 · open · 2026-10-01 · `npm run boundary` flags `src/styles/`
 
 **Page / component:** `scripts/boundary.mjs`
 
@@ -932,7 +932,7 @@ The branch adds `src/styles/site.css`, which is where the cross-cutting rules of
 **Asked for:** `/^src\/styles\//` in `ALLOWED`.
 
 ---
-## #46 · open · 2026-10-01 · 2024 and 2025 galleries: the data the 2026 ones have
+## #52 · open · 2026-10-01 · 2024 and 2025 galleries: the data the 2026 ones have
 
 **Asked by:** the client's comments of 2026-09-30, galleries: "Is it possible to do the same for 2024 and 2025 as was done to 2026 for the galleries: automatize the instagram and website buttons, create the artists pages, caption all pictures, put the correct city (**not done in 2026 either**). This would make us win a lot of time if possible."
 

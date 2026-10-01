@@ -31,17 +31,17 @@ programme tab, and the buttons still would not appear.
 
 ## 2. Five requests, in the usual place
 
-`docs/backend-requests.md`, entries **#42–#46**, house format, all `open`:
+`docs/backend-requests.md`, entries **#48–#52**, house format, all `open`:
 
 | # | What | Size |
 | :-- | :-- | :-- |
-| #42 | Exhibition pass: a fourth programme tab and a document type for the institutions' exhibitions. Field list derived from the frame is in the entry | the big one |
-| #43 | The pixelated photographs: **not** a frontend bug, the sources are small. Numbers, and a breakdown by document type | needs your judgement |
-| #44 | The Studio still offers "Past editions" as `editions` | one rename |
-| #45 | `npm run boundary` flags `src/styles/`, which is mine | one line |
-| #46 | 2024/2025 gallery data, relayed from the client | estimate first |
+| #48 | Exhibition pass: a fourth programme tab and a document type for the institutions' exhibitions. Field list derived from the frame is in the entry | the big one |
+| #49 | The pixelated photographs: **not** a frontend bug, the sources are small. Numbers, and a breakdown by document type | needs your judgement |
+| #50 | The Studio still offers "Past editions" as `editions` | one rename |
+| #51 | `npm run boundary` flags `src/styles/`, which is mine | one line |
+| #52 | 2024/2025 gallery data, relayed from the client | estimate first |
 
-#42 has one thing I decided rather than asked: the frame draws the programme
+#48 has one thing I decided rather than asked: the frame draws the programme
 pills in a new order, La Cambre first, and I have **not** followed it, because
 talks is the hub root and moving it costs a URL. Say if you disagree.
 
@@ -75,7 +75,7 @@ it is still unopened when you read this.
 
 Backend-half files on the branch are the previous-editions ones already
 recorded as a Note at the bottom of `docs/backend-requests.md`. This round's
-work added none — except `src/styles/site.css`, which is #45.
+work added none — except `src/styles/site.css`, which is #51.
 
 Also on that compare: three old merge commits that are on `main` and `lilanga`
 but not `dev`, so `dev` is behind `main`. Merging catches it up; flagging it so
