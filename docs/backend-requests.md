@@ -971,3 +971,18 @@ The branch adds `src/styles/site.css`, which is where the cross-cutting rules of
 **Asked by:** the client's comments of 2026-09-30, galleries: "Is it possible to do the same for 2024 and 2025 as was done to 2026 for the galleries: automatize the instagram and website buttons, create the artists pages, caption all pictures, put the correct city (**not done in 2026 either**). This would make us win a lot of time if possible."
 
 Relayed, not specified — this is an import job and the scope is yours. The client frames it as a time-saver rather than a must, so an estimate first would help us tell them what to expect. Note their aside that the city is wrong on 2026 as well, which is a smaller and separate fix.
+
+---
+## #53 · open · 2026-10-01 · the legacy map points 61 rules into previous editions
+
+**Page / component:** `scripts/legacy-redirects.mjs`, `src/components/launch.ts`, `src/components/editions/EditionHidden.astro`
+
+**Asked by:** the client, 2026-10-01: *"remove all 'Past Editions' access from Exhibitors — since we have to go live on Monday temporarily remove links from the site so users can't access"*. The section comes back after launch, so everything on my side is one switch, `PAST_EDITIONS_PUBLIC` in `src/components/launch.ts`.
+
+**The problem it leaves:** `LEGACY` sends 61 of the old site's URLs into `/previous-editions/…` (`pasteditions/*`, `editions/*`, `exhibitors/2024|2025|2026`, `focus-espana`, `ideat-special-prize`, `collaborations`, `magazine`, `1st-edition`, `awards`). Every target is checked against the build, so **not building the section fails the build** — which is why the pages are still built while hidden, each one a stub that `noindex`es itself and sends the reader to `/exhibitors/`.
+
+The stub exists for a second reason too: a static `Astro.redirect` writes an HTML file with no `hreflang` tags, and `target()` reads those tags to find a rule's French and Dutch address. Without them the build fails on `/fr/previous-editions/2026/`, which is not the French address at all (`/fr/editions-precedentes/2026/`).
+
+**Asked for:** while `PAST_EDITIONS_PUBLIC` is `false`, point those rules at `exhibitors` instead — in the map, or wherever you prefer to read the switch. Then the routes can stop being built altogether and `EditionHidden.astro` can go. If you would rather leave it as it is for the week, nothing is broken: the old URLs answer, in one extra hop, and nothing is indexed.
+
+**Also content, not code:** the programme hub's talks tab has an editor-made link, *"Find the 2026 talk programme here"*, pointing at `/en/previous-editions/2026/`. While the section is off it lands on the galleries list, which is the wrong place for a talks link. It wants removing in the Studio for the launch — I have not touched it.

@@ -23,8 +23,17 @@ interface Props {
    * from the frame's top edge: portrait stays portrait, landscape stays
    * landscape (Tiphaine, 2026-09-25), nothing is cropped and blown up, and
    * every slide starts at the same height (client, 2026-09-30).
+   *
+   * 'width' drops the frame altogether: every picture is the column's width
+   * and keeps its own height, so the caption sits directly under the
+   * picture rather than under a box the picture only half fills (client,
+   * 2026-10-01: *"standardize image width across slides while allowing
+   * different heights, keep artwork number/name directly beneath the
+   * image"*). `aspect` is not read in this mode, and the dots go under the
+   * line rather than on a picture whose bottom edge moves from slide to
+   * slide.
    */
-  fit?: 'cover' | 'contain';
+  fit?: 'cover' | 'contain' | 'width';
   /**
    * Milliseconds between slides for a slideshow that moves by itself
    * (homepage features, Tiphaine 2026-09-24). It waits while the pointer or
@@ -66,16 +75,17 @@ const {
 const slides = (images ?? []).filter((img) => img?.asset);
 const slideId = (i: number) => `${id}-${i + 1}`;
 const contain = fit === 'contain' && !!aspect;
+const widthFit = fit === 'width';
 ---
 
 {
   slides.length > 0 ? (
     <div
-      class:list={['slideshow', className, { 'no-aspect': !aspect, contain, 'bleed-m': bleed }]}
+      class:list={['slideshow', className, { 'no-aspect': !aspect || widthFit, contain, 'fit-width': widthFit, 'bleed-m': bleed }]}
       id={id}
       data-slides={slides.length}
       data-autoplay={autoplay && slides.length > 1 ? autoplay : undefined}
-      style={aspect ? `--aspect: ${aspect}` : undefined}
+      style={aspect && !widthFit ? `--aspect: ${aspect}` : undefined}
     >
       <div class="track" data-track tabindex={slides.length > 1 ? 0 : undefined}>
         {slides.map((img, i) => (
@@ -93,7 +103,7 @@ const contain = fit === 'contain' && !!aspect;
             ) : (
               <SanityImage
                 image={img}
-                aspect={aspect}
+                aspect={widthFit ? undefined : aspect}
                 sizes={sizes}
                 widths={widths}
                 loading={i === 0 ? 'eager' : 'lazy'}
@@ -174,6 +184,17 @@ const contain = fit === 'contain' && !!aspect;
   .frame {
     aspect-ratio: var(--aspect);
   }
+
+  /* fit="width": one width, each picture its own height. The slides no longer
+     stretch to the tallest one, so every caption sits 8px under its own
+     picture instead of under a frame's empty bottom half. */
+  .fit-width .track {
+    align-items: flex-start;
+  }
+  .fit-width .slide :global(img) {
+    width: 100%;
+    height: auto;
+  }
   /* Top, not bottom: "can you align the pictures on the galleries pages so
      that they align 'to the top' and not to the bottom? So that when you go
      through the slideshow they all start at the same place?" (client,
@@ -223,6 +244,14 @@ const contain = fit === 'contain' && !!aspect;
   /* The dots sit on the picture. A box with the same aspect as the image,
      laid over the top of the slideshow, puts them at the picture's bottom
      edge without knowing how tall the caption below it is. */
+  /* fit="width": the picture's bottom edge is a different height on every
+     slide, so there is no line to hang the dots on - they go under the
+     caption, centred, where they belong to the whole row. */
+  .fit-width .dots {
+    position: static;
+    aspect-ratio: auto;
+    margin-top: 14px;
+  }
   .dots {
     position: absolute;
     top: 0;

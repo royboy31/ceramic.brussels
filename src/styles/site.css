@@ -172,3 +172,35 @@ main :is(strong, b) {
     max-width: 72px;
   }
 }
+
+/* A slideshow does not zoom, on hover or on arrival - client, 2026-10-01:
+ * *"the current transition can look like a visual glitch because one image is
+ * zoomed while the next starts at normal scale … maintain the same zoom
+ * state/behaviour across slides"*.
+ *
+ * Two rules in design.css put the two scales on a carousel, and neither was
+ * written with one in mind:
+ *
+ * - `main :where(a, figure, …):hover > img { scale: 1.018 }` - a slide is a
+ *   `<figure>`, so the picture under the pointer grew while the one sliding
+ *   in behind it did not. That zoom belongs to a card or a link, which a
+ *   slide is not: it leads nowhere, and the pointer over it is already the
+ *   arrow that moves the slideshow;
+ * - `.motion-image[data-image-pending] { scale: 1.015; filter: blur(8px) }`,
+ *   the arrival animation Base.astro hangs on every picture that has not
+ *   loaded yet. The first slide is eager and the rest are lazy, so the next
+ *   picture played that animation *as it came into view* - mid-swipe,
+ *   against a current slide that had long finished it. Base.astro now leaves
+ *   the pictures inside a slideshow out of it; this rule covers the ones
+ *   whose markup is already in the page.
+ *
+ * Everything outside a slideshow keeps both.
+ */
+main .slideshow figure:hover > img,
+main .slideshow figure:hover > a > img {
+  scale: 1;
+}
+.slideshow img.motion-image[data-image-pending] {
+  scale: 1;
+  filter: none;
+}
