@@ -300,4 +300,15 @@ main .slideshow figure:hover > a > img {
   main .gallery .grid li > figure > figcaption {
     padding-inline: var(--gutter);
   }
+  /* The VIP shot, second try (found 2026-10-02): the image-text row keeps
+     its eight grid columns at this width, so the 50vw pull above centred
+     the picture on its *cell* rather than the screen - 27px cropped on the
+     left, a gap on the right. The row spanned whole, the cell is the text
+     column and the gutter is the exact pull; later in the file than the
+     rule above, so these win. */
+  main .vip .image-text > .shot {
+    grid-column: 1 / -1;
+    width: calc(100% + 2 * var(--gutter));
+    margin-inline: calc(-1 * var(--gutter));
+  }
 }
