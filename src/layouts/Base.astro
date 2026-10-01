@@ -466,6 +466,18 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     font-style: normal;
     font-display: swap;
   }
+  /* Medium, from the same package (2026-10-02): the FAQ's questions, which
+     have asked for 500 since 2026-09-30 and were rendering as Regular with
+     no face to answer. The trial family has a Medium too, but it carries no
+     accents at all, so a French or Dutch question would have fallen back
+     glyph by glyph - this is the Fix family, 654 glyphs, like the others. */
+  @font-face {
+    font-family: 'Noi Grotesk';
+    src: url('/fonts/noi-grotesk-500.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
   /* Black, from the same package: the exhibitor letters' hover and selected
      state (client feedback, 2026-09-16). */
   @font-face {

@@ -642,11 +642,10 @@ const altPaths = hubAltPaths('visit', tab);
   }
   .faq summary {
     cursor: pointer;
-    /* "Could you try the Medium weight?" (client, 2026-09-30). Noi Grotesk
-       is loaded at 400, 600 and 900 only, so until `noi-grotesk-500.woff2`
-       exists this renders as 400 - the weight it already had - and becomes
-       Medium by itself the moment the face is added to Base.astro. Asked
-       Léonie for the file. */
+    /* "Could you try the Medium weight?" (client, 2026-09-30, asked again on
+       2026-10-01). The face is loaded since 2026-10-02 - Noi Grotesk Fix
+       Medium, from the package in the repository root - so this now renders
+       as Medium rather than falling back to the Regular. */
     font-weight: 500;
     letter-spacing: -0.03em;
     justify-content: space-between;
