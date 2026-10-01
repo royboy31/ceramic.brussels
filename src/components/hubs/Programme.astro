@@ -340,17 +340,16 @@ const altPaths = hubAltPaths('programme', tab);
               </div>
               <div class="pass-text">
                 <h3 class="panel-title">{x.institution}</h3>
-                {(x.artist || x.exhibitionTitle) && (
-                  <p class="pass-work">
-                    {x.artist}
-                    {x.artist && x.exhibitionTitle && ' / '}
-                    {x.exhibitionTitle && <em>{x.exhibitionTitle}</em>}
-                  </p>
-                )}
-                <p class="pass-meta">
-                  <span class="pass-when">{formatExhibitionDates(x.startDate, x.endDate, lang)}</span>
+                <div class="pass-sub">
+                  {(x.artist || x.exhibitionTitle) && (
+                    <p class="pass-work">
+                      {x.artist && <span>{x.artist}</span>}
+                      {x.exhibitionTitle && <em>{x.exhibitionTitle}</em>}
+                    </p>
+                  )}
                   {x.city && <span class="pass-city">{x.city}</span>}
-                </p>
+                </div>
+                <p class="pass-when">{formatExhibitionDates(x.startDate, x.endDate, lang)}</p>
                 {x.description && <p class="body-24 pass-body">{x.description}</p>}
                 {x.link && (
                   <p class="links">
@@ -640,15 +639,20 @@ const altPaths = hubAltPaths('programme', tab);
   .pass-work em {
     font-style: italic;
   }
-  /* The date line, and the postcode-and-city chip at the end of the row. */
-  .pass-meta {
+  /* The artist over the italic title, the postcode-and-city chip at their
+     right - the frame anchors the chip to this block, not to the date. */
+  .pass-sub {
     display: flex;
-    align-items: baseline;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-    margin: 0;
+  }
+  .pass-work span,
+  .pass-work em {
+    display: block;
   }
   .pass-when {
+    margin: 0;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.02em;
