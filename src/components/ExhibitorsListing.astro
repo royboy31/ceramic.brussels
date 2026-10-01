@@ -113,11 +113,19 @@ const sectionItems = sectionTabs.map((x) => ({
 }));
 
 /**
- * The year row: only when there is more than one year to choose from - and
- * never inside the section, where the year band already does that job.
+ * The year row: whenever there is more than one year to choose from, on every
+ * galleries list including a past edition's.
+ *
+ * It used to be suppressed inside the previous-editions section, on the
+ * grounds that the year band above already chose the year. It does not do this
+ * job: a band cell leads to that year's **overview**, and the band holds only
+ * the past editions, so from /exhibitors/2024 there was no way to another
+ * year's galleries and no way back to the current ones. The two rows look
+ * alike and go to different places - the band moves you between editions, this
+ * row between galleries lists - so the galleries list keeps its own.
  */
 const viewedYear = year ?? edition?.year;
-const yearRow = years.length > 1 && !inSection ? years : [];
+const yearRow = years.length > 1 ? years : [];
 ---
 
 {inSection && <YearBand lang={lang} editions={pastEditions} active={year as number} />}
