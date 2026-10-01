@@ -1,7 +1,7 @@
 # The 30 September round, message by message — status on 2026-10-01
 
 Each ask as the group sent it, and where it stands at the end of 2026-10-01
-(`main = bdacf4e`, everything marked done is live on
+(`main = 026dcca`, everything marked done is live on
 ceramic-brussels.pages.dev). The round itself is written up in
 `docs/client-feedback-2026-09-30.md`; the numbered entries live in
 `docs/backend-requests.md`.
@@ -50,6 +50,15 @@ is in the group's hands:
 3. **Léonie:** exhibition-pass content and photographs; the two award logos.
 4. **Lilanga:** award picture sizing and the empty award row; the
    exhibition-pass type-level finish.
+
+## Found and fixed after the round, 1 Oct afternoon
+
+| reported by | what | status |
+| :-- | :-- | :-- |
+| Kamindu | the jury page's bios sat ~200px below the pills | ✅ fixed and live (`026dcca`): the portrait spans both grid rows, the phone layout untouched |
+| Kamindu | two editions ticked "Current edition" froze every build, twice more | ✅ unticked; the Studio warns; the either/or tick is the offered guard |
+| Kamindu | a new page 404'd on live and preview | live = the frozen pipeline (fixed by the untick); preview = the cookie door: open it from the Studio's Preview button, the cookie lasts 12 h |
+| - | #46, a person can only sit on one edition's jury | ✅ `editions` array, 41 migrated, Dimanche on 2025 **and** 2027 - the frame's five jurors render |
 
 Still open outside this round: #17 (VIP page documents — a content session),
 #28 (exhibitors → awards content), #52 (the 2024/2025 automation estimate),
