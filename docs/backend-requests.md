@@ -585,7 +585,7 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 ---
 
 ---
-## #32 · open · 2026-09-30 · the artists page lists art prize laureates
+## #32 · done · 2026-09-30 · the artists page lists art prize laureates
 
 **Asked:** "Remove the art prize laureates from the artists page" (Tiphaine, WhatsApp 2026-09-30 20:01).
 
@@ -595,8 +595,14 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 
 **Page / component:** `src/pages/[lang]/artists/index.astro`, `getArtists` in `src/lib/queries.ts`
 
+**Done (Kamindu, 2026-10-01):** `getArtists` now selects only artists an exhibitor presents - `count(*[_type == "exhibitor" && references(^._id) && EXHIBITOR_SHOWN]) > 0` - so the list is the galleries' artists and nothing else. In the query rather than the page, so the list and anything counting it cannot disagree, and it carries `EXHIBITOR_SHOWN` from #33, which means the badges follow the year the galleries page is on.
+
+**What it removes, measured against the live dataset: 165 artists → 129.** The 36 that go are **32 art prize laureates** (the ask), **3 past guests of honour** - Elizabeth Jaeger, Johan Creten, Marion Verboom, who have their own guest-of-honour pages, so nothing becomes unreachable - and **one orphan**: `Connor Coulston` (`ab35fd29-101b-4feb-a1f3-d5de2a9c78c2`), created 2026-09-22, presented by no gallery and referenced by no document. Worth asking Tiphaine whether that record should exist at all; either way it is off the list now. With #33's flag on 2024-2026 the list is 121, because 2027's galleries stop contributing artists.
+
+**No page change.** `showingNow` in the page already prefers the current edition's exhibitor and falls back to the most recent, so each row keeps naming the right booth.
+
 ---
-## #33 · open · 2026-09-30 · /exhibitors should open on 2026, not 2027
+## #33 · done · 2026-09-30 · /exhibitors should open on 2026, not 2027
 
 **Asked:** "Make it so that the 2027 galleries are not visible yet. First page when we click on galleries should be 2026 and buttons for 2025-2024." (Tiphaine, 2026-09-30 20:01).
 
@@ -608,6 +614,19 @@ tabs are already translated in `STRINGS` (`tabs.about`, `tabs.vipProgramme`,
 The year row and `/exhibitors/<year>` already work for the past editions, so only the landing page is in question either way.
 
 **Page / component:** `src/pages/[lang]/exhibitors/index.astro`
+**Decided (Kamindu, 2026-10-01): a flag per edition.** The other option - the listing finding the newest edition that *has* exhibitors - does not actually answer the request: 2027 already has **11 published exhibitors**, so that rule still lands on 2027, and it would only work by unpublishing records nobody asked us to unpublish. The flag also leaves the date of the announcement with the editors, which is what Tiphaine was asking for.
+
+**Done (Kamindu, 2026-10-01):** a boolean `showExhibitors` on `edition` - **"Show this edition’s galleries"**, next to Current edition - and three rules derived from it, none of them touching `isCurrent`:
+
+ - `LANDING_YEAR` in `queries.ts`: `/exhibitors` lists the **newest edition with the flag on**, so the page opens on 2026 while 2027 stays the current edition for the homepage, the programme, VIP, the partners and the key figures;
+ - `EXHIBITOR_SHOWN`: an edition with the flag off has **no gallery pages at all** - `getExhibitorPaths` writes neither `/exhibitors/<slug>` nor `/exhibitors/<year>/<slug>` for it - and nothing links into it: the clause is also in `ARTIST_GALLERY`, the artists list's `exhibitors`, `ARTIST_FULL`'s, and an award's winning gallery, which is read as a filter rather than a dereference for exactly that reason. Without that, hiding 2027 would have left the artists page pointing at pages the build no longer writes;
+ - `exhibitorEditions(editions)`: one pure helper for the year row and the landing year, shared by the listing and the year pages so they cannot disagree. `/exhibitors/<landing year>` keeps answering - `scripts/legacy-redirects.mjs` targets `exhibitors/2026` - but points its canonical at `/exhibitors`, so the two addresses do not compete.
+
+**It is inert until a box is ticked.** While no edition has the flag on, every edition is shown and the listing opens on the current one - exactly the old behaviour, verified against the live dataset (landing year 2027, 11 listed, 201 past, both award galleries intact) and by a full build. A second build with the flag simulated on 2024-2026 proves the other half: **740 pages against 773**, which is exactly the 11 × 3 gallery pages of 2027 dropping out; `/en/exhibitors/` lists 67 and marks 2026 as the year being viewed, with 2025 and 2024 beside it; `/en/exhibitors/2026/` serves the same list and points its canonical at `/en/exhibitors/`; no 2027 directory is written; all 474 redirect rules still resolve.
+
+One side effect, benign and worth knowing: because the landing year's page now declares `exhibitors` as its path, its hreflang does too, so the old site's **French and Dutch 2026 gallery URLs are now new pages in their own right** rather than redirects onto `/fr/exhibitors/2026/`. `legacy-redirects.mjs` says so at the end of a build ("2 old URLs are new pages too and keep their new meaning") and keeps serving the page, which is the same content at the address the old site used.
+
+**Editors (the content half, 3 clicks):** Setup → Editions → tick **Show this edition’s galleries** on **2026, 2025 and 2024**, leave it off on 2027, and publish each. The site opens on 2026 from the next rebuild; tick 2027 on the day the galleries are announced and everything returns to where it is now, at the same addresses.
 
 ---
 ## #34 · open · 2026-09-30 · 2024 and 2025 exhibitors, filled in as 2026 was
@@ -617,13 +636,23 @@ The year row and `/exhibitors/<year>` already work for the past editions, so onl
 **Shape of the work:** data, not schema - the same pass `scripts/fix-exhibitors-2026.mjs` made, over the 2024 and 2025 records. Her aside is the part to read twice: **2026's cities are not done either**, and the 47 that need a human decision are already waiting in `scripts/data/exhibitors-2026-review.json`, along with 56 artists whose gallery is unsure. That file wants her before any of it is worth re-running.
 
 ---
-## #35 · open · 2026-09-30 · art prize awards: a new line cannot be typed
+## #35 · answered · 2026-09-30 · art prize awards: a new line cannot be typed
 
 **Asked:** "In awards, it is impossible to start a new line." (Tiphaine, 2026-09-30 20:01).
 
 **Not yet diagnosed, and worth doing before promising anything.** `award.description` is a `localeBlock`, which takes paragraphs, so either the field she is typing in is a plain string (the award's `name`, or an intro somewhere else on the tab) or the awards tab flattens the blocks when it renders them. Ask her which box she was in, or watch the tab render a two-paragraph description.
 
 **Page / component:** the art prize hub's awards tab, `src/components/hubs/ArtPrize.astro`, `src/sanity/schemaTypes/documents/award.ts`
+
+**Diagnosed (Kamindu, 2026-10-01): the box is Outcome, and it is one line by design.** An art prize award's form has exactly two fields an editor types prose into:
+
+ - **Outcome** - `localeString`, which is `localeFields('string')`: a **single-line input**, so Enter does nothing in it. The awards tab draws it as one sentence continuing the laureate's name ("Marie Dupont *will present a solo show during ceramic brussels 2027*"), which is why it is a string and not a paragraph;
+ - **Description** - `localeBlock`, rendered below through `PortableText` (`ArtPrize.astro:297`). It takes **as many paragraphs as she likes**, and always has.
+
+So nothing is broken, and nothing needs building: the lines she wanted belong in Description, under the one-line Outcome. **Shipped with this answer:** Outcome's help text in the Studio now says so - "One line - Enter does nothing here. For more than a sentence use Description below, which takes paragraphs" - so the next editor does not have to ask.
+
+**Still worth one question to Tiphaine before this is closed:** if she was in **Description** and Enter did nothing *there*, that is a different and real fault and we want to see it. Ask which box she was in.
+
 
 ---
 ## #36 · open · 2026-09-30 · "exhibition pass", a new tab under programme
