@@ -5,9 +5,10 @@ import ExhibitorHead from '../../../components/ExhibitorHead.astro';
 import PageSections from '../../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
-import { getArtists, getMainPage, getCurrentEdition, getEditions } from '../../../lib/queries';
+import { getArtists, getMainPage, getCurrentEdition, getEditions, exhibitorEditions } from '../../../lib/queries';
 import { artistHref } from '../../../lib/links';
 import { styleAttrs } from '../../../lib/textStyle';
+import { stegaClean } from '@sanity/client/stega';
 
 /**
  * Every artist, A–Z, as the design's exhibitors/artists/index.html draws it
@@ -34,9 +35,29 @@ const [artists, page, edition, editions] = await Promise.all([
   getEditions(lang),
 ]);
 
+/**
+ * The title band's edition. The catalogue tab belongs to the edition whose
+ * galleries the exhibitors list opens on (2026 while 2027's list is being
+ * typed in), not to the current edition, which has no catalogue yet — with
+ * the current one the tab showed on /exhibitors and vanished on this page
+ * (the meeting's disappearing "Catalog" button, 2026-10-01).
+ */
+const { landingYear } = exhibitorEditions(editions);
+const bandEdition = editions.find((e: any) => e.year === landingYear) ?? edition;
+
+/**
+ * A preview render stega-encodes every name, and an encoded "Kim Sang-man"
+ * is not "Kim Sang-man": the surname lookups below missed, so the preview
+ * filed artists under different letters than the live page (the meeting's
+ * "preview vs live mismatch", 2026-10-01). Every comparison therefore runs
+ * on the cleaned string; what the page *prints* stays encoded, which is
+ * what keeps the names click-to-edit.
+ */
+const clean = (s: string) => stegaClean(s ?? '') ?? '';
+
 /** Accents folded, so "Éclat" files under E. */
 const fold = (s: string) =>
-  (s ?? '')
+  clean(s)
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .trim();
@@ -65,7 +86,7 @@ const SURNAME: Record<string, string> = {
   'Expanded Eye': 'Expanded Eye',
 };
 const surname = (name: string) => {
-  const n = (name ?? '').trim();
+  const n = clean(name).trim();
   const words = n.split(/\s+/);
   return SURNAME[n] ?? (FAMILY_NAME_FIRST.has(n) ? words[0] : words[words.length - 1]);
 };
@@ -94,7 +115,7 @@ const showingNow = (a: any) =>
 const focusOf = new Map(editions.map((e: any) => [e.year, e.countryFocus]));
 /** That year's focus lockup for this exhibitor, or null when the country has
  *  no artwork yet and the row shows nothing (see `exhibitorBadges.ts`). */
-const focusLogoOf = (ex: any) => (ex?.inCountryFocus ? focusLockup(focusOf.get(ex.year) ?? '') : null);
+const focusLogoOf = (ex: any) => (ex?.inCountryFocus ? focusLockup(clean(focusOf.get(ex.year) ?? '')) : null);
 
 /**
  * The FILTERS row of the frame: solo show, focus, publishers, jury prize,
@@ -134,7 +155,7 @@ for (const letter of letters) {
   editId={page?._id}
   editType={page?._type}
 >
-  <ExhibitorHead lang={lang} active="artists" edition={edition} alphabet={artists.length > 0} />
+  <ExhibitorHead lang={lang} active="artists" edition={bandEdition} alphabet={artists.length > 0} />
 
   {
     page?.intro && (
