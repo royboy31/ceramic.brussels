@@ -339,6 +339,20 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
     .video {
       grid-column: 1 / -1;
     }
+    /* One work at a time, the whole width of the screen - "all photos on
+       about + interview page" (Léonie, 2026-10-01). The peek-scroll of the
+       desktop frame (2.25 works in view, the next one showing) is a desktop
+       idea; on a phone it left each picture 323px wide inside a 390px
+       screen. The strip still snaps, so it reads as a slideshow. */
+    .gallery {
+      margin-inline: calc(50% - 50vw);
+    }
+    .gallery figure {
+      flex: 0 0 100vw;
+    }
+    .gallery figcaption {
+      padding-inline: var(--gutter);
+    }
     :global(.portrait) {
       height: auto;
     }
@@ -374,7 +388,8 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
       gap: 16px;
     }
     .gallery figure {
-      flex-basis: 85%;
+      /* 100vw, not the 85% peek: see the note above (Léonie, 2026-10-01). */
+      flex-basis: 100vw;
     }
     .video span {
       border-radius: 18px;

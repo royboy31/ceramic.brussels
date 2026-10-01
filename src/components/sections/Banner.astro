@@ -98,6 +98,13 @@ const Tag = link ? 'a' : 'div';
      in Base.astro (client feedback, 2026-09-24, the reverse of before). */
 
   @media (max-width: 640px) {
+    /* Closer to the section above it on a phone - "adjust spacing between 2
+       sections, make it smaller" (Léonie, 2026-10-01, the gap between the
+       Hoxton spotlight and this band). 3.4rem/3rem is the desktop rhythm and
+       reads as a hole on a 390px screen: 68px of air between two blocks. */
+    .cta {
+      margin: 2rem 0 2rem;
+    }
     .cta-gradient {
       min-height: 100px;
       padding: 15px;

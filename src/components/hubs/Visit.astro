@@ -491,6 +491,11 @@ const altPaths = hubAltPaths('visit', tab);
     }
     .columns :global(.visit-photo) {
       height: auto;
+      /* Both screen edges, with the rest of the page's photographs
+         (Léonie, 2026-10-01). */
+      width: 100vw;
+      max-width: none;
+      margin-inline: calc(50% - 50vw);
     }
     .hours {
       order: 1;
