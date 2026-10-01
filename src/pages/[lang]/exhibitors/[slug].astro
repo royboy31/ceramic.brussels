@@ -11,6 +11,7 @@ import {
   getEditions,
   getCurrentEdition,
   getAwards,
+  exhibitorEditions,
 } from '../../../lib/queries';
 
 /**
@@ -47,13 +48,17 @@ if (year) {
     getEditions(lang),
     getAwards(lang),
   ]);
+  const { landingYear, years } = exhibitorEditions(editions);
+  // An edition whose galleries are off gets no list (request #33). The build
+  // writes no page for it either; this is the preview Worker, which renders
+  // any address on request.
+  if (!years.some((y) => y.year === year)) return Astro.rewrite('/404');
   listing = {
     exhibitors,
     edition: editions.find((e: any) => e.year === year) ?? null,
-    currentYear: editions.find((e: any) => e.isCurrent)?.year,
-    years: editions
-      .filter((e: any) => e.exhibitorCount > 0)
-      .map((e: any) => ({ year: e.year, current: e.isCurrent === true })),
+    // The year that lives at /exhibitors, for the link back to it.
+    currentYear: landingYear,
+    years,
     // That year's fair-award winners, for the "awards" filter pill, as the
     // current list does for its own year: the 2026 list gets 2026's.
     awarded: new Set<string>(
@@ -65,6 +70,14 @@ if (year) {
   if (!exhibitor) return Astro.rewrite('/404');
 }
 
+/**
+ * The landing year's list answers at /exhibitors as well as at its own
+ * address, so it points its canonical at /exhibitors and the two do not
+ * compete. `exhibitors/2026` has to keep answering either way:
+ * scripts/legacy-redirects.mjs sends an old-site URL to it.
+ */
+const listingPath = listing && year === listing.currentYear ? 'exhibitors' : `exhibitors/${year}`;
+
 const orgSchema = exhibitor && {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -75,7 +88,7 @@ const orgSchema = exhibitor && {
 
 {
   listing ? (
-    <Base lang={lang} title={`${t('nav.exhibitors')} ${year}`} path={`exhibitors/${year}`}>
+    <Base lang={lang} title={`${t('nav.exhibitors')} ${year}`} path={listingPath}>
       <ExhibitorsListing
         lang={lang}
         exhibitors={listing.exhibitors}

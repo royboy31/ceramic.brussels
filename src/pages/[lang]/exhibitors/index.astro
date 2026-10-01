@@ -3,12 +3,14 @@ import Base from '../../../layouts/Base.astro';
 import ExhibitorsListing from '../../../components/ExhibitorsListing.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations } from '../../../lib/i18n';
-import { getExhibitors, getCurrentEdition, getMainPage, getAwards, getEditions } from '../../../lib/queries';
+import { getExhibitors, getMainPage, getAwards, getEditions, exhibitorEditions } from '../../../lib/queries';
 
 /**
- * The current edition's exhibitors. The list and its filters are
- * ExhibitorsListing; past editions' lists are /exhibitors/<year>, rendered by
- * [slug].astro from the same component.
+ * The galleries page. It opens on the newest edition whose galleries are shown
+ * - `showExhibitors` on the edition, not `isCurrent` (request #33): 2027 is
+ * the current edition while its gallery list is still being typed in. The list
+ * and its filters are ExhibitorsListing; the other shown editions' lists are
+ * /exhibitors/<year>, rendered by [slug].astro from the same component.
  */
 export function getStaticPaths() {
   return LOCALE_IDS.map((lang) => ({ params: { lang } }));
@@ -18,20 +20,22 @@ const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 // The main page document (Studio → Exhibitors → Exhibitors page): lead, SEO
 // and blocks around the list. The list itself never comes from it.
-const [exhibitors, edition, page, awards, editions] = await Promise.all([
+const [exhibitors, page, awards, editions] = await Promise.all([
   getExhibitors(lang),
-  getCurrentEdition(lang),
   getMainPage(lang, 'exhibitors'),
   getAwards(lang),
   getEditions(lang),
 ]);
-/** The editions that have exhibitors, newest first, for the year row. */
-const years = editions
-  .filter((e: any) => e.exhibitorCount > 0)
-  .map((e: any) => ({ year: e.year, current: e.isCurrent === true }));
+/**
+ * The edition this list belongs to, and the year row: both out of
+ * `exhibitorEditions`, so the listing, the year pages and the row under them
+ * cannot disagree about which year is at /exhibitors.
+ */
+const { landingYear, years } = exhibitorEditions(editions);
+const edition = editions.find((e: any) => e.year === landingYear) ?? null;
 /** This edition's fair-award winners, for the "awards" filter pill. */
 const awarded = new Set<string>(
-  awards.filter((a: any) => a.family === 'fair' && a.year === edition?.year && a.gallery?._id).map((a: any) => a.gallery._id),
+  awards.filter((a: any) => a.family === 'fair' && a.year === landingYear && a.gallery?._id).map((a: any) => a.gallery._id),
 );
 ---
 

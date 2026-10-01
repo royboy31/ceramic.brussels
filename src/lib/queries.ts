@@ -43,6 +43,29 @@ const SEO = `{
   "ogImage": seo.ogImage ${IMAGE}
 }`;
 
+/**
+ * Whether an exhibitor's edition has its galleries on the site (request #33,
+ * Tiphaine 2026-09-30: "the 2027 galleries are not visible yet").
+ * `showExhibitors` is the editors' switch, and it is deliberately not
+ * `isCurrent`: that flag also drives the homepage, the programme, VIP, the
+ * partners and the key figures, so 2027 stays the current edition while its
+ * gallery list is still being typed in. While no edition has the switch on at
+ * all the clause is true of every edition, so the field is inert until
+ * somebody ticks a box and nothing about the site changes on deploy.
+ * Goes inside an exhibitor filter; `edition` is the exhibitor's own.
+ */
+const EXHIBITOR_SHOWN = `(count(*[_type == "edition" && showExhibitors == true]) == 0
+  || edition->showExhibitors == true)`;
+
+/**
+ * The year /exhibitors opens on: the newest edition whose galleries are shown,
+ * or the current one while none is. The year row offers the rest.
+ */
+const LANDING_YEAR = `coalesce(
+  (*[_type == "edition" && showExhibitors == true && defined(year)] | order(year desc)[0].year),
+  (*[_type == "edition" && isCurrent == true][0].year)
+)`;
+
 /** What links.ts needs to know where a linked document lives. */
 /**
  * The gallery an artist's name leads to, since artists have no page of their
@@ -52,7 +75,7 @@ const SEO = `{
  * or a past guest of honour - whose name is then plain text.
  * `^` is the artist being projected, so this goes inside an artist projection.
  */
-const ARTIST_GALLERY = `"gallery": *[_type == "exhibitor" && references(^._id)]
+const ARTIST_GALLERY = `"gallery": *[_type == "exhibitor" && references(^._id) && ${EXHIBITOR_SHOWN}]
   | order(coalesce(edition->isCurrent, false) desc, edition->year desc)[0]{
     _id, name, "slug": slug.current, "year": edition->year, "current": edition->isCurrent == true
   }`;
@@ -456,7 +479,7 @@ export function getHomepage(lang: LocaleId) {
 /* --------------------------------------------------------------- edition */
 
 const EDITION_CORE = `
-  _id, _type, year, startDate, endDate, venue, isCurrent,
+  _id, _type, year, startDate, endDate, venue, isCurrent, showExhibitors,
   ticketsUrl, catalogueUrl, overviewUrl, pressClipsUrl,
   ${styled('title')},
   ${styled('ordinal')},
@@ -504,6 +527,30 @@ export function getEditions(lang: LocaleId) {
     }`,
     { lang },
   );
+}
+
+/**
+ * Out of `getEditions`, which editions' galleries the site shows and which
+ * year /exhibitors opens on (request #33). Pure, so the listing page, the
+ * year pages and the year row under them share one rule; the GROQ side of it
+ * is `EXHIBITOR_SHOWN` and `LANDING_YEAR` above.
+ *
+ * `years` is the year row: an edition is in it if its galleries are shown and
+ * it has any, newest first, with `current` marking the one that lives at
+ * /exhibitors rather than /exhibitors/<year>.
+ */
+export function exhibitorEditions(editions: any[]) {
+  const shown = editions.filter((e: any) => e.showExhibitors === true);
+  // Until an editor ticks a box, every edition is shown and the listing opens
+  // on the current one - exactly what the site did before the field existed.
+  const visible = shown.length > 0 ? shown : editions;
+  const landingYear: number | undefined = (shown.length > 0 ? shown : editions.filter((e: any) => e.isCurrent))[0]?.year;
+  return {
+    landingYear,
+    years: visible
+      .filter((e: any) => e.exhibitorCount > 0)
+      .map((e: any) => ({ year: e.year as number, current: e.year === landingYear })),
+  };
 }
 
 /** The past editions' years, newest first, for their archive pages. */
@@ -560,10 +607,14 @@ const EXHIBITOR_CARD = `{
   ${styled('artistsText')}
 }`;
 
-/** Current-edition participants, alphabetical by `sortName` then `name`. */
+/**
+ * The participants /exhibitors opens on, alphabetical by `sortName` then
+ * `name`: the newest edition whose galleries are shown (`LANDING_YEAR`),
+ * which is the current one until an editor says otherwise.
+ */
 export function getExhibitors(lang: LocaleId) {
   return run<any[]>(
-    `*[_type == "exhibitor" && edition->isCurrent == true]
+    `*[_type == "exhibitor" && edition->year == ${LANDING_YEAR}]
       | order(lower(coalesce(sortName, name)) asc) ${EXHIBITOR_CARD}`,
     { lang },
   );
@@ -588,8 +639,8 @@ export function getExhibitorsByYear(lang: LocaleId, year: number) {
 export function getExhibitorPaths() {
   return run<{ current: string[]; past: { year: number; slug: string }[] }>(
     `{
-      "current": *[_type == "exhibitor" && edition->isCurrent == true && defined(slug.current)].slug.current,
-      "past": *[_type == "exhibitor" && edition->isCurrent != true && defined(slug.current) && defined(edition->year)]{
+      "current": *[_type == "exhibitor" && edition->isCurrent == true && ${EXHIBITOR_SHOWN} && defined(slug.current)].slug.current,
+      "past": *[_type == "exhibitor" && edition->isCurrent != true && ${EXHIBITOR_SHOWN} && defined(slug.current) && defined(edition->year)]{
         "year": edition->year, "slug": slug.current
       }
     }`,
@@ -645,16 +696,28 @@ const ARTIST_CARD = `
   ${ARTIST_GALLERY}
 `;
 
+/**
+ * The artists the galleries present, A-Z, for /artists.
+ *
+ * Request #32 (Tiphaine, 2026-09-30: "remove the art prize laureates from the
+ * artists page"): the list is the galleries' artists, so an artist nobody
+ * exhibits - an art prize laureate, a past guest of honour - is not in it. The
+ * filter is here rather than in the page so the list and anything counting it
+ * cannot disagree. `EXHIBITOR_SHOWN` keeps it to editions whose galleries are
+ * on the site (#33), which is also what gives each artist's booth and
+ * solo-show badge below their right year.
+ */
 export function getArtists(lang: LocaleId) {
   return run<any[]>(
-    `*[_type == "artist"] | order(name asc){
+    `*[_type == "artist" && count(*[_type == "exhibitor" && references(^._id) && ${EXHIBITOR_SHOWN}]) > 0]
+      | order(name asc){
       ${ARTIST_CARD},
       // Every exhibitor that presented the artist, any year, with what the
       // list needs to pick the current edition's booth and solo-show badge
       // (docs/backend-requests.md #1) and to drive the galleries list's
       // filters - kind, country focus, and the id an award's winner is
       // matched on (#4).
-      "exhibitors": *[_type == "exhibitor" && references(^._id)]{
+      "exhibitors": *[_type == "exhibitor" && references(^._id) && ${EXHIBITOR_SHOWN}]{
         _id, name, "slug": slug.current, booth, soloShow, kind, inCountryFocus,
         "year": edition->year, "current": edition->isCurrent == true
       }
@@ -683,7 +746,7 @@ const ARTIST_FULL = `
     ${styled('materials')},
     image ${IMAGE}
   },
-  "exhibitors": *[_type == "exhibitor" && references(^._id)] | order(edition->year desc){
+  "exhibitors": *[_type == "exhibitor" && references(^._id) && ${EXHIBITOR_SHOWN}] | order(edition->year desc){
     name, booth, "slug": slug.current, "year": edition->year, "current": edition->isCurrent == true
   },
   "seo": ${SEO}
@@ -742,7 +805,10 @@ export function getAwards(lang: LocaleId) {
       // The winning gallery with what the exhibitor awards page shows of it:
       // its city, its edition (for exhibitorPath) and its pictures, which
       // stand in when the award has no image of its own.
-      "gallery": winnerExhibitor->{
+      // Read as a filter rather than a dereference so an award whose winner
+      // belongs to an edition with its galleries off has no gallery here
+      // either, instead of a link to a page the build does not write.
+      "gallery": *[_id == ^.winnerExhibitor._ref && ${EXHIBITOR_SHOWN}][0]{
         _id, name, city, country, countryCode, "slug": slug.current,
         "year": edition->year, "current": edition->isCurrent == true,
         "images": images[] ${IMAGE}
