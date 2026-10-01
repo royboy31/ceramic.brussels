@@ -10,7 +10,7 @@ import Vip from '../../../components/hubs/Vip.astro';
 import PreviousEdition from '../../../components/editions/PreviousEdition.astro';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { HUBS, hubRouteParams, hubFromSegment, tabFromSegment } from '../../../lib/hubs';
-import { getHubPages, getPastEditionsIndex } from '../../../lib/queries';
+import { getHubPages, getPastEditionsIndex, getExhibitions } from '../../../lib/queries';
 import {
   editionRouteParams,
   editionFromRest,
@@ -54,12 +54,17 @@ import { localePath } from '../../../lib/i18n';
  */
 export async function getStaticPaths() {
   const routes = Object.keys(HUBS).filter((route) => HUBS[route].pageTabs);
-  const [pageEntries, editions] = await Promise.all([
+  const [pageEntries, editions, exhibitions] = await Promise.all([
     Promise.all(routes.map(async (route) => [route, await getHubPages(DEFAULT_LOCALE, route)])),
     getPastEditionsIndex(DEFAULT_LOCALE),
+    // What an `ownContent` tab has of its own: the exhibition pass lists
+    // `exhibition` documents, so it earns its pill from those rather than
+    // from a published `page` (#48).
+    getExhibitions(DEFAULT_LOCALE),
   ]);
   const pages = Object.fromEntries(pageEntries);
-  return [...hubRouteParams(LOCALE_IDS, { pages }), ...editionRouteParams(LOCALE_IDS, editions)];
+  const has = { 'programme/exhibition-pass': exhibitions.length > 0 };
+  return [...hubRouteParams(LOCALE_IDS, { pages, has }), ...editionRouteParams(LOCALE_IDS, editions)];
 }
 
 const lang = Astro.params.lang as LocaleId;

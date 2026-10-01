@@ -1060,6 +1060,30 @@ export function getProgramme(lang: LocaleId) {
 }
 
 /**
+ * The exhibition pass: the partner institutions' exhibitions a fair ticket
+ * gets you into, for the programme hub's fourth tab (request #48, merged with
+ * #36). The current edition's, in the editors' order then by institution.
+ *
+ * Its own type rather than `programmeEvent` - see `exhibition.ts` for why -
+ * so `getProgramme` is untouched and the talks tab, the VIP programme and the
+ * archives cannot accidentally list a museum show.
+ */
+export function getExhibitions(lang: LocaleId) {
+  return run<any[]>(
+    `*[_type == "exhibition" && edition._ref == ${CURRENT_EDITION}._id]
+      | order(order asc, institution.${DEFAULT_LOCALE} asc){
+      _id, _type, artist, city, startDate, endDate, order,
+      ${styled('institution')},
+      ${styled('exhibitionTitle')},
+      ${styled('description')},
+      "link": link ${LINK},
+      "images": images[] ${IMAGE}
+    }`,
+    { lang },
+  );
+}
+
+/**
  * Every partner, ordered. Filter on `tier` in the page; food & drinks vendors
  * are the `food-drinks` tier. Partners scoped to editions only appear when
  * the current edition is among them.

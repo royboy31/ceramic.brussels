@@ -34,6 +34,7 @@ import { newsItem } from './documents/newsItem';
 import { page } from './documents/page';
 import { pageTemplate } from './documents/pageTemplate';
 import { programmeEvent } from './documents/programmeEvent';
+import { exhibition } from './documents/exhibition';
 import { partner } from './documents/partner';
 import { pressClip } from './documents/pressClip';
 import { story } from './documents/story';
@@ -83,6 +84,7 @@ export const documentTypes: SchemaTypeDefinition[] = [
   page,
   pageTemplate,
   programmeEvent,
+  exhibition,
   partner,
   pressClip,
   story,

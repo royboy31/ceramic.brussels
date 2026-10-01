@@ -661,11 +661,11 @@ So nothing is broken, and nothing needs building: the lines she wanted belong in
 
 
 ---
-## #36 · open · 2026-09-30 · "exhibition pass", a new tab under programme
+## #36 · merged into #48 · 2026-09-30 · "exhibition pass", a new tab under programme
 
 **Asked:** "I have created a new « exhibition pass » page in Figma (inside the « programme » section)" (Léonie, 2026-09-30 20:46).
 
-**Shape of the work:** a hub tab is code - its slug, its per-language segment and its label live in `src/lib/hubs.ts`, and only a tab listed there gets a route. So this is a tab in `hubs.ts`, a `page` document to carry the text, the fields it reads in `pageKinds.ts`, and whatever blocks the frame needs. The frame is in Figma under programme; read it before sizing the job.
+**One ask, logged twice.** This entry and **#48** are the same page, reached from both halves of the project on the same evening - this one from the client's message, #48 from the frame, with the field list derived from it. **#48 carries it**, and what was here is in there: the tab in `hubs.ts`, the `page` document for its text, the fields in `pageKinds.ts`. Nothing is lost by reading only #48.
 
 ---
 ## #37 · answered · 2026-09-30 · can the editors rename a menu button themselves?
@@ -873,7 +873,7 @@ map covers a stale one - so this is tidying, not a break. Worth doing when
 ---
 
 ---
-## #48 · open · 2026-10-01 · programme: the exhibition pass tab and what it lists
+## #48 · done · 2026-10-01 · programme: the exhibition pass tab and what it lists
 
 **Page / component:** a fourth tab on the programme hub; component is Lilanga's
 **Figma frame:** `screenshot/ceramic brussels — programme — exhibition pass.png` (Léonie, sent with the comments of 2026-09-30)
@@ -891,6 +891,17 @@ map covers a stale one - so this is tidying, not a break. Worth doing when
 3. Its projection, and the lead from the tab's own `page` document as the other programme tabs do.
 
 Reusing `programmeEvent` was considered and looks wrong: these are months-long exhibitions at other venues, with no time, no venue-on-site and no programme section, and they would pollute `getProgramme`. Your call.
+
+**Decided and built (Kamindu, 2026-10-01). A type of its own, and #36 is merged in here.** Reusing `programmeEvent` would have put museum shows into `getProgramme`, which feeds the talks tab, the VIP programme *and* every past edition's archive - three readers that would each have had to filter them out, and a filter is easy to forget when a fourth reader arrives. A separate type costs one schema and leaves all of that alone.
+
+ - **`exhibition`** (`src/sanity/schemaTypes/documents/exhibition.ts`): `institution` and `edition` required, `endDate` required, `startDate` **optional** - left empty the row reads "→ 18 APR. 2027", which is how the frame draws a show that opened before the fair - plus `artist` (a plain string: these are other venues' artists and have no page here), `exhibitionTitle`, `city` ("6000 Charleroi"), `description`, `link`, `images` and `order`.
+ - **The fourth pill** in `src/lib/hubs.ts`, `exhibition-pass` / `pass-expositions` / `tentoonstellingspas`, after La Cambre. The frame's order (La Cambre first) is **not** followed, and the comment there says why: talks is the hub root, so `/[lang]/programme` *is* the talks page and `programme-69` redirects onto it - reordering moves a URL for no gain anyone asked for. Lilanga raised it; agreed.
+ - **`getExhibitions(lang)`** in `queries.ts`, the current edition's, `order` then institution. `pageKinds.ts` needed nothing: the programme hub's `'*'` entry already gives a new tab its lead.
+ - **Studio**: "Exhibition pass {year}" and a past-years folder under Programme, beside the event lists.
+ - **Strings**: `tabs.exhibitionPass` and `exhibitionPass.empty` in all three locales, so a tab with nothing behind it says so rather than showing a bare pill.
+ - **`formatExhibitionDates`** in `i18n.ts` for the date line, through `readable()` like every other date helper - a value nobody can parse prints nothing rather than throwing away the page and the build. The frame's capitals are CSS, so restyling needs no content change.
+
+**What is left, and it is Lilanga's:** the rows render in the frame's structure and proportions - picture alternating sides, the ruled institution heading, artist / *title*, the city chip, the date line, the paragraph, the pill and the slideshow - but this is not a measured match of its type sizes and spacing. **And there is no content yet:** the tab shows its empty line until the institutions' exhibitions are typed in, which is the client's (BPS22, CID and the others on the frame).
 
 ---
 ## #49 · open · 2026-10-01 · the photographs are pixelated: the sources are small
