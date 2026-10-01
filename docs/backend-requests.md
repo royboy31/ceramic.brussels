@@ -916,7 +916,7 @@ The worst are clearly legacy imports — `969.jpg` at 300×225 on the person Vin
 **Asked for:** a judgement on what is recoverable. Three questions: can the 350 that failed at 2500 be re-fetched at an intermediate width rather than falling back to the original; are the 149 unreferenced ones safe to delete; and for the rest, do we go back to the galleries and the photographers. A displayed-vs-natural report per page can be produced on request.
 
 ---
-## #50 · open · 2026-10-01 · the Studio still offers "Past editions" as `editions`
+## #50 · done · 2026-10-01 · the Studio still offers "Past editions" as `editions`
 
 **Page / component:** `src/sanity/siteLinks.ts`, `src/sanity/schemaTypes/objects/routes.ts`
 
@@ -926,8 +926,10 @@ The worst are clearly legacy imports — `969.jpg` at 300×225 on the person Vin
 
 **Asked for:** rename the entry to "Previous editions" and the value to `previous-editions`, keeping the old value readable so existing links do not break.
 
+**Done (Kamindu, 2026-10-01):** the route list offers **Previous editions** / `previous-editions` (`routes.ts`), and `routePath` in `links.ts` reads both values, so every link already made keeps working - that is the "keeping the old value readable" part, and `sitePath` already translated the section's segment in all three languages. The link picker's own entries now come from `sectionSegment()` and `editionTabPath(year)` rather than the literal `editions/<year>`, and "Open preview" for a past edition points at the real section instead of `/editions`, which only answered through a redirect. One stale mention is left on purpose: `links.ts` still matches `editions` as an incoming value, which is what makes an old link resolve.
+
 ---
-## #51 · open · 2026-10-01 · `npm run boundary` flags `src/styles/`
+## #51 · done · 2026-10-01 · `npm run boundary` flags `src/styles/`
 
 **Page / component:** `scripts/boundary.mjs`
 
@@ -936,6 +938,8 @@ The worst are clearly legacy imports — `969.jpg` at 300×225 on the person Vin
 The branch adds `src/styles/site.css`, which is where the cross-cutting rules of the 2026-09-30 round live (the mobile full-bleed utility, caption sizes, the `strong` weight, the menu overrides). `npm run boundary` therefore exits 1 on a branch that is entirely inside the frontend half.
 
 **Asked for:** `/^src\/styles\//` in `ALLOWED`.
+
+**Done (Kamindu, 2026-10-01):** added, with the reason beside it - CLAUDE.md gives Lilanga "the styling throughout", `design.css` predates the script and `site.css` is where this round's cross-cutting rules live. `npm run boundary` no longer exits 1 on a branch that is entirely inside the frontend half.
 
 ---
 ## #52 · open · 2026-10-01 · 2024 and 2025 galleries: the data the 2026 ones have

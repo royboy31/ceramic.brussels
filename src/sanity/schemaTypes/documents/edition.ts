@@ -96,6 +96,14 @@ export const edition = defineType({
       title: 'Show this edition’s galleries',
       type: 'boolean',
       group: 'main',
+      /**
+       * Only the current edition can be held back - a past edition's
+       * galleries are always on the site - so the switch is shown where it
+       * does something and nowhere else. Kamindu unticked it on 2026 on
+       * 2026-10-01 expecting the listing to move, and nothing happened,
+       * because 2026 is not the current edition.
+       */
+      hidden: ({ document }) => document?.isCurrent !== true,
       description:
         'Leave off until this edition’s galleries are announced: the galleries page then skips it and opens on the year before, with year buttons to the earlier ones. Only matters on the current edition - a past edition’s galleries always stay on the site, whatever this says. Separate from Current edition on purpose: that flag also drives the homepage, the programme, VIP, the partners and the key figures, so an edition can be the current one while its gallery list is still being typed in.',
       initialValue: false,

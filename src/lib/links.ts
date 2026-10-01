@@ -198,10 +198,11 @@ export function sitePath(input: string | undefined, lang: LocaleId): string | nu
  */
 function routePath(route: string, anchor?: string, lang?: LocaleId): string {
   if (HUBS[route]) return hubTabPath(route, anchor, lang);
-  // "Past editions" + a year is the previous-editions year page. The route
-  // value stays `editions` in the Studio's list, so links already made keep
-  // working after the section moved (docs/previous-editions-plan.md §1).
-  if (route === 'editions') {
+  // "Previous editions" + a year is the year page. The Studio offers
+  // `previous-editions` since #50 and offered `editions` before it, so both
+  // are read and links already made keep working
+  // (docs/previous-editions-plan.md §1).
+  if (route === 'editions' || route === 'previous-editions') {
     return /^\d{4}$/.test(anchor ?? '')
       ? edTabPath(anchor as string, undefined, lang)
       : edSectionSegment(lang);

@@ -1,7 +1,7 @@
 import { HUBS } from '../lib/hubs';
 import { useTranslations } from '../lib/i18n';
 import { exhibitorPath, partnerPath } from '../lib/links';
-import { editionTabPath } from '../lib/previousEditions';
+import { editionTabPath, sectionSegment } from '../lib/previousEditions';
 
 /**
  * What the "link to this site" search box offers (components/SiteLinkInput.tsx).
@@ -57,12 +57,12 @@ export function pageOptions(pastYears: number[]): SiteLinkOption[] {
     pathOption('exhibitors/awards', `${t('nav.exhibitors')} – ${t('nav.awards')}`),
     pathOption('artists', t('nav.artists')),
     pathOption('news', t('nav.news')),
-    pathOption('editions', t('nav.editions')),
+    pathOption(sectionSegment(), t('nav.editions')),
   );
 
   for (const year of pastYears) {
     options.push(
-      pathOption(`editions/${year}`, `${t('nav.editions')} – ${year}`, 'Past year'),
+      pathOption(editionTabPath(year), `${t('nav.editions')} – ${year}`, 'Past year'),
       // That year's galleries are the exhibitors tab of the previous-editions
       // section since 2026-10-01, not `exhibitors/<year>`.
       pathOption(editionTabPath(year, 'exhibitors'), `${t('nav.exhibitors')} – ${year}`, 'Past year'),

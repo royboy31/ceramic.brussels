@@ -18,6 +18,9 @@ const ALLOWED = [
   /^src\/pages\//,
   /^src\/layouts\//,
   /^src\/components\//,
+  // CLAUDE.md gives Lilanga "the styling throughout", and design.css predates
+  // this script; site.css is where the cross-cutting rules live (#51).
+  /^src\/styles\//,
   /^src\/lib\/i18n\.ts$/,
   /^src\/lib\/placeholders\.ts$/,
   /^public\/(?!_headers$|_redirects$|section-previews\/)/,
