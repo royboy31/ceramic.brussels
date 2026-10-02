@@ -274,6 +274,13 @@ const SECTIONS = `sections[hidden != true]{
       "contact": coalesce(applications.recipient, contactEmail)
     }
   },
+  _type == "newsletterSection" => {
+    ${styled('heading')},
+    ${styled('note')},
+    // Only the address the failure state names; the confirmation email is
+    // the route's side (src/server/routes/newsletter.ts).
+    "contact": *[_type == "siteSettings"][0].contactEmail
+  },
   _type == "peopleSection" => {
     group,
     ${styled('heading')},

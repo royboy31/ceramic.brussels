@@ -1002,3 +1002,14 @@ The stub exists for a second reason too: a static `Astro.redirect` writes an HTM
 - **Menu vs submenus:** all four press & media menu targets were already right; the labels were not ("partners" vs the pill's "media partners", missing FR/NL, trailing spaces) — patched in the navigation document, live.
 - **Interviews:** nothing to build — a story's "read the interview" link already takes a page of this site; Léonie's interview layout is one `pageTemplate` document for all stories (answered in the group).
 - **Collector's Voices → hidden draft:** script ready (unpublish keeping drafts, backup written); the delete-published step needs a hand — or two Unpublish clicks in the Studio.
+
+---
+## #55 · built · 2026-10-02 · the newsletter signup: Sheet + confirmation
+
+**Page / component:** `src/components/sections/NewsletterSignup.astro`, `src/server/routes/newsletter.ts`, `scripts/newsletter-apps-script.gs`, Site settings → Newsletter
+
+**Asked by:** the launch call, 2026-10-01 ("newsletter form: save to Google Sheet + send the confirmation email; check the other languages too"). Kamindu confirmed the studio's own system: a Google Apps Script web app writing into the client's Sheet, as on the Pujol site.
+
+**Built:** a "Newsletter signup" page-builder block (one email field, the application form's dress, EN/FR/NL strings) posting to `/api/newsletter/` on the Worker. The route upserts one row per address into the sheet's `Newsletter` tab through the Apps Script (Date kept from the first signup, Language recorded), then sends the confirmation through Brevo (words in Site settings → Newsletter, stock English while empty). The sheet write is awaited - a failure refuses the signup rather than losing the address; the mail is best-effort. Honeypot, 24h duplicate window, same-origin check, no-JS fallback, APPLY_DRY_RUN on previews, 503 while unconfigured.
+
+**By hand before it goes live (Roy or the client):** create the Sheet with a `Newsletter` tab, paste `scripts/newsletter-apps-script.gs` (Extensions → Apps Script), deploy as web app (Execute as: Me / Access: Anyone), and put the /exec URL in the `NEWSLETTER_SHEETS_URL` Pages secret - the file's header walks through it. Then an editor places the block on a page and points the menu/footer "Newsletter" entry at that page.
