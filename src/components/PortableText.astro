@@ -204,6 +204,15 @@ const grouped = Array.isArray(value) ? group(value.filter(Boolean)) : [];
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
   }
+  /* The editor's Underline draws the browser's own line - thicker and
+     tighter to the text than the 1px the links use, so a link that is
+     also marked underline showed two different lines (Léonie,
+     2026-10-02). Same thickness and offset as a.text-link and the
+     rich-text links: nested with a link the two lines coincide. */
+  .rich-text :global(u) {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.12em;
+  }
   .rich-text :global(figure) {
     margin: 1.75rem 0;
   }
