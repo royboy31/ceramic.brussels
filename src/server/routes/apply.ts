@@ -95,15 +95,29 @@ async function settings(lang: LocaleId): Promise<FormSettings> {
   return result ?? {};
 }
 
-/** The same address twice in a quarter of an hour is a double click, not a second gallery. */
+/**
+ * The same address twice in a quarter of an hour is a double click, not a
+ * second gallery. Checking and marking are separate (as in newsletter.ts,
+ * 2026-10-02): marking before the send locked an address out for the window
+ * when the send FAILED, so a gallery retrying after a mail hiccup was told
+ * "already received" about a request nobody got.
+ */
+async function repeatKey(email: string): Promise<Request> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email.toLowerCase()));
+  return new Request(`https://apply.invalid/${[...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('')}`);
+}
+
 async function isRepeat(email: string): Promise<boolean> {
   if (typeof caches === 'undefined') return false;
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email.toLowerCase()));
-  const key = new Request(`https://apply.invalid/${[...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('')}`);
   const cache = await caches.open('apply');
-  if (await cache.match(key)) return true;
-  await cache.put(key, new Response('1', { headers: { 'cache-control': `max-age=${DUPLICATE_WINDOW_SECONDS}` } }));
-  return false;
+  return !!(await cache.match(await repeatKey(email)));
+}
+
+/** Remember the address once its emails are sent, and only then. */
+async function markSeen(email: string): Promise<void> {
+  if (typeof caches === 'undefined') return;
+  const cache = await caches.open('apply');
+  await cache.put(await repeatKey(email), new Response('1', { headers: { 'cache-control': `max-age=${DUPLICATE_WINDOW_SECONDS}` } }));
 }
 
 async function deliver(apiKey: string, s: Submission, cfg: FormSettings): Promise<void> {
@@ -191,6 +205,7 @@ export const POST: APIRoute = async ({ request }) => {
     console.error('[apply] delivery failed:', error instanceof Error ? error.message : error);
     return answer(502, 'delivery', 'Could not send', `Your request could not be sent. Please write to ${cfg.recipient || cfg.contactEmail || 'the team'}.`);
   }
+  await markSeen(submission.email);
 
   // Sent. The thank-you page when Site settings names one: a redirect for a
   // browser that posted the form itself, its address for the script.

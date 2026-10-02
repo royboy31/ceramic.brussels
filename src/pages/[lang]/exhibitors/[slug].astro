@@ -2,7 +2,7 @@
 import Base from '../../../layouts/Base.astro';
 import ExhibitorDetail from '../../../components/ExhibitorDetail.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
-import { getExhibitor, getExhibitorPaths, getCurrentEdition } from '../../../lib/queries';
+import { getExhibitor, getExhibitorPaths, getEditions, exhibitorEditions } from '../../../lib/queries';
 
 /**
  * /exhibitors/<slug>: a gallery of the edition whose galleries the site opens
@@ -22,8 +22,17 @@ export async function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const slug = Astro.params.slug as string;
 
-const [exhibitor, edition] = await Promise.all([getExhibitor(lang, slug), getCurrentEdition(lang)]);
+const [exhibitor, editions] = await Promise.all([getExhibitor(lang, slug), getEditions(lang)]);
 if (!exhibitor) return Astro.rewrite('/404');
+
+/**
+ * The band's edition is the one the galleries list opens on, so the
+ * catalogue tab here is the same one the list shows — with the *current*
+ * edition (no catalogue yet) the tab vanished on every gallery page
+ * (meeting, 2026-10-01).
+ */
+const { landingYear } = exhibitorEditions(editions);
+const edition = editions.find((e: any) => e.year === landingYear) ?? null;
 
 const orgSchema = {
   '@context': 'https://schema.org',

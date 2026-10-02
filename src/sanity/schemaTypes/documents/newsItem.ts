@@ -44,6 +44,26 @@ export const newsItem = defineType({
       description: 'The edition this release is about. Without one, the first edition that ends after the release date.',
       hidden: ({ document }) => document?.category !== 'press-release',
     }),
+    /**
+     * A press release as the file it was sent out as (Félicie, 2026-10-01):
+     * with a PDF attached, the "read in EN/FR/NL" pill on press & media →
+     * press opens the file itself instead of the generated page, so nobody
+     * has to retype the release's content. A language without a file keeps
+     * the page link.
+     */
+    defineField({
+      name: 'pdfs',
+      title: 'PDF per language',
+      type: 'object',
+      description:
+        'Attach the release as the PDF that was sent out. The "read in EN / FR / NL" buttons on press & media → press then open the file; a language without one links the page below instead.',
+      hidden: ({ document }) => document?.category !== 'press-release',
+      fields: [
+        defineField({ name: 'en', title: 'English', type: 'file', options: { accept: 'application/pdf' } }),
+        defineField({ name: 'fr', title: 'Français', type: 'file', options: { accept: 'application/pdf' } }),
+        defineField({ name: 'nl', title: 'Nederlands', type: 'file', options: { accept: 'application/pdf' } }),
+      ],
+    }),
     defineField({ name: 'excerpt', title: 'Excerpt', type: 'localeText' }),
     defineField({ name: 'cover', title: 'Cover image', type: 'figure' }),
     defineField({ name: 'body', title: 'Body', type: 'localeBlock' }),

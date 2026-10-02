@@ -752,6 +752,19 @@ const rateLink =
     margin-top: 36px;
     align-items: start;
   }
+  /* The hotel column is editor rich text now, so its heading arrived as a
+     22px subheading; the frame draws "The Hoxton" as the ruled panel title
+     every other VIP panel wears (Félicie, 2026-10-01). */
+  .hotel .body-20 :global(h2),
+  .hotel .body-20 :global(h3) {
+    border-bottom: 2px solid;
+    margin-bottom: 24px;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    text-transform: none;
+  }
   .aperitivos {
     margin-top: 56px;
     align-items: start;
@@ -795,9 +808,11 @@ const rateLink =
   }
   .rate-heading {
     margin-top: 4px;
-    font-size: 20px;
+    /* "in a larger font" (Félicie, 2026-10-01): up from 20px, level with
+       the "special rate" label above it. */
+    font-size: 30px;
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.2;
     letter-spacing: -0.02em;
     text-transform: uppercase;
   }

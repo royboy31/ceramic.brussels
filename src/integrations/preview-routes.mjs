@@ -66,8 +66,9 @@ import Page from '${target.startsWith('.') ? target : `./${target}`}';
         injectRoute({ pattern: '/api/preview/enable', entrypoint: './src/server/routes/preview-enable.ts', prerender: false });
         injectRoute({ pattern: '/api/preview/disable', entrypoint: './src/server/routes/preview-disable.ts', prerender: false });
         injectRoute({ pattern: '/api/apply', entrypoint: './src/server/routes/apply.ts', prerender: false });
+        injectRoute({ pattern: '/api/newsletter', entrypoint: './src/server/routes/newsletter.ts', prerender: false });
 
-        logger.info(`${files.length} preview routes mounted under ${prefix}/, plus /api/preview/ and /api/apply`);
+        logger.info(`${files.length} preview routes mounted under ${prefix}/, plus /api/preview/, /api/apply and /api/newsletter`);
       },
     },
   };

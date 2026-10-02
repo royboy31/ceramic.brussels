@@ -279,8 +279,9 @@ main .slideshow figure:hover > a > img {
   main .practical .visit-photo,
   main .practical .venue-map,
   main .practical .access img,
-  /* VIP: the picture beside each row */
-  main .vip .image-text > .shot,
+  /* The VIP picture (every image-text row's, in fact) bleeds from its own
+     component since 2026-10-02 - ImageText.astro - where the cascade is
+     certain and the pull is the gutter, not 50vw. */
   /* press & media: stories, clippings, photos & videos */
   main .press-media .story-card > img,
   main .press-media .story-card > figure,

@@ -764,4 +764,24 @@ const captionOf = (img: any, fallback?: string) => ({
       font-size: 17px;
     }
   }
+
+  /* The about pictures to both screen edges on a phone (Léonie, 2026-10-01).
+     The sweep in site.css never moved the hero: its pull loses to this
+     component's `.hero figure { margin: 0 }` - the cascade Feature.astro
+     documents - so the picture took the viewport's width and kept the
+     gutter's offset, 25px of sideways scroll (found 2026-10-02). And the
+     sweep's 50vw arithmetic drags the scrollbar's width into the sum in a
+     narrow desktop window. The hero and the gallery sit exactly one gutter
+     in at this width, so the gutter is the exact pull, whatever the
+     scrollbar. */
+  @media (width <= 700px) {
+    /* `.prize-about` on the gallery too: the shorter selector lost to the
+       site.css sweep's and the pictures kept the 50vw pull. */
+    .hero figure,
+    .prize-about .gallery > :global(img) {
+      width: calc(100% + 2 * var(--gutter));
+      max-width: none;
+      margin-inline: calc(-1 * var(--gutter));
+    }
+  }
 </style>

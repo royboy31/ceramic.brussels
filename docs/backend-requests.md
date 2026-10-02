@@ -986,3 +986,32 @@ The stub exists for a second reason too: a static `Astro.redirect` writes an HTM
 **Asked for:** while `PAST_EDITIONS_PUBLIC` is `false`, point those rules at `exhibitors` instead — in the map, or wherever you prefer to read the switch. Then the routes can stop being built altogether and `EditionHidden.astro` can go. If you would rather leave it as it is for the week, nothing is broken: the old URLs answer, in one extra hop, and nothing is indexed.
 
 **Also content, not code:** the programme hub's talks tab has an editor-made link, *"Find the 2026 talk programme here"*, pointing at `/en/previous-editions/2026/`. While the section is off it lands on the galleries list, which is the wrong place for a talks link. It wants removing in the Studio for the launch — I have not touched it.
+
+---
+## #54 · done · 2026-10-02 · press releases as PDFs, and the rest of Félicie's press & media round
+
+**Page / component:** `src/sanity/schemaTypes/documents/newsItem.ts`, `src/lib/queries.ts`, `src/components/PressMedia.astro`, `src/pages/[lang]/news/[slug].astro`, `src/components/hubs/Programme.astro`
+
+**Asked by:** Félicie's WhatsApp of 2026-10-01 (screenshots), folded into `launch-meeting.md`.
+
+**Done (Kamindu, 2026-10-02):**
+- **Press releases as PDFs:** `newsItem` grows a "PDF per language" object (en/fr/nl file fields, shown on the press-release category only). The press tab's "read in EN / FR / NL" pills open the file where one is attached (↗, new tab) and keep the generated page where none is (→). The release's own page offers the PDF too (`news.openPdf` ×3 locales) — so a release can be title + date + files, nothing retyped.
+- **"Back to News":** a press release's page now returns to press & media → press; other categories keep News. The reader never came from News, so the button led somewhere they had not been.
+- **"As Seen in the Press" frame:** the 40px of white between a card's frame and its photo was `:global(.cover) { margin: 40px 0 }` in `Programme.astro` leaking across the hub bundle; now anchored to the programme's own `.content-wrap`.
+- **Press Room "Press kit" button:** removed (it opened the same clippings book the press reviews list links); `pressKitUrl` hidden in Site settings, value kept.
+- **Menu vs submenus:** all four press & media menu targets were already right; the labels were not ("partners" vs the pill's "media partners", missing FR/NL, trailing spaces) — patched in the navigation document, live.
+- **Interviews:** nothing to build — a story's "read the interview" link already takes a page of this site; Léonie's interview layout is one `pageTemplate` document for all stories (answered in the group).
+- **Collector's Voices → hidden draft:** script ready (unpublish keeping drafts, backup written); the delete-published step needs a hand — or two Unpublish clicks in the Studio.
+
+---
+## #55 · built · 2026-10-02 · the newsletter signup: Sheet + confirmation
+
+**Page / component:** `src/components/sections/NewsletterSignup.astro`, `src/server/routes/newsletter.ts`, `scripts/newsletter-apps-script.gs`, Site settings → Newsletter
+
+**Asked by:** the launch call, 2026-10-01 ("newsletter form: save to Google Sheet + send the confirmation email; check the other languages too"). Kamindu confirmed the studio's own system: a Google Apps Script web app writing into the client's Sheet, as on the Pujol site.
+
+**Built:** a "Newsletter signup" page-builder block (one email field, the application form's dress, EN/FR/NL strings) posting to `/api/newsletter/` on the Worker. The route upserts one row per address into the sheet's `Newsletter` tab through the Apps Script (Date kept from the first signup, Language recorded), then sends the confirmation through Brevo (words in Site settings → Newsletter, stock English while empty). The sheet write is awaited - a failure refuses the signup rather than losing the address; the mail is best-effort. Honeypot, 24h duplicate window, same-origin check, no-JS fallback, APPLY_DRY_RUN on previews, 503 while unconfigured.
+
+**By hand before it goes live (Roy or the client):** create the Sheet with a `Newsletter` tab, paste `scripts/newsletter-apps-script.gs` (Extensions → Apps Script), deploy as web app (Execute as: Me / Access: Anyone), and put the /exec URL in the `NEWSLETTER_SHEETS_URL` Pages secret - the file's header walks through it. Then an editor places the block on a page and points the menu/footer "Newsletter" entry at that page.
+
+**Wired (2026-10-02 pm, in the browser with Kamindu):** the Sheet is `ceramic_contact_pages` (tab `Newsletter`), the script is deployed from it as the web app "ceramic brussels newsletter" (Execute as: Me / Access: Anyone, owner kamindudushmantha@gmail.com — only the owner can manage its deployments, the Pujol lesson), the upsert was proven from the shell (one row despite four posts, Date kept by writeOnce, Language updated; the test row is still in the sheet as proof), and the /exec URL is in the `NEWSLETTER_SHEETS_URL` Pages secret (production) and `.env`. Left: cherry-pick the branch to main (the route ships with it), publish the draft Newsletter page, point the menu/footer "Newsletter" entry at it, FR/NL confirmation text in Site settings → Newsletter.

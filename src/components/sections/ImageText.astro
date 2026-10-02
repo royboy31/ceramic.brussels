@@ -117,10 +117,21 @@ const hasImage = !!section.image?.asset;
   .vip .copy {
     grid-column: span 8;
   }
+  /* The VIP tabs render these inside `.content-wrap`, which already pays
+     the gutter; `page-grid` paying it again indented every row by a second
+     45px against the section titles above ("aligned fully left" - Félicie,
+     2026-10-01). */
+  .image-text.vip {
+    padding-inline: 0;
+  }
   /* The about tab's "programme overview" rows: the heading is the design's
      bold capitals over the paragraph - "DISCOVERY TOURS", "VIP LOUNGE". */
   .vip-rows .panel-title {
     margin-bottom: 10px;
+    /* Not ruled: the frame's row label is bold capitals alone, and the
+       2px rule design.css gives every panel title read as an underline
+       here (Félicie, 2026-10-01). */
+    border-bottom: 0;
     font-size: 24px;
     font-weight: 600;
     line-height: 1.25;
@@ -157,8 +168,14 @@ const hasImage = !!section.image?.asset;
   }
 
   @media (max-width: 900px) {
+    /* The .vip pairs too: their span rules are more specific than the two
+       plain selectors and kept eight tracks alive in the four-column phone
+       grid - the shot then centred on its tracks, not the screen (found
+       2026-10-02, VIP about at 390px). */
     .shot,
-    .copy {
+    .copy,
+    .vip .shot,
+    .vip .copy {
       grid-column: 1 / -1;
     }
     .flip .shot {
@@ -166,6 +183,22 @@ const hasImage = !!section.image?.asset;
     }
     .copy {
       margin-top: 1.5rem;
+    }
+  }
+
+  /* The picture to both screen edges on a phone (Léonie, 2026-10-01).
+     Here rather than in site.css so the cascade is certain, and by 50vw
+     rather than the gutter: the row renders at different depths - alone,
+     or inside a content-wrap that adds a second gutter - so no constant
+     knows the inset, while the stack fix above leaves the grid area
+     centred on the viewport, which is all this formula asks. (A classic
+     desktop scrollbar still leans it a few px, as everywhere the sweep
+     uses it; phones have none.) */
+  @media (width <= 700px) {
+    .shot {
+      width: 100vw;
+      max-width: none;
+      margin-inline: calc(50% - 50vw);
     }
   }
 </style>

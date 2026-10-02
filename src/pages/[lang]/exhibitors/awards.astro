@@ -6,7 +6,7 @@ import PortableText from '../../../components/PortableText.astro';
 import PageSections from '../../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { useTranslations, localePath } from '../../../lib/i18n';
-import { getAwards, getCurrentEdition, getHubPages } from '../../../lib/queries';
+import { getAwards, getCurrentEdition, getHubPages, getEditions, exhibitorEditions } from '../../../lib/queries';
 import { pageForTab } from '../../../lib/hubs';
 import { countryCode } from '../../../lib/countries';
 import { exhibitorPath } from '../../../lib/links';
@@ -35,7 +35,21 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const t = useTranslations(lang);
 
-const [allAwards, edition, pages] = await Promise.all([getAwards(lang), getCurrentEdition(lang), getHubPages(lang, 'exhibitors')]);
+const [allAwards, edition, pages, editions] = await Promise.all([
+  getAwards(lang),
+  getCurrentEdition(lang),
+  getHubPages(lang, 'exhibitors'),
+  getEditions(lang),
+]);
+/**
+ * The title band's edition: the one the exhibitors list opens on, which is
+ * the one with a catalogue — the current edition has none yet and the
+ * catalogue tab vanished on this page (meeting, 2026-10-01). The awards
+ * logic below keeps reading the *current* edition: which awards show is a
+ * different question from which catalogue the band links.
+ */
+const { landingYear } = exhibitorEditions(editions);
+const bandEdition = editions.find((e: any) => e.year === landingYear) ?? edition;
 const page = pageForTab(pages, 'awards');
 const fair = allAwards.filter((a: any) => a.family === 'fair' && a.year);
 const sameAward = (a: any, b: any) => String(a?.name ?? '').trim().toLowerCase() === String(b?.name ?? '').trim().toLowerCase();
@@ -90,7 +104,7 @@ const imagesOf = (a: any): any[] => {
   editId={page?._id}
   editType={page?._type}
 >
-  <ExhibitorHead lang={lang} active="awards" edition={edition} />
+  <ExhibitorHead lang={lang} active="awards" edition={bandEdition} />
 
   {
     page?.intro && (

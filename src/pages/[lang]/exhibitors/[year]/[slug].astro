@@ -33,8 +33,15 @@ const lang = Astro.params.lang as LocaleId;
 const year = Number(Astro.params.year);
 const slug = Astro.params.slug as string;
 
-const exhibitor = await getExhibitor(lang, slug, year);
+const [exhibitor, editions] = await Promise.all([getExhibitor(lang, slug, year), getEditions(lang)]);
 if (!exhibitor) return Astro.rewrite('/404');
+
+/**
+ * This year's edition, for the band's catalogue tab: a 2026 gallery links
+ * the 2026 catalogue. The page passed no edition at all until 2026-10-02,
+ * which is where the meeting's disappearing "Catalog" button lived.
+ */
+const edition = editions.find((e: any) => e.year === year) ?? null;
 ---
 
 <Base
@@ -47,5 +54,11 @@ if (!exhibitor) return Astro.rewrite('/404');
   editId={exhibitor._id}
   editType={exhibitor._type}
 >
-  <ExhibitorDetail lang={lang} exhibitor={exhibitor} listPath={PAST_EDITIONS_PUBLIC ? editionTabPath(year, 'exhibitors', lang) : 'exhibitors'} year={year} />
+  <ExhibitorDetail
+    lang={lang}
+    exhibitor={exhibitor}
+    listPath={PAST_EDITIONS_PUBLIC ? editionTabPath(year, 'exhibitors', lang) : 'exhibitors'}
+    year={year}
+    edition={edition}
+  />
 </Base>

@@ -1,7 +1,8 @@
 ---
-import type { LocaleId } from '../lib/locales';
+import { LOCALE_IDS, type LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
-import { HUBS, hubTabHref, tabHasPage } from '../lib/hubs';
+import { HUBS, hubSegment, hubTabHref, tabHasPage } from '../lib/hubs';
+import { getNavigation } from '../lib/queries';
 
 /**
  * The title band of a hub page, as the design draws it on every hub frame:
@@ -47,7 +48,22 @@ interface Props {
 const { lang, route, active, pages = [], dark = false, class: className, title, items, has = {} } = Astro.props;
 const t = useTranslations(lang);
 const hub = route ? HUBS[route] : undefined;
-const heading = title ?? (hub ? t(hub.title) : '');
+
+/**
+ * The band's name follows the menu (launch call, 2026-10-01): the menu rows
+ * are editor content, but this h1 was an i18n constant, so renaming a
+ * section in the Studio changed the menu and left every band behind. The
+ * menu item that leads to this hub now names the band too; the i18n string
+ * stays as the fallback for a hub the menu does not list. getNavigation is
+ * memoised, so this costs the build nothing.
+ */
+const nav = hub ? await getNavigation(lang) : null;
+const navLabel = nav?.items?.find((item: any) => {
+  if (item.route === route) return true;
+  const tail = String(item.path ?? '').split('/').filter(Boolean).pop();
+  return !!tail && LOCALE_IDS.some((l) => tail === hubSegment(route!, l));
+})?.label;
+const heading = title ?? navLabel ?? (hub ? t(hub.title) : '');
 
 // Only the tabs in hubs.ts: they are the ones with a route. A pill for any
 // other page of the hub led to a 404.
