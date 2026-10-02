@@ -163,6 +163,38 @@ const ALIASES = {
   'editions/2026': 'previous-editions/2026',
   'editions/2025': 'previous-editions/2025',
   'editions/2024': 'previous-editions/2024',
+  /**
+   * The Wayback Machine's record of the domain (the 2026-10-02 sweep for the
+   * launch, 240 HTML URLs crawled live since 2023, standing in for the GSC
+   * export): slugs the Twill export does not carry - renamed pages' earlier
+   * slugs, year-suffixed application pages, the Norway focus's four names.
+   * Each answered 200 on the old site, so each deserves a landing.
+   */
+  'collaborations-2': 'previous-editions/2024',
+  'collaborations-3': 'previous-editions/2024',
+  'focus-espagne': 'previous-editions/2026',
+  'focus-norway': 'previous-editions/2025',
+  'focus-norvege': 'previous-editions/2025',
+  'focus-noorwegen': 'previous-editions/2025',
+  'norway-focus': 'previous-editions/2025',
+  'norwegian-focus': 'previous-editions/2025',
+  '2024-awards': 'previous-editions/2024',
+  'invite-d-honneur': 'guest-of-honour',
+  partenaires: 'partners',
+  'advisory-board': 'about/advisory-board',
+  'talks-and-news': 'programme',
+  'news-and-collabs': 'visit/food-drinks',
+  'news-and-agenda': 'news',
+  'photo-gallery': 'press-media/photos-videos',
+  'photos-2024': 'press-media/photos-videos',
+  'photos-2025': 'press-media/photos-videos',
+  'gallery-application-2025': 'gallery-applications',
+  'gallery-applications-2025': 'gallery-applications',
+  'candidatures-galeries-2025': 'gallery-applications',
+  'pasteditions/galeries': 'previous-editions/2026/exhibitors',
+  'pasteditions/exhibitors': 'previous-editions/2026/exhibitors',
+  'pasteditions/agenda': 'previous-editions/2026',
+  'pasteditions/photos-2': 'press-media/photos-videos',
 };
 
 /** Language-less URLs the old sitemap listed. */
