@@ -18,6 +18,7 @@ export const siteSettings = defineType({
     { name: 'faq', title: 'FAQ' },
     { name: 'press', title: 'Press' },
     { name: 'applications', title: 'Applications' },
+    { name: 'newsletter', title: 'Newsletter' },
     { name: 'vip', title: 'VIP' },
   ],
   fields: [
@@ -265,6 +266,37 @@ export const siteSettings = defineType({
           title: 'Message under the form after sending',
           type: 'localeText',
           description: 'Optional. Used when no page is chosen above; replaces the standard "thank you" line.',
+        }),
+      ],
+    }),
+
+    /**
+     * The newsletter signup (launch call, 2026-10-01): the block writes each
+     * address into the team's Google Sheet - through the same Apps Script
+     * system the studio's other sites use - and sends a confirmation through
+     * Brevo. Only the confirmation's words live here; the sheet's write URL
+     * is the NEWSLETTER_SHEETS_URL Pages secret, never in this world-readable
+     * dataset, because whoever holds it can write rows.
+     */
+    defineField({
+      name: 'newsletter',
+      title: 'Newsletter signup',
+      type: 'object',
+      group: 'newsletter',
+      options: { collapsible: false },
+      fields: [
+        defineField({
+          name: 'confirmationSubject',
+          title: 'Confirmation email: subject',
+          type: 'localeString',
+          description: 'Sent to the subscriber. Stock English is used while this is empty.',
+        }),
+        defineField({
+          name: 'confirmationText',
+          title: 'Confirmation email: text',
+          type: 'localeText',
+          rows: 8,
+          description: 'Plain text; a blank line starts a new paragraph. {email} is filled in.',
         }),
       ],
     }),

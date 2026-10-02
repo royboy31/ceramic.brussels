@@ -694,6 +694,40 @@ export const applicationFormSection = defineType({
   },
 });
 
+/**
+ * The newsletter signup (launch call, 2026-10-01): one email field as a
+ * block of the page. The address goes into the team's Google Sheet through
+ * their Apps Script (scripts/newsletter-apps-script.gs has the setup) and
+ * the subscriber gets a confirmation through Brevo; the words of that email
+ * live in Site settings → Newsletter. Rendering:
+ * src/components/sections/NewsletterSignup.astro; the submission goes to
+ * /api/newsletter (src/server/routes/newsletter.ts).
+ */
+export const newsletterSection = defineType({
+  name: 'newsletterSection',
+  title: 'Newsletter signup',
+  type: 'object',
+  icon: EnvelopeIcon,
+  fields: [
+    headingField('Optional. Shown above the field.'),
+    defineField({
+      name: 'note',
+      title: 'Note',
+      type: 'localeText',
+      description: 'Optional. A line above the field, e.g. what the newsletter brings and how often.',
+    }),
+    anchorField(),
+    hiddenField(),
+  ],
+  preview: {
+    select: { heading: 'heading.en', hidden: 'hidden' },
+    prepare: ({ heading, hidden }) => ({
+      title: heading ?? 'Newsletter signup',
+      subtitle: sectionSubtitle('Newsletter signup', hidden, '· confirmation under Site settings → Newsletter'),
+    }),
+  },
+});
+
 /* ---------- the field ---------- */
 
 /** Every block a `page` or the homepage can hold. Order here is the order in the Add menu. */
@@ -716,6 +750,7 @@ export const PAGE_SECTION_TYPES = [
   'faqSection',
   'embedSection',
   'applicationFormSection',
+  'newsletterSection',
 ] as const;
 
 /** The subset that makes sense inside an artist profile or a news item. */
@@ -754,7 +789,7 @@ export function sectionsField(
   const groups = [
     { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection', 'spacerSection'] },
     { name: 'media', title: 'Images & video', of: ['gallerySection', 'slideshowSection', 'videoSection', 'spotlight'] },
-    { name: 'action', title: 'Links & banners', of: ['bannerSection', 'linksSection', 'embedSection', 'applicationFormSection'] },
+    { name: 'action', title: 'Links & banners', of: ['bannerSection', 'linksSection', 'embedSection', 'applicationFormSection', 'newsletterSection'] },
     { name: 'lists', title: 'From other content', of: ['peopleSection', 'partnersSection', 'keyFiguresSection', 'newsSection'] },
   ]
     .map((g) => ({ ...g, of: g.of.filter(has) }))
@@ -800,4 +835,5 @@ export const pageBuilderTypes = [
   linksSection,
   embedSection,
   applicationFormSection,
+  newsletterSection,
 ];
