@@ -184,6 +184,9 @@ const NEWS_CARD = `{
   _id, publishedAt, category,
   // A press release's edition, for the "sort by" pills on press & media (#22).
   "edition": edition->year,
+  // A release attached as a file: the press tab's language pills open the
+  // PDF itself where one exists (Félicie, 2026-10-01).
+  "pdfs": { "en": pdfs.en.asset->url, "fr": pdfs.fr.asset->url, "nl": pdfs.nl.asset->url },
   "slug": slug.current,
   ${styled('title')},
   ${styled('excerpt')},
@@ -964,6 +967,7 @@ export function getNewsItem(lang: LocaleId, slug: string) {
   return run<any>(
     `*[_type == "newsItem" && slug.current == $slug][0]{
       _id, _type, publishedAt, category,
+      "pdf": pdfs[$lang].asset->url,
       "slug": slug.current,
       ${styled('title')},
       ${styled('excerpt')},

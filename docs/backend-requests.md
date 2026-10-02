@@ -986,3 +986,19 @@ The stub exists for a second reason too: a static `Astro.redirect` writes an HTM
 **Asked for:** while `PAST_EDITIONS_PUBLIC` is `false`, point those rules at `exhibitors` instead — in the map, or wherever you prefer to read the switch. Then the routes can stop being built altogether and `EditionHidden.astro` can go. If you would rather leave it as it is for the week, nothing is broken: the old URLs answer, in one extra hop, and nothing is indexed.
 
 **Also content, not code:** the programme hub's talks tab has an editor-made link, *"Find the 2026 talk programme here"*, pointing at `/en/previous-editions/2026/`. While the section is off it lands on the galleries list, which is the wrong place for a talks link. It wants removing in the Studio for the launch — I have not touched it.
+
+---
+## #54 · done · 2026-10-02 · press releases as PDFs, and the rest of Félicie's press & media round
+
+**Page / component:** `src/sanity/schemaTypes/documents/newsItem.ts`, `src/lib/queries.ts`, `src/components/PressMedia.astro`, `src/pages/[lang]/news/[slug].astro`, `src/components/hubs/Programme.astro`
+
+**Asked by:** Félicie's WhatsApp of 2026-10-01 (screenshots), folded into `launch-meeting.md`.
+
+**Done (Kamindu, 2026-10-02):**
+- **Press releases as PDFs:** `newsItem` grows a "PDF per language" object (en/fr/nl file fields, shown on the press-release category only). The press tab's "read in EN / FR / NL" pills open the file where one is attached (↗, new tab) and keep the generated page where none is (→). The release's own page offers the PDF too (`news.openPdf` ×3 locales) — so a release can be title + date + files, nothing retyped.
+- **"Back to News":** a press release's page now returns to press & media → press; other categories keep News. The reader never came from News, so the button led somewhere they had not been.
+- **"As Seen in the Press" frame:** the 40px of white between a card's frame and its photo was `:global(.cover) { margin: 40px 0 }` in `Programme.astro` leaking across the hub bundle; now anchored to the programme's own `.content-wrap`.
+- **Press Room "Press kit" button:** removed (it opened the same clippings book the press reviews list links); `pressKitUrl` hidden in Site settings, value kept.
+- **Menu vs submenus:** all four press & media menu targets were already right; the labels were not ("partners" vs the pill's "media partners", missing FR/NL, trailing spaces) — patched in the navigation document, live.
+- **Interviews:** nothing to build — a story's "read the interview" link already takes a page of this site; Léonie's interview layout is one `pageTemplate` document for all stories (answered in the group).
+- **Collector's Voices → hidden draft:** script ready (unpublish keeping drafts, backup written); the delete-published step needs a hand — or two Unpublish clicks in the Studio.

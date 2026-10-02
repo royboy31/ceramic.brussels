@@ -278,13 +278,9 @@ const logoHeight = (p: any) => {
                   {page.intro2}
                 </p>
               )}
-              {settings?.pressKitUrl && (
-                <p class="kit">
-                  <a class="small-pill" href={settings.pressKitUrl} {...external}>
-                    {t('about.pressKit')} ↗
-                  </a>
-                </p>
-              )}
+              {/* The "Press kit" pill came off on 2026-10-02 (Félicie): it
+                  opened the same clippings book the press reviews list below
+                  already links, so the button was a duplicate. */}
             </div>
             <div class:list={['room-grid', { single: !releaseGroups.length || !reviews.length }]}>
               {releaseGroups.length > 0 && (
@@ -309,11 +305,19 @@ const logoHeight = (p: any) => {
                           </p>
                           <h4 {...styleAttrs(r.titleStyle)}>{r.title}</h4>
                           <div class="languages">
-                            {LOCALE_IDS.map((l) => (
-                              <a class="small-pill" href={localePath(l, `news/${r.slug}`)} hreflang={l}>
-                                {t('press.readIn')} {l.toUpperCase()} →
-                              </a>
-                            ))}
+                            {/* A language whose PDF is attached opens the file
+                                itself; one without keeps the generated page. */}
+                            {LOCALE_IDS.map((l) =>
+                              r.pdfs?.[l] ? (
+                                <a class="small-pill" href={r.pdfs[l]} hreflang={l} {...external}>
+                                  {t('press.readIn')} {l.toUpperCase()} ↗
+                                </a>
+                              ) : (
+                                <a class="small-pill" href={localePath(l, `news/${r.slug}`)} hreflang={l}>
+                                  {t('press.readIn')} {l.toUpperCase()} →
+                                </a>
+                              ),
+                            )}
                           </div>
                         </article>
                       ))}
@@ -514,9 +518,6 @@ const logoHeight = (p: any) => {
     font-size: 52px;
     font-weight: 400;
     line-height: 1.05;
-  }
-  .top-section .kit {
-    margin-top: 24px;
   }
   /* The leads (request #19): under a heading, or at the top of a view that
      has none. Wired by Kamindu on 2026-09-22; Lilanga to restyle. */

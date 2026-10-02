@@ -5,6 +5,7 @@ import PortableText from '../../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
 import { hasString, useTranslations, localePath, formatDate } from '../../../lib/i18n';
 import { getNewsItem, getNewsSlugs } from '../../../lib/queries';
+import { hubTabPath } from '../../../lib/hubs';
 import { styleAttrs } from '../../../lib/textStyle';
 
 /**
@@ -27,6 +28,17 @@ const categoryLabel = (category: string) => {
 
 const item = await getNewsItem(lang, slug);
 if (!item) return Astro.rewrite('/404');
+
+/**
+ * A press release is reached from press & media → press, never from the news
+ * list, so "Back to News" led somewhere the reader had not been (Félicie,
+ * 2026-10-01). Its back link returns to the press tab instead.
+ */
+const isRelease = item.category === 'press-release';
+const backHref = isRelease
+  ? localePath(lang, hubTabPath('press-media', 'press', lang))
+  : localePath(lang, 'news');
+const backLabel = isRelease ? t('tabs.pressMedia') : t('nav.news');
 
 const articleSchema = {
   '@context': 'https://schema.org',
@@ -61,6 +73,18 @@ const articleSchema = {
     {item.excerpt && <p class="intro-large" {...styleAttrs(item.excerptStyle)}>{item.excerpt}</p>}
 
     {
+      /* A release attached as a file (Félicie, 2026-10-01): the page offers
+         the PDF itself, which matters most when the body was never typed. */
+      item.pdf && (
+        <p class="pdf-row">
+          <a class="pill" href={item.pdf} target="_blank" rel="noopener noreferrer">
+            {t('news.openPdf')} ↗
+          </a>
+        </p>
+      )
+    }
+
+    {
       item.cover?.asset && (
         <SanityImage
           image={item.cover}
@@ -82,7 +106,7 @@ const articleSchema = {
     }
 
     <p class="back-row">
-      <a class="text-link" href={localePath(lang, 'news')}>← {t('common.backTo')} {t('nav.news')}</a>
+      <a class="text-link" href={backHref}>← {t('common.backTo')} {backLabel}</a>
     </p>
   </article>
   </div>
@@ -116,6 +140,9 @@ const articleSchema = {
   .cover {
     margin: 0 0 2.5rem;
     width: 100%;
+  }
+  .pdf-row {
+    margin: 0 0 2.5rem;
   }
   .post-body :global(p) {
     margin: 0 0 1.5rem;
