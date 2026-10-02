@@ -102,16 +102,23 @@ const galleries = editions
 const hasPhotos = galleries.length > 0;
 
 /**
- * The frame's rhythm, twelve pictures long: a full-width picture, two
- * halves, three thirds, two halves, a full-width one, three thirds. The
- * gallery repeats it for as many pictures as the edition has.
+ * "Arrange the photos automatically by format" (Félicie, 2026-10-01). The
+ * frame's fixed twelve-step rhythm opened on a full-width hero - her "first
+ * photo takes the whole page" - and its fixed slot heights cropped whatever
+ * did not fit. Now the pictures group themselves by orientation: the
+ * horizontals stand together two a row, the verticals three a row, each at
+ * its own height, so nothing is cropped and nothing towers.
  */
-const RHYTHM = ['hero', 'half', 'half', 'third', 'third', 'third', 'half', 'half', 'hero', 'third', 'third', 'third'];
 const IMAGE_SIZES: Record<string, { widths: number[]; sizes: string }> = {
-  hero: { widths: [900, 1400, 2000], sizes: '100vw' },
   half: { widths: [700, 1000, 1400], sizes: '(max-width: 800px) 100vw, 50vw' },
   third: { widths: [480, 720, 960], sizes: '(max-width: 800px) 100vw, 33vw' },
 };
+/** A square counts as a horizontal; an image without dimensions too. */
+const shapeOf = (img: any) => ((img.dimensions?.aspectRatio ?? 1.5) >= 1 ? 'half' : 'third');
+const byOrientation = (images: any[]) => [
+  ...images.filter((img) => shapeOf(img) === 'half'),
+  ...images.filter((img) => shapeOf(img) === 'third'),
+];
 /** "Hall A © Geoffrey Fritsch, 2026", as the frame writes each caption. */
 const captionOf = (img: any, year: number) => {
   const who = [img.caption, img.workTitle].filter(Boolean).join(', ');
@@ -417,8 +424,8 @@ const logoHeight = (p: any) => {
                 {g.film.title && <figcaption>{g.film.title}</figcaption>}
               </figure>
             )}
-            {g.images.map((img: any, n: number) => {
-              const shape = RHYTHM[n % RHYTHM.length];
+            {byOrientation(g.images).map((img: any) => {
+              const shape = shapeOf(img);
               const caption = captionOf(img, g.year);
               return (
                 <figure class={shape}>
@@ -868,21 +875,17 @@ const logoHeight = (p: any) => {
   .photo-grid .third {
     grid-column: span 2;
   }
+  /* Each picture keeps its own shape: the grouping by orientation replaced
+     the fixed slot heights that cropped whatever did not fit (Félicie,
+     2026-10-01). Same-orientation neighbours level themselves. */
   .photo-grid :global(img) {
-    object-fit: cover;
     width: 100%;
-    height: 100%;
-    max-height: 925px;
-  }
-  .photo-grid .hero :global(img) {
-    aspect-ratio: 1380 / 925;
     height: auto;
   }
-  .photo-grid .half :global(img) {
-    height: 448px;
-  }
-  .photo-grid .third :global(img) {
-    height: 655px;
+  /* The film keeps the full row and the frame's cinema shape. */
+  .photo-grid .hero :global(img) {
+    aspect-ratio: 1380 / 925;
+    object-fit: cover;
   }
   /* The film is the first picture of the grid, not a block of its own. */
   .photo-grid .film :global(.video) {
@@ -930,12 +933,6 @@ const logoHeight = (p: any) => {
     .logo-grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
-    .photo-grid .third :global(img) {
-      height: 45vw;
-    }
-    .photo-grid .half :global(img) {
-      height: 32vw;
-    }
   }
   @media (width<=800px) {
     .top-section h2,
@@ -969,10 +966,6 @@ const logoHeight = (p: any) => {
     .photo-grid .half,
     .photo-grid .third {
       grid-column: 1;
-    }
-    .photo-grid .half :global(img),
-    .photo-grid .third :global(img) {
-      height: auto;
     }
     .logo-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
