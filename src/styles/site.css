@@ -10,6 +10,26 @@
  * component's scoped block; this is only for what genuinely crosses them.
  */
 
+/* ------------------------------------------------- no sideways scroll
+ *
+ * "The right edge is cut off and pinching out reveals the rest" - Léonie,
+ * 2026-10-02, on guest-of-honour, press & media and programme. Two causes
+ * found, one of them transient: `.motion-image[data-image-pending]` scales
+ * an image 1.015 until it loads (design.css), and a scaled full-bleed
+ * image widens the scrollable area ~3px past the screen - long enough on
+ * a slow connection for iOS to size the viewport to it. This clips that
+ * class of overshoot at the root. `clip`, not `hidden`: clip makes no
+ * scroll container, so sticky positioning and scroll anchoring keep
+ * working. Mobile only - phones are where the bleed formulas assume no
+ * classic scrollbar, and a desktop overflow should stay visible to us.
+ */
+@media (width <= 700px) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+}
+
 /* ------------------------------------------------------- full-bleed photos
  *
  * "On the smartphone, every time there's a photo, there's always a margin on
