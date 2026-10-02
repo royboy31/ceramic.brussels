@@ -282,13 +282,17 @@ main .slideshow figure:hover > a > img {
   /* The VIP picture (every image-text row's, in fact) bleeds from its own
      component since 2026-10-02 - ImageText.astro - where the cascade is
      certain and the pull is the gutter, not 50vw. */
-  /* press & media: stories, clippings, photos & videos */
+  /* press & media: stories, clippings. The photo grid is NOT here: its
+     figures are grid items, whose percentage margins are zero while the
+     track is sized, so the 1fr track grew to the item's 100vw and every
+     photo sat a gutter right of the screen with a sideways scroll
+     (Kamindu, 2026-10-02). The grid bleeds as a whole in PressMedia.astro
+     instead. */
   main .press-media .story-card > img,
   main .press-media .story-card > figure,
   main .press-media .collector-list article > img,
   main .press-media .collector-list article > figure,
-  main .press-media .press-card > .cover,
-  main .press-media .photo-grid > * {
+  main .press-media .press-card > .cover {
     width: 100vw;
     max-width: none;
     margin-inline: calc(50% - 50vw);

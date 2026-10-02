@@ -972,6 +972,21 @@ const logoHeight = (p: any) => {
       gap: 24px;
     }
   }
+  /* The photos to both screen edges on a phone (Léonie, 2026-10-01): the
+     grid bleeds as one piece - its inset is .press-media's own gutter, a
+     constant here - and the figures simply fill the track. The per-item
+     100vw formula of site.css's sweep cannot work on a grid item (its
+     percentage margins are zero while the track is sized, which grew the
+     track to 100vw and left a sideways scroll - found 2026-10-02). The
+     captions come back in to the text column. */
+  @media (width <= 700px) {
+    .photo-grid {
+      margin-inline: calc(-1 * var(--gutter));
+    }
+    .photo-grid figcaption {
+      padding-inline: var(--gutter);
+    }
+  }
 </style>
 
 <script>
