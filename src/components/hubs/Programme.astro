@@ -370,8 +370,12 @@ const altPaths = hubAltPaths('programme', tab);
 
 <style>
   /* From the design's programme pages (html pages/programme/*). */
-  /* `cover` is passed to SanityImage, whose <img> carries no scope attribute. */
-  :global(.cover) {
+  /* `cover` is passed to SanityImage, whose <img> carries no scope attribute.
+     Anchored to this hub's own .content-wrap: the hub route bundles every
+     hub's CSS, so a bare :global(.cover) reached the press clipping cards
+     on press & media → press and pushed each photo 40px below its frame
+     (Félicie's screenshot, 2026-10-01). */
+  .content-wrap > :global(.cover) {
     width: 100%;
     margin: 40px 0;
   }

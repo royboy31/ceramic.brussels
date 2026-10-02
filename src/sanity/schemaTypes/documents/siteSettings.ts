@@ -176,7 +176,10 @@ export const siteSettings = defineType({
       group: 'press',
       of: [defineArrayMember({ type: 'pressContact' })],
     }),
-    defineField({ name: 'pressKitUrl', title: 'Press kit URL', type: 'url', group: 'press' }),
+    // No page reads this since 2026-10-02: the "Press kit" pill on press &
+    // media → press duplicated the press reviews list (same clippings book).
+    // Hidden rather than removed so the value stays.
+    defineField({ name: 'pressKitUrl', title: 'Press kit URL', type: 'url', group: 'press', hidden: true }),
     defineField({ name: 'pressEmail', title: 'Press email', type: 'string', group: 'press' }),
     // The pill beside the collectors' voices lead on press & media → stories
     // ("discover Ceramics Now ↗", request #21): the series lives elsewhere.
