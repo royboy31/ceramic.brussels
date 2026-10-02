@@ -73,15 +73,29 @@ async function settings(lang: LocaleId): Promise<Settings> {
   return result ?? {};
 }
 
-/** The same address twice in a day is a double click, not a second subscriber. */
+/**
+ * The same address twice in a day is a double click, not a second
+ * subscriber. Checking and marking are separate on purpose: marking before
+ * the write locked an address out for a day when the write FAILED - found
+ * live on 2026-10-02, when the misuploaded secret 502ed a signup and the
+ * retry got "already on the list" for a row that was never written.
+ */
+async function repeatKey(email: string): Promise<Request> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email.toLowerCase()));
+  return new Request(`https://newsletter.invalid/${[...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('')}`);
+}
+
 async function isRepeat(email: string): Promise<boolean> {
   if (typeof caches === 'undefined') return false;
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email.toLowerCase()));
-  const key = new Request(`https://newsletter.invalid/${[...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('')}`);
   const cache = await caches.open('newsletter');
-  if (await cache.match(key)) return true;
-  await cache.put(key, new Response('1', { headers: { 'cache-control': `max-age=${DUPLICATE_WINDOW_SECONDS}` } }));
-  return false;
+  return !!(await cache.match(await repeatKey(email)));
+}
+
+/** Remember the address once its row is written, and only then. */
+async function markSeen(email: string): Promise<void> {
+  if (typeof caches === 'undefined') return;
+  const cache = await caches.open('newsletter');
+  await cache.put(await repeatKey(email), new Response('1', { headers: { 'cache-control': `max-age=${DUPLICATE_WINDOW_SECONDS}` } }));
 }
 
 /**
@@ -158,6 +172,7 @@ export const POST: APIRoute = async ({ request }) => {
     console.error('[newsletter] sheet write failed:', error instanceof Error ? error.message : error);
     return answer(502, 'delivery', 'Could not save', `Your subscription could not be saved. Please write to ${cfg.contactEmail || 'the team'}.`);
   }
+  await markSeen(email);
 
   // The row is saved; the confirmation is best-effort.
   const apiKey = brevoKey();
