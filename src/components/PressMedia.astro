@@ -972,6 +972,22 @@ const logoHeight = (p: any) => {
       gap: 24px;
     }
   }
+
+  /* The photos to both screen edges on a phone (Léonie, 2026-10-02). Here
+     rather than in site.css's full-bleed list: the scoped `figure` margin
+     above outranks that pull, so the figures stayed on the gutter and the
+     page scrolled 10px past the screen. */
+  @media (width <= 700px) {
+    .photo-grid figure {
+      width: 100vw;
+      max-width: none;
+      margin-inline: calc(50% - 50vw);
+    }
+    /* The caption belongs to the text column, not the picture's new edges. */
+    .photo-grid figcaption {
+      padding-inline: var(--gutter);
+    }
+  }
 </style>
 
 <script>
