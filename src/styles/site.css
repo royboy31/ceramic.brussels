@@ -224,6 +224,17 @@ main .slideshow figure:hover > a > img {
   scale: 1;
   filter: none;
 }
+/* The clip that zoom needed, kept after the zoom, cut the caption: it ends
+ * flush with the picture's right edge, and the last glyph of an italic work
+ * title leans past its box - "Moon Jar" and "Drop 2" lost their tails, and
+ * "sometimes the captions don't appear correctly (for example Han
+ * collection)" (Léonie, 2026-10-02). design.css clips any figure with a bare
+ * img child so the hover zoom stays inside; a slide no longer zooms, so
+ * there is nothing to contain - the track clips the sideways scroll itself.
+ */
+main .slideshow figure:has(> img) {
+  overflow: visible;
+}
 
 /* The menu's × on a phone: no focus ring after a tap.
  *
