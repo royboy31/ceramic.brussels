@@ -1,5 +1,5 @@
 ---
-import { useTranslations } from '../lib/i18n';
+import { localePath, useTranslations } from '../lib/i18n';
 import type { LocaleId } from '../lib/locales';
 
 /**
@@ -30,8 +30,9 @@ interface Props {
   newsletterUrl?: string;
 }
 
-const { lang, items } = Astro.props;
+const { lang, items, siteName = 'ceramic brussels' } = Astro.props;
 const t = useTranslations(lang);
+const home = localePath(lang);
 /* External menu entries open a new tab, as every other external link on the
    site does (LinkPill, the exhibitors band) - asked for the catalogue
    (Tiphaine, 2026-10-02). */
@@ -46,9 +47,12 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
           On desktop the header's own wordmark is never covered - the panel
           is narrow enough - so the slot stays the empty spacer it was, and
           `space-between` keeps the × at the right either way. */}
-      <span class="menu-mark" aria-hidden="true">
+      {/* A link home, as the header's own wordmark is ("could you make the
+          ceramic brussels logo clickable, linking back to the homepage?" -
+          Léonie, 2026-10-03). */}
+      <a class="menu-mark" href={home} aria-label={`${siteName} homepage`}>
         <img src="/assets/wordmark.svg" alt="" width="144" height="75" />
-      </span>
+      </a>
       <button data-menu-close aria-label={t('nav.closeMenu')}><span aria-hidden="true">×</span></button>
     </div>
     <nav aria-label={t('nav.menu')} class="menu-stack">

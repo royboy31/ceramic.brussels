@@ -264,7 +264,10 @@ main .slideshow figure:has(> img) {
  */
 @media (max-width: 700px) {
   .site-date {
-    width: 108px;
+    /* 108px until 2026-10-03: "reduce the 20-24 jan dates size a tiny bit
+       so that they don't compete with the ceramic brussels logo" (Léonie) -
+       every unscrolled step in design.css came down ~9% with it. */
+    width: 98px;
   }
 }
 

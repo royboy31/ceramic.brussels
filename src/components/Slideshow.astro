@@ -245,12 +245,27 @@ const widthFit = fit === 'width';
      laid over the top of the slideshow, puts them at the picture's bottom
      edge without knowing how tall the caption below it is. */
   /* fit="width": the picture's bottom edge is a different height on every
-     slide, so there is no line to hang the dots on - they go under the
-     caption, centred, where they belong to the whole row. */
+     slide. Static-under-the-caption was wrong twice over - the track is as
+     tall as the TALLEST slide, so under a short photo the dots hung far
+     below it, off the picture and ink-on-white ("not on the photo anymore,
+     but below, and sometimes way too further down, & it also has changed
+     colour" - Léonie and Gilles, 2026-10-03). The script measures the slide
+     in view (`--media-h`, updated on every swipe), so once it has, the dots
+     ride the current picture's bottom edge in white, exactly as the aspect
+     slideshows draw them. Static stays only as the no-JavaScript fallback. */
   .fit-width .dots {
     position: static;
     aspect-ratio: auto;
     margin-top: 14px;
+  }
+  .fit-width[data-measured] .dots {
+    position: absolute;
+    aspect-ratio: auto;
+    height: var(--media-h);
+    margin-top: 0;
+  }
+  .fit-width[data-measured] .dots a {
+    background: var(--color-white);
   }
   /* With a measured height the box is the picture's, whatever shape the
      picture turns out to be. `--aspect` is the first image's ratio as Sanity
