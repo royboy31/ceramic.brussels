@@ -117,10 +117,21 @@ const hasImage = !!section.image?.asset;
   .vip .copy {
     grid-column: span 8;
   }
+  /* The VIP tabs render these inside `.content-wrap`, which already pays
+     the gutter; `page-grid` paying it again indented every row by a second
+     45px against the section titles above ("aligned fully left" - Félicie,
+     2026-10-01). */
+  .image-text.vip {
+    padding-inline: 0;
+  }
   /* The about tab's "programme overview" rows: the heading is the design's
      bold capitals over the paragraph - "DISCOVERY TOURS", "VIP LOUNGE". */
   .vip-rows .panel-title {
     margin-bottom: 10px;
+    /* Not ruled: the frame's row label is bold capitals alone, and the
+       2px rule design.css gives every panel title read as an underline
+       here (Félicie, 2026-10-01). */
+    border-bottom: 0;
     font-size: 24px;
     font-weight: 600;
     line-height: 1.25;

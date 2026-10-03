@@ -184,6 +184,9 @@ const NEWS_CARD = `{
   _id, publishedAt, category,
   // A press release's edition, for the "sort by" pills on press & media (#22).
   "edition": edition->year,
+  // A release attached as a file: the press tab's language pills open the
+  // PDF itself where one exists (Félicie, 2026-10-01).
+  "pdfs": { "en": pdfs.en.asset->url, "fr": pdfs.fr.asset->url, "nl": pdfs.nl.asset->url },
   "slug": slug.current,
   ${styled('title')},
   ${styled('excerpt')},
@@ -270,6 +273,13 @@ const SECTIONS = `sections[hidden != true]{
       "successSlugs": applications.successPage->{ "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current },
       "contact": coalesce(applications.recipient, contactEmail)
     }
+  },
+  _type == "newsletterSection" => {
+    ${styled('heading')},
+    ${styled('note')},
+    // Only the address the failure state names; the confirmation email is
+    // the route's side (src/server/routes/newsletter.ts).
+    "contact": *[_type == "siteSettings"][0].contactEmail
   },
   _type == "peopleSection" => {
     group,
@@ -964,6 +974,7 @@ export function getNewsItem(lang: LocaleId, slug: string) {
   return run<any>(
     `*[_type == "newsItem" && slug.current == $slug][0]{
       _id, _type, publishedAt, category,
+      "pdf": pdfs[$lang].asset->url,
       "slug": slug.current,
       ${styled('title')},
       ${styled('excerpt')},

@@ -1,0 +1,260 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { useTranslations } from '../../lib/i18n';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * The newsletter signup block (launch call, 2026-10-01): one email field
+ * and the site's black pill, in the application form's dress. The address
+ * goes to `/api/newsletter/` on the Worker (src/server/routes/newsletter.ts),
+ * which writes a row into the team's Google Sheet through their Apps Script
+ * and sends the confirmation through Brevo. Until the NEWSLETTER_SHEETS_URL
+ * secret exists the route answers 503 and the failure state names the
+ * contact address - never a false "subscribed".
+ *
+ * Progressive like ApplicationForm.astro: without JavaScript the form still
+ * posts and gets a plain page back.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { lang, section } = Astro.props;
+const t = useTranslations(lang);
+const contact = section.contact || 'info@ceramic.brussels';
+const id = section.anchor || 'newsletter';
+---
+
+<section class="newsletter" id={id}>
+  {
+    section.heading && (
+      <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+        {section.heading}
+      </h2>
+    )
+  }
+  {
+    section.note && (
+      <p class="note body-24" {...styleAttrs(section.noteStyle)}>
+        {section.note}
+      </p>
+    )
+  }
+
+  <form
+    class="form"
+    method="post"
+    action="/api/newsletter/"
+    novalidate
+    data-newsletter
+    data-success={t('newsletter.success')}
+    data-error={t('newsletter.error', { email: contact })}
+    data-duplicate={t('newsletter.duplicate')}
+    data-required={t('apply.required')}
+    data-invalid-email={t('apply.invalidEmail')}
+    data-sending={t('apply.sending')}
+  >
+    <input type="hidden" name="lang" value={lang} />
+    {/* Bots fill every field; people never see this one. */}
+    <div class="hp" aria-hidden="true">
+      <label>
+        website <input type="text" name="website" tabindex="-1" autocomplete="off" />
+      </label>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label class="body-24" for={`${id}-email`}>
+          {t('apply.email')} <span class="req" aria-hidden="true">*</span>
+        </label>
+        <input id={`${id}-email`} name="email" type="email" required autocomplete="email" maxlength="254" inputmode="email" />
+        <p class="hint" data-hint aria-live="polite" />
+      </div>
+      <button type="submit" class="pill dark" data-submit>
+        {t('newsletter.submit')} <span class="link-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+    <p class="status body-24" data-status role="status" aria-live="polite" />
+  </form>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('form[data-newsletter]').forEach((form) => {
+    const button = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const input = form.querySelector<HTMLInputElement>('input[type="email"]')!;
+    const hint = form.querySelector<HTMLElement>('[data-hint]')!;
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const idle = button.innerHTML;
+    const say = (text: string, kind: 'ok' | 'bad' | '') => {
+      status.textContent = text;
+      status.dataset.kind = kind;
+    };
+
+    const check = (): boolean => {
+      let problem = '';
+      if (!input.value.trim()) problem = form.dataset.required!;
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim())) problem = form.dataset.invalidEmail!;
+      input.setAttribute('aria-invalid', problem ? 'true' : 'false');
+      hint.textContent = problem;
+      return !problem;
+    };
+    input.addEventListener('blur', check);
+    input.addEventListener('input', () => {
+      if (input.getAttribute('aria-invalid') === 'true') check();
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!check()) {
+        input.focus();
+        return;
+      }
+      button.disabled = true;
+      button.textContent = form.dataset.sending!;
+      say('', '');
+
+      const data: Record<string, string> = {};
+      new FormData(form).forEach((value, key) => (data[key] = String(value)));
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const body = await response.json().catch(() => ({}));
+        if (response.ok) {
+          form.classList.add('sent');
+          input.disabled = true;
+          say(form.dataset.success!, 'ok');
+          return;
+        }
+        if (body?.error === 'duplicate') say(form.dataset.duplicate!, 'bad');
+        else say(form.dataset.error!, 'bad');
+      } catch {
+        say(form.dataset.error!, 'bad');
+      }
+      button.disabled = false;
+      button.innerHTML = idle;
+    });
+  });
+</script>
+
+<style>
+  /* The application form's dress, one field wide. */
+  .newsletter {
+    max-width: 880px;
+    margin: 56px auto 80px;
+    padding-top: 40px;
+    border-top: 2px solid;
+  }
+  .note {
+    margin: 0 0 40px;
+    max-width: 62ch;
+  }
+  .hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 20px 40px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 28ch;
+  }
+  label {
+    letter-spacing: -0.025em;
+    text-transform: lowercase;
+  }
+  .req {
+    color: var(--ink-3, #6b6b6b);
+  }
+  input[type='email'] {
+    width: 100%;
+    margin-top: 6px;
+    padding: 8px 0 10px;
+    border: 0;
+    border-bottom: 1px solid currentColor;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    transition:
+      border-color 0.18s,
+      box-shadow 0.18s;
+  }
+  input[type='email']:focus-visible {
+    outline: none;
+    box-shadow: inset 0 -2px 0 currentColor;
+  }
+  input[aria-invalid='true'] {
+    border-bottom-color: #c8102e;
+    box-shadow: inset 0 -2px 0 #c8102e;
+  }
+  .hint {
+    margin: 8px 0 0;
+    min-height: 1.4em;
+    font-size: 18px;
+    line-height: 1.3;
+    color: #c8102e;
+  }
+  /* The pill sits on the field's baseline; the hint below keeps its row. */
+  .row .pill {
+    margin-bottom: calc(1.4em + 8px);
+  }
+  .pill.dark {
+    cursor: pointer;
+    background: #050505;
+    border-color: #050505;
+    color: #fff;
+    text-transform: lowercase;
+  }
+  .pill:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+  .status {
+    margin: 12px 0 0;
+    max-width: 62ch;
+  }
+  .status:empty {
+    display: none;
+  }
+  .status[data-kind='ok'] {
+    display: inline-block;
+    padding: 6px 14px;
+    background: var(--color-acid);
+    color: #050505;
+  }
+  .status[data-kind='bad'] {
+    color: #c8102e;
+  }
+  .sent .field {
+    opacity: 0.45;
+  }
+  @media (width<=700px) {
+    .newsletter {
+      margin: 28px 0 50px;
+    }
+    input[type='email'] {
+      font-size: 18px;
+    }
+    .hint {
+      font-size: 15px;
+    }
+    .row .pill {
+      margin-bottom: 0;
+    }
+  }
+</style>
