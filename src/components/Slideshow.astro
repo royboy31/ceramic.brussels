@@ -263,6 +263,10 @@ const widthFit = fit === 'width';
     aspect-ratio: auto;
     height: var(--media-h);
     margin-top: 0;
+    /* The base rule's 16px off the picture's edge: `.no-aspect .dots`
+       zeroes the bottom padding for the static fallback, which left these
+       dots flush with the photo's bottom (2026-10-03). */
+    padding: 0 0 16px;
   }
   .fit-width[data-measured] .dots a {
     background: var(--color-white);
