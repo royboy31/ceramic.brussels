@@ -925,7 +925,9 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
       --header-h: 64px;
     }
     body[data-scrolled] .site-date {
-      width: 110px;
+      /* With the unscrolled phone mark at 98px (Léonie, 2026-10-03), 110
+         would make the dates GROW on scroll; same size keeps them still. */
+      width: 98px;
     }
     body[data-scrolled] .site-wordmark {
       width: 62px;

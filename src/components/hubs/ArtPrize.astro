@@ -696,13 +696,28 @@ const captionOf = (img: any, fallback?: string) => ({
       font-size: 28px;
     }
   }
+  @media (max-width: 800px) {
+    /* PersonCard's breakpoint and sizes: "the size of each jury member's
+       title is too big, it should be the same as on the advisory board
+       page" (Léonie, 2026-10-03 - the role stayed 24px on a phone while
+       the advisory board's drops to 17). */
+    .people .role {
+      font-size: 17px;
+      line-height: 1.35;
+    }
+  }
   @media (max-width: 700px) {
     .hero,
     .gallery {
       grid-template-columns: minmax(0, 1fr);
     }
     .hero > p {
-      font-size: 34px;
+      /* The size the other tabs' .intro-large takes at this width - "the
+         art prize intro text on the about page should be the same size as
+         the intro text on the awards page" (Léonie, 2026-10-03; it was 34,
+         the awards intro 28). */
+      font-size: 28px;
+      line-height: 1.25;
     }
     .prize-about :global(.cs-body .rich-text > p.lead) {
       font-size: 28px;
