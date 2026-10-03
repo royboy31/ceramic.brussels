@@ -187,18 +187,21 @@ const hasImage = !!section.image?.asset;
   }
 
   /* The picture to both screen edges on a phone (Léonie, 2026-10-01).
-     Here rather than in site.css so the cascade is certain, and by 50vw
-     rather than the gutter: the row renders at different depths - alone,
-     or inside a content-wrap that adds a second gutter - so no constant
-     knows the inset, while the stack fix above leaves the grid area
-     centred on the viewport, which is all this formula asks. (A classic
-     desktop scrollbar still leans it a few px, as everywhere the sweep
-     uses it; phones have none.) */
+     Here rather than in site.css so the cascade is certain. The row
+     renders at different depths - alone, or inside a content-wrap that
+     adds a second gutter - so no constant knows the inset; the stack fix
+     above leaves the grid area centred on the viewport, and the shot is
+     recentred positionally: `left` with a transform, because WebKit does
+     not honour a percentage MARGIN pull on a grid item (2026-10-03, the
+     programme/visitors-info lesson), while positional offsets play no
+     part in track sizing. */
   @media (max-width: 700px) {
     .shot {
       width: 100vw;
       max-width: none;
-      margin-inline: calc(50% - 50vw);
+      position: relative;
+      left: 50%;
+      transform: translateX(-50%);
     }
   }
 </style>

@@ -273,12 +273,15 @@ const AUTOPLAY_MS = 4500;
      here rather than in site.css because this component's scoped selectors
      outrank a global one. */
   @media (max-width: 700px) {
+    /* By the gutter, not 50% - 50vw: these are grid items, where WebKit
+       does not honour a percentage pull though the simulator does
+       (2026-10-03, the programme/visitors-info lesson). */
     .split.feature > :global(img),
     .split.feature > :global(.video-frame),
     .split.feature > .feature-empty {
-      width: 100vw;
+      width: calc(100% + 2 * var(--gutter));
       max-width: none;
-      margin-inline: calc(50% - 50vw);
+      margin-inline: calc(-1 * var(--gutter));
     }
   }
 </style>
