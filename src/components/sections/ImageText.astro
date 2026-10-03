@@ -194,7 +194,7 @@ const hasImage = !!section.image?.asset;
      centred on the viewport, which is all this formula asks. (A classic
      desktop scrollbar still leans it a few px, as everywhere the sweep
      uses it; phones have none.) */
-  @media (width <= 700px) {
+  @media (max-width: 700px) {
     .shot {
       width: 100vw;
       max-width: none;

@@ -165,7 +165,7 @@ const AUTOPLAY_MS = 4500;
   .split.feature--guest {
     margin-top: 82px;
   }
-  @media (width<=900px) {
+  @media (max-width: 900px) {
     .split {
       gap: 20px;
     }
@@ -173,7 +173,7 @@ const AUTOPLAY_MS = 4500;
       font-size: 32px;
     }
   }
-  @media (width<=640px) {
+  @media (max-width: 640px) {
     .split {
       flex-direction: column;
       margin: 15px var(--gutter) 40px;
@@ -272,7 +272,7 @@ const AUTOPLAY_MS = 4500;
      homepage's Hoxton spotlight and the Bureau Rouge film). The rule lives
      here rather than in site.css because this component's scoped selectors
      outrank a global one. */
-  @media (width <= 700px) {
+  @media (max-width: 700px) {
     .split.feature > :global(img),
     .split.feature > :global(.video-frame),
     .split.feature > .feature-empty {

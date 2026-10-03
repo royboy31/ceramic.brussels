@@ -90,14 +90,14 @@ const band = variant === 'home' && style !== 'pill' && links.length > 0 ? resolv
     line-height: 1;
     display: flex;
   }
-  @media (width>=701px) and (width<=1439px) {
+  @media (min-width: 701px) and (max-width: 1439px) {
     .home-image-cta {
       height: 10.5556vw;
       margin-top: 3.75vw;
       font-size: 4.1667vw;
     }
   }
-  @media (width<=700px) {
+  @media (max-width: 700px) {
     .home-image-cta {
       text-align: center;
       height: 100px;

@@ -654,7 +654,7 @@ const captionOf = (img: any, fallback?: string) => ({
      wide on a small window (Roy's follow-up of 2026-09-28: "jury text too
      narrow"); below 1200px each member gets the full row, the text kept to
      a readable measure. */
-  @media (width<=1200px) {
+  @media (max-width: 1200px) {
     .people {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -677,7 +677,7 @@ const captionOf = (img: any, fallback?: string) => ({
   .people .jury-bio :global(.rich-text p + p) {
     margin-top: 24px;
   }
-  @media (width<=800px) {
+  @media (max-width: 800px) {
     .people article > div {
       grid-template-columns: 120px 1fr;
       gap: 18px;
@@ -696,7 +696,7 @@ const captionOf = (img: any, fallback?: string) => ({
       font-size: 28px;
     }
   }
-  @media (width<=700px) {
+  @media (max-width: 700px) {
     .hero,
     .gallery {
       grid-template-columns: minmax(0, 1fr);
@@ -727,7 +727,7 @@ const captionOf = (img: any, fallback?: string) => ({
       line-height: 1.3;
     }
   }
-  @media (width<=900px) {
+  @media (max-width: 900px) {
     .laureates article,
     .laureates article.reverse {
       grid-template-columns: 34% 1fr;
@@ -750,7 +750,7 @@ const captionOf = (img: any, fallback?: string) => ({
       columns: 1;
     }
   }
-  @media (width<=640px) {
+  @media (max-width: 640px) {
     .laureates article,
     .laureates article.reverse {
       flex-direction: column;
@@ -779,7 +779,7 @@ const captionOf = (img: any, fallback?: string) => ({
      narrow desktop window. The hero and the gallery sit exactly one gutter
      in at this width, so the gutter is the exact pull, whatever the
      scrollbar. */
-  @media (width <= 700px) {
+  @media (max-width: 700px) {
     /* `.prize-about` on the gallery too: the shorter selector lost to the
        site.css sweep's and the pictures kept the 50vw pull. */
     .hero figure,

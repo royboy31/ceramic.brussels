@@ -209,7 +209,7 @@ const external = (link: ResolvedLink | null) =>
     color: #fff;
     background: #000;
   }
-  @media (width<=900px) {
+  @media (max-width: 900px) {
     .hero {
       gap: 20px;
     }
@@ -217,7 +217,7 @@ const external = (link: ResolvedLink | null) =>
       gap: 12px;
     }
   }
-  @media (width<=640px) {
+  @media (max-width: 640px) {
     .hero {
       flex-direction: column;
       margin: 30px var(--gutter) 40px;

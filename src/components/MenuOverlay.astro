@@ -364,7 +364,7 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
   .menu-row:first-child.expanded .menu-sheet {
     translate: 0;
   }
-  @media (width<=640px) {
+  @media (max-width: 640px) {
     .menu-row {
       --strip: 52px;
     }
@@ -389,7 +389,7 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
     height: auto;
     display: block;
   }
-  @media (width <= 900px) {
+  @media (max-width: 900px) {
     .menu-mark {
       display: block;
     }

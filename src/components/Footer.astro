@@ -100,7 +100,7 @@ const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
     gap: 0.25em;
     white-space: nowrap;
   }
-  @media (width<=700px) {
+  @media (max-width: 700px) {
     /* Three groups do not sit on one line on a phone: the pill takes the
        first row, the credit and the links follow, all left-aligned. */
     .site-footer.has-back {
