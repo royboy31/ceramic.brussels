@@ -412,6 +412,9 @@ const logoHeight = (p: any) => {
           <div class="photo-grid" data-filter-group="photos" data-value={g.year} hidden={i > 0}>
             {g.film && (
               <figure class="hero film">
+                {/* quiet: no acid title over the film ("delete the yellow
+                    title that gets in front of the video" - Tiphaine,
+                    2026-10-02); the figcaption below carries it. */}
                 <VideoEmbed
                   url={g.film.url}
                   poster={
@@ -420,6 +423,7 @@ const logoHeight = (p: any) => {
                       : '/assets/video-still.webp'
                   }
                   label={g.film.title ?? String(g.year)}
+                  quiet
                 />
                 {g.film.title && <figcaption>{g.film.title}</figcaption>}
               </figure>

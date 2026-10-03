@@ -253,10 +253,17 @@ export const HUBS: Record<string, Hub> = {
     title: 'tabs.pressMedia',
     pageTabs: true,
     tabs: [
-      { slug: 'stories', segment: { fr: 'recits', nl: 'verhalen' }, label: 'press.stories' },
+      /* Press first since 2026-10-03: the client is unpublishing stories for
+         the launch, and the first tab can never drop (it is the hub root, and
+         `tabHasPage` always keeps it). Last instead of first, the stories tab
+         disappears pill-and-route the moment its page is unpublished, and
+         comes back the same way. /press-media/press's old URLs fall back to
+         the hub root - which now IS press - via PAGE_TAB_HUBS in
+         scripts/legacy-redirects.mjs. */
       { slug: 'press', segment: { fr: 'presse', nl: 'pers' }, label: 'tabs.press' },
       { slug: 'photos-videos', segment: { nl: 'fotos-videos' }, label: 'press.photosVideos' },
       { slug: 'media-partners', segment: { fr: 'partenaires-medias', nl: 'mediapartners' }, label: 'press.mediaPartners' },
+      { slug: 'stories', segment: { fr: 'recits', nl: 'verhalen' }, label: 'press.stories' },
     ],
   },
 };
