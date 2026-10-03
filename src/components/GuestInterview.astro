@@ -277,12 +277,12 @@ const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--row
     font-size: var(--body-size);
     line-height: var(--body-lh);
   }
-  @media (width<=900px) {
+  @media (max-width: 900px) {
     .row {
       gap: 30px 16px;
     }
   }
-  @media (width<=700px) {
+  @media (max-width: 700px) {
     .pull {
       font-size: 27px;
       line-height: 1.15;

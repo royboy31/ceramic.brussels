@@ -90,7 +90,7 @@ const t = useTranslations(lang);
     background: #050505;
   }
 
-  @media (width<=700px) {
+  @media (max-width: 700px) {
     /* Three cells of "2025, SECOND EDITION" do not fit a phone in a row;
        they stack, and the rules between them become rules under them. */
     .year-band {
@@ -140,7 +140,7 @@ const t = useTranslations(lang);
    * which is hard-coded in design.css and untouched. Desktop only: below
    * 900px design.css steps the gutter to 16 and then 10, and those stand.
    */
-  @media (width>900px) {
+  @media (min-width: 900.02px) {
     body:has(.year-band) {
       --gutter: 30px;
     }
@@ -170,7 +170,7 @@ const t = useTranslations(lang);
   }
   /* Below about 1180 the row cannot hold the title and seven pills; they
      wrap under it rather than climbing over it. */
-  @media (width<=1180px) {
+  @media (max-width: 1180px) {
     .section-head.ed-band {
       display: block;
     }

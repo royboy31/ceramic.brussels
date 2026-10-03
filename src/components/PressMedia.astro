@@ -681,7 +681,7 @@ const logoHeight = (p: any) => {
     gap: 32px;
     display: grid;
   }
-  @media (width<=1100px) {
+  @media (max-width: 1100px) {
     .press-cards {
       grid-template-columns: repeat(2, 1fr);
     }
@@ -933,12 +933,12 @@ const logoHeight = (p: any) => {
     line-height: 1;
   }
 
-  @media (width<=1100px) {
+  @media (max-width: 1100px) {
     .logo-grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
-  @media (width<=800px) {
+  @media (max-width: 800px) {
     .top-section h2,
     .section-intro h2 {
       font-size: 38px;
@@ -983,7 +983,7 @@ const logoHeight = (p: any) => {
      percentage margins are zero while the track is sized, which grew the
      track to 100vw and left a sideways scroll - found 2026-10-02). The
      captions come back in to the text column. */
-  @media (width <= 700px) {
+  @media (max-width: 700px) {
     .photo-grid {
       margin-inline: calc(-1 * var(--gutter));
     }

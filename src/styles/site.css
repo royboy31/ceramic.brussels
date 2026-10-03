@@ -23,7 +23,7 @@
  * working. Mobile only - phones are where the bleed formulas assume no
  * classic scrollbar, and a desktop overflow should stay visible to us.
  */
-@media (width <= 700px) {
+@media (max-width: 700px) {
   html,
   body {
     overflow-x: clip;
@@ -42,7 +42,7 @@
  * Jury and advisory board portraits are `PersonCard` → `SanityImage`, which
  * never opts in, so they keep their inset without needing an exception.
  */
-@media (width <= 700px) {
+@media (max-width: 700px) {
   .bleed-m {
     margin-inline: calc(var(--gutter) * -1);
     width: calc(100% + var(--gutter) * 2);
@@ -69,7 +69,7 @@
  * those, sizing lives here, once, with `!important` confined to this mobile
  * query. `Slideshow.astro` keeps only its spacing.
  */
-@media (width <= 700px) {
+@media (max-width: 700px) {
   main figcaption {
     font-size: 12px !important;
     line-height: 1.3;
@@ -127,7 +127,7 @@ main :is(strong, b) {
   width: min(41vw, 600px);
   max-width: calc(100vw - 24px);
 }
-@media (width <= 900px) {
+@media (max-width: 900px) {
   /* The whole screen, not design.css's 16px-short strip: "could the menu
      always take up the whole width of the page when looking at it on a
      smartphone? (see screenshot where there currently is a weird margin on
@@ -182,7 +182,7 @@ main :is(strong, b) {
  * Letting the label take the two lines its `min-width` already allows for is
  * enough, and hides nothing.
  */
-@media (width <= 1200px) {
+@media (max-width: 1200px) {
   .site-partner > span {
     white-space: normal;
     /* `white-space` alone changes nothing: the span is a flex item sizing to
@@ -262,7 +262,7 @@ main .slideshow figure:has(> img) {
  * 2026-10-01). design.css steps it 252 → 210 → 150 → 132; this is the step
  * below, and the wordmark is 78px at that width.
  */
-@media (width <= 700px) {
+@media (max-width: 700px) {
   .site-date {
     width: 108px;
   }
@@ -285,7 +285,7 @@ main .slideshow figure:has(> img) {
  * (`.people`, `PersonCard`) are the exception the client named, and partner
  * logos keep their slot.
  */
-@media (width <= 700px) {
+@media (max-width: 700px) {
   .u-bleed-m,
   /* homepage: the partner spotlight's picture and the film */
   main .feature > img,

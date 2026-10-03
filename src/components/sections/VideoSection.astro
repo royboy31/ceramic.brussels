@@ -148,7 +148,7 @@ const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) :
     line-height: 1;
     display: inline-flex;
   }
-  @media (width<=900px) {
+  @media (max-width: 900px) {
     .split {
       gap: 20px;
     }
@@ -156,7 +156,7 @@ const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) :
       font-size: 32px;
     }
   }
-  @media (width<=640px) {
+  @media (max-width: 640px) {
     .split {
       flex-direction: column;
       margin: 15px var(--gutter) 40px;

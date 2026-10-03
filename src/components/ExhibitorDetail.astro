@@ -342,7 +342,7 @@ const bioRight = bio.slice(split);
   .copy :global(p + p) {
     margin-top: 32px;
   }
-  @media (width<=900px) {
+  @media (max-width: 900px) {
     /* minmax(0, …): a bare 1fr grows to its widest child's min-content,
        which pushed a phone page 200px wider than the screen. */
     .detail {
@@ -352,7 +352,7 @@ const bioRight = bio.slice(split);
       margin-top: 20px;
     }
   }
-  @media (width<=640px) {
+  @media (max-width: 640px) {
     .detail {
       padding: 30px var(--gutter) 70px;
     }

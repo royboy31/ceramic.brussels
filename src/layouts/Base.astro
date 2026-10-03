@@ -781,7 +781,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     --body-lh: 30px;
     --body-ls: -0.03em;
   }
-  @media (width<=700px) {
+  @media (max-width: 700px) {
     :root {
       --body-size: 18px;
       --body-lh: 1.3;
@@ -798,7 +798,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     --intro-lh: 38px;
     --intro-ls: -0.03em;
   }
-  @media (width<=700px) {
+  @media (max-width: 700px) {
     :root {
       --intro-size: 24px;
       --intro-lh: 1.3;
@@ -815,7 +815,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     --name-lh: 1.03;
     --name-ls: -0.045em;
   }
-  @media (width<=900px) {
+  @media (max-width: 900px) {
     :root {
       --name-size: 32px;
     }
@@ -838,7 +838,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     --pill-lh: 1.3;
     --pill-ls: -0.035em;
   }
-  @media (width<=700px) {
+  @media (max-width: 700px) {
     :root {
       --pill-size: 18px;
       --pill-pad: 2px 14px;
@@ -854,7 +854,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     /* Measured, not the 159px rule in design.css: a later rule overrides it. */
     --header-h: 149px;
   }
-  @media (width<=640px) {
+  @media (max-width: 640px) {
     :root {
       --header-h: 96px;
     }
@@ -920,7 +920,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   body[data-scrolled] .alphabet {
     margin-top: 12px;
   }
-  @media (width<=640px) {
+  @media (max-width: 640px) {
     body[data-scrolled] {
       --header-h: 64px;
     }

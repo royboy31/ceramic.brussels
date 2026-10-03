@@ -404,7 +404,7 @@ for (const letter of letters) {
     margin: 40px var(--gutter) 0;
   }
   /* One column: the two stacks dissolve and each letter's `order` keeps A–Z. */
-  @media (width<=900px) {
+  @media (max-width: 900px) {
     .artist-list {
       grid-template-columns: 1fr;
       display: flex;
@@ -418,7 +418,7 @@ for (const letter of letters) {
   }
   /* The capital clear of its rule, and the names a little further in
      (client feedback, 2026-09-25: the letter ran into the line). */
-  @media (width<=640px) {
+  @media (max-width: 640px) {
     .artist-list section {
       grid-template-columns: 76px 1fr;
     }

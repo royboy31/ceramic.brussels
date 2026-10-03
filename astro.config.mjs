@@ -131,6 +131,24 @@ export default defineConfig({
   ],
   vite: {
     plugins: [fixSanityWindowsAlias()],
+    build: {
+      // The CSS minifier "modernises" (max-width: 700px) into (width<=700px),
+      // range syntax that iOS Safari only parses from 16.4 - on an older
+      // iPhone every such media query is silently dropped and the phone
+      // renders the desktop layout with no mobile sweep at all (Gilles and
+      // Kamindu's phones, 2026-10-03: "web simulator is fine, actual phone
+      // doesn't"). Pinning the CSS targets keeps the classic syntax in the
+      // shipped files; the sources use classic syntax too, so `astro dev`
+      // and preview builds match. cssTarget covers an esbuild minifier,
+      // css.lightningcss.targets the Lightning CSS one Astro actually uses.
+      cssTarget: ['chrome90', 'firefox90', 'safari15'],
+    },
+    css: {
+      lightningcss: {
+        // major << 16 | minor << 8, Lightning CSS's version encoding.
+        targets: { chrome: 90 << 16, firefox: 90 << 16, safari: 15 << 16, ios_saf: 15 << 16 },
+      },
+    },
     optimizeDeps: {
       // The Studio lazy-loads its panes. Without this, Vite only discovers those
       // chunks when you first click into one, re-optimises, and changes the dep

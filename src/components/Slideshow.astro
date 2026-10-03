@@ -334,7 +334,7 @@ const widthFit = fit === 'width';
   /* Tighter to the picture on a phone. The caption and mark *sizes* are set
      once in src/styles/site.css - parents reach into this component's
      figcaption with higher specificity, so they cannot live here. */
-  @media (width <= 700px) {
+  @media (max-width: 700px) {
     figcaption {
       margin-top: 6px;
     }

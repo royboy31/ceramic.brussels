@@ -141,7 +141,7 @@ const count = (value: string) => {
     font-size: clamp(1.25rem, 2.7vw, 2.5rem);
     letter-spacing: -0.05em;
   }
-  @media (width<=900px) {
+  @media (max-width: 900px) {
     .stats__grid > .stat-cell {
       padding-inline: 18px;
     }
@@ -152,7 +152,7 @@ const count = (value: string) => {
       font-size: 22px;
     }
   }
-  @media (width<=640px) {
+  @media (max-width: 640px) {
     .home-stats h2 {
       font-size: 42px;
     }
