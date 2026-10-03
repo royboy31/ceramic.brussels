@@ -258,7 +258,10 @@ const widthFit = fit === 'width';
     aspect-ratio: auto;
     margin-top: 14px;
   }
-  .fit-width[data-measured] .dots {
+  /* `.no-aspect`, not `.fit-width`: fit="width" always carries no-aspect,
+     and a slideshow with no aspect at all (the partners hotel's) had the
+     same adrift ink dots - Gilles' second screenshot, 2026-10-03. */
+  .no-aspect[data-measured] .dots {
     position: absolute;
     aspect-ratio: auto;
     height: var(--media-h);
@@ -268,7 +271,7 @@ const widthFit = fit === 'width';
        dots flush with the photo's bottom (2026-10-03). */
     padding: 0 0 16px;
   }
-  .fit-width[data-measured] .dots a {
+  .no-aspect[data-measured] .dots a {
     background: var(--color-white);
   }
   /* With a measured height the box is the picture's, whatever shape the
