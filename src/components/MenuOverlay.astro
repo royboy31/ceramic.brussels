@@ -32,7 +32,10 @@ interface Props {
 
 const { lang, items } = Astro.props;
 const t = useTranslations(lang);
-const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer' } : {});
+/* External menu entries open a new tab, as every other external link on the
+   site does (LinkPill, the exhibitors band) - asked for the catalogue
+   (Tiphaine, 2026-10-02). */
+const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', target: '_blank' } : {});
 ---
 
 <dialog id="site-menu" data-menu aria-label={t('nav.menu')}>

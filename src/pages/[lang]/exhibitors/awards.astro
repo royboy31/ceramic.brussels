@@ -82,15 +82,15 @@ const awards = names
   .sort((a: any, b: any) => (a.order ?? 100) - (b.order ?? 100));
 
 /**
- * The award's own slideshow (`images`, request #5), else its single image,
- * else its winning gallery's pictures, else the previous laureate's.
+ * The award's own slideshow (`images`, request #5), else its single image.
+ * Nothing else: it used to fall back to the winning gallery's pictures, but
+ * an award with no picture should show none ("see best group show" -
+ * Tiphaine, 2026-10-02).
  */
 const imagesOf = (a: any): any[] => {
   const slides = (a.images ?? []).filter((img: any) => img?.asset);
   if (slides.length) return slides;
-  if (a.image?.asset) return [a.image];
-  const own = (a.gallery?.images ?? []).filter((img: any) => img?.asset);
-  return own.length ? own : (a.previous?.gallery?.images ?? []).filter((img: any) => img?.asset);
+  return a.image?.asset ? [a.image] : [];
 };
 ---
 

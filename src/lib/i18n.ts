@@ -76,7 +76,9 @@ const STRINGS = {
     'tabs.mainPartner': 'main partner',
     'tabs.institutions': 'institutions',
     'tabs.hotel': 'hotel',
-    'tabs.eventPartners': 'event partners',
+    // "partners", not "event partners", on the pill (Tiphaine, 2026-10-02;
+    // the menu entry was renamed by the client in the Studio the same day).
+    'tabs.eventPartners': 'partners',
     'tabs.media': 'media',
     'tabs.practicalInfo': 'practical info',
     'tabs.foodDrinks': 'food & drinks',
@@ -379,7 +381,7 @@ const STRINGS = {
     'tabs.mainPartner': 'partenaire principal',
     'tabs.institutions': 'institutions',
     'tabs.hotel': 'hôtel',
-    'tabs.eventPartners': 'partenaires événement',
+    'tabs.eventPartners': 'partenaires',
     'tabs.media': 'médias',
     'tabs.practicalInfo': 'infos pratiques',
     'tabs.foodDrinks': 'food & drinks',
@@ -681,7 +683,7 @@ const STRINGS = {
     'tabs.mainPartner': 'hoofdpartner',
     'tabs.institutions': 'instellingen',
     'tabs.hotel': 'hotel',
-    'tabs.eventPartners': 'eventpartners',
+    'tabs.eventPartners': 'partners',
     'tabs.media': 'media',
     'tabs.practicalInfo': 'praktische info',
     'tabs.foodDrinks': 'food & drinks',
