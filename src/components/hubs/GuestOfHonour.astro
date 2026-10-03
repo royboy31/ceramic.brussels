@@ -345,7 +345,11 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
        idea; on a phone it left each picture 323px wide inside a 390px
        screen. The strip still snaps, so it reads as a slideshow. */
     .gallery {
-      margin-inline: calc(50% - 50vw);
+      /* The gutter, not 50% - 50vw: the strip is a grid item, where WebKit
+         does not honour a percentage pull (the simulator did - 2026-10-03,
+         the programme/visitors-info lesson). Full columns = the content
+         width, one gutter in. */
+      margin-inline: calc(-1 * var(--gutter));
     }
     .gallery figure {
       flex: 0 0 100vw;

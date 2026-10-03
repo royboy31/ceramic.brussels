@@ -291,25 +291,20 @@ main .slideshow figure:has(> img) {
   main .feature > img,
   main .feature > figure,
   main .feature .video-frame,
-  /* guest of honour: the portrait, the gallery strip, the interview */
+  /* guest of honour: the portrait and the gallery strip (the interview's
+     pictures are grid children - see the gutter rule below) */
   main .guest-page > .portrait-figure,
   main .guest-page .gallery-track > figure,
-  main .guest-interview .cell > img,
-  main .guest-interview .cell > figure,
   /* art prize: the about hero and gallery, the award pictures */
   main .prize-about .hero > figure,
   main .prize-about .gallery > img,
   main .prize-about .gallery figure,
   main .awards-page .award-grid > article > img,
   main .awards-page .award-grid > article > figure,
-  /* programme and about: the picture grids */
-  main .gallery .grid li > figure,
   main .about > .strip,
-  /* visitors info */
+  /* visitors info: the three-photo row (its own pictures are grid
+     children - the gutter rule below) */
   main .practical .photo-row,
-  main .practical .visit-photo,
-  main .practical .venue-map,
-  main .practical .access img,
   /* The VIP picture (every image-text row's, in fact) bleeds from its own
      component since 2026-10-02 - ImageText.astro - where the cascade is
      certain and the pull is the gutter, not 50vw. */
@@ -327,6 +322,25 @@ main .slideshow figure:has(> img) {
     width: 100vw;
     max-width: none;
     margin-inline: calc(50% - 50vw);
+  }
+  /* The pictures that live inside a grid bleed by the gutter, not by the
+     50vw formula. Chrome lets a grid cell's child pull out with percentage
+     margins; real WebKit does not - on an iPhone these kept the gutter
+     inset while the simulator showed them full-bleed (Kamindu and Gilles,
+     2026-10-03: programme, La Cambre, visitors info). The gutter is the
+     exact inset at this width - the art prize gallery bleeds this way and
+     was the one page the phone showed correctly. The programme/about
+     galleries are `ul.grid` cells; the visitors-info photo, map and access
+     picture become grid items through `display: contents`. */
+  main .guest-interview .cell > img,
+  main .guest-interview .cell > figure,
+  main .gallery .grid li > figure,
+  main .practical .visit-photo,
+  main .practical .venue-map,
+  main .practical .access img {
+    width: calc(100% + 2 * var(--gutter));
+    max-width: none;
+    margin-inline: calc(-1 * var(--gutter));
   }
   /* A caption belongs to the text column, not to the picture's new edges.
      The guest portrait's credit sat flush with the screen edge without its
