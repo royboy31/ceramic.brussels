@@ -614,16 +614,19 @@ const captionOf = (img: any, fallback?: string) => ({
   .people section :global(p) {
     margin-top: 16px;
   }
-  /* The role as the advisory board sets it (PersonCard): capitals, Bold
-     not Black (client feedback, 2026-09-23). */
+  /* The role as the advisory board sets it: capitals, Bold not Black
+     (client feedback, 2026-09-23), and at the advisory page's own
+     20px/26 - not PersonCard's base 24 - since "it should be the same as
+     on the advisory board page" (Léonie, 2026-10-03; the desktop gap was
+     spotted by Kamindu the same day). */
   .people .role {
     margin-top: 0;
     white-space: pre-line;
     text-transform: uppercase;
     letter-spacing: 0;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 600;
-    line-height: 30px;
+    line-height: 26px;
   }
   /* The nationality after the name, as the artists list sets the country;
      Bold since 2026-09-24 (client feedback). */
