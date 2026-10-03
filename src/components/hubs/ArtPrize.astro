@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import HubNav from '../../components/HubNav.astro';
+import LinkPill from '../../components/LinkPill.astro';
 import Sections from '../../components/Sections.astro';
 import PageSections from '../../components/PageSections.astro';
 import SanityImage from '../../components/SanityImage.astro';
@@ -47,6 +48,15 @@ const regionName = (code?: string) => {
 const allAwards = tab === 'awards' ? (await getAwards(lang)).filter((a: any) => a.family === 'art-prize' && a.year) : [];
 const awardYear = allAwards[0]?.year;
 const awards = allAwards.filter((a: any) => a.year === awardYear);
+
+/* The partner logos' slot height, as Partners.astro sizes its cards: the
+   wider the file, the shorter the slot, so unlike files cover comparable
+   area. */
+const logoHeight = (image: any, max = 78, base = 92) => {
+  const ar = image?.dimensions?.aspectRatio;
+  if (!ar || !Number.isFinite(ar) || ar <= 0) return max;
+  return Math.round(Math.min(max, Math.max(38, base / Math.pow(ar, 0.45))));
+};
 
 const jury = tab === 'jury' ? await getPeople(lang, 'jury') : [];
 
@@ -297,6 +307,21 @@ const captionOf = (img: any, fallback?: string) => ({
                     <PortableText value={a.description} fieldStyle={a.descriptionStyle} />
                   </div>
                 )}
+                {/* The granting partner's website and logo under the
+                    description, the partner cards' own foot ("can you
+                    please add a logo and website redirection link box
+                    under every award description" - Gilles, 2026-10-03).
+                    Both come from the award's "Granted by" partner. */}
+                {(a.partner?.url || a.partner?.logo?.asset) && (
+                  <div class="award-foot">
+                    {a.partner?.url ? <LinkPill lang={lang} href={a.partner.url} label={t('common.website')} external /> : <span />}
+                    {a.partner?.logo?.asset && (
+                      <span class="logo-slot" style={`--logo-h:${logoHeight(a.partner.logo)}px`}>
+                        <SanityImage image={a.partner.logo} widths={[250, 500]} sizes="250px" class="logo" placeholder={false} />
+                      </span>
+                    )}
+                  </div>
+                )}
                 {a.image?.asset && <SanityImage image={a.image} sizes="(max-width: 700px) 100vw, 50vw" widths={[500, 800, 1200]} />}
               </article>
             ))}
@@ -528,6 +553,31 @@ const captionOf = (img: any, fallback?: string) => ({
 
   .awards-page .intro-large {
     margin-bottom: 0;
+  }
+  /* The partner cards' foot (Partners.astro): website pill left, the
+     granting partner's logo fitted right. */
+  .award-foot {
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-top: 24px;
+    display: flex;
+  }
+  .logo-slot {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 250px;
+    margin-left: auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .logo-slot :global(.logo) {
+    object-fit: contain;
+    object-position: right center;
+    width: 100%;
+    min-width: 0;
+    height: var(--logo-h, 78px);
   }
   .award-grid {
     columns: 2;

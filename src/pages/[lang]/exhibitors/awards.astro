@@ -1,6 +1,8 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import ExhibitorHead from '../../../components/ExhibitorHead.astro';
+import LinkPill from '../../../components/LinkPill.astro';
+import SanityImage from '../../../components/SanityImage.astro';
 import Slideshow from '../../../components/Slideshow.astro';
 import PortableText from '../../../components/PortableText.astro';
 import PageSections from '../../../components/PageSections.astro';
@@ -92,6 +94,13 @@ const imagesOf = (a: any): any[] => {
   if (slides.length) return slides;
   return a.image?.asset ? [a.image] : [];
 };
+
+/* The partner logos' slot height, as Partners.astro sizes its cards. */
+const logoHeight = (image: any, max = 78, base = 92) => {
+  const ar = image?.dimensions?.aspectRatio;
+  if (!ar || !Number.isFinite(ar) || ar <= 0) return max;
+  return Math.round(Math.min(max, Math.max(38, base / Math.pow(ar, 0.45))));
+};
 ---
 
 <Base
@@ -135,6 +144,20 @@ const imagesOf = (a: any): any[] => {
                 <h2 {...styleAttrs(a.nameStyle)}>{a.name}</h2>
                 {a.isNew && <p class="label">{t('exhibitors.newThisYear')}</p>}
                 {a.description && <PortableText value={a.description} fieldStyle={a.descriptionStyle} />}
+                {/* The granting partner's website and logo under the
+                    description, as on the art prize awards and the partner
+                    cards ("add a logo and website redirection link box
+                    under every award description" - Gilles, 2026-10-03). */}
+                {(a.partner?.url || a.partner?.logo?.asset) && (
+                  <div class="award-foot">
+                    {a.partner?.url ? <LinkPill lang={lang} href={a.partner.url} label={t('common.website')} external /> : <span />}
+                    {a.partner?.logo?.asset && (
+                      <span class="logo-slot" style={`--logo-h:${logoHeight(a.partner.logo)}px`}>
+                        <SanityImage image={a.partner.logo} widths={[250, 500]} sizes="250px" class="logo" placeholder={false} />
+                      </span>
+                    )}
+                  </div>
+                )}
                 {gallery && (
                   <div class="laureate">
                     <p class="label">{t('exhibitors.previousLaureate', { year: prev.year })}</p>
@@ -262,5 +285,30 @@ const imagesOf = (a: any): any[] => {
     .award-copy {
       padding-top: 16px;
     }
+  }
+  /* The partner cards' foot (Partners.astro): website pill left, the
+     granting partner's logo fitted right. */
+  .award-foot {
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-top: 24px;
+    display: flex;
+  }
+  .logo-slot {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 250px;
+    margin-left: auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .logo-slot :global(.logo) {
+    object-fit: contain;
+    object-position: right center;
+    width: 100%;
+    min-width: 0;
+    height: var(--logo-h, 78px);
   }
 </style>
