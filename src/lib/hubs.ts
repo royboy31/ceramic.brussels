@@ -194,10 +194,13 @@ export const HUBS: Record<string, Hub> = {
     segment: { fr: 'partenaires' },
     title: 'nav.partners',
     tabs: [
+      /* Gilles' order of 2026-10-03: main partner, partners, institutions,
+         hotel. Main partner stays first - the first tab is the hub root,
+         so moving it would move /partners itself. */
       { slug: 'main', segment: { fr: 'partenaire-principal', nl: 'hoofdpartner' }, label: 'tabs.mainPartner' },
+      { slug: 'event', segment: { fr: 'partenaires-evenement', nl: 'eventpartners' }, label: 'tabs.eventPartners' },
       { slug: 'institutions', segment: { nl: 'instellingen' }, label: 'tabs.institutions' },
       { slug: 'hotel', label: 'tabs.hotel' },
-      { slug: 'event', segment: { fr: 'partenaires-evenement', nl: 'eventpartners' }, label: 'tabs.eventPartners' },
       // The designer's annotated frame of 2026-09-17 crosses this pill out
       // (backend request #10): media partners are listed on the about hub's
       // press & media tab instead. Kept built, without a pill, because the
