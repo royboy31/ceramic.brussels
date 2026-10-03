@@ -367,9 +367,14 @@ const captionOf = (img: any, fallback?: string) => ({
 </Base>
 
 <style>
-  /* From the design's art prize pages. */
+  /* From the design's art prize pages. minmax(0, …) because a bare fr
+     track's automatic minimum is the content's own width: the cover
+     slideshow's min-content is its picture (735px), which grew the track
+     past the screen in any narrow window - the page shifted sideways and
+     the picture ignored the layout (Gilles, 2026-10-03; Tiphaine's white
+     line on the right, 2026-10-02). */
   .hero {
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: 40px;
     display: grid;
   }
@@ -421,7 +426,7 @@ const captionOf = (img: any, fallback?: string) => ({
     margin-top: 55px;
   }
   .gallery {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 40px;
     margin-top: 55px;
     display: grid;
@@ -694,7 +699,7 @@ const captionOf = (img: any, fallback?: string) => ({
   @media (width<=700px) {
     .hero,
     .gallery {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
     .hero > p {
       font-size: 34px;

@@ -328,9 +328,12 @@ main .slideshow figure:has(> img) {
     max-width: none;
     margin-inline: calc(50% - 50vw);
   }
-  /* A caption belongs to the text column, not to the picture's new edges. */
+  /* A caption belongs to the text column, not to the picture's new edges.
+     The guest portrait's credit sat flush with the screen edge without its
+     row here (Gilles, 2026-10-03). */
   .u-bleed-m > figcaption,
   main .feature > figure > figcaption,
+  main .guest-page > .portrait-figure > figcaption,
   main .guest-page .gallery-track > figure > figcaption,
   main .prize-about .hero > figure > figcaption,
   main .gallery .grid li > figure > figcaption {
