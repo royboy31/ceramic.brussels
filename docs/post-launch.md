@@ -168,3 +168,74 @@ Nothing in the code blocks the switch. What follows must happen *in order*.
       and can go.
 - [ ] Run `npm run dates` after anything that writes to the dataset. It is
       deliberately not part of the build.
+
+## The Buzz QA list, checked against the live site — 2026-10-05 ~21:30
+
+A post-launch audit arrived from Opus-mini (Buzz). Every claim in it that could
+be checked from here was checked against `https://www.ceramic.brussels`,
+production `31ba16c`, the dataset and the zone settings. Most of it holds. The
+figures below replace the ones in the original where they differ.
+
+**Confirmed, worth doing:**
+
+- **Cloudflare Email Address Obfuscation is `on`** (the zone setting itself, in
+  `legacy-export/dns/dns-records-after-cutover.json`). Every `mailto:` on the
+  live pages is rewritten: the team page has **0** `mailto:` and 6
+  `/cdn-cgi/l/email-protection` links, the applications page 1, the FAQ 5. The
+  addresses are public anyway, so turning it off costs nothing and fixes no-JS,
+  crawlers and link previews.
+- **No default share image.** `defaultSeo.ogImage` is empty, and a sweep of all
+  210 live pages finds **exactly 54 with no `og:image`** — the number in the
+  report is right to the page. One 1200×630 upload in Site settings fixes all
+  54, because `Base.astro` already falls back to it. **Best return of anything
+  on this list.**
+- **`seo.title.fr` is empty on `main-exhibitors`, `demo-page-programme-talks`,
+  `-la-cambre` and `-vip`**, so the French pages show the English SEO title.
+  Four one-field writes.
+- **`/storage/*` answers 404** — the old site's upload links (floor-plan PDFs
+  mailed out and linked from partner sites) have no rule. Worth one.
+- **No `fetchpriority` anywhere** in the codebase, and `/assets/video-still.webp`
+  is **215,370 bytes** at a fixed 1,600px, used by `VideoSection.astro:27` and
+  `PressMedia.astro:423` — both cited lines are exact.
+- **`og:locale` is the bare locale** (`en`/`fr`/`nl`) where Facebook wants
+  `en_GB`/`fr_BE`/`nl_BE`, and there is no `og:locale:alternate`.
+- **No site-wide `Organization` JSON-LD.** The homepage has `ExhibitionEvent`,
+  exhibitor pages `Organization`, news `Article` — nothing in `Base.astro`.
+- **Security headers:** `Permissions-Policy` absent, `X-Frame-Options` absent on
+  `/*` (only `/studio` sends `DENY`), HSTS disabled in the zone
+  (`security_header.strict_transport_security.enabled: false`). And the report
+  is right that **`/api/*` gets none of `_headers`** — the Worker's responses
+  carry neither `nosniff` nor `Referrer-Policy`.
+- **42 exhibitor websites stored as `http://`** (32 are `https://`), and
+  `exhibitor-2026-chaxartxrtm` holds `http://chaxart.com`,
+  `exhibitor-2026-barrera-baldan-galeria` `https://www.berlingaleria.es`,
+  `exhibitor-2026-a-iynedjian-fine-art-aifa` an Instagram field reading
+  "AIFA Gallery" rather than a handle.
+- **`newsletterUrl` is still Mailchimp** while the internal form works — the
+  decision in R1 is real and worth making before anything is mailed.
+
+**Corrected:**
+
+| Claim | What is actually there |
+| :-- | :-- |
+| 178 of 210 pages use the default description | **87** of 210 use the site default; **0** pages have no description at all. (217 *documents* lack `seo.description.en`, which is likely where 178 came from — most of them never build a page.) The priority 16 fields are still worth writing. |
+| `/fonts/*` and `/assets/*` return `max-age=0, must-revalidate` | Both return `public, max-age=14400, must-revalidate` — Cloudflare's 4-hour browser TTL, not "uncached". Lengthening it is still reasonable; the premise is not. |
+| Two **news titles** over 65 characters | No *stored* title exceeds 65. Four *rendered* `<title>`s do: the Marion Verboom news in EN (81) and FR (77), and the Enric Mestre tribute in both (79). The point stands, the field does not. |
+| 78 old `/nl/…` URLs | The map holds **190** `/nl/` rules of 585. |
+| The opus-mini token "was deleted or revoked → add a token" | A token labelled **`opus-mini` exists**, created **2026-10-05 14:03:31Z**, roles developer + editor + contributor. Nothing is missing in Sanity; the value on the mini is stale or truncated. Since a token value is shown only once, rotating it is the fix — but the diagnosis to act on is "the mini has the wrong string", not "the project lost its token". |
+| 250/250 old URLs verified | True as far as it goes; the cutover check measured **562/562** rules (250 is the Wayback + old-sitemap subset of them). |
+
+**Found while checking, not in the report:** the Enric Mestre news title is
+stored with literal `>>` and `<<` around it, which renders as escaped entities
+in the page title. Editor cleanup.
+
+**Could not be verified from here** (no access, or it needs a real send): the
+Search Console state, the WAF/rate-limiting rules, every test in section 2,
+Lighthouse's numbers (LCP 3.0 s, 361 KiB avoidable, a11y 100), and "GA4 consent
+works end to end" — the tracker only fires on the real host, so nothing has
+confirmed a hit in `G-XVTPYEC66H` yet.
+
+**The token listing also showed `studio-site-accounts` (role: editor) still
+alive** — the leftover from the removed D1 site-accounts system, still bound to
+production as `SANITY_STUDIO_TOKEN`. Delete the Pages secret and revoke the
+token.
