@@ -1,0 +1,63 @@
+# How the live domain answered before the cutover — 2026-10-05, 17:26Z
+# Captured with curl against the Twill site still on www.ceramic.brussels.
+
+## https://ceramic.brussels/
+  final: 200  after 1 hop(s) -> https://ceramic.brussels/en
+  server: https / 2606:4700:3031::6815:d21
+  Content-Type: text/html; charset=UTF-8
+  Server: cloudflare
+  location: https://ceramic.brussels/en
+  cf-cache-status: DYNAMIC
+
+## https://www.ceramic.brussels/
+  final: 200  after 1 hop(s) -> https://www.ceramic.brussels/en
+  server: https / 2606:4700:3031::6815:d21
+  Content-Type: text/html; charset=UTF-8
+  Server: cloudflare
+  location: https://www.ceramic.brussels/en
+  cf-cache-status: DYNAMIC
+
+## http://www.ceramic.brussels/
+  final: 200  after 1 hop(s) -> http://www.ceramic.brussels/en
+  server: http / 2606:4700:3031::6815:d21
+  Content-Type: text/html; charset=UTF-8
+  server: cloudflare
+  cf-cache-status: DYNAMIC
+  location: http://www.ceramic.brussels/en
+
+## https://www.ceramic.brussels/en
+  final: 200  after 0 hop(s) -> https://www.ceramic.brussels/en
+  server: https / 2606:4700:3031::6815:d21
+  Content-Type: text/html; charset=UTF-8
+  Server: cloudflare
+  cf-cache-status: DYNAMIC
+
+## https://www.ceramic.brussels/fr/la-foire
+  final: 404  after 0 hop(s) -> https://www.ceramic.brussels/fr/la-foire
+  server: https / 2606:4700:3031::6815:d21
+  Content-Type: text/html; charset=UTF-8
+  Server: cloudflare
+  cf-cache-status: DYNAMIC
+
+## https://www.ceramic.brussels/admintool
+  final: 200  after 1 hop(s) -> https://www.ceramic.brussels/admintool/login
+  server: https / 2606:4700:3031::6815:d21
+  Content-Type: text/html; charset=UTF-8
+  Server: cloudflare
+  location: https://www.ceramic.brussels/admintool/login
+  cf-cache-status: DYNAMIC
+
+## https://www.ceramic.brussels/sitemap.xml
+  final: 200  after 0 hop(s) -> https://www.ceramic.brussels/sitemap.xml
+  server: https / 2606:4700:3031::6815:d21
+  Content-Type: application/xml
+  Server: cloudflare
+  cf-cache-status: DYNAMIC
+
+## https://www.ceramic.brussels/robots.txt
+  final: 200  after 0 hop(s) -> https://www.ceramic.brussels/robots.txt
+  server: https / 2606:4700:3031::6815:d21
+  Content-Type: text/plain
+  Server: cloudflare
+  cf-cache-status: MISS
+

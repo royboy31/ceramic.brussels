@@ -1,0 +1,375 @@
+{
+  "zone": "ceramic.brussels",
+  "takenAt": "2026-10-05T17:23:36.537Z",
+  "note": "Public DNS answers only. Proxied records answer with Cloudflare addresses; the origin and the proxy flag live in the dashboard zone export.",
+  "records": [
+    {
+      "name": "ceramic.brussels",
+      "asked": "A",
+      "type": "A",
+      "ttl": 300,
+      "data": "172.67.132.125"
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "A",
+      "type": "A",
+      "ttl": 300,
+      "data": "104.21.13.33"
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "AAAA",
+      "type": "AAAA",
+      "ttl": 300,
+      "data": "2606:4700:3031::6815:d21"
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "AAAA",
+      "type": "AAAA",
+      "ttl": 300,
+      "data": "2606:4700:3036::ac43:847d"
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "MX",
+      "type": "MX",
+      "ttl": 300,
+      "data": "0 ceramic-brussels.mail.protection.outlook.com."
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "MX",
+      "type": "MX",
+      "ttl": 300,
+      "data": "10 mx.mailprotect.be."
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "MX",
+      "type": "MX",
+      "ttl": 300,
+      "data": "50 mx.backup.mailprotect.be."
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "TXT",
+      "type": "TXT",
+      "ttl": 300,
+      "data": "\"MS=ms75504785\""
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "TXT",
+      "type": "TXT",
+      "ttl": 300,
+      "data": "\"brevo-code:759690ab30f7663a74e98158246367c8\""
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "TXT",
+      "type": "TXT",
+      "ttl": 300,
+      "data": "\"google-site-verification=q0T3lX2Qi530w3FL6suKrjKNrBvqAVffsrJnb8ExUac\""
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "TXT",
+      "type": "TXT",
+      "ttl": 300,
+      "data": "\"v=spf1 include:spf.protection.outlook.com -all\""
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "NS",
+      "type": "NS",
+      "ttl": 86400,
+      "data": "gabriella.ns.cloudflare.com."
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "NS",
+      "type": "NS",
+      "ttl": 86400,
+      "data": "jobs.ns.cloudflare.com."
+    },
+    {
+      "name": "ceramic.brussels",
+      "asked": "SOA",
+      "type": "SOA",
+      "ttl": 1800,
+      "data": "gabriella.ns.cloudflare.com. dns.cloudflare.com. 2416335260 10000 2400 604800 1800"
+    },
+    {
+      "name": "www.ceramic.brussels",
+      "asked": "A",
+      "type": "A",
+      "ttl": 300,
+      "data": "104.21.13.33"
+    },
+    {
+      "name": "www.ceramic.brussels",
+      "asked": "A",
+      "type": "A",
+      "ttl": 300,
+      "data": "172.67.132.125"
+    },
+    {
+      "name": "www.ceramic.brussels",
+      "asked": "AAAA",
+      "type": "AAAA",
+      "ttl": 300,
+      "data": "2606:4700:3031::6815:d21"
+    },
+    {
+      "name": "www.ceramic.brussels",
+      "asked": "AAAA",
+      "type": "AAAA",
+      "ttl": 300,
+      "data": "2606:4700:3036::ac43:847d"
+    },
+    {
+      "name": "ftp.ceramic.brussels",
+      "asked": "A",
+      "type": "A",
+      "ttl": 300,
+      "data": "104.21.13.33"
+    },
+    {
+      "name": "ftp.ceramic.brussels",
+      "asked": "A",
+      "type": "A",
+      "ttl": 300,
+      "data": "172.67.132.125"
+    },
+    {
+      "name": "ftp.ceramic.brussels",
+      "asked": "AAAA",
+      "type": "AAAA",
+      "ttl": 300,
+      "data": "2606:4700:3036::ac43:847d"
+    },
+    {
+      "name": "ftp.ceramic.brussels",
+      "asked": "AAAA",
+      "type": "AAAA",
+      "ttl": 300,
+      "data": "2606:4700:3031::6815:d21"
+    },
+    {
+      "name": "autodiscover.ceramic.brussels",
+      "asked": "A",
+      "type": "A",
+      "ttl": 300,
+      "data": "172.67.132.125"
+    },
+    {
+      "name": "autodiscover.ceramic.brussels",
+      "asked": "A",
+      "type": "A",
+      "ttl": 300,
+      "data": "104.21.13.33"
+    },
+    {
+      "name": "autodiscover.ceramic.brussels",
+      "asked": "AAAA",
+      "type": "AAAA",
+      "ttl": 300,
+      "data": "2606:4700:3031::6815:d21"
+    },
+    {
+      "name": "autodiscover.ceramic.brussels",
+      "asked": "AAAA",
+      "type": "AAAA",
+      "ttl": 300,
+      "data": "2606:4700:3036::ac43:847d"
+    },
+    {
+      "name": "_dmarc.ceramic.brussels",
+      "asked": "TXT",
+      "type": "TXT",
+      "ttl": 300,
+      "data": "\"v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com\""
+    },
+    {
+      "name": "brevo1._domainkey.ceramic.brussels",
+      "asked": "CNAME",
+      "type": "CNAME",
+      "ttl": 300,
+      "data": "b1.ceramic-brussels.dkim.brevo.com."
+    },
+    {
+      "name": "brevo1._domainkey.ceramic.brussels",
+      "asked": "TXT",
+      "type": "CNAME",
+      "ttl": 300,
+      "data": "b1.ceramic-brussels.dkim.brevo.com."
+    },
+    {
+      "name": "b1.ceramic-brussels.dkim.brevo.com",
+      "asked": "TXT",
+      "type": "CNAME",
+      "ttl": 3600,
+      "data": "brevo19.dkim.brevo.com."
+    },
+    {
+      "name": "brevo19.dkim.brevo.com",
+      "asked": "TXT",
+      "type": "TXT",
+      "ttl": 3600,
+      "data": "\"k=rsa;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwbRNmMHLd8i105CxWYpX+XCJTey4NtvAthzQD1f9671rRbyaW3iP8uY5YZVJrMvix70u+txW8S30U+wBkFHy84fBRIi0OGNt+Ma6a62AsIsV4mjX7rmaNGhLBY2jodQjxqi5debZLAEWGuIeoQxFdIHhYZE8x8ZZRSI8HSaYshQLbKTL17eub7Q4AWh46C0bDfWdhtCMHLU\" \"C8m3asxG/BwTUi3jZmmzCuf/1kf2zxW/96ctkyRPi5gaUo9VHoOu08tyiuI46OsXKS5XJD64VsTsx5xbpbOadpeddJGbFxEYSFZwklRmikoudmrXiVppK5RQh0jlImJ+HME1Bx1aIjwIDAQAB\""
+    },
+    {
+      "name": "brevo2._domainkey.ceramic.brussels",
+      "asked": "CNAME",
+      "type": "CNAME",
+      "ttl": 300,
+      "data": "b2.ceramic-brussels.dkim.brevo.com."
+    },
+    {
+      "name": "brevo2._domainkey.ceramic.brussels",
+      "asked": "TXT",
+      "type": "CNAME",
+      "ttl": 300,
+      "data": "b2.ceramic-brussels.dkim.brevo.com."
+    },
+    {
+      "name": "b2.ceramic-brussels.dkim.brevo.com",
+      "asked": "TXT",
+      "type": "CNAME",
+      "ttl": 3600,
+      "data": "brevo20.dkim.brevo.com."
+    },
+    {
+      "name": "brevo20.dkim.brevo.com",
+      "asked": "TXT",
+      "type": "TXT",
+      "ttl": 3600,
+      "data": "\"k=rsa;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArykoimnRxhxyB+d1IluDsq+TictYrEptknqQoptFoAaGo9jG3+9xIVpjRlHl3AH8bPTtafP+DlPvtaHU7FdettiP3PgBiSR8qcosL0vEMPoew02lf98SwSh7otjRKFaBiORsLk/lgxEY+tvRSVqB+m/RVynrOtE6IaqBXouz1dcQQVobj0PhDT9yXHR7tgSh+CH3toYuVOp\" \"i6sXj/Ma07S7csxppVCFPoLS37fj4yfhf4xv8n0HSJ6mr0xn+ZbBhHrxZsLvE+0YZRUZtTRcDO7M3+6R3/3Ys5bs5gOir5ABQS9XUSYJe0EU981ghx4TY+FAvgqATaRJ1QZh70Lm/2wIDAQAB\""
+    }
+  ],
+  "crossCheck": [
+    {
+      "resolver": "google",
+      "fqdn": "ceramic.brussels",
+      "type": "A",
+      "status": 0,
+      "answers": [
+        {
+          "name": "ceramic.brussels.",
+          "type": 1,
+          "ttl": 300,
+          "data": "172.67.132.125"
+        },
+        {
+          "name": "ceramic.brussels.",
+          "type": 1,
+          "ttl": 300,
+          "data": "104.21.13.33"
+        }
+      ]
+    },
+    {
+      "resolver": "google",
+      "fqdn": "ceramic.brussels",
+      "type": "AAAA",
+      "status": 0,
+      "answers": [
+        {
+          "name": "ceramic.brussels.",
+          "type": 28,
+          "ttl": 300,
+          "data": "2606:4700:3036::ac43:847d"
+        },
+        {
+          "name": "ceramic.brussels.",
+          "type": 28,
+          "ttl": 300,
+          "data": "2606:4700:3031::6815:d21"
+        }
+      ]
+    },
+    {
+      "resolver": "google",
+      "fqdn": "ceramic.brussels",
+      "type": "CNAME",
+      "status": 0,
+      "answers": []
+    },
+    {
+      "resolver": "google",
+      "fqdn": "ceramic.brussels",
+      "type": "NS",
+      "status": 0,
+      "answers": [
+        {
+          "name": "ceramic.brussels.",
+          "type": 2,
+          "ttl": 21600,
+          "data": "gabriella.ns.cloudflare.com."
+        },
+        {
+          "name": "ceramic.brussels.",
+          "type": 2,
+          "ttl": 21600,
+          "data": "jobs.ns.cloudflare.com."
+        }
+      ]
+    },
+    {
+      "resolver": "google",
+      "fqdn": "www.ceramic.brussels",
+      "type": "A",
+      "status": 0,
+      "answers": [
+        {
+          "name": "www.ceramic.brussels.",
+          "type": 1,
+          "ttl": 300,
+          "data": "172.67.132.125"
+        },
+        {
+          "name": "www.ceramic.brussels.",
+          "type": 1,
+          "ttl": 300,
+          "data": "104.21.13.33"
+        }
+      ]
+    },
+    {
+      "resolver": "google",
+      "fqdn": "www.ceramic.brussels",
+      "type": "AAAA",
+      "status": 0,
+      "answers": [
+        {
+          "name": "www.ceramic.brussels.",
+          "type": 28,
+          "ttl": 300,
+          "data": "2606:4700:3031::6815:d21"
+        },
+        {
+          "name": "www.ceramic.brussels.",
+          "type": 28,
+          "ttl": 300,
+          "data": "2606:4700:3036::ac43:847d"
+        }
+      ]
+    },
+    {
+      "resolver": "google",
+      "fqdn": "www.ceramic.brussels",
+      "type": "CNAME",
+      "status": 0,
+      "answers": []
+    },
+    {
+      "resolver": "google",
+      "fqdn": "www.ceramic.brussels",
+      "type": "NS",
+      "status": 0,
+      "answers": []
+    }
+  ]
+}
