@@ -5,6 +5,14 @@ Written 2026-10-05, the launch day, from the state of `main` = `fe4335d`
 checklist is `launch-meeting.md`; this file takes over from the moment the
 domain moves.
 
+> **The cutover ran on 2026-10-05 at 18:43Z** — `https://www.ceramic.brussels`
+> serves the new site, the apex 301s to it, 562/562 legacy URLs and 210/210
+> sitemap URLs check out. The record of it, and the way back, is
+> `docs/cutover-runbook.md`. What is left of "the first hour" below is the three
+> things that need a human or send real mail: the forms, GA4 realtime, and one
+> publish → webhook → build cycle. Two tokens to revoke:
+> `CLOUDFLARE_ZONE_READ_TOKEN` and `CLOUDFLARE_ZONE_WRITE_TOKEN` in `.env`.
+
 ## Can we go live?
 
 **Yes — the site is ready; the cutover itself is four steps, and two of them

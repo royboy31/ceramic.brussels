@@ -1,5 +1,26 @@
 # The cutover: connecting www.ceramic.brussels to Pages
 
+> **Done. The site went live on `https://www.ceramic.brussels` at 18:43:49Z on
+> 2026-10-05** (20:43 Brussels), by `node scripts/cutover-connect.mjs --apply`:
+> the custom domain attached, `www`'s `AAAA` deleted and its `A` turned into a
+> proxied `CNAME` to `ceramic-brussels.pages.dev`, and the apex 301 written as a
+> Single Redirect. The zone had no redirect rules before, so nothing was
+> displaced. Verified immediately after:
+>
+> - **562 of 562 legacy URLs**: 301, one hop, onto a 200
+> - **all 210 sitemap URLs**: 200, every canonical on `www`
+> - apex → `www` 301 keeping path *and* query; `http://` → `https://` on both
+>   hosts (Pages does this itself, so the zone's Always Use HTTPS can stay off)
+> - `/studio/` 200, `noindex`, frame-denied; Sanity CORS answers both hosts
+> - `/nl/` still `noindex`; `robots.txt` and the sitemap name `www`
+> - the VIP gate 302s to `/en/vip/access/`; `/api/apply/` answers 405 to a GET,
+>   so the Worker is alive; the 404 page 404s
+> - `legacy-export/dns/*-after-cutover.*` is the matching new snapshot
+>
+> Still untested because each one sends real mail or needs a human: the three
+> forms, GA4 realtime, and one publish → webhook → build cycle. They are in
+> `docs/post-launch.md`.
+
 Written 2026-10-05, the launch day, for the switch from the Twill server to the
 Cloudflare Pages project `ceramic-brussels`. The after-live checklist is
 `docs/post-launch.md`; this file is only the switch itself, in order, with the

@@ -1,0 +1,578 @@
+{
+  "takenAt": "2026-10-05T18:50:52.627Z",
+  "zone": {
+    "id": "3e9e033390af03d5deafbcb46cef924b",
+    "name": "ceramic.brussels",
+    "status": "active",
+    "paused": false,
+    "type": "full",
+    "nameServers": [
+      "gabriella.ns.cloudflare.com",
+      "jobs.ns.cloudflare.com"
+    ],
+    "originalNameServers": [
+      "ns3.combell.net",
+      "ns4.combell.net"
+    ],
+    "account": {
+      "id": "68abcbaf4817943a805737802e15679a",
+      "name": "Roy@perelweb.studio's Account"
+    },
+    "plan": "Free Website"
+  },
+  "records": [
+    {
+      "id": "ee72cd02c4ed23b775b3bf9af3e7c4ec",
+      "type": "A",
+      "name": "ceramic.brussels",
+      "content": "45.157.189.111",
+      "ttl": 1,
+      "proxied": true,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T11:59:07.571646Z"
+    },
+    {
+      "id": "4689a0c2201adf328df7fbc47058b439",
+      "type": "A",
+      "name": "ftp.ceramic.brussels",
+      "content": "185.86.19.149",
+      "ttl": 1,
+      "proxied": true,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T11:59:07.523964Z"
+    },
+    {
+      "id": "5077f65e2239464618e91b5e079c488d",
+      "type": "AAAA",
+      "name": "ceramic.brussels",
+      "content": "2001:1600:4:9:f816:3eff:fe14:9a8",
+      "ttl": 1,
+      "proxied": true,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T11:59:07.513076Z"
+    },
+    {
+      "id": "7e535286f6fc4b5d91b776e1fc22979b",
+      "type": "CNAME",
+      "name": "autodiscover.ceramic.brussels",
+      "content": "autodiscover.outlook.com",
+      "ttl": 1,
+      "proxied": true,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T11:59:07.503696Z"
+    },
+    {
+      "id": "dfa51621d2b200e78f7a1957ea5db864",
+      "type": "CNAME",
+      "name": "brevo1._domainkey.ceramic.brussels",
+      "content": "b1.ceramic-brussels.dkim.brevo.com",
+      "ttl": 1,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T12:10:12.868806Z"
+    },
+    {
+      "id": "1228f3f71e9ef5929cd4ed64c5231615",
+      "type": "CNAME",
+      "name": "brevo2._domainkey.ceramic.brussels",
+      "content": "b2.ceramic-brussels.dkim.brevo.com",
+      "ttl": 1,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T12:10:47.108966Z"
+    },
+    {
+      "id": "293cfd7c4dd0fdb67b3e8e4f7b1933e1",
+      "type": "CNAME",
+      "name": "k2._domainkey.ceramic.brussels",
+      "content": "dkim2.mcsv.net",
+      "ttl": 1,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T11:59:07.606822Z"
+    },
+    {
+      "id": "4c11897bbcbc44184db80063d69f1252",
+      "type": "CNAME",
+      "name": "k3._domainkey.ceramic.brussels",
+      "content": "dkim3.mcsv.net",
+      "ttl": 1,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T11:59:07.618471Z"
+    },
+    {
+      "id": "c19021be74ce0c9c70314278a075e271",
+      "type": "CNAME",
+      "name": "www.ceramic.brussels",
+      "content": "ceramic-brussels.pages.dev",
+      "ttl": 1,
+      "proxied": true,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-10-05T18:42:27.294813Z"
+    },
+    {
+      "id": "14e47bf94be45d735066672ba652cf67",
+      "type": "MX",
+      "name": "ceramic.brussels",
+      "content": "mx.backup.mailprotect.be",
+      "priority": 50,
+      "ttl": 1,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T11:59:07.563332Z"
+    },
+    {
+      "id": "99a764db3c4638fb8605a139470da821",
+      "type": "MX",
+      "name": "ceramic.brussels",
+      "content": "mx.mailprotect.be",
+      "priority": 10,
+      "ttl": 1,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T11:59:07.555318Z"
+    },
+    {
+      "id": "4b6c3f06aa900ea0c520ecc3f902b91d",
+      "type": "MX",
+      "name": "ceramic.brussels",
+      "content": "ceramic-brussels.mail.protection.outlook.com",
+      "priority": 0,
+      "ttl": 1,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T11:59:07.546901Z"
+    },
+    {
+      "id": "3daa7e4ed17b54fe70f12b4e282e7a5e",
+      "type": "TXT",
+      "name": "ceramic.brussels",
+      "content": "\"google-site-verification=q0T3lX2Qi530w3FL6suKrjKNrBvqAVffsrJnb8ExUac\"",
+      "ttl": 3600,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-10-01T10:12:37.446477Z"
+    },
+    {
+      "id": "a4e9e9d49707e079e5d8d4f9d1d4aa80",
+      "type": "TXT",
+      "name": "ceramic.brussels",
+      "content": "\"brevo-code:759690ab30f7663a74e98158246367c8\"",
+      "ttl": 1,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T12:09:43.585489Z"
+    },
+    {
+      "id": "c7200fe9d613abb6260ef42bca4118dd",
+      "type": "TXT",
+      "name": "ceramic.brussels",
+      "content": "\"v=spf1 include:spf.protection.outlook.com -all\"",
+      "ttl": 1,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T11:59:07.540007Z"
+    },
+    {
+      "id": "0ea3fffd430083a833fee3a12eaa1019",
+      "type": "TXT",
+      "name": "ceramic.brussels",
+      "content": "\"MS=ms75504785\"",
+      "ttl": 1,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T11:59:07.533461Z"
+    },
+    {
+      "id": "6cfa07d22b3527ed67fa1f4885c6a982",
+      "type": "TXT",
+      "name": "_dmarc.ceramic.brussels",
+      "content": "\"v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com\"",
+      "ttl": 1,
+      "proxied": false,
+      "comment": null,
+      "tags": [],
+      "modifiedOn": "2026-09-22T12:11:17.26304Z"
+    }
+  ],
+  "settings": [
+    {
+      "id": "0rtt",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "advanced_ddos",
+      "value": "on",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "always_online",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "always_use_https",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "automatic_https_rewrites",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "brotli",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "browser_cache_ttl",
+      "value": 14400,
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "browser_check",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "cache_level",
+      "value": "aggressive",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "challenge_ttl",
+      "value": 1800,
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "ciphers",
+      "value": [],
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "cname_flattening",
+      "value": "flatten_at_root",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "development_mode",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "early_hints",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "ech",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "edge_cache_ttl",
+      "value": 7200,
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "email_obfuscation",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "filter_logs_to_cloudflare",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "hotlink_protection",
+      "modified_on": null,
+      "value": "off",
+      "editable": true
+    },
+    {
+      "id": "http2",
+      "value": "on",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "http3",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "ip_geolocation",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "ipv6",
+      "value": "on",
+      "modified_on": "2026-09-22T11:59:02.691547Z",
+      "editable": true
+    },
+    {
+      "id": "log_to_cloudflare",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "long_lived_grpc",
+      "value": "off",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "max_upload",
+      "value": 100,
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "min_tls_version",
+      "value": "1.0",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "minify",
+      "value": {
+        "css": "off",
+        "html": "off",
+        "js": "off"
+      },
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "mirage",
+      "value": "off",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "mobile_redirect",
+      "value": {
+        "status": "off",
+        "mobile_subdomain": null,
+        "strip_uri": false
+      },
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "opportunistic_encryption",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "opportunistic_onion",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "orange_to_orange",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "origin_error_page_pass_thru",
+      "value": "off",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "polish",
+      "value": "off",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "pq_keyex",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "prefetch_preload",
+      "value": "off",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "privacy_pass",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "proxy_read_timeout",
+      "value": "125",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "pseudo_ipv4",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "replace_insecure_js",
+      "value": "on",
+      "modified_on": "2026-09-22T11:59:11.321589Z",
+      "editable": true
+    },
+    {
+      "id": "response_buffering",
+      "value": "off",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "rocket_loader",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "security_header",
+      "modified_on": null,
+      "value": {
+        "strict_transport_security": {
+          "enabled": false,
+          "max_age": 0,
+          "include_subdomains": false,
+          "preload": false,
+          "nosniff": false
+        }
+      },
+      "editable": true
+    },
+    {
+      "id": "security_level",
+      "value": "medium",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "server_side_exclude",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "sort_query_string_for_cache",
+      "value": "off",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "ssl",
+      "value": "full",
+      "modified_on": null,
+      "certificate_status": "active",
+      "validation_errors": [],
+      "editable": true
+    },
+    {
+      "id": "tls_1_2_only",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "tls_1_3",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "tls_client_auth",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "true_client_ip_header",
+      "value": "off",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "visitor_ip",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "waf",
+      "value": "off",
+      "modified_on": null,
+      "editable": true
+    },
+    {
+      "id": "webp",
+      "value": "off",
+      "modified_on": null,
+      "editable": false
+    },
+    {
+      "id": "websockets",
+      "value": "on",
+      "modified_on": null,
+      "editable": true
+    }
+  ],
+  "pageRules": {
+    "unavailable": "9109 Unauthorized to access requested resource"
+  },
+  "rulesets": {
+    "unavailable": "10000 Authentication error"
+  },
+  "phases": {}
+}
