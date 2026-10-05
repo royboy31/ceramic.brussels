@@ -1,5 +1,5 @@
 ---
-import { LOCALES, type LocaleId } from '../lib/locales';
+import { LOCALES, SWITCHER_LOCALES, type LocaleId } from '../lib/locales';
 import { localePath, useTranslations } from '../lib/i18n';
 import { urlFor } from '../sanity/image';
 import SanityImage from './SanityImage.astro';
@@ -38,7 +38,11 @@ const home = localePath(lang);
 const partnerName = mainPartner?.name ?? 'Puilaetco';
 const Lockup = mainPartner?.url ? 'a' : 'div';
 const current = LOCALES.find((l) => l.id === lang)!;
-const others = LOCALES.filter((l) => l.id !== lang);
+/* The offered languages, which is not every language: Dutch is held back
+   for the launch (see `SWITCHER_LOCALES`). `current` still reads the full
+   list, so a visitor already on a Dutch page sees NL as their language and
+   can switch away from it rather than being stranded. */
+const others = SWITCHER_LOCALES.filter((l) => l.id !== lang);
 ---
 
 <header class="site-header acid-wash">
