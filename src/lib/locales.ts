@@ -29,6 +29,16 @@ const HELD_BACK: LocaleId[] = ['nl'];
 
 export const SWITCHER_LOCALES = LOCALES.filter((l) => !HELD_BACK.includes(l.id));
 
+/**
+ * A held-back language's pages are also kept out of search: `Base.astro` sends
+ * `<meta name="robots" content="noindex">` on them, and because
+ * `scripts/sitemap-noindex.mjs` drops every page whose HTML says noindex, they
+ * leave the sitemap by the same stroke. The pages still build and still
+ * answer - a bookmark or an existing link works - they are simply not
+ * advertised while the language is held back.
+ */
+export const isHeldBack = (lang: LocaleId) => HELD_BACK.includes(lang);
+
 export const DEFAULT_LOCALE: LocaleId = 'en';
 
 export const LOCALE_IDS = LOCALES.map((l) => l.id) as LocaleId[];
