@@ -12,6 +12,120 @@ domain moves.
 > things that need a human or send real mail: the forms, GA4 realtime, and one
 > publish → webhook → build cycle. Two tokens to revoke:
 > `CLOUDFLARE_ZONE_READ_TOKEN` and `CLOUDFLARE_ZONE_WRITE_TOKEN` in `.env`.
+>
+> **Start at "Tomorrow, in order" below** — it is the whole open list, ordered,
+> with the Buzz QA findings folded in and its five wrong figures corrected.
+
+## Tomorrow, in order — the resume point for 2026-10-06
+
+Everything below is open; everything not below is done. Owners as in the Buzz
+list: **K** Kamindu · **L** Lilanga · **E** editors · **R** Roy/client.
+
+**First, because they are live credentials (K, ten minutes):**
+
+1. **Revoke the two Cloudflare tokens** — `CLOUDFLARE_ZONE_READ_TOKEN` and
+   `CLOUDFLARE_ZONE_WRITE_TOKEN`: delete at dash.cloudflare.com → My Profile →
+   API Tokens, then drop the two lines from `.env`. They did the cutover and
+   have no further use.
+2. **Revoke `studio-site-accounts`** (sanity.io/manage → project 5hqzhin7 → API
+   → Tokens; role *editor*, created 2026-09-06) **and delete the
+   `SANITY_STUDIO_TOKEN` Pages secret.** It is the leftover from the removed D1
+   site-accounts system: a browser still holding it can edit the dataset. This
+   has been owed since 2026-09-15.
+3. **Rotate the opus-mini token.** It exists (created 2026-10-05 14:03:31Z,
+   developer + editor + contributor), so nothing is missing in Sanity — the mini
+   holds a stale string, and a token value is shown only once. Issue a fresh one,
+   Roy pastes it into `~/.buzz/.secrets/sanity.env` (mode 600), never through
+   Buzz, WhatsApp or a DM.
+
+**Then the cheap wins (minutes each, biggest effect first):**
+
+4. **E/K — upload a default share image** (Site settings → Default SEO → Share
+   image, 1200×630). **Fixes all 54 live pages that have no `og:image` in one
+   action**; `Base.astro` already falls back to it.
+5. **K — turn Email Address Obfuscation off** (Cloudflare → Scrape Shield). The
+   setting is `on`, so every address on the site is a `/cdn-cgi/l/…` link and no
+   `mailto:` survives for crawlers, no-JS readers or link previews.
+6. **E — four `seo.title.fr` writes**: `main-exhibitors` → *Exposants*,
+   `demo-page-programme-talks` → *Programme — conférences*, `-la-cambre` →
+   *Programme — ceramic brussels x La Cambre*, `-vip` → *Programme — VIP*. Each
+   French page shows the English title today.
+7. **K — `/storage/*` rule.** Add above the generated block in
+   `public/_redirects`, pointing at the floor plan (host the current PDF under
+   `public/files/` if there is one). The old upload links answer 404 today.
+8. **K — delete the two newsletter test rows** from the Newsletter tab of
+   `ceramic_contact_pages` (`kamindudushmantha@gmail.com` and the `+cbtest`
+   variant, 2026-10-05 21:10 and 21:12).
+9. **E — unpublish Collector's Voices**, still open from 2026-10-02:
+   `story-collector-charles-kaisin` and `story-collector-galila` are published.
+   Two clicks, or `node scripts/unpublish-collectors.mjs --apply`.
+
+**The three things the launch could not prove (K + E, needs a human):**
+
+10. **GA4** — accept statistics on `www` and watch realtime in `G-XVTPYEC66H`.
+    The tracker only fires on the real host, so it has never fired. Check that
+    `?utm_source=…` survives the apex hop.
+11. **One publish → webhook → build → page** cycle from the Studio.
+12. **The application form and the VIP request**, EN/FR, with a test address:
+    team mail, applicant confirmation in the right language, the thank-you page,
+    `Reply-To`. Brevo itself is proven (two confirmations delivered 2026-10-05
+    21:10/21:12), so this tests those two templates and recipients, nothing more.
+
+**K — Search Console (do it early, it only starts collecting once submitted):**
+
+13. Submit `https://www.ceramic.brussels/sitemap-index.xml`, remove the old
+    `sitemap.xml` if listed, and request indexing for `/en/`, `/fr/`, and the
+    main hubs in both languages. The verification TXT is already in DNS.
+
+**K — hardening, in the order the Buzz list proposes (headers first, HSTS last):**
+
+14. `Permissions-Policy` and `X-Frame-Options: SAMEORIGIN` in `public/_headers`
+    (the Studio keeps `DENY`); `nosniff` + `Referrer-Policy` onto the Worker's
+    responses in `scripts/pages-worker.mjs`, which `_headers` never reaches.
+15. Cache: `/fonts/*` and `/assets/*` are on Cloudflare's 4-hour TTL — a week is
+    safe for both, `immutable` only for files that get renamed when they change.
+16. Rate limiting on `POST /api/apply/` and `/api/newsletter/` (5/min/IP), WAF.
+17. HSTS only after a week or two of stable HTTPS, no `includeSubDomains` at
+    first, no preload. Then CSP in report-only for a week before enforcing.
+
+**L — frontend (PR into `dev`):**
+
+18. **The narrow-window exhibitors overflow** (~1020px) — promised in the group
+    before launch and still the one code item outstanding.
+19. Homepage LCP: `fetchpriority="high"` + `loading="eager"` on the hero image
+    (nothing in the codebase sets either), and a smaller
+    `/assets/video-still.webp` — it is 215 kB at a fixed 1,600px.
+20. `og:locale` → `en_GB`/`fr_BE`/`nl_BE` with `og:locale:alternate`; a
+    site-wide `Organization` JSON-LD in `Base.astro`.
+21. The jury-prize badge's alt says "jury prize 2026" for the 2025 image.
+
+**R — decisions blocking other work:**
+
+22. **Newsletter: Mailchimp or the internal form.** `newsletterUrl` still points
+    at `mailchi.mp/ceramic/…` in the menu, footer and about/team while the
+    internal form works end to end. Two lists drift apart; pick one, then either
+    publish `drafts.page-newsletter` and repoint the setting, or leave the page
+    unpublished deliberately.
+23. A privacy notice beside each form and a privacy/cookie page (Brevo, Sheets,
+    VIP D1, GA4, retention, contact) — needed before any campaign.
+24. The candidatures deadline, the fair-award names EN/FR, and the
+    "voir tous les awards de l'art prize" label with Tiphaine.
+
+**E — content, no deadline:**
+
+25. The 16 priority SEO descriptions (EN + FR). **87** of 210 pages use the site
+    default today, not 178 — exhibitor details can take a code-side template
+    instead of hand-written text.
+26. The Mestre news title is stored with literal `>>` and `<<`; 42 exhibitor
+    websites are `http://`; the **Artists main page has never been created**
+    (empty form, no lead paragraph, no SEO).
+
+**Later, tracked but not tomorrow:** Dutch (translate, then drop the `/nl/`
+noindex, the switcher entry and the hreflang workaround together — `L2` in the
+Buzz list explains why the tag stays until `legacy-redirects.mjs` learns another
+way to find NL targets); `#52` and `PAST_EDITIONS_PUBLIC=true` for the 2024/2025
+galleries; the weekly monitoring of GSC, GA4 and Cloudflare for the first four
+weeks.
 
 ## Can we go live?
 
