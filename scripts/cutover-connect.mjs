@@ -11,10 +11,20 @@
  * It needs a write token in `.env` as `CLOUDFLARE_ZONE_WRITE_TOKEN`:
  *
  *     Account · Cloudflare Pages · Edit      (attach the custom domain)
+ *     Zone · Zone · Read                     (find the zone by name)
  *     Zone · DNS · Edit                      (the www record)
- *     Zone · Config Rules · Edit             (the apex redirect)
- *     Zone · Transform Rules · Edit          (same ruleset family, belt and braces)
+ *     Zone · Single Redirect · Edit          (the apex 301; the row is called
+ *                                             "Dynamic URL Redirects" on older accounts)
+ *     Zone · Page Rules · Edit               (optional: the same 301 the old way,
+ *                                             if neither row is on the token's list)
  *     Zone Resources: ceramic.brussels
+ *
+ * The apex redirect is tried as a Single Redirect first - rulesets are where
+ * Cloudflare puts new work, and the rule is visible under Rules → Redirect
+ * Rules. If the token cannot write rulesets, the same 301 is written as a
+ * legacy Page Rule (`ceramic.brussels/*` → forwarding URL), which every
+ * account has and which does the job identically. Either way `--rollback`
+ * finds and removes whichever one was made.
  *
  * Why `www` serves and the apex redirects, and not the other way round: every
  * page Google has indexed is a `www.ceramic.brussels/…` URL, the old site's
@@ -158,16 +168,44 @@ const apexRule = {
   enabled: !rollback,
 };
 
+/* The same 301 as a legacy Page Rule, for a token whose list offers neither
+   "Single Redirect" nor "Dynamic URL Redirects". `$1` carries the path, and
+   Cloudflare appends the query string by itself. */
+const pageRule = {
+  targets: [{ target: 'url', constraint: { operator: 'matches', value: `${ZONE_NAME}/*` } }],
+  actions: [{ id: 'forwarding_url', value: { url: `https://${HOST}/$1`, status_code: 301 } }],
+  status: 'active',
+  priority: 1,
+};
+const pageRules = await call('GET', `/zones/${zone.id}/pagerules`);
+const oursAsPageRule = pageRules.ok
+  ? pageRules.body.find((r) => (r.targets || []).some((t) => t.constraint?.value === `${ZONE_NAME}/*`) && (r.actions || []).some((a) => a.id === 'forwarding_url'))
+  : null;
+
+/** The ruleset write, falling back to a Page Rule when the token cannot. */
+async function writeApexRedirect() {
+  const viaRuleset = await call('PUT', `/zones/${zone.id}/rulesets/phases/http_request_dynamic_redirect/entrypoint`, {
+    rules: [...existing.map(cleanRule), apexRule],
+  });
+  if (viaRuleset.ok) {
+    console.log('  written as a Single Redirect (Rules → Redirect Rules)');
+    return viaRuleset;
+  }
+  if (!/9109|10000|unauthoriz|not entitled|permission/i.test(viaRuleset.error)) return viaRuleset;
+  console.log(`  the ruleset refused the token (${viaRuleset.error}); writing a Page Rule instead`);
+  const viaPageRule = await call('POST', `/zones/${zone.id}/pagerules`, pageRule);
+  if (viaPageRule.ok) console.log('  written as a Page Rule (Rules → Page Rules)');
+  return viaPageRule;
+}
+
 if (rollback) {
-  if (ours) step('remove the apex → www redirect rule', () => call('PUT', `/zones/${zone.id}/rulesets/phases/http_request_dynamic_redirect/entrypoint`, { rules: existing.filter((r) => r.description !== RULE_DESCRIPTION).map(cleanRule) }));
-} else if (ours) {
-  console.log('  already present: the apex → www redirect rule');
+  if (ours) step('remove the apex → www Single Redirect', () => call('PUT', `/zones/${zone.id}/rulesets/phases/http_request_dynamic_redirect/entrypoint`, { rules: existing.filter((r) => r.description !== RULE_DESCRIPTION).map(cleanRule) }));
+  if (oursAsPageRule) step(`remove the apex → www Page Rule (${oursAsPageRule.id})`, () => call('DELETE', `/zones/${zone.id}/pagerules/${oursAsPageRule.id}`));
+  if (!ours && !oursAsPageRule) console.log('  no apex redirect of ours to remove');
+} else if (ours || oursAsPageRule) {
+  console.log(`  already present: the apex → www redirect (${ours ? 'Single Redirect' : 'Page Rule'})`);
 } else {
-  step(`add the redirect rule: ${ZONE_NAME}/* → https://${HOST}/* (301, query kept)`, () =>
-    call('PUT', `/zones/${zone.id}/rulesets/phases/http_request_dynamic_redirect/entrypoint`, {
-      rules: [...existing.map(cleanRule), apexRule],
-    }),
-  );
+  step(`add the apex redirect: ${ZONE_NAME}/* → https://${HOST}/* (301, query kept)`, writeApexRedirect);
 }
 
 /** A rule read back from the API carries fields it will not accept on write. */
