@@ -19,6 +19,40 @@ Re-take the credentialled half at any time with:
 node scripts/dns-backup.mjs --label after-cutover
 ```
 
+## What the credentialled export added — run 2026-10-05 18:08Z
+
+Zone `3e9e033390af03d5deafbcb46cef924b`, plan Free Website, 18 records,
+**SSL mode `full`** (Pages-compatible; Flexible would have looped the custom
+domain) and **Always Use HTTPS off**, which is why plain `http://` was answered
+rather than redirected.
+
+**The origin the public snapshot could not show:**
+
+```
+A     ceramic.brussels      proxied → 45.157.189.111
+A     www.ceramic.brussels  proxied → 45.157.189.111
+AAAA  both                  proxied → 2001:1600:4:9:f816:3eff:fe14:9a8
+```
+
+That is the Twill server. Those four records, with the proxied flag, are the
+whole of what the cutover replaces.
+
+Two records in the set are worth not deleting by reflex later:
+
+- `ftp.ceramic.brussels` → `185.86.19.149`, a different and older host than the
+  website's. Nothing on the new site uses it; it is also not ours to clean up.
+- `k2._domainkey` / `k3._domainkey` → `dkim2/dkim3.mcsv.net` are **Mailchimp's**
+  DKIM. Site settings → `newsletterUrl` still points at the Mailchimp landing
+  page, so these stay until the newsletter has fully moved to the on-site form
+  and Brevo.
+
+**Not captured:** page rules and the redirect/transform rule phases — the
+read-only token has DNS and zone-settings scope only, and Cloudflare answered
+`9109 Unauthorized` / `10000 Authentication error` for those two. Nothing is
+known to exist there, but **look at Rules → Page Rules and Rules → Redirect
+Rules by eye before the switch**: a leftover rule from the Twill setup would
+outlive the record change and could fight the new apex redirect.
+
 ## What the public snapshot already tells us
 
 - **`ceramic.brussels` and `www.ceramic.brussels` were proxied** — both answered
@@ -51,11 +85,19 @@ node scripts/dns-backup.mjs --label after-cutover
 
 The cutover replaces two records and adds one rule. To undo it:
 
-1. In **DNS → Records**, delete the `CNAME www → ceramic-brussels.pages.dev`
-   and the apex record Pages created, then re-add the `A`/`AAAA` records for
-   `ceramic.brussels` and `www` exactly as `dns-records-2026-10-05.txt` lists
-   them — **including the proxied flag**, which is what keeps the certificate
-   working. The origin addresses are in `zone-export-2026-10-05.txt`.
+1. In **DNS → Records**, delete the `CNAME www → ceramic-brussels.pages.dev`,
+   then re-add these four, **proxied**, TTL auto:
+
+   | Type | Name | Content |
+   | :-- | :-- | :-- |
+   | A | `ceramic.brussels` | `45.157.189.111` |
+   | AAAA | `ceramic.brussels` | `2001:1600:4:9:f816:3eff:fe14:9a8` |
+   | A | `www` | `45.157.189.111` |
+   | AAAA | `www` | `2001:1600:4:9:f816:3eff:fe14:9a8` |
+
+   The proxied flag is not decoration: without it the records answer with the
+   origin's own address and the site comes back without a certificate. The same
+   four lines, in restorable form, are in `zone-export-2026-10-05.txt`.
 2. Disable the apex → www **redirect rule** (Rules → Redirect Rules). It is a
    rule, not a record, so it survives the record restore and would otherwise
    keep sending the apex to a `www` that no longer serves Pages.

@@ -15,13 +15,14 @@ would send every indexed URL through a hop it does not need.
 
 ## Before anything is switched
 
-- [x] **Backups taken** — `legacy-export/dns/` holds the public DNS snapshot,
-      the old site's HTTP behaviour, and the Pages project's deployed settings.
-      `legacy-export/dns/README.md` lists what each file is and spells out the
-      rollback. The credentialled half (zone file, records with their proxy
-      flags, zone settings, rules) comes from
-      `node scripts/dns-backup.mjs`, which needs a read-only
-      `CLOUDFLARE_ZONE_READ_TOKEN` in `.env`.
+- [x] **Backups taken, in full** — `legacy-export/dns/` holds the public DNS
+      snapshot, the old site's HTTP behaviour, the Pages project's deployed
+      settings, and, since the credentialled export of 18:08Z, the BIND zone
+      file plus every record with its `proxied` flag. The Twill origin behind
+      the proxy is `45.157.189.111` / `2001:1600:4:9:f816:3eff:fe14:9a8` — the
+      one thing public DNS could never show, and the thing a rollback needs.
+      `legacy-export/dns/README.md` lists each file and spells out the restore.
+      Re-take it any time with `node scripts/dns-backup.mjs --label …`.
 - [x] **`PUBLIC_SITE_URL` → `https://www.ceramic.brussels`** in `wrangler.toml`
       `[vars]`. It feeds Astro's `site`, so canonicals, hreflang, OG URLs and
       the sitemap are built from it. **This must be deployed *before* DNS
@@ -36,9 +37,16 @@ would send every indexed URL through a hop it does not need.
       served from the live domain, so without this `/studio` stops loading
       content for every editor the moment DNS moves, and it reads as "the CMS is
       down".
-- [ ] **SSL/TLS mode must be Full or Full (strict)**, not Flexible
-      (SSL/TLS → Overview on the zone). A Pages custom domain behind Flexible
-      can redirect-loop. `scripts/dns-backup.mjs` prints the mode it finds.
+- [x] **SSL/TLS mode is `full`** — checked by the export, so a Pages custom
+      domain will not redirect-loop the way it does behind Flexible. *Always Use
+      HTTPS* is **off**, which is why plain `http://` was answered rather than
+      redirected; Pages forces HTTPS on its custom domain by itself, and turning
+      the zone setting on afterwards makes the apex do the same.
+- [ ] **Look at Rules → Page Rules and Rules → Redirect Rules by eye.** The
+      read-only token cannot read either (`9109 Unauthorized`), so they are the
+      one part of the zone that is not backed up. Nothing is known to be there,
+      but a leftover rule from the Twill setup would outlive the record change
+      and could fight the new apex redirect.
 
 ## The switch
 

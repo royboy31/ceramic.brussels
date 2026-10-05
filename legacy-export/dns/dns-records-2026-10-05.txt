@@ -1,0 +1,27 @@
+# ceramic.brussels — every DNS record as it stood on 2026-10-05T18:08:04.314Z
+# zone 3e9e033390af03d5deafbcb46cef924b · plan Free Website · SSL mode full · Always Use HTTPS off
+#
+# "proxied" is the orange cloud: the record answers with Cloudflare addresses
+# and the content below is the origin behind it. Restoring a record means
+# restoring this flag too, or the site comes back without a certificate.
+
+TXT    _dmarc.ceramic.brussels                 auto    dns    "v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com"
+CNAME  autodiscover.ceramic.brussels           auto  proxied  autodiscover.outlook.com
+CNAME  brevo1._domainkey.ceramic.brussels      auto    dns    b1.ceramic-brussels.dkim.brevo.com
+CNAME  brevo2._domainkey.ceramic.brussels      auto    dns    b2.ceramic-brussels.dkim.brevo.com
+A      ceramic.brussels                        auto  proxied  45.157.189.111
+AAAA   ceramic.brussels                        auto  proxied  2001:1600:4:9:f816:3eff:fe14:9a8
+MX     ceramic.brussels                        auto    dns    mx.backup.mailprotect.be (prio 50)
+MX     ceramic.brussels                        auto    dns    mx.mailprotect.be (prio 10)
+MX     ceramic.brussels                        auto    dns    ceramic-brussels.mail.protection.outlook.com (prio 0)
+TXT    ceramic.brussels                        3600    dns    "google-site-verification=q0T3lX2Qi530w3FL6suKrjKNrBvqAVffsrJnb8ExUac"
+TXT    ceramic.brussels                        auto    dns    "brevo-code:759690ab30f7663a74e98158246367c8"
+TXT    ceramic.brussels                        auto    dns    "v=spf1 include:spf.protection.outlook.com -all"
+TXT    ceramic.brussels                        auto    dns    "MS=ms75504785"
+A      ftp.ceramic.brussels                    auto  proxied  185.86.19.149
+CNAME  k2._domainkey.ceramic.brussels          auto    dns    dkim2.mcsv.net
+CNAME  k3._domainkey.ceramic.brussels          auto    dns    dkim3.mcsv.net
+A      www.ceramic.brussels                    auto  proxied  45.157.189.111
+AAAA   www.ceramic.brussels                    auto  proxied  2001:1600:4:9:f816:3eff:fe14:9a8
+
+# 18 records
