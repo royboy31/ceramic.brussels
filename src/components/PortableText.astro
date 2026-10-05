@@ -1,5 +1,6 @@
 ---
 import SanityImage from './SanityImage.astro';
+import FigureCaption from './FigureCaption.astro';
 import { bodyStyleAttrs } from '../lib/textStyle';
 import { normalizeHref, resolveTextLink } from '../lib/links';
 import { getLinkTargets } from '../lib/queries';
@@ -137,7 +138,10 @@ const grouped = Array.isArray(value) ? group(value.filter(Boolean)) : [];
         return (
           <figure>
             <SanityImage image={block} />
-            {block.credit && <figcaption>{block.credit}</figcaption>}
+            {/* The whole line, not the credit alone: a figure placed in rich
+                text carries the same artist / title / year as one in a
+                picture block (Léonie, 2026-10-05). */}
+            <FigureCaption image={block} />
           </figure>
         );
       }

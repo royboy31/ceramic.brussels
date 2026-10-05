@@ -2,6 +2,7 @@
 import type { LocaleId } from '../lib/locales';
 import PortableText from './PortableText.astro';
 import SanityImage from './SanityImage.astro';
+import FigureCaption from './FigureCaption.astro';
 import LinkPill from './LinkPill.astro';
 import { styleAttrs, bodyStyleAttrs } from '../lib/textStyle';
 
@@ -60,7 +61,10 @@ const list = (sections ?? []).filter(
               <ul class="cs-images" data-count={Math.min(images.length, 3)}>
                 {images.map((img: any) => (
                   <li>
-                    <SanityImage image={img} aspect={1.5} sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw" widths={[400, 600, 900, 1200]} />
+                    <figure>
+                      <SanityImage image={img} aspect={1.5} sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 33vw" widths={[400, 600, 900, 1200]} />
+                      <FigureCaption image={img} />
+                    </figure>
                   </li>
                 ))}
               </ul>
@@ -153,6 +157,9 @@ const list = (sections ?? []).filter(
   }
   .cs-images :global(img) {
     width: 100%;
+  }
+  .cs-images figure {
+    margin: 0;
   }
   .cs-links {
     display: flex;
