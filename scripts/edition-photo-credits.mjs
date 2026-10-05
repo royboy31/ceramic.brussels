@@ -162,11 +162,21 @@ if (!APPLY) {
 fs.writeFileSync(file, JSON.stringify(backup, null, 2));
 console.log(`\nBacked up ${backup.length} picture(s) to ${path.relative(ROOT, file)}`);
 
-/* Drafts take the same patch, so publishing one later does not drop the values. */
+/* Drafts take the same patch, so publishing one later does not drop the
+   values - but only the drafts that exist. Patching an absent `drafts.<id>`
+   is not a no-op: it fails the whole transaction, and with it the published
+   documents that were fine (2026-10-05, demo-edition-2024 has no draft). */
+const bareIds = patches.map(({ id }) => id.replace(/^drafts\./, ''));
+const liveDrafts = new Set(
+  await client.fetch(`*[_id in $ids]._id`, { ids: bareIds.map((id) => `drafts.${id}`) }),
+);
+
 const tx = patches.reduce((t, { id, set }) => {
   const bare = id.replace(/^drafts\./, '');
-  return t.patch(bare, (p) => p.set(set)).patch(`drafts.${bare}`, (p) => p.set(set));
+  const next = t.patch(bare, (p) => p.set(set));
+  return liveDrafts.has(`drafts.${bare}`) ? next.patch(`drafts.${bare}`, (p) => p.set(set)) : next;
 }, client.transaction());
+console.log(`${liveDrafts.size} of ${bareIds.length} edition(s) have a draft; those get the patch too.`);
 
 await tx.commit({ visibility: 'async' }).then(
   () => console.log(`Written: ${patches.length} edition(s).`),
