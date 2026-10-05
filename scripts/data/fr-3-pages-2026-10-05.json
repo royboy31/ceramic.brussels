@@ -228,7 +228,7 @@
   "doc": "demo-award-2026-1",
   "champ": "outcome",
   "en": "is the winner of the jury prize",
-  "fr": "remporte le prix du jury"
+  "fr": "est la lauréate du prix du jury"
  },
  {
   "page": "Art prize, awards",
@@ -249,7 +249,7 @@
   "doc": "demo-award-2026-2",
   "champ": "outcome",
   "en": "is the winner of the Ambassade de France en Belgique award",
-  "fr": "remporte l’award Ambassade de France en Belgique"
+  "fr": "est la lauréate du prix Ambassade de France en Belgique"
  },
  {
   "page": "Art prize, awards",
@@ -277,7 +277,7 @@
   "doc": "demo-award-2026-3",
   "champ": "outcome",
   "en": "is the winner of the Centre Wallonie-Bruxelles | Paris award",
-  "fr": "remporte l’award Centre Wallonie-Bruxelles | Paris"
+  "fr": "est la lauréate du prix du Centre Wallonie-Bruxelles | Paris"
  },
  {
   "page": "Art prize, awards",
@@ -305,7 +305,7 @@
   "doc": "demo-award-2026-4",
   "champ": "outcome",
   "en": "is the winner of Les Ateliers dans la Forêt residency",
-  "fr": "remporte la résidence Les Ateliers dans la Forêt"
+  "fr": "est le lauréat de la résidence Les Ateliers dans la Forêt"
  },
  {
   "page": "Art prize, awards",
@@ -333,7 +333,7 @@
   "doc": "demo-award-2026-5",
   "champ": "outcome",
   "en": "is the winner of the Keramis award",
-  "fr": "remporte l’award Keramis"
+  "fr": "est le lauréat du prix Keramis"
  },
  {
   "page": "Art prize, awards",
@@ -354,7 +354,7 @@
   "doc": "demo-award-2026-6",
   "champ": "outcome",
   "en": "is the winner of The Latvian Centre for Contemporary Ceramics award",
-  "fr": "remporte l’award The Latvian Centre for Contemporary Ceramics"
+  "fr": "est le lauréat du prix du Latvian Centre for Contemporary Ceramics"
  },
  {
   "page": "Art prize, awards",
@@ -382,7 +382,7 @@
   "doc": "demo-award-2026-7",
   "champ": "outcome",
   "en": "are the winners of the YXCCCA award",
-  "fr": "remportent l’award YXCCCA"
+  "fr": "sont les lauréates du prix YXCCCA"
  },
  {
   "page": "Exhibitors awards (Best Solo Show…)",
@@ -466,7 +466,7 @@
   "doc": "exhibitor-2026-anna-laudel-tr",
   "champ": "bio.en[2]",
   "en": "Following its first location in Istanbul, Anna Laudel opened its second gallery in Düsseldorf (Germany) in 2019 to further its international outreach. Soon after, in 2022, a third gallery was inaugurated in Bodrum, in the district of Zai Yasam, allowing for yet another audience and an interesting location to host mostly solo exhibitions.",
-  "fr": "Après son premier espace à Istanbul, Anna Laudel a ouvert sa deuxième galerie à Düsseldorf (Allemagne) en 2019 afin de développer son rayonnement international. Peu après, en 2022, une troisième galerie a été inaugurée à Bodrum, dans le quartier de Zai Yasam, lui permettant de toucher encore un autre public et offrant un lieu singulier pour accueillir principalement des expositions personnelles."
+  "fr": "Après son premier espace à Istanbul, Anna Laudel a ouvert sa deuxième galerie à Düsseldorf (Allemagne) en 2019 afin de développer son rayonnement international. Peu après, en 2022, une troisième galerie a été inaugurée à Bodrum, dans le quartier de Zai Yasam, lui permettant de toucher encore un autre public et offrant un lieu singulier pour accueillir principalement des solo shows."
  },
  {
   "page": "Galerie: Arnoldsche Art Publishers",
@@ -802,7 +802,7 @@
   "doc": "exhibitor-2026-galerie-judith-andreae",
   "champ": "bio.en[0]",
   "en": "Galerie Judith Andreae is a contemporary art gallery based in Bonn, representing both emerging and established international artists working across painting, drawing, photography, video, sculpture, object art, installation, and performance. The gallery presents six to eight curated solo and group exhibitions per year and regularly participates in international art fairs, – most recently at Art Düsseldorf, SPARK Art Fair in Vienna, and Paris Photo, where the gallery has had particular success with solo presentations.",
-  "fr": "La Galerie Judith Andreae est une galerie d’art contemporain basée à Bonn, qui représente des artistes émergent·es comme confirmé·es de la scène internationale, actif·ves dans la peinture, le dessin, la photographie, la vidéo, la sculpture, l’art de l’objet, l’installation et la performance. La galerie présente chaque année six à huit expositions personnelles et collectives et participe régulièrement à des salons internationaux, dernièrement Art Düsseldorf, SPARK Art Fair à Vienne et Paris Photo, où ses présentations monographiques ont rencontré un succès particulier."
+  "fr": "La Galerie Judith Andreae est une galerie d’art contemporain basée à Bonn, qui représente des artistes émergent·es comme confirmé·es de la scène internationale, actif·ves dans la peinture, le dessin, la photographie, la vidéo, la sculpture, l’art de l’objet, l’installation et la performance. La galerie présente chaque année six à huit solo shows et expositions collectives et participe régulièrement à des salons internationaux, dernièrement Art Düsseldorf, SPARK Art Fair à Vienne et Paris Photo, où ses présentations monographiques ont rencontré un succès particulier."
  },
  {
   "page": "Galerie: Galerie Judith Andreae",
@@ -816,7 +816,7 @@
   "doc": "exhibitor-2026-galerie-judith-andreae",
   "champ": "bio.en[2]",
   "en": "A significant milestone was reached in October 2024, when Katja Kamilla, the daughter of the gallery founder, joined the gallery and began leading it into its next generation. While continuing to honor the gallery’s roots and its collector base in the Rhineland, she is shaping a more internationally oriented and progressive program. This includes a stronger focus on emerging voices, such as the upcoming solo exhibition of an artist from Ghana in summer 2025.",
-  "fr": "Une étape importante a été franchie en octobre 2024, lorsque Katja Kamilla, la fille de la fondatrice de la galerie, l’a rejointe et a commencé à la mener vers une nouvelle génération. Tout en restant fidèle aux racines de la galerie et à sa base de collectionneur·euses en Rhénanie, elle façonne une programmation plus internationale et plus progressiste. Celle-ci accorde notamment une place accrue aux voix émergentes, comme en témoigne la prochaine exposition personnelle d’un·e artiste originaire du Ghana à l’été 2025."
+  "fr": "Une étape importante a été franchie en octobre 2024, lorsque Katja Kamilla, la fille de la fondatrice de la galerie, l’a rejointe et a commencé à la mener vers une nouvelle génération. Tout en restant fidèle aux racines de la galerie et à sa base de collectionneur·euses en Rhénanie, elle façonne une programmation plus internationale et plus progressiste. Celle-ci accorde notamment une place accrue aux voix émergentes, comme en témoigne le prochain solo show d’un·e artiste originaire du Ghana à l’été 2025."
  },
  {
   "page": "Galerie: Galerie Metzger",
@@ -865,7 +865,7 @@
   "doc": "exhibitor-2026-galerie-pauline-renard",
   "champ": "bio.en[1]",
   "en": "With eight years of experience as a partner in a contemporary art gallery, Pauline Renard is opening her own space with the firm intention of promoting the emerging French and Belgian art scene. The gallery offers a demanding programme combining solo and group exhibitions, promoting intergenerational and transdisciplinary dialogue.",
-  "fr": "Forte de huit années d’expérience en tant qu’associée d’une galerie d’art contemporain, Pauline Renard ouvre son propre espace avec la ferme intention de promouvoir la scène artistique émergente française et belge. La galerie propose une programmation exigeante mêlant expositions personnelles et collectives, favorisant un dialogue intergénérationnel et transdisciplinaire."
+  "fr": "Forte de huit années d’expérience en tant qu’associée d’une galerie d’art contemporain, Pauline Renard ouvre son propre espace avec la ferme intention de promouvoir la scène artistique émergente française et belge. La galerie propose une programmation exigeante mêlant solo shows et expositions collectives, favorisant un dialogue intergénérationnel et transdisciplinaire."
  },
  {
   "page": "Galerie: Galerie Pauline Renard",
@@ -1376,7 +1376,7 @@
   "doc": "exhibitor-2026-sorry-we-re-closed",
   "champ": "bio.en[0]",
   "en": "Sorry We're Closed is a contemporary art gallery created by Sébastien Janssen in 2008. The focus of the gallery is upon mid-career and emerging artists from Belgium and abroad. Since 2021, the galerie is located in a four hundred meter square XIX century mansion, in the heart of the historic Sablons district. The gallery maintains a diverse exhibition program with solo exhibitions of the gallery artists as well as group exhibitions and special projects as editing artists jewels or books.",
-  "fr": "Sorry We're Closed est une galerie d’art contemporain créée par Sébastien Janssen en 2008. La galerie se concentre sur des artistes émergent·es et en milieu de carrière, de Belgique et de l’étranger. Depuis 2021, elle est installée dans un hôtel de maître du XIXe siècle de quatre cents mètres carrés, au cœur du quartier historique du Sablon. La galerie mène un programme d’expositions varié, avec des expositions personnelles des artistes de la galerie ainsi que des expositions collectives et des projets spéciaux, comme l’édition de bijoux ou de livres d’artistes."
+  "fr": "Sorry We're Closed est une galerie d’art contemporain créée par Sébastien Janssen en 2008. La galerie se concentre sur des artistes émergent·es et en milieu de carrière, de Belgique et de l’étranger. Depuis 2021, elle est installée dans un hôtel de maître du XIXe siècle de quatre cents mètres carrés, au cœur du quartier historique du Sablon. La galerie mène un programme d’expositions varié, avec des solo shows des artistes de la galerie ainsi que des expositions collectives et des projets spéciaux, comme l’édition de bijoux ou de livres d’artistes."
  },
  {
   "page": "Galerie: SPAX Projects",
@@ -1481,7 +1481,7 @@
   "doc": "exhibitor-2026-yod-gallery",
   "champ": "bio.en[0]",
   "en": "Yodo Gallery was founded in 1960 by Yasuko Kotani, former Managing Director of Osaka Formes Gallery, which introduced Japanese audiences to Fauvism, the École de Paris, and Surrealist European artists. After the war, Kotani significantly contributed to the development of Osaka’s local and international art scenes, notably by organizing the city’s first solo exhibitions for Joan Miró and André Derain.",
-  "fr": "Yodo Gallery a été fondée en 1960 par Yasuko Kotani, qui avait auparavant dirigé l’Osaka Formes Gallery, galerie qui a fait découvrir au public japonais le fauvisme, l’École de Paris et les artistes surréalistes européens. Après la guerre, Kotani a largement contribué au développement des scènes artistiques locale et internationale d’Osaka, notamment en organisant les premières expositions personnelles de Joan Miró et d’André Derain dans la ville."
+  "fr": "Yodo Gallery a été fondée en 1960 par Yasuko Kotani, qui avait auparavant dirigé l’Osaka Formes Gallery, galerie qui a fait découvrir au public japonais le fauvisme, l’École de Paris et les artistes surréalistes européens. Après la guerre, Kotani a largement contribué au développement des scènes artistiques locale et internationale d’Osaka, notamment en organisant les premiers solo shows de Joan Miró et d’André Derain dans la ville."
  },
  {
   "page": "Galerie: YOD Gallery",
