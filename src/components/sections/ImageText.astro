@@ -1,6 +1,7 @@
 ---
 import type { LocaleId } from '../../lib/locales';
 import SanityImage from '../SanityImage.astro';
+import FigureCaption from '../FigureCaption.astro';
 import PortableText from '../PortableText.astro';
 import LinkPill from '../LinkPill.astro';
 import { styleAttrs, bodyStyleAttrs } from '../../lib/textStyle';
@@ -49,6 +50,7 @@ const hasImage = !!section.image?.asset;
           sizes="(max-width: 900px) 100vw, 66vw"
           widths={[600, 900, 1200, 1600]}
         />
+        <FigureCaption image={section.image} />
       </figure>
     )
   }
@@ -202,6 +204,11 @@ const hasImage = !!section.image?.asset;
       position: relative;
       left: 50%;
       transform: translateX(-50%);
+    }
+    /* The picture goes to both edges; its caption does not follow it there
+       (site.css draws the same line for every other bleeding figure). */
+    .shot :global(figcaption) {
+      padding-inline: var(--gutter);
     }
   }
 </style>

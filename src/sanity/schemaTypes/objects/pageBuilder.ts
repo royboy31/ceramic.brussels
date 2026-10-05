@@ -158,12 +158,16 @@ export const gallerySection = defineType({
       },
       initialValue: 3,
     }),
+    /* No page reads this any more: a picture prints its caption wherever it
+       appears, so the switch only ever hid text an editor had typed (Léonie,
+       2026-10-05). Hidden rather than deleted - the data stays. */
     defineField({
       name: 'captions',
       title: 'Show captions',
       type: 'boolean',
       initialValue: false,
       description: 'Artist, work title, year and credit from each image.',
+      hidden: true,
     }),
     anchorField(),
     hiddenField(),

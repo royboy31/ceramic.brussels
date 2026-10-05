@@ -1,9 +1,19 @@
 ---
 import type { LocaleId } from '../../lib/locales';
 import SanityImage from '../SanityImage.astro';
+import FigureCaption from '../FigureCaption.astro';
 import { styleAttrs } from '../../lib/textStyle';
 
-/** A grid of 3:2 images, two to four across, with the design's caption line. */
+/**
+ * A grid of 3:2 images, two to four across, with the design's caption line.
+ *
+ * Every picture that carries a caption prints it. The block used to hide them
+ * all behind a "Show captions" switch that was off by default, so an editor
+ * who typed a caption into each image saw nothing and had no reason to suspect
+ * a second control ("Tiphaine has put them in the CMS, but they don't show
+ * under the photos" - Léonie, 2026-10-05). The switch is hidden in the schema
+ * and its data left alone.
+ */
 interface Props {
   lang: LocaleId;
   section: any;
@@ -12,9 +22,6 @@ interface Props {
 const { section } = Astro.props;
 const images = (section.images ?? []).filter((img: any) => img?.asset);
 const columns = [2, 3, 4].includes(section.columns) ? section.columns : 3;
-const showCaptions = section.captions === true;
-
-const hasCaption = (img: any) => img.caption || img.workTitle || img.year || img.credit;
 ---
 
 {
@@ -35,19 +42,7 @@ const hasCaption = (img: any) => img.caption || img.workTitle || img.year || img
                 sizes={`(max-width: 640px) 100vw, (max-width: 900px) 50vw, ${Math.round(100 / columns)}vw`}
                 widths={[400, 600, 900, 1200]}
               />
-              {showCaptions && hasCaption(img) && (
-                <figcaption>
-                  {img.caption}
-                  {img.workTitle && (
-                    <>
-                      {img.caption ? ', ' : ''}
-                      <em>{img.workTitle}</em>
-                    </>
-                  )}
-                  {img.year && `, ${img.year}`}
-                  {img.credit && <span class="credit"> © {img.credit}</span>}
-                </figcaption>
-              )}
+              <FigureCaption image={img} />
             </figure>
           </li>
         ))}
@@ -77,14 +72,7 @@ const hasCaption = (img: any) => img.caption || img.workTitle || img.year || img
     object-fit: cover;
     width: 100%;
   }
-  figcaption {
-    margin-top: 8px; /* not touching the picture (feedback, 2026-09-23) */
-    font-size: 18px;
-    letter-spacing: -0.025em;
-  }
-  .credit {
-    color: var(--ink-3);
-  }
+  /* The caption line and its credit are FigureCaption's own. */
 
   @media (max-width: 900px) {
     .grid {

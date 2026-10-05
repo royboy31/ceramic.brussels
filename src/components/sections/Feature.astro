@@ -1,6 +1,7 @@
 ---
 import type { LocaleId } from '../../lib/locales';
 import Figure from '../Figure.astro';
+import FigureCaption from '../FigureCaption.astro';
 import SanityImage from '../SanityImage.astro';
 import Slideshow from '../Slideshow.astro';
 import { resolveLink } from '../../lib/links';
@@ -101,7 +102,12 @@ const AUTOPLAY_MS = 4500;
         {pictures.length > 1 ? (
           <Slideshow images={pictures} aspect={3 / 2} autoplay={AUTOPLAY_MS} sizes="(max-width: 640px) 100vw, 50vw" label={lines[0]} id={slideshowId} />
         ) : (
-          <Figure image={section.image} sizes="(max-width: 640px) 100vw, 50vw" />
+          <figure>
+            <Figure image={section.image} sizes="(max-width: 640px) 100vw, 50vw" />
+            {/* The slideshow above captions each of its pictures; a block with
+                one picture captioned none (Léonie, 2026-10-05). */}
+            <FigureCaption image={section.image} />
+          </figure>
         )}
       </div>
     </section>
@@ -220,6 +226,9 @@ const AUTOPLAY_MS = 4500;
   }
   .feature-shot {
     grid-column: span 6;
+  }
+  .feature-shot figure {
+    margin: 0;
   }
   .feature-shot :global(img) {
     width: 100%;

@@ -5,6 +5,7 @@ import LinkPill from '../../components/LinkPill.astro';
 import Sections from '../../components/Sections.astro';
 import PageSections from '../../components/PageSections.astro';
 import SanityImage from '../../components/SanityImage.astro';
+import FigureCaption from '../../components/FigureCaption.astro';
 import Slideshow from '../../components/Slideshow.astro';
 import PortableText from '../../components/PortableText.astro';
 import { LOCALE_IDS, type LocaleId } from '../../lib/locales';
@@ -139,7 +140,10 @@ const captionOf = (img: any, fallback?: string) => ({
           ) : cover ? (
             <figure>
               <SanityImage image={cover} loading="eager" sizes="(max-width: 700px) 100vw, 66vw" widths={[600, 900, 1200, 1800]} />
-              {(cover.caption || cover.workTitle) && (
+              {/* The credit counts too: a cover whose only caption field was
+                  the photographer printed nothing (Léonie, 2026-10-05). The
+                  span stays - the mobile rule below hides the line by it. */}
+              {(cover.caption || cover.workTitle || cover.year || cover.credit) && (
                 <figcaption>
                   <span>
                     {captionOf(cover).who}
@@ -149,7 +153,8 @@ const captionOf = (img: any, fallback?: string) => ({
                         <em>{captionOf(cover).title}</em>
                       </>
                     )}
-                    {captionOf(cover).year && `, ${captionOf(cover).year}`}
+                    {captionOf(cover).year && `${captionOf(cover).who || captionOf(cover).title ? ', ' : ''}${captionOf(cover).year}`}
+                    {cover.credit && <span class="credit"> © {cover.credit}</span>}
                   </span>
                 </figcaption>
               )}
@@ -177,7 +182,13 @@ const captionOf = (img: any, fallback?: string) => ({
         {closing.length > 0 && (
           <div class="gallery">
             {closing.map((img: any) => (
-              <SanityImage image={img} aspect={1.5} sizes="(max-width: 700px) 100vw, 33vw" widths={[400, 600, 900, 1200]} />
+              <figure>
+                <SanityImage image={img} aspect={1.5} sizes="(max-width: 700px) 100vw, 33vw" widths={[400, 600, 900, 1200]} />
+                {/* This row captioned nothing at all, which is the art prize
+                    half of "they don't show under the photos sometimes"
+                    (Léonie, 2026-10-05). */}
+                <FigureCaption image={img} />
+              </figure>
             ))}
           </div>
         )}
@@ -460,6 +471,14 @@ const captionOf = (img: any, fallback?: string) => ({
     aspect-ratio: 1.5;
     object-fit: cover;
     width: 100%;
+  }
+  .gallery figure {
+    margin: 0;
+  }
+  /* The row's captions are FigureCaption's, not the hero's flex line above. */
+  .gallery :global(figcaption) {
+    display: block;
+    padding-top: 0;
   }
 
   /* The laureates, from art-prize/laureates/index.html (2026-09-14 build). */
