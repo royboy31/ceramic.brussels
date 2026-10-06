@@ -250,8 +250,17 @@ const widthFit = fit === 'width';
   .slideshow[data-slides='1'] .counter {
     display: none;
   }
+  /* "On some of the slideshows, mainly the gallery ones, sometimes the
+     caption is cut on its right edge" - Léonie, 2026-10-06. A flex item
+     keeps `min-width: auto`, so it will not shrink below its longest word:
+     past that it overflows the line instead of wrapping, and `.track`
+     (`overflow-x: auto`, the carousel) cuts off whatever sticks out. With
+     `min-width: 0` it wraps onto a second line, and a word longer than the
+     column breaks rather than running past the edge. */
   .caption {
     text-align: right;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .credit {
     color: var(--ink-3);

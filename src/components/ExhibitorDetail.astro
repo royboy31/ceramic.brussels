@@ -1,6 +1,6 @@
 ---
 import ExhibitorHead from './ExhibitorHead.astro';
-import { focusLockup } from './exhibitorBadges';
+import { focusLockup, juryPrizeLockup } from './exhibitorBadges';
 import Slideshow from './Slideshow.astro';
 import PortableText from './PortableText.astro';
 import type { LocaleId } from '../lib/locales';
@@ -51,6 +51,14 @@ const badge = exhibitor.kind === 'jury-prize' ? t('exhibitors.juryPrize') : exhi
  *  `exhibitorBadges.ts`. */
 const focusLabel = exhibitor.countryFocusLabel ?? t('exhibitors.countryFocus');
 const focusLogo = exhibitor.inCountryFocus ? focusLockup(focusLabel) : null;
+/** The jury prize oval, the same artwork the listing card has carried since
+ *  2026-10-02 - the page was still printing the words in a black disc
+ *  ("don't forget to change the « jury prize 2025 » logo on Léonore
+ *  Chastagner's page", Léonie, 2026-10-06). The badge names the year the
+ *  prize was won, which is the edition before the one exhibited in, and an
+ *  edition with no artwork keeps the words - see `exhibitorBadges.ts`. */
+const juryLogo = exhibitor.kind === 'jury-prize' ? juryPrizeLockup(exhibitor.year) : null;
+const juryYear = exhibitor.year ? exhibitor.year - 1 : null;
 
 /** "solo show" → "solo<br>show", the two-line badge of the design. */
 const twoLines = (s: string) => {
@@ -107,6 +115,8 @@ const bioRight = bio.slice(split);
               {focusLogo && <img class="focus-logo" src={focusLogo} alt={focusLabel} width="260" height="149" />}
               {badge && exhibitor.kind !== 'jury-prize' ? (
                 <img class="solo-logo" src="/assets/exhibitors/solo-show.png" alt={badge} width="60" height="60" />
+              ) : juryLogo ? (
+                <img class="jury-logo" src={juryLogo} alt={`${badge} ${juryYear}`} width="120" height="56" />
               ) : badge && (
                 <span>
                   {twoLines(badge).map((l, i) => (
@@ -258,6 +268,12 @@ const bioRight = bio.slice(split);
     width: 60px;
     height: 60px;
   }
+  /* The jury prize oval is wider than it is tall, so it keeps its own shape
+     rather than the disc's square - the same treatment as on the cards. */
+  .jury-logo {
+    width: auto;
+    height: 56px;
+  }
   /* The Spain outline and its words, as tall as the solo show disc. */
   .focus-logo {
     width: auto;
@@ -379,6 +395,9 @@ const bioRight = bio.slice(split);
     }
     .focus-logo {
       height: 50px;
+    }
+    .jury-logo {
+      height: 46px;
     }
     .booth span {
       width: 50px;
