@@ -276,6 +276,17 @@ const widthFit = fit === 'width';
     text-align: right;
     min-width: 0;
     overflow-wrap: anywhere;
+    /* And the last glyph is not sliced. The caption is right-aligned and its
+       box ends exactly on the track's clip edge - measured 478.00 for the
+       caption, the figcaption and the track's visible edge alike - while the
+       work title is italic, and an italic glyph's ink leans past the advance
+       width its box is drawn from. So the tail of "Travail 2", "Travail 1",
+       "Upright leaning rod yellow" was shaved off by `overflow-x` ("there
+       still seems to be a bug on the display of the captions", Léonie,
+       2026-10-06; it is what every one of her screenshots since 2:43 PM
+       shows - each caption ends in an italic title). The slant needs about
+       a pixel; this gives it a little under two. */
+    padding-inline-end: 0.15em;
   }
   .credit {
     color: var(--ink-3);
