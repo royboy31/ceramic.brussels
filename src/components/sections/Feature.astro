@@ -45,7 +45,10 @@ const AUTOPLAY_MS = 4500;
         (pictures.length > 1 ? (
           <Slideshow images={pictures} aspect={638 / 428} autoplay={AUTOPLAY_MS} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 50vw" label={lines[0]} id={slideshowId} />
         ) : image ? (
-          <SanityImage image={image} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 50vw" />
+          <figure class="feature-figure">
+            <SanityImage image={image} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 50vw" />
+            <FigureCaption image={image} />
+          </figure>
         ) : (
           <div class="feature-empty" />
         ))}
@@ -78,7 +81,10 @@ const AUTOPLAY_MS = 4500;
         (pictures.length > 1 ? (
           <Slideshow images={pictures} aspect={638 / 428} autoplay={AUTOPLAY_MS} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 60vw" label={lines[0]} id={slideshowId} />
         ) : image ? (
-          <SanityImage image={image} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 60vw" />
+          <figure class="feature-figure">
+            <SanityImage image={image} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 60vw" />
+            <FigureCaption image={image} />
+          </figure>
         ) : (
           <div class="feature-empty" />
         ))}
@@ -132,7 +138,13 @@ const AUTOPLAY_MS = 4500;
     align-items: start;
     margin-top: 30px;
   }
+  /* One picture, so no slideshow to carry the legend: the image sits in its
+     own figure and the caption goes under it, the way a slideshow's does.
+     Without it a single-picture row printed nothing, and "Basel Tourismus"
+     and "Hoxton Hotel, Brussels" were in the CMS all along ("the hotel and
+     Basel ones don't appear", client, 2026-10-06). */
   .split.feature > :global(img),
+  .split.feature > .feature-figure > :global(img),
   .feature-empty {
     aspect-ratio: 638 / 428;
     object-fit: cover;
@@ -286,6 +298,7 @@ const AUTOPLAY_MS = 4500;
        does not honour a percentage pull though the simulator does
        (2026-10-03, the programme/visitors-info lesson). */
     .split.feature > :global(img),
+    .split.feature > .feature-figure,
     .split.feature > :global(.video-frame),
     .split.feature > .feature-empty {
       width: calc(100% + 2 * var(--gutter));
