@@ -87,6 +87,11 @@ const widthFit = fit === 'width';
       data-autoplay={autoplay && slides.length > 1 ? autoplay : undefined}
       style={aspect && !widthFit ? `--aspect: ${aspect}` : undefined}
     >
+      {/* The clip the height is animated on. It wraps the track rather than
+          being the track, because the track is the scroll container and a
+          scroll container that is resized mid-swipe abandons its snap - see
+          the `fit` note in the script. */}
+      <div class="viewport" data-viewport>
       <div class="track" data-track tabindex={slides.length > 1 ? 0 : undefined}>
         {slides.map((img, i) => (
           <figure class="slide" id={slideId(i)} data-slide>
@@ -127,6 +132,7 @@ const widthFit = fit === 'width';
             </figcaption>
           </figure>
         ))}
+      </div>
       </div>
 
       {slides.length > 1 && (
@@ -203,9 +209,18 @@ const widthFit = fit === 'width';
      given a scrollbar, which `overflow-x: auto` would otherwise force.
      Both rules hang off `[data-fit]`, which the script sets only once it has
      measured: with no JavaScript the track keeps its natural height and the
-     band comes back, which is merely the old, ugly, behaviour. */
-  .fit-width[data-fit] .track {
-    overflow-y: hidden;
+     band comes back, which is merely the old, ugly, behaviour.
+
+     The height lives on `.viewport`, never on `.track`. The track is the
+     scroll container, and resizing a scroll container while the browser is
+     running its snap animation makes the engine give up and leave the swipe
+     between two pictures - "it doesn't stop at one image sometimes, it stops
+     in the middle of 2" (Kamindu, 2026-10-06), on gallery slideshows where
+     the slides are 320 and 681px tall side by side. The clip is a parent, so
+     the box that snaps never changes size. `clip`, not `hidden`: it makes no
+     scroll container of its own and so cannot swallow the swipe. */
+  .fit-width[data-fit] .viewport {
+    overflow: clip;
   }
   .fit-width .slide :global(img) {
     width: 100%;
@@ -447,9 +462,10 @@ const widthFit = fit === 'width';
        ResizeObserver below watches an element whose height this changes, and
        without the guard the two would drive each other. */
     const widthFit = show.classList.contains('fit-width');
+    const viewport = show.querySelector<HTMLElement>('[data-viewport]');
     let fitted = -1;
     const fit = () => {
-      if (!widthFit) return;
+      if (!widthFit || !viewport) return;
       const width = track.clientWidth || 1;
       const at = track.scrollLeft / width;
       const i = Math.max(0, Math.min(slides.length - 1, Math.floor(at)));
@@ -460,7 +476,9 @@ const widthFit = fit === 'width';
       const height = Math.round(from + (to - from) * part);
       if (height > 0 && Math.abs(height - fitted) > 1) {
         fitted = height;
-        track.style.height = `${height}px`;
+        /* The clip, not the scroll container: resizing the snapping element
+           mid-swipe drops the snap and strands it between two pictures. */
+        viewport.style.height = `${height}px`;
         show.setAttribute('data-fit', '');
       }
     };
