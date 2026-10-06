@@ -3,6 +3,8 @@ import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
 import { editionTabPath } from '../lib/previousEditions';
 import { PAST_EDITIONS_PUBLIC } from './launch';
+import { getNavigation } from '../lib/queries';
+import { stegaClean } from '@sanity/client/stega';
 
 /**
  * The title band of the exhibitor pages, as the design's exhibitors pages
@@ -58,14 +60,38 @@ const tabs = [
   { key: 'awards', label: t('nav.awards').toLowerCase(), href: localePath(lang, 'exhibitors/awards') },
 ].filter(Boolean) as { key: string; label: string; href: string; external?: boolean }[];
 const mark = activeLetter.toUpperCase();
+
+/**
+ * The band's name follows the menu, as a hub band's does (HubNav): the menu
+ * row that leads to /exhibitors names this band too, so renaming the section
+ * in the Studio renames the galleries list, the artists list, the awards tab
+ * and every gallery page at once. It was an i18n constant, so the menu read
+ * "exhibitors 2026" while every band still read "exhibitors" (client,
+ * 2026-10-06). The string stays as the fallback for a menu that does not
+ * list the section. getNavigation is memoised, so this costs the build
+ * nothing.
+ */
+const nav = await getNavigation(lang);
+const navLabel = nav?.items?.find((item: any) => {
+  if (item.route === 'exhibitors') return true;
+  return String(item.path ?? '').split('/').filter(Boolean).pop() === 'exhibitors';
+})?.label;
+const name = navLabel ?? t('nav.exhibitors').toLowerCase();
+/**
+ * A past edition puts its year after the name - unless the editor has already
+ * put it there, which is what the menu says today ("exhibitors 2026"):
+ * appending then read "exhibitors 2026 2026". Compared on the cleaned
+ * string, because a preview render stega-encodes the label.
+ */
+const yearSuffix = year && !stegaClean(name ?? '').trim().endsWith(String(year)) ? ` ${year}` : '';
 ---
 
 {!bandless && (
 <header class="exhibitor-head title-band">
   <div class="exhibitor-head__top">
     <h1>
-      {t('nav.exhibitors').toLowerCase()}
-      {year && ` ${year}`}
+      {name}
+      {yearSuffix}
     </h1>
     <nav aria-label={t('nav.exhibitors')}>
       {
@@ -136,7 +162,11 @@ const mark = activeLetter.toUpperCase();
     gap: 32px;
     display: flex;
   }
+  /* Lowercase in the design, as every hub band is (HubNav): the name is the
+     editor's menu row now, so the capitals it may be typed with are dropped
+     here rather than in the markup. */
   h1 {
+    text-transform: lowercase;
     letter-spacing: -0.055em;
     font-size: var(--band-h1, 70px);
     font-weight: 600;
