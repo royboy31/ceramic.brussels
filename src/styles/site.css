@@ -316,12 +316,18 @@ main .slideshow figure:has(> img) {
      track is sized, so the 1fr track grew to the item's 100vw and every
      photo sat a gutter right of the screen with a sideways scroll
      (Kamindu, 2026-10-02). The grid bleeds as a whole in PressMedia.astro
-     instead. */
+     instead.
+     A press card's cover is not here either, for the same reason and one
+     more: the card is a bordered grid item with `overflow: hidden`, so a
+     100vw cover was not bleeding at all - it was being cut off inside its
+     own card, taking the headline and "lire l'article" with it on a narrow
+     phone ("can you please check this on the mobile version", Gilles,
+     2026-10-06). The cover fills the card at `width: 100%`, which is what
+     PressMedia.astro already asks for; this sweep was overriding it. */
   main .press-media .story-card > img,
   main .press-media .story-card > figure,
   main .press-media .collector-list article > img,
-  main .press-media .collector-list article > figure,
-  main .press-media .press-card > .cover {
+  main .press-media .collector-list article > figure {
     width: 100vw;
     max-width: none;
     margin-inline: calc(50% - 50vw);
@@ -347,12 +353,18 @@ main .slideshow figure:has(> img) {
   }
   /* A caption belongs to the text column, not to the picture's new edges.
      The guest portrait's credit sat flush with the screen edge without its
-     row here (Gilles, 2026-10-03). */
+     row here (Gilles, 2026-10-03). The visitors-info photo row and the
+     about page's strip were the two blocks still missing from this list:
+     their captions started at the bleed edge, so "ceramic brussels 2026 ©
+     Geoffrey Fritsch" touched the glass with the first letters clipped
+     (Gilles, 2026-10-06, the same report as the press card above). */
   .u-bleed-m > figcaption,
   main .feature > figure > figcaption,
   main .guest-page > .portrait-figure > figcaption,
   main .guest-page .gallery-track > figure > figcaption,
   main .prize-about .hero > figure > figcaption,
+  main .practical .photo-row > figure > figcaption,
+  main .about > .strip > figure > figcaption,
   main .gallery .grid li > figure > figcaption {
     padding-inline: var(--gutter);
   }
