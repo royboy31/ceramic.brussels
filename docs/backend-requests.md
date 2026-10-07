@@ -1017,7 +1017,7 @@ The stub exists for a second reason too: a static `Astro.redirect` writes an HTM
 **Wired (2026-10-02 pm, in the browser with Kamindu):** the Sheet is `ceramic_contact_pages` (tab `Newsletter`), the script is deployed from it as the web app "ceramic brussels newsletter" (Execute as: Me / Access: Anyone, owner kamindudushmantha@gmail.com — only the owner can manage its deployments, the Pujol lesson), the upsert was proven from the shell (one row despite four posts, Date kept by writeOnce, Language updated; the test row is still in the sheet as proof), and the /exec URL is in the `NEWSLETTER_SHEETS_URL` Pages secret (production) and `.env`. Left: cherry-pick the branch to main (the route ships with it), publish the draft Newsletter page, point the menu/footer "Newsletter" entry at it, FR/NL confirmation text in Site settings → Newsletter.
 
 ---
-## #56 · open · 2026-10-07 · the French and Dutch previews 404: Studio builds hub paths in English
+## #56 · done · 2026-10-07 · the French and Dutch previews 404: Studio builds hub paths in English
 
 **Page / component:** `src/sanity/previewPaths.ts` (yours), using `hubTabPath()` from `src/lib/hubs.ts` (mine)
 
@@ -1045,3 +1045,5 @@ partnerPath({ tier }, lang)        // → /fr/partenaires/institutions
 `EVENT_TABS` and the `siteSettings` / hub literals want the same treatment (`hubTabPath('programme', 'awards', lang)` and so on). The `page` branch lower down is already right: standalone pages map each locale to its own slug.
 
 **Not touched by me** — `src/sanity/` is your half, and you are working in it. Say the word if you would rather I took it.
+
+**Done (Kamindu, 2026-10-07, `f1ed0b0` "The preview of a French page opens the French page"):** taken as asked. `previewPaths.ts` now imports `hubTabPath` from `src/lib/hubs.ts` and builds every hub address through one `hubLoc()` helper; `TIER_PAGES` and `EVENT_TABS` hold a hub + tab reference instead of an English href. The composition is right - `hubTabPath` is locale-less and `at()` adds `/preview/<lang>`, so a main partner resolves to `/preview/fr/partenaires` rather than the `/preview/fr/partners` that 404'd.
