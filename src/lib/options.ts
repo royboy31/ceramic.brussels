@@ -18,6 +18,9 @@ export const EXHIBITOR_KINDS = [
 export const PARTNER_TIERS = [
   { title: 'Main partner', value: 'main' },
   { title: 'Institution', value: 'institutional' },
+  // Felicie's three filters on the institutions tab (2026-10-06): the
+  // institutional tier split in two, with the exhibition pass beside it.
+  { title: 'Organization', value: 'organization' },
   { title: 'Hotel', value: 'hotel' },
   { title: 'Event partner', value: 'event' },
   { title: 'Media', value: 'media' },

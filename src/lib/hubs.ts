@@ -274,8 +274,13 @@ export const HUBS: Record<string, Hub> = {
 /** Partner tab → partner tier(s) it lists. */
 export const PARTNER_TABS: Record<string, string[]> = {
   main: ['main'],
-  // The design's institutions tab lists the institutional tier alone.
-  institutions: ['institutional'],
+  /* The institutions tab carried the institutional tier alone until
+     Felicie asked for three filters under the title - "institutions",
+     "organizations" and "exhibition pass" (2026-10-06). They are the tiers
+     themselves, so the tab lists all three and the pills narrow it; a tier
+     with no partner yet simply gives an empty pill. `exhibition-pass` is
+     left on the event tab too, where it has always been listed. */
+  institutions: ['institutional', 'organization', 'exhibition-pass'],
   hotel: ['hotel'],
   event: ['event', 'supplier', 'exhibition-pass'],
   media: ['media'],
