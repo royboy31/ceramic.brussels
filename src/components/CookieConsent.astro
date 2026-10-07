@@ -233,6 +233,10 @@ const categories = categoriesInUse();
       // start the page again without it.
       const wasMeasuring = before ? before.analytics : preConsentRunning;
       if ((wasMeasuring && !choice.analytics) || (before?.marketing && !choice.marketing)) {
+        // Deny first: a running GA4 or Clarity writes its cookies again as
+        // the page unloads, after forget() has cleared them.
+        w.gtag('consent', 'update', { analytics_storage: 'denied', ad_storage: 'denied' });
+        w.clarity?.('consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' });
         forget();
         location.reload();
         return;
