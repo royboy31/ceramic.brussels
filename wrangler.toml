@@ -28,7 +28,12 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 PUBLIC_SANITY_PROJECT_ID = "5hqzhin7"
 PUBLIC_SANITY_DATASET = "production"
-PUBLIC_SITE_URL = "https://ceramic-brussels.pages.dev"
+# The canonical host, and the cutover of 2026-10-05 is the one edit that makes
+# it real: astro.config.mjs feeds this to `site`, so every canonical tag, every
+# hreflang, every OG URL and the whole sitemap are built from it. While it named
+# the pages.dev alias, the site published canonicals pointing at the one host
+# public/_headers tells search engines to ignore.
+PUBLIC_SITE_URL = "https://www.ceramic.brussels"
 # The preview runtime on production too (2026-09-06): editors use the live
 # Studio's Preview tab and share draft links from the real domain. See the
 # explanation under [env.preview.vars]; production needs the same

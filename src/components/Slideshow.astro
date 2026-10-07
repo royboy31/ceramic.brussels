@@ -87,6 +87,11 @@ const widthFit = fit === 'width';
       data-autoplay={autoplay && slides.length > 1 ? autoplay : undefined}
       style={aspect && !widthFit ? `--aspect: ${aspect}` : undefined}
     >
+      {/* The clip the height is animated on. It wraps the track rather than
+          being the track, because the track is the scroll container and a
+          scroll container that is resized mid-swipe abandons its snap - see
+          the `fit` note in the script. */}
+      <div class="viewport" data-viewport>
       <div class="track" data-track tabindex={slides.length > 1 ? 0 : undefined}>
         {slides.map((img, i) => (
           <figure class="slide" id={slideId(i)} data-slide>
@@ -127,6 +132,7 @@ const widthFit = fit === 'width';
             </figcaption>
           </figure>
         ))}
+      </div>
       </div>
 
       {slides.length > 1 && (
@@ -191,6 +197,31 @@ const widthFit = fit === 'width';
   .fit-width .track {
     align-items: flex-start;
   }
+  /* The slides stopped stretching, but the track is still a flex row and so
+     is still as tall as the TALLEST of them. Under a short picture that left
+     a tall empty band between the slideshow and whatever came next - "there's
+     a big blank space in between the slideshow and the name of the gallery,
+     it looks weird! The content about the gallery should come right below the
+     image" (Léonie, 2026-10-05, on a phone, where the pictures are widest and
+     the difference largest). The script gives the track the height of the
+     slide in view and follows the swipe across to the next one, so the page
+     closes up behind the picture. A taller neighbour is clipped rather than
+     given a scrollbar, which `overflow-x: auto` would otherwise force.
+     Both rules hang off `[data-fit]`, which the script sets only once it has
+     measured: with no JavaScript the track keeps its natural height and the
+     band comes back, which is merely the old, ugly, behaviour.
+
+     The height lives on `.viewport`, never on `.track`. The track is the
+     scroll container, and resizing a scroll container while the browser is
+     running its snap animation makes the engine give up and leave the swipe
+     between two pictures - "it doesn't stop at one image sometimes, it stops
+     in the middle of 2" (Kamindu, 2026-10-06), on gallery slideshows where
+     the slides are 320 and 681px tall side by side. The clip is a parent, so
+     the box that snaps never changes size. `clip`, not `hidden`: it makes no
+     scroll container of its own and so cannot swallow the swipe. */
+  .fit-width[data-fit] .viewport {
+    overflow: clip;
+  }
   .fit-width .slide :global(img) {
     width: 100%;
     height: auto;
@@ -234,8 +265,28 @@ const widthFit = fit === 'width';
   .slideshow[data-slides='1'] .counter {
     display: none;
   }
+  /* "On some of the slideshows, mainly the gallery ones, sometimes the
+     caption is cut on its right edge" - Léonie, 2026-10-06. A flex item
+     keeps `min-width: auto`, so it will not shrink below its longest word:
+     past that it overflows the line instead of wrapping, and `.track`
+     (`overflow-x: auto`, the carousel) cuts off whatever sticks out. With
+     `min-width: 0` it wraps onto a second line, and a word longer than the
+     column breaks rather than running past the edge. */
   .caption {
     text-align: right;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    /* And the last glyph is not sliced. The caption is right-aligned and its
+       box ends exactly on the track's clip edge - measured 478.00 for the
+       caption, the figcaption and the track's visible edge alike - while the
+       work title is italic, and an italic glyph's ink leans past the advance
+       width its box is drawn from. So the tail of "Travail 2", "Travail 1",
+       "Upright leaning rod yellow" was shaved off by `overflow-x` ("there
+       still seems to be a bug on the display of the captions", Léonie,
+       2026-10-06; it is what every one of her screenshots since 2:43 PM
+       shows - each caption ends in an italic title). The slant needs about
+       a pixel; this gives it a little under two. */
+    padding-inline-end: 0.15em;
   }
   .credit {
     color: var(--ink-3);
@@ -413,9 +464,57 @@ const widthFit = fit === 'width';
         show.setAttribute('data-measured', '');
       }
     };
-    const remeasure = () => requestAnimationFrame(media);
+    /* fit="width" only: the track's own height, taken from the slide in view
+       rather than from the tallest one, so nothing below the slideshow is
+       pushed down by a picture that is not on screen (Léonie, 2026-10-05).
+       The height is interpolated across the swipe from the fractional scroll
+       position, so it moves with the gesture instead of jumping at the
+       half-way mark. `fitted` makes the write idempotent, which matters: the
+       ResizeObserver below watches an element whose height this changes, and
+       without the guard the two would drive each other. */
+    const widthFit = show.classList.contains('fit-width');
+    const viewport = show.querySelector<HTMLElement>('[data-viewport]');
+    let fitted = -1;
+    const fit = () => {
+      if (!widthFit || !viewport) return;
+      const width = track.clientWidth || 1;
+      const at = track.scrollLeft / width;
+      const i = Math.max(0, Math.min(slides.length - 1, Math.floor(at)));
+      const next = Math.min(slides.length - 1, i + 1);
+      const part = Math.min(1, Math.max(0, at - i));
+      const from = slides[i].getBoundingClientRect().height;
+      const to = slides[next].getBoundingClientRect().height;
+      const height = Math.round(from + (to - from) * part);
+      if (height > 0 && Math.abs(height - fitted) > 1) {
+        fitted = height;
+        /* The clip, not the scroll container: resizing the snapping element
+           mid-swipe drops the snap and strands it between two pictures. */
+        viewport.style.height = `${height}px`;
+        show.setAttribute('data-fit', '');
+      }
+    };
+
+    const remeasure = () => requestAnimationFrame(() => {
+      media();
+      fit();
+    });
     new ResizeObserver(remeasure).observe(show);
     slides.forEach((slide) => slide.querySelector('img')?.addEventListener('load', remeasure, { once: true }));
+
+    let tracking = false;
+    track.addEventListener(
+      'scroll',
+      () => {
+        if (tracking) return;
+        tracking = true;
+        requestAnimationFrame(() => {
+          tracking = false;
+          fit();
+        });
+      },
+      { passive: true },
+    );
+    fit();
 
     /* Only now does the one-caption rule apply: the CSS is gated on this
        attribute, so if the script never runs every caption stays visible

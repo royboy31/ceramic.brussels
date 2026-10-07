@@ -1,5 +1,5 @@
 ---
-import { LOCALES, type LocaleId } from '../lib/locales';
+import { LOCALES, SWITCHER_LOCALES, type LocaleId } from '../lib/locales';
 import { localePath, useTranslations } from '../lib/i18n';
 import { urlFor } from '../sanity/image';
 import SanityImage from './SanityImage.astro';
@@ -38,7 +38,11 @@ const home = localePath(lang);
 const partnerName = mainPartner?.name ?? 'Puilaetco';
 const Lockup = mainPartner?.url ? 'a' : 'div';
 const current = LOCALES.find((l) => l.id === lang)!;
-const others = LOCALES.filter((l) => l.id !== lang);
+/* The offered languages, which is not every language: Dutch is held back
+   for the launch (see `SWITCHER_LOCALES`). `current` still reads the full
+   list, so a visitor already on a Dutch page sees NL as their language and
+   can switch away from it rather than being stranded. */
+const others = SWITCHER_LOCALES.filter((l) => l.id !== lang);
 ---
 
 <header class="site-header acid-wash">
@@ -100,7 +104,7 @@ const others = LOCALES.filter((l) => l.id !== lang);
           aria-label={`${t('common.language')}: ${current.title}`}
           data-lang-toggle
         >
-          {current.id.toUpperCase()}<span aria-hidden="true" class="site-lang__caret">▾</span>
+          {current.id.toUpperCase()}<span aria-hidden="true" class="site-lang__caret" />
         </button>
         <ul id="site-lang-list" class="site-lang__list" hidden>
           {
@@ -167,8 +171,19 @@ const others = LOCALES.filter((l) => l.id !== lang);
     cursor: pointer;
     transition: opacity 0.18s;
   }
+  /* The caret is drawn, not typed. `▾` is not in Noi Grotesk, so it came
+     from whatever fallback the machine happened to have, at 0.6em of the
+     switcher's 22px - about 10px of mostly empty em box, which read as a
+     speck beside the type and was a different size on every platform. A
+     border triangle is the size it is asked for, everywhere, and still
+     scales with the switcher through `em`, so the smaller header sizes and
+     the scrolled state carry it down with them. */
   .site-lang__caret {
-    font-size: 0.6em;
+    width: 0;
+    height: 0;
+    border-left: 0.3em solid transparent;
+    border-right: 0.3em solid transparent;
+    border-top: 0.34em solid currentColor;
     transition: transform 0.18s;
   }
   .site-lang__current[aria-expanded='true'] .site-lang__caret {

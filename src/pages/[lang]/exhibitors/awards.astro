@@ -132,14 +132,17 @@ const logoHeight = (image: any, max = 78, base = 92) => {
           const gallery = prev?.gallery;
           const code = gallery ? countryCode(gallery.countryCode ?? gallery.country) : null;
           return (
-            <article>
-              <figure>
-                {images.length ? (
+            <article class:list={{ 'no-shot': !images.length }}>
+              {/* No picture, no frame: an award with nothing to show drew an
+                  empty grey rectangle beside its text ("we currently don't
+                  have a photo to put there. Maybe just align the block of
+                  text to the left?" - Léonie, 2026-10-05). The row then runs
+                  as one column and the copy starts at the gutter. */}
+              {images.length > 0 && (
+                <figure>
                   <Slideshow images={images} aspect={1.5} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 50vw" label={a.name} id={`award-${i + 1}`} />
-                ) : (
-                  <div class="award-empty" />
-                )}
-              </figure>
+                </figure>
+              )}
               <div class="award-copy">
                 <h2 {...styleAttrs(a.nameStyle)}>{a.name}</h2>
                 {a.isNew && <p class="label">{t('exhibitors.newThisYear')}</p>}
@@ -221,12 +224,20 @@ const logoHeight = (image: any, max = 78, base = 92) => {
     padding-bottom: 50px;
     display: grid;
   }
+  /* Pictureless: one column, the text at the left where the pictures were.
+     The copy keeps the half-width measure of the ruled rows above it rather
+     than running the full page (Léonie, 2026-10-05). */
+  .awards-list article.no-shot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .no-shot .award-copy {
+    max-width: calc(50% - 20px);
+  }
   .awards-list figure {
     margin: 0;
     position: relative;
   }
-  .awards-list :global(img),
-  .award-empty {
+  .awards-list :global(img) {
     aspect-ratio: 1.5;
     object-fit: cover;
     width: 100%;
@@ -284,6 +295,11 @@ const logoHeight = (image: any, max = 78, base = 92) => {
     }
     .award-copy {
       padding-top: 16px;
+    }
+    /* One column already: the half-width measure above is a desktop rule. */
+    .no-shot .award-copy {
+      max-width: none;
+      padding-top: 0;
     }
   }
   /* The partner cards' foot (Partners.astro): website pill left, the

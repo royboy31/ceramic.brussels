@@ -26,6 +26,18 @@ interface Props {
 const { lang, exhibitor: ex, code, id, awarded = false } = Astro.props;
 const t = useTranslations(lang);
 
+/**
+ * The name, split so the country code can never be left alone on a line of
+ * its own: "on mobile, is there a way to force the exponent country code to
+ * never be separated from the last word of the gallery name … it looks a bit
+ * weird" (Léonie, 2026-10-06). The last word and the code travel together in
+ * a `white-space: nowrap` span; everything before it wraps as before, so a
+ * long name still breaks, just never right before the code.
+ */
+const nameWords = String(ex.name ?? '').split(' ');
+const nameTail = nameWords.pop() ?? '';
+const nameHead = nameWords.join(' ');
+
 /** First letter of the sort name, folded so "Éclat" files under E. */
 const letter = (ex.sortName ?? ex.name ?? '')
   .normalize('NFD')
@@ -95,7 +107,7 @@ const juryLogo = ex.kind === 'jury-prize' ? juryPrizeLockup(ex.year) : null;
             <img
               class="badge badge--oval"
               src={juryLogo}
-              alt={`${t('exhibitors.juryPrize')} ${ex.year}`}
+              alt={`${t('exhibitors.juryPrize')} ${ex.year ? ex.year - 1 : ''}`.trim()}
               width="120"
               height="56"
             />
@@ -131,7 +143,10 @@ const juryLogo = ex.kind === 'jury-prize' ? juryPrizeLockup(ex.year) : null;
       }
     </div>
     <h2>
-      {ex.name} {code && <sup>{code}</sup>}
+      {nameHead && `${nameHead} `}
+      <span class="name-tail">
+        {nameTail} {code && <sup>{code}</sup>}
+      </span>
     </h2>
   </a>
 </article>
@@ -208,6 +223,11 @@ const juryLogo = ex.kind === 'jury-prize' ? juryPrizeLockup(ex.year) : null;
     font-size: var(--name-size);
     font-weight: 400;
     line-height: var(--name-lh);
+  }
+  /* The last word of the name and the country code, kept on one line
+     together (Léonie, 2026-10-06). The name still wraps anywhere else. */
+  .name-tail {
+    white-space: nowrap;
   }
   /* Bigger, and hung from the top of the capitals rather than raised off
      the baseline (client feedback, 2026-09-16). */

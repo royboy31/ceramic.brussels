@@ -1,0 +1,58 @@
+;;
+;; Domain:     ceramic.brussels.
+;; Exported:   2026-10-05 18:50:50
+;;
+;; This file is intended for use for informational and archival
+;; purposes ONLY and MUST be edited before use on a production
+;; DNS server.  In particular, you must:
+;;   -- update the SOA record with the correct authoritative name server
+;;   -- update the SOA record with the contact e-mail address information
+;;   -- update the NS record(s) with the authoritative name servers for this domain.
+;;
+;; For further information, please consult the BIND documentation
+;; located on the following website:
+;;
+;; http://www.isc.org/
+;;
+;; And RFC 1035:
+;;
+;; http://www.ietf.org/rfc/rfc1035.txt
+;;
+;; Please note that we do NOT offer technical support for any use
+;; of this zone data, the BIND name server, or any other third-party
+;; DNS software.
+;;
+;; Use at your own risk.
+;; SOA Record
+ceramic.brussels	3600	IN	SOA	gabriella.ns.cloudflare.com. dns.cloudflare.com. 2054289285 10000 2400 604800 3600
+
+;; NS Records
+ceramic.brussels.	86400	IN	NS	gabriella.ns.cloudflare.com.
+ceramic.brussels.	86400	IN	NS	jobs.ns.cloudflare.com.
+
+;; A Records
+ceramic.brussels.	1	IN	A	45.157.189.111 ; cf_tags=cf-proxied:true
+ftp.ceramic.brussels.	1	IN	A	185.86.19.149 ; cf_tags=cf-proxied:true
+
+;; AAAA Records
+ceramic.brussels.	1	IN	AAAA	2001:1600:4:9:f816:3eff:fe14:9a8 ; cf_tags=cf-proxied:true
+
+;; CNAME Records
+autodiscover.ceramic.brussels.	1	IN	CNAME	autodiscover.outlook.com. ; cf_tags=cf-proxied:true
+brevo1._domainkey.ceramic.brussels.	1	IN	CNAME	b1.ceramic-brussels.dkim.brevo.com. ; cf_tags=cf-proxied:false
+brevo2._domainkey.ceramic.brussels.	1	IN	CNAME	b2.ceramic-brussels.dkim.brevo.com. ; cf_tags=cf-proxied:false
+k2._domainkey.ceramic.brussels.	1	IN	CNAME	dkim2.mcsv.net. ; cf_tags=cf-proxied:false
+k3._domainkey.ceramic.brussels.	1	IN	CNAME	dkim3.mcsv.net. ; cf_tags=cf-proxied:false
+www.ceramic.brussels.	1	IN	CNAME	ceramic-brussels.pages.dev. ; cf_tags=cf-proxied:true
+
+;; MX Records
+ceramic.brussels.	1	IN	MX	50 mx.backup.mailprotect.be.
+ceramic.brussels.	1	IN	MX	10 mx.mailprotect.be.
+ceramic.brussels.	1	IN	MX	0 ceramic-brussels.mail.protection.outlook.com.
+
+;; TXT Records
+ceramic.brussels.	3600	IN	TXT	"google-site-verification=q0T3lX2Qi530w3FL6suKrjKNrBvqAVffsrJnb8ExUac"
+ceramic.brussels.	1	IN	TXT	"brevo-code:759690ab30f7663a74e98158246367c8"
+ceramic.brussels.	1	IN	TXT	"v=spf1 include:spf.protection.outlook.com -all"
+ceramic.brussels.	1	IN	TXT	"MS=ms75504785"
+_dmarc.ceramic.brussels.	1	IN	TXT	"v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com"

@@ -4,6 +4,7 @@ import HubNav from '../../components/HubNav.astro';
 import Sections from '../../components/Sections.astro';
 import PageSections from '../../components/PageSections.astro';
 import SanityImage from '../../components/SanityImage.astro';
+import FigureCaption from '../../components/FigureCaption.astro';
 import PortableText from '../../components/PortableText.astro';
 import PersonCard from '../../components/PersonCard.astro';
 import LinkPill from '../../components/LinkPill.astro';
@@ -148,7 +149,10 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
             {closingImages.length > 0 && (
               <div class="strip">
                 {closingImages.map((img: any) => (
-                  <SanityImage image={img} aspect={1.5} widths={[440, 660, 880]} sizes="(max-width: 700px) 100vw, 33vw" />
+                  <figure>
+                    <SanityImage image={img} aspect={1.5} widths={[440, 660, 880]} sizes="(max-width: 700px) 100vw, 33vw" />
+                    <FigureCaption image={img} />
+                  </figure>
                 ))}
               </div>
             )}
@@ -291,7 +295,10 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
       tab !== 'the-fair' && closingImages.length > 0 && (
         <div class="strip">
           {closingImages.map((img: any) => (
-            <SanityImage image={img} aspect={1.5} widths={[440, 660, 880]} sizes="(max-width: 700px) 100vw, 33vw" />
+            <figure>
+              <SanityImage image={img} aspect={1.5} widths={[440, 660, 880]} sizes="(max-width: 700px) 100vw, 33vw" />
+              <FigureCaption image={img} />
+            </figure>
           ))}
         </div>
       )
@@ -346,6 +353,9 @@ const wrap = { 'the-fair': 'about', 'advisory-board': 'advisory', team: 'team-pa
     gap: 40px;
     margin-top: 60px;
     display: grid;
+  }
+  .strip figure {
+    margin: 0;
   }
   .strip :global(img) {
     aspect-ratio: 1.5;

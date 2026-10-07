@@ -4,6 +4,7 @@ import HubNav from '../../components/HubNav.astro';
 import PageSections from '../../components/PageSections.astro';
 import Sections from '../../components/Sections.astro';
 import SanityImage from '../../components/SanityImage.astro';
+import FigureCaption from '../../components/FigureCaption.astro';
 import PortableText from '../../components/PortableText.astro';
 import Slideshow from '../../components/Slideshow.astro';
 import LinkPill from '../../components/LinkPill.astro';
@@ -607,7 +608,10 @@ const rateLink =
         <ul class="image-row">
           {closingImages.map((img: any) => (
             <li>
-              <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 640px) 100vw, 440px" widths={[440, 880]} />
+              <figure>
+                <SanityImage image={img} aspect={3 / 2} sizes="(max-width: 640px) 100vw, 440px" widths={[440, 880]} />
+                <FigureCaption image={img} />
+              </figure>
             </li>
           ))}
         </ul>
@@ -949,6 +953,9 @@ const rateLink =
     margin: 90px 0 0;
     padding: 0;
     list-style: none;
+  }
+  .image-row figure {
+    margin: 0;
   }
   .access {
     align-items: start;

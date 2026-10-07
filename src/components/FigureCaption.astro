@@ -1,0 +1,63 @@
+---
+/**
+ * The design's caption line for one picture: "Artist, *Title*, 2024 © credit".
+ *
+ * Every image slot that an editor can type a caption into draws it through
+ * this, so a caption entered in the Studio appears wherever the picture does
+ * ("can you make sure the option to put a caption under every single photo
+ * exists everywhere & works? Tiphaine has put them in the CMS, but they don't
+ * show under the photos sometimes" - Léonie, 2026-10-05). It renders nothing
+ * at all when the figure carries none of the four parts, so adding it to a
+ * block can only ever surface text an editor actually wrote.
+ *
+ * The parts are joined with ", " only between the ones that are present: a
+ * figure with a year but no artist used to read ", 2024". The credit keeps its
+ * own " © " and the lighter ink, as `Slideshow` and `Gallery` have always
+ * drawn it.
+ *
+ * Sizing is deliberately not here. `src/styles/site.css` sets every caption's
+ * size once under `main figcaption` (client, 2026-09-30), and several parents
+ * reach in with `:global(figcaption)`; this only carries the spacing and the
+ * credit's colour, so those keep winning.
+ */
+interface Props {
+  image?: any;
+  class?: string;
+}
+
+const { image, class: className } = Astro.props;
+const img = image ?? {};
+const { caption, workTitle, year, credit } = img;
+const has = !!(caption || workTitle || year || credit);
+/** A separator only once something is already on the line. */
+const beforeYear = caption || workTitle ? ', ' : '';
+---
+
+{
+  has && (
+    <figcaption class:list={['figure-caption', className]}>
+      {caption}
+      {workTitle && (
+        <>
+          {caption ? ', ' : ''}
+          <em>{workTitle}</em>
+        </>
+      )}
+      {year && `${beforeYear}${year}`}
+      {credit && <span class="credit"> © {credit}</span>}
+    </figcaption>
+  )
+}
+
+<style>
+  .figure-caption {
+    /* Not touching the picture (client feedback, 2026-09-23). */
+    margin-top: 8px;
+    font-size: 18px;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+  }
+  .credit {
+    color: var(--ink-3);
+  }
+</style>
