@@ -198,7 +198,7 @@ const STRINGS = {
     'contact.newsletter': 'subscribe to our newsletter',
     'consent.title': 'cookies',
     'consent.body':
-      'With your permission we measure visits with Google Analytics, to see which pages are read. No tracking cookie is set until you agree, the site works the same either way, and you can change your mind under “cookie settings” at the bottom of every page.',
+      'We measure visits with Google Analytics and Microsoft Clarity, to see which pages are read and how they are used. These set cookies. You can refuse them here, the site works the same either way, and you can change your mind under “cookie settings” at the bottom of every page.',
     'consent.accept': 'accept all',
     'consent.reject': 'refuse',
     'consent.customise': 'choose',
@@ -208,7 +208,7 @@ const STRINGS = {
     'consent.necessaryText': 'Remembers the choice you make here, in your browser. Always on, tracks nothing.',
     'consent.analytics': 'statistics',
     'consent.analyticsText':
-      'Google Analytics 4 counts visits and the pages read. Sets the _ga cookies, kept up to two years; the data is processed by Google.',
+      'Google Analytics 4 counts visits and the pages read, and Microsoft Clarity records how pages are scrolled and clicked. They set the _ga cookies (kept up to two years) and the _clck and _clsk cookies (up to a year); the data is processed by Google and Microsoft.',
     'consent.marketing': 'marketing',
     'consent.marketingText': 'Lets advertising partners such as Meta measure our campaigns.',
     'common.facebook': 'facebook',
@@ -503,7 +503,7 @@ const STRINGS = {
     'contact.newsletter': 'abonnez-vous à la newsletter',
     'consent.title': 'cookies',
     'consent.body':
-      'Avec votre accord, nous mesurons les visites avec Google Analytics, pour savoir quelles pages sont lues. Aucun cookie de mesure n’est déposé tant que vous n’avez pas accepté, le site fonctionne de la même façon dans les deux cas, et vous pouvez changer d’avis via « paramètres des cookies » en bas de chaque page.',
+      'Nous mesurons les visites avec Google Analytics et Microsoft Clarity, pour savoir quelles pages sont lues et comment elles sont utilisées. Ils déposent des cookies. Vous pouvez les refuser ici, le site fonctionne de la même façon dans les deux cas, et vous pouvez changer d’avis via « paramètres des cookies » en bas de chaque page.',
     'consent.accept': 'tout accepter',
     'consent.reject': 'refuser',
     'consent.customise': 'choisir',
@@ -513,7 +513,7 @@ const STRINGS = {
     'consent.necessaryText': 'Retient dans votre navigateur le choix fait ici. Toujours actif, sans aucun suivi.',
     'consent.analytics': 'statistiques',
     'consent.analyticsText':
-      'Google Analytics 4 compte les visites et les pages lues. Dépose les cookies _ga, conservés jusqu’à deux ans ; les données sont traitées par Google.',
+      'Google Analytics 4 compte les visites et les pages lues, et Microsoft Clarity enregistre comment les pages sont parcourues et cliquées. Ils déposent les cookies _ga (conservés jusqu’à deux ans) et _clck et _clsk (jusqu’à un an) ; les données sont traitées par Google et Microsoft.',
     'consent.marketing': 'marketing',
     'consent.marketingText': 'Permet à des partenaires publicitaires comme Meta de mesurer nos campagnes.',
     'common.facebook': 'facebook',
@@ -807,7 +807,7 @@ const STRINGS = {
     'contact.newsletter': 'schrijf je in voor de nieuwsbrief',
     'consent.title': 'cookies',
     'consent.body':
-      'Met uw toestemming meten we bezoeken met Google Analytics, om te zien welke pagina’s gelezen worden. Er wordt geen trackingcookie geplaatst zolang u niet akkoord gaat, de site werkt in beide gevallen hetzelfde, en u kunt uw keuze wijzigen via ‘cookie-instellingen’ onderaan elke pagina.',
+      'We meten bezoeken met Google Analytics en Microsoft Clarity, om te zien welke pagina’s gelezen worden en hoe ze gebruikt worden. Die plaatsen cookies. U kunt ze hier weigeren, de site werkt in beide gevallen hetzelfde, en u kunt uw keuze wijzigen via ‘cookie-instellingen’ onderaan elke pagina.',
     'consent.accept': 'alles accepteren',
     'consent.reject': 'weigeren',
     'consent.customise': 'kiezen',
@@ -817,7 +817,7 @@ const STRINGS = {
     'consent.necessaryText': 'Onthoudt in uw browser de keuze die u hier maakt. Altijd aan, volgt niets.',
     'consent.analytics': 'statistieken',
     'consent.analyticsText':
-      'Google Analytics 4 telt bezoeken en gelezen pagina’s. Plaatst de _ga-cookies, tot twee jaar bewaard; de gegevens worden door Google verwerkt.',
+      'Google Analytics 4 telt bezoeken en gelezen pagina’s, en Microsoft Clarity legt vast hoe pagina’s gescrold en aangeklikt worden. Ze plaatsen de _ga-cookies (tot twee jaar bewaard) en de _clck- en _clsk-cookies (tot een jaar); de gegevens worden door Google en Microsoft verwerkt.',
     'consent.marketing': 'marketing',
     'consent.marketingText': 'Laat advertentiepartners zoals Meta onze campagnes meten.',
     'common.facebook': 'facebook',

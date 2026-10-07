@@ -306,6 +306,9 @@ never hand-write `/en/...` - and
   (Consent Mode v2, basic mode) and only on `www.ceramic.brussels` -
   pages.dev, previews and localhost show the banner but send nothing
   (`localStorage['cb-tracking-test'] = '1'` lifts that in one browser).
+  Since 2026-10-07 it also sends to G-DP54EJ7WWZ (Perelweb's own property)
+  and loads Microsoft Clarity, and `PRE_CONSENT` in `tracking.ts` is `full`:
+  both run before a choice, until "refuse", for two months (Roy's call).
   Adding a tracker: its id there, its loader in the banner's script, its
   text in `consent.*` in all three locales, and a `CONSENT_VERSION` bump so
   everyone is asked again.

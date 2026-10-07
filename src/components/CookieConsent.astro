@@ -1,11 +1,12 @@
 ---
 import type { LocaleId } from '../lib/locales';
 import { useTranslations } from '../lib/i18n';
-import { CONSENT_VERSION, TRACKERS, TRACKING_HOSTS, categoriesInUse } from '../lib/tracking';
+import { CONSENT_VERSION, PRE_CONSENT, TRACKERS, TRACKING_HOSTS, categoriesInUse } from '../lib/tracking';
 
 /**
  * The cookie banner. Nothing that measures anyone loads until the visitor
- * says yes to its category; "refuse" sits beside "accept all" at the same
+ * says yes to its category (unless PRE_CONSENT in src/lib/tracking.ts says
+ * otherwise); "refuse" sits beside "accept all" at the same
  * weight, as Belgian guidance asks, and "cookie settings" in the footer
  * reopens it, because consent has to be as easy to withdraw as to give.
  *
@@ -33,7 +34,9 @@ const categories = categoriesInUse();
       hidden
       data-version={CONSENT_VERSION}
       data-hosts={TRACKING_HOSTS.join(',')}
-      data-ga4={TRACKERS.ga4}
+      data-ga4={TRACKERS.ga4.join(',')}
+      data-clarity={TRACKERS.clarity}
+      data-pre-consent={PRE_CONSENT}
       data-meta-pixel={TRACKERS.metaPixel}
     >
       <div class="consent-text">
@@ -78,6 +81,8 @@ const categories = categoriesInUse();
   // Consent first, trackers second. Google's Consent Mode starts every signal
   // at "denied", and a tracker's script is only fetched once its category is
   // granted ("basic" consent mode: nothing reaches Google before a yes).
+  // PRE_CONSENT in src/lib/tracking.ts can start the statistics trackers
+  // before the visitor has chosen; "refuse" still stops them.
   type Choice = { v: number; analytics: boolean; marketing: boolean; at: string };
   type Categories = { analytics: boolean; marketing: boolean };
 
@@ -104,7 +109,9 @@ const categories = categoriesInUse();
   if (root) {
     const w = window as any;
     const version = Number(root.dataset.version);
-    const ga4 = root.dataset.ga4 ?? '';
+    const ga4 = (root.dataset.ga4 ?? '').split(',').filter(Boolean);
+    const clarity = root.dataset.clarity ?? '';
+    const preConsent = root.dataset.preConsent ?? 'none';
     const metaPixel = root.dataset.metaPixel ?? '';
     const live =
       (root.dataset.hosts ?? '').split(',').includes(location.hostname) || storage.get('cb-tracking-test') === '1';
@@ -139,7 +146,33 @@ const categories = categoriesInUse();
       s.src = src;
       document.head.append(s);
     };
-    const loaded = { ga4: false, metaPixel: false };
+    const loaded = { ga4: false, clarity: false, metaPixel: false };
+    let preConsentRunning = false;
+
+    const loadGa4 = () => {
+      if (!ga4.length || loaded.ga4) return;
+      loaded.ga4 = true;
+      load(`https://www.googletagmanager.com/gtag/js?id=${ga4[0]}`);
+      w.gtag('js', new Date());
+      for (const id of ga4) w.gtag('config', id);
+    };
+
+    /** Clarity sets cookies only once told analytics storage is granted. */
+    const loadClarity = (granted: boolean) => {
+      if (!clarity) return;
+      if (!loaded.clarity) {
+        loaded.clarity = true;
+        // Microsoft's loader, as its snippet defines it: queue calls until the tag arrives.
+        w.clarity =
+          w.clarity ||
+          function () {
+            // eslint-disable-next-line prefer-rest-params
+            (w.clarity.q = w.clarity.q || []).push(arguments);
+          };
+        load(`https://www.clarity.ms/tag/${clarity}`);
+      }
+      w.clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: granted ? 'granted' : 'denied' });
+    };
 
     const apply = (choice: Choice) => {
       const state = (on: boolean) => (on ? 'granted' : 'denied');
@@ -151,11 +184,9 @@ const categories = categoriesInUse();
       });
       if (!live) return;
 
-      if (choice.analytics && ga4 && !loaded.ga4) {
-        loaded.ga4 = true;
-        load(`https://www.googletagmanager.com/gtag/js?id=${ga4}`);
-        w.gtag('js', new Date());
-        w.gtag('config', ga4);
+      if (choice.analytics) {
+        loadGa4();
+        loadClarity(true);
       }
 
       if (choice.marketing && metaPixel && !loaded.metaPixel) {
@@ -183,7 +214,7 @@ const categories = categoriesInUse();
       const names = document.cookie
         .split(';')
         .map((c) => c.split('=')[0].trim())
-        .filter((name) => /^(_ga|_gid|_gat|_fbp|_fbc)/.test(name));
+        .filter((name) => /^(_ga|_gid|_gat|_fbp|_fbc|_clck|_clsk)/.test(name));
       const host = location.hostname;
       const domains = ['', host, `.${host}`, `.${host.split('.').slice(-2).join('.')}`];
       for (const name of names) {
@@ -200,7 +231,8 @@ const categories = categoriesInUse();
       root.hidden = true;
       // A script that already runs cannot be unloaded: clear its cookies and
       // start the page again without it.
-      if ((before?.analytics && !choice.analytics) || (before?.marketing && !choice.marketing)) {
+      const wasMeasuring = before ? before.analytics : preConsentRunning;
+      if ((wasMeasuring && !choice.analytics) || (before?.marketing && !choice.marketing)) {
         forget();
         location.reload();
         return;
@@ -235,7 +267,16 @@ const categories = categoriesInUse();
 
     const current = read();
     if (current) apply(current);
-    else open(false);
+    else {
+      if (live && preConsent !== 'none') {
+        preConsentRunning = true;
+        const full = preConsent === 'full';
+        if (full) w.gtag('consent', 'update', { analytics_storage: 'granted' });
+        loadGa4();
+        loadClarity(full);
+      }
+      open(false);
+    }
   }
 </script>
 
