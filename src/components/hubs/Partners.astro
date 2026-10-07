@@ -37,6 +37,22 @@ const tabLabel = page?.tabLabel ?? (hubTab ? t(hubTab.label) : tab);
 
 const tiers = PARTNER_TABS[tab] ?? [];
 const listed = partners.filter((p: any) => tiers.includes(p.tier));
+/*
+ * "On this page partners > institutions, could you add 3 filters below the
+ * title" - Felicie, 2026-10-06. The three are partner tiers, so the pills
+ * narrow the tab's own list in place, the way the exhibitors list works: a
+ * pill is pressed or not, several can be on at once (a partner has one
+ * tier, so they read as "either of these"), and pressing the last one again
+ * shows everything. A tier nobody carries yet gives an empty list under a
+ * pressed pill, which is expected rather than a fault.
+ */
+const FILTER_TIERS = ['institutional', 'organization', 'exhibition-pass'] as const;
+const FILTER_LABELS: Record<string, string> = {
+  institutional: 'partners.institutional',
+  organization: 'partners.organization',
+  'exhibition-pass': 'partners.exhibitionPass',
+};
+const showFilters = tab === 'institutions';
 const featured = tab === 'hotel';
 const path = hubTabPath('partners', tab, lang);
 const altPaths = hubAltPaths('partners', tab);
@@ -84,6 +100,18 @@ const logoScale = (p: any) => {
   <HubNav lang={lang} route="partners" active={tab} pages={pages} />
 
   <div class:list={['content-wrap', featured ? 'hotel-page' : 'institutions-page']}>
+    {
+      showFilters && (
+        <div class="partner-filters" id="partner-filters">
+          <span>{t('exhibitors.filters')}:</span>
+          {FILTER_TIERS.map((tier) => (
+            <button type="button" data-tier={tier} aria-pressed="false">
+              {t(FILTER_LABELS[tier])}
+            </button>
+          ))}
+        </div>
+      )
+    }
     {page?.intro && <p class="intro-large" {...styleAttrs(page.introStyle)}>{page.intro}</p>}
     {page && <PageSections lang={lang} sections={page.sections} />}
     {
@@ -146,8 +174,13 @@ const logoScale = (p: any) => {
         ))
       ) : (
         <div class="institutions">
+          {showFilters && (
+            <p class="empty" id="partner-none" hidden>
+              {t('partners.empty')}
+            </p>
+          )}
           {listed.map((p: any) => (
-            <article>
+            <article data-tier={showFilters ? p.tier : undefined}>
               <h3 {...styleAttrs(p.nameStyle)}>
                 <PartnerName partner={p} />
               </h3>
@@ -201,6 +234,57 @@ const logoScale = (p: any) => {
   .empty {
     margin-top: 40px;
     font-size: 24px;
+  }
+  /* The institutions filters (Felicie, 2026-10-06), the same pill as the
+     exhibitors list: thin stroke close to the text, black when pressed,
+     with a x saying it can be let go again. The row sits under the title
+     band and above the list, so the list keeps its own top margin. */
+  .partner-filters {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 33px;
+    display: flex;
+  }
+  .partner-filters span {
+    margin-right: 6px;
+    text-transform: uppercase;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .partner-filters button {
+    border: 1px solid;
+    border-radius: 999px;
+    padding: 1px 12px 0;
+    font-size: 18px;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
+    background: #fff;
+    cursor: pointer;
+    transition:
+      color 0.18s,
+      background-color 0.18s;
+  }
+  .partner-filters button[aria-pressed='true']::before {
+    content: '×';
+    margin-right: 0.3em;
+  }
+  .partner-filters button[aria-pressed='true'],
+  .partner-filters button:hover {
+    color: #fff;
+    background: #000;
+  }
+  /* The row replaces the list's own "first child" top margin. */
+  .partner-filters + .institutions {
+    margin-top: 55px;
+  }
+  .institutions :global(article[hidden]) {
+    display: none;
+  }
+  #partner-none {
+    grid-column: 1 / -1;
+    margin-top: 0;
   }
   /* With no lead or body above, the list starts right under the tabs: the
      frames put the first title's rule and the hotel photo ~65px under them. */
@@ -305,6 +389,13 @@ const logoScale = (p: any) => {
     list-style: none;
   }
 
+  /* As on the exhibitors list, where the row is the same pills. */
+  @media (max-width: 900px) {
+    .partner-filters span {
+      font-size: 20px;
+    }
+  }
+
   @media (max-width: 700px) {
     .institutions {
       grid-template-columns: 1fr;
@@ -325,3 +416,35 @@ const logoScale = (p: any) => {
     }
   }
 </style>
+
+<script>
+  // The institutions filters. They work on the rendered list, like the ones
+  // on the exhibitors page: a card shows when no pill is pressed, or when
+  // its tier is one of the pressed ones. The bar only exists on that tab,
+  // so every other partners page runs none of this.
+  const bar = document.getElementById('partner-filters');
+  const none = document.getElementById('partner-none');
+
+  if (bar) {
+    const buttons = Array.from(bar.querySelectorAll<HTMLButtonElement>('button[data-tier]'));
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('.institutions article[data-tier]'));
+
+    const apply = () => {
+      const active = buttons.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.tier);
+      let visible = 0;
+      for (const card of cards) {
+        const match = active.length === 0 || active.includes(card.dataset.tier);
+        card.hidden = !match;
+        if (match) visible++;
+      }
+      if (none) none.hidden = visible > 0;
+    };
+
+    for (const b of buttons) {
+      b.addEventListener('click', () => {
+        b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+        apply();
+      });
+    }
+  }
+</script>
