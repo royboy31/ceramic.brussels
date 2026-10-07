@@ -1015,3 +1015,35 @@ The stub exists for a second reason too: a static `Astro.redirect` writes an HTM
 **By hand before it goes live (Roy or the client):** create the Sheet with a `Newsletter` tab, paste `scripts/newsletter-apps-script.gs` (Extensions → Apps Script), deploy as web app (Execute as: Me / Access: Anyone), and put the /exec URL in the `NEWSLETTER_SHEETS_URL` Pages secret - the file's header walks through it. Then an editor places the block on a page and points the menu/footer "Newsletter" entry at that page.
 
 **Wired (2026-10-02 pm, in the browser with Kamindu):** the Sheet is `ceramic_contact_pages` (tab `Newsletter`), the script is deployed from it as the web app "ceramic brussels newsletter" (Execute as: Me / Access: Anyone, owner kamindudushmantha@gmail.com — only the owner can manage its deployments, the Pujol lesson), the upsert was proven from the shell (one row despite four posts, Date kept by writeOnce, Language updated; the test row is still in the sheet as proof), and the /exec URL is in the `NEWSLETTER_SHEETS_URL` Pages secret (production) and `.env`. Left: cherry-pick the branch to main (the route ships with it), publish the draft Newsletter page, point the menu/footer "Newsletter" entry at it, FR/NL confirmation text in Site settings → Newsletter.
+
+---
+## #56 · done · 2026-10-07 · the French and Dutch previews 404: Studio builds hub paths in English
+
+**Page / component:** `src/sanity/previewPaths.ts` (yours), using `hubTabPath()` from `src/lib/hubs.ts` (mine)
+
+**Asked by:** Félicie, WhatsApp 2026-10-07: *"it seems that the preview for the french version is not completely effective. Often when I open the preview, the page does not exist…"*, with a 404 screenshot and *"for example, this is when I try to open the page Partner > Puilaetco"*.
+
+**The bug:** `previewPaths.ts` keeps its own table of hub addresses written in English — `TIER_PAGES` (`/partners`, `/partners/institutions`, `/press-media/media-partners`, `/visit/food-drinks`…), `EVENT_TABS`, and the literals in the `previewLocations` switch — and `at()` simply prefixes the locale. But **a hub's own segment is translated**; only the tab slug after it stays English. So the preview opens an address that was never built:
+
+```
+/fr/partners/                404   ← what Preview opens for Puilaetco (tier: main)
+/fr/partenaires/             200   ← the page it meant
+/fr/partners/institutions/   404      /fr/partenaires/institutions/  200
+/fr/visit/food-drinks/       404      /nl/programme/                 404  (it is /nl/programma/)
+```
+
+Measured against `astro dev` on 2026-10-07. This is not specific to partners — it hits every hub whose segment is translated, in both FR and NL, which is most of them. English is unaffected, which is why it went unnoticed.
+
+**Asked for:** drop the English tables and build the path with `hubTabPath(route, tab, lang)` from `src/lib/hubs.ts`, which is the single source of truth for a hub address in a language and already handles the fallback to the English identifier. `partnerPath()` in `src/lib/links.ts` is the worked example for the tier → tab mapping — it does exactly what `TIER_PAGES` is trying to do, in one line, and stays correct when a segment changes:
+
+```ts
+// instead of TIER_PAGES[tier].href
+import { partnerPath } from '../lib/links';
+partnerPath({ tier }, lang)        // → /fr/partenaires/institutions
+```
+
+`EVENT_TABS` and the `siteSettings` / hub literals want the same treatment (`hubTabPath('programme', 'awards', lang)` and so on). The `page` branch lower down is already right: standalone pages map each locale to its own slug.
+
+**Not touched by me** — `src/sanity/` is your half, and you are working in it. Say the word if you would rather I took it.
+
+**Done (Kamindu, 2026-10-07, `f1ed0b0` "The preview of a French page opens the French page"):** taken as asked. `previewPaths.ts` now imports `hubTabPath` from `src/lib/hubs.ts` and builds every hub address through one `hubLoc()` helper; `TIER_PAGES` and `EVENT_TABS` hold a hub + tab reference instead of an English href. The composition is right - `hubTabPath` is locale-less and `at()` adds `/preview/<lang>`, so a main partner resolves to `/preview/fr/partenaires` rather than the `/preview/fr/partners` that 404'd.
