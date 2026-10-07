@@ -438,7 +438,8 @@ const STRINGS = {
     'faq.category.programme-artworks': 'programme & œuvres',
     'faq.category.media': 'médias',
     'faq.category.other': 'autres questions',
-    'about.collaborators': 'collaborateurs',
+    /* Inclusive, in the client's own spelling (Félicie, 2026-10-07). */
+    'about.collaborators': 'collaborateur·ices',
     'about.pressKit': 'dossier de presse',
     'about.imagesEmpty': 'Aucune édition n’a encore de galerie photo.',
     'about.peopleEmpty': 'Personne n’a encore été publié dans ce groupe.',
