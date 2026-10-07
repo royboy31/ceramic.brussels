@@ -66,9 +66,31 @@
  * and several parents reach into a child's caption: `ArtPrize.astro` has
  * `.image :global(figcaption)`, specificity (0,2,1), which beat `Slideshow`'s
  * own scoped rule when that was tried first. Rather than chase every one of
- * those, sizing lives here, once, with `!important` confined to this mobile
- * query. `Slideshow.astro` keeps only its spacing.
+ * those, sizing lives here, once, with `!important` confined to these two
+ * queries. `Slideshow.astro` keeps only its spacing.
+ *
+ * The desktop rule below arrived later, on the same reasoning. The size was
+ * only ever equalised under 700px, so above it the site drew captions at
+ * three sizes at once - 14px in a slideshow, 16px on the guest of honour,
+ * 18px everywhere else - and the homepage showed two of them a screen apart:
+ * "size of the copyrights on the HomePage are différent" (Félicie,
+ * 2026-10-07, circling "Portrait of Marion Verboom © Claire Dorn" at 14
+ * against "Hoxton Hotel, Brussels" at 18). 14px is the one the client has
+ * already seen and asked to keep discreet, and the one the 23 slideshow
+ * captions use, so the other 23 come down to meet it rather than the reverse.
+ * `FigureCaption.astro` says its sizing is "deliberately not here" and lives
+ * by this rule - which was true only below 700px until now.
+ *
+ * The counter is not a caption: it sets its own size on its own element, so
+ * `!important` on the parent `figcaption` never reaches it.
  */
+main figcaption {
+  font-size: 14px !important;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+
+/* The phone keeps its own, smaller pair - later in the file, so it wins. */
 @media (max-width: 700px) {
   main figcaption {
     font-size: 12px !important;

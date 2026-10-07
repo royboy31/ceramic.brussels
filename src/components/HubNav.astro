@@ -157,7 +157,19 @@ const tabs = items
     background: #000;
     border-color: #000;
   }
-  @media (max-width: 900px) {
+  /* The band stacks well before the phone (Roy, 2026-10-07: "we should
+     switch the breakpoint to mobile view at 1135 px width already", after
+     Félicie's screenshot of "programme" drawn straight through its own
+     pills). Above this width the h1 is `nowrap` at 70px in a 4-column track
+     while the pills fill the other 8 and are right-aligned, so on the hubs
+     with the most tabs the two run into each other: measured on /programme/,
+     4px of overlap at 1100px, 71px at 1000px, 137px at 901px - the whole
+     band between the pills' natural width and the old 900px switch.
+     1180 rather than Roy's 1135 because 1135 leaves the French programme
+     hub just 9px of clearance, which the next longer tab label would eat;
+     at 1180 it keeps about 40. Nothing else in that band breaks - every
+     other page was measured clear at 1100, 1000 and 950. */
+  @media (max-width: 1180px) {
     .section-head h1,
     .section-head nav {
       grid-column: 1 / -1;
