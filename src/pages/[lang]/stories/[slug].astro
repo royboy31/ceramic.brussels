@@ -1,0 +1,70 @@
+---
+import Base from '../../../layouts/Base.astro';
+import StoryInterview from '../../../components/StoryInterview.astro';
+import { LOCALE_IDS, DEFAULT_LOCALE, type LocaleId } from '../../../lib/locales';
+import { getHubPages, getStory, getStorySlugs } from '../../../lib/queries';
+
+/**
+ * One interview from press & media → stories, on an address of its own
+ * (the frame of 2026-10-08). The layout is `StoryInterview.astro`; this
+ * route only finds the document and gives the page its head.
+ *
+ * A story is built here once an editor gives it a slug; the ones without
+ * stay cards on the stories tab, pointing wherever their link says.
+ */
+type Slugs = Partial<Record<LocaleId, string>>;
+
+export async function getStaticPaths() {
+  const stories = await getStorySlugs();
+
+  return LOCALE_IDS.flatMap((lang) =>
+    stories
+      .map(({ slugs }) => {
+        const slug = slugs[lang] ?? slugs[DEFAULT_LOCALE];
+        if (!slug) return null;
+        return { params: { lang, slug }, props: { slugs } };
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null),
+  );
+}
+
+const lang = Astro.params.lang as LocaleId;
+const slug = Astro.params.slug as string;
+
+const story = await getStory(lang, slug);
+if (!story) return Astro.rewrite('/404');
+
+// getStaticPaths supplies the slugs at build time; a preview render of the
+// same file has none, so they come from the document itself.
+const slugs: Slugs = (Astro.props as any).slugs ?? story.slugs ?? {};
+// Each language links to its own slug, so the language switcher never 404s.
+const altPaths = Object.fromEntries(
+  LOCALE_IDS.map((l) => [l, `stories/${slugs[l] ?? slugs[DEFAULT_LOCALE] ?? slug}`]),
+) as Slugs;
+
+// The band's pills take their labels from the hub's own page documents.
+const pages = await getHubPages(lang, 'press-media');
+
+// A story has no SEO tab of its own: the description is the interview's lead,
+// which is the paragraphs before the first question.
+const description =
+  (story.body ?? [])
+    .filter((b: any) => b?._type === 'block' && (b.style ?? 'normal') === 'normal')
+    .flatMap((b: any) => (b.children ?? []).map((c: any) => c.text ?? ''))
+    .join(' ')
+    .slice(0, 200)
+    .trim() || undefined;
+---
+
+<Base
+  lang={lang}
+  title={[story.title, story.role].filter(Boolean).join(', ')}
+  description={description}
+  image={story.image}
+  path={`stories/${slug}`}
+  altPaths={altPaths}
+  editId={story._id}
+  editType={story._type}
+>
+  <StoryInterview lang={lang} story={story} pages={pages} />
+</Base>

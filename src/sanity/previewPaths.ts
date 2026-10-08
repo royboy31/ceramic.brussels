@@ -1,4 +1,4 @@
-import { HUBS } from '../lib/hubs';
+import { HUBS, hubTabPath } from '../lib/hubs';
 import type { LocaleId } from '../lib/locales';
 import { LISTING_SECTIONS } from './schemaTypes/objects/routes';
 import { editionTabPath, sectionSegment } from '../lib/previousEditions';
@@ -67,26 +67,37 @@ export function previewFields(doc: Record<string, any>): PreviewFields {
   };
 }
 
+/**
+ * A hub tab, named the way `hubTabPath` wants it: the hub's identifier and the
+ * tab's. Never a written-out path - the segments are translated, and the first
+ * tab collapses onto the hub root, both of which that helper knows.
+ */
+interface TabRef {
+  title: string;
+  route: string;
+  tab?: string;
+}
+
 /** The partners tab (or other page) each tier is listed on. */
-const TIER_PAGES: Record<string, PreviewLocation> = {
-  main: { title: 'Partners – main partner', href: '/partners' },
-  institutional: { title: 'Partners – institutions', href: '/partners/institutions' },
-  hotel: { title: 'Partners – hotel', href: '/partners/hotel' },
-  event: { title: 'Partners – event partners', href: '/partners/event' },
-  supplier: { title: 'Partners – event partners', href: '/partners/event' },
-  'exhibition-pass': { title: 'Partners – event partners', href: '/partners/event' },
+const TIER_PAGES: Record<string, TabRef> = {
+  main: { title: 'Partners – main partner', route: 'partners', tab: 'main' },
+  institutional: { title: 'Partners – institutions', route: 'partners', tab: 'institutions' },
+  hotel: { title: 'Partners – hotel', route: 'partners', tab: 'hotel' },
+  event: { title: 'Partners – event partners', route: 'partners', tab: 'event' },
+  supplier: { title: 'Partners – event partners', route: 'partners', tab: 'event' },
+  'exhibition-pass': { title: 'Partners – event partners', route: 'partners', tab: 'event' },
   // Listed on press & media since request #10; the partners tab has no pill.
-  media: { title: 'Press & media – media partners', href: '/press-media/media-partners' },
-  'food-drinks': { title: 'Visitors info – food & drinks', href: '/visit/food-drinks' },
-  'art-prize': { title: 'Art prize', href: '/art-prize' },
+  media: { title: 'Press & media – media partners', route: 'press-media', tab: 'media-partners' },
+  'food-drinks': { title: 'Visitors info – food & drinks', route: 'visit', tab: 'food-drinks' },
+  'art-prize': { title: 'Art prize', route: 'art-prize' },
 };
 
-const EVENT_TABS: Record<string, PreviewLocation> = {
+const EVENT_TABS: Record<string, TabRef> = {
   // Talks is the hub root since the designer's order of 2026-09-17 (#8).
-  talks: { title: 'Programme – talks', href: '/programme' },
-  vip: { title: 'VIP – VIP programme', href: '/vip/programme' },
-  awards: { title: 'Programme – award ceremony', href: '/programme/awards' },
-  project: { title: 'Programme – La Cambre', href: '/programme/la-cambre' },
+  talks: { title: 'Programme – talks', route: 'programme', tab: 'talks' },
+  vip: { title: 'VIP – VIP programme', route: 'vip', tab: 'programme' },
+  awards: { title: 'Programme – award ceremony', route: 'programme', tab: 'awards' },
+  project: { title: 'Programme – La Cambre', route: 'programme', tab: 'la-cambre' },
 };
 
 /** The types that have a preview at all. */
@@ -116,6 +127,18 @@ export const PREVIEWABLE_TYPES = new Set([
 export function previewLocations(type: string, doc: PreviewFields | null | undefined, lang: LocaleId = 'en'): PreviewLocation[] {
   const at = (path: string, l: LocaleId = lang) => `${PREVIEW_ROOT}/${l}${path}`;
   const loc = (title: string, path: string): PreviewLocation => ({ title, href: at(path) });
+  /**
+   * A hub tab. **Always build one through here, never by writing the path
+   * out.** A hub and its tabs have a translated segment per locale, so
+   * `/about/team` is the English page and the French one is
+   * `/fr/a-propos/equipe`: a path spelt with the English identifiers is a 404
+   * in French and Dutch, which is what the editors kept opening (Félicie and
+   * Léonie, 2026-10-07). The first tab collapses onto the hub root, which
+   * `hubTabPath` also knows - so press is `/press-media`, not
+   * `/press-media/press`.
+   */
+  const hubLoc = (title: string, route: string, tab?: string): PreviewLocation =>
+    loc(title, `/${hubTabPath(route, tab, lang)}`);
   const d: PreviewFields = doc ?? {};
   // Edition-scoped documents: shown only while their edition is the current
   // one. Unknown (no edition yet, or not looked up) counts as current.
@@ -128,50 +151,50 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
       return [loc('Menu and footer (homepage)', '')];
     case 'siteSettings':
       return [
-        loc('Visitors info', '/visit'),
-        loc('Visitors info – FAQ', '/visit/faq'),
-        loc('About – contact & team', '/about/team'),
-        loc('Press & media – press', '/press-media/press'),
-        loc('Press & media – stories', '/press-media'),
-        loc('VIP – access page', '/vip/access'),
+        hubLoc('Visitors info', 'visit'),
+        hubLoc('Visitors info – FAQ', 'visit', 'faq'),
+        hubLoc('About – contact & team', 'about', 'team'),
+        hubLoc('Press & media – press', 'press-media', 'press'),
+        hubLoc('Press & media – stories', 'press-media', 'stories'),
+        hubLoc('VIP – access page', 'vip', 'access'),
         loc('Footer (homepage)', ''),
       ];
     case 'edition':
       return d.isCurrent
-        ? [loc('Homepage', ''), loc('Visitors info', '/visit'), loc('Floor plan', '/visit/floor-plan'), loc('Exhibitors', '/exhibitors')]
+        ? [loc('Homepage', ''), hubLoc('Visitors info', 'visit'), hubLoc('Floor plan', 'visit', 'floor-plan'), loc('Exhibitors', '/exhibitors')]
         : [
-            ...(d.ownYear ? [loc(`Edition ${d.ownYear}`, `/${editionTabPath(d.ownYear)}`)] : []),
-            loc('Previous editions', `/${sectionSegment()}`),
-            loc('Press & media – photos & videos', '/press-media/photos-videos'),
-            ...(d.ownYear ? [loc(`Exhibitors ${d.ownYear}`, `/${editionTabPath(d.ownYear, 'exhibitors')}`)] : []),
+            ...(d.ownYear ? [loc(`Edition ${d.ownYear}`, `/${editionTabPath(d.ownYear, undefined, lang)}`)] : []),
+            loc('Previous editions', `/${sectionSegment(lang)}`),
+            hubLoc('Press & media – photos & videos', 'press-media', 'photos-videos'),
+            ...(d.ownYear ? [loc(`Exhibitors ${d.ownYear}`, `/${editionTabPath(d.ownYear, 'exhibitors', lang)}`)] : []),
           ];
     case 'person': {
       if (past) return [];
       const groups = d.groups ?? [];
       return [
-        ...(groups.includes('advisory-board') ? [loc('About – advisory board', '/about/advisory-board')] : []),
-        ...(groups.includes('team') || groups.includes('collaborator') ? [loc('About – contact & team', '/about/team')] : []),
-        ...(groups.includes('jury') ? [loc('Art prize – jury', '/art-prize/jury')] : []),
+        ...(groups.includes('advisory-board') ? [hubLoc('About – advisory board', 'about', 'advisory-board')] : []),
+        ...(groups.includes('team') || groups.includes('collaborator') ? [hubLoc('About – contact & team', 'about', 'team')] : []),
+        ...(groups.includes('jury') ? [hubLoc('Art prize – jury', 'art-prize', 'jury')] : []),
       ];
     }
     case 'partner': {
       const page = d.tier ? TIER_PAGES[d.tier] : undefined;
-      return page ? [loc(page.title, page.href)] : [];
+      return page ? [hubLoc(page.title, page.route, page.tab)] : [];
     }
     case 'programmeEvent': {
       // Any year: the tab only lists the current edition's events
       // (getProgramme), but a past event still previews on its tab.
       const tab = d.section ? EVENT_TABS[d.section] : undefined;
-      return tab && d.startsAt ? [loc(tab.title, tab.href)] : [];
+      return tab && d.startsAt ? [hubLoc(tab.title, tab.route, tab.tab)] : [];
     }
     case 'laureate':
-      return past ? [] : [loc('Art prize – laureates', '/art-prize/laureates')];
+      return past ? [] : [hubLoc('Art prize – laureates', 'art-prize', 'laureates')];
     case 'award':
-      return d.family === 'art-prize' ? [loc('Art prize – awards', '/art-prize/awards')] : [];
+      return d.family === 'art-prize' ? [hubLoc('Art prize – awards', 'art-prize', 'awards')] : [];
     case 'pressClip':
-      return [loc('Press & media – press', '/press-media/press')];
+      return [hubLoc('Press & media – press', 'press-media', 'press')];
     case 'story':
-      return [loc('Press & media – stories', '/press-media')];
+      return [hubLoc('Press & media – stories', 'press-media', 'stories')];
     case 'artist':
       // No page of their own since 2026-09-22: the A–Z list, where the name leads to the gallery.
       return [loc('Artists (A–Z list)', '/artists')];
@@ -181,20 +204,25 @@ export function previewLocations(type: string, doc: PreviewFields | null | undef
       return past
         ? [
             loc(`${name} (${d.year})`, `/exhibitors/${d.year}/${d.slug}`),
-            loc(`Exhibitors ${d.year}`, `/${editionTabPath(d.year, 'exhibitors')}`),
+            loc(`Exhibitors ${d.year}`, `/${editionTabPath(d.year, 'exhibitors', lang)}`),
           ]
         : [loc(name, `/exhibitors/${d.slug}`), loc('Exhibitors', '/exhibitors')];
     }
     case 'newsItem':
       return d.slug ? [loc(d.title ?? 'News', `/news/${d.slug}`), loc('News list', '/news'), loc('Homepage – latest news', '')] : [];
     case 'page':
-      return pageLocations(d, at);
+      return pageLocations(d, at, hubLoc, lang);
     default:
       return [];
   }
 }
 
-function pageLocations(d: PreviewFields, at: (path: string, l?: LocaleId) => string): PreviewLocation[] {
+function pageLocations(
+  d: PreviewFields,
+  at: (path: string, l?: LocaleId) => string,
+  hubLoc: (title: string, route: string, tab?: string) => PreviewLocation,
+  lang: LocaleId,
+): PreviewLocation[] {
   const title = d.title ?? 'Page';
   if (d.section) {
     // A listing's main page is the listing itself; another page of the
@@ -210,14 +238,16 @@ function pageLocations(d: PreviewFields, at: (path: string, l?: LocaleId) => str
     // A tab that links to another hub has no page of its own.
     if (tab?.link) return [];
     // The guest of honour's tab pages only label the pills; the page is the artist's.
-    if (d.section === 'guest-of-honour') return [{ title: 'Guest of honour', href: at('/guest-of-honour') }];
-    // Hub tabs: the first tab is the hub root, the others carry their
-    // English slug whatever the language of the page.
-    const path = !d.en || d.en === first ? d.section : `${d.section}/${d.en}`;
-    return [{ title, href: at(`/${path}`) }];
+    if (d.section === 'guest-of-honour') return [hubLoc('Guest of honour', 'guest-of-honour')];
+    // Hub tabs: the page is filed under its English slug, and `hubTabPath`
+    // turns that identifier into the segment this language's URL spells.
+    return [hubLoc(title, d.section, d.en ?? first)];
   }
   // Standalone pages have a slug per language, so the URL is translated too.
-  return (['en', 'fr', 'nl'] as const)
+  // The language being edited comes first: the caller opens the first entry,
+  // and an editor working in French means the French page.
+  const order = [lang, ...(['en', 'fr', 'nl'] as const).filter((l) => l !== lang)];
+  return order
     .filter((l) => d[l])
     .map((l) => ({ title: `${title} (${l.toUpperCase()})`, href: at(`/${d[l]}`, l) }));
 }
