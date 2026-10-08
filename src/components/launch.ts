@@ -29,5 +29,12 @@
  *   editions →" pill are not drawn.
  *
  * Set it back to `true` and the section returns exactly as it was.
+ *
+ * **On this branch it is `true`, and this branch must never be merged.**
+ * `previous-editions-review` exists only to give the client a build of the
+ * section to comment on (their ask of 2026-10-08, after the pages bounced
+ * for them in the Studio preview as they do on the live site). Production
+ * keeps the launch setting until the 2024/2025 galleries have their data
+ * and the client asks for the section back - docs/post-launch.md #52.
  */
-export const PAST_EDITIONS_PUBLIC = false;
+export const PAST_EDITIONS_PUBLIC = true;
