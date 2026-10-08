@@ -1047,3 +1047,51 @@ partnerPath({ tier }, lang)        // → /fr/partenaires/institutions
 **Not touched by me** — `src/sanity/` is your half, and you are working in it. Say the word if you would rather I took it.
 
 **Done (Kamindu, 2026-10-07, `f1ed0b0` "The preview of a French page opens the French page"):** taken as asked. `previewPaths.ts` now imports `hubTabPath` from `src/lib/hubs.ts` and builds every hub address through one `hubLoc()` helper; `TIER_PAGES` and `EVENT_TABS` hold a hub + tab reference instead of an English href. The composition is right - `hubTabPath` is locale-less and `at()` adds `/preview/<lang>`, so a main partner resolves to `/preview/fr/partenaires` rather than the `/preview/fr/partners` that 404'd.
+
+---
+## #57 · open · 2026-10-08 · the stories interview: a page behind each story card
+
+**Page / component:** `src/components/StoryInterview.astro` (new), `src/pages/[lang]/stories/[slug].astro` (new), `src/sanity/schemaTypes/documents/story.ts`, `src/lib/queries.ts`
+
+**Figma frame:** `screenshot/ceramic brussels — press & media — stories — interview.png` (1440px), with Léonie's four comments in `interview accets/comment/`.
+
+**This reverses the interview line of #54.** That entry closed with "nothing to build — Léonie's interview layout is one `pageTemplate` document for all stories". The frame that arrived on 2026-10-08 is not a stack the page builder can produce: the portrait holds columns 1-4 for the header only, the title, rule and lead sit on 5-12, and the questions then run in **two four-column columns inside that same 5-12 band**, with the pull quote opening the right one. A `page` stack can only split 6+6 across all twelve, and has no way to leave the first four columns empty below the header. Léonie's own note on the frame also says "this is the interview template … there's gonna be 4-5 of them", i.e. one per interview rather than one shared layout document.
+
+**The design shows:** the press & media band with *stories* filled acid; the portrait with its caption on columns 1-4; "Gilles Parmentier & Jean-Marc Dimanche, ceramic brussels co-directors" over a 2px rule on 5-12; a lead at the site's intro size; then the interview in two columns of four - questions semibold, answers at 24/30 with the speaker's initials bold and set off; a 40/50 pull quote with its attribution opening the right column; a "read more interviews →" pill at the foot of the right column; and an optional strip of three captioned photographs across all twelve.
+
+**The query returns today:** `getStories` → `_id, kind, publishedAt, order, title, role, text, image, link`. No slug, so the interview has no address of its own, and no body, so there is nothing to render on it. There is no `getStory`.
+
+**Asked for** - four fields on `story`, and two helpers:
+
+| Field | Type | Why |
+| :-- | :-- | :-- |
+| `slug` | `localeSlug` | The page's address, per language, as `page` has it. Required on `kind == 'interview'` only. |
+| `body` | `localeBlock` (rich text, figures allowed) | The whole interview, read by the roles an editor already has - exactly as `artist.interview` is read by `GuestInterview.astro`. See below. |
+| `links` | array of `link` | Léonie, comment 2: "we would need the option to add an 'instagram' or 'website' button here, to link to our partners' instagrams or websites if needed". Drawn as outline pills under the title. Empty on most interviews. |
+| `images` | array of `figure` | Léonie, comment 3: "Félicie should have the option to add it underneath every interview or not, depending on whether we have available images or not". The closing strip. Empty → no strip, and the page ends on the text. |
+
+`body` needs no new roles: the component reads the Style dropdown that `richText.ts` already offers - **Quote** is the pull quote, **Subheading / Minor heading / a paragraph that is bold throughout** is a question, the paragraphs after it are its answer, and anything before the first question is the lead. That is the pattern `GuestInterview.astro` documents and the editors have already been taught. The strip could equally come from figures inside `body`; a field of its own is asked for because Léonie wants it switched on and off per interview without touching the text.
+
+```groq
+export function getStorySlugs() {
+  return run(`*[_type == "story" && defined(slug.en.current)]{
+    "slugs": { "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current }
+  }`);
+}
+
+export function getStory(lang: LocaleId, slug: string) {
+  return run(`*[_type == "story" && (slug[$lang].current == $slug || slug.en.current == $slug)][0]{
+    _id, _type, kind, publishedAt,
+    ${styled('title')}, ${styled('role')},
+    "slugs": { "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current },
+    "body": coalesce(body[$lang], body.en)[]{ ..., _type == "figure" => ${IMAGE} },
+    image ${IMAGE},
+    "links": links[] ${LINK},
+    images[] ${IMAGE}
+  }`, { lang, slug });
+}
+```
+
+**Rendered meanwhile:** the layout and the route are built and on the branch. `src/pages/[lang]/stories/[slug].astro` resolves both helpers off the queries module rather than importing them, so the branch builds today and emits **no** interview pages; the moment the two helpers exist the route starts building them and the two lines marked `BACKEND-REQUEST #57` come out. `StoryInterview.astro` renders the frame in full from the shape above and degrades on every optional part - no links, no quote, no photographs, no role.
+
+**Also for you, while the slug is being added:** the stories tab's cards point at their interview through the card's own `link` today. Once a story has a slug the card should link to its own page by itself, and `link` can stay for the interviews that live somewhere else (Marie Pic's is an external magazine piece, Marion Verboom's is the guest-of-honour tab). `src/components/PressMedia.astro` reads `story.link` only; it needs `slug` on the card projection in `getStories` to prefer the page.
