@@ -2,29 +2,19 @@
 import Base from '../../../layouts/Base.astro';
 import StoryInterview from '../../../components/StoryInterview.astro';
 import { LOCALE_IDS, DEFAULT_LOCALE, type LocaleId } from '../../../lib/locales';
-import { getHubPages } from '../../../lib/queries';
+import { getHubPages, getStory, getStorySlugs } from '../../../lib/queries';
 
 /**
- * One interview from press & media → stories, on an address of its own.
- * The layout is `StoryInterview.astro`; this route only finds the document
- * and gives the page its head.
+ * One interview from press & media → stories, on an address of its own
+ * (the frame of 2026-10-08). The layout is `StoryInterview.astro`; this
+ * route only finds the document and gives the page its head.
  *
- * BACKEND-REQUEST #57: `story` has no slug and no body yet, and there is no
- * `getStory` / `getStorySlugs` in `src/lib/queries.ts` - that half is
- * Kamindu's. Both are therefore looked up on the module at run time rather
- * than imported, so the branch builds today and emits no interview pages at
- * all, and starts building them the moment the two land. **Put them in the
- * import above once #57 is done** and drop the two lookups; nothing else
- * here changes. (Read off a static namespace instead, the bundler rewrites
- * the names to `undefined`; `getStaticPaths` is hoisted out of this scope,
- * so it has to do its own lookup.)
+ * A story is built here once an editor gives it a slug; the ones without
+ * stay cards on the stories tab, pointing wherever their link says.
  */
 type Slugs = Partial<Record<LocaleId, string>>;
 
 export async function getStaticPaths() {
-  const mod = (await import('../../../lib/queries')) as Record<string, any>;
-  const getStorySlugs: undefined | (() => Promise<{ slugs: Slugs }[]>) = mod['getStorySlugs'];
-  if (!getStorySlugs) return [];
   const stories = await getStorySlugs();
 
   return LOCALE_IDS.flatMap((lang) =>
@@ -41,9 +31,7 @@ export async function getStaticPaths() {
 const lang = Astro.params.lang as LocaleId;
 const slug = Astro.params.slug as string;
 
-const queries = (await import('../../../lib/queries')) as Record<string, any>;
-const getStory: undefined | ((lang: LocaleId, slug: string) => Promise<any>) = queries['getStory'];
-const story = getStory ? await getStory(lang, slug) : null;
+const story = await getStory(lang, slug);
 if (!story) return Astro.rewrite('/404');
 
 // getStaticPaths supplies the slugs at build time; a preview render of the
@@ -57,23 +45,22 @@ const altPaths = Object.fromEntries(
 // The band's pills take their labels from the hub's own page documents.
 const pages = await getHubPages(lang, 'press-media');
 
+// A story has no SEO tab of its own: the description is the interview's lead,
+// which is the paragraphs before the first question.
 const description =
-  story.seo?.description ??
   (story.body ?? [])
     .filter((b: any) => b?._type === 'block' && (b.style ?? 'normal') === 'normal')
     .flatMap((b: any) => (b.children ?? []).map((c: any) => c.text ?? ''))
     .join(' ')
     .slice(0, 200)
-    .trim() ||
-  undefined;
+    .trim() || undefined;
 ---
 
 <Base
   lang={lang}
-  title={story.seo?.title ?? [story.title, story.role].filter(Boolean).join(', ')}
+  title={[story.title, story.role].filter(Boolean).join(', ')}
   description={description}
-  noIndex={story.seo?.noIndex}
-  image={story.seo?.ogImage ?? story.image}
+  image={story.image}
   path={`stories/${slug}`}
   altPaths={altPaths}
   editId={story._id}

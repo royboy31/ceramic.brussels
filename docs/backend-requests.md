@@ -1049,7 +1049,7 @@ partnerPath({ tier }, lang)        // → /fr/partenaires/institutions
 **Done (Kamindu, 2026-10-07, `f1ed0b0` "The preview of a French page opens the French page"):** taken as asked. `previewPaths.ts` now imports `hubTabPath` from `src/lib/hubs.ts` and builds every hub address through one `hubLoc()` helper; `TIER_PAGES` and `EVENT_TABS` hold a hub + tab reference instead of an English href. The composition is right - `hubTabPath` is locale-less and `at()` adds `/preview/<lang>`, so a main partner resolves to `/preview/fr/partenaires` rather than the `/preview/fr/partners` that 404'd.
 
 ---
-## #57 · open · 2026-10-08 · the stories interview: a page behind each story card
+## #57 · done · 2026-10-08 · the stories interview: a page behind each story card
 
 **Page / component:** `src/components/StoryInterview.astro` (new), `src/pages/[lang]/stories/[slug].astro` (new), `src/sanity/schemaTypes/documents/story.ts`, `src/lib/queries.ts`
 
@@ -1092,6 +1092,13 @@ export function getStory(lang: LocaleId, slug: string) {
 }
 ```
 
-**Rendered meanwhile:** the layout and the route are built and on the branch. `src/pages/[lang]/stories/[slug].astro` resolves both helpers off the queries module rather than importing them, so the branch builds today and emits **no** interview pages; the moment the two helpers exist the route starts building them and the two lines marked `BACKEND-REQUEST #57` come out. `StoryInterview.astro` renders the frame in full from the shape above and degrades on every optional part - no links, no quote, no photographs, no role.
+**Done (Lilanga, 2026-10-08, working across the stack per `docs/project-handbook.md` §6 Recipe A — Kamindu please review):** taken as asked, and nothing above is left for you.
 
-**Also for you, while the slug is being added:** the stories tab's cards point at their interview through the card's own `link` today. Once a story has a slug the card should link to its own page by itself, and `link` can stay for the interviews that live somewhere else (Marie Pic's is an external magazine piece, Marion Verboom's is the guest-of-honour tab). `src/components/PressMedia.astro` reads `story.link` only; it needs `slug` on the card projection in `getStories` to prefer the page.
+- **Schema** (`documents/story.ts`): `slug` (localeSlug), `body` (localeBlock, "The interview"), `links` ("Buttons under the name"), `images` ("Photographs under the interview"). All four `hidden` unless the kind is Interview, as `role` already is. The existing `link` keeps its field and only its description changed.
+- **Queries**: `getStorySlugs()` and `getStory(lang, slug)`, both through `run()`; `slug` added to the `getStories` card projection; `story` added to `getLinkTargets`.
+- **Links**: `story: 'stories'` in `DOC_ROUTES` (`links.ts`), and `story` in `DOCUMENTS_QUERY` + `documentOption` (`siteLinks.ts`), so the Studio's "link to this site" box offers an interview and a reference follows it through a slug change.
+- **Frontend**: the route imports the two helpers plainly, and the stories card prefers its own page over `link`.
+
+**Additive, so no migration and no backup** (Recipe B does not apply): nothing is renamed, moved or retyped, every field is new and optional, and a `story` without a slug is exactly the card it was — which today is all six of them, so the live site is unchanged until Félicie fills one in. Verified: `npx tsc --noEmit` clean, `npm run build` 383 pages (the same count as before, since no story has a slug yet).
+
+**Two things worth your eye, Kamindu:** (1) I touched `src/sanity/` and `src/lib/queries.ts` while you are working in both — this wants a rebase before it merges. (2) `/press-media/stories` is not built at all while the stories page is unpublished (`tabHasPage`), so the interview's "read more interviews" pill points at a 404 until Félicie republishes it; she has to, for the cards to be reachable.

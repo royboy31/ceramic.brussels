@@ -130,7 +130,14 @@ for (let i = 1; i <= groups.length; i++) {
 const columns = [groups.slice(0, breakAt), groups.slice(breakAt)];
 
 const links = (story?.links ?? []).filter(Boolean);
-const photos = (story?.images ?? []).filter((img: any) => img?.asset);
+/*
+ * The strip is its own field, so an editor switches it on and off without
+ * touching the text. A picture typed into the interview itself joins it
+ * rather than being dropped: the frame has no place for one mid-column.
+ */
+const photos = [...(story?.images ?? []), ...blocks.filter((b: any) => b?._type === 'figure')].filter(
+  (img: any) => img?.asset,
+);
 /** Back to the tab the card sits on - Léonie, comment 1. */
 const storiesHref = localePath(lang, hubTabPath('press-media', 'stories', lang));
 const heading = [story?.title, story?.role].filter(Boolean).join(', ');

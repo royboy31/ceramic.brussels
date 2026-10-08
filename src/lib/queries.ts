@@ -399,7 +399,7 @@ function run<T>(query: string, params: Record<string, unknown> = {}): Promise<T>
  */
 export function getLinkTargets(lang: LocaleId) {
   return run<any[]>(
-    `*[_type in ["page", "exhibitor", "artist", "newsItem", "partner"] && !(_id in path("drafts.**"))] ${LINK_TARGET}`,
+    `*[_type in ["page", "exhibitor", "artist", "newsItem", "partner", "story"] && !(_id in path("drafts.**"))] ${LINK_TARGET}`,
     { lang },
   );
 }
@@ -1163,8 +1163,46 @@ export function getStories(lang: LocaleId) {
       ${styled('role')},
       ${styled('text')},
       image ${IMAGE},
+      // An interview with a slug has a page of its own; the card leads there
+      // rather than through its link, which stays for the ones that live
+      // elsewhere (an external magazine piece, the guest of honour's tab).
+      "slug": coalesce(slug[$lang].current, slug.${DEFAULT_LOCALE}.current),
       "link": link ${LINK}
     }`,
     { lang },
+  );
+}
+
+/**
+ * One interview, on its own page under /stories (the frame of 2026-10-08,
+ * `StoryInterview.astro`). The whole text is `body`, read by the roles an
+ * editor already has in the Style dropdown - the component works out which
+ * block is the pull quote, which are questions and which are answers, so
+ * nothing here needs a field of its own.
+ */
+export function getStorySlugs() {
+  return run<{ slugs: Record<string, string | undefined> }[]>(
+    `*[_type == "story" && kind == "interview" && defined(slug.${DEFAULT_LOCALE}.current)]{
+      "slugs": { "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current }
+    }`,
+  );
+}
+
+export function getStory(lang: LocaleId, slug: string) {
+  return run<any>(
+    `*[_type == "story" && kind == "interview" &&
+       (slug[$lang].current == $slug || slug.${DEFAULT_LOCALE}.current == $slug)][0]{
+      _id, _type, kind, publishedAt,
+      ${styled('title')},
+      ${styled('role')},
+      "slugs": { "en": slug.en.current, "fr": slug.fr.current, "nl": slug.nl.current },
+      // Figures an editor put in the text carry their caption parts too, so a
+      // picture typed into the body is not silently dropped.
+      "body": ${localised('body')}[]{ ..., _type == "figure" => ${IMAGE} },
+      image ${IMAGE},
+      "links": links[] ${LINK},
+      "images": images[] ${IMAGE}
+    }`,
+    { lang, slug },
   );
 }
