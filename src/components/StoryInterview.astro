@@ -140,7 +140,6 @@ const photos = [...(story?.images ?? []), ...blocks.filter((b: any) => b?._type 
 );
 /** Back to the tab the card sits on - Léonie, comment 1. */
 const storiesHref = localePath(lang, hubTabPath('press-media', 'stories', lang));
-const heading = [story?.title, story?.role].filter(Boolean).join(', ');
 ---
 
 <HubNav lang={lang} route="press-media" active="stories" pages={pages} class="press-band" />
@@ -165,7 +164,19 @@ const heading = [story?.title, story?.role].filter(Boolean).join(', ');
       questions start level with its middle. */}
   <div class:list={['body', { 'no-portrait': !story?.image?.asset }]}>
     <header class="head">
-      <h1 class="title">{heading}</h1>
+      {/* The frame breaks the heading itself - the names, then the role on
+          its own line ("…Jean-Marc Dimanche, / ceramic brussels
+          co-directors"). Left to wrap, a short role trails a word up onto
+          the first line instead. */}
+      <h1 class="title">
+        {story?.title}
+        {story?.role && (
+          <>
+            ,<br />
+            {story.role}
+          </>
+        )}
+      </h1>
       {
         /* Comment 2: "we would need the option to add an 'instagram' or
            'website' button here". The editor's own labels keep their case. */
