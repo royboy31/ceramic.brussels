@@ -13,11 +13,19 @@ export const STORY_KINDS = [
  * lines and "read the interview →" - or an entry of the collectors' voices
  * series, dated, with a picture, a title and the same link.
  *
- * A story is a card, not a page: its link says where "read the interview"
- * goes - a news item (an interview published here), a page of this site
- * (the guest of honour's interview tab), or the site that hosts the series
- * (Ceramics Now). That keeps interviews out of the news list unless they
- * are news items too.
+ * Since 2026-10-08 an interview can also **be** a page: give it a slug and
+ * an Interview text and it is built at /<lang>/stories/<slug> in the
+ * interview layout Léonie drew (`StoryInterview.astro`), with this card
+ * leading to it.
+ *
+ * Without a slug nothing changes - the card's own link says where "read the
+ * interview" goes: a news item (an interview published here), a page of this
+ * site (the guest of honour's interview tab), or the site that hosts the
+ * series (Ceramics Now). That keeps interviews out of the news list unless
+ * they are news items too.
+ *
+ * The page's four fields are hidden on a collectors' voice, which is a card
+ * pointing at Ceramics Now and has no page of its own here.
  */
 export const story = defineType({
   name: 'story',
@@ -46,6 +54,16 @@ export const story = defineType({
       description: 'The line in capitals under the name: guest of honour, main partner, media partner…',
       hidden: ({ document }) => document?.kind !== 'interview',
     }),
+    // The interview's own page (Léonie, 2026-10-08). Everything here is
+    // optional: a story without a slug is the card it has always been.
+    defineField({
+      name: 'slug',
+      title: 'Slugs',
+      type: 'localeSlug',
+      description:
+        'Fill these in and the interview gets a page of its own at /stories/… in each language, in the interview layout. Leave them empty and this stays a card linking somewhere else.',
+      hidden: ({ document }) => document?.kind !== 'interview',
+    }),
     defineField({
       name: 'publishedAt',
       title: 'Date',
@@ -64,7 +82,33 @@ export const story = defineType({
       name: 'link',
       title: 'Where “read the interview” goes',
       type: 'link',
-      description: 'A news item, a page of this site, or an external address. Without one the card has no link.',
+      description:
+        'Only used while the interview has no page of its own. A news item, a page of this site, or an external address; with neither, the card has no link.',
+    }),
+    defineField({
+      name: 'body',
+      title: 'The interview',
+      type: 'localeBlock',
+      description:
+        'The whole interview. Style a paragraph “Quote” to make it the big pull quote — the line under it becomes the name below it. Style a question “Minor heading” (or set it bold from end to end); the paragraphs after it are its answer, with the speaker’s initials in bold at the start. Anything before the first question is the lead under the title.',
+      hidden: ({ document }) => document?.kind !== 'interview',
+    }),
+    defineField({
+      name: 'links',
+      title: 'Buttons under the name',
+      type: 'array',
+      of: [{ type: 'link' }],
+      description: 'Optional, e.g. “instagram” or “website” for the person or gallery interviewed. Drawn as pills under the title.',
+      hidden: ({ document }) => document?.kind !== 'interview',
+    }),
+    defineField({
+      name: 'images',
+      title: 'Photographs under the interview',
+      type: 'array',
+      of: [{ type: 'figure' }],
+      options: { layout: 'grid' },
+      description: 'Optional, three across at the foot of the page. Leave it empty and the page ends on the text.',
+      hidden: ({ document }) => document?.kind !== 'interview',
     }),
     defineField({
       name: 'order',

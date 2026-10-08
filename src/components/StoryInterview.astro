@@ -1,0 +1,475 @@
+---
+import HubNav from './HubNav.astro';
+import SanityImage from './SanityImage.astro';
+import FigureCaption from './FigureCaption.astro';
+import PortableText from './PortableText.astro';
+import LinkPill from './LinkPill.astro';
+import type { LocaleId } from '../lib/locales';
+import { useTranslations, localePath } from '../lib/i18n';
+import { hubTabPath } from '../lib/hubs';
+
+/**
+ * One interview from press & media → stories, as the 2027 interview frame
+ * draws it (`screenshot/ceramic brussels — press & media — stories —
+ * interview.png`, 1440px): the press & media band with *stories* filled, the
+ * portrait on the first four columns, the name and role over a rule on the
+ * other eight, the lead under it, and then the interview itself in two
+ * columns of four inside that same band - the pull quote opening the right
+ * one, "read more interviews" closing it, and the photographs across all
+ * twelve at the foot.
+ *
+ * As on the guest of honour's interview tab (`GuestInterview.astro`), the
+ * whole text is one rich-text field read by the roles an editor already has
+ * in the Style dropdown - nothing here is a field of its own:
+ *
+ * - before the first question: the lead;
+ * - a question is a Subheading, a Minor heading, or a paragraph that is bold
+ *   from end to end, and the paragraphs after it are its answer, the
+ *   speaker's initials ("GP", "JMD") in bold at their start;
+ * - a Quote is the pull quote. It opens the right column wherever it is
+ *   written, with the line after it as its attribution, so an editor does
+ *   not have to guess where the column break falls.
+ *
+ * The questions are dealt to the two columns at the point that leaves them
+ * most nearly level, counting the quote against the right one - the frame's
+ * split, and the one that holds when an interview is longer or shorter than
+ * this one. Reading order is kept: the left column is read to its end, then
+ * the right.
+ *
+ * Every part below the name is optional and leaves no gap behind it: an
+ * interview with no quote, no links, no photographs or no role is the same
+ * page without them (Léonie, 2026-10-08 - the photographs "depending on
+ * whether we have available images or not").
+ */
+interface Props {
+  lang: LocaleId;
+  story: any;
+  /** The hub's pages, so the band's pills take their editor labels. */
+  pages?: any[];
+}
+
+const { lang, story, pages = [] } = Astro.props;
+const t = useTranslations(lang);
+
+const blocks: any[] = (story?.body ?? []).filter(Boolean);
+
+const isText = (b: any) => b?._type === 'block';
+const isQuote = (b: any) => isText(b) && b.style === 'blockquote';
+const spans = (b: any) => (b.children ?? []).filter((c: any) => (c.text ?? '').trim());
+/** A question: the two heading roles, or a paragraph set bold throughout. */
+const isQuestion = (b: any) =>
+  isText(b) &&
+  !b.listItem &&
+  (b.style === 'h3' ||
+    b.style === 'h4' ||
+    ((b.style ?? 'normal') === 'normal' && spans(b).length > 0 && spans(b).every((c: any) => c.marks?.includes('strong'))));
+/** The role chose the place; the place decides the look. */
+const plain = (b: any) => ({ ...b, style: 'normal' });
+
+/* A Heading an editor may have typed over the interview is dropped: the
+   name above the rule is the title. */
+const firstQuestion = blocks.findIndex(isQuestion);
+const headEnd = firstQuestion >= 0 ? firstQuestion : blocks.length;
+
+/* The pull quote, wherever it was written, and the paragraph under it. */
+const quoteAt = blocks.findIndex(isQuote);
+const quote = quoteAt >= 0 ? plain(blocks[quoteAt]) : null;
+const after = quoteAt >= 0 ? blocks[quoteAt + 1] : null;
+const attribution = after && isText(after) && !isQuestion(after) && !isQuote(after) ? spans(after).map((c: any) => c.text).join('') : null;
+
+/* The lead is everything before the first question that the quote has not
+   already claimed - a quote written straight under the lead, which is where
+   an editor would put it, takes the line after it with it. */
+const lead = blocks
+  .slice(0, headEnd)
+  .filter(
+    (b, i) =>
+      isText(b) &&
+      !isQuote(b) &&
+      b.style !== 'h1' &&
+      b.style !== 'h2' &&
+      !(attribution && i === quoteAt + 1),
+  );
+
+/* Question, then the paragraphs that answer it, in order. */
+type Group = { question?: any; answer: any[] };
+const groups: Group[] = [];
+blocks.slice(headEnd).forEach((b, i) => {
+  if (isQuote(b)) return;
+  // The line under the quote is its attribution, not an answer.
+  if (attribution && headEnd + i === quoteAt + 1) return;
+  if (isQuestion(b)) groups.push({ question: plain(b), answer: [] });
+  else if (isText(b)) {
+    const last = groups[groups.length - 1];
+    if (last) last.answer.push(b);
+    else groups.push({ answer: [b] });
+  }
+});
+
+/*
+ * Where the columns break. Each group is weighed by the text it holds; the
+ * quote is weighed into the right column so a long one does not leave the
+ * right side short, as it does on this frame. The split that levels the two
+ * wins, and at least one group stays on the left.
+ */
+const weigh = (g: Group) =>
+  [g.question, ...g.answer].filter(Boolean).reduce((n, b: any) => n + spans(b).reduce((m: number, c: any) => m + c.text.length, 0), 0);
+const weights = groups.map(weigh);
+const quoteWeight = quote ? spans(quote).reduce((n: number, c: any) => n + c.text.length, 0) * 2.4 : 0;
+const total = weights.reduce((a, b) => a + b, 0);
+let breakAt = groups.length;
+let best = Infinity;
+for (let i = 1; i <= groups.length; i++) {
+  const left = weights.slice(0, i).reduce((a, b) => a + b, 0);
+  const diff = Math.abs(left - (total - left + quoteWeight));
+  if (diff < best) {
+    best = diff;
+    breakAt = i;
+  }
+}
+const columns = [groups.slice(0, breakAt), groups.slice(breakAt)];
+
+const links = (story?.links ?? []).filter(Boolean);
+/*
+ * The strip is its own field, so an editor switches it on and off without
+ * touching the text. A picture typed into the interview itself joins it
+ * rather than being dropped: the frame has no place for one mid-column.
+ */
+const photos = [...(story?.images ?? []), ...blocks.filter((b: any) => b?._type === 'figure')].filter(
+  (img: any) => img?.asset,
+);
+/** Back to the tab the card sits on - Léonie, comment 1. */
+const storiesHref = localePath(lang, hubTabPath('press-media', 'stories', lang));
+---
+
+<HubNav lang={lang} route="press-media" active="stories" pages={pages} class="press-band" />
+
+<article class="story-interview page-grid">
+  {
+    story?.image?.asset && (
+      <figure class="portrait">
+        <SanityImage
+          image={story.image}
+          loading="eager"
+          widths={[440, 660, 880]}
+          sizes="(max-width: 700px) 100vw, (max-width: 900px) 40vw, 30vw"
+        />
+        <FigureCaption image={story.image} />
+      </figure>
+    )
+  }
+
+  {/* One item on columns 5-12, so the portrait's height never pushes the
+      interview down: on the frame the picture runs past the lead and the
+      questions start level with its middle. */}
+  <div class:list={['body', { 'no-portrait': !story?.image?.asset }]}>
+    <header class="head">
+      {/* The frame breaks the heading itself - the names, then the role on
+          its own line ("…Jean-Marc Dimanche, / ceramic brussels
+          co-directors"). Left to wrap, a short role trails a word up onto
+          the first line instead. */}
+      <h1 class="title">
+        {story?.title}
+        {story?.role && (
+          <>
+            ,<br />
+            {story.role}
+          </>
+        )}
+      </h1>
+      {
+        /* Comment 2: "we would need the option to add an 'instagram' or
+           'website' button here". The editor's own labels keep their case. */
+        links.length > 0 && (
+          <p class="head-links">
+            {links.map((link: any) => (
+              <LinkPill lang={lang} link={link} />
+            ))}
+          </p>
+        )
+      }
+    </header>
+
+    {
+      lead.length > 0 && (
+        <div class="lead">
+          <PortableText value={lead} lang={lang} />
+        </div>
+      )
+    }
+
+    {/* Always drawn, even for an interview that is only a lead: the way back
+        to the stories tab lives at the foot of the right column. */}
+    <div class="columns">
+      {columns.map((column, side) => (
+        <div class="column">
+          {side === 1 && quote && (
+            <blockquote class="pull">
+              <div class="pull-text">
+                <PortableText value={[quote]} lang={lang} />
+              </div>
+              {attribution && <p class="who">{attribution}</p>}
+            </blockquote>
+          )}
+          {column.map((group) => (
+            <div class="qa">
+              {group.question && (
+                <div class="question">
+                  <PortableText value={[group.question]} lang={lang} />
+                </div>
+              )}
+              {group.answer.length > 0 && (
+                <div class="answer">
+                  <PortableText value={group.answer} lang={lang} />
+                </div>
+              )}
+            </div>
+          ))}
+          {side === 1 && (
+            <p class="more">
+              <LinkPill lang={lang} href={storiesHref} label={t('press.moreInterviews')} />
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {
+    /* Comment 3: the strip is there when the interview has photographs and
+       gone when it has not. */
+    photos.length > 0 && (
+      <ul class="shots">
+        {photos.map((img: any) => (
+          <li class="shot">
+            <SanityImage image={img} aspect={1.5} widths={[440, 660, 880]} sizes="(max-width: 640px) 100vw, 33vw" />
+            <FigureCaption image={img} />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</article>
+
+<style>
+  /* Measured off the 1440px interview frame. */
+  .story-interview {
+    align-items: start;
+    padding-top: 22px;
+    padding-bottom: 100px;
+  }
+
+  /* The portrait holds the first four columns, and only beside the header:
+     the interview below it runs on 5-12 with these four left empty, which is
+     the one thing a page-builder stack cannot do (BACKEND-REQUEST #57). */
+  .portrait {
+    grid-column: span 4;
+    margin: 0;
+  }
+  .portrait :global(img) {
+    width: 100%;
+  }
+
+  .body {
+    grid-column: 5 / span 8;
+    min-width: 0;
+  }
+  /* Without a portrait the text takes the page rather than sitting in from
+     the left edge on four empty columns. */
+  .body.no-portrait {
+    grid-column: 1 / -1;
+  }
+
+  /* The name and role on one line of 40px over the frame's 2px rule. The
+     site's panel title at a tighter leading, which is how the frame sets a
+     two-line heading. */
+  .title {
+    letter-spacing: -0.04em;
+    border-bottom: 2px solid;
+    margin: 0;
+    padding-bottom: 10px;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 42px;
+  }
+  .head-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    margin: 18px 0 0;
+  }
+
+  .lead {
+    letter-spacing: var(--intro-ls);
+    margin-top: 28px;
+    font-size: var(--intro-size);
+    line-height: var(--intro-lh);
+  }
+  .lead :global(p + p) {
+    margin-top: 20px;
+  }
+
+  /* Two columns of four inside the eight the header uses: the nesting makes
+     the inner gap the grid's own, so the four tracks still line up with the
+     photographs below. */
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 30px;
+    align-items: start;
+    margin-top: 67px;
+  }
+  .column {
+    min-width: 0;
+  }
+
+  /* The frame sets the quote below the title and above its own column's
+     first question, at 40/50 - smaller than the guest of honour's, which is
+     a page-wide pull quote and not a column's. */
+  .pull {
+    margin: 0 0 46px;
+  }
+  .pull-text {
+    letter-spacing: -0.03em;
+    font-size: 40px;
+    line-height: 50px;
+  }
+  /* The name at the lead's size, as on the guest of honour's interview. */
+  .who {
+    margin: 4px 0 0;
+    font-size: var(--intro-size);
+    line-height: var(--intro-lh);
+    letter-spacing: var(--intro-ls);
+  }
+
+  /* A size above the site's body text: the frame sets the interview at 24px,
+     as the guest of honour's is. */
+  .qa {
+    letter-spacing: -0.03em;
+    font-size: 24px;
+    line-height: 30px;
+  }
+  .qa + .qa {
+    margin-top: 60px;
+  }
+  /* The semibold: the frame's bold is a weight the site does not ship, and
+     "bold" on its own would pick 900. Upright here - the italic is the guest
+     of honour's own ask (client, 2026-09-30) and this frame sets it plain. */
+  .question,
+  .qa :global(strong) {
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  .answer {
+    margin-top: 28px;
+  }
+  .answer :global(p + p) {
+    margin-top: 15px;
+  }
+  /* The speaker's initials, set off from the answer as the frame does. */
+  .answer :global(p > strong:first-child) {
+    margin-right: 1.5em;
+  }
+
+  /* Comment 1: back to the tab the card sits on. The frame's pill is a size
+     under the site's; the tokens are set here so LinkPill keeps its shape. */
+  .more {
+    --pill-size: 18px;
+    --pill-pad: 3px 16px;
+    margin: 56px 0 0;
+  }
+
+  /* The photographs across all twelve, three a row with their captions. */
+  .shots {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 30px;
+    margin: 110px 0 0;
+    padding-inline: 0;
+    list-style: none;
+  }
+  .shot :global(img) {
+    width: 100%;
+  }
+
+  /* The two columns only hold while the eight they share are wide enough:
+     below this they are four twenty-odd-character lines, which is where the
+     frame's rhythm stops being readable. The portrait keeps its rail and the
+     interview runs down one column under it, quote and all, in the same
+     order it is read in. */
+  @media (max-width: 1100px) {
+    .columns {
+      grid-template-columns: 1fr;
+    }
+    .column + .column {
+      margin-top: 60px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .title {
+      font-size: 32px;
+      line-height: 36px;
+      padding-bottom: 12px;
+    }
+    .pull-text {
+      font-size: 32px;
+      line-height: 40px;
+    }
+    .columns {
+      column-gap: 16px;
+      margin-top: 44px;
+    }
+    .shots {
+      gap: 16px;
+      margin-top: 70px;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .story-interview {
+      padding-bottom: 60px;
+    }
+    /* One column: the portrait, then the name, then the interview straight
+       down. There are no mobile frames - this only keeps it readable. */
+    .portrait,
+    .body,
+    .body.no-portrait {
+      grid-column: 1 / -1;
+    }
+    .body {
+      margin-top: 28px;
+    }
+    .title {
+      font-size: 27px;
+      line-height: 31px;
+    }
+    .pull-text {
+      font-size: 27px;
+      line-height: 33px;
+    }
+    .pull {
+      margin-bottom: 44px;
+    }
+    .qa {
+      font-size: 18px;
+      line-height: 1.3;
+    }
+    .qa + .qa,
+    .column + .column {
+      margin-top: 44px;
+    }
+    .columns {
+      grid-template-columns: 1fr;
+    }
+    .more {
+      margin-top: 36px;
+    }
+    .shots {
+      grid-template-columns: 1fr;
+      margin-top: 50px;
+      gap: 30px;
+    }
+  }
+</style>

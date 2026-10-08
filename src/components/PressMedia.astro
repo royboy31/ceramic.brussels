@@ -51,7 +51,17 @@ const [clips, news, editions, partners, stories] = await Promise.all([
  */
 const card = (s: any) => {
   const link = resolveLink(lang, s.link);
-  return { ...s, date: s.publishedAt, url: link?.href, arrow: link?.arrow ?? '→', external: link?.external ?? false };
+  // Since 2026-10-08 an interview can have a page of its own (its slug, the
+  // frame Léonie drew); that comes first, and `link` keeps the ones that live
+  // elsewhere - an external magazine piece, the guest of honour's own tab.
+  const own = s.slug ? localePath(lang, `stories/${s.slug}`) : null;
+  return {
+    ...s,
+    date: s.publishedAt,
+    url: own ?? link?.href,
+    arrow: own ? '→' : (link?.arrow ?? '→'),
+    external: own ? false : (link?.external ?? false),
+  };
 };
 const interviews = stories.filter((s: any) => s.kind === 'interview').map(card);
 const collectors = stories.filter((s: any) => s.kind === 'collectors-voice').map(card);
