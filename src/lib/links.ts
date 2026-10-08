@@ -28,6 +28,8 @@ const DOC_ROUTES: Record<string, string> = {
   newsItem: 'news',
   page: '',
   partner: 'partners',
+  // An interview from press & media → stories, once it has a slug of its own.
+  story: 'stories',
 };
 
 const LISTINGS = ['exhibitors', 'artists', 'news'];
