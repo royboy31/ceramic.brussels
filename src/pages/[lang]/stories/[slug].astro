@@ -3,6 +3,7 @@ import Base from '../../../layouts/Base.astro';
 import StoryInterview from '../../../components/StoryInterview.astro';
 import { LOCALE_IDS, DEFAULT_LOCALE, type LocaleId } from '../../../lib/locales';
 import { getHubPages, getStory, getStorySlugs } from '../../../lib/queries';
+import { pageForTab } from '../../../lib/hubs';
 
 /**
  * One interview from press & media → stories, on an address of its own
@@ -15,6 +16,10 @@ import { getHubPages, getStory, getStorySlugs } from '../../../lib/queries';
 type Slugs = Partial<Record<LocaleId, string>>;
 
 export async function getStaticPaths() {
+  // No interview page while the stories tab is off the site (its page
+  // unpublished, 2026-10-09: the client took stories offline).
+  if (!pageForTab(await getHubPages(DEFAULT_LOCALE, 'press-media'), 'stories')) return [];
+
   const stories = await getStorySlugs();
 
   return LOCALE_IDS.flatMap((lang) =>

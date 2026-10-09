@@ -256,21 +256,17 @@ export const HUBS: Record<string, Hub> = {
     title: 'tabs.pressMedia',
     pageTabs: true,
     tabs: [
-      /* Stories first again, as the frames draw the band (2026-10-08, with
-         Leonie's interview page). It was moved last on 2026-10-03 so that it
-         would disappear pill-and-route while the client kept its page
-         unpublished for the launch - the first tab can never drop, being the
-         hub root that `tabHasPage` always keeps. Putting it back in front is
-         therefore also the decision that stories is on the site for good, and
-         it wants `page-press-media-stories` published: unpublished, the hub
-         root renders the cards with no lead above them.
-         /press-media/press is a built address again rather than the hub root,
-         which is what PAGE_TAB_HUBS in scripts/legacy-redirects.mjs sends the
-         old URLs to. */
-      { slug: 'stories', segment: { fr: 'recits', nl: 'verhalen' }, label: 'press.stories' },
+      /* Press first since 2026-10-03: the client is unpublishing stories for
+         the launch, and the first tab can never drop (it is the hub root, and
+         `tabHasPage` always keeps it). Last instead of first, the stories tab
+         disappears pill-and-route the moment its page is unpublished, and
+         comes back the same way. /press-media/press's old URLs fall back to
+         the hub root - which now IS press - via PAGE_TAB_HUBS in
+         scripts/legacy-redirects.mjs. */
       { slug: 'press', segment: { fr: 'presse', nl: 'pers' }, label: 'tabs.press' },
       { slug: 'photos-videos', segment: { nl: 'fotos-videos' }, label: 'press.photosVideos' },
       { slug: 'media-partners', segment: { fr: 'partenaires-medias', nl: 'mediapartners' }, label: 'press.mediaPartners' },
+      { slug: 'stories', segment: { fr: 'recits', nl: 'verhalen' }, label: 'press.stories' },
     ],
   },
 };
