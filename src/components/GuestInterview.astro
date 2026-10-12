@@ -231,11 +231,13 @@ const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--row
     grid-row: var(--row) / span var(--rows);
     margin: 0;
   }
-  /* A size above the site's body text: the frame sets the interview at 24px. */
+  /* The site's own body size: the frame reads 24px, but the client asked
+     for the Figma Body style instead (Félicie, 2026-10-12 - the type "too
+     large for the Marion Verboom Interview"). */
   .qa {
-    letter-spacing: -0.03em;
-    font-size: 24px;
-    line-height: 30px;
+    letter-spacing: var(--body-ls);
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
   }
   /* Questions and the speaker's initials in the semibold: the frame's bold
      is a weight the site does not ship, and "bold" on its own would pick
@@ -292,10 +294,7 @@ const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--row
       font-size: 20px;
       line-height: 1.3;
     }
-    .qa {
-      font-size: 18px;
-      line-height: 1.3;
-    }
+    /* `.qa` keeps the body tokens, which step to 18 on a phone. */
     .intro {
       grid-column: 1 / -1;
     }

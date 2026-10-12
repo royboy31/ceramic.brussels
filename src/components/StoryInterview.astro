@@ -15,7 +15,7 @@ import { hubTabPath } from '../lib/hubs';
  * portrait on the first four columns, the name and role over a rule on the
  * other eight, the lead under it, and then the interview itself in two
  * columns of four inside that same band - the pull quote opening the right
- * one, "read more interviews" closing it, and the photographs across all
+ * one, "read more interviews" under both, and the photographs across all
  * twelve at the foot.
  *
  * As on the guest of honour's interview tab (`GuestInterview.astro`), the
@@ -225,14 +225,16 @@ const storiesHref = localePath(lang, hubTabPath('press-media', 'stories', lang))
               )}
             </div>
           ))}
-          {side === 1 && (
-            <p class="more">
-              <LinkPill lang={lang} href={storiesHref} label={t('press.moreInterviews')} />
-            </p>
-          )}
         </div>
       ))}
     </div>
+
+    {/* After the whole text, between it and the photographs, whatever the
+        columns' lengths - it closed the right column until Félicie's
+        2026-10-12 ask, where an uneven split left it mid-text. */}
+    <p class="more">
+      <LinkPill lang={lang} href={storiesHref} label={t('press.moreInterviews')} />
+    </p>
   </div>
 
   {
@@ -342,12 +344,13 @@ const storiesHref = localePath(lang, hubTabPath('press-media', 'stories', lang))
     letter-spacing: var(--intro-ls);
   }
 
-  /* A size above the site's body text: the frame sets the interview at 24px,
-     as the guest of honour's is. */
+  /* The site's own body size: the frame reads 24px, but the client asked
+     for the Figma Body style instead (Félicie, 2026-10-12 - "the body text
+     here is too large"), and the tokens are that style. */
   .qa {
-    letter-spacing: -0.03em;
-    font-size: 24px;
-    line-height: 30px;
+    letter-spacing: var(--body-ls);
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
   }
   .qa + .qa {
     margin-top: 60px;
@@ -452,10 +455,7 @@ const storiesHref = localePath(lang, hubTabPath('press-media', 'stories', lang))
     .pull {
       margin-bottom: 44px;
     }
-    .qa {
-      font-size: 18px;
-      line-height: 1.3;
-    }
+    /* `.qa` keeps the body tokens, which step to 18 on a phone. */
     .qa + .qa,
     .column + .column {
       margin-top: 44px;
