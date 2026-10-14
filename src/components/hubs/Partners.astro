@@ -92,6 +92,7 @@ const logoScale = (p: any) => {
  * takes the site's own string in each language.
  */
 const interview = (p: any) => {
+  if (p?.interviewButtonHidden) return null;
   const r = resolveLink(lang, p?.interviewLink);
   return r ? { ...r, label: r.label || t('press.readInterview'), editorLabel: !!r.label } : null;
 };

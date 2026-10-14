@@ -98,7 +98,17 @@ export const partner = defineType({
       title: 'Interview button',
       type: 'link',
       description:
-        'Fill this in and the partner\'s entry on the partners pages gets a "read the interview" button beside the website one — point it at the interview\'s page. Clear it to take the button off. Leave the label empty for the standard "read the interview" text in each language.',
+        'Fill this in and the partner\'s entry on the partners pages gets a "read the interview" button beside the website one — point it at the interview\'s page. Leave the label empty for the standard "read the interview" text in each language.',
+    }),
+    // Like a section block's "hidden": the link is kept, the page lets it go,
+    // so showing it again is one untick rather than finding the page anew.
+    defineField({
+      name: 'interviewButtonHidden',
+      title: 'Hide the interview button',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Takes the button off the page but keeps the link above, ready to show again.',
+      hidden: ({ parent }) => !parent?.interviewLink,
     }),
     defineField({ name: 'instagram', title: 'Instagram handle', type: 'string', hidden: true }),
     defineField({ name: 'order', title: 'Sort order', type: 'number', initialValue: 100 }),
