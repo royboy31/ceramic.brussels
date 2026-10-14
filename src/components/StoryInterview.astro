@@ -109,8 +109,14 @@ blocks.slice(headEnd).forEach((b, i) => {
 /*
  * Where the columns break. Each group is weighed by the text it holds; the
  * quote is weighed into the right column so a long one does not leave the
- * right side short, as it does on this frame. The split that levels the two
- * wins, and at least one group stays on the left.
+ * right side short, as it does on this frame. The two are kept as level as
+ * the groups allow, but the longer column is always the LEFT one, as the
+ * frame sets it ("the right-hand column is always longer than the left one,
+ * whereas it's the opposite in the Figma" - Félicie, 2026-10-14): the break
+ * falls on the first split whose left side has caught the right up, which is
+ * also the levellest of the left-heavy splits. At least one group stays on
+ * the left, and a quote outweighing the whole text leaves it alone on the
+ * right.
  */
 const weigh = (g: Group) =>
   [g.question, ...g.answer].filter(Boolean).reduce((n, b: any) => n + spans(b).reduce((m: number, c: any) => m + c.text.length, 0), 0);
@@ -118,13 +124,11 @@ const weights = groups.map(weigh);
 const quoteWeight = quote ? spans(quote).reduce((n: number, c: any) => n + c.text.length, 0) * 2.4 : 0;
 const total = weights.reduce((a, b) => a + b, 0);
 let breakAt = groups.length;
-let best = Infinity;
 for (let i = 1; i <= groups.length; i++) {
   const left = weights.slice(0, i).reduce((a, b) => a + b, 0);
-  const diff = Math.abs(left - (total - left + quoteWeight));
-  if (diff < best) {
-    best = diff;
+  if (left >= total - left + quoteWeight) {
     breakAt = i;
+    break;
   }
 }
 const columns = [groups.slice(0, breakAt), groups.slice(breakAt)];

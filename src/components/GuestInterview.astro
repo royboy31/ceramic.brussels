@@ -1,8 +1,10 @@
 ---
 import SanityImage from './SanityImage.astro';
 import PortableText from './PortableText.astro';
+import LinkPill from './LinkPill.astro';
 import type { LocaleId } from '../lib/locales';
-import { useTranslations } from '../lib/i18n';
+import { useTranslations, localePath } from '../lib/i18n';
+import { hubTabPath } from '../lib/hubs';
 
 /**
  * The guest-of-honour interview tab, as the 2027 interview frame draws it:
@@ -102,6 +104,8 @@ const filled = rows.filter((r) => r.length);
 const details = (img: any) => [img.year, img.caption].filter(Boolean).join(', ');
 const hasCaption = (img: any) => !!(img.workTitle || details(img) || img.credit);
 const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--rows:${c.rows}`;
+/** To the stories tab, as under every story interview (Félicie, 2026-10-14). */
+const storiesHref = localePath(lang, hubTabPath('press-media', 'stories', lang));
 ---
 
 <article class="guest-interview page-grid">
@@ -171,6 +175,13 @@ const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--row
       <p class="soon col-span-full">{t('artists.interviewSoon')}</p>
     )
   }
+
+  {/* "Please add a 'Read more interviews' button here as well, like on the
+      other interviews" (Félicie, 2026-10-14): the same pill as the story
+      interviews', after the whole text. */}
+  <p class="more col-span-full">
+    <LinkPill lang={lang} href={storiesHref} label={t('press.moreInterviews')} />
+  </p>
 </article>
 
 <style>
@@ -279,6 +290,12 @@ const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--row
     font-size: var(--body-size);
     line-height: var(--body-lh);
   }
+  /* The story interviews' own pill (StoryInterview.astro `.more`). */
+  .more {
+    --pill-size: 18px;
+    --pill-pad: 3px 16px;
+    margin: 56px 0 0;
+  }
   @media (max-width: 900px) {
     .row {
       gap: 30px 16px;
@@ -313,6 +330,9 @@ const place = (c: Cell) => `--col:${c.col};--span:${c.span};--row:${c.row};--row
     .cell {
       grid-column: 1;
       grid-row: auto;
+    }
+    .more {
+      margin-top: 36px;
     }
   }
 </style>

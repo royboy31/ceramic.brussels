@@ -10,6 +10,7 @@ import { useTranslations } from '../../lib/i18n';
 import { getHubPages, getPartners } from '../../lib/queries';
 import { HUBS, PARTNER_TABS, hubTabPath, pageForTab , hubAltPaths } from '../../lib/hubs';
 import { styleAttrs } from '../../lib/textStyle';
+import { resolveLink } from '../../lib/links';
 import PartnerName from '../PartnerName.astro';
 import LinkPill from '../LinkPill.astro';
 
@@ -84,6 +85,16 @@ const logoScale = (p: any) => {
   const pct = Number(p?.logoScale);
   return Number.isFinite(pct) && pct > 0 ? pct / 100 : 1;
 };
+/**
+ * The "read the interview" button under a partner's text (Félicie,
+ * 2026-10-14, for Puilaetco and Embelco). The editor switches it on by
+ * filling partner → Interview button and off by clearing it; an empty label
+ * takes the site's own string in each language.
+ */
+const interview = (p: any) => {
+  const r = resolveLink(lang, p?.interviewLink);
+  return r ? { ...r, label: r.label || t('press.readInterview'), editorLabel: !!r.label } : null;
+};
 ---
 
 <Base
@@ -126,7 +137,9 @@ const logoScale = (p: any) => {
       listed.length === 0 ? (
         <p class="empty">{t('partners.empty')}</p>
       ) : featured ? (
-        listed.map((p: any, i: number) => (
+        listed.map((p: any, i: number) => {
+          const iv = interview(p);
+          return (
           <div class="hotel">
             <figure>
               {p.images?.some((img: any) => img?.asset) ? (
@@ -155,10 +168,13 @@ const logoScale = (p: any) => {
                   doesn't appear in the preview nor on the studio website"
                   (Léonie, 2026-10-01; it is there, `partner.logo`). Same
                   foot as an institution card: button left, logo right. */}
-              {(p.url || p.logo?.asset) && (
+              {(p.url || iv || p.logo?.asset) && (
                 <div class="institution-foot partner-foot">
-                  {p.url ? (
-                    <LinkPill lang={lang} href={p.url} label={t('common.website')} external />
+                  {p.url || iv ? (
+                    <span class="foot-pills">
+                      {p.url && <LinkPill lang={lang} href={p.url} label={t('common.website')} external />}
+                      {iv && <LinkPill lang={lang} href={iv.href} label={iv.label} external={iv.external} preserveCase={iv.editorLabel} />}
+                    </span>
                   ) : (
                     <span />
                   )}
@@ -171,7 +187,8 @@ const logoScale = (p: any) => {
               )}
             </section>
           </div>
-        ))
+          );
+        })
       ) : (
         <div class="institutions">
           {showFilters && (
@@ -179,7 +196,9 @@ const logoScale = (p: any) => {
               {t('partners.empty')}
             </p>
           )}
-          {listed.map((p: any) => (
+          {listed.map((p: any) => {
+            const iv = interview(p);
+            return (
             <article data-tier={showFilters ? p.tier : undefined}>
               <h3 {...styleAttrs(p.nameStyle)}>
                 <PartnerName partner={p} />
@@ -191,10 +210,14 @@ const logoScale = (p: any) => {
                   body-text, aligned to the left (so facing every logo)?"
                   - Léonie, 2026-10-01. The partner's name is a link too
                   (2026-09-25); this is the button of her screenshot, in the
-                  foot opposite the logo. */}
+                  foot opposite the logo. The interview button joins it when
+                  the editor fills it in (Félicie, 2026-10-14). */}
               <div class="institution-foot">
-                {p.url ? (
-                  <LinkPill lang={lang} href={p.url} label={t('common.website')} external />
+                {p.url || iv ? (
+                  <span class="foot-pills">
+                    {p.url && <LinkPill lang={lang} href={p.url} label={t('common.website')} external />}
+                    {iv && <LinkPill lang={lang} href={iv.href} label={iv.label} external={iv.external} preserveCase={iv.editorLabel} />}
+                  </span>
                 ) : (
                   <span />
                 )}
@@ -206,7 +229,8 @@ const logoScale = (p: any) => {
                 )}
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       )
     }
@@ -323,6 +347,14 @@ const logoScale = (p: any) => {
   }
   .partner-foot {
     margin-top: 28px;
+  }
+  /* The website and interview buttons together on the left, wrapping as a
+     pair on a narrow card, with the logo keeping the right edge. */
+  .foot-pills {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    display: flex;
   }
   .institution-foot {
     justify-content: space-between;

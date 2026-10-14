@@ -90,6 +90,16 @@ export const partner = defineType({
       hidden: true,
     }),
     defineField({ name: 'url', title: 'Website', type: 'url' }),
+    // "Do we always have to ask you or could we make it easier for us to add
+    // it whenever we want to?" (Félicie, 2026-10-14): the button is on when
+    // the link is filled and off when it is cleared, no code change needed.
+    defineField({
+      name: 'interviewLink',
+      title: 'Interview button',
+      type: 'link',
+      description:
+        'Fill this in and the partner\'s entry on the partners pages gets a "read the interview" button beside the website one — point it at the interview\'s page. Clear it to take the button off. Leave the label empty for the standard "read the interview" text in each language.',
+    }),
     defineField({ name: 'instagram', title: 'Instagram handle', type: 'string', hidden: true }),
     defineField({ name: 'order', title: 'Sort order', type: 'number', initialValue: 100 }),
   ],
