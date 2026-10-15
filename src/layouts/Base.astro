@@ -192,6 +192,27 @@ const fallbackNav = [
 
 const nav = editorNav.length ? editorNav : fallbackNav;
 
+/**
+ * ceramic basel, the sister fair, is the last row of the menu. It is
+ * appended here rather than left to the navigation document because it is
+ * the one menu entry that leaves the site: nothing an editor reorders can
+ * drop it or move it above a page of this site, and MenuOverlay gives the
+ * row the Basel site's own colour (`sister`).
+ *
+ * That site is bilingual - French at the root, English under /en/, per its
+ * own hreflang (checked 2026-10-15) - so Dutch takes the English page, as
+ * every other missing translation here falls back to English.
+ */
+const BASEL_URL: Record<LocaleId, string> = {
+  en: 'https://www.ceramic-basel.com/en/',
+  fr: 'https://www.ceramic-basel.com/',
+  nl: 'https://www.ceramic-basel.com/en/',
+};
+const menu = [
+  ...nav,
+  { label: 'ceramic basel', href: BASEL_URL[lang], external: true, sister: true, children: [] },
+];
+
 const footerLinks = (navigation?.footerItems ?? [])
   .map((i: any) => resolveNavItem(lang, i))
   .filter(Boolean) as { label: string; href: string; external: boolean }[];
@@ -259,7 +280,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
       datesMark={edition?.datesMark}
       mainPartner={mainPartner}
     />
-    <MenuOverlay lang={lang} items={nav} siteName={siteName} newsletterUrl={settings?.newsletterUrl} />
+    <MenuOverlay lang={lang} items={menu} siteName={siteName} newsletterUrl={settings?.newsletterUrl} />
 
     <div class="edit-bar">
       <EditLink id="navigation" type="navigation" label="Edit menu" />

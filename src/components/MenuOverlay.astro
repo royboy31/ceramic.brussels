@@ -21,6 +21,8 @@ interface Child {
 }
 interface Item extends Child {
   children?: Child[];
+  /** The sister fair's row: its own colour, set by Base.astro. */
+  sister?: boolean;
 }
 
 interface Props {
@@ -60,11 +62,16 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
         items.map((item, i) => {
           const children = item.children ?? [];
           return (
-            <section class:list={['menu-row', { 'no-links': children.length === 0 }]} style={`--row:${i}`}>
+            <section class:list={['menu-row', { 'no-links': children.length === 0, sister: item.sister }]} style={`--row:${i}`}>
               <div class="menu-sheet">
                 <div class="menu-heading">
                   <a href={item.href} {...rel(item.external)}>
                     {item.label}
+                    {item.external && (
+                      <span class="link-arrow" aria-hidden="true">
+                        ↗
+                      </span>
+                    )}
                   </a>
                 </div>
                 {children.length > 0 && (
@@ -316,6 +323,14 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
   }
   :global(.menu-heading) {
     min-height: calc(var(--strip) + 3px);
+  }
+  /* The ceramic basel row in the Basel site's own gold rather than our acid.
+     That site is built from this codebase, so one token carries its whole
+     menu row over: the strip's gradient, the hairline edge above the sheet
+     and the lift shadow all read --color-acid, and #c29c26 is its
+     --color-brand (read off its stylesheet, 2026-10-15). */
+  .menu-row.sister {
+    --color-acid: #c29c26;
   }
   /* Tighter sub-links and heavier underlines (client feedback, 2026-09-16). */
   .submenu a {
