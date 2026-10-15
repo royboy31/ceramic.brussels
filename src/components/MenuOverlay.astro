@@ -332,6 +332,14 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
   .menu-row.sister {
     --color-acid: #c29c26;
   }
+  /* Its title centred in the strip rather than in the taller heading
+     design.css gives a row without sub-links (81px, the design's last
+     strip): the sister row is the only such row in the menu, and in a
+     58px sheet that heading hangs 7px past the foot, which the sheet
+     clips. */
+  .menu-row.sister :global(.menu-heading) {
+    min-height: calc(var(--strip) + 3px);
+  }
   /* Tighter sub-links and heavier underlines (client feedback, 2026-09-16). */
   .submenu a {
     letter-spacing: -0.03em;
