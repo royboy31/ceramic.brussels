@@ -232,6 +232,9 @@ const STRINGS = {
     'nav.openMenu': 'Open menu',
     'nav.closeMenu': 'Close menu',
     'nav.expand': 'Expand',
+    /* The banner's label. The dates are in it because the mark beside the
+       name is a picture of them, and the picture is decorative. */
+    'nav.sisterFair': 'ceramic basel, 15–20 June 2027 — open the site',
     'home.inImages': 'ceramic brussels {year} in images',
     'home.exhibitors2': 'exhibitors',
     'home.visitors': 'visitors',
@@ -538,6 +541,7 @@ const STRINGS = {
     'nav.openMenu': 'Ouvrir le menu',
     'nav.closeMenu': 'Fermer le menu',
     'nav.expand': 'Développer',
+    'nav.sisterFair': 'ceramic basel, 15–20 juin 2027 — ouvrir le site',
     'home.inImages': 'ceramic brussels {year} en images',
     'home.exhibitors2': 'exposant·es',
     'home.visitors': 'visiteur·euses',
@@ -843,6 +847,7 @@ const STRINGS = {
     'nav.openMenu': 'Menu openen',
     'nav.closeMenu': 'Menu sluiten',
     'nav.expand': 'Uitklappen',
+    'nav.sisterFair': 'ceramic basel, 15–20 juni 2027 — site openen',
     'home.inImages': 'ceramic brussels {year} in beeld',
     'home.exhibitors2': 'exposanten',
     'home.visitors': 'bezoekers',

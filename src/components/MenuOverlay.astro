@@ -1,5 +1,6 @@
 ---
 import { localePath, useTranslations } from '../lib/i18n';
+import { sisterSiteUrl } from './sisterSite';
 import type { LocaleId } from '../lib/locales';
 
 /**
@@ -37,6 +38,7 @@ const home = localePath(lang);
    site does (LinkPill, the exhibitors band) - asked for the catalogue
    (Tiphaine, 2026-10-02). */
 const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', target: '_blank' } : {});
+const sisterHref = sisterSiteUrl(lang);
 ---
 
 <dialog id="site-menu" data-menu aria-label={t('nav.menu')}>
@@ -83,6 +85,22 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
           );
         })
       }
+      {/* ceramic basel last, in ceramic basel's own colour: the mirror of
+          this site's row at the foot of their menu ("on the menu last we
+          needs to add basel link ... in basel gradients only for that menu
+          item" - Lilanga, 2026-10-15). It is not a Sanity menu item: the
+          pair of rows is an arrangement between the two sites rather than
+          something an editor sets, and the colour it is drawn in lives in
+          code either way. */}
+      <section class="menu-row no-links sister" style={`--row:${items.length}`}>
+        <div class="menu-sheet">
+          <div class="menu-heading">
+            <a href={sisterHref} rel="noopener noreferrer" target="_blank">
+              ceramic basel<span class="link-arrow">↗</span>
+            </a>
+          </div>
+        </div>
+      </section>
     </nav>
   </div>
 </dialog>
@@ -383,6 +401,23 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
     }
   }
 
+  /* The sister fair's row carries ceramic basel's gold rather than this
+     site's yellow - their site draws our row in our yellow the same way
+     (`--color-sister` there). Every rule above reads `--color-acid`, so the
+     one override recolours the sheet, the edge above it and the shadow it
+     lifts on, and nothing else on the page sees it. #c29c26 is their
+     `--color-brand`, read off ceramic-basel.com. */
+  .menu-row.sister {
+    --color-acid: #c29c26;
+  }
+  /* It reads as one of the rows, not as the design's taller `no-links`
+     strip: that height (81px, design.css) is only ever reached when a row
+     is hovered, so at rest the sheet cut the name off at the foot of the
+     panel - there is no sheet below this one to hide it under. The rule the
+     other rows get, which `.no-links` would otherwise beat. */
+  .menu-row.sister :global(.menu-heading) {
+    min-height: calc(var(--strip) + 3px);
+  }
   /* The wordmark slot is empty above 900: the panel clears the header's own
      wordmark there, so a second one would be a duplicate. */
   .menu-mark {

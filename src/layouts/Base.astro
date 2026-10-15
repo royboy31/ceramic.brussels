@@ -18,6 +18,7 @@ import EditLink from '../components/EditLink.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MenuOverlay from '../components/MenuOverlay.astro';
+import CrossBanner from '../components/CrossBanner.astro';
 import CookieConsent from '../components/CookieConsent.astro';
 import { categoriesInUse } from '../lib/tracking';
 import { VisualEditing } from '@sanity/astro/visual-editing';
@@ -251,6 +252,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   <body class:list={[{ 'acid-page': acid, 'dark-page': dark, 'ash-page': ash }]}>
     <a class="skip" href="#main">{t('common.skip')}</a>
 
+    <CrossBanner lang={lang} />
     <Header
       lang={lang}
       siteName={siteName}
@@ -876,6 +878,21 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     top: 0;
     height: var(--header-h);
     transition: height 0.28s var(--motion-ease);
+  }
+  /* The sister-fair strip (CrossBanner) is fixed over the top of the window,
+     so the page starts under it and both pinned bands pin under it in turn.
+     Its height is this one token; the component draws itself to it. */
+  :root {
+    --banner-h: 38px;
+  }
+  body:has(.cross-banner) {
+    padding-top: var(--banner-h);
+  }
+  body:has(.cross-banner) .site-header {
+    top: var(--banner-h);
+  }
+  body:has(.cross-banner) .title-band {
+    top: calc(var(--banner-h) + var(--header-h));
   }
   /* Scrolled, both pinned bands shrink, so a scrolled page keeps more of the
      window for the page itself (client feedback, 2026-09-17: the header and

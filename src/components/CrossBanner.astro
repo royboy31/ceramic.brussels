@@ -1,0 +1,117 @@
+---
+import { useTranslations } from '../lib/i18n';
+import { sisterSiteUrl } from './sisterSite';
+import type { LocaleId } from '../lib/locales';
+
+/**
+ * The strip over the top of the window, linking to the sister fair: ceramic
+ * basel's own site carries this one pointing here, and this is the same
+ * banner pointing back ("we have to do animated banner like in the ceramic
+ * basel site to Ceramic site also to link basel site" - Lilanga,
+ * 2026-10-15). Built as theirs is: a white band the height of
+ * `--banner-h`, the fair's name and its dates mark repeating across it,
+ * travelling slowly, standing still under the pointer and for anyone who
+ * asks for less motion. Their mark is their own artwork, taken from their
+ * site as a file (`public/assets/basel-dates.svg`), not hotlinked.
+ *
+ * The track holds ten copies of name + mark and the animation travels half
+ * the width, so the loop has no seam: the pairs are evenly spaced - the
+ * track's trailing space is the same as the gap between items - which is
+ * what makes half a width land on a frame identical to the first.
+ *
+ * Everything inside is hidden from screen readers; the link carries the
+ * whole sentence, dates included, as its label, because the mark is a
+ * picture of them.
+ */
+interface Props {
+  lang: LocaleId;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const href = sisterSiteUrl(lang);
+const PAIRS = 10;
+---
+
+<a class="cross-banner" href={href} target="_blank" rel="noopener noreferrer" aria-label={t('nav.sisterFair')}>
+  <div class="cross-banner__viewport" aria-hidden="true">
+    <div class="cross-banner__track">
+      {
+        Array.from({ length: PAIRS }).map(() => (
+          <Fragment>
+            <span class="cross-banner__name">
+              ceramic basel <span class="cross-banner__arrow">↗</span>
+            </span>
+            <img class="cross-banner__dates" src="/assets/basel-dates.svg" alt="" width="387" height="103" />
+          </Fragment>
+        ))
+      }
+    </div>
+  </div>
+</a>
+
+<style>
+  /* Over the header (z-index 40), under the skip link (50): the skip link
+     lands at the very top of the window when it is focused, and a banner
+     above it would hide the one control a keyboard reader needs first. */
+  .cross-banner {
+    display: block;
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 45;
+    height: var(--banner-h);
+    overflow: hidden;
+    background: #fff;
+    color: #050505;
+  }
+  .cross-banner__viewport {
+    display: flex;
+    width: max-content;
+    height: 100%;
+    animation: cross-banner-scroll 105s linear infinite;
+  }
+  .cross-banner:hover .cross-banner__viewport,
+  .cross-banner:focus-visible .cross-banner__viewport {
+    animation-play-state: paused;
+  }
+  /* The trailing space has to equal the gap, or the loop shows a seam. */
+  .cross-banner__track {
+    --banner-gap: clamp(22px, 3vw, 46px);
+    display: flex;
+    flex: none;
+    align-items: center;
+    height: 100%;
+    gap: var(--banner-gap);
+    padding-right: var(--banner-gap);
+  }
+  .cross-banner__name {
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+    font-size: clamp(12px, 1.1vw, 16px);
+  }
+  .cross-banner__arrow {
+    display: inline-block;
+  }
+  .cross-banner__dates {
+    display: block;
+    width: clamp(78px, 7.6vw, 116px);
+    height: auto;
+  }
+  @keyframes cross-banner-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  /* design.css cuts every animation to 0.01ms under reduced motion, which
+     would leave this one parked half a width along rather than stopped.
+     Dropping the animation itself keeps the band where it starts. */
+  @media (prefers-reduced-motion: reduce) {
+    .cross-banner__viewport {
+      animation: none;
+    }
+  }
+</style>
