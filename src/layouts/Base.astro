@@ -18,6 +18,8 @@ import EditLink from '../components/EditLink.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MenuOverlay from '../components/MenuOverlay.astro';
+import CrossBanner from '../components/CrossBanner.astro';
+import { BASEL_URL } from '../lib/basel';
 import CookieConsent from '../components/CookieConsent.astro';
 import { categoriesInUse } from '../lib/tracking';
 import { VisualEditing } from '@sanity/astro/visual-editing';
@@ -197,17 +199,9 @@ const nav = editorNav.length ? editorNav : fallbackNav;
  * appended here rather than left to the navigation document because it is
  * the one menu entry that leaves the site: nothing an editor reorders can
  * drop it or move it above a page of this site, and MenuOverlay gives the
- * row the Basel site's own colour (`sister`).
- *
- * That site is bilingual - French at the root, English under /en/, per its
- * own hreflang (checked 2026-10-15) - so Dutch takes the English page, as
- * every other missing translation here falls back to English.
+ * row the Basel site's own colour (`sister`). Its address, which is
+ * per-language, is in src/lib/basel.ts with the banner's.
  */
-const BASEL_URL: Record<LocaleId, string> = {
-  en: 'https://www.ceramic-basel.com/en/',
-  fr: 'https://www.ceramic-basel.com/',
-  nl: 'https://www.ceramic-basel.com/en/',
-};
 const menu = [
   ...nav,
   { label: 'ceramic basel', href: BASEL_URL[lang], external: true, sister: true, children: [] },
@@ -271,6 +265,8 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
 
   <body class:list={[{ 'acid-page': acid, 'dark-page': dark, 'ash-page': ash }]}>
     <a class="skip" href="#main">{t('common.skip')}</a>
+
+    <CrossBanner lang={lang} />
 
     <Header
       lang={lang}

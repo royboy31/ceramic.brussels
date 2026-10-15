@@ -198,6 +198,10 @@ const STRINGS = {
     'contact.team': 'the team',
     'contact.follow': 'follow us',
     'contact.newsletter': 'subscribe to our newsletter',
+    /* The label of the marquee above the header: the strip itself is
+       decoration, so this sentence is the whole of it a screen reader
+       reads. The dates are in the drawing it scrolls too. */
+    'basel.banner': 'ceramic basel, 15–20 June 2027 — open the site',
     'consent.title': 'cookies',
     'consent.body':
       'With your permission we measure visits with Google Analytics, to see which pages are read. No tracking cookie is set until you agree, the site works the same either way, and you can change your mind under “cookie settings” at the bottom of every page.',
@@ -503,6 +507,10 @@ const STRINGS = {
     'contact.team': 'l’équipe',
     'contact.follow': 'suivez-nous',
     'contact.newsletter': 'abonnez-vous à la newsletter',
+    /* The label of the marquee above the header: the strip itself is
+       decoration, so this sentence is the whole of it a screen reader
+       reads. The dates are in the drawing it scrolls too. */
+    'basel.banner': 'ceramic basel, 15–20 juin 2027 — ouvrir le site',
     'consent.title': 'cookies',
     'consent.body':
       'Avec votre accord, nous mesurons les visites avec Google Analytics, pour savoir quelles pages sont lues. Aucun cookie de mesure n’est déposé tant que vous n’avez pas accepté, le site fonctionne de la même façon dans les deux cas, et vous pouvez changer d’avis via « paramètres des cookies » en bas de chaque page.',
@@ -808,6 +816,10 @@ const STRINGS = {
     'contact.team': 'het team',
     'contact.follow': 'volg ons',
     'contact.newsletter': 'schrijf je in voor de nieuwsbrief',
+    /* The label of the marquee above the header: the strip itself is
+       decoration, so this sentence is the whole of it a screen reader
+       reads. The dates are in the drawing it scrolls too. */
+    'basel.banner': 'ceramic basel, 15–20 juni 2027 — site openen',
     'consent.title': 'cookies',
     'consent.body':
       'Met uw toestemming meten we bezoeken met Google Analytics, om te zien welke pagina’s gelezen worden. Er wordt geen trackingcookie geplaatst zolang u niet akkoord gaat, de site werkt in beide gevallen hetzelfde, en u kunt uw keuze wijzigen via ‘cookie-instellingen’ onderaan elke pagina.',
