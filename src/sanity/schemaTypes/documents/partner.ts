@@ -90,6 +90,26 @@ export const partner = defineType({
       hidden: true,
     }),
     defineField({ name: 'url', title: 'Website', type: 'url' }),
+    // "Do we always have to ask you or could we make it easier for us to add
+    // it whenever we want to?" (Félicie, 2026-10-14): the button is on when
+    // the link is filled and off when it is cleared, no code change needed.
+    defineField({
+      name: 'interviewLink',
+      title: 'Interview button',
+      type: 'link',
+      description:
+        'Fill this in and the partner\'s entry on the partners pages gets a "read the interview" button beside the website one — point it at the interview\'s page. Leave the label empty for the standard "read the interview" text in each language.',
+    }),
+    // Like a section block's "hidden": the link is kept, the page lets it go,
+    // so showing it again is one untick rather than finding the page anew.
+    defineField({
+      name: 'interviewButtonHidden',
+      title: 'Hide the interview button',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Takes the button off the page but keeps the link above, ready to show again.',
+      hidden: ({ parent }) => !parent?.interviewLink,
+    }),
     defineField({ name: 'instagram', title: 'Instagram handle', type: 'string', hidden: true }),
     defineField({ name: 'order', title: 'Sort order', type: 'number', initialValue: 100 }),
   ],

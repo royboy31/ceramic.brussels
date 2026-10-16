@@ -1,0 +1,132 @@
+---
+import { useTranslations } from '../lib/i18n';
+import { BASEL_URL } from '../lib/basel';
+import type { LocaleId } from '../lib/locales';
+
+/**
+ * The strip above the header pointing at ceramic basel: the sister fair's
+ * name and its dates scrolling past, the whole strip one link off the site.
+ *
+ * The dates are a drawing rather than type (`/assets/basel-dates.svg`, the
+ * Basel site's own lockup), so they are decoration here and the reading of
+ * the strip is the link's label - the marquee itself is aria-hidden, or a
+ * screen reader would read the run ten times over.
+ */
+interface Props {
+  lang: LocaleId;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+/* The run twice over: the scroll ends at -50%, where the second half stands
+   exactly where the first began, so the loop never shows its seam - but
+   only while that half is itself wider than the window, or the end of the
+   loop leaves a blank strip at the right. A pair is about 343px once the
+   type and the drawing reach the top of their clamps, so twelve of them
+   carry a 4K screen. (The first build of this banner ran five, which falls
+   188px short of a 1905px-wide window.) */
+const RUNS = 24;
+---
+
+<a
+  class="cross-banner"
+  href={BASEL_URL[lang]}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={t('basel.banner')}
+>
+  <div class="cross-banner__viewport" aria-hidden="true">
+    <div class="cross-banner__track">
+      {
+        Array.from({ length: RUNS }).map(() => (
+          <>
+            <span class="cross-banner__name">
+              ceramic basel <span class="cross-banner__arrow">↗</span>
+            </span>
+            <img class="cross-banner__dates" src="/assets/basel-dates.svg" alt="" width="387" height="103" />
+          </>
+        ))
+      }
+    </div>
+  </div>
+</a>
+
+<style>
+  .cross-banner {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 45;
+    display: block;
+    height: var(--banner-h);
+    overflow: hidden;
+    background: #fff;
+    color: #050505;
+  }
+  .cross-banner__viewport {
+    display: flex;
+    width: max-content;
+    height: 100%;
+    animation: cross-banner-scroll 105s linear infinite;
+  }
+  /* Held still while it is pointed at or focused, so the name can be read
+     before it is clicked. */
+  .cross-banner:hover .cross-banner__viewport,
+  .cross-banner:focus-visible .cross-banner__viewport {
+    animation-play-state: paused;
+  }
+  .cross-banner__track {
+    --banner-gap: clamp(22px, 3vw, 46px);
+    display: flex;
+    flex: none;
+    align-items: center;
+    height: 100%;
+    gap: var(--banner-gap);
+    padding-right: var(--banner-gap);
+  }
+  .cross-banner__name {
+    font-size: clamp(12px, 1.1vw, 16px);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .cross-banner__arrow {
+    display: inline-block;
+  }
+  .cross-banner__dates {
+    display: block;
+    width: clamp(78px, 7.6vw, 116px);
+    height: auto;
+  }
+  @keyframes cross-banner-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cross-banner__viewport {
+      animation: none;
+    }
+  }
+</style>
+
+<style is:global>
+  /* The strip is fixed, so the page starts below it and the two sticky
+     things above the content - the header, and a title band under it -
+     stick below it rather than behind it. Written against `:has` so that a
+     page rendered without the banner is untouched. */
+  :root {
+    --banner-h: 38px;
+  }
+  body:has(.cross-banner) {
+    padding-top: var(--banner-h);
+  }
+  body:has(.cross-banner) .site-header {
+    top: var(--banner-h);
+  }
+  body:has(.cross-banner) .title-band {
+    top: calc(var(--banner-h) + var(--header-h));
+  }
+</style>
