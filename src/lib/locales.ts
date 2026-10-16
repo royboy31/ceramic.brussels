@@ -25,7 +25,10 @@ export type LocaleId = (typeof LOCALES)[number]['id'];
  * To put Dutch back: delete this and the `SWITCHER_LOCALES` import in
  * `Header.astro`, which reads `LOCALES` again.
  */
-const HELD_BACK: LocaleId[] = ['nl'];
+// On this branch alone, nothing is held back: the kamindu preview is where
+// the Dutch retranslation is read, switcher button included. On main this
+// line says ['nl'] - never carry this change there.
+const HELD_BACK: LocaleId[] = [];
 
 export const SWITCHER_LOCALES = LOCALES.filter((l) => !HELD_BACK.includes(l.id));
 
