@@ -332,6 +332,38 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
         document.body.toggleAttribute('data-scrolled', shrunk);
       };
       addEventListener('scroll', onScroll, { passive: true });
+
+      // Measure what the page under the header loses in the scrolled state
+      // (the bands' padding and type, the A-Z row's margin), so the CSS can
+      // hand it back as margin under the last band. Both states are laid out
+      // with transitions off and the current one restored before the next
+      // paint, so nothing is seen. Again after the fonts arrive and on resize,
+      // since both change the band's height.
+      const main = document.getElementById('main');
+      const lastBand = [...document.querySelectorAll<HTMLElement>('.title-band')].at(-1);
+      const measureBands = () => {
+        if (!main || !lastBand) return;
+        const root = document.documentElement;
+        const body = document.body;
+        const was = body.hasAttribute('data-scrolled');
+        root.classList.add('band-measure');
+        body.removeAttribute('data-scrolled');
+        const rest = main.offsetHeight;
+        body.setAttribute('data-scrolled', '');
+        const given = parseFloat(getComputedStyle(lastBand).marginBottom) || 0;
+        const scrolled = main.offsetHeight - given;
+        body.toggleAttribute('data-scrolled', was);
+        lastBand.style.setProperty('--band-gap', `${Math.max(0, rest - scrolled)}px`);
+        void main.offsetHeight;
+        root.classList.remove('band-measure');
+      };
+      measureBands();
+      document.fonts?.ready.then(measureBands);
+      let resizing = 0;
+      addEventListener('resize', () => {
+        cancelAnimationFrame(resizing);
+        resizing = requestAnimationFrame(measureBands);
+      });
       onScroll();
 
       const ARROWS = new Set(['→', '↗', '←']);
@@ -376,6 +408,10 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
                 el.textContent = `${fmt.format(Math.round(target * eased))}${suffix}`;
                 if (p < 1) requestAnimationFrame(tick);
               };
+              // Hold the final number's width while it counts, so the label
+              // beside it stays put (it slid right as digits were added,
+              // which counted as layout shift).
+              el.style.minWidth = `${el.getBoundingClientRect().width}px`;
               el.textContent = `0${suffix}`;
               requestAnimationFrame(tick);
             });
@@ -882,17 +918,27 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   :root {
     /* Measured, not the 159px rule in design.css: a later rule overrides it. */
     --header-h: 149px;
+    --header-rest: 149px;
   }
   @media (max-width: 640px) {
     :root {
       --header-h: 96px;
+      --header-rest: 96px;
     }
   }
+  /* The margin gives back what the header loses when it shrinks, on the same
+     curve, so the page under it never moves. Moving it was layout shift:
+     Search Console flagged the whole site at CLS 0.22 on desktop
+     (2026-10-16). --header-rest is the unscrolled height; keep it in step
+     with --header-h above. */
   .site-header {
     position: sticky;
     top: 0;
     height: var(--header-h);
-    transition: height 0.28s var(--motion-ease);
+    margin-bottom: calc(var(--header-rest) - var(--header-h));
+    transition:
+      height 0.28s var(--motion-ease),
+      margin-bottom 0.28s var(--motion-ease);
   }
   /* Scrolled, both pinned bands shrink, so a scrolled page keeps more of the
      window for the page itself (client feedback, 2026-09-17: the header and
@@ -949,6 +995,9 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
   body[data-scrolled] .alphabet {
     margin-top: 12px;
   }
+  .alphabet {
+    transition: margin-top 0.28s var(--motion-ease);
+  }
   @media (max-width: 640px) {
     body[data-scrolled] {
       --header-h: 64px;
@@ -977,8 +1026,20 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     z-index: 20;
     /* Same duration and easing as the header's height, so the band travels
        with it instead of jumping to the end while it animates. */
-    transition: top 0.28s var(--motion-ease);
+    transition:
+      top 0.28s var(--motion-ease),
+      padding 0.28s var(--motion-ease),
+      margin-bottom 0.28s var(--motion-ease);
     background: var(--band-bg, #fff);
+  }
+  /* What the page loses below the header once scrolled (band, A-Z row),
+     measured by the script below, comes back as margin under the last band,
+     so the content does not move up (layout shift, as for the header). */
+  body[data-scrolled] .title-band {
+    margin-bottom: var(--band-gap, 0px);
+  }
+  html.band-measure * {
+    transition: none !important;
   }
   /* The fade under the pinned bands: the page's ground (white, acid or
      black) running out to transparent, so text scrolling under them has no
