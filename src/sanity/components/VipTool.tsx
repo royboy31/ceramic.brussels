@@ -404,7 +404,7 @@ export function VipTool() {
             opens nothing before that. Approving a guest or giving them a new code shows the code and emails it to them;
             adding one asks first (the text is Site settings → VIP). An import emails nobody: the invitation mailing is
             yours, from the export, and "Email code" on a row sends one guest's code at a time. A spreadsheet needs the
-            columns first name, last name and email (institution and function are optional).
+            an email column (first name, last name, institution and function are optional).
           </Text>
         </Card>
 
@@ -523,18 +523,8 @@ export function VipTool() {
                 if (result?.code) setShown({ guest: result.guest, code: result.code, note: `Added. ${mailLine(result.mail)}`, mail: result.mail });
               });
             } else {
-              void run(() => api<Coded & { codeChanged: boolean }>({ action: 'update', id: target.id, ...fields }), 'Saved.').then(
-                (result) => {
-                  if (result?.codeChanged && result.code) {
-                    setShown({
-                      guest: result.guest,
-                      code: result.code,
-                      note: `The first name is part of the code, so the code changed with it; the old one no longer works. ${mailLine(result.mail)}`,
-                      mail: result.mail,
-                    });
-                  }
-                },
-              );
+              // The code is made from the email alone, so editing names never changes it.
+              void run(() => api<Coded>({ action: 'update', id: target.id, ...fields }), 'Saved.');
             }
           }}
         />

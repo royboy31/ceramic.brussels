@@ -38,11 +38,13 @@
  * SHA-256 of `<pepper>:<code>`, where the pepper is VIP_CODE_PEPPER in
  * `.env` here and the Pages secret of the same name on the Worker - they
  * must be the same value. The code itself is derived, not drawn:
- * `CB27-<FIRST NAME>-<6 characters>`, the six from an HMAC of the guest's
- * email and their `code_version` with the same pepper. That is what lets a
- * re-run reproduce every code, `--export` print them, and `--reissue` make
- * a different one by bumping the version, all without keeping a code
- * anywhere in the clear.
+ * `CB27-<3-4 chars of the email's local part>-<6 characters>`, the six from
+ * an HMAC of the guest's email, their `code_version` and their `created_at`
+ * with the same pepper. That is what lets a re-run reproduce every code,
+ * `--export` print them, and `--reissue` make a different one by bumping
+ * the version, all without keeping a code anywhere in the clear - and the
+ * timestamp means a guest deleted and added again gets a code that never
+ * existed before. The import refuses to write two identical full codes.
  *
  * Talks to Cloudflare through wrangler (signed in; the account id below
  * picks the studio's account). D1 for the guests, KV for the sessions a
@@ -91,22 +93,27 @@ const normalise = (code) => String(code).toUpperCase().replace(/[^A-Z0-9]/g, '')
 const codeHash = (code) => crypto.createHash('sha256').update(`${PEPPER}:${normalise(code)}`).digest('hex');
 const guestId = (email) => crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex').slice(0, 20);
 
-/** "Émilie-Louise" → "EMILIELOUISE"; nothing usable → "VIP". */
-function namePart(firstName) {
-  const ascii = String(firstName ?? '')
+/** The email's local part, first three characters plus the last -
+ *  "marie.dupont@x" → "MART", "info@x" → "INFO"; nothing usable → "VIP". */
+function emailPart(email) {
+  const ascii = String(email ?? '')
+    .split('@')[0]
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .toUpperCase()
-    .replace(/[^A-Z]/g, '')
-    .slice(0, 10);
-  return ascii || 'VIP';
+    .replace(/[^A-Z0-9]/g, '');
+  const part = ascii.length <= 4 ? ascii : ascii.slice(0, 3) + ascii.slice(-1);
+  return part || 'VIP';
 }
 
-function makeCode(firstName, email, version) {
-  const mac = crypto.createHmac('sha256', PEPPER).update(`${email.trim().toLowerCase()}:${version}`).digest();
+/** The row's created_at is in the MAC, so a guest deleted and added again
+ *  gets a code that never existed before. Must stay the same function as
+ *  makeCode in src/server/vipGuests.ts. */
+function makeCode(email, version, createdAt) {
+  const mac = crypto.createHmac('sha256', PEPPER).update(`${email.trim().toLowerCase()}:${version}:${createdAt}`).digest();
   let tail = '';
   for (let i = 0; i < 6; i++) tail += ALPHABET[mac[i] % ALPHABET.length];
-  return `${PREFIX}-${namePart(firstName)}-${tail}`;
+  return `${PREFIX}-${emailPart(email)}-${tail}`;
 }
 
 /* ------------------------------------------------------------ wrangler */
@@ -259,23 +266,33 @@ function importSheet(file) {
 
   const existing = new Map(allGuests().map((g) => [g.id, g]));
   const stamp = now();
+  // Every full code must be unique, the sheet's and the ones already out
+  // there: on a clash the version is bumped until the code is fresh.
+  const inSheet = new Set(sheet.map((g) => guestId(g.email)));
+  const used = new Set();
+  for (const g of existing.values()) if (!inSheet.has(g.id)) used.add(makeCode(g.email, g.code_version, g.created_at));
   const statements = [];
   const out = [];
   let created = 0;
   let updated = 0;
   for (const g of sheet) {
     const id = guestId(g.email);
-    const version = existing.get(id)?.code_version ?? 1;
-    const code = makeCode(g.firstName, g.email, version);
+    const was = existing.get(id);
+    const createdAt = was?.created_at ?? stamp;
+    let version = was?.code_version ?? 1;
+    let code = makeCode(g.email, version, createdAt);
+    while (used.has(code)) code = makeCode(g.email, ++version, createdAt);
+    used.add(code);
     statements.push(
       `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at)
        VALUES (${q(id)}, ${q(codeHash(code))}, ${version}, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(g.institution || null)}, ${q(g.function || null)}, 'approved', ${q(stamp)}, 'import', ${q(stamp)}, ${q(stamp)})
        ON CONFLICT(id) DO UPDATE SET first_name = excluded.first_name, last_name = excluded.last_name, institution = excluded.institution, function = excluded.function, updated_at = excluded.updated_at,
+         code_hash = excluded.code_hash, code_version = excluded.code_version,
          decided_at = CASE WHEN guests.status = 'pending' THEN excluded.decided_at ELSE guests.decided_at END,
          decided_by = CASE WHEN guests.status = 'pending' THEN 'import' ELSE guests.decided_by END,
          status = CASE WHEN guests.status = 'pending' THEN 'approved' ELSE guests.status END;`,
     );
-    existing.has(id) ? updated++ : created++;
+    was ? updated++ : created++;
     out.push([g.firstName, g.lastName, g.email, g.institution, g.function, code]);
   }
   // In batches: one statement per row, a few hundred rows per call.
@@ -299,7 +316,7 @@ function exportList() {
         g.email,
         g.institution,
         g.function,
-        g.revoked || g.status !== 'approved' ? '' : makeCode(g.first_name, g.email, g.code_version),
+        g.revoked || g.status !== 'approved' ? '' : makeCode(g.email, g.code_version, g.created_at),
         g.status,
         g.revoked ? 'yes' : '',
         g.entries,
@@ -312,7 +329,7 @@ function exportList() {
 
 function findGuest(email) {
   const id = guestId(email);
-  const [g] = rows(d1(`SELECT id, code_version, first_name, last_name, email, status, revoked FROM guests WHERE id = ${q(id)}`));
+  const [g] = rows(d1(`SELECT id, code_version, first_name, last_name, email, status, revoked, created_at FROM guests WHERE id = ${q(id)}`));
   if (!g) {
     console.error(`No guest with the email ${email}.`);
     process.exit(1);
@@ -330,19 +347,19 @@ function revoke(email, revoked) {
 function reissue(email) {
   const g = findGuest(email);
   const version = Number(g.code_version) + 1;
-  const code = makeCode(g.first_name, g.email, version);
+  const code = makeCode(g.email, version, g.created_at);
   d1(`UPDATE guests SET code_version = ${version}, code_hash = ${q(codeHash(code))}, revoked = 0, updated_at = ${q(now())} WHERE id = ${q(g.id)};`);
   const ended = endSessions(g.id);
   console.log(`${g.first_name} ${g.last_name}: new code ${code} (${ended} session(s) ended). The old one no longer works.`);
 }
 
 function addGuest(email) {
-  const g = { email: email.trim().toLowerCase(), firstName: value('first')?.trim(), lastName: value('last')?.trim() };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g.email) || !g.firstName || !g.lastName) throw new Error('--add needs an email, --first and --last');
+  const g = { email: email.trim().toLowerCase(), firstName: value('first')?.trim() ?? '', lastName: value('last')?.trim() ?? '' };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g.email)) throw new Error('--add needs an email (--first and --last are optional)');
   const id = guestId(g.email);
   if (rows(d1(`SELECT id FROM guests WHERE id = ${q(id)}`)).length) throw new Error(`${g.email} is already in the list (--approve, --restore or --reissue).`);
-  const code = makeCode(g.firstName, g.email, 1);
   const stamp = now();
+  const code = makeCode(g.email, 1, stamp);
   d1(`INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at)
       VALUES (${q(id)}, ${q(codeHash(code))}, 1, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(value('institution') || null)}, ${q(value('function') || null)}, 'approved', ${q(stamp)}, 'cli', ${q(stamp)}, ${q(stamp)});`);
   console.log(`${g.firstName} ${g.lastName} added. Code: ${code}`);

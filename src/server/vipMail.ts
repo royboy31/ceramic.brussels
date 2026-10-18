@@ -75,15 +75,18 @@ export async function mailVipCode(
   try {
     const cfg = await settings();
     const values = {
-      firstName: guest.first_name,
-      lastName: guest.last_name,
+      // Most guests have no name on file (the Mailchimp list carries none):
+      // "Dear guest," rather than "Dear ,".
+      firstName: guest.first_name?.trim() || 'guest',
+      lastName: guest.last_name ?? '',
       code,
       link: accessLink(origin),
       contact: cfg.contactEmail ?? '',
     };
+    const toName = `${guest.first_name ?? ''} ${guest.last_name ?? ''}`.trim();
     await sendMail(apiKey, {
       sender: senderFor(cfg.senderName || cfg.siteName, cfg.senderEmail),
-      to: [{ email: to, name: `${guest.first_name} ${guest.last_name}` }],
+      to: [toName ? { email: to, name: toName } : { email: to }],
       ...(cfg.contactEmail ? { replyTo: { email: cfg.contactEmail } } : {}),
       subject: fill(cfg.codeSubject || DEFAULT_SUBJECT, values),
       text: fill(cfg.codeText || DEFAULT_TEXT, values),
