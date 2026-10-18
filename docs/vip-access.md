@@ -90,9 +90,16 @@ Pages → Plans. The session store is one module, `src/server/vipSession.ts`,
 so if the plan is not wanted it can be pointed at a `sessions` table in D1
 instead, whose free writes are a hundred times higher.
 
-**Codes.** Format `CB27-<FIRSTNAME>-<6 chars>` from an alphabet without
-0/O/1/I, upper-case, hyphens and case ignored on entry. Around 700 million
-per first name, and a Cloudflare rate limiting rule on the entry route.
+**Codes.** Format `CB27-<3-4 chars of the email's local part>-<6 chars>`
+(`marie.dupont@x` → `CB27-MART-X7K2P9`), the six from an HMAC of the
+guest's email, code version **and created_at** - so a guest removed and
+added again gets a code that never existed before, and editing names never
+changes a code. The tail alphabet has no 0/O/1/I; upper-case, hyphens and
+case ignored on entry. Around 700 million codes per visible part, the
+import refuses to write two identical full codes, and a Cloudflare rate
+limiting rule guards the entry route. (Until 2026-10-18 the visible part
+was the first name; names are optional everywhere since Félicie's Mailchimp
+list carries almost none.)
 
 **Entering.** `POST /api/vip/enter/` with `code` and `next` (the path to
 return to, same-site only). The Worker hashes the code, looks the guest up
@@ -118,11 +125,12 @@ Sanity query keeps the request count trivial. `scripts/pages-worker.mjs`
 adds the locked paths to `_routes.json` from the built hub list.
 
 **Issuing codes.** `scripts/vip-guests.mjs --import guests.csv` reads the
-team's spreadsheet (first name, last name, email, institution, function),
-generates a code per row, writes the hashes to D1 through `wrangler d1
-execute --remote` and writes `guests-with-codes.csv` back for the
-invitation mailing. Deterministic on email, so a re-run updates rather than
-duplicates and never changes a code already issued. `--revoke <email>`,
+team's spreadsheet (email required; first name, last name, institution,
+function optional), generates a code per row, writes the hashes to D1
+through `wrangler d1 execute --remote` and writes `guests-with-codes.csv`
+back for the invitation mailing. Deterministic on email + created_at, so a
+re-run updates rather than duplicates and never changes a code already
+issued. `--revoke <email>`,
 `--export` (the list without codes; codes are not recoverable, a lost one is
 reissued with `--reissue <email>`). Sending the invitations stays with the
 team's mailing tool.
@@ -214,9 +222,10 @@ above; the tool only edits rows.
   page on `PUBLIC_SITE_URL`) and `{contact}` filled in, stock English when
   empty. An import mails nobody: the invitation mailing of ~3,000 guests is
   the team's, from the export.
-- **Editing a first name changes the code**, because the name is part of it;
-  the tool says so and shows the new one. The email cannot be edited - it is
-  the guest's identity: delete and add again.
+- **Editing names never changes the code** (since 2026-10-18 it is made
+  from the email, version and created_at alone). The email cannot be
+  edited - it is the guest's identity: delete and add again, which also
+  makes a brand-new code.
 - The import goes up 300 rows a call and the export comes down 500 a call,
   each one read and one batch: a Worker may make only so many database
   calls per request.

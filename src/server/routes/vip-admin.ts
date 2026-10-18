@@ -62,7 +62,7 @@ function readGuest(body: Record<string, unknown>): GuestInput | string {
     institution: clean(body.institution, 200),
     function: clean(body.function, 200),
   };
-  if (!input.firstName || !input.lastName) return 'A first name and a last name are required.';
+  // Names are optional since 2026-10-18: the code is made from the email alone.
   return input;
 }
 
