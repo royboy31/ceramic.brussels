@@ -9,6 +9,29 @@
 # Hand-written rules can still go above this line; the generated block is
 # appended after them.
 
+# Dutch, off the site while it is retranslated (Kamindu, 2026-10-17). Every
+# /nl/ address answers a **302** to the English homepage - temporary, never a
+# 301, which a browser would keep long after Dutch comes back.
+#
+# The pages themselves are still built and still carry their hreflang, which
+# is what `scripts/legacy-redirects.mjs` reads to find the Dutch target of
+# every old-site rule; a rule is followed whether or not a file matches it
+# (Cloudflare Pages, "Redirects"), so the files are simply never served.
+# Dutch was already out of the switcher and out of search - see `HELD_BACK`
+# in `src/lib/locales.ts`, which names the three places this state lives.
+#
+# Two notes. The static rules below and in the generated block are matched
+# before a splat rule, so an old Dutch URL takes two hops while this is on
+# (/nl/contact/ → /nl/over/team/ → /en/); it lands in the right place, but
+# `legacy-redirects.mjs --check` reports those rules as landing on a 302.
+# And /preview/nl/… is untouched: the drafts preview still renders Dutch, so
+# the retranslation can be read before it goes anywhere.
+#
+# To put Dutch back: delete these three lines (and see locales.ts).
+/nl    /en/   302
+/nl/   /en/   302
+/nl/*  /en/   302
+
 # VIP left the programme hub for a hub of its own on 2026-09-17 (docs/vip-access.md).
 /en/programme/vip/   /en/vip/programme/   301
 /en/programme/vip    /en/vip/programme/   301

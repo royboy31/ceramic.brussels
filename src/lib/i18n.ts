@@ -198,6 +198,10 @@ const STRINGS = {
     'contact.team': 'the team',
     'contact.follow': 'follow us',
     'contact.newsletter': 'subscribe to our newsletter',
+    /* The label of the marquee above the header: the strip itself is
+       decoration, so this sentence is the whole of it a screen reader
+       reads. The dates are in the drawing it scrolls too. */
+    'basel.banner': 'ceramic basel, 15–20 June 2027 — open the site',
     'consent.title': 'cookies',
     'consent.body':
       'We measure visits with Google Analytics and Microsoft Clarity, to see which pages are read and how they are used. These set cookies. You can refuse them here, the site works the same either way, and you can change your mind under “cookie settings” at the bottom of every page.',
@@ -504,6 +508,10 @@ const STRINGS = {
     'contact.team': 'l’équipe',
     'contact.follow': 'suivez-nous',
     'contact.newsletter': 'abonnez-vous à la newsletter',
+    /* The label of the marquee above the header: the strip itself is
+       decoration, so this sentence is the whole of it a screen reader
+       reads. The dates are in the drawing it scrolls too. */
+    'basel.banner': 'ceramic basel, 15–20 juin 2027 — ouvrir le site',
     'consent.title': 'cookies',
     'consent.body':
       'Nous mesurons les visites avec Google Analytics et Microsoft Clarity, pour savoir quelles pages sont lues et comment elles sont utilisées. Ils déposent des cookies. Vous pouvez les refuser ici, le site fonctionne de la même façon dans les deux cas, et vous pouvez changer d’avis via « paramètres des cookies » en bas de chaque page.',
@@ -809,6 +817,10 @@ const STRINGS = {
     'contact.team': 'het team',
     'contact.follow': 'volg ons',
     'contact.newsletter': 'schrijf je in voor de nieuwsbrief',
+    /* The label of the marquee above the header: the strip itself is
+       decoration, so this sentence is the whole of it a screen reader
+       reads. The dates are in the drawing it scrolls too. */
+    'basel.banner': 'ceramic basel, 15–20 juni 2027 — site openen',
     'consent.title': 'cookies',
     'consent.body':
       'We meten bezoeken met Google Analytics en Microsoft Clarity, om te zien welke pagina’s gelezen worden en hoe ze gebruikt worden. Die plaatsen cookies. U kunt ze hier weigeren, de site werkt in beide gevallen hetzelfde, en u kunt uw keuze wijzigen via ‘cookie-instellingen’ onderaan elke pagina.',
