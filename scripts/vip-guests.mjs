@@ -4,9 +4,10 @@
  * Worker reads.
  *
  *   npm run vip -- --import guests.csv [--out guests-with-codes.csv]
- *       Reads the team's spreadsheet - columns first name, last name, email,
+ *       Reads the team's spreadsheet - columns email, first name, last name,
  *       institution, function (any order, any case, French or Dutch
- *       headings accepted) - creates or updates one guest per email, and
+ *       headings accepted; only email is required - without a first name
+ *       the code reads CB27-VIP-…) - creates or updates one guest per email, and
  *       writes the same rows back with a `code` column for the invitation
  *       mailing. Re-running with the same sheet changes nothing; a guest
  *       already in the list keeps their code.
@@ -224,9 +225,7 @@ function readSheet(file) {
     const key = Object.keys(COLUMNS).find((k) => COLUMNS[k].test(h.trim()));
     if (key && index[key] === undefined) index[key] = i;
   });
-  for (const k of ['firstName', 'lastName', 'email']) {
-    if (index[k] === undefined) throw new Error(`No "${k}" column in ${file}. Headings seen: ${header.join(' | ')}`);
-  }
+  if (index.email === undefined) throw new Error(`No "email" column in ${file}. Headings seen: ${header.join(' | ')}`);
   const get = (r, k) => (index[k] === undefined ? '' : (r[index[k]] ?? '').trim());
   return data
     .map((r) => ({
@@ -245,9 +244,9 @@ const now = () => new Date().toISOString();
 
 function importSheet(file) {
   const sheet = readSheet(file);
-  const bad = sheet.filter((g) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g.email) || !g.firstName || !g.lastName);
+  const bad = sheet.filter((g) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g.email));
   if (bad.length) {
-    console.error(`${bad.length} row(s) without a first name, last name or a valid email:`);
+    console.error(`${bad.length} row(s) without a valid email:`);
     for (const g of bad.slice(0, 10)) console.error('  ', JSON.stringify(g));
     process.exit(1);
   }
