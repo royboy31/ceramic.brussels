@@ -239,15 +239,20 @@ export async function deleteGuest(db: D1Like, id: string): Promise<void> {
 /** Ends every session of a guest: their keys share a prefix in KV. */
 export async function endSessions(kv: KVLike, id: string): Promise<number> {
   let ended = 0;
-  let cursor: string | undefined;
-  do {
-    const page = await kv.list({ prefix: `s:${id}:`, cursor });
-    for (const key of page.keys) {
-      await kv.delete(key.name);
-      ended++;
-    }
-    cursor = page.list_complete ? undefined : page.cursor;
-  } while (cursor);
+  // Both realms (vipSession.ts REALMS): a guest only ever has one audience,
+  // but clearing the other prefix costs one empty list and closes the gap
+  // where a row's audience was edited after a session was opened.
+  for (const prefix of ['s', 'x']) {
+    let cursor: string | undefined;
+    do {
+      const page = await kv.list({ prefix: `${prefix}:${id}:`, cursor });
+      for (const key of page.keys) {
+        await kv.delete(key.name);
+        ended++;
+      }
+      cursor = page.list_complete ? undefined : page.cursor;
+    } while (cursor);
+  }
   return ended;
 }
 

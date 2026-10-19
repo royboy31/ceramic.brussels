@@ -2,11 +2,16 @@ import type { APIRoute } from 'astro';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { localePath } from '../../lib/i18n';
 import { hubTabPath } from '../../lib/hubs';
-import { codeHash, codePepper, findGuestByCode, normaliseCode, recordEntry, safeNext, vipEnv } from '../vip';
-import { createVipSession } from '../vipSession';
+import { PLATFORM_PATH } from '../../lib/exhibitorsPlatform';
+import { codeHash, codePepper, findGuestByCode, normaliseCode, recordEntry, safeNext, vipEnv, type Audience } from '../vip';
+import { createVipSession, REALMS } from '../vipSession';
 
 /**
- * POST /api/vip/enter - the "VIP already? enter your code" box.
+ * POST /api/vip/enter - the "VIP already? enter your code" box, and (with
+ * `audience=exhibitor`) the exhibitors platform's password box: same codes,
+ * same throttle, same rate limiting rule, separate realm - an exhibitor
+ * session lives in its own cookie and can never open the VIP tabs, nor a
+ * VIP's code the platform (docs/exhibitors-platform.md).
  *
  * Takes `code`, `next` (the path to land on) and `lang`. A code that hashes
  * to a guest who is not revoked gets a session in KV and the cookie, and the
@@ -64,8 +69,14 @@ export const POST: APIRoute = async ({ request }) => {
   const wantsJson = (request.headers.get('accept') ?? '').includes('application/json');
   const body = await readBody(request);
   const lang = (LOCALE_IDS as string[]).includes(body.lang) ? (body.lang as LocaleId) : DEFAULT_LOCALE;
-  const accessPage = localePath(lang, hubTabPath('vip', 'access', lang));
-  const next = safeNext(body.next, localePath(lang, hubTabPath('vip', 'programme', lang)));
+  const audience: Audience = body.audience === 'exhibitor' ? 'exhibitor' : 'vip';
+  // The platform is its own access page: a wrong code lands back on its form.
+  const accessPage =
+    audience === 'exhibitor' ? localePath(lang, PLATFORM_PATH) : localePath(lang, hubTabPath('vip', 'access', lang));
+  const next = safeNext(
+    body.next,
+    audience === 'exhibitor' ? localePath(lang, PLATFORM_PATH) : localePath(lang, hubTabPath('vip', 'programme', lang)),
+  );
   const back = (error: string) =>
     wantsJson ? json(401, { ok: false, error }) : redirect(`${accessPage}?error=${error}&next=${encodeURIComponent(next)}`);
 
@@ -84,13 +95,13 @@ export const POST: APIRoute = async ({ request }) => {
   if (code.length < 6 || code.length > 40) return back('code');
   if (await tooManyFailures(request, false)) return wantsJson ? json(429, { ok: false, error: 'throttled' }) : back('throttled');
 
-  const guest = await findGuestByCode(env.VIP_DB, await codeHash(code, pepper));
+  const guest = await findGuestByCode(env.VIP_DB, await codeHash(code, pepper), audience);
   if (!guest || guest.revoked) {
     await tooManyFailures(request, true);
     return back('code');
   }
 
-  const cookie = await createVipSession(env.VIP_SESSIONS, guest.id, request);
+  const cookie = await createVipSession(env.VIP_SESSIONS, guest.id, request, REALMS[audience]);
   await recordEntry(env.VIP_DB, guest.id).catch((error) => console.error('[vip] could not record the entry:', error));
 
   return wantsJson ? json(200, { ok: true, next }, { 'set-cookie': cookie }) : redirect(next, { 'set-cookie': cookie });

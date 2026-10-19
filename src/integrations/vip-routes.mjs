@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { accessPaths, lockedPaths } from '../lib/hubs';
+import { platformPaths } from '../lib/exhibitorsPlatform';
 
 /**
  * The VIP hub's server side, on every build (docs/vip-access.md).
@@ -31,12 +32,25 @@ export function vipRoutes({ onDemand = false } = {}) {
         injectRoute({ pattern: '/api/vip/request', entrypoint: './src/server/routes/vip-request.ts', prerender: false });
         // The guest list, for the Studio's VIP tool (Sanity administrators only).
         injectRoute({ pattern: '/api/vip/admin', entrypoint: './src/server/routes/vip-admin.ts', prerender: false });
-        logger.info('VIP locked tabs mounted on request at /[lang]/vip/[tab], plus /api/vip/');
+        // The exhibitors platform: one address, form or page by session
+        // (docs/exhibitors-platform.md). Same enter/leave routes, realm apart.
+        injectRoute({
+          pattern: '/[lang]/exhibitors/platform',
+          entrypoint: './src/server/routes/exhibitors-platform.astro',
+          prerender: false,
+        });
+        logger.info('VIP locked tabs mounted on request at /[lang]/vip/[tab], plus /api/vip/ and /[lang]/exhibitors/platform');
       },
       'astro:build:done': ({ logger }) => {
         const out = path.resolve('dist', '_vip-paths.json');
         fs.mkdirSync(path.dirname(out), { recursive: true });
-        fs.writeFileSync(out, JSON.stringify({ locked: lockedPaths(), access: accessPaths() }, null, 2) + '\n');
+        // The platform paths ride in `locked`: scripts/pages-worker.mjs sends
+        // those to the Worker in _routes.json and disallows them in robots.txt,
+        // which is exactly what the platform needs too.
+        fs.writeFileSync(
+          out,
+          JSON.stringify({ locked: [...lockedPaths(), ...platformPaths()], access: accessPaths() }, null, 2) + '\n',
+        );
         logger.info(`wrote ${path.relative(process.cwd(), out)}`);
       },
     },

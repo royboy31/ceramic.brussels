@@ -1,0 +1,22 @@
+---
+/**
+ * `astro dev` only. On a deployed build the exhibitors platform is mounted
+ * on request by src/integrations/vip-routes.mjs (preview runtime on) or does
+ * not exist at all (static build) - never as a file, so there is nothing to
+ * fetch around the gate. Without this wrapper plain `astro dev`, which has
+ * no Worker, would have no platform page to work on; here it renders in its
+ * entered state, exactly as the VIP locked tabs open without a code in dev
+ * (docs/exhibitors-platform.md).
+ */
+import Page from '../../../server/routes/exhibitors-platform.astro';
+import { LOCALE_IDS } from '../../../lib/locales';
+
+export function getStaticPaths() {
+  // A production build emits nothing here; with the preview runtime the
+  // injected route owns the address, so this must not also claim it.
+  if (import.meta.env.PROD || import.meta.env.PREVIEW_RUNTIME === '1') return [];
+  return LOCALE_IDS.map((lang) => ({ params: { lang } }));
+}
+---
+
+<Page />
