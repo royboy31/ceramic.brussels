@@ -1042,6 +1042,18 @@ export function getHubPages(lang: LocaleId, section: string) {
  * page per section; the Studio's "Main pages" entry opens it. Null until an
  * editor has made one, and the page renders without it.
  */
+/**
+ * The exhibitors platform's page (docs/exhibitors-platform.md): section
+ * "exhibitors", English slug "platform". Rendered only behind the gate, by
+ * the Worker - but the dataset is public by design, so like the VIP tabs the
+ * page must hold nothing secret; the gate protects the address, not the API.
+ */
+export function getPlatformPage(lang: LocaleId) {
+  return run<any>(`*[_type == "page" && section == "exhibitors" && slug.en.current == "platform"][0] ${PAGE}`, {
+    lang,
+  });
+}
+
 export function getMainPage(lang: LocaleId, section: string) {
   // The main page carries the section as its English slug (mainPages.ts);
   // a section can also hold other pages - exhibitors/awards reads its intro

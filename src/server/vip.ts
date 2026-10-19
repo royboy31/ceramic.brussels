@@ -75,15 +75,22 @@ export interface Guest {
 }
 
 /**
+ * Which door a guest's code opens (migration 0004): the VIP hub's locked
+ * tabs, or the exhibitors platform (docs/exhibitors-platform.md). One table,
+ * two audiences, and a code only ever opens its own.
+ */
+export type Audience = 'vip' | 'exhibitor';
+
+/**
  * Approved guests only. A request filed through the "not a VIP yet?" form is
  * a row like any other, and its code can be worked out from its email the
  * moment it exists - so a pending or denied row must never match here, or
  * asking for access would be the same as having it.
  */
-export async function findGuestByCode(db: D1Like, hash: string): Promise<Guest | null> {
+export async function findGuestByCode(db: D1Like, hash: string, audience: Audience = 'vip'): Promise<Guest | null> {
   return db
-    .prepare("SELECT id, first_name, last_name, revoked FROM guests WHERE code_hash = ? AND status = 'approved'")
-    .bind(hash)
+    .prepare("SELECT id, first_name, last_name, revoked FROM guests WHERE code_hash = ? AND status = 'approved' AND audience = ?")
+    .bind(hash, audience)
     .first<Guest>();
 }
 

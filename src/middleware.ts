@@ -5,10 +5,11 @@ import { runLive, runWithPreview } from './lib/previewContext';
 import { previewToken } from './server/runtime';
 import { readPreviewCookie, verifyPreviewCookie } from './server/preview';
 import { hubTabPath, lockedTabFromPath } from './lib/hubs';
+import { platformFromPath } from './lib/exhibitorsPlatform';
 import { localePath } from './lib/i18n';
 import { DEFAULT_LOCALE, isHeldBack, type LocaleId } from './lib/locales';
 import { gateOpen, vipEnv } from './server/vip';
-import { readVipSession } from './server/vipSession';
+import { readVipSession, REALMS } from './server/vipSession';
 
 /**
  * Two jobs, only on the deployed Worker (and `astro dev`):
@@ -30,6 +31,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const locked = lockedTabFromPath(pathname);
   if (locked) return vipGate(context, next, locked);
+
+  if (platformFromPath(pathname)) return platformGate(context, next);
 
   return next();
 });
@@ -88,6 +91,42 @@ async function vipGate(context: Ctx, next: Next, locked: { lang: LocaleId; tab: 
 
   // Read to the end inside the store, as the preview does: the frontmatter
   // runs as the stream is pulled.
+  const response = await runLive(async () => {
+    const rendered = await next();
+    const body = await rendered.text();
+    return new Response(body, rendered);
+  });
+  response.headers.set('cache-control', 'private, no-store');
+  response.headers.set('x-robots-tag', 'noindex, nofollow');
+  return response;
+}
+
+/**
+ * The exhibitors platform's gate (docs/exhibitors-platform.md). Unlike the
+ * VIP tabs there is no separate access page: the one address renders the
+ * password form or the platform, and this gate only decides which, through
+ * `locals.exhibitorEntered` - an exhibitor session, or the editors' preview
+ * cookie. Both states are rendered live by the Worker, never cached, never
+ * indexed. Under `astro dev` there is no Worker and no KV: the platform
+ * renders entered, exactly as the VIP tabs render unlocked there.
+ */
+async function platformGate(context: Ctx, next: Next): Promise<Response> {
+  const { request, url } = context;
+  const env = await vipEnv();
+  if (!env) {
+    (context.locals as Record<string, unknown>).exhibitorEntered = true;
+    return next();
+  }
+
+  if (!url.pathname.endsWith('/')) {
+    return new Response(null, { status: 308, headers: { location: `${url.pathname}/${url.search}`, 'cache-control': 'no-store' } });
+  }
+
+  const token = previewToken();
+  let entered = !!token && (await verifyPreviewCookie(readPreviewCookie(request), token));
+  if (!entered) entered = (await readVipSession(env.VIP_SESSIONS, request, REALMS.exhibitor)) !== null;
+  (context.locals as Record<string, unknown>).exhibitorEntered = entered;
+
   const response = await runLive(async () => {
     const rendered = await next();
     const body = await rendered.text();

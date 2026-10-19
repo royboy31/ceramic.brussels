@@ -11,6 +11,13 @@
  *       writes the same rows back with a `code` column for the invitation
  *       mailing. Re-running with the same sheet changes nothing; a guest
  *       already in the list keeps their code.
+ *
+ *   --audience exhibitor   on --import or --add puts the guests on the
+ *       exhibitors platform's door instead of the VIP hub's (migration 0004,
+ *       docs/exhibitors-platform.md). Everything else is the same machinery.
+ *       One email is one row, so an address is in one list or the other:
+ *       the import refuses a row whose email already belongs to the other
+ *       audience rather than silently moving it.
  *   npm run vip -- --export [--out guests-with-codes.csv]
  *       The whole list with codes, as it stands.
  *   npm run vip -- --add a@b.c --first Ada --last Lovelace [--institution X] [--function Y]
@@ -81,6 +88,11 @@ function readEnv() {
   return out;
 }
 const env = { ...readEnv(), ...process.env };
+const AUDIENCE = value('audience') === 'exhibitor' ? 'exhibitor' : 'vip';
+if (value('audience') && !['vip', 'exhibitor'].includes(value('audience'))) {
+  console.error(`--audience takes "vip" or "exhibitor", not "${value('audience')}".`);
+  process.exit(1);
+}
 const PEPPER = env.VIP_CODE_PEPPER;
 if (!PEPPER || PEPPER.length < 16) {
   console.error('VIP_CODE_PEPPER is missing from .env (at least 16 characters; the same value as the Pages secret).');
@@ -163,15 +175,17 @@ const rows = (out) => out?.[0]?.results ?? [];
 function allGuests() {
   return rows(
     d1(
-      'SELECT id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, created_at FROM guests ORDER BY last_name, first_name',
+      'SELECT id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, created_at, audience FROM guests ORDER BY last_name, first_name',
     ),
   );
 }
 
-/** Ends every session of a guest: their keys share a prefix in KV. */
+/** Ends every session of a guest: their keys share a prefix in KV
+ *  (`s:` the VIP hub, `x:` the exhibitors platform - vipSession.ts REALMS). */
 function endSessions(id) {
-  const listed = wrangler(['kv', 'key', 'list', '--namespace-id', KV_NAMESPACE_ID, '--prefix', `s:${id}:`], { json: true });
-  const keys = listed.map((k) => k.name);
+  const keys = ['s', 'x'].flatMap((p) =>
+    wrangler(['kv', 'key', 'list', '--namespace-id', KV_NAMESPACE_ID, '--prefix', `${p}:${id}:`], { json: true }).map((k) => k.name),
+  );
   if (!keys.length) return 0;
   const file = path.join(os.tmpdir(), `vip-keys-${Date.now()}.json`);
   fs.writeFileSync(file, JSON.stringify(keys));
@@ -265,6 +279,16 @@ function importSheet(file) {
   }
 
   const existing = new Map(allGuests().map((g) => [g.id, g]));
+  // One email is one row: a guest cannot be moved between audiences by an
+  // import, only deleted and added again, which also makes a new code.
+  const crossed = sheet.filter((g) => {
+    const was = existing.get(guestId(g.email));
+    return was && (was.audience ?? 'vip') !== AUDIENCE;
+  });
+  if (crossed.length) {
+    console.error(`${crossed.length} email(s) already belong to the other audience: ${crossed.map((g) => g.email).slice(0, 10).join(', ')}`);
+    process.exit(1);
+  }
   const stamp = now();
   // Every full code must be unique, the sheet's and the ones already out
   // there: on a clash the version is bumped until the code is fresh.
@@ -284,8 +308,8 @@ function importSheet(file) {
     while (used.has(code)) code = makeCode(g.email, ++version, createdAt);
     used.add(code);
     statements.push(
-      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at)
-       VALUES (${q(id)}, ${q(codeHash(code))}, ${version}, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(g.institution || null)}, ${q(g.function || null)}, 'approved', ${q(stamp)}, 'import', ${q(stamp)}, ${q(stamp)})
+      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at, audience)
+       VALUES (${q(id)}, ${q(codeHash(code))}, ${version}, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(g.institution || null)}, ${q(g.function || null)}, 'approved', ${q(stamp)}, 'import', ${q(stamp)}, ${q(stamp)}, ${q(AUDIENCE)})
        ON CONFLICT(id) DO UPDATE SET first_name = excluded.first_name, last_name = excluded.last_name, institution = excluded.institution, function = excluded.function, updated_at = excluded.updated_at,
          code_hash = excluded.code_hash, code_version = excluded.code_version,
          decided_at = CASE WHEN guests.status = 'pending' THEN excluded.decided_at ELSE guests.decided_at END,
@@ -309,7 +333,7 @@ function exportList() {
   fs.writeFileSync(
     outFile,
     toCsv(
-      ['first name', 'last name', 'email', 'institution', 'function', 'code', 'status', 'revoked', 'entries', 'last entry'],
+      ['first name', 'last name', 'email', 'institution', 'function', 'code', 'status', 'revoked', 'entries', 'last entry', 'audience'],
       guests.map((g) => [
         g.first_name,
         g.last_name,
@@ -321,6 +345,7 @@ function exportList() {
         g.revoked ? 'yes' : '',
         g.entries,
         g.last_entry_at ?? '',
+        g.audience ?? 'vip',
       ]),
     ),
   );
@@ -360,8 +385,8 @@ function addGuest(email) {
   if (rows(d1(`SELECT id FROM guests WHERE id = ${q(id)}`)).length) throw new Error(`${g.email} is already in the list (--approve, --restore or --reissue).`);
   const stamp = now();
   const code = makeCode(g.email, 1, stamp);
-  d1(`INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at)
-      VALUES (${q(id)}, ${q(codeHash(code))}, 1, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(value('institution') || null)}, ${q(value('function') || null)}, 'approved', ${q(stamp)}, 'cli', ${q(stamp)}, ${q(stamp)});`);
+  d1(`INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at, audience)
+      VALUES (${q(id)}, ${q(codeHash(code))}, 1, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(value('institution') || null)}, ${q(value('function') || null)}, 'approved', ${q(stamp)}, 'cli', ${q(stamp)}, ${q(stamp)}, ${q(AUDIENCE)});`);
   console.log(`${g.firstName} ${g.lastName} added. Code: ${code}`);
 }
 
