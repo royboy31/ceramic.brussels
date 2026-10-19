@@ -63,12 +63,23 @@ one enter route; what keeps the two doors separate:
 
 ## Issuing the passwords
 
-`npm run vip -- --import exhibitors.csv --audience exhibitor` - the same
-sheet shape (email required, names optional), codes written back for
-Tiphaine's mailing. `--add x@y.z --audience exhibitor` for one. The Studio's
-VIP guests tool still manages VIPs only: its add/import write `audience`
-'vip' (the column default). Giving the tool an audience filter is the next
-step if the team wants to manage exhibitors there too.
+Two ways, the same as VIP:
+
+- **The Studio** (2026-10-19): the VIP guests tool has a **VIPs /
+  Exhibitors** switch in its header. On the Exhibitors screen, "Add a
+  guest" needs only an email (names optional everywhere since the nameless
+  codes); the password is generated, shown, and emailed through Brevo with
+  its own text - Site settings → VIP → "Exhibitor password email", stock
+  English when empty, `{link}` filled with the platform's address. Import
+  CSV and "Export with codes" work per screen; an import that meets an
+  email already on the *other* list leaves it alone and says so.
+- **The CLI**: `npm run vip -- --import exhibitors.csv --audience
+  exhibitor` (same sheet shape, codes written back for the mailing),
+  `--add x@y.z --audience exhibitor` for one.
+
+`/api/vip/request/` also takes `audience=exhibitor` and files a pending
+exhibitor row - the door is open should the platform ever carry a request
+form, though the design says "write to Tiphaine" instead.
 
 ## Still to do
 
@@ -84,5 +95,7 @@ step if the team wants to manage exhibitors there too.
 - The `page-exhibitors-platform` document itself (editors, or a seed
   script): until it is published the entered state shows the "published
   shortly" line.
+- Editors: the "Exhibitor password email" text in Site settings → VIP, if
+  the stock English will not do.
 - Apply migration 0004 (remote) before the deploy that carries this code.
 - Tiphaine's gallery list through the import; send her the codes CSV.
