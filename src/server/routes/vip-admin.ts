@@ -69,6 +69,7 @@ function readGuest(body: Record<string, unknown>): GuestInput | string {
 /** What the tool shows of a guest. The code is asked for, never listed. */
 const view = (g: GuestRow) => ({
   id: g.id,
+  audience: g.audience ?? 'vip',
   firstName: g.first_name,
   lastName: g.last_name,
   email: g.email,
@@ -97,6 +98,9 @@ export const POST: APIRoute = async ({ request }) => {
 
   const body = ((await request.json().catch(() => null)) ?? {}) as Record<string, unknown>;
   const db = env.VIP_DB;
+  // Which list the tool is on (docs/exhibitors-platform.md). Only list, add,
+  // import and export are scoped by it; everything else acts on a row by id.
+  const audience = body.audience === 'exhibitor' ? ('exhibitor' as const) : ('vip' as const);
   const id = clean(body.id, 64);
   const found = async () => (/^[a-f0-9]{8,64}$/.test(id) ? getGuest(db, id) : null);
   const site = new URL(request.url).origin;
@@ -108,14 +112,14 @@ export const POST: APIRoute = async ({ request }) => {
 
   switch (body.action) {
     case 'list':
-      return json(200, { ok: true, me: admin.name, guests: (await listGuests(db)).map(view) });
+      return json(200, { ok: true, me: admin.name, guests: (await listGuests(db, audience)).map(view) });
 
     case 'add': {
       const input = readGuest(body);
       if (typeof input === 'string') return fail(400, input);
       if (!isEmail(input.email)) return fail(400, 'A valid email address is required.');
-      const guest = await createGuest(db, pepper, input, 'approved', admin.name);
-      if (!guest) return fail(409, 'A guest with that email is already in the list.');
+      const guest = await createGuest(db, pepper, input, 'approved', admin.name, audience);
+      if (!guest) return fail(409, 'A guest with that email is already in the list (this one or the other audience’s).');
       // The tool's "email them their code now" box; unticked, the code is only shown.
       const send = body.mail !== false;
       return json(200, { ok: true, guest: view(guest), ...(send ? await withMail(guest) : { code: await codeFor(pepper, guest) }) });
@@ -193,14 +197,14 @@ export const POST: APIRoute = async ({ request }) => {
         if (typeof input === 'string' || !isEmail(input.email)) rejected.push(String(row.email ?? '(no email)').slice(0, 254));
         else inputs.push(input);
       }
-      return json(200, { ok: true, ...(await importGuests(db, pepper, inputs, admin.name)), rejected });
+      return json(200, { ok: true, ...(await importGuests(db, pepper, inputs, admin.name, audience)), rejected });
     }
 
     // Every working code, for the invitation mailing, a page at a time.
     // Made, not read: no code is stored anywhere.
     case 'export': {
       const offset = Math.max(0, Number(body.offset) || 0);
-      const guests = await listGuests(db);
+      const guests = await listGuests(db, audience);
       const page = guests.slice(offset, offset + EXPORT_PAGE);
       const out = [];
       for (const g of page) out.push({ ...view(g), code: (await codeFor(pepper, g)) ?? '' });

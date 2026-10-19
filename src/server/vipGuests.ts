@@ -1,4 +1,4 @@
-import { codeHash, sha256Hex, type D1Like, type KVLike } from './vip';
+import { codeHash, sha256Hex, type Audience, type D1Like, type KVLike } from './vip';
 
 /**
  * The guest list, as the Worker edits it (docs/vip-access.md): what the
@@ -34,6 +34,7 @@ export interface GuestRow {
   decided_at: string | null;
   decided_by: string | null;
   created_at: string;
+  audience: Audience;
 }
 
 export interface GuestInput {
@@ -45,7 +46,7 @@ export interface GuestInput {
 }
 
 const COLUMNS =
-  'id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, decided_at, decided_by, created_at';
+  'id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, decided_at, decided_by, created_at, audience';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const now = () => new Date().toISOString();
@@ -90,8 +91,12 @@ export async function makeCode(pepper: string, email: string, version: number, c
   return `${PREFIX}-${emailPart(email)}-${tail}`;
 }
 
-export async function listGuests(db: D1Like): Promise<GuestRow[]> {
-  const { results } = await db.prepare(`SELECT ${COLUMNS} FROM guests ORDER BY last_name, first_name`).bind().all<GuestRow>();
+/** One audience's guests: the VIP list and the exhibitors platform's are two screens. */
+export async function listGuests(db: D1Like, audience: Audience = 'vip'): Promise<GuestRow[]> {
+  const { results } = await db
+    .prepare(`SELECT ${COLUMNS} FROM guests WHERE audience = ? ORDER BY last_name, first_name`)
+    .bind(audience)
+    .all<GuestRow>();
   return results;
 }
 
@@ -110,6 +115,7 @@ export async function createGuest(
   input: GuestInput,
   status: GuestStatus,
   by: string | null,
+  audience: Audience = 'vip',
 ): Promise<GuestRow | null> {
   const email = cleanEmail(input.email);
   const id = await guestId(email);
@@ -118,8 +124,8 @@ export async function createGuest(
   const hash = await codeHash(await makeCode(pepper, email, 1, stamp), pepper);
   await db
     .prepare(
-      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, requested_at, decided_at, decided_by, created_at, updated_at)
-       VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
+      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, requested_at, decided_at, decided_by, created_at, updated_at, audience)
+       VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
     )
     .bind(
       id,
@@ -135,6 +141,7 @@ export async function createGuest(
       status === 'pending' ? null : by,
       stamp,
       stamp,
+      audience,
     )
     .run();
   return getGuest(db, id);
@@ -151,40 +158,46 @@ export async function importGuests(
   pepper: string,
   inputs: GuestInput[],
   by: string,
-): Promise<{ created: number; approved: number; unchanged: number }> {
-  const { results } = await db.prepare('SELECT id, status FROM guests').bind().all<{ id: string; status: GuestStatus }>();
-  const existing = new Map(results.map((r) => [r.id, r.status]));
+  audience: Audience = 'vip',
+): Promise<{ created: number; approved: number; unchanged: number; crossed: number }> {
+  const { results } = await db.prepare('SELECT id, status, audience FROM guests').bind().all<{ id: string; status: GuestStatus; audience: Audience }>();
+  const existing = new Map(results.map((r) => [r.id, r]));
   const stamp = now();
   const statements = [];
   let created = 0;
   let approved = 0;
   let unchanged = 0;
+  // One email is one row, in one list: a row that already belongs to the
+  // other audience is left exactly as it is and counted, never moved.
+  let crossed = 0;
   for (const input of inputs) {
     const email = cleanEmail(input.email);
     const id = await guestId(email);
-    const status = existing.get(id);
-    if (!status) {
+    const was = existing.get(id);
+    if (was && (was.audience ?? 'vip') !== audience) {
+      crossed++;
+    } else if (!was) {
       const hash = await codeHash(await makeCode(pepper, email, 1, stamp), pepper);
       statements.push(
         db
           .prepare(
-            `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at)
-             VALUES (?, ?, 1, ?, ?, ?, ?, ?, 'approved', ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
+            `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at, audience)
+             VALUES (?, ?, 1, ?, ?, ?, ?, ?, 'approved', ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
           )
-          .bind(id, hash, input.firstName, input.lastName, email, input.institution || null, input.function || null, stamp, by, stamp, stamp),
+          .bind(id, hash, input.firstName, input.lastName, email, input.institution || null, input.function || null, stamp, by, stamp, stamp, audience),
       );
-      existing.set(id, 'approved');
+      existing.set(id, { id, status: 'approved', audience });
       created++;
-    } else if (status === 'pending') {
+    } else if (was.status === 'pending') {
       statements.push(
         db.prepare("UPDATE guests SET status = 'approved', decided_at = ?, decided_by = ?, updated_at = ? WHERE id = ?").bind(stamp, by, stamp, id),
       );
-      existing.set(id, 'approved');
+      existing.set(id, { ...was, status: 'approved' });
       approved++;
     } else unchanged++;
   }
   if (statements.length) await db.batch(statements);
-  return { created, approved, unchanged };
+  return { created, approved, unchanged, crossed };
 }
 
 /**

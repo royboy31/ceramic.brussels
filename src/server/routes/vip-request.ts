@@ -36,6 +36,10 @@ interface Submission {
   jobTitle: string;
   email: string;
   lang: LocaleId;
+  /** 'vip' (the access page's form) or 'exhibitor' (docs/exhibitors-platform.md,
+   *  should the platform ever carry a request form - the design today says
+   *  "write to Tiphaine" instead, but the door costs nothing to keep open). */
+  audience: 'vip' | 'exhibitor';
 }
 
 interface FormSettings {
@@ -143,8 +147,8 @@ async function deliver(apiKey: string, s: Submission, cfg: FormSettings): Promis
     to: [{ email: to }],
     ...(cfg.cc ? { cc: [{ email: cfg.cc }] } : {}),
     replyTo: { email: s.email, name: `${s.firstName} ${s.lastName}` },
-    subject: `VIP access request: ${s.firstName} ${s.lastName}, ${s.institution}`,
-    html: `<p>Someone asked for VIP access through the website. It waits under Requests in the Studio's VIP guests tool.</p>${rowsHtml(rows)}`,
+    subject: `${s.audience === 'exhibitor' ? 'Exhibitors platform' : 'VIP'} access request: ${s.firstName} ${s.lastName}, ${s.institution}`,
+    html: `<p>Someone asked for ${s.audience === 'exhibitor' ? 'exhibitors platform' : 'VIP'} access through the website. It waits under Requests in the Studio's VIP guests tool.</p>${rowsHtml(rows)}`,
   });
 
   // A confirmation only when the team wrote one: a VIP request is a judgement
@@ -187,6 +191,7 @@ export const POST: APIRoute = async ({ request }) => {
     jobTitle: clean(body.function, 200),
     email: clean(body.email, 254),
     lang,
+    audience: body.audience === 'exhibitor' ? 'exhibitor' : 'vip',
   };
   if (!submission.firstName || !submission.lastName || !submission.institution || !submission.jobTitle || !EMAIL.test(submission.email)) {
     return answer(400, 'invalid', 'Something is missing', 'Please fill in every field with a valid email address.');
@@ -215,6 +220,7 @@ export const POST: APIRoute = async ({ request }) => {
         { firstName: submission.firstName, lastName: submission.lastName, email: submission.email, institution: submission.institution, function: submission.jobTitle },
         'pending',
         null,
+        submission.audience,
       );
       filed = true;
     } catch (error) {

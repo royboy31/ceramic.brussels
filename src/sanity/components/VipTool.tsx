@@ -36,8 +36,14 @@ export function VipToolIcon() {
 
 type Status = 'pending' | 'approved' | 'denied';
 
+/** Which list is on screen: the VIP hub's guests, or the exhibitors
+ *  platform's galleries (docs/exhibitors-platform.md). Same table, same
+ *  codes, same actions - a second audience, so a second screen. */
+type Audience = 'vip' | 'exhibitor';
+
 interface Guest {
   id: string;
+  audience?: Audience;
   firstName: string;
   lastName: string;
   email: string;
@@ -166,9 +172,9 @@ function readSheet(text: string): Fields[] {
     const key = (Object.keys(COLUMNS) as (keyof Fields)[]).find((k) => COLUMNS[k].test(h.trim()));
     if (key && index[key] === undefined) index[key] = i;
   });
-  for (const k of ['firstName', 'lastName', 'email'] as const) {
-    if (index[k] === undefined) throw new Error(`No "${k}" column. Headings seen: ${header.join(' | ')}`);
-  }
+  // Only the email is required (2026-10-18: the code is made from it alone);
+  // name columns are welcome but a bare address list imports fine.
+  if (index.email === undefined) throw new Error(`No "email" column. Headings seen: ${header.join(' | ')}`);
   const get = (r: string[], k: keyof Fields) => (index[k] === undefined ? '' : (r[index[k]!] ?? '').trim());
   return data
     .map((r) => ({
@@ -210,6 +216,7 @@ export function VipTool() {
   const [guests, setGuests] = useState<Guest[] | null>(null);
   const [blocked, setBlocked] = useState<{ status: number; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [audience, setAudience] = useState<Audience>('vip');
   const [filter, setFilter] = useState<Filter>('pending');
   const [search, setSearch] = useState('');
   const [editing, setEditing] = useState<Guest | 'new' | null>(null);
@@ -218,14 +225,14 @@ export function VipTool() {
 
   const load = useCallback(async () => {
     try {
-      const { guests: list } = await api<{ guests: Guest[] }>({ action: 'list' });
+      const { guests: list } = await api<{ guests: Guest[] }>({ action: 'list', audience });
       setGuests(list);
       setBlocked(null);
     } catch (error) {
       const e = error as ApiError;
       setBlocked({ status: e.status ?? 0, text: e.message });
     }
-  }, []);
+  }, [audience]);
 
   useEffect(() => {
     void load();
@@ -309,19 +316,21 @@ export function VipTool() {
     if (!window.confirm(`Import ${rows.length} guest(s) from ${file.name}? New emails are added as approved; everyone already in the list keeps their code.`)) return;
     await run(
       async () => {
-        const total = { created: 0, approved: 0, unchanged: 0, rejected: [] as string[] };
+        const total = { created: 0, approved: 0, unchanged: 0, crossed: 0, rejected: [] as string[] };
         for (let i = 0; i < rows.length; i += IMPORT_CHUNK) {
-          const part = await api<typeof total>({ action: 'import', rows: rows.slice(i, i + IMPORT_CHUNK) });
+          const part = await api<typeof total>({ action: 'import', rows: rows.slice(i, i + IMPORT_CHUNK), audience });
           total.created += part.created;
           total.approved += part.approved;
           total.unchanged += part.unchanged;
+          total.crossed += part.crossed ?? 0;
           total.rejected.push(...part.rejected);
         }
         return total;
       },
       (t) =>
         `${t.created} added, ${t.approved} pending request(s) approved, ${t.unchanged} already in the list` +
-        (t.rejected.length ? `, ${t.rejected.length} row(s) skipped (no name or no valid email)` : '') +
+        (t.crossed ? `, ${t.crossed} left alone (already on the other list)` : '') +
+        (t.rejected.length ? `, ${t.rejected.length} row(s) skipped (no valid email)` : '') +
         '.',
     );
   };
@@ -332,7 +341,7 @@ export function VipTool() {
         const all: Guest[] = [];
         let offset: number | null = 0;
         while (offset !== null) {
-          const page: { guests: Guest[]; next: number | null } = await api({ action: 'export', offset });
+          const page: { guests: Guest[]; next: number | null } = await api({ action: 'export', offset, audience });
           all.push(...page.guests);
           offset = page.next;
         }
@@ -342,7 +351,7 @@ export function VipTool() {
             .map(csvCell)
             .join(','),
         );
-        download('guests-with-codes.csv', [header.join(','), ...lines].join(NEWLINE) + NEWLINE);
+        download(audience === 'exhibitor' ? 'exhibitors-with-passwords.csv' : 'guests-with-codes.csv', [header.join(','), ...lines].join(NEWLINE) + NEWLINE);
         return all.length;
       },
       (n) => `${n} guest(s) exported. Keep that file private.`,
@@ -379,7 +388,31 @@ export function VipTool() {
     <Box padding={4} style={{ overflow: 'auto', height: '100%' }}>
       <Stack gap={4}>
         <Flex align="center" justify="space-between" gap={3} wrap="wrap">
-          <Heading size={2}>VIP guests</Heading>
+          <Flex gap={3} align="center" wrap="wrap">
+            <Heading size={2}>{audience === 'exhibitor' ? 'Exhibitors platform' : 'VIP guests'}</Heading>
+            <Flex gap={1}>
+              {(
+                [
+                  ['vip', 'VIPs'],
+                  ['exhibitor', 'Exhibitors'],
+                ] as [Audience, string][]
+              ).map(([key, label]) => (
+                <Button
+                  key={key}
+                  text={label}
+                  fontSize={1}
+                  mode={audience === key ? 'default' : 'ghost'}
+                  disabled={busy}
+                  onClick={() => {
+                    setAudience(key);
+                    setGuests(null);
+                    setFilter(key === 'exhibitor' ? 'approved' : 'pending');
+                    setSearch('');
+                  }}
+                />
+              ))}
+            </Flex>
+          </Flex>
           <Flex gap={2} wrap="wrap">
             <Button text="Add a guest" tone="primary" fontSize={1} disabled={busy} onClick={() => setEditing('new')} />
             <Button text="Import CSV" mode="ghost" fontSize={1} disabled={busy} onClick={() => fileInput.current?.click()} />
@@ -400,11 +433,16 @@ export function VipTool() {
 
         <Card padding={3} radius={2} tone="primary" border>
           <Text size={1}>
-            A request from the site's "not a VIP yet?" form waits under Requests until you approve or deny it; its code
-            opens nothing before that. Approving a guest or giving them a new code shows the code and emails it to them;
-            adding one asks first (the text is Site settings → VIP). An import emails nobody: the invitation mailing is
-            yours, from the export, and "Email code" on a row sends one guest's code at a time. A spreadsheet needs the
-            an email column (first name, last name, institution and function are optional).
+            {audience === 'exhibitor'
+              ? 'One row per participating gallery; their code is the "personal password" that opens the exhibitors platform ' +
+                '(/exhibitors/platform) and nothing else. Approving a gallery or giving them a new password shows it and emails it ' +
+                '(the text is Site settings → VIP → "Exhibitor password email"); adding one asks first. An import emails nobody: ' +
+                'the mailing is yours, from the export. A spreadsheet needs an email column (names, institution and function are optional).'
+              : 'A request from the site’s "not a VIP yet?" form waits under Requests until you approve or deny it; its code ' +
+                'opens nothing before that. Approving a guest or giving them a new code shows the code and emails it to them; ' +
+                'adding one asks first (the text is Site settings → VIP). An import emails nobody: the invitation mailing is ' +
+                'yours, from the export, and "Email code" on a row sends one guest’s code at a time. A spreadsheet needs ' +
+                'an email column (first name, last name, institution and function are optional).'}
           </Text>
         </Card>
 
@@ -519,7 +557,7 @@ export function VipTool() {
             const target = editing;
             setEditing(null);
             if (target === 'new') {
-              void run(() => api<Coded>({ action: 'add', ...fields, mail })).then((result) => {
+              void run(() => api<Coded>({ action: 'add', ...fields, mail, audience })).then((result) => {
                 if (result?.code) setShown({ guest: result.guest, code: result.code, note: `Added. ${mailLine(result.mail)}`, mail: result.mail });
               });
             } else {
@@ -585,7 +623,9 @@ function GuestDialog({
     const value = event.currentTarget.value;
     setFields((f) => ({ ...f, [key]: value }));
   };
-  const ready = fields.firstName.trim() && fields.lastName.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim());
+  // Only the email is required, as everywhere since 2026-10-18: the code is
+  // made from it alone, and a gallery contact may well be info@….
+  const ready = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim());
 
   const field = (key: keyof Fields, label: string, props: Record<string, unknown> = {}) => (
     <Stack gap={2}>
