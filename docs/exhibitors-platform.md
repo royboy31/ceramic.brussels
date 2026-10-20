@@ -98,6 +98,14 @@ dates (the design's French beside English and Dutch), useful links, the
 Hoxton deal, Tiphaine's contact, Embelco. Verified on the kamindu preview
 in EN and FR.
 
+**The frame's two columns.** The page carries a second builder field,
+`aside` - the narrow right column (forms, kit, links, contact) beside the
+wide one (guide, agenda, booths, hotel). It reads the same block
+projection (`SECTION_FIELDS` in queries.ts), the Studio shows it on this
+one page (pageKinds `aside`), and the route lays the stacks out 2:1 from
+1000px, stacked below; the design's 907:433. Editors move a block between
+columns by cutting it from one stack and adding it to the other.
+
 ## Still to do
 
 - Lilanga: the styling pass on both states to the frames (the two-column
