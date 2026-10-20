@@ -205,6 +205,9 @@ const PLAIN_KEYS = new Set([
   'contactEmail', 'pressEmail', 'recipient', 'cc', 'senderEmail',
   // a "link to this site" mark's path in rich text (links.ts sitePath)
   'path',
+  // agenda calendar entries (pageBuilder agendaEntry): the component parses
+  // these into Date objects, and an encoded ISO string is not a date
+  'date', 'endDate',
 ]);
 
 const stegaFilter: FilterDefault = (props) =>

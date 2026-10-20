@@ -326,6 +326,15 @@ const SECTIONS = `sections[hidden != true]{
     ${styled('heading')},
     "items": items[]{ _key, category, ${styled('question')}, ${styled('answer')} }
   },
+  _type == "agendaSection" => {
+    ${styled('heading')},
+    "entries": entries[]{
+      _key, kind, date, endDate,
+      "label": ${localised('label')},
+      "text": ${localised('text')},
+      "link": link ${LINK}
+    }
+  },
   _type == "embedSection" => {
     url, height,
     ${styled('heading')}

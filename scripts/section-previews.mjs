@@ -52,6 +52,14 @@ const BLOCKS = {
   keyFiguresSection: () => `${rule(0, 50, W)}${rule(W / 2, 50, 2)}<line x1="${W / 2}" y1="50" x2="${W / 2}" y2="170" stroke="${INK}" stroke-width="2"/>${rule(0, 110, W)}${rule(0, 170, W)}<text x="${M}" y="96" font-family="sans-serif" font-size="40" fill="${INK}">12k</text>${line(M + 82, 84, 50, 8, MUTED)}<text x="${W / 2 + 20}" y="96" font-family="sans-serif" font-size="40" fill="${INK}">60</text>${line(W / 2 + 76, 84, 50, 8, MUTED)}<text x="${M}" y="156" font-family="sans-serif" font-size="40" fill="${INK}">90</text>${line(M + 82, 144, 50, 8, MUTED)}<text x="${W / 2 + 20}" y="156" font-family="sans-serif" font-size="40" fill="${INK}">5</text>${line(W / 2 + 50, 144, 60, 8, MUTED)}`,
   newsSection: () => `${line(W / 2 - 50, 22, 100, 12)}${line(M, 60, 80, 6, MUTED)}${line(M, 74, 110, 12)}${line(M, 110, 50, 6)}${picture(M + 146, 52, 126, 60)}${picture(M, 122, 126, 60)}${line(M + 146, 130, 80, 6, MUTED)}${line(M + 146, 144, 110, 12)}${line(M + 146, 170, 50, 6)}`,
   faqSection: () => [0, 1, 2, 3].map((i) => `${rule(M, 44 + i * 34, CW)}${line(M, 54 + i * 34, 150 + (i % 2) * 40, 10)}<text x="${W - M - 12}" y="66 " font-family="sans-serif" font-size="14" fill="${INK}" transform="translate(0 ${i * 34})">↓</text>`).join('') + rule(M, 44 + 4 * 34, CW),
+  agendaSection: () => {
+    const cw = CW / 7;
+    const cells = [0, 1, 2].map((r) => [0, 1, 2, 3, 4, 5, 6].map((c) => {
+      const fill = (r === 0 && c === 4) ? ACID : (r === 2 && c >= 2) ? INK : PAPER;
+      return `<rect x="${M + c * cw}" y="${44 + r * 42}" width="${cw}" height="42" fill="${fill}" stroke="${INK}" stroke-width="1.5"/>`;
+    }).join('')).join('');
+    return `${[0, 1, 2, 3, 4, 5, 6].map((c) => dot(M + c * cw + cw / 2, 32, 5, MUTED)).join('')}${cells}${line(M + 4 * cw + 4, 50, cw - 10, 4)}${line(M + 2 * cw + 6, 136, cw - 12, 4, PAPER)}${line(M + 3 * cw + 6, 136, cw - 12, 4, PAPER)}`;
+  },
   applicationFormSection: () => `${[0, 1].map((r) => [0, 1].map((c) => `${line(M + c * 144, 44 + r * 52, 60, 6, MUTED)}${rule(M + c * 144, 70 + r * 52, 128)}`).join('')).join('')}${pill(M, 158, 70, INK)}`,
   newsletterSection: () => `${line(M, 44, 120, 10)}${line(M, 92, 60, 6, MUTED)}${rule(M, 118, 160)}${pill(M + 176, 104, 86, INK)}`,
   embedSection: () => `<rect x="${M}" y="30" width="${CW}" height="140" fill="${PAPER}" stroke="${INK}" stroke-width="2" stroke-dasharray="6 4"/>${line(M + 16, 46, 60, 6, MUTED)}${rect(M + 16, 62, CW - 32, 92, '#eeeeee')}<text x="${W / 2}" y="114" text-anchor="middle" font-family="sans-serif" font-size="16" fill="${INK}">https://…</text>`,
