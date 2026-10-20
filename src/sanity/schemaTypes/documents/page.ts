@@ -134,7 +134,8 @@ export const page = defineType({
       title: 'Sidebar',
       group: 'main',
       hidden: pageHides('aside'),
-      description: 'The narrow right column beside the sections - forms, kit, links, contact.',
+      description:
+        'The narrow right column beside the sections - forms, kit, links, contact. A spacer here means "continue below the full-width image band", which is what puts the transport partner beside the hotel.',
     }),
     defineField({
       name: 'body',
