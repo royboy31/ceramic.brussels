@@ -98,13 +98,20 @@ dates (the design's French beside English and Dutch), useful links, the
 Hoxton deal, Tiphaine's contact, Embelco. Verified on the kamindu preview
 in EN and FR.
 
-**The frame's two columns.** The page carries a second builder field,
+**The frame's three bands.** The page carries a second builder field,
 `aside` - the narrow right column (forms, kit, links, contact) beside the
-wide one (guide, agenda, booths, hotel). It reads the same block
-projection (`SECTION_FIELDS` in queries.ts), the Studio shows it on this
-one page (pageKinds `aside`), and the route lays the stacks out 2:1 from
-1000px, stacked below; the design's 907:433. Editors move a block between
-columns by cutting it from one stack and adding it to the other.
+wide one (guide, agenda, hotel). It reads the same block projection
+(`SECTION_FIELDS` in queries.ts), the Studio shows it on this one page
+(pageKinds `aside`), and the route lays the stacks out 2:1 from 1000px,
+stacked below; the design's 907:433. Two markers give the frame its
+middle band: a **gallerySection in Sections renders as a full-width band**
+interrupting the columns (a section title straight above it rides along) -
+that is the booths strip, seeded with six 2026 stand photos referenced
+from the edition's archive until Tiphaine has 2027 pictures - and a
+**spacer in the Sidebar means "continue below the band"**, which drops the
+transport partner beside the hotel. Editors move a block between columns
+by cutting it from one stack and adding it to the other, and move the band
+by moving the gallery.
 
 ## Still to do
 
