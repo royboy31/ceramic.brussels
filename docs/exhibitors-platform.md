@@ -97,5 +97,13 @@ form, though the design says "write to Tiphaine" instead.
   shortly" line.
 - Editors: the "Exhibitor password email" text in Site settings → VIP, if
   the stock English will not do.
-- Apply migration 0004 (remote) before the deploy that carries this code.
 - Tiphaine's gallery list through the import; send her the codes CSV.
+
+Migration 0004 was applied to the remote D1 and the whole flow verified on
+the kamindu preview on 2026-10-20: wrong code → `?error=code`, a code typed
+lower-case enters, leave returns to the form, and neither realm's session
+opens the other's door. The same check caught the page rendering without
+any CSS: the dev wrapper in src/pages and the injected route both claimed
+the pattern, and the Worker matched the style-less file-based entry - which
+is why the route is now the wrapper alone, flipped to on-demand by
+vip-routes.mjs (`astro:route:setup`) when the runtime is on.
