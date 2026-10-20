@@ -32,14 +32,19 @@ export function vipRoutes({ onDemand = false } = {}) {
         injectRoute({ pattern: '/api/vip/request', entrypoint: './src/server/routes/vip-request.ts', prerender: false });
         // The guest list, for the Studio's VIP tool (Sanity administrators only).
         injectRoute({ pattern: '/api/vip/admin', entrypoint: './src/server/routes/vip-admin.ts', prerender: false });
-        // The exhibitors platform: one address, form or page by session
-        // (docs/exhibitors-platform.md). Same enter/leave routes, realm apart.
-        injectRoute({
-          pattern: '/[lang]/exhibitors/platform',
-          entrypoint: './src/server/routes/exhibitors-platform.astro',
-          prerender: false,
-        });
         logger.info('VIP locked tabs mounted on request at /[lang]/vip/[tab], plus /api/vip/ and /[lang]/exhibitors/platform');
+      },
+      // The exhibitors platform: one address, form or page by session
+      // (docs/exhibitors-platform.md). The route is the one file
+      // src/pages/[lang]/exhibitors/platform.astro - injecting a second route
+      // on the same pattern put two entries in the Worker's manifest and the
+      // file-based one, carrying no styles, won the match: the platform
+      // rendered bare HTML. So with the runtime on, that file itself goes
+      // on-demand here; without it, its getStaticPaths [] builds nothing.
+      'astro:route:setup': ({ route }) => {
+        if (onDemand && route.component.replace(/\\/g, '/').endsWith('src/pages/[lang]/exhibitors/platform.astro')) {
+          route.prerender = false;
+        }
       },
       'astro:build:done': ({ logger }) => {
         const out = path.resolve('dist', '_vip-paths.json');
