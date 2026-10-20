@@ -206,8 +206,11 @@ const NEWS_CARD = `{
  * Adding a block type means adding a branch here, its schema in
  * src/sanity/schemaTypes/objects/pageBuilder.ts, and its component in
  * src/components/sections/.
+ *
+ * SECTION_FIELDS is the projection alone, so a second builder field (the
+ * platform page's `aside`) reads the same branches.
  */
-const SECTIONS = `sections[hidden != true]{
+const SECTION_FIELDS = `{
   _key, _type, anchor,
   _type == "contentSection" => {
     layout,
@@ -340,6 +343,8 @@ const SECTIONS = `sections[hidden != true]{
     ${styled('heading')}
   }
 }`;
+
+const SECTIONS = `sections[hidden != true]${SECTION_FIELDS}`;
 
 export type Params = { lang: LocaleId; [key: string]: unknown };
 
@@ -1015,6 +1020,9 @@ const PAGE = `{
   // The pills under the body, the page's own rather than a block (VIP hotel).
   "links": links[] ${LINK},
   "sections": ${SECTIONS},
+  // The exhibitors platform's sidebar - the frame's narrow right column
+  // (docs/exhibitors-platform.md). Null on every other page.
+  "aside": aside[hidden != true]${SECTION_FIELDS},
   "images": images[] ${IMAGE},
   cover ${IMAGE},
   // The cover as a slideshow (#12); the single cover stays for pages with one.

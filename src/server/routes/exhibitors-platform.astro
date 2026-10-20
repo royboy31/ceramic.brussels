@@ -89,9 +89,16 @@ const altPaths = Object.fromEntries(LOCALE_IDS.map((l) => [l, PLATFORM_PATH]));
       </section>
     ) : (
       <>
-        {(page?.sections?.length ?? 0) > 0 ? (
+        {(page?.sections?.length ?? 0) > 0 || (page?.aside?.length ?? 0) > 0 ? (
           <div class="platform-body">
-            <PageSections lang={lang} sections={page.sections} />
+            <div class="platform-main">
+              <PageSections lang={lang} sections={page.sections} />
+            </div>
+            {(page?.aside?.length ?? 0) > 0 && (
+              <aside class="platform-aside">
+                <PageSections lang={lang} sections={page.aside} />
+              </aside>
+            )}
           </div>
         ) : (
           <p class="empty">{t('platform.empty')}</p>
@@ -213,10 +220,25 @@ const altPaths = Object.fromEntries(LOCALE_IDS.map((l) => [l, PLATFORM_PATH]));
     padding: 10px var(--gutter) 60px;
     font-size: 22px;
   }
-  /* The section stack renders inside the page's gutters; the blocks bring
-     their own vertical rhythm. */
+  /* The frame's two columns: the wide stack (guide, agenda, booths, hotel)
+     beside the narrow one (forms, kit, links, contact), 907:433 in the
+     design, 2:1 here; below 1000px they stack, sidebar after. The blocks
+     bring their own vertical rhythm. */
   .platform-body {
     padding: 0 var(--gutter) 40px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0 44px;
+    align-items: start;
+  }
+  @media (min-width: 1000px) {
+    .platform-body {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+  .platform-main,
+  .platform-aside {
+    min-width: 0;
   }
   .leave {
     padding: 0 var(--gutter) 70px;

@@ -200,36 +200,6 @@ const sections = [
     ],
   },
 
-  heading(ls('useful links', 'liens utiles', 'nuttige links')),
-  {
-    _key: key('l'),
-    _type: 'linksSection',
-    variant: 'pill',
-    links: [
-      {
-        _key: key('k'),
-        _type: 'link',
-        kind: 'route',
-        path: 'exhibitors',
-        label: ls('see the full exhibitors 2027 list', 'voir la liste complète des exposant·es 2027', 'bekijk de volledige lijst van exposanten 2027'),
-      },
-      {
-        _key: key('k'),
-        _type: 'link',
-        kind: 'route',
-        path: 'vip/programme',
-        label: ls('discover our VIP programme', 'découvrez notre programme VIP', 'ontdek ons VIP-programma'),
-      },
-      {
-        _key: key('k'),
-        _type: 'link',
-        kind: 'route',
-        path: 'visit',
-        label: ls('visitors info', 'infos visiteurs', 'bezoekersinfo'),
-      },
-    ],
-  },
-
   heading(ls('hotel deal', 'offre hôtel', 'hoteldeal')),
   {
     _key: key('c'),
@@ -272,6 +242,40 @@ const sections = [
         kind: 'external',
         external: 'https://thehoxton.com/belgium/brussels/',
         label: ls('book your stay', 'réservez votre séjour', 'boek uw verblijf'),
+      },
+    ],
+  },
+
+];
+
+// The frame's narrow right column, beside the stack above (page.aside).
+const aside = [
+  heading(ls('useful links', 'liens utiles', 'nuttige links')),
+  {
+    _key: key('l'),
+    _type: 'linksSection',
+    variant: 'pill',
+    links: [
+      {
+        _key: key('k'),
+        _type: 'link',
+        kind: 'route',
+        path: 'exhibitors',
+        label: ls('see the full exhibitors 2027 list', 'voir la liste complète des exposant·es 2027', 'bekijk de volledige lijst van exposanten 2027'),
+      },
+      {
+        _key: key('k'),
+        _type: 'link',
+        kind: 'route',
+        path: 'vip/programme',
+        label: ls('discover our VIP programme', 'découvrez notre programme VIP', 'ontdek ons VIP-programma'),
+      },
+      {
+        _key: key('k'),
+        _type: 'link',
+        kind: 'route',
+        path: 'visit',
+        label: ls('visitors info', 'infos visiteurs', 'bezoekersinfo'),
       },
     ],
   },
@@ -333,6 +337,7 @@ const doc = {
     nl: { _type: 'slug', current: 'platform' },
   },
   sections,
+  aside,
 };
 
 /* ------------------------------------------------------------ run */
@@ -343,7 +348,9 @@ if (existing.length && !FORCE) {
   process.exit(1);
 }
 
-console.log(`${doc.sections.length} sections, ${doc.sections.find((s) => s._type === 'agendaSection').entries.length} agenda entries.`);
+console.log(
+  `${doc.sections.length} sections + ${doc.aside.length} sidebar, ${doc.sections.find((s) => s._type === 'agendaSection').entries.length} agenda entries.`,
+);
 if (!APPLY) {
   console.log(`Plan only. --apply writes drafts.${ID}; add --publish to publish it.`);
   process.exit(0);
