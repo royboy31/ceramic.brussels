@@ -90,7 +90,9 @@ const altPaths = Object.fromEntries(LOCALE_IDS.map((l) => [l, PLATFORM_PATH]));
     ) : (
       <>
         {(page?.sections?.length ?? 0) > 0 ? (
-          <PageSections lang={lang} sections={page.sections} />
+          <div class="platform-body">
+            <PageSections lang={lang} sections={page.sections} />
+          </div>
         ) : (
           <p class="empty">{t('platform.empty')}</p>
         )}
@@ -210,6 +212,11 @@ const altPaths = Object.fromEntries(LOCALE_IDS.map((l) => [l, PLATFORM_PATH]));
   .empty {
     padding: 10px var(--gutter) 60px;
     font-size: 22px;
+  }
+  /* The section stack renders inside the page's gutters; the blocks bring
+     their own vertical rhythm. */
+  .platform-body {
+    padding: 0 var(--gutter) 40px;
   }
   .leave {
     padding: 0 var(--gutter) 70px;
