@@ -81,20 +81,32 @@ Two ways, the same as VIP:
 exhibitor row - the door is open should the platform ever carry a request
 form, though the design says "write to Tiphaine" instead.
 
+## The page and the calendar (built 2026-10-20)
+
+The agenda calendar is a page-builder block, `agendaSection` - the usual
+three places plus the thumbnail. Each `agendaEntry` is a label, a kind, a
+date, an optional end date it repeats until, detail lines and a link; the
+Monday-first month grid draws itself around the entries, the kind colours
+the day (deadline acid, payment violet, build-up grey, fair ink-on-ground),
+deadline and payment entries close on the bold DEADLINE word, and below
+700px the grid gives way to a list of the same entries. `date` and
+`endDate` are in stegaFilter's `PLAIN_KEYS`.
+
+`scripts/seed-exhibitors-platform-page.mjs` wrote and published
+`page-exhibitors-platform` from the frame: intro, the calendar's eleven
+dates (the design's French beside English and Dutch), useful links, the
+Hoxton deal, Tiphaine's contact, Embelco. Verified on the kamindu preview
+in EN and FR.
+
 ## Still to do
 
-- The agenda section block (`agendaSection`): schema + `SECTIONS` branch +
-  `PLAIN_KEYS` (`kind`, `date`, `endDate`) are designed, not yet written -
-  the calendar is an editor-entered list of dated, coloured, linkable
-  entries, and the month grid draws itself. Until it exists the page can
-  carry the calendar as an image block.
-- Lilanga: the styling pass on both states to the frames, and the entry
-  point - where the public exhibitors pages link to the platform (a pill in
-  the band, or a menu row via a typed path; the address is noindexed and
-  disallowed either way).
-- The `page-exhibitors-platform` document itself (editors, or a seed
-  script): until it is published the entered state shows the "published
-  shortly" line.
+- Lilanga: the styling pass on both states to the frames (the two-column
+  zigzag; today the blocks stack), and the entry point - where the public
+  exhibitors pages link to the platform (a pill in the band, or a menu row
+  via a typed path; the address is noindexed and disallowed either way).
+- Editors/Tiphaine, on the page: the exhibitor guide embed, the three form
+  links (the deadlines are already on the calendar), the communication kit
+  (logos, colour palette), the booth photos.
 - Editors: the "Exhibitor password email" text in Site settings → VIP, if
   the stock English will not do.
 - Tiphaine's gallery list through the import; send her the codes CSV.
