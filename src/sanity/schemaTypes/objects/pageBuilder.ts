@@ -2,6 +2,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity';
 // @sanity/icons 5 exposes each icon as its own subpath; the root exports only
 // the generic <Icon symbol=… /> and the map.
 import { BarChartIcon } from '@sanity/icons/BarChart';
+import { CalendarIcon } from '@sanity/icons/Calendar';
 import { BlockquoteIcon } from '@sanity/icons/Blockquote';
 import { CodeBlockIcon } from '@sanity/icons/CodeBlock';
 import { ComponentIcon } from '@sanity/icons/Component';
@@ -501,6 +502,101 @@ export const faqSection = defineType({
   },
 });
 
+/**
+ * One dated entry on the agenda calendar (agendaSection below). The kind
+ * colours the whole day cell - the exhibitors platform frame's calendar
+ * paints deadlines acid yellow, the payment date violet, build-up days grey
+ * and fair days black - and an entry with an end date repeats over every day
+ * it covers. The colours are fixed in the component
+ * (src/components/sections/Agenda.astro); only the name is stored, so a
+ * restyle never needs a content migration, the same rule as the text swatches.
+ */
+export const AGENDA_KINDS = [
+  { title: 'Deadline (yellow)', value: 'deadline' },
+  { title: 'Payment (violet)', value: 'payment' },
+  { title: 'Build-up (grey)', value: 'montage' },
+  { title: 'Fair day (black)', value: 'fair' },
+  { title: 'Plain', value: 'info' },
+] as const;
+
+export const agendaEntry = defineType({
+  name: 'agendaEntry',
+  title: 'Agenda entry',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'label',
+      title: 'Label',
+      type: 'localeString',
+      validation: (rule) => rule.required(),
+      description: 'The entry’s name in its day cell, e.g. "Form 1", "Build-up", "Fair".',
+    }),
+    defineField({
+      name: 'kind',
+      title: 'Kind',
+      type: 'string',
+      options: { list: [...AGENDA_KINDS], layout: 'radio' },
+      initialValue: 'info',
+      description: 'Colours the day cell. A deadline or payment entry also gets the bold DEADLINE word.',
+    }),
+    defineField({ name: 'date', title: 'Date', type: 'date', validation: (rule) => rule.required() }),
+    defineField({
+      name: 'endDate',
+      title: 'Until',
+      type: 'date',
+      description: 'Optional. The entry repeats on every day up to and including this one, e.g. the fair days.',
+      validation: (rule) =>
+        rule.custom((value, context) => {
+          const start = (context.parent as { date?: string } | undefined)?.date;
+          return !value || !start || value >= start ? true : 'Ends before it starts';
+        }),
+    }),
+    defineField({
+      name: 'text',
+      title: 'Details',
+      type: 'localeText',
+      description: 'Optional. Small lines under the label - times, access notes. Each line of its own.',
+    }),
+    defineField({ name: 'link', title: 'Link', type: 'link', description: 'Optional. Makes the label a link, e.g. to the form.' }),
+  ],
+  preview: {
+    select: { label: 'label.en', kind: 'kind', date: 'date', endDate: 'endDate' },
+    prepare: ({ label, kind, date, endDate }) => ({
+      title: label ?? '(no label)',
+      subtitle: [date, endDate ? `→ ${endDate}` : null, AGENDA_KINDS.find((k) => k.value === kind)?.title]
+        .filter(Boolean)
+        .join(' '),
+    }),
+  },
+});
+
+/** A month-grid calendar drawn from dated entries, as on the exhibitors platform. */
+export const agendaSection = defineType({
+  name: 'agendaSection',
+  title: 'Agenda calendar',
+  type: 'object',
+  icon: CalendarIcon,
+  fields: [
+    headingField('Optional.'),
+    defineField({
+      name: 'entries',
+      title: 'Entries',
+      type: 'array',
+      of: [defineArrayMember({ type: 'agendaEntry' })],
+      description: 'The month grid draws itself around these, first date to last.',
+    }),
+    anchorField(),
+    hiddenField(),
+  ],
+  preview: {
+    select: { heading: 'heading.en', entries: 'entries', hidden: 'hidden' },
+    prepare: ({ heading, entries, hidden }) => ({
+      title: heading ?? 'Agenda calendar',
+      subtitle: sectionSubtitle('Agenda calendar', hidden, `· ${entries?.length ?? 0} entries`),
+    }),
+  },
+});
+
 /** The latest news items as feature blocks, alternating text and picture. */
 export const newsSection = defineType({
   name: 'newsSection',
@@ -752,6 +848,7 @@ export const PAGE_SECTION_TYPES = [
   'keyFiguresSection',
   'newsSection',
   'faqSection',
+  'agendaSection',
   'embedSection',
   'applicationFormSection',
   'newsletterSection',
@@ -791,7 +888,7 @@ export function sectionsField(
   const { name = 'sections', title = 'Sections', group, description, hidden, types = PAGE_SECTION_TYPES } = overrides;
   const has = (t: string) => types.includes(t);
   const groups = [
-    { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection', 'spacerSection'] },
+    { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection', 'agendaSection', 'spacerSection'] },
     { name: 'media', title: 'Images & video', of: ['gallerySection', 'slideshowSection', 'videoSection', 'spotlight'] },
     { name: 'action', title: 'Links & banners', of: ['bannerSection', 'linksSection', 'embedSection', 'applicationFormSection', 'newsletterSection'] },
     { name: 'lists', title: 'From other content', of: ['peopleSection', 'partnersSection', 'keyFiguresSection', 'newsSection'] },
@@ -835,6 +932,8 @@ export const pageBuilderTypes = [
   headingSection,
   spacerSection,
   faqSection,
+  agendaEntry,
+  agendaSection,
   newsSection,
   linksSection,
   embedSection,
