@@ -43,6 +43,37 @@ const contactEmail = 'tiphaine@ceramic.brussels';
 const here = localePath(lang, PLATFORM_PATH);
 const exhibitorsList = localePath(lang, 'exhibitors');
 const altPaths = Object.fromEntries(LOCALE_IDS.map((l) => [l, PLATFORM_PATH]));
+
+/**
+ * The frame is three bands: two columns, the full-width booths strip, two
+ * columns again. Both stacks carry that as explicit markers: in Sections a
+ * gallerySection renders as a full-width band interrupting the columns
+ * (with a section title straight above it, the pair goes together), and in
+ * the Sidebar a spacer means "continue below the band", which is what drops
+ * the transport partner beside the hotel.
+ */
+type Seg = { cols: any[]; band: any[] };
+const segs: Seg[] = [{ cols: [], band: [] }];
+for (const block of (page?.sections ?? []).filter(Boolean)) {
+  const cur = segs[segs.length - 1];
+  if (block._type === 'gallerySection') {
+    if (cur.band.length === 0 && cur.cols[cur.cols.length - 1]?._type === 'headingSection') {
+      cur.band.push(cur.cols.pop());
+    }
+    cur.band.push(block);
+  } else if (cur.band.length > 0) {
+    segs.push({ cols: [block], band: [] });
+  } else {
+    cur.cols.push(block);
+  }
+}
+const asideSegs: any[][] = [[]];
+for (const block of (page?.aside ?? []).filter(Boolean)) {
+  if (block._type === 'spacerSection') asideSegs.push([]);
+  else asideSegs[asideSegs.length - 1].push(block);
+}
+while (asideSegs.length > segs.length) segs.push({ cols: [], band: [] });
+const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs.some((s) => s.length);
 ---
 
 <Base
@@ -89,16 +120,29 @@ const altPaths = Object.fromEntries(LOCALE_IDS.map((l) => [l, PLATFORM_PATH]));
       </section>
     ) : (
       <>
-        {(page?.sections?.length ?? 0) > 0 || (page?.aside?.length ?? 0) > 0 ? (
+        {hasContent ? (
           <div class="platform-body">
-            <div class="platform-main">
-              <PageSections lang={lang} sections={page.sections} />
-            </div>
-            {(page?.aside?.length ?? 0) > 0 && (
-              <aside class="platform-aside">
-                <PageSections lang={lang} sections={page.aside} />
-              </aside>
-            )}
+            {segs.map((seg, i) => (
+              <>
+                {(seg.cols.length > 0 || (asideSegs[i]?.length ?? 0) > 0) && (
+                  <div class="platform-row">
+                    <div class="platform-main">
+                      <PageSections lang={lang} sections={seg.cols} />
+                    </div>
+                    {(asideSegs[i]?.length ?? 0) > 0 && (
+                      <aside class="platform-aside">
+                        <PageSections lang={lang} sections={asideSegs[i]} />
+                      </aside>
+                    )}
+                  </div>
+                )}
+                {seg.band.length > 0 && (
+                  <div class="platform-band">
+                    <PageSections lang={lang} sections={seg.band} />
+                  </div>
+                )}
+              </>
+            ))}
           </div>
         ) : (
           <p class="empty">{t('platform.empty')}</p>
@@ -220,19 +264,21 @@ const altPaths = Object.fromEntries(LOCALE_IDS.map((l) => [l, PLATFORM_PATH]));
     padding: 10px var(--gutter) 60px;
     font-size: 22px;
   }
-  /* The frame's two columns: the wide stack (guide, agenda, booths, hotel)
-     beside the narrow one (forms, kit, links, contact), 907:433 in the
-     design, 2:1 here; below 1000px they stack, sidebar after. The blocks
-     bring their own vertical rhythm. */
+  /* The frame's bands: each row is the wide stack beside the narrow one,
+     907:433 in the design, 2:1 here, and a gallery (booths) spans the full
+     width between the rows. Below 1000px a row stacks, sidebar after. The
+     blocks bring their own vertical rhythm. */
   .platform-body {
     padding: 0 var(--gutter) 40px;
+  }
+  .platform-row {
     display: grid;
     grid-template-columns: 1fr;
     gap: 0 44px;
     align-items: start;
   }
   @media (min-width: 1000px) {
-    .platform-body {
+    .platform-row {
       grid-template-columns: 2fr 1fr;
     }
   }

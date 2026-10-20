@@ -90,6 +90,15 @@ const entry = (kind, date, label, text, endDate) => ({
 
 const heading = (title) => ({ _key: key('h'), _type: 'headingSection', title, level: 'group' });
 
+/** A booth photo referencing an asset already in Sanity (the 2026 archive). */
+const booth = (ref, alt, caption) => ({
+  _key: key('f'),
+  _type: 'figure',
+  asset: { _type: 'reference', _ref: ref },
+  alt,
+  caption,
+});
+
 /* ------------------------------------------------------------ content */
 
 const sections = [
@@ -200,6 +209,25 @@ const sections = [
     ],
   },
 
+  // The booths strip: a gallery renders as a full-width band between the
+  // columns (the route's rule), its section title riding along. The photos
+  // are 2026 fair stands from the edition's archive gallery - referenced,
+  // not re-uploaded - as stand-ins until Tiphaine has 2027 booth pictures.
+  heading(ls('booths', 'stands', 'stands')),
+  {
+    _key: key('g'),
+    _type: 'gallerySection',
+    columns: 3,
+    images: [
+      booth('image-01fc1d5dc417fb63cffa92672deb8105392d4d7f-2048x1365-jpg', "people in front of the sorry we're closed booth at ceramic brussels", 'ceramic brussels © Geoffrey Fritsch'),
+      booth('image-ff4b056e9986ad51468d16720f95539a0f9fc610-3600x2400-jpg', 'a booth with ceramic art works during ceramic brussels', 'ceramic brussels © Geoffrey Fritsch'),
+      booth('image-3523c159ecd3b376a674c640b78d7a83ddb80553-2500x1667-jpg', 'a booth with ceramics on black plinths at ceramic brussels', 'ceramic brussels © Bureau Rouge'),
+      booth('image-40803066807c61d97a4ddfcd7e7a2f659a64074e-2500x1667-jpg', 'visitors at a booth of blue and white ceramics at ceramic brussels', 'ceramic brussels © Geoffrey Fritsch'),
+      booth('image-68c923b0b3b747ce34b745c1e2008ae64df0e0fe-2500x1667-jpg', 'a booth with framed works and vases at ceramic brussels', 'ceramic brussels © Geoffrey Fritsch'),
+      booth('image-a04da206b5790c25c55349974190405a6b2fcd7a-2500x1667-jpg', 'a booth with works on the wall at ceramic brussels', 'ceramic brussels © Geoffrey Fritsch'),
+    ],
+  },
+
   heading(ls('hotel deal', 'offre hôtel', 'hoteldeal')),
   {
     _key: key('c'),
@@ -304,6 +332,10 @@ const aside = [
       ],
     },
   },
+
+  // The spacer is the route's marker: the sidebar continues below the
+  // booths band, which lands the transport partner beside the hotel.
+  { _key: key('s'), _type: 'spacerSection', size: 'medium' },
 
   heading(ls('transport partner', 'partenaire transport', 'transportpartner')),
   {
