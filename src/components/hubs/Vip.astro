@@ -518,6 +518,10 @@ const rateLink =
       tab === 'programme' && (
         <section class="group off-site">
           <h2 class="group-title">{t('vip.venue.off-site')}</h2>
+          {/* No off-site event published yet: the title stays, with the date
+              the programme is due (client, 2026-10-21). Publishing the events
+              again brings the rows back and this line goes by itself. */}
+          {!fromDesign && days.length === 0 && <p class="body-20 tba">{t('vip.offSite.tba')}</p>}
           {!fromDesign
             ? days.map((day) => (
                 <section class="day">
@@ -868,6 +872,9 @@ const rateLink =
   .agenda .group-title,
   .agenda .rows {
     max-width: 83%;
+  }
+  .off-site .tba {
+    margin: 12px 0 0;
   }
   .off-site .row {
     grid-template-columns: 6fr 4fr;
