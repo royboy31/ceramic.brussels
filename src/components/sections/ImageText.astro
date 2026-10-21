@@ -155,6 +155,20 @@ const hasImage = !!section.image?.asset;
     margin-bottom: 30px;
     padding-bottom: 5px;
   }
+  /* The date line that opens a lounge block ("everyday — 17:30 → 19:00",
+     "thurs. 21 january 2027 — 14:30"), written as a Small or Lead line: the
+     site's BOLD & CAPS, the whole line, at body size, as the programme's
+     "KANAL VISIT — 10:30" is (Léonie, 2026-10-21). */
+  .vip-panel .body :global(.rich-text > p:is(.small, .lead):first-child) {
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+  .vip-panel .body :global(.rich-text > p:is(.small, .lead):first-child strong) {
+    font-weight: inherit;
+  }
   .body :global(p) {
     margin: 0 0 1.25rem;
   }
