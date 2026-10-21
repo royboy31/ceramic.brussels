@@ -175,11 +175,22 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
     line-height: 1.1;
     margin: 0;
   }
+  /* The site's one pill, as every other button (Base.astro; Tiphaine's
+     feedback 2026-10-20 - the square one-off didn't match). */
   .band .back {
     border: 1px solid var(--ink);
-    padding: 10px 16px;
+    border-radius: 999px;
+    padding: var(--pill-pad);
+    font-size: var(--pill-size);
+    line-height: var(--pill-lh);
+    letter-spacing: var(--pill-ls);
     text-decoration: none;
     white-space: nowrap;
+    transition: background-color 0.15s ease;
+  }
+  .band .back:hover,
+  .band .back:focus-visible {
+    background: var(--acid);
   }
   .intro {
     padding: 28px var(--gutter) 34px;
@@ -251,9 +262,10 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
     font-weight: 600;
     margin: 6px 0 8px;
   }
+  /* "A bit larger" (Tiphaine's feedback 2026-10-20). */
   .gate aside p {
-    font-size: 17px;
-    line-height: 1.45;
+    font-size: 20px;
+    line-height: 1.4;
     margin: 0;
   }
   .gate aside a {
