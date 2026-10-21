@@ -670,6 +670,63 @@ export const linksSection = defineType({
 });
 
 /**
+ * The exhibitors platform's "forms" column (Figma 1813:716, Léonie's comment
+ * of 2026-10-21): one row per form - an underlined link, a line saying what
+ * it is for, its deadline in bold capitals - with a rule under each, and the
+ * whole row turning acid on hover like the artists list. A row with no link
+ * yet still shows, without the hover: the client sends the form addresses
+ * later.
+ */
+export const formRow = defineType({
+  name: 'formRow',
+  title: 'Form',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'link',
+      title: 'Link',
+      type: 'link',
+      description: 'The form. Its label is the row title, e.g. "Form 1". Leave the address empty until the form exists.',
+    }),
+    defineField({ name: 'text', title: 'Description', type: 'localeText', description: 'One line on what the form is for.' }),
+    defineField({ name: 'deadline', title: 'Deadline', type: 'localeString', description: 'Shown in bold capitals, e.g. "before 4 Dec. 2026".' }),
+  ],
+  preview: {
+    select: { label: 'link.label.en', deadline: 'deadline.en' },
+    prepare: ({ label, deadline }) => ({ title: label ?? '(no label)', subtitle: deadline }),
+  },
+});
+
+export const formsSection = defineType({
+  name: 'formsSection',
+  title: 'Forms',
+  type: 'object',
+  icon: DocumentTextIcon,
+  fields: [
+    defineField({
+      name: 'forms',
+      title: 'Forms',
+      type: 'array',
+      of: [defineArrayMember({ type: 'formRow' })],
+      validation: (rule) => rule.min(1),
+    }),
+    anchorField(),
+    hiddenField(),
+  ],
+  preview: {
+    select: { forms: 'forms', hidden: 'hidden' },
+    prepare: ({ forms, hidden }) => ({
+      title:
+        (forms ?? [])
+          .map((f: any) => f?.link?.label?.en)
+          .filter(Boolean)
+          .join(' · ') || '(forms)',
+      subtitle: sectionSubtitle('Forms', hidden),
+    }),
+  },
+});
+
+/**
  * Partners, from a tier or hand-picked: the logo row under "partners" on the
  * art prize page, the main partner and media lists on the partners hub. The
  * partner documents carry the logos, names and links, so nothing here goes
@@ -849,6 +906,7 @@ export const PAGE_SECTION_TYPES = [
   'newsSection',
   'faqSection',
   'agendaSection',
+  'formsSection',
   'embedSection',
   'applicationFormSection',
   'newsletterSection',
@@ -890,7 +948,7 @@ export function sectionsField(
   const groups = [
     { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection', 'agendaSection', 'spacerSection'] },
     { name: 'media', title: 'Images & video', of: ['gallerySection', 'slideshowSection', 'videoSection', 'spotlight'] },
-    { name: 'action', title: 'Links & banners', of: ['bannerSection', 'linksSection', 'embedSection', 'applicationFormSection', 'newsletterSection'] },
+    { name: 'action', title: 'Links & banners', of: ['bannerSection', 'linksSection', 'formsSection', 'embedSection', 'applicationFormSection', 'newsletterSection'] },
     { name: 'lists', title: 'From other content', of: ['peopleSection', 'partnersSection', 'keyFiguresSection', 'newsSection'] },
   ]
     .map((g) => ({ ...g, of: g.of.filter(has) }))
@@ -936,6 +994,8 @@ export const pageBuilderTypes = [
   agendaSection,
   newsSection,
   linksSection,
+  formRow,
+  formsSection,
   embedSection,
   applicationFormSection,
   newsletterSection,

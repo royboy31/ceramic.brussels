@@ -1102,3 +1102,16 @@ export function getStory(lang: LocaleId, slug: string) {
 **Additive, so no migration and no backup** (Recipe B does not apply): nothing is renamed, moved or retyped, every field is new and optional, and a `story` without a slug is exactly the card it was — which today is all six of them, so the live site is unchanged until Félicie fills one in. Verified: `npx tsc --noEmit` clean, `npm run build` 383 pages (the same count as before, since no story has a slug yet).
 
 **Two things worth your eye, Kamindu:** (1) I touched `src/sanity/` and `src/lib/queries.ts` while you are working in both — this wants a rebase before it merges. (2) `/press-media/stories` is not built at all while the stories page is unpublished (`tabHasPage`), so the interview's "read more interviews" pill points at a 404 until Félicie republishes it; she has to, for the cards to be reachable.
+
+
+## #58 · built · 2026-10-21 · the exhibitors platform's "forms" block
+
+The Figma frame (1813:716) and Léonie's comment of 2026-10-21 put three form rows in the platform's right column: an underlined "Form 1 ↗", a line on what it is for, the deadline in bold capitals ("BEFORE 4 DEC. 2026"), a rule under each, and the whole row turning acid on hover like the artists list. No block could carry that.
+
+**Built (Opus 5.5, 2026-10-21, across the stack per `docs/project-handbook.md` §6 Recipe A, while Kamindu was away — Kamindu please review):**
+
+- **Schema** (`objects/pageBuilder.ts`): `formRow` (`link`, `text` localeText, `deadline` localeString) and `formsSection` (`forms[]`, `anchor`, `hidden`), in `PAGE_SECTION_TYPES` and the "Links & banners" insert group, so it is offered in Sections and in the platform's Sidebar.
+- **Query**: a `formsSection` branch in `SECTION_FIELDS`.
+- **Frontend**: `sections/Forms.astro`, wired in `PageSections.astro`; thumbnail from `npm run previews`.
+
+**Additive, so no migration**: two new types, nothing renamed or retyped, and no page holds the block until an editor adds it. A row whose link has no address yet renders as plain text without the hover, because the client has not sent the three form addresses.
