@@ -518,6 +518,10 @@ const rateLink =
       tab === 'programme' && (
         <section class="group off-site">
           <h2 class="group-title">{t('vip.venue.off-site')}</h2>
+          {/* No off-site event published yet: the title stays, with the date
+              the programme is due (client, 2026-10-21). Publishing the events
+              again brings the rows back and this line goes by itself. */}
+          {!fromDesign && days.length === 0 && <p class="body-20 tba">{t('vip.offSite.tba')}</p>}
           {!fromDesign
             ? days.map((day) => (
                 <section class="day">
@@ -746,7 +750,8 @@ const rateLink =
      around the titles was off): the letters stand 7px clear of the rule,
      not touching it, and the copy starts ~38px under it. */
   .lounge-top .panel-title,
-  .aperitivos .panel-title {
+  .aperitivos .panel-title,
+  .lounge-top :global(.sections .panel-title) {
     padding-bottom: 5px;
     margin-bottom: 30px;
   }
@@ -868,6 +873,9 @@ const rateLink =
   .agenda .rows {
     max-width: 83%;
   }
+  .off-site .tba {
+    margin: 12px 0 0;
+  }
   .off-site .row {
     grid-template-columns: 6fr 4fr;
     gap: 30px;
@@ -930,8 +938,14 @@ const rateLink =
     line-height: var(--body-lh);
     letter-spacing: 0;
   }
+  /* The programme's date lines are the same BOLD & CAPS line as the
+     off-site "KANAL VISIT — 10:30", size, tracking and the 28px under the
+     rule (Léonie, 2026-10-21: "everyday — 11:00 / 16:00" sat closer). */
   .event-when {
-    margin-top: 10px;
+    margin-top: 28px;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: 0;
   }
   .event-text {
     margin-top: 12px;

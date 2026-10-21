@@ -10,7 +10,7 @@ import { styleAttrs } from '../../lib/textStyle';
 interface Props {
   lang: LocaleId;
   section: any;
-  variant?: 'default' | 'home';
+  variant?: 'default' | 'home' | 'vip' | 'vip-panel';
 }
 
 const { section, variant = 'default' } = Astro.props;
@@ -24,7 +24,7 @@ const { section, variant = 'default' } = Astro.props;
       </h2>
     ) : (
       <h2
-        class:list={['group-title', { subgroup: section.level === 'subgroup' }]}
+        class:list={['group-title', { subgroup: section.level === 'subgroup', wide: variant === 'vip-panel' }]}
         id={section.anchor || undefined}
         {...styleAttrs(section.titleStyle)}
       >
@@ -63,6 +63,11 @@ const { section, variant = 'default' } = Astro.props;
     line-height: 1.15;
     letter-spacing: -0.04em;
     text-transform: none;
+  }
+  /* On the VIP lounge the rows under "agenda" run the full width, and the
+     rule now does too, out to the right margin (Léonie, 2026-10-21). */
+  .group-title.subgroup.wide {
+    max-width: none;
   }
   @media (max-width: 900px) {
     .group-title.subgroup {
