@@ -1115,3 +1115,5 @@ The Figma frame (1813:716) and Léonie's comment of 2026-10-21 put three form ro
 - **Frontend**: `sections/Forms.astro`, wired in `PageSections.astro`; thumbnail from `npm run previews`.
 
 **Additive, so no migration**: two new types, nothing renamed or retyped, and no page holds the block until an editor adds it. A row whose link has no address yet renders as plain text without the hover, because the client has not sent the three form addresses.
+
+**Reviewed and merged (Kamindu, 2026-10-22):** the schema and query branch read clean - additive, keyed, in both insert groups - and the branch is merged into `kamindu` (b2d3667) together with the day's fixes; the rows' addresses are still the client's to send.
