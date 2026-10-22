@@ -15,9 +15,10 @@
  *   --audience exhibitor   on --import or --add puts the guests on the
  *       exhibitors platform's door instead of the VIP hub's (migration 0004,
  *       docs/exhibitors-platform.md). Everything else is the same machinery.
- *       One email is one row, so an address is in one list or the other:
- *       the import refuses a row whose email already belongs to the other
- *       audience rather than silently moving it.
+ *       One email is one row: importing an address that already belongs to
+ *       the other audience sets that row to `all` - the guest's one code now
+ *       opens both doors (Tiphaine, 2026-10-22) - and keeps the row's own
+ *       name, details, status and code untouched.
  *   npm run vip -- --export [--out guests-with-codes.csv]
  *       The whole list with codes, as it stands.
  *   npm run vip -- --add a@b.c --first Ada --last Lovelace [--institution X] [--function Y]
@@ -279,15 +280,23 @@ function importSheet(file) {
   }
 
   const existing = new Map(allGuests().map((g) => [g.id, g]));
-  // One email is one row: a guest cannot be moved between audiences by an
-  // import, only deleted and added again, which also makes a new code.
+  // One email is one row: an address already on the other list is set to
+  // `all` by the upsert below - the same code opens both doors - and keeps
+  // its own name, details, status and code (Tiphaine, 2026-10-22).
   const crossed = sheet.filter((g) => {
     const was = existing.get(guestId(g.email));
-    return was && (was.audience ?? 'vip') !== AUDIENCE;
+    return was && (was.audience ?? 'vip') !== AUDIENCE && was.audience !== 'all';
   });
   if (crossed.length) {
-    console.error(`${crossed.length} email(s) already belong to the other audience: ${crossed.map((g) => g.email).slice(0, 10).join(', ')}`);
-    process.exit(1);
+    console.log(`${crossed.length} email(s) already on the other list - set to "all", same code opens both doors: ${crossed.map((g) => g.email).join(', ')}`);
+    const dead = crossed.filter((g) => {
+      const was = existing.get(guestId(g.email));
+      return was.status !== 'approved' || was.revoked;
+    });
+    for (const g of dead) {
+      const was = existing.get(guestId(g.email));
+      console.log(`  NOTE ${g.email} is ${was.revoked ? 'revoked' : was.status} - the code in the output will not work until that changes.`);
+    }
   }
   const stamp = now();
   // Every full code must be unique, the sheet's and the ones already out
@@ -310,7 +319,13 @@ function importSheet(file) {
     statements.push(
       `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at, audience)
        VALUES (${q(id)}, ${q(codeHash(code))}, ${version}, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(g.institution || null)}, ${q(g.function || null)}, 'approved', ${q(stamp)}, 'import', ${q(stamp)}, ${q(stamp)}, ${q(AUDIENCE)})
-       ON CONFLICT(id) DO UPDATE SET first_name = excluded.first_name, last_name = excluded.last_name, institution = excluded.institution, function = excluded.function, updated_at = excluded.updated_at,
+       ON CONFLICT(id) DO UPDATE SET
+         first_name = CASE WHEN guests.audience = excluded.audience THEN excluded.first_name ELSE guests.first_name END,
+         last_name = CASE WHEN guests.audience = excluded.audience THEN excluded.last_name ELSE guests.last_name END,
+         institution = CASE WHEN guests.audience = excluded.audience THEN excluded.institution ELSE guests.institution END,
+         function = CASE WHEN guests.audience = excluded.audience THEN excluded.function ELSE guests.function END,
+         audience = CASE WHEN guests.audience = excluded.audience THEN guests.audience ELSE 'all' END,
+         updated_at = excluded.updated_at,
          code_hash = excluded.code_hash, code_version = excluded.code_version,
          decided_at = CASE WHEN guests.status = 'pending' THEN excluded.decided_at ELSE guests.decided_at END,
          decided_by = CASE WHEN guests.status = 'pending' THEN 'import' ELSE guests.decided_by END,

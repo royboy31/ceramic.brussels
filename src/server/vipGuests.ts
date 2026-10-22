@@ -1,4 +1,4 @@
-import { codeHash, sha256Hex, type Audience, type D1Like, type KVLike } from './vip';
+import { codeHash, sha256Hex, type Audience, type RowAudience, type D1Like, type KVLike } from './vip';
 
 /**
  * The guest list, as the Worker edits it (docs/vip-access.md): what the
@@ -34,7 +34,7 @@ export interface GuestRow {
   decided_at: string | null;
   decided_by: string | null;
   created_at: string;
-  audience: Audience;
+  audience: RowAudience;
 }
 
 export interface GuestInput {
@@ -91,10 +91,11 @@ export async function makeCode(pepper: string, email: string, version: number, c
   return `${PREFIX}-${emailPart(email)}-${tail}`;
 }
 
-/** One audience's guests: the VIP list and the exhibitors platform's are two screens. */
+/** One audience's guests: the VIP list and the exhibitors platform's are two
+ *  screens, and a row marked `all` sits on both. */
 export async function listGuests(db: D1Like, audience: Audience = 'vip'): Promise<GuestRow[]> {
   const { results } = await db
-    .prepare(`SELECT ${COLUMNS} FROM guests WHERE audience = ? ORDER BY last_name, first_name`)
+    .prepare(`SELECT ${COLUMNS} FROM guests WHERE audience IN (?, 'all') ORDER BY last_name, first_name`)
     .bind(audience)
     .all<GuestRow>();
   return results;
@@ -160,21 +161,34 @@ export async function importGuests(
   by: string,
   audience: Audience = 'vip',
 ): Promise<{ created: number; approved: number; unchanged: number; crossed: number }> {
-  const { results } = await db.prepare('SELECT id, status, audience FROM guests').bind().all<{ id: string; status: GuestStatus; audience: Audience }>();
+  const { results } = await db.prepare('SELECT id, status, audience FROM guests').bind().all<{ id: string; status: GuestStatus; audience: RowAudience }>();
   const existing = new Map(results.map((r) => [r.id, r]));
   const stamp = now();
   const statements = [];
   let created = 0;
   let approved = 0;
   let unchanged = 0;
-  // One email is one row, in one list: a row that already belongs to the
-  // other audience is left exactly as it is and counted, never moved.
+  // One email is one row: importing it into the other audience sets the row
+  // to `all` - the same code now opens both doors (Tiphaine, 2026-10-22) -
+  // and keeps the row's own name and details, which the other list owns.
   let crossed = 0;
   for (const input of inputs) {
     const email = cleanEmail(input.email);
     const id = await guestId(email);
     const was = existing.get(id);
-    if (was && (was.audience ?? 'vip') !== audience) {
+    if (was && (was.audience ?? 'vip') !== audience && was.audience !== 'all') {
+      statements.push(
+        db
+          .prepare(
+            `UPDATE guests SET audience = 'all',
+               decided_at = CASE WHEN status = 'pending' THEN ? ELSE decided_at END,
+               decided_by = CASE WHEN status = 'pending' THEN ? ELSE decided_by END,
+               status = CASE WHEN status = 'pending' THEN 'approved' ELSE status END,
+               updated_at = ? WHERE id = ?`,
+          )
+          .bind(stamp, by, stamp, id),
+      );
+      existing.set(id, { ...was, audience: 'all', status: was.status === 'pending' ? 'approved' : was.status });
       crossed++;
     } else if (!was) {
       const hash = await codeHash(await makeCode(pepper, email, 1, stamp), pepper);

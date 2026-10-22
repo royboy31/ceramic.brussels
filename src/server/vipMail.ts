@@ -3,7 +3,7 @@ import { DEFAULT_LOCALE } from '../lib/locales';
 import { localePath } from '../lib/i18n';
 import { PLATFORM_PATH } from '../lib/exhibitorsPlatform';
 import { brevoKey, fill, mailDryRun, sendMail, senderFor } from './mail';
-import type { Audience } from './vip';
+import type { Audience, RowAudience } from './vip';
 
 /**
  * A guest's code, mailed to them (docs/vip-access.md). The Studio's VIP tool
@@ -81,7 +81,7 @@ const accessLink = (origin: string, audience: Audience) =>
   new URL(localePath(DEFAULT_LOCALE, audience === 'exhibitor' ? PLATFORM_PATH : 'vip/access'), import.meta.env.PUBLIC_SITE_URL || origin).href;
 
 export async function mailVipCode(
-  guest: { first_name: string; last_name: string; email: string; audience?: Audience },
+  guest: { first_name: string; last_name: string; email: string; audience?: RowAudience },
   code: string,
   origin: string,
 ): Promise<MailOutcome> {
