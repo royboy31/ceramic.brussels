@@ -77,9 +77,13 @@ export interface Guest {
 /**
  * Which door a guest's code opens (migration 0004): the VIP hub's locked
  * tabs, or the exhibitors platform (docs/exhibitors-platform.md). One table,
- * two audiences, and a code only ever opens its own.
+ * two audiences, and a code opens its own - except a row marked `all`,
+ * which opens both with the one code (Tiphaine, 2026-10-22: a gallery that
+ * is also a VIP gets one code, not two). `Audience` stays the request side -
+ * which door is being tried - and only a row carries `all`.
  */
 export type Audience = 'vip' | 'exhibitor';
+export type RowAudience = Audience | 'all';
 
 /**
  * Approved guests only. A request filed through the "not a VIP yet?" form is
@@ -89,7 +93,7 @@ export type Audience = 'vip' | 'exhibitor';
  */
 export async function findGuestByCode(db: D1Like, hash: string, audience: Audience = 'vip'): Promise<Guest | null> {
   return db
-    .prepare("SELECT id, first_name, last_name, revoked FROM guests WHERE code_hash = ? AND status = 'approved' AND audience = ?")
+    .prepare("SELECT id, first_name, last_name, revoked FROM guests WHERE code_hash = ? AND status = 'approved' AND audience IN (?, 'all')")
     .bind(hash, audience)
     .first<Guest>();
 }

@@ -38,12 +38,13 @@ type Status = 'pending' | 'approved' | 'denied';
 
 /** Which list is on screen: the VIP hub's guests, or the exhibitors
  *  platform's galleries (docs/exhibitors-platform.md). Same table, same
- *  codes, same actions - a second audience, so a second screen. */
+ *  codes, same actions - a second audience, so a second screen. A row
+ *  marked `all` is on both screens, one code for both doors. */
 type Audience = 'vip' | 'exhibitor';
 
 interface Guest {
   id: string;
-  audience?: Audience;
+  audience?: Audience | 'all';
   firstName: string;
   lastName: string;
   email: string;
@@ -329,7 +330,7 @@ export function VipTool() {
       },
       (t) =>
         `${t.created} added, ${t.approved} pending request(s) approved, ${t.unchanged} already in the list` +
-        (t.crossed ? `, ${t.crossed} left alone (already on the other list)` : '') +
+        (t.crossed ? `, ${t.crossed} now on both lists (same code opens both)` : '') +
         (t.rejected.length ? `, ${t.rejected.length} row(s) skipped (no valid email)` : '') +
         '.',
     );
@@ -489,6 +490,11 @@ export function VipTool() {
                       ) : (
                         <Badge tone={g.status === 'approved' ? 'positive' : g.status === 'pending' ? 'caution' : 'critical'} fontSize={0}>
                           {g.status === 'pending' ? 'request' : g.status}
+                        </Badge>
+                      )}
+                      {g.audience === 'all' && (
+                        <Badge tone="primary" fontSize={0}>
+                          VIP + platform
                         </Badge>
                       )}
                     </Flex>
