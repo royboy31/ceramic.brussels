@@ -17,8 +17,10 @@
  *       docs/exhibitors-platform.md). Everything else is the same machinery.
  *       One email is one row: importing an address that already belongs to
  *       the other audience sets that row to `all` - the guest's one code now
- *       opens both doors (Tiphaine, 2026-10-22) - and keeps the row's own
- *       name, details, status and code untouched.
+ *       opens both doors (Tiphaine, 2026-10-22) - keeping the row's status
+ *       and code, and its name and details wherever they are filled; only
+ *       an empty field takes the sheet's value (the VIP list was imported
+ *       without names, so a promoted row would otherwise show blank).
  *   npm run vip -- --export [--out guests-with-codes.csv]
  *       The whole list with codes, as it stands.
  *   npm run vip -- --add a@b.c --first Ada --last Lovelace [--institution X] [--function Y]
@@ -138,6 +140,10 @@ function wrangler(args, { json = false } = {}) {
   const result = spawnSync(process.execPath, [WRANGLER, ...args], {
     encoding: 'utf8',
     env: { ...process.env, CLOUDFLARE_ACCOUNT_ID: ACCOUNT_ID },
+    // The whole guest table comes back as one JSON print; node's default
+    // 1 MB maxBuffer cut it off at ~3,100 guests (2026-10-22) and the cut
+    // read exactly like a wrangler failure.
+    maxBuffer: 64 * 1024 * 1024,
   });
   if (result.status !== 0) {
     console.error(result.stdout);
@@ -320,10 +326,10 @@ function importSheet(file) {
       `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at, audience)
        VALUES (${q(id)}, ${q(codeHash(code))}, ${version}, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(g.institution || null)}, ${q(g.function || null)}, 'approved', ${q(stamp)}, 'import', ${q(stamp)}, ${q(stamp)}, ${q(AUDIENCE)})
        ON CONFLICT(id) DO UPDATE SET
-         first_name = CASE WHEN guests.audience = excluded.audience THEN excluded.first_name ELSE guests.first_name END,
-         last_name = CASE WHEN guests.audience = excluded.audience THEN excluded.last_name ELSE guests.last_name END,
-         institution = CASE WHEN guests.audience = excluded.audience THEN excluded.institution ELSE guests.institution END,
-         function = CASE WHEN guests.audience = excluded.audience THEN excluded.function ELSE guests.function END,
+         first_name = CASE WHEN guests.audience = excluded.audience OR coalesce(guests.first_name, '') = '' THEN excluded.first_name ELSE guests.first_name END,
+         last_name = CASE WHEN guests.audience = excluded.audience OR coalesce(guests.last_name, '') = '' THEN excluded.last_name ELSE guests.last_name END,
+         institution = CASE WHEN guests.audience = excluded.audience OR coalesce(guests.institution, '') = '' THEN excluded.institution ELSE guests.institution END,
+         function = CASE WHEN guests.audience = excluded.audience OR coalesce(guests.function, '') = '' THEN excluded.function ELSE guests.function END,
          audience = CASE WHEN guests.audience = excluded.audience THEN guests.audience ELSE 'all' END,
          updated_at = excluded.updated_at,
          code_hash = excluded.code_hash, code_version = excluded.code_version,
