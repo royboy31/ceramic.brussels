@@ -163,6 +163,15 @@ export function sitePath(input: string | undefined, lang: LocaleId): string | nu
   const segments = (hashAt === -1 ? own : own.slice(0, hashAt)).split('?')[0].split('/').filter(Boolean);
   if ((LOCALE_IDS as readonly string[]).includes(segments[0])) segments.shift();
 
+  // A file of the site ("assets/exhibitors-kit/….pdf"): the link schema has
+  // no file kind, so a typed path whose last segment has an extension is
+  // served as it stands - no language prefix, no trailing slash, which is
+  // how Pages serves a static asset (the exhibitors platform's communication
+  // kit, Léonie 2026-10-22).
+  if (/\.[a-z\d]{2,5}$/i.test(segments[segments.length - 1] ?? '')) {
+    return '/' + segments.join('/') + hash;
+  }
+
   const [first, second, ...rest] = segments;
 
   // Previous editions, in whichever language it is written and under the
