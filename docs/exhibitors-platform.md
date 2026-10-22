@@ -115,13 +115,23 @@ by moving the gallery.
 
 ## Still to do
 
-- Lilanga: the styling pass on both states to the frames (the two-column
-  zigzag; today the blocks stack), and the entry point - where the public
-  exhibitors pages link to the platform (a pill in the band, or a menu row
-  via a typed path; the address is noindexed and disallowed either way).
-- Editors/Tiphaine, on the page: the exhibitor guide embed, the three form
-  links (the deadlines are already on the calendar), the communication kit
-  (logos, colour palette), the booth photos.
+Done since: Lilanga's styling pass to the frames (2026-10-21/22, merged with
+request #58's forms block), the entry point (the platform pill in the
+exhibitors band, 2026-10-22 - which also answers Léonie's "no way back in":
+the session survives the round trip, so the pill reopens the platform), the
+communication kit (files in `public/assets/exhibitors-kit/`, linked as typed
+file paths - `sitePath` now serves a path ending in a file extension as it
+stands), the booth legends and small-to-giga order, and the Hoxton rate at
+165/185 (all Léonie, 2026-10-22).
+
+- Editors/Tiphaine, on the page: the exhibitor guide embed and the three
+  form links, from Léonie's 2026-10-21 emails to Lilanga (the deadlines are
+  already on the calendar and the forms block); the 2027 booth renders if
+  better ones than the current set arrive. The "see the full exhibitors 2027
+  list" row is OFF until the week of 2026-10-26 (Léonie) - restore it in the
+  Sidebar's useful-links block (label was "see the full exhibitors 2027
+  list" / "voir la liste complète des exposant·es 2027" / "bekijk de
+  volledige lijst van exposanten 2027", path `exhibitors`).
 - Editors: the "Exhibitor password email" text in Site settings → VIP, if
   the stock English will not do.
 - Tiphaine's gallery list through the import; send her the codes CSV.
