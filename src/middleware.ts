@@ -7,7 +7,7 @@ import { readPreviewCookie, verifyPreviewCookie } from './server/preview';
 import { hubTabPath, lockedTabFromPath } from './lib/hubs';
 import { platformFromPath } from './lib/exhibitorsPlatform';
 import { localePath } from './lib/i18n';
-import type { LocaleId } from './lib/locales';
+import { DEFAULT_LOCALE, isHeldBack, type LocaleId } from './lib/locales';
 import { gateOpen, vipEnv } from './server/vip';
 import { readVipSession, REALMS } from './server/vipSession';
 
@@ -51,6 +51,21 @@ async function vipGate(context: Ctx, next: Next, locked: { lang: LocaleId; tab: 
   const { request, url } = context;
   const env = await vipEnv();
   if (!env) return next();
+
+  // A held-back language is off the site (Dutch, while it is retranslated):
+  // `public/_redirects` sends every /nl/ address to the English homepage, but
+  // a rule there is not applied to a request the Worker answers, and the VIP
+  // hub's locked tabs are exactly those. So the same 302, here.
+  if (isHeldBack(locked.lang)) {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        location: localePath(DEFAULT_LOCALE, ''),
+        'cache-control': 'no-store',
+        'x-robots-tag': 'noindex, nofollow',
+      },
+    });
+  }
 
   // Pages serves every address in its slash form; the on-demand route insists on it too.
   if (!url.pathname.endsWith('/')) {

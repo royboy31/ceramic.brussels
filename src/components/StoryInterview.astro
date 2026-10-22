@@ -15,7 +15,7 @@ import { hubTabPath } from '../lib/hubs';
  * portrait on the first four columns, the name and role over a rule on the
  * other eight, the lead under it, and then the interview itself in two
  * columns of four inside that same band - the pull quote opening the right
- * one, "read more interviews" closing it, and the photographs across all
+ * one, "read more interviews" under both, and the photographs across all
  * twelve at the foot.
  *
  * As on the guest of honour's interview tab (`GuestInterview.astro`), the
@@ -109,8 +109,14 @@ blocks.slice(headEnd).forEach((b, i) => {
 /*
  * Where the columns break. Each group is weighed by the text it holds; the
  * quote is weighed into the right column so a long one does not leave the
- * right side short, as it does on this frame. The split that levels the two
- * wins, and at least one group stays on the left.
+ * right side short, as it does on this frame. The two are kept as level as
+ * the groups allow, but the longer column is always the LEFT one, as the
+ * frame sets it ("the right-hand column is always longer than the left one,
+ * whereas it's the opposite in the Figma" - Félicie, 2026-10-14): the break
+ * falls on the first split whose left side has caught the right up, which is
+ * also the levellest of the left-heavy splits. At least one group stays on
+ * the left, and a quote outweighing the whole text leaves it alone on the
+ * right.
  */
 const weigh = (g: Group) =>
   [g.question, ...g.answer].filter(Boolean).reduce((n, b: any) => n + spans(b).reduce((m: number, c: any) => m + c.text.length, 0), 0);
@@ -118,13 +124,11 @@ const weights = groups.map(weigh);
 const quoteWeight = quote ? spans(quote).reduce((n: number, c: any) => n + c.text.length, 0) * 2.4 : 0;
 const total = weights.reduce((a, b) => a + b, 0);
 let breakAt = groups.length;
-let best = Infinity;
 for (let i = 1; i <= groups.length; i++) {
   const left = weights.slice(0, i).reduce((a, b) => a + b, 0);
-  const diff = Math.abs(left - (total - left + quoteWeight));
-  if (diff < best) {
-    best = diff;
+  if (left >= total - left + quoteWeight) {
     breakAt = i;
+    break;
   }
 }
 const columns = [groups.slice(0, breakAt), groups.slice(breakAt)];
@@ -225,14 +229,16 @@ const storiesHref = localePath(lang, hubTabPath('press-media', 'stories', lang))
               )}
             </div>
           ))}
-          {side === 1 && (
-            <p class="more">
-              <LinkPill lang={lang} href={storiesHref} label={t('press.moreInterviews')} />
-            </p>
-          )}
         </div>
       ))}
     </div>
+
+    {/* After the whole text, between it and the photographs, whatever the
+        columns' lengths - it closed the right column until Félicie's
+        2026-10-12 ask, where an uneven split left it mid-text. */}
+    <p class="more">
+      <LinkPill lang={lang} href={storiesHref} label={t('press.moreInterviews')} />
+    </p>
   </div>
 
   {
@@ -342,12 +348,13 @@ const storiesHref = localePath(lang, hubTabPath('press-media', 'stories', lang))
     letter-spacing: var(--intro-ls);
   }
 
-  /* A size above the site's body text: the frame sets the interview at 24px,
-     as the guest of honour's is. */
+  /* The site's own body size: the frame reads 24px, but the client asked
+     for the Figma Body style instead (Félicie, 2026-10-12 - "the body text
+     here is too large"), and the tokens are that style. */
   .qa {
-    letter-spacing: -0.03em;
-    font-size: 24px;
-    line-height: 30px;
+    letter-spacing: var(--body-ls);
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
   }
   .qa + .qa {
     margin-top: 60px;
@@ -452,10 +459,7 @@ const storiesHref = localePath(lang, hubTabPath('press-media', 'stories', lang))
     .pull {
       margin-bottom: 44px;
     }
-    .qa {
-      font-size: 18px;
-      line-height: 1.3;
-    }
+    /* `.qa` keeps the body tokens, which step to 18 on a phone. */
     .qa + .qa,
     .column + .column {
       margin-top: 44px;

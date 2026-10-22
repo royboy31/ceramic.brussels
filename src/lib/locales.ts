@@ -13,17 +13,28 @@ export type LocaleId = (typeof LOCALES)[number]['id'];
 
 /**
  * The languages the header's switcher offers. Dutch is held back for the
- * launch, which goes out in English and French (Kamindu, 2026-10-05).
+ * launch, which went out in English and French (Kamindu, 2026-10-05), and is
+ * **off the site** since 2026-10-17 while it is retranslated: the old site's
+ * Dutch is machine-made and in places says something other than the English.
  *
- * **This hides a button, nothing else.** `LOCALES` above is untouched, so
- * /nl/ still builds, the Studio still has its Dutch fields, and every Dutch
- * page keeps its URL and its hreflang - a visitor who has one bookmarked, or
- * arrives from a search result, lands on it as before and still sees NL as
- * their current language with English and French offered underneath. Nothing
- * is deleted and no translation is lost.
+ * `LOCALES` above is untouched, so /nl/ still builds, the Studio still has
+ * its Dutch fields, and every Dutch page keeps its URL and its hreflang -
+ * which `scripts/legacy-redirects.mjs` reads to find the Dutch target of
+ * every old-site rule. Nothing is deleted and no translation is lost; the
+ * pages are simply not served.
  *
- * To put Dutch back: delete this and the `SWITCHER_LOCALES` import in
- * `Header.astro`, which reads `LOCALES` again.
+ * Being held back now lives in three places, and putting Dutch back means
+ * all three:
+ *
+ * 1. **here** - out of the switcher (`SWITCHER_LOCALES`, read by
+ *    `Header.astro`) and out of search (`isHeldBack`, below);
+ * 2. **`public/_redirects`** - the three `/nl` rules at the top of the file,
+ *    a 302 to the English homepage for every Dutch address;
+ * 3. **`src/middleware.ts`** - the same 302 for the VIP hub's locked tabs,
+ *    which the Worker answers and a `_redirects` rule never reaches.
+ *
+ * `/preview/nl/…` is deliberately untouched: the drafts preview still renders
+ * Dutch, so the retranslation can be read page by page before it goes live.
  */
 // On this branch alone, nothing is held back: the kamindu preview is where
 // the Dutch retranslation is read, switcher button included. On main this
@@ -36,9 +47,9 @@ export const SWITCHER_LOCALES = LOCALES.filter((l) => !HELD_BACK.includes(l.id))
  * A held-back language's pages are also kept out of search: `Base.astro` sends
  * `<meta name="robots" content="noindex">` on them, and because
  * `scripts/sitemap-noindex.mjs` drops every page whose HTML says noindex, they
- * leave the sitemap by the same stroke. The pages still build and still
- * answer - a bookmark or an existing link works - they are simply not
- * advertised while the language is held back.
+ * leave the sitemap by the same stroke. The pages still build - the rules in
+ * `public/_redirects` send the visitor to the English homepage before one of
+ * them is ever served.
  */
 export const isHeldBack = (lang: LocaleId) => HELD_BACK.includes(lang);
 

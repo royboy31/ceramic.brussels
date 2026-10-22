@@ -282,11 +282,12 @@ export const PARTNER_TABS: Record<string, string[]> = {
      Felicie asked for three filters under the title - "institutions",
      "organizations" and "exhibition pass" (2026-10-06). They are the tiers
      themselves, so the tab lists all three and the pills narrow it; a tier
-     with no partner yet simply gives an empty pill. `exhibition-pass` is
-     left on the event tab too, where it has always been listed. */
+     with no partner yet simply gives an empty pill. `exhibition-pass` was
+     listed on the event tab too until the client asked for it to show on
+     institutions alone (2026-10-12). */
   institutions: ['institutional', 'organization', 'exhibition-pass'],
   hotel: ['hotel'],
-  event: ['event', 'supplier', 'exhibition-pass'],
+  event: ['event', 'supplier'],
   media: ['media'],
 };
 

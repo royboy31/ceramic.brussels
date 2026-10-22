@@ -163,6 +163,10 @@ const PERSON = `{
 
 const PARTNER = `{
   _id, name, tier, url, instagram, order,
+  // The "read the interview" button an editor switches on by filling the
+  // link and off with the tick under it (Félicie, 2026-10-14).
+  "interviewLink": interviewLink ${LINK},
+  interviewButtonHidden,
   ${styled('subtitle')},
   ${styled('description')},
   ${styled('currentExhibition')},
