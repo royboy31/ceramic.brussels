@@ -432,6 +432,18 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
   .leave button:focus-visible {
     background: var(--acid);
   }
+  /* Stacked, the frame's rows need air the desktop grid gets from its
+     columns: first-title margins are zeroed to align the two columns, so
+     when the sidebar, the booths band and the next row pile up on a phone
+     they ran into each other (Léonie, 2026-10-22, screenshots - "booths"
+     on the phone number, "transport partner" on the hotel card). */
+  @media (max-width: 999px) {
+    .platform-aside,
+    .platform-band,
+    .platform-row:not(:first-child) {
+      margin-top: 48px;
+    }
+  }
   @media (max-width: 760px) {
     .gate {
       grid-template-columns: 1fr;

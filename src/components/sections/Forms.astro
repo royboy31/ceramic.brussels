@@ -95,10 +95,13 @@ const rows = (section.forms ?? [])
     text-decoration: underline 1px;
     text-underline-offset: 0.12em;
   }
+  /* The body text's own tokens, not a size of its own: Léonie, 2026-10-22
+     (her third screenshot, the pink circles) - the description line read
+     smaller than the rest of the page. */
   .form-text {
-    font-size: clamp(1rem, 1.6vw, 1.4rem);
-    line-height: 1.25;
-    letter-spacing: -0.03em;
+    font-size: var(--body-size, 22px);
+    line-height: var(--body-lh, 30px);
+    letter-spacing: var(--body-ls, -0.03em);
   }
   .form-deadline {
     font-weight: 600;
