@@ -17,6 +17,7 @@ import KeyFigures from './sections/KeyFigures.astro';
 import News from './sections/News.astro';
 import Faq from './sections/Faq.astro';
 import Agenda from './sections/Agenda.astro';
+import Forms from './sections/Forms.astro';
 import Embed from './sections/Embed.astro';
 import ApplicationForm from './sections/ApplicationForm.astro';
 import NewsletterSignup from './sections/NewsletterSignup.astro';
@@ -119,6 +120,8 @@ for (const section of (sections ?? []).filter(Boolean)) {
             return <Faq lang={lang} section={s} />;
           case 'agendaSection':
             return <Agenda lang={lang} section={s} />;
+          case 'formsSection':
+            return <Forms lang={lang} section={s} />;
           case 'embedSection':
             return <Embed lang={lang} section={s} />;
           case 'applicationFormSection':

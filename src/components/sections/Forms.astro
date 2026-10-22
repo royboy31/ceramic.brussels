@@ -1,0 +1,110 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { resolveLink } from '../../lib/links';
+
+/**
+ * The exhibitors platform's forms (Figma 1813:716): per row an underlined
+ * "Form 1 ↗", a line on what it is for and the deadline in bold capitals,
+ * a rule under each. Léonie, 2026-10-21: the whole row turns acid on hover,
+ * as on the artists list, and the arrow keeps its nudge - so the row is the
+ * link. A row whose form has no address yet shows as plain text.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { lang, section } = Astro.props;
+const rows = (section.forms ?? [])
+  .filter(Boolean)
+  .map((f: any) => ({ ...f, resolved: resolveLink(lang, f.link), label: f.link?.label ?? '' }))
+  .filter((f: any) => f.label || f.text || f.deadline);
+---
+
+{
+  rows.length > 0 && (
+    <ul class="forms" id={section.anchor || undefined}>
+      {rows.map((f: any) => {
+        const inner = (
+          <>
+            {f.label && (
+              <span class="form-title">
+                <span class="form-label">{f.label}</span>
+                {f.resolved && (
+                  <>
+                    {' '}
+                    <span class="link-arrow" aria-hidden="true">
+                      {f.resolved.arrow}
+                    </span>
+                  </>
+                )}
+              </span>
+            )}
+            {f.text && <span class="form-text">{f.text}</span>}
+            {f.deadline && <span class="form-deadline">{f.deadline}</span>}
+          </>
+        );
+        return (
+          <li>
+            {f.resolved ? (
+              <a
+                class="form-row"
+                href={f.resolved.href}
+                {...(f.resolved.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              >
+                {inner}
+              </a>
+            ) : (
+              <div class="form-row">{inner}</div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  )
+}
+
+<style>
+  .forms {
+    margin: 0 0 3rem;
+    padding: 0;
+    list-style: none;
+  }
+  .forms li {
+    border-bottom: 1px solid;
+  }
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+    padding: 0.7em 0 0.8em;
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 0.18s;
+  }
+  a.form-row:hover,
+  a.form-row:focus-visible {
+    background: var(--color-acid);
+  }
+  .form-title {
+    font-size: clamp(1.5rem, 2.6vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+  a.form-row .form-label {
+    text-decoration: underline 1px;
+    text-underline-offset: 0.12em;
+  }
+  .form-text {
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    line-height: 1.25;
+    letter-spacing: -0.03em;
+  }
+  .form-deadline {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: clamp(1.1rem, 1.7vw, 24px);
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+</style>

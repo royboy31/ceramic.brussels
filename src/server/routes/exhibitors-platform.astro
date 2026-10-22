@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PageSections from '../../components/PageSections.astro';
+import PortableText from '../../components/PortableText.astro';
 import { type LocaleId, LOCALE_IDS, DEFAULT_LOCALE } from '../../lib/locales';
 import { useTranslations, localePath } from '../../lib/i18n';
 import { PLATFORM_PATH } from '../../lib/exhibitorsPlatform';
@@ -52,9 +53,23 @@ const altPaths = Object.fromEntries(LOCALE_IDS.map((l) => [l, PLATFORM_PATH]));
  * the Sidebar a spacer means "continue below the band", which is what drops
  * the transport partner beside the hotel.
  */
+/**
+ * The frame opens on one line, "On this page, you will find all useful
+ * information…", at the intro size, in place of the locked state's
+ * "exclusively dedicated" line (Léonie, 2026-10-21). The editors already
+ * wrote it as the first block, a text block with no heading, so that block
+ * becomes the intro rather than a second, smaller paragraph under it.
+ */
+const blocks = (page?.sections ?? []).filter(Boolean);
+const first = blocks[0];
+const introBlock =
+  first?._type === 'contentSection' && !first.heading && first.body && !(first.links ?? []).length && !(first.images ?? []).length
+    ? blocks.shift()
+    : null;
+
 type Seg = { cols: any[]; band: any[] };
 const segs: Seg[] = [{ cols: [], band: [] }];
-for (const block of (page?.sections ?? []).filter(Boolean)) {
+for (const block of blocks) {
   const cur = segs[segs.length - 1];
   if (block._type === 'gallerySection') {
     if (cur.band.length === 0 && cur.cols[cur.cols.length - 1]?._type === 'headingSection') {
@@ -85,6 +100,7 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
   noIndex={true}
   editId={entered ? page?._id : undefined}
   editType={entered ? page?._type : undefined}
+  crossBanner={false}
 >
   <div class="band">
     <h1>{t('platform.title')}</h1>
@@ -92,7 +108,7 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
   </div>
 
   <div class="intro">
-    <p>{t('platform.intro', { year })}</p>
+    {entered && introBlock ? <PortableText value={introBlock.body} /> : <p>{t('platform.intro', { year })}</p>}
   </div>
 
   {
@@ -106,7 +122,18 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
             <input type="hidden" name="audience" value="exhibitor" />
             <input type="hidden" name="lang" value={lang} />
             <input type="hidden" name="next" value={here} />
-            <input type="password" name="code" required autocomplete="off" aria-label={t('platform.password')} />
+            {/* Shown as typed (Léonie, 2026-10-21): a gallery's code is
+                read off an email, and the dots hid the typo. */}
+            <input
+              type="text"
+              name="code"
+              required
+              autocomplete="off"
+              autocapitalize="characters"
+              autocorrect="off"
+              spellcheck="false"
+              aria-label={t('platform.password')}
+            />
             <button type="submit">→ {t('platform.enter')}</button>
           </form>
         </div>
@@ -150,7 +177,7 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
         <form class="leave" method="post" action="/api/vip/leave/">
           <input type="hidden" name="audience" value="exhibitor" />
           <input type="hidden" name="lang" value={lang} />
-          <button type="submit">{t('platform.leave')}</button>
+          <button type="submit">← {t('platform.leave')}</button>
         </form>
       </>
     )
@@ -167,23 +194,27 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
     gap: 20px;
     padding: 36px var(--gutter) 0;
   }
+  /* The size every other page's title has (HubNav, ExhibitorHead: 70px,
+     48px on a phone; Léonie, 2026-10-22: it read smaller than the others).
+     A literal, not --band-h1: this band is not sticky, and the token shrinks
+     on scroll, which would move the page under the reader. */
   .band h1 {
     text-transform: lowercase;
     letter-spacing: -0.04em;
-    font-size: clamp(34px, 3.4vw, 54px);
+    font-size: 70px;
     font-weight: 600;
-    line-height: 1.1;
+    line-height: 1;
     margin: 0;
   }
-  /* The site's one pill, as every other button (Base.astro; Tiphaine's
-     feedback 2026-10-20 - the square one-off didn't match). */
+  /* Rectangular, as the buttons at the top of every other page are
+     (HubNav, ExhibitorHead): Léonie, 2026-10-21, after the pill of the
+     20th. Same --band-pill tokens, so it shrinks with the others on scroll. */
   .band .back {
     border: 1px solid var(--ink);
-    border-radius: 999px;
-    padding: var(--pill-pad);
-    font-size: var(--pill-size);
-    line-height: var(--pill-lh);
-    letter-spacing: var(--pill-ls);
+    padding: var(--band-pill-pad, 7px 15px);
+    font-size: var(--band-pill, 24px);
+    line-height: 30px;
+    letter-spacing: -0.045em;
     text-decoration: none;
     white-space: nowrap;
     transition: background-color 0.15s ease;
@@ -195,7 +226,8 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
   .intro {
     padding: 28px var(--gutter) 34px;
   }
-  .intro p {
+  .intro p,
+  .intro :global(.rich-text p) {
     letter-spacing: -0.035em;
     max-width: 1120px;
     font-size: clamp(24px, 2.2vw, 34px);
@@ -209,8 +241,9 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
     padding: 0 var(--gutter) 90px;
     align-items: start;
   }
+  /* The frame's flat #d9d9d9, the grey of the ash pages. */
   .gate .box {
-    background: var(--surface-2, #e5e5e3);
+    background: #d9d9d9;
     padding: 34px 40px 40px;
   }
   .gate .box h2 {
@@ -232,12 +265,17 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
     gap: 16px;
     align-items: center;
   }
-  .gate input[type='password'] {
-    border: 1px solid var(--ink);
+  /* The frame's field: white, square, black edge, 195 x 58. */
+  .gate input[name='code'] {
+    border: 2px solid var(--ink);
+    border-radius: 0;
     background: #fff;
     font: inherit;
-    padding: 12px 14px;
-    width: min(200px, 60%);
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    height: 58px;
+    padding: 0 14px;
+    width: min(195px, 60%);
   }
   .gate button {
     background: var(--ink);
@@ -256,21 +294,36 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
     max-width: none;
     margin-bottom: 18px;
   }
+  /* The site's BOLD & CAPS label and its body text, size and tracking
+     (Léonie, 2026-10-21: the title was smaller than the others, the text
+     smaller and tighter than the body). */
   .gate aside h3 {
     text-transform: uppercase;
-    font-size: 18px;
+    font-size: var(--body-size, 22px);
+    line-height: var(--body-lh, 30px);
     font-weight: 600;
-    margin: 6px 0 8px;
+    letter-spacing: 0;
+    margin: 6px 0 4px;
   }
-  /* "A bit larger" (Tiphaine's feedback 2026-10-20). */
   .gate aside p {
-    font-size: 20px;
-    line-height: 1.4;
+    font-size: var(--body-size, 22px);
+    line-height: var(--body-lh, 30px);
+    letter-spacing: var(--body-ls, -0.03em);
     margin: 0;
   }
   .gate aside a {
     text-decoration: underline;
+    text-decoration-thickness: 1px;
     text-underline-offset: 0.12em;
+  }
+  /* An email address ends in the ↗ every outbound link carries, outside
+     the underline (Léonie, 2026-10-21; the frame's contact block). */
+  .gate aside a[href^='mailto:']::after,
+  .platform-body :global(a[href^='mailto:'])::after {
+    content: '↗';
+    display: inline-block;
+    margin-left: 0.2em;
+    text-decoration: none;
   }
   .empty {
     padding: 10px var(--gutter) 60px;
@@ -298,18 +351,86 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
   .platform-aside {
     min-width: 0;
   }
+
+  /* Two title levels, one look across the page (Léonie, 2026-10-21, with
+     the frame): a section title ("agenda", "useful links", "hotel deal") is
+     the medium bold lowercase line ruled underneath across its column - the
+     .subgroup heading, full column width; a name over a text block ("the
+     hoxton", "tiphaine quéguineur", "embelco") is the BOLD & CAPS label. */
+  .platform-body :global(.group-title) {
+    margin: 3rem 0 1.25rem;
+    padding: 0 0 0.15rem;
+    border-top: 0;
+    /* 2px, the site's rule weight (Vip.astro; Léonie, 2026-10-22). */
+    border-bottom: 2px solid var(--ink);
+    max-width: none;
+    font-size: clamp(1.625rem, 2.5vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+  }
+  .platform-body :global(.page-sections > .group-title:first-child) {
+    margin-top: 0;
+  }
+  .platform-body :global(.panel-title) {
+    margin: 0 0 0.25rem;
+    padding: 0;
+    border: 0;
+    max-width: none;
+    font-size: 24px;
+    line-height: 30px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  /* The hotel offer: a text block with no name over it that ends in a link
+     is the framed card, and the whole card answers the pointer - light grey,
+     the click anywhere following its link - as the rate frame on the VIP
+     hotel tab does (Vip.astro .rate; Léonie's Figma comment, 2026-10-21).
+     Its first line is the BOLD & CAPS label. */
+  .platform-body :global(.sections section:not(:has(.panel-title)):has(.cs-links)) {
+    position: relative;
+    padding: 14px 20px 22px;
+    border: 1px solid var(--ink);
+    transition: background-color 0.18s;
+  }
+  .platform-body :global(.sections section:not(:has(.panel-title)):has(.cs-links):hover),
+  .platform-body :global(.sections section:not(:has(.panel-title)):has(.cs-links):focus-within) {
+    background-color: #d4d4d4;
+  }
+  .platform-body :global(.sections section:not(:has(.panel-title)):has(.cs-links) .cs-links a::after) {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .platform-body :global(.sections section:not(:has(.panel-title)):has(.cs-links) .rich-text > p:first-child) {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
   .leave {
     padding: 0 var(--gutter) 70px;
   }
+  /* The site's pill with the arrow to its left, as "← back to 2027"
+     (Léonie, 2026-10-21: it was a small grey one-off). */
   .leave button {
     background: none;
-    border: 1px solid var(--rule);
+    border: 1px solid var(--ink);
     border-radius: 999px;
     font: inherit;
-    font-size: 14px;
-    padding: 6px 14px;
+    padding: var(--pill-pad);
+    font-size: var(--pill-size);
+    line-height: var(--pill-lh);
+    letter-spacing: var(--pill-ls);
     cursor: pointer;
-    color: var(--ink-2);
+    color: var(--ink);
+    transition: background-color 0.15s ease;
+  }
+  .leave button:hover,
+  .leave button:focus-visible {
+    background: var(--acid);
   }
   @media (max-width: 760px) {
     .gate {
@@ -317,6 +438,11 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
     }
     .band {
       flex-wrap: wrap;
+    }
+  }
+  @media (max-width: 640px) {
+    .band h1 {
+      font-size: 48px;
     }
   }
 </style>

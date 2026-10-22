@@ -225,6 +225,7 @@ half-width blocks side by side); everything else is one block, one component.
 | Key figures | `keyFiguresSection` | `sections/KeyFigures.astro` | `image`, `link`, `edition.keyFigures` (resolved) |
 | Latest news | `newsSection` | `sections/News.astro` | `count`, `heading`, `items[]` (resolved) |
 | FAQ | `faqSection` | `sections/Faq.astro` | `heading`, `items[]{question, answer}` |
+| Forms | `formsSection` | `sections/Forms.astro` | `forms[]{link, text, deadline}` - the exhibitors platform's form rows |
 | Embed | `embedSection` | `sections/Embed.astro` | `url`, `height`, `heading` |
 
 Every block also has `anchor` (render it as the section `id`) and `hidden`

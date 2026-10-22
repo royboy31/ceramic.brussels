@@ -338,6 +338,14 @@ const SECTION_FIELDS = `{
       "link": link ${LINK}
     }
   },
+  _type == "formsSection" => {
+    "forms": forms[]{
+      _key,
+      "link": link ${LINK},
+      "text": ${localised('text')},
+      "deadline": ${localised('deadline')}
+    }
+  },
   _type == "embedSection" => {
     url, height,
     ${styled('heading')}
