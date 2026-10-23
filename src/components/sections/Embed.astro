@@ -1,19 +1,29 @@
 ---
 import type { LocaleId } from '../../lib/locales';
 import { styleAttrs } from '../../lib/textStyle';
+import { useTranslations } from '../../lib/i18n';
+import LinkPill from '../LinkPill.astro';
 
 /**
  * A map, a form, a ticket widget: an https address in a frame. The schema
  * only accepts an address, never markup, so nothing here is injected HTML.
+ * An uploaded file on the block becomes a download button under the frame
+ * (the exhibitor guide PDF; Tiphaine, 2026-10-23) - the Sanity CDN's ?dl=
+ * makes the click save the file under its own name instead of opening it.
  */
 interface Props {
   lang: LocaleId;
   section: any;
 }
 
-const { section } = Astro.props;
+const { lang, section } = Astro.props;
+const t = useTranslations(lang);
 const url = typeof section.url === 'string' && /^https:\/\//i.test(section.url) ? section.url : null;
 const height = Math.min(Math.max(Number(section.height) || 600, 100), 3000);
+const downloadHref = section.downloadUrl
+  ? `${section.downloadUrl}?dl=${encodeURIComponent(section.downloadName ?? 'download')}`
+  : null;
+const downloadLabel = section.downloadLabel || t('embed.download');
 ---
 
 {
@@ -33,6 +43,11 @@ const height = Math.min(Math.max(Number(section.height) || 600, 100), 3000);
         allow="fullscreen; geolocation; payment"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
       />
+      {downloadHref && (
+        <p class="embed-download">
+          <LinkPill lang={lang} href={downloadHref} label={downloadLabel} external={false} preserveCase={!!section.downloadLabel} />
+        </p>
+      )}
     </section>
   )
 }
@@ -62,6 +77,8 @@ const height = Math.min(Math.max(Number(section.height) || 600, 100), 3000);
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = (e.target as Element).closest?.('a[href]') as HTMLAnchorElement | null;
     if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    // The block's own download pill saves a file and never leaves the page.
+    if (a.closest('.embed-download')) return;
     if (!/^https?:$/.test(a.protocol)) return;
     // A same-document jump (an anchor on this page) adds its own entry
     // after ours and must not be rerouted.
@@ -88,6 +105,9 @@ const height = Math.min(Math.max(Number(section.height) || 600, 100), 3000);
 <style>
   .embed {
     margin: 0 0 3rem;
+  }
+  .embed-download {
+    margin: 1.25rem 0 0;
   }
   iframe {
     display: block;

@@ -330,6 +330,7 @@ const STRINGS = {
     'platform.forgotText': 'Please write to {name} at {email}',
     'platform.leave': 'leave the platform',
     'platform.empty': 'The exhibitor information will be published here shortly.',
+    'embed.download': 'Download',
   },
   fr: {
     'nav.exhibitors': 'Exposant·es',
@@ -653,6 +654,7 @@ const STRINGS = {
     'platform.forgotText': 'Écrivez à {name} : {email}',
     'platform.leave': 'quitter la plateforme',
     'platform.empty': 'Les informations pour les exposant·es seront publiées ici prochainement.',
+    'embed.download': 'Télécharger',
   },
   nl: {
     'nav.exhibitors': 'Exposanten',
@@ -975,6 +977,7 @@ const STRINGS = {
     'platform.forgotText': 'Schrijf naar {name}: {email}',
     'platform.leave': 'het platform verlaten',
     'platform.empty': 'De informatie voor exposanten verschijnt hier binnenkort.',
+    'embed.download': 'Downloaden',
   },
 } as const;
 
