@@ -798,9 +798,21 @@ export const embedSection = defineType({
     defineField({
       name: 'url',
       title: 'Address to embed',
-      type: 'url',
-      validation: (rule) => rule.required().uri({ scheme: ['https'] }),
-      description: 'The https address of the map, form or widget. Only the address - not an <iframe> tag.',
+      // Per language since 2026-10-23: the exhibitor guide flipbook exists in
+      // French and English, and one shared address showed the same book on
+      // both (Tiphaine). An empty language falls back to English, so a map or
+      // form that is the same everywhere only needs its English field filled.
+      type: 'localeString',
+      validation: (rule) =>
+        rule.custom((value: Record<string, unknown> | undefined) => {
+          if (!value || typeof value === 'string') return true;
+          for (const [k, v] of Object.entries(value)) {
+            if (k.startsWith('_') || k === 'style' || !v) continue;
+            if (typeof v === 'string' && !/^https:\/\//i.test(v.trim())) return `The ${k.toUpperCase()} address must start with https://`;
+          }
+          return true;
+        }),
+      description: 'The https address of the map, form or widget. Only the address - not an <iframe> tag. Switch language to give the French or Dutch page its own address; empty languages use the English one.',
     }),
     defineField({
       name: 'height',
@@ -813,8 +825,11 @@ export const embedSection = defineType({
     hiddenField(),
   ],
   preview: {
-    select: { heading: 'heading.en', url: 'url', hidden: 'hidden' },
-    prepare: ({ heading, url, hidden }) => ({ title: heading ?? url ?? '(embed)', subtitle: sectionSubtitle('Embed', hidden) }),
+    select: { heading: 'heading.en', url: 'url.en', legacyUrl: 'url', hidden: 'hidden' },
+    prepare: ({ heading, url, legacyUrl, hidden }) => ({
+      title: heading ?? url ?? (typeof legacyUrl === 'string' ? legacyUrl : undefined) ?? '(embed)',
+      subtitle: sectionSubtitle('Embed', hidden),
+    }),
   },
 });
 

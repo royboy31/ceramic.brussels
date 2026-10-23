@@ -347,7 +347,10 @@ const SECTION_FIELDS = `{
     }
   },
   _type == "embedSection" => {
-    url, height,
+    // Localised since 2026-10-23 (the FR exhibitor guide is its own book);
+    // the bare url at the end keeps embeds saved as a plain string working
+    // until the migration wraps them.
+    "url": coalesce(url[$lang], url.${DEFAULT_LOCALE}, url), height,
     ${styled('heading')}
   }
 }`;
