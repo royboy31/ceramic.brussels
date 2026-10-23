@@ -302,6 +302,22 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     {!preview && <CookieConsent lang={lang} />}
 
     <script>
+      // The other half of Embed.astro's history rewind: when leaving a page
+      // whose embedded viewer wrote history entries, the exit rewinds over
+      // them before navigating, and an overshot rewind can land here instead
+      // of on the link's target. The target waits in sessionStorage; carry
+      // the visitor on to it. The flag is set only in the moment of such an
+      // exit, so on every ordinary view this is a no-op.
+      addEventListener('pageshow', () => {
+        const target = sessionStorage.getItem('cb-embed-exit');
+        if (target) {
+          sessionStorage.removeItem('cb-embed-exit');
+          if (target !== location.href) location.replace(target);
+        }
+      });
+    </script>
+
+    <script>
       // The design's page behaviours, as built (html pages): the trailing
       // arrow of a link becomes a span that slides on hover; key figures
       // count up when they scroll into view; sections and images below the

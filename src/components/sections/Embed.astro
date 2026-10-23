@@ -37,6 +37,54 @@ const height = Math.min(Math.max(Number(section.height) || 600, 100), 3000);
   )
 }
 
+<script>
+  // An embedded viewer can write to the tab's history: FlipHTML5 pushes one
+  // session-history entry per page flip, so after reading the guide, Back
+  // from the next page steps through the book again - and Safari surfaces
+  // the viewer's own URL as a full page (Tiphaine, 2026-10-23, screen
+  // recording). A cross-origin frame's entries can neither be prevented
+  // (tested: <object> embeds and removing the iframe both keep them) nor
+  // read, only traversed. So leaving through a link rewinds first: the
+  // entries added since this page loaded are stepped back over, then the
+  // click's navigation truncates them from the stack. The count is a
+  // heuristic - a visitor who un-flipped with the Back button makes it
+  // overshoot - so the target is parked in sessionStorage and Base.astro
+  // finishes the journey from whatever page a rewind lands on.
+  const KEY = 'cb-embed-exit';
+  let base = history.length;
+  addEventListener('pageshow', (e) => {
+    // After a bfcache restore the old count may include entries that are
+    // now ahead of us; starting over can only undercount, which just means
+    // a shorter rewind - never an overshoot.
+    if ((e as PageTransitionEvent).persisted) base = history.length;
+  });
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = (e.target as Element).closest?.('a[href]') as HTMLAnchorElement | null;
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    if (!/^https?:$/.test(a.protocol)) return;
+    // A same-document jump (an anchor on this page) adds its own entry
+    // after ours and must not be rerouted.
+    if (a.pathname === location.pathname && a.search === location.search && a.hash) return;
+    const extra = history.length - base;
+    if (extra <= 0) return;
+    e.preventDefault();
+    const href = a.href;
+    sessionStorage.setItem(KEY, href);
+    history.go(-extra);
+    setTimeout(() => {
+      // Still here with the flag unclaimed: the rewind stayed on this page
+      // (the usual case) - navigate, truncating the viewer's entries. An
+      // overshoot landed elsewhere and Base.astro consumed the flag; if this
+      // page is ever revived from bfcache, the timer must then do nothing.
+      if (sessionStorage.getItem(KEY) === href) {
+        sessionStorage.removeItem(KEY);
+        location.assign(href);
+      }
+    }, 180);
+  });
+</script>
+
 <style>
   .embed {
     margin: 0 0 3rem;
