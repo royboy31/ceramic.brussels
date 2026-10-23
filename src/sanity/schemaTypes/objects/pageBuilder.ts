@@ -821,6 +821,20 @@ export const embedSection = defineType({
       initialValue: 600,
       validation: (rule) => rule.min(100).max(3000),
     }),
+    defineField({
+      name: 'download',
+      title: 'Downloadable file',
+      type: 'localeFile',
+      description:
+        'Upload a file (the exhibitor guide PDF, say) and a download button appears under the embed. Switch language to upload the French or Dutch version; empty languages offer the English file.',
+    }),
+    defineField({
+      name: 'downloadLabel',
+      title: 'Download button label',
+      type: 'localeString',
+      description: 'The button’s text, e.g. "download the guide". Empty shows plain "download".',
+      hidden: ({ parent }) => !parent?.download,
+    }),
     anchorField(),
     hiddenField(),
   ],

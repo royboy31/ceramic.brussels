@@ -351,6 +351,9 @@ const SECTION_FIELDS = `{
     // the bare url at the end keeps embeds saved as a plain string working
     // until the migration wraps them.
     "url": coalesce(url[$lang], url.${DEFAULT_LOCALE}, url), height,
+    "downloadUrl": coalesce(download[$lang].asset->url, download.${DEFAULT_LOCALE}.asset->url),
+    "downloadName": coalesce(download[$lang].asset->originalFilename, download.${DEFAULT_LOCALE}.asset->originalFilename),
+    "downloadLabel": ${localised('downloadLabel')},
     ${styled('heading')}
   }
 }`;
