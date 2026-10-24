@@ -73,6 +73,19 @@ const downloadLabel = section.downloadLabel || t('embed.download');
     // a shorter rewind - never an overshoot.
     if ((e as PageTransitionEvent).persisted) base = history.length;
   });
+
+  // Rewind the viewer's entries, then run the exit. The traversal gives no
+  // completion event when it stays on this page (only the iframe moves), so
+  // the exit runs on a timer - long enough for Safari to finish the jump,
+  // or the navigation starts from the un-rewound spot and the entries
+  // survive truncation, which is exactly the bug (Tiphaine, 2026-10-23
+  // evening: Back after a language change still landed on the flipbook).
+  // An overshoot lands on an earlier page and the timer dies with this one.
+  const rewindThen = (extra: number, exit: () => void) => {
+    history.go(-extra);
+    setTimeout(exit, 400);
+  };
+
   document.addEventListener('click', (e) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = (e.target as Element).closest?.('a[href]') as HTMLAnchorElement | null;
@@ -88,8 +101,7 @@ const downloadLabel = section.downloadLabel || t('embed.download');
     e.preventDefault();
     const href = a.href;
     sessionStorage.setItem(KEY, href);
-    history.go(-extra);
-    setTimeout(() => {
+    rewindThen(extra, () => {
       // Still here with the flag unclaimed: the rewind stayed on this page
       // (the usual case) - navigate, truncating the viewer's entries. An
       // overshoot landed elsewhere and Base.astro consumed the flag; if this
@@ -98,7 +110,23 @@ const downloadLabel = section.downloadLabel || t('embed.download');
         sessionStorage.removeItem(KEY);
         location.assign(href);
       }
-    }, 180);
+    });
+  });
+
+  // The platform's "back to all exhibitors" is a form POST (/api/vip/leave/),
+  // not a link, so it slipped past the click handler and left every flip in
+  // the stack: Back from the exhibitors list stepped into the flipbook
+  // (Tiphaine, 2026-10-23). Same rewind; the submit is re-issued once the
+  // stack is clean (submit() skips this listener, so no loop). On an
+  // overshoot the timer dies with the page and the visitor simply stays one
+  // step earlier, still signed in - the gentler failure.
+  document.addEventListener('submit', (e) => {
+    if (e.defaultPrevented) return;
+    const form = e.target as HTMLFormElement;
+    const extra = history.length - base;
+    if (extra <= 0) return;
+    e.preventDefault();
+    rewindThen(extra, () => form.submit());
   });
 </script>
 
