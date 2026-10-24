@@ -6,9 +6,11 @@ import {
   HighlightIcon,
   MutedIcon,
   InverseIcon,
+  SupIcon,
   HighlightDecorator,
   MutedDecorator,
   InverseDecorator,
+  SupDecorator,
   LeadStyle,
   SmallStyle,
 } from '../../components/richTextMarks';
@@ -67,6 +69,8 @@ export const richTextBlock = defineArrayMember({
       { title: 'Underline', value: 'underline' },
       { title: 'Strike', value: 'strike-through' },
       { title: 'Code', value: 'code' },
+      // m² and the like (Léonie, 2026-10-21: exponents in body text).
+      { title: 'Superscript', value: 'sup', icon: SupIcon, component: SupDecorator },
       { title: 'Highlight', value: 'highlight', icon: HighlightIcon, component: HighlightDecorator },
       { title: 'Muted', value: 'muted', icon: MutedIcon, component: MutedDecorator },
       { title: 'Inverse', value: 'inverse', icon: InverseIcon, component: InverseDecorator },
