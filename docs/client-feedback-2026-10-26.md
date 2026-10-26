@@ -37,19 +37,19 @@ right for every year.
 | :-- | :-- | :-- | :-- |
 | 1 | overview | "make this button rectangle, not pill-shaped" — the footer's `← back to 2027` | `Footer.astro`, `.footer-back` |
 | 2 | overview | "move the credits next to the « back to 2027 » button, on its right … same size as on ceramic basel website" | `Footer.astro`, `.has-back .footer-credit` — left-aligned, and ceramic-basel's own credit clamp |
-| 3 | overview | "thinner underline, see Figma" on the highlights links | `Overview.astro`, 1px |
+| 3 | overview | "thinner underline, see Figma" on the highlights links | `Overview.astro`, **2px**, measured off node `1448:607` |
 | 4 | overview | "make these 2 photos a slideshow, same as on guest of honour's « about » page, with 5 photos" | `Overview.astro` — the pair is now one `Slideshow` of up to five, two in view at a time |
-| 5 | year band | "all these caps titles could be a little bit bigger" | `YearBand.astro`, 16 → 20px (14 → 16 on a phone) |
+| 5 | year band | "all these caps titles could be a little bit bigger" | `YearBand.astro`, 16 → **24px**, the frame's own size (node `1462:1889`); 14 → 18 on a phone |
 | 6 | exhibitors | filter buttons transparent, not white | `ExhibitorsListing.astro` |
 | 7 | exhibitors | the heading read "exhibitors 2026 2025" | `ExhibitorHead.astro` — the menu label's own year is dropped before the page's is added |
 | 8 | exhibitors | individual gallery pages grey, like the rest of the section | `[year]/[slug].astro`, `theme="ash"` on an archived year |
 | 9 | exhibitors | no "artists"/"awards" on those pages; "galleries" becomes "← back to all exhibitors" | `ExhibitorHead.astro`, one pill behind the `archive` prop; the string is `exhibitors.backToAll` in all three locales |
-| 10 | art prize | "make underline thinner for the laureates names" | `ArtPrize.astro`, 1px |
+| 10 | art prize | "make underline thinner for the laureates names" | `ArtPrize.astro`, **2px**, measured off node `1457:1403` |
 | 11 | art prize | "the sentence under each award should be body-text size" | `ArtPrize.astro`, `--body-*` |
 | 12 | art prize | jury roles "the same text-style as all the other bold & caps ones throughout the website" | `ArtPrize.astro` `.role` — body size, 600, no extra tracking |
 | 13 | art prize | jury instagram/website buttons "bigger, just like they are on the rest of the website" | `ArtPrize.astro` — the 15px override dropped, so `.pill`'s site tokens apply |
 | 14 | norway focus | "when there's a link, the highlight should be black and the text white, and not yellow, to respect the « grey & black » codes of this section" | `PreviousEdition.astro`, keyed on `body.ash-page`, both mark/link nestings |
-| 15 | norway focus | "underline thinner" on the galleries list | `Focus.astro`, 1px |
+| 15 | norway focus | "underline thinner" on the galleries list | `Focus.astro`, **2px**, as the other two |
 | 16 | norway focus | "the text explaining every talk should be body-text size" | `Focus.astro` `.talk .body` |
 | 17 | norway focus | "« speakers » and « Moderator » subtitles should be the same style as the other bold & caps subtitles" | `Focus.astro` `.tag` |
 | 18 | publication | "remove the « publication » button underneath the inserted publication" | `Publication.astro` |
@@ -60,6 +60,27 @@ languages checked for its heading, its grey ground, its single pill, that
 pill's left arrow and its href — 603 pages, with the landing year's 201
 checked for the opposite. `npm run build` clean: 398 pages with the flag
 off, 800 with it on.
+
+## Checked against the Figma frames
+
+She wrote "see Figma" on the underline, so the frames were measured rather
+than guessed (`Previous editions` on page `0:1`; overview `1405:650`, art
+prize `1457:1217`).
+
+| What | The frame says | What we do |
+| :-- | :-- | :-- |
+| Underlines | **2px** solid under both the 32px highlights and the 40px laureates | 2px. 1px, tried first, was half the design; the browser's `auto` is about half again as thick, which is what she was looking at |
+| Year band caps | Noi Grotesk Fix **24** | 24px |
+| `← back to 2027` | 166 × 37, **corner radius 0**, 1px inside stroke | `border-radius: 0` |
+| The footer credit | **not in the frame at all** | which is why she gave ceramic-basel as the size reference, and why that site's own clamp is what we use |
+| The overview pictures | `Frame 3`, 2052 wide inside a 1440 frame: three 670 × 447 pictures at x 0 / 710 / 1429 — a row that runs off the right edge | a slideshow with 40px gaps and slides at `(100% - 40px) / 2`, which is 670 at the section's width. The frame *is* a two-up scrolling row |
+| Jury roles | the shared text style **"Body — CAPS BOLD · 24/30"** | the site's own bold & caps, 22/30 — she asked for "the same text-style as all the other bold & caps ones throughout the website", and the site's body is 22px. The 2px gap to the frame is site-wide and predates this round |
+| Award sentences | 24px | `var(--body-size)` = 22px, same reason |
+| Jury instagram/website | 129 × 31, smaller than the site's pill | the site's `--pill` tokens: she asked for "bigger, just like they are on the rest of the website", which overrides the frame |
+| Laureates list | 40px on a 62.7px pitch | ours is 36px on ~51px. **Not flagged by her**, left alone, noted here |
+
+There is no frame for an individual gallery page in the section, so items 7
+to 9 are her words alone.
 
 ## Not code — content, for an editor or a migration
 
