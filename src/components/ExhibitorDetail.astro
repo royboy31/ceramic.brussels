@@ -32,11 +32,18 @@ interface Props {
   listPath: string;
   /** Past editions put their year after the heading. */
   year?: number;
+  /**
+   * Reached through the previous-editions section: the band becomes one
+   * "back to all exhibitors" pill and the page is drawn on that section's
+   * grey ground. Decided by the route, which knows which year `/exhibitors`
+   * itself lands on.
+   */
+  archive?: boolean;
   /** The edition, for the catalogue tab. */
   edition?: any;
 }
 
-const { lang, exhibitor, listPath, year, edition } = Astro.props;
+const { lang, exhibitor, listPath, year, archive = false, edition } = Astro.props;
 const t = useTranslations(lang);
 
 const images: any[] = (exhibitor.images ?? []).filter((i: any) => i?.asset);
@@ -83,7 +90,7 @@ const bioLeft = bio.slice(0, split);
 const bioRight = bio.slice(split);
 ---
 
-<ExhibitorHead lang={lang} active="galleries" edition={edition} year={year} alphabet activeLetter={initial} letterHref={listPath} />
+<ExhibitorHead lang={lang} active="galleries" edition={edition} year={year} archive={archive} alphabet activeLetter={initial} letterHref={listPath} />
 
 <article class="detail">
   <figure>

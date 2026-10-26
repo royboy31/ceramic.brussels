@@ -2,7 +2,6 @@
 import type { LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
 import { editionTabPath } from '../lib/previousEditions';
-import { PAST_EDITIONS_PUBLIC } from './launch';
 import { getNavigation } from '../lib/queries';
 import { PLATFORM_PATH } from '../lib/exhibitorsPlatform';
 import { stegaClean } from '@sanity/client/stega';
@@ -30,6 +29,13 @@ interface Props {
   edition?: any;
   /** A past edition's list or exhibitor: the year joins the title and the galleries tab points at that year. */
   year?: number;
+  /**
+   * This page belongs to the previous-editions section, so the band is one
+   * "back to all exhibitors" pill. The route decides it, because only the
+   * route knows which year `/exhibitors` lands on - that year's galleries
+   * are the current list's and keep the full band (see `[year]/[slug].astro`).
+   */
+  archive?: boolean;
   /** Draw the A–Z row. */
   alphabet?: boolean;
   /** The letter to mark: none on a list, the exhibitor's initial on a detail page. */
@@ -45,7 +51,7 @@ interface Props {
   bandless?: boolean;
 }
 
-const { lang, active, edition, year, alphabet = false, activeLetter = '', letterHref, bandless = false } = Astro.props;
+const { lang, active, edition, year, archive = false, alphabet = false, activeLetter = '', letterHref, bandless = false } = Astro.props;
 const t = useTranslations(lang);
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -53,15 +59,13 @@ const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 // since 2026-10-01; this year's is /exhibitors. With the section off for the
 // launch there is only this year's, so the tab leads there whatever year the
 // gallery belongs to.
-const listPath = year && PAST_EDITIONS_PUBLIC ? editionTabPath(year, 'exhibitors', lang) : 'exhibitors';
 /**
- * Whether this page belongs to the **previous-editions section** - a past
- * year's gallery, reached from that section's exhibitors tab. The same test
- * `listPath` makes: with the section off for the launch, `/exhibitors/<year>`
- * pages are the landing year's and are ordinary current-edition pages, which
- * is why the year alone is not enough.
+ * Where "galleries" leads. Inside the section it is that year's tab; on the
+ * landing year's pages, and while the section is off, it is `/exhibitors`.
+ * `archive` already carries both conditions, so this follows it.
  */
-const inPastSection = !!year && PAST_EDITIONS_PUBLIC;
+const listPath = archive && year ? editionTabPath(year, 'exhibitors', lang) : 'exhibitors';
+const inPastSection = archive && !!year;
 /**
  * Inside the section the band carries **one** pill, pointing back to that
  * year's list: "the « artists » and « awards » buttons aren't there. The

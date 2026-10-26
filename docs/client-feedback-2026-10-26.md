@@ -13,12 +13,23 @@ which it does by construction: the seven tabs are one set of components
 rendering any year (`docs/previous-editions-plan.md`).
 
 **The section is still off for the public** (`PAST_EDITIONS_PUBLIC` in
-`src/components/launch.ts`). These changes are in place for when it comes
-back; nothing here reaches a live page while it is false. The three items
-that depend on it — the grey gallery pages, their one back pill and the
-"exhibitors 2025" heading — are gated on the same flag, so today's
-`/exhibitors/<year>/<slug>` pages, which serve the landing year, are
-untouched.
+`src/components/launch.ts`), and on for the branch it is reviewed on. These
+changes are in place for when it comes back; nothing here reaches a live
+page while the flag is false on main.
+
+**Two of the items are gated on more than the flag.** The grey ground and
+the one back pill apply to a gallery of an **archived** year, which is not
+the same as any year-numbered address. 2027 is the current edition but does
+not show its galleries yet, so `/exhibitors` is 2026's list and its cards
+link to `/exhibitors/2026/<slug>`. Those are the pages a reader means by
+"the current edition pages" — the very thing the grey is meant to tell them
+apart from — and greying them would also strand them, since the one pill
+leads into a section they never entered. So `[year]/[slug].astro` compares
+the year against `exhibitorEditions(editions).landingYear` and passes
+`archive` down: 2026 keeps its white page and its full band, 2025 and 2024
+are the archive. When 2027 opens its exhibitors the landing year moves with
+it and 2026 joins them, with no edit. The heading fix is not gated — it is
+right for every year.
 
 ## Done
 
@@ -31,8 +42,8 @@ untouched.
 | 5 | year band | "all these caps titles could be a little bit bigger" | `YearBand.astro`, 16 → 20px (14 → 16 on a phone) |
 | 6 | exhibitors | filter buttons transparent, not white | `ExhibitorsListing.astro` |
 | 7 | exhibitors | the heading read "exhibitors 2026 2025" | `ExhibitorHead.astro` — the menu label's own year is dropped before the page's is added |
-| 8 | exhibitors | individual gallery pages grey, like the rest of the section | `[year]/[slug].astro`, `theme="ash"` |
-| 9 | exhibitors | no "artists"/"awards" on those pages; "galleries" becomes "← back to all exhibitors" | `ExhibitorHead.astro`, one pill; the string is `exhibitors.backToAll` in all three locales |
+| 8 | exhibitors | individual gallery pages grey, like the rest of the section | `[year]/[slug].astro`, `theme="ash"` on an archived year |
+| 9 | exhibitors | no "artists"/"awards" on those pages; "galleries" becomes "← back to all exhibitors" | `ExhibitorHead.astro`, one pill behind the `archive` prop; the string is `exhibitors.backToAll` in all three locales |
 | 10 | art prize | "make underline thinner for the laureates names" | `ArtPrize.astro`, 1px |
 | 11 | art prize | "the sentence under each award should be body-text size" | `ArtPrize.astro`, `--body-*` |
 | 12 | art prize | jury roles "the same text-style as all the other bold & caps ones throughout the website" | `ArtPrize.astro` `.role` — body size, 600, no extra tracking |
@@ -43,8 +54,12 @@ untouched.
 | 17 | norway focus | "« speakers » and « Moderator » subtitles should be the same style as the other bold & caps subtitles" | `Focus.astro` `.tag` |
 | 18 | publication | "remove the « publication » button underneath the inserted publication" | `Publication.astro` |
 
-Checked on `astro dev` with the flag temporarily on, every tab of 2025, EN and
-FR; `npm run build` clean at 398 pages with the flag back off.
+Verified against the **built** output, not the dev server: every rule above
+found in `dist`'s CSS, and every archived gallery page in all three
+languages checked for its heading, its grey ground, its single pill, that
+pill's left arrow and its href — 603 pages, with the landing year's 201
+checked for the opposite. `npm run build` clean: 398 pages with the flag
+off, 800 with it on.
 
 ## Not code — content, for an editor or a migration
 
