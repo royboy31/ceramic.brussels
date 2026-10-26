@@ -44,17 +44,31 @@ if (!exhibitor) return Astro.rewrite('/404');
 const edition = editions.find((e: any) => e.year === year) ?? null;
 
 /**
- * A gallery of a previous edition wears that section's grey ground: "make
- * each of the individual gallery pages grey like the rest of the « previous
- * editions » section of the website, so that the user completely understands
- * they're in that part of the website and not consulting the current edition
- * pages" (Léonie, 2026-10-26).
+ * A gallery the reader reached through the **previous-editions section**
+ * wears that section's grey ground and its one way back: "make each of the
+ * individual gallery pages grey like the rest of the « previous editions »
+ * section of the website, so that the user completely understands they're in
+ * that part of the website and not consulting the current edition pages"
+ * (Léonie, 2026-10-26).
  *
- * The same test `ExhibitorHead` makes for its one back pill, and for the
- * same reason: with the section off for the launch these addresses serve the
- * landing year, which *is* the current list, and must stay white.
+ * Two conditions, not one:
+ *
+ * - the section has to be **on**. While it is off for the launch these
+ *   addresses are all the site has, and they are the current list's.
+ * - the year must not be the one **`/exhibitors` itself lands on**. 2027 is
+ *   the current edition but does not show its galleries yet, so `/exhibitors`
+ *   is 2026's list and its cards link here, to `/exhibitors/2026/<slug>`.
+ *   Those pages are what a reader means by "the current edition pages" - the
+ *   very thing the grey is meant to tell them apart from - and greying them
+ *   would also strand them, since the one pill leads into the section they
+ *   never entered. 2026 keeps its white page and its full band; 2025 and
+ *   2024 are the archive. When 2027 opens its exhibitors the landing year
+ *   moves with it and 2026 joins them, with no edit here.
  */
-const inPastSection = PAST_EDITIONS_PUBLIC;
+const { landingYear } = exhibitorEditions(editions);
+const archive = PAST_EDITIONS_PUBLIC && year !== landingYear;
+/** That edition's list: the section's tab for an archived year, `/exhibitors` for the landing one. */
+const listPath = archive ? editionTabPath(year, 'exhibitors', lang) : 'exhibitors';
 ---
 
 <Base
@@ -66,12 +80,13 @@ const inPastSection = PAST_EDITIONS_PUBLIC;
   path={`exhibitors/${year}/${slug}`}
   editId={exhibitor._id}
   editType={exhibitor._type}
-  theme={inPastSection ? 'ash' : 'default'}
+  theme={archive ? 'ash' : 'default'}
 >
   <ExhibitorDetail
     lang={lang}
     exhibitor={exhibitor}
-    listPath={PAST_EDITIONS_PUBLIC ? editionTabPath(year, 'exhibitors', lang) : 'exhibitors'}
+    listPath={listPath}
+    archive={archive}
     year={year}
     edition={edition}
   />
