@@ -137,6 +137,8 @@ for (const s of siblings) if (!byName.has(norm(s.name))) byName.set(norm(s.name)
 
 const plans = [];
 const unresolved = [];
+/** Records carrying a link paragraph the pills already replace, flag or no flag. */
+const strippables = [];
 let prose = 0;
 
 for (const r of rows) {
@@ -173,14 +175,33 @@ for (const r of rows) {
   if (found.instagram && !r.instagram) set.instagram = found.instagram;
   if (found.website && !r.website) set.website = found.website;
 
-  if (Object.keys(set).length) plans.push({ ...r, set, source, evidence, sibling });
-  else unresolved.push(r);
+  /**
+   * The link paragraph may only go once the pills can stand in its place -
+   * either this run is setting the fields, or an earlier one already did.
+   * Without that guard a second pass would delete the only copy of a handle
+   * it had never saved anywhere.
+   *
+   * It is also why `strippable` is tracked apart from `set`: the first run
+   * filled the fields, so on every run after it `set` is empty and the
+   * record would otherwise drop out of the plan with its paragraph still
+   * there (which is exactly what happened on 2026-10-27).
+   */
+  const strippable =
+    Object.keys(evidence).length > 0 &&
+    Boolean(r.instagram ?? set.instagram ?? r.website ?? set.website);
+  if (strippable) strippables.push(r._id);
+
+  if (Object.keys(set).length || (STRIP && strippable)) {
+    plans.push({ ...r, set, source, evidence, sibling, strippable });
+  } else unresolved.push(r);
 }
 
 /* ------------------------------------------------------------------ report */
 
+const toFill = plans.filter((p) => Object.keys(p.set).length);
 console.log(`\nPast exhibitor records (${YEARS.join(', ')}): ${rows.length}`);
-console.log(`  would be filled : ${plans.length}`);
+console.log(`  fields to fill  : ${toFill.length}`);
+console.log(`  paragraphs to remove (--strip-bio): ${strippables.length}`);
 console.log(`  left untouched  : ${unresolved.length}`);
 console.log(`  bios naming artists in prose (NOT touched): ${prose}\n`);
 
@@ -196,9 +217,9 @@ for (const p of plans.slice(0, SHOW)) {
 }
 if (plans.length > SHOW) console.log(`\n… and ${plans.length - SHOW} more (SHOW=all to list)`);
 
-const stripCount = plans.filter((p) => Object.keys(p.evidence).length).length;
 console.log(
-  `\n--strip-bio would remove the link paragraph from ${stripCount} record(s), in every language it appears.`,
+  `\n--strip-bio removes the link paragraph from ${strippables.length} record(s), in every language it appears,` +
+    ' and only where the pills already carry the same handle or address.',
 );
 
 if (unresolved.length) {
@@ -218,7 +239,7 @@ if (!APPLY) {
    first. The file is enough to put any paragraph back by hand. */
 if (STRIP) {
   const backup = plans
-    .filter((p) => Object.keys(p.evidence).length)
+    .filter((p) => p.strippable)
     .map((p) => ({ _id: p._id, name: p.name, year: p.year, removed: p.evidence }));
   const dir = path.join(ROOT, 'legacy-export', 'backups');
   fs.mkdirSync(dir, { recursive: true });
@@ -230,8 +251,9 @@ if (STRIP) {
 let tx = client.transaction();
 let n = 0;
 for (const p of plans) {
-  let patch = client.patch(p._id).set(p.set);
-  if (STRIP) {
+  let patch = client.patch(p._id);
+  if (Object.keys(p.set).length) patch = patch.set(p.set);
+  if (STRIP && p.strippable) {
     for (const [loc, ev] of Object.entries(p.evidence)) {
       patch = patch.unset([`bio.${loc}[_key=="${ev.key}"]`]);
     }
