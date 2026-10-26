@@ -288,10 +288,12 @@ const highlights = (edition.highlights ?? [])
     line-height: 1.15;
     letter-spacing: -0.035em;
     text-decoration: underline;
-    /* The site's 1px line, not the browser's own, which at this size drew a
-       rule under every highlight ("thinner underline, see Figma", Léonie,
-       2026-10-26). Same value as a.text-link and the menu. */
-    text-decoration-thickness: 1px;
+    /* Measured off the frame, not guessed: "thinner underline, see Figma"
+       (Léonie, 2026-10-26), and Figma draws 2px under this 32px list
+       (node 1448:607, two solid rows at 1440). The browser's own `auto` is
+       half again as thick at this size, which is what she was looking at;
+       1px, tried first, was half the design. */
+    text-decoration-thickness: 2px;
     text-underline-offset: 0.16em;
   }
 

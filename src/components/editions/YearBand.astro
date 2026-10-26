@@ -62,9 +62,11 @@ const t = useTranslations(lang);
     justify-content: center;
     min-height: 53px;
     padding: 6px 12px;
-    /* 16px until 2026-10-26 - "all these caps titles could be a little bit
-       bigger" (Léonie), so one notch up rather than a new size. */
-    font-size: 20px;
+    /* 24px, the frame's own size (node 1462:1889, Noi Grotesk Fix 24) -
+       "all these caps titles could be a little bit bigger" (Léonie,
+       2026-10-26). It was 16px, and 20px, tried first, was still short of
+       the design. */
+    font-size: 24px;
     line-height: 1.2;
     letter-spacing: 0.01em;
     /* The design sets these in small caps; the content is lowercase in the
@@ -103,7 +105,9 @@ const t = useTranslations(lang);
       justify-content: flex-start;
       min-height: 38px;
       padding-inline: var(--gutter);
-      font-size: 16px;
+      /* The design is desktop-only; three stacked rows at the frame's 24px
+         are heavy on a phone, so the band steps down here as it always has. */
+      font-size: 18px;
     }
     .year-cell + .year-cell {
       border-top: 1px solid var(--color-ink, #050505);

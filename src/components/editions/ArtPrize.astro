@@ -190,10 +190,11 @@ const suffix = (artist: any) => {
   }
   .laureates a {
     text-decoration: underline;
-    /* The site's 1px line ("make underline thinner for the laureates
-       names", Léonie, 2026-10-26); the browser's default scales with the
-       type and these names are set at 36px. */
-    text-decoration-thickness: 1px;
+    /* 2px, measured off the frame (node 1457:1403, two solid rows under
+       40px type) - "make underline thinner for the laureates names"
+       (Léonie, 2026-10-26) meant thinner than the browser's `auto`, not
+       hairline. */
+    text-decoration-thickness: 2px;
     text-underline-offset: 0.14em;
   }
 
