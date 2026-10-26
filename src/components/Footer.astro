@@ -86,19 +86,28 @@ const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
     color: #fff;
     background-color: #050505;
   }
-  /* With a back pill on the left the credit is centred between the two
-     groups rather than dropped (Lilanga, 2026-09-30). `flex: 1` on the
-     credit and a matching basis on the pill groups keeps it on the band's
-     centre line, not merely between its neighbours. */
+  /* With a back pill on the left the credit stands **next to it, on its
+     right** - "move the credits next to the « back to 2027 » button, on its
+     right ... same size as on ceramic basel website" (Léonie, 2026-10-26).
+     It was centred on the band between 2026-09-30 and then, which read as a
+     third group rather than as the button's caption. `flex: 1` still keeps
+     the pill group hard right; only the text's alignment changes. The size
+     is ceramic-basel's own credit clamp, a step under this site's, and it
+     applies here alone - the rest of the footers keep theirs. */
   .site-footer.has-back .footer-credit {
     flex: 1;
-    text-align: center;
+    text-align: left;
+    font-size: clamp(0.6875rem, 0.9vw, 0.8125rem);
   }
+  /* Square, not a lozenge: this one pill is a rectangle ("make this button
+     rectangle, not pill-shaped", Léonie, 2026-10-26). The footer's other
+     pills are unchanged. */
   .footer-back {
     display: inline-flex;
     align-items: baseline;
     gap: 0.25em;
     white-space: nowrap;
+    border-radius: 0;
   }
   @media (max-width: 700px) {
     /* Three groups do not sit on one line on a phone: the pill takes the
