@@ -190,6 +190,10 @@ const suffix = (artist: any) => {
   }
   .laureates a {
     text-decoration: underline;
+    /* The site's 1px line ("make underline thinner for the laureates
+       names", Léonie, 2026-10-26); the browser's default scales with the
+       type and these names are set at 36px. */
+    text-decoration-thickness: 1px;
     text-underline-offset: 0.14em;
   }
 
@@ -210,13 +214,17 @@ const suffix = (artist: any) => {
     font-size: 0.5em;
     vertical-align: super;
   }
-  /* The frame sets a jury member's role in small caps under the name. */
+  /* A jury member's role is the site's one BOLD & CAPS line - body size,
+     600, no extra tracking - and not a 15px small-caps of its own ("these
+     subtitles should be the same text-style as all the other bold & caps
+     ones throughout the website", Léonie, 2026-10-26). Same values as the
+     VIP programme's date lines and the platform's labels. */
   .role {
     margin: 6px 0 0;
-    font-size: 15px;
+    font-size: var(--body-size);
     font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: 0.01em;
+    line-height: var(--body-lh);
+    letter-spacing: 0;
     text-transform: uppercase;
   }
   .pills {
@@ -225,17 +233,18 @@ const suffix = (artist: any) => {
     gap: 8px;
     margin: 12px 0 0;
   }
-  .pills .pill {
-    padding: 1px 11px 0;
-    border-radius: 999px;
-    font-size: 15px;
-    line-height: 1.6;
-  }
+  /* No size of their own any more: `.pill` carries the site's --pill tokens
+     (22px, 3px 20px) and these were overridden down to 15px - "these
+     website & instagram buttons should be bigger, just like they are on the
+     rest of the website" (Léonie, 2026-10-26). Dropping the override is the
+     whole fix. */
   .award .outcome {
     margin: 6px 0 0;
-    font-size: 18px;
-    line-height: 1.35;
-    letter-spacing: -0.02em;
+    /* Body text, as under every other heading on the site ("the sentence
+       under each award should be body-text size", Léonie, 2026-10-26). */
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
 
   @media (max-width: 900px) {

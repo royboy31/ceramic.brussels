@@ -62,7 +62,9 @@ const t = useTranslations(lang);
     justify-content: center;
     min-height: 53px;
     padding: 6px 12px;
-    font-size: 16px;
+    /* 16px until 2026-10-26 - "all these caps titles could be a little bit
+       bigger" (Léonie), so one notch up rather than a new size. */
+    font-size: 20px;
     line-height: 1.2;
     letter-spacing: 0.01em;
     /* The design sets these in small caps; the content is lowercase in the
@@ -101,7 +103,7 @@ const t = useTranslations(lang);
       justify-content: flex-start;
       min-height: 38px;
       padding-inline: var(--gutter);
-      font-size: 14px;
+      font-size: 16px;
     }
     .year-cell + .year-cell {
       border-top: 1px solid var(--color-ink, #050505);

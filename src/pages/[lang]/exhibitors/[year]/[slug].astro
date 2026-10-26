@@ -42,6 +42,19 @@ if (!exhibitor) return Astro.rewrite('/404');
  * which is where the meeting's disappearing "Catalog" button lived.
  */
 const edition = editions.find((e: any) => e.year === year) ?? null;
+
+/**
+ * A gallery of a previous edition wears that section's grey ground: "make
+ * each of the individual gallery pages grey like the rest of the « previous
+ * editions » section of the website, so that the user completely understands
+ * they're in that part of the website and not consulting the current edition
+ * pages" (Léonie, 2026-10-26).
+ *
+ * The same test `ExhibitorHead` makes for its one back pill, and for the
+ * same reason: with the section off for the launch these addresses serve the
+ * landing year, which *is* the current list, and must stay white.
+ */
+const inPastSection = PAST_EDITIONS_PUBLIC;
 ---
 
 <Base
@@ -53,6 +66,7 @@ const edition = editions.find((e: any) => e.year === year) ?? null;
   path={`exhibitors/${year}/${slug}`}
   editId={exhibitor._id}
   editType={exhibitor._type}
+  theme={inPastSection ? 'ash' : 'default'}
 >
   <ExhibitorDetail
     lang={lang}

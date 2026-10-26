@@ -54,17 +54,37 @@ const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 // launch there is only this year's, so the tab leads there whatever year the
 // gallery belongs to.
 const listPath = year && PAST_EDITIONS_PUBLIC ? editionTabPath(year, 'exhibitors', lang) : 'exhibitors';
-const tabs = [
-  { key: 'galleries', label: t('exhibitors.galleries'), href: localePath(lang, listPath) },
-  { key: 'artists', label: t('nav.artists').toLowerCase(), href: localePath(lang, 'artists') },
-  edition?.catalogueUrl && { key: 'catalogue', label: t('home.catalogue').toLowerCase(), href: edition.catalogueUrl, external: true },
-  { key: 'awards', label: t('nav.awards').toLowerCase(), href: localePath(lang, 'exhibitors/awards') },
-  /* The way back into the gated platform (Léonie, 2026-10-22: leaving it
-     through "back to all exhibitors" stranded her on this page). The session
-     survives the round trip, so for an entered gallery this pill reopens the
-     platform directly; everyone else meets the gate. */
-  { key: 'platform', label: t('platform.title'), href: localePath(lang, PLATFORM_PATH) },
-].filter(Boolean) as { key: string; label: string; href: string; external?: boolean }[];
+/**
+ * Whether this page belongs to the **previous-editions section** - a past
+ * year's gallery, reached from that section's exhibitors tab. The same test
+ * `listPath` makes: with the section off for the launch, `/exhibitors/<year>`
+ * pages are the landing year's and are ordinary current-edition pages, which
+ * is why the year alone is not enough.
+ */
+const inPastSection = !!year && PAST_EDITIONS_PUBLIC;
+/**
+ * Inside the section the band carries **one** pill, pointing back to that
+ * year's list: "the « artists » and « awards » buttons aren't there. The
+ * « galleries » button text can become « back to all exhibitors », with an
+ * arrow on the left of this text & pointing to the left" (Léonie,
+ * 2026-10-26). Artists and awards are the current edition's indexes and led
+ * out of the year being read; the catalogue and the platform likewise.
+ */
+const tabs = (
+  inPastSection
+    ? [{ key: 'galleries', label: t('exhibitors.backToAll'), href: localePath(lang, listPath), back: true }]
+    : [
+        { key: 'galleries', label: t('exhibitors.galleries'), href: localePath(lang, listPath) },
+        { key: 'artists', label: t('nav.artists').toLowerCase(), href: localePath(lang, 'artists') },
+        edition?.catalogueUrl && { key: 'catalogue', label: t('home.catalogue').toLowerCase(), href: edition.catalogueUrl, external: true },
+        { key: 'awards', label: t('nav.awards').toLowerCase(), href: localePath(lang, 'exhibitors/awards') },
+        /* The way back into the gated platform (Léonie, 2026-10-22: leaving it
+           through "back to all exhibitors" stranded her on this page). The session
+           survives the round trip, so for an entered gallery this pill reopens the
+           platform directly; everyone else meets the gate. */
+        { key: 'platform', label: t('platform.title'), href: localePath(lang, PLATFORM_PATH) },
+      ]
+).filter(Boolean) as { key: string; label: string; href: string; external?: boolean; back?: boolean }[];
 const mark = activeLetter.toUpperCase();
 
 /**
@@ -84,30 +104,34 @@ const navLabel = nav?.items?.find((item: any) => {
 })?.label;
 const name = navLabel ?? t('nav.exhibitors').toLowerCase();
 /**
- * A past edition puts its year after the name - unless the editor has already
- * put it there, which is what the menu says today ("exhibitors 2026"):
- * appending then read "exhibitors 2026 2026". Compared on the cleaned
- * string, because a preview render stega-encodes the label.
+ * A past edition puts **its own** year after the name. The menu label
+ * already carries one today ("exhibitors 2026"), so the year it carries is
+ * dropped rather than added to: appending gave "exhibitors 2026 2025" on a
+ * 2025 gallery page (Léonie, 2026-10-26) and "exhibitors 2026 2026" before
+ * the endsWith test that preceded this. Cleaned first, because a preview
+ * render stega-encodes the label - which also means the heading on a year
+ * page is plain text, not a click-to-edit one; the menu row it comes from is
+ * reachable from any other band.
  */
-const yearSuffix = year && !stegaClean(name ?? '').trim().endsWith(String(year)) ? ` ${year}` : '';
+const heading = year ? `${stegaClean(name ?? '').trim().replace(/\s+\d{4}$/, '')} ${year}` : name;
 ---
 
 {!bandless && (
 <header class="exhibitor-head title-band">
   <div class="exhibitor-head__top">
-    <h1>
-      {name}
-      {yearSuffix}
-    </h1>
+    <h1>{heading}</h1>
     <nav aria-label={t('nav.exhibitors')}>
       {
         tabs.map((tab) => (
           <a
-            class:list={[{ active: tab.key === active }]}
+            class:list={[{ active: !tab.back && tab.key === active }]}
             href={tab.href}
-            aria-current={tab.key === active ? 'page' : undefined}
+            aria-current={!tab.back && tab.key === active ? 'page' : undefined}
             {...(tab.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
           >
+            {/* The one back pill wears the arrow on its left, as every other
+                "←" on the site does (Léonie, 2026-10-26). */}
+            {tab.back && <span class="link-arrow" data-arrow="←">←</span>}
             {tab.label}
           </a>
         ))
@@ -205,6 +229,11 @@ const yearSuffix = year && !stegaClean(name ?? '').trim().endsWith(String(year))
   }
   .exhibitor-head__top a.active {
     background: var(--color-acid);
+  }
+  /* A leading "←" wants its air on the right; design.css sets .link-arrow's
+     margin on the start side, for the trailing arrows. */
+  .exhibitor-head__top a .link-arrow {
+    margin-inline: 0 0.25em;
   }
   /* Hover is black with white type, as the tabs of every other title band
      (client feedback, 2026-09-24; it was the acid fill since 2026-09-16). */

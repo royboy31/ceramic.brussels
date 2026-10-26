@@ -241,7 +241,12 @@ const yearRow = inSection || !PAST_EDITIONS_PUBLIC ? [] : years.length > 1 ? yea
     font-size: 18px;
     line-height: 1.5;
     letter-spacing: -0.02em;
-    background: #fff;
+    /* Transparent, not white: on the grey ground of a previous edition's
+       list the white fill read as a box around every pill ("adjust the
+       filter buttons so that their background isn't white but transparent,
+       so the same grey colour as the page background", Léonie,
+       2026-10-26). On /exhibitors, which is white, nothing changes. */
+    background: transparent;
     cursor: pointer;
     transition:
       color 0.18s,

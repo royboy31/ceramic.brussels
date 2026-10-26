@@ -168,6 +168,9 @@ const speakersOf = (event: any) =>
   }
   .galleries a {
     text-decoration: underline;
+    /* The site's 1px line ("underline thinner", Léonie, 2026-10-26), as on
+       the laureates list and the overview's highlights. */
+    text-decoration-thickness: 1px;
     text-underline-offset: 0.14em;
   }
 
@@ -183,27 +186,34 @@ const speakersOf = (event: any) =>
     line-height: 1.15;
     letter-spacing: -0.035em;
   }
+  /* Body text: "the text explaining every talk should be body-text size,
+     it currently is smaller" (Léonie, 2026-10-26). It was 18px. */
   .talk .body {
-    font-size: 18px;
-    line-height: 1.35;
-    letter-spacing: -0.02em;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
   .talk .body :global(p + p) {
     margin-top: 16px;
   }
-  /* SPEAKERS / MODERATOR, small caps over the names, as the frame sets them. */
+  /* SPEAKERS / MODERATOR are the site's one BOLD & CAPS line - body size,
+     600, no extra tracking - and not a 14px small-caps of their own ("the
+     same style as the other bold & caps subtitles on the rest of the
+     website", Léonie, 2026-10-26). Same values as the jury roles on the art
+     prize tab. */
   .tag {
     margin: 18px 0 2px;
-    font-size: 14px;
+    font-size: var(--body-size);
     font-weight: 600;
-    letter-spacing: 0.02em;
+    line-height: var(--body-lh);
+    letter-spacing: 0;
     text-transform: uppercase;
   }
   .who {
     margin: 0;
-    font-size: 18px;
-    line-height: 1.35;
-    letter-spacing: -0.02em;
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
 
   @media (max-width: 900px) {

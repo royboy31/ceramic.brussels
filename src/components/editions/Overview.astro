@@ -1,5 +1,5 @@
 ---
-import SanityImage from '../SanityImage.astro';
+import Slideshow from '../Slideshow.astro';
 import PortableText from '../PortableText.astro';
 import type { LocaleId } from '../../lib/locales';
 import { useTranslations } from '../../lib/i18n';
@@ -21,14 +21,19 @@ import { styleAttrs } from '../../lib/textStyle';
 const { lang, edition, lead } = Astro.props as { lang: LocaleId; edition: any; lead?: any };
 const t = useTranslations(lang);
 
-/* BACKEND-REQUEST #33: the pair of pictures under the lead. Until the field
-   exists, the cover and the first archive photo stand in, so the row is never
-   half-empty and never a 60-picture gallery. */
-const pair: any[] = ((edition.leadImages ?? []).filter((img: any) => img?.asset) as any[]).slice(0, 2);
+/* BACKEND-REQUEST #33: the pictures under the lead. They were a fixed pair,
+   two 670x447 frames side by side as the frame draws them; since 2026-10-26
+   they are a slideshow of up to five - "make these 2 photos a slideshow,
+   same as on guest of honour's « about » page, with 5 photos" (Léonie). Two
+   still show at a time, which is what that gallery does and what keeps the
+   frame's proportions; the rest are scrolled to. Until the field is filled
+   the cover and the first archive photo stand in, so the row is never empty
+   and never a 60-picture gallery. */
+const chosen: any[] = ((edition.leadImages ?? []).filter((img: any) => img?.asset) as any[]).slice(0, 5);
 const fallbackPair = [edition.cover, (edition.images ?? []).find((img: any) => img?.asset)].filter(
   (img: any) => img?.asset,
 );
-const images = pair.length ? pair : fallbackPair;
+const images = chosen.length ? chosen : fallbackPair;
 
 const figures: any[] = edition.keyFigures ?? [];
 
@@ -69,10 +74,15 @@ const highlights = (edition.highlights ?? [])
 
   {
     images.length > 0 && (
-      <div class:list={['ed-split', 'half', 'lead-images', { single: images.length === 1 }]}>
-        {images.map((image: any) => (
-          <SanityImage image={image} aspect={1.5} sizes="(max-width: 900px) 100vw, 46vw" widths={[600, 900, 1400]} />
-        ))}
+      <div class:list={['lead-images', { single: images.length === 1 }]}>
+        <Slideshow
+          images={images}
+          aspect={670 / 447}
+          sizes="(max-width: 900px) 100vw, 46vw"
+          widths={[600, 900, 1400]}
+          label={t('prevEd.overview')}
+          id="lead"
+        />
       </div>
     )
   }
@@ -144,18 +154,70 @@ const highlights = (edition.highlights ?? [])
     margin-top: 28px;
   }
 
-  /* 670 x 447 each on the frame - 3:2, side by side, 40px apart. */
+  /* 670 x 447 each on the frame - 3:2, side by side, 40px apart. The pair is
+     a slideshow since 2026-10-26, so the two frames are two slides of one
+     track rather than two cells of a grid: each slide is half the row less
+     half the gap, and a third picture waits just off the right edge. The
+     overrides reach into Slideshow's own classes, which is why they are
+     `:global` - the component is shared and keeps its one-up default. */
   .lead-images {
     margin-bottom: 88px;
   }
+  .lead-images :global(.track) {
+    gap: var(--ed-gap, 40px);
+  }
+  .lead-images :global(.slide) {
+    flex-basis: calc((100% - var(--ed-gap, 40px)) / 2);
+  }
+  .lead-images.single :global(.slide) {
+    flex-basis: 100%;
+  }
   .lead-images.single {
-    grid-template-columns: minmax(0, 1fr);
     max-width: 670px;
   }
   .lead-images :global(img) {
     width: 100%;
     height: auto;
     display: block;
+  }
+  /**
+   * Two slides in view need two captions and two visible dots, and
+   * `Slideshow` is built for one of each. Both defaults are right for a
+   * one-up carousel and wrong here, so both are turned off - on desktop
+   * only, since below 900px this is a one-up carousel again.
+   *
+   * - The captions: the component fades every slide but the current one, so
+   *   that a swipe does not run two caption lines together. Side by side,
+   *   that left the left-hand picture unsigned.
+   * - The dots: they are white and laid over the *slideshow's* centre, which
+   *   between two pictures is the 40px of grey ground between them. Under
+   *   the row and in ink instead, which is what the component itself does
+   *   when it has no aspect to hang them on.
+   *
+   * `!important` because Astro scopes `Slideshow`'s own rules with its cid
+   * on every compound, which outweighs anything written from outside - the
+   * same reason `.ed-band`'s pill rules in YearBand.astro carry it.
+   */
+  @media (min-width: 900.02px) {
+    .lead-images :global(.slideshow[data-one-caption] .slide:not([data-current]) figcaption) {
+      opacity: 1 !important;
+    }
+    .lead-images :global(.dots) {
+      position: static !important;
+      aspect-ratio: auto !important;
+      height: auto !important;
+      padding: 14px 0 0 !important;
+    }
+    .lead-images :global(.dots a) {
+      background: var(--ink) !important;
+    }
+  }
+
+  /* One picture per screen on a phone, as every other slideshow is. */
+  @media (max-width: 900px) {
+    .lead-images :global(.slide) {
+      flex-basis: 100%;
+    }
   }
 
   /* The frame rules the heading (that is `.panel-title`, 2px) and **nothing
@@ -226,6 +288,10 @@ const highlights = (edition.highlights ?? [])
     line-height: 1.15;
     letter-spacing: -0.035em;
     text-decoration: underline;
+    /* The site's 1px line, not the browser's own, which at this size drew a
+       rule under every highlight ("thinner underline, see Figma", Léonie,
+       2026-10-26). Same value as a.text-link and the menu. */
+    text-decoration-thickness: 1px;
     text-underline-offset: 0.16em;
   }
 
