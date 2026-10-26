@@ -244,7 +244,24 @@ if (STRIP) {
   const dir = path.join(ROOT, 'legacy-export', 'backups');
   fs.mkdirSync(dir, { recursive: true });
   const file = path.join(dir, 'exhibitor-bio-link-lines-2026-10-27.json');
-  fs.writeFileSync(file, JSON.stringify(backup, null, 2));
+  /**
+   * Merged, never overwritten. A second pass only sees the paragraphs still
+   * standing, so writing the file fresh would drop what the first pass took:
+   * that is how the Dutch entries were lost on 2026-10-27 and had to be read
+   * back out of Sanity's document history.
+   */
+  let merged = backup;
+  if (fs.existsSync(file)) {
+    const prev = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const byId = new Map(prev.map((r) => [r._id, r]));
+    for (const r of backup) {
+      const old = byId.get(r._id);
+      if (old) old.removed = { ...r.removed, ...old.removed };
+      else byId.set(r._id, r);
+    }
+    merged = [...byId.values()];
+  }
+  fs.writeFileSync(file, JSON.stringify(merged, null, 2));
   console.log(`\nbacked up ${backup.length} removed paragraph(s) to ${path.relative(ROOT, file)}`);
 }
 
@@ -253,10 +270,18 @@ let n = 0;
 for (const p of plans) {
   let patch = client.patch(p._id);
   if (Object.keys(p.set).length) patch = patch.set(p.set);
+  /**
+   * One `unset` call with every path, never one per language: the client's
+   * patch builder *assigns* the unset list rather than appending to it, so a
+   * call per locale left only the last one standing. The 2026-10-27 run
+   * removed the Dutch paragraph from all seven records and neither the
+   * English nor the French one, which is how this came to light.
+   */
   if (STRIP && p.strippable) {
-    for (const [loc, ev] of Object.entries(p.evidence)) {
-      patch = patch.unset([`bio.${loc}[_key=="${ev.key}"]`]);
-    }
+    const paths = Object.entries(p.evidence).map(
+      ([loc, ev]) => `bio.${loc}[_key=="${ev.key}"]`,
+    );
+    if (paths.length) patch = patch.unset(paths);
   }
   tx = tx.patch(patch);
   n += 1;
