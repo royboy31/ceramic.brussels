@@ -79,6 +79,33 @@ prize `1457:1217`).
 | Jury instagram/website | 129 × 31, smaller than the site's pill | the site's `--pill` tokens: she asked for "bigger, just like they are on the rest of the website", which overrides the frame |
 | Laureates list | 40px on a 62.7px pitch | ours is 36px on ~51px. **Not flagged by her**, left alone, noted here |
 
+**The other four frames, checked the same way** (guest of honour
+`1449:626`, exhibitors `1449:968`, norway focus `1457:1513`, publication
+`1462:1982`):
+
+- **Guest of honour.** The picture beside the AT TWILIGHT essay is drawn as
+  a slideshow already - half width, one at a time, with its dots and a
+  `1/5` counter. That is what the component does; only the photographs are
+  missing.
+- **Exhibitors.** The filter pills measure 215-219 against a 217 page, so
+  they are transparent on the grey, which is what she asked for and what we
+  now draw. The ground samples **#D9D9D9**, confirming the ash theme. The
+  row's order - solo show, norway focus, publishers, jury prize 2024,
+  awards - is exactly `FILTER_ORDER`'s for a past year. And the frame draws
+  **both** the "jury prize 2024" pill **and** a Damien Fragnon card carrying
+  the yellow badge, so request 19 below is the design's intent, not an
+  afterthought.
+- **Norway focus.** Pictures left, galleries right (the frame's 907/433),
+  then the talks two across with a `1/3` slideshow taking a cell of the same
+  grid - the layout we render. MODERATOR and SPEAKERS carry the shared
+  "Body — CAPS BOLD · 24/30" style, the same one the jury roles use.
+  **"Norwegian Crafts" carries no highlight in the frame at all**, only an
+  underline; her note is about what an editor's Highlight should look like
+  here, not about restoring something the design has.
+- **Publication.** Lead, reader, footer. No button under it, which is the
+  removal. (Its reader is about 2:1 in the frame where ours is 16:10 - not
+  raised by her, left alone.)
+
 There is no frame for an individual gallery page in the section, so items 7
 to 9 are her words alone.
 
