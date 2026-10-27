@@ -143,6 +143,31 @@ its own large allowance, and `run()` fails a build over 2,500 requests. Keep
 `useCdn: true` in place through all of this; an upgrade loop against the live
 endpoint is how the free plan was burned in four days once already.
 
+## What happened, 2026-10-27
+
+Steps 0-5 ran on `kamindu` itself rather than a side branch (Kamindu's call).
+
+**The seventeen minors are in, on `3c62402`.** They cost one fix: `@sanity/ui`
+4.4.10 ships a container query, `scripts/lower-css.mjs` could not tell a
+`@container` prelude from a `@media` one, and the build died at the guard -
+taking `legacy-redirects` and `sitemap-noindex` down with it, so a dist that
+looked finished was missing 561 redirect rules. The guard now matches `@media`
+alone. Both build shapes verified, the Studio swept pane by pane in dev, and the
+deploy confirmed live: 804 pages, 561 redirects, zero `@media` range syntax in
+the stylesheets Cloudflare actually serves.
+
+**`@astrojs/react` 7 is parked, reverted in `0e8f57e`.** It builds on Windows and
+fails `npm ci` on Linux, because two peers want disjoint ranges of the same
+native package: `@astrojs/react@7.1.1` asks for `oxc-transform-react ^0.145.0`
+(`>=0.145.0 <0.146.0`) while the `@vitejs/plugin-react` nested under it - and
+under four `@sanity/*` packages - asks for `^0.152.0`. `npm i` here settled on
+0.145.0 and wrote a lockfile `npm ci` cannot reproduce: *Missing
+@oxc-transform-react/binding-linux-x64-gnu@0.152.0 from lock file*. Two things to
+carry forward: `npm ci --dry-run` **passes on Windows and fails on Linux**, so it
+is not a pre-push check here - the builder's own log is; and the major buys no
+functional change, so retry it only once Astro's integration and
+`@vitejs/plugin-react` agree on an oxc range.
+
 ---
 
 # Part 2 — Porting previous editions to `main`
