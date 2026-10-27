@@ -168,6 +168,39 @@ is not a pre-push check here - the builder's own log is; and the major buys no
 functional change, so retry it only once Astro's integration and
 `@vitejs/plugin-react` agree on an oxc range.
 
+
+## Porting the upgrade to live - queued for 2026-10-28
+
+Decided the evening of 2026-10-27: the dependency round goes to `main`
+tomorrow. It is ready; nothing about it is waiting on anyone.
+
+**What goes:** `3c62402` alone - the seventeen minors and the `lower-css`
+guard. Not `a2a8122` (React 7) and therefore not its revert `0e8f57e` either;
+leaving both out gives `main` the same tree with two fewer commits. By
+cherry-pick, never a merge.
+
+**Before pushing:** `npm run build` and `npm run build:preview` on a worktree
+off `origin/main`, because `main` has `PAST_EDITIONS_PUBLIC` false and
+`HELD_BACK = ['nl']` where `kamindu` has neither - a build there renders a
+different, smaller set of pages (220 sitemap URLs on production against 792 on
+the kamindu preview), so it is genuinely not the build already verified.
+
+**After pushing:** read the deployment, do not poll a page -
+`npx wrangler pages deployment list --project-name ceramic-brussels` after
+`npx wrangler whoami`, and the build log by API on a failure. A failed Pages
+build keeps serving the last good deployment, so from the URL alone a failure
+and a slow build look identical. That cost ~50 minutes today.
+
+**The check that matters afterwards:** zero `@media` range syntax in the
+stylesheets www actually serves. That is the regression the guard exists for,
+and the whole reason this round was not a no-op.
+
+**Not coupled to the exhibitors work.** The 2027 switch and the
+previous-editions release are content and flag decisions
+(`docs/exhibitors-2027-switch.md`); this is dependencies. Land it first and on
+its own, so that if anything does go wrong tomorrow it is not tangled with an
+announcement.
+
 ---
 
 # Part 2 — Porting previous editions to `main`
