@@ -73,22 +73,40 @@ text on an exhibitor:
 | booth | 62 / 63 | 1 |
 | instagram | 62 / 63 | 1 |
 | website | 61 / 63 | 2 |
-| **list image** | **8 / 63** | **55** |
+| listImage set | 8 / 63 | see below |
 
 Two galleries have no English bio to translate from - **County Hall Pottery**
 and **Vriend van Bavink Gallery** - so those need the client's copy first, in
 any language.
 
-**The list images are the louder problem.** 55 of 63 galleries have no
-`listImage`, and that is the picture the `/exhibitors` grid is built on. A
-public announcement tomorrow afternoon would land on a list that is mostly
-empty frames. Nobody has mentioned it, which is why it is written here.
+**The list images were not the problem, and saying they were was a mistake.**
+This file first claimed 55 of 63 galleries had no picture and that the
+announcement would land on empty frames. That read `listImage` alone and never
+read the query the cards are drawn from:
+
+```groq
+"image": coalesce(listImage, images[0])
+```
+
+A card falls back to the gallery's own first image, so **59 of 63 had a picture
+all along** and the list looked right the moment it went up.
+
+What the mistake did turn up is a real bug, older than this round. An editor can
+fill a figure's alt text and credit and never attach the asset, which leaves
+`listImage` a present-but-assetless object - and a present object is where
+`coalesce` stops, so the fallback never ran. Three galleries were in that state,
+Andreae with four usable images sitting behind the blank. Fixed in the
+projection on 2026-10-28 (`select(defined(listImage.asset) => listImage)`,
+kamindu `ef6aa83`, main `a4007bb`): 2027 goes 59 -> 62 cards with a picture and
+2024-2026 keep all 199 of theirs.
+
+**Galerie Michel Giraud is the one real gap** - no `listImage`, no `images` -
+and it is the client's to fill.
 
 ## What this costs, in order
 
-1. **Ask about the images.** 55 missing covers the announcement's own landing
-   page. This is the question to put first, tonight, because only the client
-   can answer it.
+1. **Ask for one picture**, Galerie Michel Giraud's. That is the whole of the
+   image problem, once the projection stopped stopping at an empty figure.
 2. **Decide the previous-editions switch with it.** Either both go on together,
    or 67 live gallery pages 404 tomorrow afternoon.
 3. **Translate 58 FR + 54 NL bios.** Mechanical, scriptable the way the
