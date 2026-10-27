@@ -15,8 +15,14 @@
  * shows "spaxprojects.com @spaxprojects" as a stray line of body copy instead
  * of two pills. So the source is that paragraph, per record, per language.
  *
- * `legacy-export/normalized/exhibitors.json` is no help: its `attrs` carry
- * only city, category, year and booth, and the records have no blocks.
+ * **`legacy-export/normalized/exhibitors.json` is the third source, and the
+ * richest one.** The first pass of this script dismissed it after reading
+ * `attrs` (city, category, year, booth) and `blocks` (empty) - but the old
+ * site put each gallery's address and handle in the **body of its
+ * description**, as ordinary `<a href>` links. 55 of the 57 2024 records and
+ * 69 of the 78 2025 ones carry one, which is four times what the bio tail and
+ * the sibling years together could find. Matched on name *and* year, with a
+ * cross-year fallback for a gallery whose own year's page has none.
  *
  * **Artists are deliberately not touched.** They are per-year - a gallery
  * shows different artists each edition - so copying 2026's references back
@@ -135,6 +141,56 @@ const norm = (s) =>
 const byName = new Map();
 for (const s of siblings) if (!byName.has(norm(s.name))) byName.set(norm(s.name), s);
 
+/* ------------------------------------------------------- the legacy export */
+
+/**
+ * Legacy titles carry the country the old listing showed - "Valerius Gallery
+ * (lu)", "Almine Rech (be/fr/us)" - and accents the Sanity names also have.
+ * Both go before the alphanumeric squeeze, or no 2024 record matches.
+ */
+const legacyNorm = (s) =>
+  String(s ?? '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/\s*\([a-z/\s]{2,20}\)\s*$/, '')
+    .replace(/[^a-z0-9]+/g, '');
+
+/** The gallery's own handle and address out of one legacy description. */
+function legacyLinks(record) {
+  const hrefs = [];
+  for (const loc of ['en', 'fr', 'nl']) {
+    const html = record.description?.[loc];
+    if (typeof html !== 'string') continue;
+    for (const m of html.matchAll(/href="([^"]+)"/g)) hrefs.push(m[1]);
+  }
+  const external = hrefs.filter(
+    (h) => /^https?:\/\//i.test(h) && !/ceramic\.brussels/i.test(h),
+  );
+  const igHref = external.find((h) => /instagram\.com/i.test(h));
+  const webHref = external.find((h) => !/instagram\.com|facebook\.com|twitter\.com|x\.com/i.test(h));
+  const handle = igHref?.match(/instagram\.com\/([A-Za-z0-9._]{2,30})/i)?.[1] ?? null;
+  return {
+    instagram: handle,
+    website: webHref ? webHref.replace(/\/$/, '') : null,
+  };
+}
+
+const legacyPath = path.join(ROOT, 'legacy-export', 'normalized', 'exhibitors.json');
+const legacyByYear = new Map();
+const legacyAnyYear = new Map();
+if (fs.existsSync(legacyPath)) {
+  for (const rec of JSON.parse(fs.readFileSync(legacyPath, 'utf8'))) {
+    const key = legacyNorm(rec.title?.en ?? rec.listingTitle);
+    if (!key) continue;
+    const year = rec.attrs?.year;
+    if (!legacyByYear.has(`${key}|${year}`)) legacyByYear.set(`${key}|${year}`, rec);
+    if (!legacyAnyYear.has(key)) legacyAnyYear.set(key, rec);
+  }
+} else {
+  console.warn(`legacy export not found at ${legacyPath}; that source is skipped.`);
+}
+
 const plans = [];
 const unresolved = [];
 /** Records carrying a link paragraph the pills already replace, flag or no flag. */
@@ -165,6 +221,21 @@ for (const r of rows) {
       if (sib.website) found.website = sib.website;
       source = `sibling ${sib.year}`;
       sibling = sib;
+    }
+  }
+  /* The old site's own page for this gallery, that year, is the last word -
+     and for 2024 and 2025 it is usually the only one. */
+  if (!found.instagram && !found.website) {
+    const key = legacyNorm(r.name);
+    const sameYear = legacyByYear.get(`${key}|${r.year}`);
+    const rec = sameYear ?? legacyAnyYear.get(key);
+    if (rec) {
+      const links = legacyLinks(rec);
+      if (links.instagram || links.website) {
+        if (links.instagram) found.instagram = links.instagram;
+        if (links.website) found.website = links.website;
+        source = sameYear ? `legacy ${r.year}` : `legacy ${rec.attrs?.year ?? '?'}`;
+      }
     }
   }
 
