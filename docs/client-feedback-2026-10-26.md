@@ -48,7 +48,7 @@ right for every year.
 | 11 | art prize | "the sentence under each award should be body-text size" | `ArtPrize.astro`, `--body-*` |
 | 12 | art prize | jury roles "the same text-style as all the other bold & caps ones throughout the website" | `ArtPrize.astro` `.role` — body size, 600, no extra tracking |
 | 13 | art prize | jury instagram/website buttons "bigger, just like they are on the rest of the website" | `ArtPrize.astro` — the 15px override dropped, so `.pill`'s site tokens apply |
-| 14 | norway focus | "when there's a link, the highlight should be black and the text white, and not yellow, to respect the « grey & black » codes of this section" | `PreviousEdition.astro`, keyed on `body.ash-page`, both mark/link nestings |
+| 14 | norway focus | "when there's a link, the highlight should be black and the text white, and not yellow, to respect the « grey & black » codes of this section" | Two yellows, and the first pass caught only one. `PreviousEdition.astro` knocks out the **Highlight mark** on a link, both nestings. But "Norwegian Crafts" carries no Highlight mark - in her build or ours - so what she annotated is the **acid wash that sweeps in behind any rich-text link on hover** (`--hl`, `Base.astro`), which had an override for `body.acid-page` and none for `body.ash-page`. Added 2026-10-27 (2ee29d5), verified by hovering the link |
 | 15 | norway focus | "underline thinner" on the galleries list | `Focus.astro`, **2px**, as the other two |
 | 16 | norway focus | "the text explaining every talk should be body-text size" | `Focus.astro` `.talk .body` |
 | 17 | norway focus | "« speakers » and « Moderator » subtitles should be the same style as the other bold & caps subtitles" | `Focus.astro` `.tag` |
