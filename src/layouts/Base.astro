@@ -743,8 +743,16 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
     background-size: 100% 100%;
     color: var(--hl-ink);
   }
+  /* The grey section knocks the sweep out the same way as the acid pages:
+     "when there's a link, the highlight should be black and the text white,
+     and not yellow, to respect the « grey & black » codes of this section"
+     (Léonie, 2026-10-26, on "Norwegian Crafts" in the focus lead). That link
+     carries no Highlight mark - what she saw is this hover wash, which was
+     still acid here. */
   body.acid-page :where(.rich-text) a:not(.pill, .arrow-link, .text-link),
-  body.acid-page a.hl-link {
+  body.acid-page a.hl-link,
+  body.ash-page :where(.rich-text) a:not(.pill, .arrow-link, .text-link),
+  body.ash-page a.hl-link {
     --hl: #050505;
     --hl-ink: #fff;
   }
