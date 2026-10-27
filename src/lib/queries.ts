@@ -746,6 +746,19 @@ export function getPastEditionsIndex(lang: LocaleId) {
 
 /* ------------------------------------------------------------ exhibitors */
 
+/**
+ * A card's picture is the gallery's own list image, or failing that the first
+ * of its images - but coalesce alone was not enough to say so.
+ *
+ * An editor can fill a figure's alt text and credit and never attach the
+ * picture, which leaves listImage a present-but-assetless object, and a
+ * present object is where coalesce stops. The fallback never ran, so the card
+ * drew an empty frame beside a gallery holding four usable images: Andreae,
+ * Vriend van Bavink Gallery and THIS IS NOT A WHITE CUBE, all three found on
+ * the 2027 list the day it went up (2026-10-28). The select makes the asset
+ * the test rather than the field, and gains those three without costing any
+ * of the other 262 records across 2024-2026 its picture.
+ */
 const EXHIBITOR_CARD = `{
   _id, name, sortName, kind, booth, country, countryCode, city, website, instagram,
   soloShow, inCountryFocus,
@@ -753,7 +766,7 @@ const EXHIBITOR_CARD = `{
   "year": edition->year,
   "current": edition->isCurrent == true,
   ${styled('countryFocusLabel', 'edition->countryFocus')},
-  "image": coalesce(listImage, images[0]) ${IMAGE},
+  "image": coalesce(select(defined(listImage.asset) => listImage), images[0]) ${IMAGE},
   "artists": artists[]->{ _id, name, "slug": slug.current },
   ${styled('artistsText')}
 }`;
