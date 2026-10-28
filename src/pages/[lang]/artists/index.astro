@@ -99,9 +99,16 @@ const byLetter = (letter: string) =>
 /**
  * The exhibitor the row stands for - the one its name links to (artistPath):
  * this edition's, or else the most recent. Its booth, solo show and focus are
- * the row's, so a 2026 gallery's artist shows the 2026 booth rather than
+ * the row's, so a past gallery's artist shows that year's booth rather than
  * nothing (client feedback, 2026-09-25: "I can't see the booth number" -
- * the 2027 galleries have none yet).
+ * the 2027 galleries had none yet).
+ *
+ * `a.exhibitors` only ever holds galleries whose page the build writes
+ * (`EXHIBITOR_SHOWN` in queries.ts), which is what keeps the fallback honest:
+ * while previous editions are off it is this edition's galleries alone, so a
+ * row can neither link to a 404 nor label an artist with a booth from a fair
+ * that is over. Léonie, 2026-10-28: *"Kato Mami is written as A22 but that is
+ * the A22 from 2026 which is not the same as 2027."*
  */
 const showingNow = (a: any) =>
   a.exhibitors?.find((ex: any) => ex.current) ??
