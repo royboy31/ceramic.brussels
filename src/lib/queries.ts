@@ -1,6 +1,9 @@
 import type { LocaleId } from './locales';
 import { currentClient, isPreview, previewFetch, isLive } from './previewContext';
 import { DEFAULT_LOCALE } from './locales';
+// Which gallery pages the build actually writes is half a launch decision:
+// see EXHIBITOR_SHOWN below.
+import { PAST_EDITIONS_PUBLIC } from '../components/launch';
 
 /**
  * All GROQ lives here so the pages stay readable and every query resolves
@@ -59,12 +62,11 @@ const SEO = `{
 const CURRENT_EDITION = `*[_type == "edition" && isCurrent == true] | order(year desc)[0]`;
 
 /**
- * Whether an exhibitor's edition has its galleries on the site (request #33,
- * Tiphaine 2026-09-30: "the 2027 galleries are not visible yet").
- * `showExhibitors` is the editors' switch, and it is deliberately not
- * `isCurrent`: that flag also drives the homepage, the programme, VIP, the
- * partners and the key figures, so 2027 stays the current edition while its
- * gallery list is still being typed in.
+ * The editors' switch, for filtering edition documents rather than exhibitors.
+ * `showExhibitors` is deliberately not `isCurrent`: that flag also drives the
+ * homepage, the programme, VIP, the partners and the key figures, so 2027 stays
+ * the current edition while its gallery list is still being typed in
+ * (request #33, Tiphaine 2026-09-30: "the 2027 galleries are not visible yet").
  *
  * **A past edition is always shown; only the current one can be held back.**
  * The first version of this read "shown if any edition has the switch on and
@@ -73,12 +75,7 @@ const CURRENT_EDITION = `*[_type == "edition" && isCurrent == true] | order(year
  * switch exists to keep an edition private *before* its fair, which is only
  * ever the current one, so that is all it governs. Nothing an editor does to a
  * past edition can take its galleries off the site.
- *
- * Goes inside an exhibitor filter; `edition` is the exhibitor's own.
  */
-const EXHIBITOR_SHOWN = `(edition->showExhibitors == true || edition->isCurrent != true)`;
-
-/** The same rule, for filtering edition documents rather than exhibitors. */
 const EDITION_SHOWN = `(showExhibitors == true || isCurrent != true)`;
 
 /**
@@ -89,6 +86,43 @@ const LANDING_YEAR = `coalesce(
   (*[_type == "edition" && ${EDITION_SHOWN} && defined(year)] | order(year desc)[0].year),
   (${CURRENT_EDITION}.year)
 )`;
+
+/**
+ * Whether an exhibitor's gallery page **exists on the site**, for any query
+ * that links to one. Goes inside an exhibitor filter; `edition` is the
+ * exhibitor's own.
+ *
+ * Two things decide that, and for a long time this only knew about one of them:
+ *
+ * - `EDITION_SHOWN` - the editors' switch, which holds the current edition's
+ *   galleries back until its list is typed in;
+ * - `PAST_EDITIONS_PUBLIC` - the launch switch, which while it is off builds
+ *   **only the landing year's** gallery pages (`[year]/[slug].astro` filters
+ *   `getStaticPaths` to `landingYear`, and `launch.ts` says so: *"a past
+ *   edition's gallery pages are not built at all - no rule points at one, so
+ *   nothing breaks"*).
+ *
+ * That last sentence was the bug. A rule did point at one: this projection.
+ * While `PAST_EDITIONS_PUBLIC` was off *and* the landing year was a past
+ * edition the two agreed by accident - 2026 was both the newest past edition
+ * and the year whose pages were built - so nothing showed. Flipping the 2027
+ * galleries on (2026-10-28) moved the landing year to the current edition and
+ * un-built every 2026 page, and the disagreement surfaced on /artists:
+ * **158 of 243 artists linked to a gallery page that no longer existed**, and
+ * every one of those rows printed its 2026 booth beside the artist's name
+ * (Léonie, 2026-10-28: *"Kato Mami is written as A22 but that is the A22 from
+ * 2026 which is not the same as 2027"*). The art prize laureates, the
+ * programme's speakers, an award's winning gallery and every artist linked
+ * from rich text had the same broken link.
+ *
+ * So it is one rule now: an exhibitor is shown if the page that would be
+ * linked is one the build writes. While previous editions are off, that is the
+ * landing year alone - which covers the current edition too, since the landing
+ * year *is* the current year once its switch is on.
+ */
+const EXHIBITOR_SHOWN = PAST_EDITIONS_PUBLIC
+  ? `(edition->showExhibitors == true || edition->isCurrent != true)`
+  : `(edition->year == ${LANDING_YEAR})`;
 
 /** What links.ts needs to know where a linked document lives. */
 /**
@@ -613,15 +647,21 @@ export function getEditions(lang: LocaleId) {
  * Out of `getEditions`, which editions' galleries the site shows and which
  * year /exhibitors opens on (request #33). Pure, so the listing page, the
  * year pages and the year row under them share one rule; the GROQ side of it
- * is `EXHIBITOR_SHOWN` and `LANDING_YEAR` above.
+ * is `EDITION_SHOWN` and `LANDING_YEAR` above.
  *
  * `years` is the year row: an edition is in it if its galleries are shown and
  * it has any, newest first, with `current` marking the one that lives at
  * /exhibitors rather than /exhibitors/<year>.
  */
 export function exhibitorEditions(editions: any[]) {
-  // `EXHIBITOR_SHOWN` in JS: a past edition always counts, the current one
+  // `EDITION_SHOWN` in JS: a past edition always counts, the current one
   // only once its switch is on. `getEditions` returns newest first.
+  //
+  // This one deliberately does **not** honour `PAST_EDITIONS_PUBLIC`, where
+  // `EXHIBITOR_SHOWN` does: the landing year is what that rule is written in
+  // terms of, so reading the launch switch here would make the two circular.
+  // The launch switch is applied where it belongs - on the year row
+  // (`ExhibitorsListing.astro`) and on `getStaticPaths` of `[year]/[slug]`.
   const visible = editions.filter((e: any) => e.showExhibitors === true || e.isCurrent !== true);
   const landingYear: number | undefined =
     visible[0]?.year ?? editions.find((e: any) => e.isCurrent)?.year;
