@@ -169,7 +169,16 @@ async function preview(context: Ctx, next: Next): Promise<Response> {
   // stream is pulled - which would otherwise happen after this returns.
   const response = await runWithPreview(client, async () => {
     const rendered = await next();
-    const body = await rendered.text();
+    // Internal links keep the reader inside /preview/: a page's links are
+    // written site-absolute (/en/…), and following one out of the preview
+    // lands on the published site - for a hidden page (previous editions,
+    // while PAST_EDITIONS_PUBLIC is off) that is a bounce to /exhibitors/,
+    // which reads as "the preview is broken" (Léonie, 2026-11-03). Only a
+    // root-relative href with a locale prefix is rewritten: canonical,
+    // hreflang and og URLs are absolute with a host, /api/ and /studio
+    // carry no locale, and hrefs are never stega-encoded (url and path are
+    // PLAIN_KEYS), so the pattern cannot tear an encoded string.
+    const body = (await rendered.text()).replace(/href="\/(en|fr|nl)\//g, 'href="/preview/$1/');
     return new Response(body, rendered);
   });
 
