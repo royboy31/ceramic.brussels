@@ -54,6 +54,26 @@ const now = () => new Date().toISOString();
 export const cleanEmail = (email: unknown) => (typeof email === 'string' ? email.trim().toLowerCase() : '');
 export const isEmail = (email: string) => EMAIL.test(email) && email.length <= 254;
 
+/**
+ * A name as it is saved, whatever the guest typed: "marie DUPONT" → "Marie
+ * Dupont", "jean-luc" → "Jean-Luc", "o'brien" → "O'Brien", "BAÏLO" → "Baïlo".
+ * A word typed all in lower or all in upper case gets a capital initial; one
+ * already in mixed case ("McDonald", "DiCaprio") is left as typed. Particles
+ * are words like any other: "van der berg" → "Van Der Berg". Case only, so a
+ * guest's code never moves with it (`namePart` upper-cases). The import
+ * script has the same function: change one and change both.
+ */
+export function formatName(name: string): string {
+  return String(name ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[\p{L}\p{M}]+/gu, (word) =>
+      word === word.toLocaleLowerCase() || word === word.toLocaleUpperCase()
+        ? word.charAt(0).toLocaleUpperCase() + word.slice(1).toLocaleLowerCase()
+        : word,
+    );
+}
+
 /** First 20 hex of sha256(lower(email)), as the import script makes it. */
 export const guestId = async (email: string) => (await sha256Hex(cleanEmail(email))).slice(0, 20);
 
@@ -131,8 +151,8 @@ export async function createGuest(
     .bind(
       id,
       hash,
-      input.firstName,
-      input.lastName,
+      formatName(input.firstName),
+      formatName(input.lastName),
       email,
       input.institution || null,
       input.function || null,
@@ -198,7 +218,7 @@ export async function importGuests(
             `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at, audience)
              VALUES (?, ?, 1, ?, ?, ?, ?, ?, 'approved', ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
           )
-          .bind(id, hash, input.firstName, input.lastName, email, input.institution || null, input.function || null, stamp, by, stamp, stamp, audience),
+          .bind(id, hash, formatName(input.firstName), formatName(input.lastName), email, input.institution || null, input.function || null, stamp, by, stamp, stamp, audience),
       );
       existing.set(id, { id, status: 'approved', audience });
       created++;
@@ -230,7 +250,7 @@ export async function updateGuest(
   if (!before) return null;
   await db
     .prepare('UPDATE guests SET first_name = ?, last_name = ?, institution = ?, function = ?, updated_at = ? WHERE id = ?')
-    .bind(fields.firstName, fields.lastName, fields.institution || null, fields.function || null, now(), id)
+    .bind(formatName(fields.firstName), formatName(fields.lastName), fields.institution || null, fields.function || null, now(), id)
     .run();
   return { guest: (await getGuest(db, id))!, codeChanged: false };
 }
