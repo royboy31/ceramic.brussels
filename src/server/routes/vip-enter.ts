@@ -5,6 +5,7 @@ import { hubTabPath } from '../../lib/hubs';
 import { PLATFORM_PATH } from '../../lib/exhibitorsPlatform';
 import { codeHash, codePepper, findGuestByCode, normaliseCode, recordEntry, safeNext, vipEnv, type Audience } from '../vip';
 import { createVipSession, REALMS } from '../vipSession';
+import { needsDetails } from '../vipGuests';
 
 /**
  * POST /api/vip/enter - the "VIP already? enter your code" box, and (with
@@ -23,6 +24,10 @@ import { createVipSession, REALMS } from '../vipSession';
  * name, and an address that fails twenty times in ten minutes is refused
  * for the rest of them (the Cache API, per colo, which is enough). A
  * Cloudflare rate limiting rule on this path is the belt to that brace.
+ *
+ * A guest the list has no first or last name for goes to the name step
+ * first - the access page's "One last detail" window (routes/vip-details.ts)
+ * - and on to `next` from there. The gate holds every locked tab until then.
  */
 export const prerender = false;
 
@@ -101,10 +106,19 @@ export const POST: APIRoute = async ({ request }) => {
     return back('code');
   }
 
-  const cookie = await createVipSession(env.VIP_SESSIONS, guest.id, request, REALMS[audience]);
+  // The name step is the VIP hub's: the platform asks no name.
+  const owesDetails = audience === 'vip' && needsDetails(guest);
+  const cookie = await createVipSession(
+    env.VIP_SESSIONS,
+    guest.id,
+    request,
+    REALMS[audience],
+    audience === 'vip' ? (owesDetails ? 'needed' : 'ok') : undefined,
+  );
   await recordEntry(env.VIP_DB, guest.id).catch((error) => console.error('[vip] could not record the entry:', error));
 
-  return wantsJson ? json(200, { ok: true, next }, { 'set-cookie': cookie }) : redirect(next, { 'set-cookie': cookie });
+  const to = owesDetails ? `${accessPage}?next=${encodeURIComponent(next)}&step=details#vip-details` : next;
+  return wantsJson ? json(200, { ok: true, next: to }, { 'set-cookie': cookie }) : redirect(to, { 'set-cookie': cookie });
 };
 
 export const GET: APIRoute = () => json(405, { ok: false, error: 'method' });
