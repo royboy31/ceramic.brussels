@@ -19,6 +19,11 @@ import type { Audience, RowAudience } from './vip';
  * platform's address (docs/exhibitors-platform.md).
  * The outcome goes back to the tool, so an editor always knows whether the
  * guest has the code or must be sent it by hand.
+ *
+ * The same code goes out a second way, as the "already a member" mail: an
+ * approved guest who fills in the "not a VIP yet?" form again gets their
+ * code back at the address on file (routes/vip-request.ts). That text has
+ * no Site settings field yet and is always the stock one below.
  */
 
 export type MailOutcome =
@@ -36,7 +41,10 @@ interface CodeMailSettings {
   siteName?: string;
 }
 
+export type CodeMailKind = 'code' | 'member';
+
 const DEFAULT_SUBJECT = 'Your VIP code for ceramic brussels';
+const MEMBER_SUBJECT = 'Your ceramic brussels VIP code';
 const DEFAULT_TEXT = `Dear {firstName},
 
 Welcome to the VIP programme of ceramic brussels. Your personal access code is
@@ -44,6 +52,18 @@ Welcome to the VIP programme of ceramic brussels. Your personal access code is
 {code}
 
 Enter it at {link} to open the VIP programme, the VIP lounge and the hotel deal. The code is yours alone; type it in any case, with or without the hyphens.
+
+The ceramic brussels VIP team
+{contact}`;
+const MEMBER_TEXT = `Dear {firstName},
+
+We have received a new VIP request with your email address. You are already a member of the ceramic brussels VIP programme, so there is nothing more to do: here is your personal access code.
+
+{code}
+
+Enter it at {link} to open the VIP programme, the VIP lounge and the hotel deal. The code is yours alone; type it in any case, with or without the hyphens.
+
+If you did not make this request, you can simply ignore this email.
 
 The ceramic brussels VIP team
 {contact}`;
@@ -84,6 +104,7 @@ export async function mailVipCode(
   guest: { first_name: string; last_name: string; email: string; audience?: RowAudience },
   code: string,
   origin: string,
+  kind: CodeMailKind = 'code',
 ): Promise<MailOutcome> {
   const audience: Audience = guest.audience === 'exhibitor' ? 'exhibitor' : 'vip';
   const to = guest.email;
@@ -113,8 +134,8 @@ export async function mailVipCode(
       sender: senderFor(cfg.senderName || cfg.siteName, cfg.senderEmail),
       to: [toName ? { email: to, name: toName } : { email: to }],
       ...(cfg.contactEmail ? { replyTo: { email: cfg.contactEmail } } : {}),
-      subject: fill(subject, values),
-      text: fill(text, values),
+      subject: fill(kind === 'member' ? MEMBER_SUBJECT : subject, values),
+      text: fill(kind === 'member' ? MEMBER_TEXT : text, values),
     });
     return { sent: true, to };
   } catch (error) {
