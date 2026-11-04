@@ -131,7 +131,8 @@ export function safeNext(input: unknown, fallback: string): string {
   if (typeof input !== 'string') return fallback;
   const value = input.trim();
   // A path of this site: one slash, then anything but a second slash or a
-  // backslash, and no line breaks anywhere.
-  if (!value.startsWith('/') || value.startsWith('//') || value.charAt(1) === '\\' || /[\r\n]/.test(value)) return fallback;
+  // backslash, and no whitespace or control character anywhere - a browser
+  // drops a tab from a URL, so "/<tab>/evil.example" would become "//evil.example".
+  if (!value.startsWith('/') || value.startsWith('//') || value.charAt(1) === '\\' || /[\x00-\x20\x7f]/.test(value)) return fallback;
   return value;
 }

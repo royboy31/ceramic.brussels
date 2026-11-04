@@ -34,6 +34,11 @@ export interface GuestRow {
   decided_at: string | null;
   decided_by: string | null;
   created_at: string;
+  /** The first name the code is made from, once the name step froze it; null = `first_name`. */
+  code_name: string | null;
+  details_at: string | null;
+  lang: string | null;
+  decline_mail_id: string | null;
 }
 
 export interface GuestInput {
@@ -42,10 +47,32 @@ export interface GuestInput {
   email: string;
   institution?: string;
   function?: string;
+  /** en | fr | nl: the page the request form was sent from (Baïlo, 3 Nov: for mails in their language later). */
+  lang?: string;
 }
 
+/**
+ * The functions the name step offers (Baïlo, 4 Nov 2026), stored as written
+ * here, in English, whatever the page's language. The request form and the
+ * Studio still take free text, so a row may hold anything else too.
+ */
+export const GUEST_FUNCTIONS = [
+  'Collector / Patron',
+  'Art Advisor',
+  'Interior Designer / Architect',
+  'Curator',
+  'Museum / Foundation',
+  'Embassy / Cultural Institute',
+  'Gallery / Auction House',
+  'Artist / Designer',
+  'Press / Media',
+  'Brand Partner',
+  'Academic / Education',
+  'Other',
+] as const;
+
 const COLUMNS =
-  'id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, decided_at, decided_by, created_at';
+  'id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, decided_at, decided_by, created_at, code_name, details_at, lang, decline_mail_id';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const now = () => new Date().toISOString();
@@ -133,8 +160,8 @@ export async function createGuest(
   const hash = await codeHash(await makeCode(pepper, input.firstName, email, 1), pepper);
   await db
     .prepare(
-      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, requested_at, decided_at, decided_by, created_at, updated_at)
-       VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
+      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, requested_at, decided_at, decided_by, created_at, updated_at, lang)
+       VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
     )
     .bind(
       id,
@@ -150,6 +177,7 @@ export async function createGuest(
       status === 'pending' ? null : by,
       stamp,
       stamp,
+      input.lang || null,
     )
     .run();
   return getGuest(db, id);
@@ -205,8 +233,10 @@ export async function importGuests(
 /**
  * Name, institution and function. The email is the guest's identity - their
  * id and their code both come from it - so it is not editable: delete and
- * add again. The first name is part of the code as printed, so the hash is
- * made again from the new one and the caller is told when the code moved.
+ * add again. The first name is part of the code as printed, so a new first
+ * name makes the hash again from it, and the caller is told when the code
+ * moved. Anything else - a last name, an institution, the casing of the
+ * first name - leaves the code alone, including one the name step froze.
  */
 export async function updateGuest(
   db: D1Like,
@@ -216,11 +246,22 @@ export async function updateGuest(
 ): Promise<{ guest: GuestRow; codeChanged: boolean } | null> {
   const before = await getGuest(db, id);
   if (!before) return null;
-  const was = await makeCode(pepper, before.first_name, before.email, before.code_version);
-  const is = await makeCode(pepper, fields.firstName, before.email, before.code_version);
+  const was = await makeCode(pepper, codeName(before), before.email, before.code_version);
+  const renamed = namePart(fields.firstName) !== namePart(before.first_name);
+  const is = renamed ? await makeCode(pepper, fields.firstName, before.email, before.code_version) : was;
   await db
-    .prepare('UPDATE guests SET first_name = ?, last_name = ?, institution = ?, function = ?, code_hash = ?, updated_at = ? WHERE id = ?')
-    .bind(formatName(fields.firstName), formatName(fields.lastName), fields.institution || null, fields.function || null, await codeHash(is, pepper), now(), id)
+    .prepare('UPDATE guests SET first_name = ?, last_name = ?, institution = ?, function = ?, code_hash = ?, code_name = ?, updated_at = ? WHERE id = ?')
+    .bind(
+      formatName(fields.firstName),
+      formatName(fields.lastName),
+      fields.institution || null,
+      fields.function || null,
+      await codeHash(is, pepper),
+      // A renamed guest's code follows the new name again.
+      renamed ? null : before.code_name,
+      now(),
+      id,
+    )
     .run();
   return { guest: (await getGuest(db, id))!, codeChanged: was !== is };
 }
@@ -241,9 +282,10 @@ export async function reissueGuest(db: D1Like, pepper: string, id: string): Prom
   const guest = await getGuest(db, id);
   if (!guest) return null;
   const version = Number(guest.code_version) + 1;
+  // A new code is made from the name the guest has now, and follows it from here.
   const code = await makeCode(pepper, guest.first_name, guest.email, version);
   await db
-    .prepare('UPDATE guests SET code_version = ?, code_hash = ?, revoked = 0, updated_at = ? WHERE id = ?')
+    .prepare('UPDATE guests SET code_version = ?, code_hash = ?, code_name = NULL, revoked = 0, updated_at = ? WHERE id = ?')
     .bind(version, await codeHash(code, pepper), now(), id)
     .run();
   return { guest: (await getGuest(db, id))!, code };
@@ -268,6 +310,41 @@ export async function endSessions(kv: KVLike, id: string): Promise<number> {
   return ended;
 }
 
+/** The first name a guest's code is made from: frozen by the name step, else the first name. */
+export const codeName = (g: Pick<GuestRow, 'first_name' | 'code_name'>) => g.code_name ?? g.first_name;
+
 /** The code a guest types, for the ones who have a working one. */
 export const codeFor = (pepper: string, g: GuestRow) =>
-  g.status === 'approved' && !g.revoked ? makeCode(pepper, g.first_name, g.email, g.code_version) : Promise.resolve(null);
+  g.status === 'approved' && !g.revoked ? makeCode(pepper, codeName(g), g.email, g.code_version) : Promise.resolve(null);
+
+/** Whether the gate still has to ask this guest for their name (Baïlo: required, and once). */
+export const needsDetails = (g: Pick<GuestRow, 'first_name' | 'last_name'>) => !g.first_name.trim() || !g.last_name.trim();
+
+/**
+ * What a guest gives at the name step: both names, and the function and
+ * institution if they like. The code is not touched: `code_name` keeps the
+ * first name it was made from (the old value, read in the same statement),
+ * so the code already mailed keeps working. An optional field left empty
+ * keeps what the row had.
+ */
+export async function saveDetails(
+  db: D1Like,
+  id: string,
+  fields: { firstName: string; lastName: string; function?: string; institution?: string },
+): Promise<GuestRow | null> {
+  const stamp = now();
+  await db
+    .prepare(
+      `UPDATE guests SET code_name = COALESCE(code_name, first_name), first_name = ?, last_name = ?,
+         function = COALESCE(?, function), institution = COALESCE(?, institution), details_at = ?, updated_at = ?
+       WHERE id = ?`,
+    )
+    .bind(formatName(fields.firstName), formatName(fields.lastName), fields.function || null, fields.institution || null, stamp, stamp, id)
+    .run();
+  return getGuest(db, id);
+}
+
+/** The Brevo id of a decline waiting to go out, or null once it went or was called off. */
+export async function setDeclineMail(db: D1Like, id: string, messageId: string | null): Promise<void> {
+  await db.prepare('UPDATE guests SET decline_mail_id = ? WHERE id = ?').bind(messageId, id).run();
+}

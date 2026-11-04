@@ -113,6 +113,13 @@ function formatName(name) {
     );
 }
 
+/**
+ * The first name a guest's code is made from. The name step on the site
+ * fills in a missing name without moving the code, and keeps the old one in
+ * `code_name` (migrations/0004). src/server/vipGuests.ts `codeName`.
+ */
+const codeName = (g) => g.code_name ?? g.first_name;
+
 function makeCode(firstName, email, version) {
   const mac = crypto.createHmac('sha256', PEPPER).update(`${email.trim().toLowerCase()}:${version}`).digest();
   let tail = '';
@@ -167,7 +174,7 @@ const rows = (out) => out?.[0]?.results ?? [];
 function allGuests() {
   return rows(
     d1(
-      'SELECT id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, created_at FROM guests ORDER BY last_name, first_name',
+      'SELECT id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, created_at, code_name FROM guests ORDER BY last_name, first_name',
     ),
   );
 }
@@ -278,12 +285,14 @@ function importSheet(file) {
   let updated = 0;
   for (const g of sheet) {
     const id = guestId(g.email);
-    const version = existing.get(id)?.code_version ?? 1;
-    const code = makeCode(g.firstName, g.email, version);
+    const before = existing.get(id);
+    const version = before?.code_version ?? 1;
+    // A guest already in keeps their hash, so the sheet gets the code they already have.
+    const code = makeCode(before ? codeName(before) : g.firstName, g.email, version);
     statements.push(
       `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at)
        VALUES (${q(id)}, ${q(codeHash(code))}, ${version}, ${q(g.firstName)}, ${q(g.lastName)}, ${q(g.email)}, ${q(g.institution || null)}, ${q(g.function || null)}, 'approved', ${q(stamp)}, 'import', ${q(stamp)}, ${q(stamp)})
-       ON CONFLICT(id) DO UPDATE SET first_name = excluded.first_name, last_name = excluded.last_name, institution = excluded.institution, function = excluded.function, updated_at = excluded.updated_at,
+       ON CONFLICT(id) DO UPDATE SET code_name = COALESCE(guests.code_name, guests.first_name), first_name = excluded.first_name, last_name = excluded.last_name, institution = excluded.institution, function = excluded.function, updated_at = excluded.updated_at,
          decided_at = CASE WHEN guests.status = 'pending' THEN excluded.decided_at ELSE guests.decided_at END,
          decided_by = CASE WHEN guests.status = 'pending' THEN 'import' ELSE guests.decided_by END,
          status = CASE WHEN guests.status = 'pending' THEN 'approved' ELSE guests.status END;`,
@@ -312,7 +321,7 @@ function exportList() {
         g.email,
         g.institution,
         g.function,
-        g.revoked || g.status !== 'approved' ? '' : makeCode(g.first_name, g.email, g.code_version),
+        g.revoked || g.status !== 'approved' ? '' : makeCode(codeName(g), g.email, g.code_version),
         g.status,
         g.revoked ? 'yes' : '',
         g.entries,
@@ -325,7 +334,7 @@ function exportList() {
 
 function findGuest(email) {
   const id = guestId(email);
-  const [g] = rows(d1(`SELECT id, code_version, first_name, last_name, email, status, revoked FROM guests WHERE id = ${q(id)}`));
+  const [g] = rows(d1(`SELECT id, code_version, first_name, last_name, email, status, revoked, code_name, decline_mail_id FROM guests WHERE id = ${q(id)}`));
   if (!g) {
     console.error(`No guest with the email ${email}.`);
     process.exit(1);
@@ -344,7 +353,7 @@ function reissue(email) {
   const g = findGuest(email);
   const version = Number(g.code_version) + 1;
   const code = makeCode(g.first_name, g.email, version);
-  d1(`UPDATE guests SET code_version = ${version}, code_hash = ${q(codeHash(code))}, revoked = 0, updated_at = ${q(now())} WHERE id = ${q(g.id)};`);
+  d1(`UPDATE guests SET code_version = ${version}, code_hash = ${q(codeHash(code))}, code_name = NULL, revoked = 0, updated_at = ${q(now())} WHERE id = ${q(g.id)};`);
   const ended = endSessions(g.id);
   console.log(`${g.first_name} ${g.last_name}: new code ${code} (${ended} session(s) ended). The old one no longer works.`);
 }
@@ -364,7 +373,11 @@ function addGuest(email) {
 function decide(email, status) {
   const g = findGuest(email);
   d1(`UPDATE guests SET status = ${q(status)}, decided_at = ${q(now())}, decided_by = 'cli', updated_at = ${q(now())} WHERE id = ${q(g.id)};`);
-  if (status === 'approved') console.log(`${g.first_name} ${g.last_name}: approved. Code: ${makeCode(g.first_name, g.email, g.code_version)}`);
+  if (status === 'approved' && g.decline_mail_id) {
+    // The Studio calls a scheduled decline off on approval; this script has no Brevo key.
+    console.warn(`A decline mail is still scheduled in Brevo for ${g.email} (messageId ${g.decline_mail_id}). Approve in the Studio instead, or delete it in Brevo, or they get it within 48 hours.`);
+  }
+  if (status === 'approved') console.log(`${g.first_name} ${g.last_name}: approved. Code: ${makeCode(codeName(g), g.email, g.code_version)}`);
   else console.log(`${g.first_name} ${g.last_name}: denied, ${endSessions(g.id)} session(s) ended.`);
 }
 

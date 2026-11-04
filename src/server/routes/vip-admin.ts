@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { codePepper, vipEnv } from '../vip';
 import { verifySanityAdmin } from '../sanityIdentity';
 import { mailVip, mailVipCode } from '../vipMail';
+import { brevoKey, cancelMail } from '../mail';
 import {
   cleanEmail,
   codeFor,
@@ -14,6 +15,7 @@ import {
   isEmail,
   listGuests,
   reissueGuest,
+  setDeclineMail,
   setRevoked,
   updateGuest,
   type GuestInput,
@@ -39,10 +41,15 @@ import {
  * and `mail` sends it again on request. The answer always carries the
  * outcome, so the tool can say "emailed" or "send it yourself". An import
  * mails nobody: the invitation mailing is the team's, from the export.
+ *
+ * A declined request is answered 48 hours later (Baïlo, 4 Nov 2026): Brevo
+ * holds the mail, its id waits on the row, and approving or deleting the
+ * guest before it goes calls it off.
  */
 export const prerender = false;
 
 const IMPORT_CHUNK = 300;
+const DECLINE_DELAY_MS = 48 * 3600 * 1000;
 const EXPORT_PAGE = 500;
 
 const json = (status: number, body: Record<string, unknown>) =>
@@ -100,6 +107,17 @@ export const POST: APIRoute = async ({ request }) => {
   const id = clean(body.id, 64);
   const found = async () => (/^[a-f0-9]{8,64}$/.test(id) ? getGuest(db, id) : null);
   const site = new URL(request.url).origin;
+  /** A decline still waiting at Brevo, called off. Logged, never fatal: the decision stands either way. */
+  const cancelDecline = async (guest: GuestRow) => {
+    const key = brevoKey();
+    if (!guest.decline_mail_id || !key) return;
+    try {
+      await cancelMail(key, guest.decline_mail_id);
+      await setDeclineMail(db, guest.id, null);
+    } catch (error) {
+      console.error('[vip] scheduled decline not cancelled:', guest.decline_mail_id, error instanceof Error ? error.message : error);
+    }
+  };
   /** The guest's working code and, when there is one, the outcome of mailing it. */
   const withMail = async (guest: GuestRow) => {
     const code = await codeFor(pepper, guest);
@@ -141,9 +159,12 @@ export const POST: APIRoute = async ({ request }) => {
       // Declining a request answers it (Baïlo, 3 Nov: on every decline). Only
       // a pending request: a member taken off the list is not "declined".
       if (body.action === 'deny') {
-        const mail = guest.status === 'pending' ? await mailVip('decline', decided!, site) : undefined;
+        const mail =
+          guest.status === 'pending' ? await mailVip('decline', decided!, site, undefined, new Date(Date.now() + DECLINE_DELAY_MS)) : undefined;
+        if (mail?.sent && mail.messageId) await setDeclineMail(db, guest.id, mail.messageId);
         return json(200, { ok: true, guest: view(decided!), code: null, ...(mail ? { mail } : {}), ended });
       }
+      await cancelDecline(guest);
       return json(200, { ok: true, guest: view(decided!), ...(await withMail(decided!)), ended });
     }
 
@@ -167,6 +188,7 @@ export const POST: APIRoute = async ({ request }) => {
     case 'delete': {
       const guest = await found();
       if (!guest) return fail(404, 'No such guest.');
+      await cancelDecline(guest);
       await deleteGuest(db, guest.id);
       return json(200, { ok: true, ended: await endSessions(env.VIP_SESSIONS, guest.id) });
     }
