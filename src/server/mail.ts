@@ -33,6 +33,8 @@ export interface Message {
   /** Plain text; a blank line starts a new paragraph. The HTML is made from it when none is given. */
   text?: string;
   html?: string;
+  /** Sent later by Brevo, at most 72 hours ahead; cancelMail() calls it off until then. */
+  scheduledAt?: Date;
 }
 
 export const brevoKey = (): string | undefined => getSecret('BREVO_API_KEY') || undefined;
@@ -65,7 +67,8 @@ export const rowsHtml = (rows: [string, string][]) =>
     .map(([k, v]) => `<tr><th align="left" style="padding:2px 12px 2px 0">${escapeHtml(k)}</th><td>${escapeHtml(v)}</td></tr>`)
     .join('')}</table>`;
 
-export async function sendMail(apiKey: string, message: Message): Promise<void> {
+/** Sends a message, or schedules it, and returns Brevo's messageId (what cancelMail() takes). */
+export async function sendMail(apiKey: string, message: Message): Promise<string | undefined> {
   const body = {
     sender: message.sender ?? DEFAULT_SENDER,
     to: message.to,
@@ -74,6 +77,7 @@ export async function sendMail(apiKey: string, message: Message): Promise<void> 
     subject: message.subject,
     ...(message.text ? { textContent: message.text } : {}),
     htmlContent: message.html ?? paragraphs(message.text ?? ''),
+    ...(message.scheduledAt ? { scheduledAt: message.scheduledAt.toISOString() } : {}),
   };
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
@@ -81,4 +85,18 @@ export async function sendMail(apiKey: string, message: Message): Promise<void> 
     body: JSON.stringify(body),
   });
   if (!response.ok) throw new Error(`Brevo ${response.status}: ${(await response.text()).slice(0, 300)}`);
+  const sent = (await response.json().catch(() => null)) as { messageId?: string } | null;
+  return sent?.messageId;
+}
+
+/**
+ * Calls off a scheduled message. Brevo answers 204, or 404 once it has gone
+ * out or was already deleted - both mean there is nothing left to cancel.
+ */
+export async function cancelMail(apiKey: string, messageId: string): Promise<void> {
+  const response = await fetch(`https://api.brevo.com/v3/smtp/email/${encodeURIComponent(messageId)}`, {
+    method: 'DELETE',
+    headers: { 'api-key': apiKey, accept: 'application/json' },
+  });
+  if (!response.ok && response.status !== 404) throw new Error(`Brevo ${response.status}: ${(await response.text()).slice(0, 300)}`);
 }

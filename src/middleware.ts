@@ -8,6 +8,7 @@ import { hubTabPath, lockedTabFromPath } from './lib/hubs';
 import { localePath } from './lib/i18n';
 import { DEFAULT_LOCALE, isHeldBack, type LocaleId } from './lib/locales';
 import { gateOpen, vipEnv } from './server/vip';
+import { getGuest, needsDetails } from './server/vipGuests';
 import { readVipSession } from './server/vipSession';
 
 /**
@@ -70,20 +71,26 @@ async function vipGate(context: Ctx, next: Next, locked: { lang: LocaleId; tab: 
   }
 
   const token = previewToken();
+  const access = localePath(locked.lang, hubTabPath('vip', 'access', locked.lang));
+  const toAccess = (query: string) =>
+    new Response(null, {
+      status: 302,
+      headers: { location: `${access}?${query}`, 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow' },
+    });
+
   let allowed = !!token && (await verifyPreviewCookie(readPreviewCookie(request), token));
   if (!allowed) allowed = !(await gateOpen());
-  if (!allowed) allowed = (await readVipSession(env.VIP_SESSIONS, request)) !== null;
-
   if (!allowed) {
-    const access = localePath(locked.lang, hubTabPath('vip', 'access', locked.lang));
-    return new Response(null, {
-      status: 302,
-      headers: {
-        location: `${access}?next=${encodeURIComponent(url.pathname)}`,
-        'cache-control': 'private, no-store',
-        'x-robots-tag': 'noindex, nofollow',
-      },
-    });
+    const session = await readVipSession(env.VIP_SESSIONS, request);
+    if (!session) return toAccess(`next=${encodeURIComponent(url.pathname)}`);
+    // The name step (Baïlo, 4 Nov 2026): required, asked once, before any
+    // locked tab. A session from before it carries no answer: ask the list.
+    let owesDetails = session.details === 'needed';
+    if (session.details === undefined) {
+      const guest = await getGuest(env.VIP_DB, session.guestId).catch(() => null);
+      owesDetails = !!guest && needsDetails(guest);
+    }
+    if (owesDetails) return toAccess(`next=${encodeURIComponent(url.pathname)}&step=details#vip-details`);
   }
 
   // Read to the end inside the store, as the preview does: the frontmatter

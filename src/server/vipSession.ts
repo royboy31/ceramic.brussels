@@ -9,6 +9,12 @@ import { sha256Hex, type KVLike } from './vip';
  * a guest is one list and a few deletes (scripts/vip-guests.mjs). Each key
  * carries its own expiry; nothing is ever pruned. A gate check is one KV
  * read, cached at the edge for a minute.
+ *
+ * A session also says whether the guest still owes the name step
+ * (`details`: 'needed' or 'ok'), so the gate need not read the guest list
+ * on every page. Giving the name ends that session and opens a new one,
+ * because the edge may hold the old answer for that minute. A session from
+ * before the name step has no `details`: the gate looks the guest up.
  */
 
 export const VIP_COOKIE = 'cb_vip';
@@ -36,18 +42,20 @@ export function readVipCookie(request: Request): string | null {
 const sessionKey = async (guestId: string, secret: string) => `s:${guestId}:${await sha256Hex(secret)}`;
 
 /** Opens a session for a guest and returns the Set-Cookie header. */
-export async function createVipSession(kv: KVLike, guestId: string, request: Request): Promise<string> {
+export type SessionDetails = 'needed' | 'ok';
+
+export async function createVipSession(kv: KVLike, guestId: string, request: Request, details: SessionDetails): Promise<string> {
   const secret = base64url(crypto.getRandomValues(new Uint8Array(32)));
   await kv.put(
     await sessionKey(guestId, secret),
-    JSON.stringify({ at: new Date().toISOString(), ua: (request.headers.get('user-agent') ?? '').slice(0, 200) }),
+    JSON.stringify({ at: new Date().toISOString(), ua: (request.headers.get('user-agent') ?? '').slice(0, 200), details }),
     { expirationTtl: TTL_SECONDS },
   );
   return cookieHeader(`${guestId}.${secret}`, TTL_SECONDS);
 }
 
-/** The guest id of the request's session, or null. */
-export async function readVipSession(kv: KVLike, request: Request): Promise<string | null> {
+/** The request's session: its guest, and where they are with the name step (undefined: an older session). */
+export async function readVipSession(kv: KVLike, request: Request): Promise<{ guestId: string; details?: SessionDetails } | null> {
   const value = readVipCookie(request);
   if (!value) return null;
   const dot = value.indexOf('.');
@@ -56,7 +64,15 @@ export async function readVipSession(kv: KVLike, request: Request): Promise<stri
   const secret = value.slice(dot + 1);
   if (!/^[a-f0-9]{8,64}$/.test(guestId) || secret.length < 32) return null;
   const hit = await kv.get(await sessionKey(guestId, secret), { cacheTtl: 60 });
-  return hit ? guestId : null;
+  if (!hit) return null;
+  let details: SessionDetails | undefined;
+  try {
+    const stored = JSON.parse(hit) as { details?: unknown };
+    if (stored.details === 'needed' || stored.details === 'ok') details = stored.details;
+  } catch {
+    // An unreadable value is still a session; the gate looks the guest up.
+  }
+  return { guestId, details };
 }
 
 export async function deleteVipSession(kv: KVLike, request: Request): Promise<void> {

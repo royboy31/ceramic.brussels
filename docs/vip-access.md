@@ -211,6 +211,35 @@ above; the tool only edits rows.
   and the decline, sent when a **pending** request is denied in the VIP
   tool. The code buttons link to the access page with `#code=…`, which
   `VipCodeForm.astro` puts in the box.
+- **The decline goes out 48 hours later** (Baïlo, 4 Nov 2026, so the
+  selection does not feel automated). Brevo holds it (`scheduledAt`, at
+  most 72 hours ahead), its messageId waits on the row in
+  `decline_mail_id` (migration `0004`), and approving or deleting the
+  guest before then calls it off (`cancelMail` in `mail.ts`).
+- **The name step** (Baïlo, 3 and 4 Nov 2026; migration `0004`). Most of
+  the list came in with an email and no name. A guest whose first or last
+  name is missing is sent, once their code is accepted, to the access page's
+  "One last detail" window (`VipDetailsForm.astro` →
+  `routes/vip-details.ts`): first and last name required, function (her
+  list of twelve, stored in English, `GUEST_FUNCTIONS`) and institution
+  optional. It cannot be dismissed, and `src/middleware.ts` holds every
+  locked tab until it is answered; once both names are stored nobody is
+  asked again. The session says whether the step is owed (`details` in its
+  KV value), so the gate does not read D1 per page; answering swaps the
+  session for a new one, because the edge may cache the old one for a
+  minute. A session from before the step carries no answer and the gate
+  looks the guest up instead.
+- **A filled-in name never moves a code.** A code is made from the first
+  name, so the name step keeps the one the code was made from in
+  `code_name` (NULL = `first_name`, so no row was backfilled). `codeFor`,
+  the Studio's edit, the export and the script all read it through
+  `codeName`. Changing the first name in the Studio still gives a new code
+  and mails it, as before; anything else, casing included, leaves it.
+  Reissuing makes the new code from the current name and clears
+  `code_name`.
+- **The request form's language is kept** (`lang`, migration `0004`): en,
+  fr or nl, from the page the form was sent from, for mails in the guest's
+  language later. Mails are English for now.
 - **Names are saved with a capital initial** (`formatName` in
   `vipGuests.ts`, and the same function in `scripts/vip-guests.mjs`): the
   form, the Studio's add, edit and import, and the script's import and
