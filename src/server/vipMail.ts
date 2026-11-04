@@ -1,97 +1,182 @@
 import { sanityClient } from 'sanity:client';
 import { DEFAULT_LOCALE } from '../lib/locales';
 import { localePath } from '../lib/i18n';
-import { brevoKey, fill, mailDryRun, sendMail, senderFor } from './mail';
+import { brevoKey, mailDryRun, sendMail, senderFor, type Address } from './mail';
+import { EDITION, renderVipMail, type VipMail } from './vipMailLayout';
 
 /**
- * A VIP's code, mailed to them (docs/vip-access.md). The Studio's VIP tool
- * sends it when a guest is added, approved or given a new code, and on its
- * "Send by email" button; an import never does - the invitation mailing is
- * the team's, from the export.
+ * The mails a VIP guest gets (docs/vip-access.md), all in the branded
+ * layout of vipMailLayout.ts, their texts from Baïlo's mockup of 2 Nov 2026:
  *
- * The text is Site settings → VIP → "Code email", with the guest's name,
- * the code, the access page and the VIP address filled in, and a stock
- * English text when the team wrote none: the guest list keeps no language.
- * The outcome goes back to the tool, so an editor always knows whether the
- * guest has the code or must be sent it by hand.
+ * - `acknowledgement` - the "not a VIP yet?" form was sent (routes/vip-request.ts);
+ * - `code` - the welcome with their code, when the Studio's VIP tool adds,
+ *   approves or reissues a guest and on its "Send by email" button; an
+ *   import never sends it, the invitation mailing is the team's;
+ * - `member` - an approved guest asked again, so their code goes back to
+ *   the address on file (routes/vip-request.ts);
+ * - `decline` - the VIP tool denied a request.
+ *
+ * The acknowledgement and the decline share a subject so the answer lands
+ * in the request's thread. The texts are English: the guest list keeps no
+ * language. Sender and reply-to are Site settings → VIP. The outcome goes
+ * back to the tool, so an editor always knows whether the guest has the
+ * mail or must be written to by hand.
  */
 
 export type MailOutcome =
   | { sent: true; to: string }
   | { sent: false; to: string; reason: 'unconfigured' | 'dry-run' | 'failed'; detail?: string };
 
-interface CodeMailSettings {
+export type VipMailKind = 'acknowledgement' | 'code' | 'member' | 'decline';
+
+interface MailSettings {
   senderName?: string;
   senderEmail?: string;
   contactEmail?: string;
-  codeSubject?: string;
-  codeText?: string;
   siteName?: string;
 }
 
-const DEFAULT_SUBJECT = 'Your VIP code for ceramic brussels';
-const DEFAULT_TEXT = `Dear {firstName},
+const APPLICATION_SUBJECT = `Your VIP application, ceramic brussels ${EDITION.year}`;
 
-Welcome to the VIP programme of ceramic brussels. Your personal access code is
-
-{code}
-
-Enter it at {link} to open the VIP programme, the VIP lounge and the hotel deal. The code is yours alone; type it in any case, with or without the hyphens.
-
-The ceramic brussels VIP team
-{contact}`;
-
-async function settings(): Promise<CodeMailSettings> {
-  const result = await sanityClient.fetch<CodeMailSettings | null>(
+async function settings(): Promise<MailSettings> {
+  const result = await sanityClient.fetch<MailSettings | null>(
     `*[_type == "siteSettings"][0]{
       "senderName": vip.senderName,
       "senderEmail": vip.senderEmail,
       "contactEmail": coalesce(vip.contactEmail, contactEmail),
-      "codeSubject": vip.codeSubject,
-      "codeText": vip.codeText,
       siteName
     }`,
   );
   return result ?? {};
 }
 
-/** The access page on the site the code is for: the canonical host, or the one the request came in on. */
-const accessLink = (origin: string) => new URL(localePath(DEFAULT_LOCALE, 'vip/access'), import.meta.env.PUBLIC_SITE_URL || origin).href;
+/** The site the links point at: the canonical host, or the one the request came in on. */
+export const mailSite = (origin: string) => import.meta.env.PUBLIC_SITE_URL || origin;
 
-export async function mailVipCode(
+/** The access page, the code already in the box (VipCodeForm reads `#code=`; a fragment never reaches a log). */
+const accessLink = (site: string, code?: string) =>
+  new URL(localePath(DEFAULT_LOCALE, 'vip/access'), site).href + (code ? `#code=${encodeURIComponent(code)}` : '');
+
+/** Each mail's subject and content. `firstName` is already a fallback when the row has none. */
+export function vipMailContent(kind: VipMailKind, firstName: string, site: string, code?: string): { subject: string; mail: VipMail } {
+  const team = { name: `The ${EDITION.name} VIP team` };
+  const home = new URL(localePath(DEFAULT_LOCALE, ''), site).href;
+  switch (kind) {
+    case 'acknowledgement':
+      return {
+        subject: APPLICATION_SUBJECT,
+        mail: {
+          preheader: 'We have received your application to the VIP programme.',
+          heading: `Thank you, ${firstName}`,
+          intro: [
+            'We have received your application to the VIP programme of ceramic brussels.',
+            'As our programme is intentionally limited in size, each request is reviewed individually by our VIP Relations team. You will hear from us within ten working days.',
+            'Should you wish to share any additional information in the meantime, simply reply to this email. Your details will, of course, be treated with the utmost confidentiality.',
+            `ceramic brussels takes place from **${EDITION.dates}** at ${EDITION.venue}, in Brussels.`,
+          ],
+          button: { label: 'discover the fair', href: home },
+          signOff: 'With kind regards,',
+          signature: team,
+        },
+      };
+    case 'code':
+      return {
+        subject: `Welcome to the ${EDITION.name} VIP programme`,
+        mail: {
+          preheader: 'Your personal access code to the VIP programme.',
+          heading: `Welcome, ${firstName}`,
+          intro: ['It is a great pleasure to welcome you to the VIP programme of ceramic brussels.'],
+          code,
+          afterCode: ['Enter it on our VIP page to discover the full VIP programme and to benefit from our partner hotel offer when booking your stay.'],
+          button: { label: 'access the VIP programme', href: accessLink(site, code) },
+          closing: [
+            'Our team remains at your entire disposal to tailor your visit, whether you would like an introduction to specific galleries, a private tour of the fair or recommendations for your stay in Brussels.',
+            `We look forward to welcoming you at ${EDITION.venue}, from ${EDITION.dates}.`,
+          ],
+          signOff: 'Warm regards,',
+          signature: { name: 'Baïlo Staumont', title: 'Head of International Relations & Partnership Development', bold: true },
+        },
+      };
+    case 'member':
+      return {
+        subject: `Your ${EDITION.name} VIP code`,
+        mail: {
+          preheader: 'You are already a member: here is your personal access code.',
+          heading: `Dear ${firstName}`,
+          intro: [
+            'We have received a new VIP request with your email address. You are already a member of the VIP programme of ceramic brussels, so there is nothing more to do: here is your personal access code.',
+          ],
+          code,
+          button: { label: 'access the VIP programme', href: accessLink(site, code) },
+          closing: ['If you did not make this request, you can simply ignore this email.'],
+          signOff: 'With kind regards,',
+          signature: team,
+        },
+      };
+    case 'decline':
+      return {
+        subject: APPLICATION_SUBJECT,
+        mail: {
+          preheader: 'About your application to the VIP programme.',
+          heading: `Dear ${firstName}`,
+          intro: [
+            'Thank you for your interest in ceramic brussels and for the time you took to share your application with us.',
+            'As the number of places in our VIP programme is deliberately limited, we are not in a position to extend a VIP invitation to you for this edition.',
+            `We would nevertheless be delighted to welcome you at the fair, held at ${EDITION.venue} from ${EDITION.dates}, and warmly invite you to discover ceramic and the city, our free programme of exhibitions, talks and book launches across Brussels.`,
+          ],
+          // The "ceramic and the city" page is still to be confirmed (mockup, note 3): the programme hub until then.
+          button: { label: 'discover ceramic and the city', href: new URL(localePath(DEFAULT_LOCALE, 'programme'), site).href },
+          closing: ['With your permission, we will gladly keep your details for our future editions.'],
+          signOff: 'With kind regards,',
+          signature: team,
+        },
+      };
+  }
+}
+
+/** One of the mails above to one guest, through Brevo, or the reason it was not sent. */
+export async function mailVip(
+  kind: VipMailKind,
   guest: { first_name: string; last_name: string; email: string },
-  code: string,
   origin: string,
+  code?: string,
 ): Promise<MailOutcome> {
   const to = guest.email;
   const apiKey = brevoKey();
   if (!apiKey) {
     if (mailDryRun()) {
-      console.warn('[vip] APPLY_DRY_RUN: code not mailed', JSON.stringify({ to, code }));
+      console.warn(`[vip] APPLY_DRY_RUN: ${kind} mail not sent`, JSON.stringify({ to, ...(code ? { code } : {}) }));
       return { sent: false, to, reason: 'dry-run' };
     }
     return { sent: false, to, reason: 'unconfigured' };
   }
   try {
     const cfg = await settings();
-    const values = {
-      firstName: guest.first_name,
-      lastName: guest.last_name,
-      code,
-      link: accessLink(origin),
-      contact: cfg.contactEmail ?? '',
-    };
+    const name = `${guest.first_name} ${guest.last_name}`.trim();
+    // Most of the imported list has no first name yet: "Dear guest", never "Dear ,".
+    const { subject, mail } = vipMailContent(kind, guest.first_name || 'guest', mailSite(origin), code);
+    const { html, text } = renderVipMail(mail, mailSite(origin));
+    const recipient: Address = { email: to, ...(name ? { name } : {}) };
     await sendMail(apiKey, {
       sender: senderFor(cfg.senderName || cfg.siteName, cfg.senderEmail),
-      to: [{ email: to, name: `${guest.first_name} ${guest.last_name}` }],
+      to: [recipient],
       ...(cfg.contactEmail ? { replyTo: { email: cfg.contactEmail } } : {}),
-      subject: fill(cfg.codeSubject || DEFAULT_SUBJECT, values),
-      text: fill(cfg.codeText || DEFAULT_TEXT, values),
+      subject,
+      text,
+      html,
     });
     return { sent: true, to };
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
-    console.error('[vip] code not mailed:', detail);
+    console.error(`[vip] ${kind} mail not sent:`, detail);
     return { sent: false, to, reason: 'failed', detail };
   }
 }
+
+/** A guest's code, as the welcome or as the "already a member" reminder. */
+export const mailVipCode = (
+  guest: { first_name: string; last_name: string; email: string },
+  code: string,
+  origin: string,
+  kind: 'code' | 'member' = 'code',
+) => mailVip(kind, guest, origin, code);

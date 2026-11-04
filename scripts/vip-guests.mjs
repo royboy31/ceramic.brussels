@@ -101,6 +101,18 @@ function namePart(firstName) {
   return ascii || 'VIP';
 }
 
+/** src/server/vipGuests.ts' formatName: "marie DUPONT" → "Marie Dupont". Change one and change both. */
+function formatName(name) {
+  return String(name ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[\p{L}\p{M}]+/gu, (word) =>
+      word === word.toLocaleLowerCase() || word === word.toLocaleUpperCase()
+        ? word.charAt(0).toLocaleUpperCase() + word.slice(1).toLocaleLowerCase()
+        : word,
+    );
+}
+
 function makeCode(firstName, email, version) {
   const mac = crypto.createHmac('sha256', PEPPER).update(`${email.trim().toLowerCase()}:${version}`).digest();
   let tail = '';
@@ -230,8 +242,8 @@ function readSheet(file) {
   const get = (r, k) => (index[k] === undefined ? '' : (r[index[k]] ?? '').trim());
   return data
     .map((r) => ({
-      firstName: get(r, 'firstName'),
-      lastName: get(r, 'lastName'),
+      firstName: formatName(get(r, 'firstName')),
+      lastName: formatName(get(r, 'lastName')),
       email: get(r, 'email').toLowerCase(),
       institution: get(r, 'institution'),
       function: get(r, 'function'),
@@ -338,7 +350,7 @@ function reissue(email) {
 }
 
 function addGuest(email) {
-  const g = { email: email.trim().toLowerCase(), firstName: value('first')?.trim(), lastName: value('last')?.trim() };
+  const g = { email: email.trim().toLowerCase(), firstName: formatName(value('first')), lastName: formatName(value('last')) };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g.email) || !g.firstName || !g.lastName) throw new Error('--add needs an email, --first and --last');
   const id = guestId(g.email);
   if (rows(d1(`SELECT id FROM guests WHERE id = ${q(id)}`)).length) throw new Error(`${g.email} is already in the list (--approve, --restore or --reissue).`);
