@@ -204,6 +204,13 @@ above; the tool only edits rows.
   is mailed their code at the address on file ("already a member",
   `vipMail.ts`) and the team is not mailed; the answer on screen is the
   same for everyone. Ten requests an hour per address.
+- **Every mail to a guest is branded** (`vipMailLayout.ts`, texts in
+  `vipMail.ts`, from Baïlo's mockup of 2 Nov 2026): the acknowledgement
+  after the form (always, in its own step so a failed team mail cannot
+  drop it), the welcome with the code, the "already a member" reminder,
+  and the decline, sent when a **pending** request is denied in the VIP
+  tool. The code buttons link to the access page with `#code=…`, which
+  `VipCodeForm.astro` puts in the box.
 - **Names are saved with a capital initial** (`formatName` in
   `vipGuests.ts`, and the same function in `scripts/vip-guests.mjs`): the
   form, the Studio's add, edit and import, and the script's import and
