@@ -85,8 +85,10 @@ async function vipGate(context: Ctx, next: Next, locked: { lang: LocaleId; tab: 
     if (!session) return toAccess(`next=${encodeURIComponent(url.pathname)}`);
     // The name step (Baïlo, 4 Nov 2026): required, asked once, before any
     // locked tab. A session from before it carries no answer: ask the list.
-    let owesDetails = session.details === 'needed';
-    if (session.details === undefined) {
+    // A session that still says "needed" may be on another device of a guest
+    // who has since answered, so the list has the last word.
+    let owesDetails = false;
+    if (session.details !== 'ok') {
       const guest = await getGuest(env.VIP_DB, session.guestId).catch(() => null);
       owesDetails = !!guest && needsDetails(guest);
     }

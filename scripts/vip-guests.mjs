@@ -334,7 +334,7 @@ function exportList() {
 
 function findGuest(email) {
   const id = guestId(email);
-  const [g] = rows(d1(`SELECT id, code_version, first_name, last_name, email, status, revoked, code_name FROM guests WHERE id = ${q(id)}`));
+  const [g] = rows(d1(`SELECT id, code_version, first_name, last_name, email, status, revoked, code_name, decline_mail_id FROM guests WHERE id = ${q(id)}`));
   if (!g) {
     console.error(`No guest with the email ${email}.`);
     process.exit(1);
@@ -373,6 +373,10 @@ function addGuest(email) {
 function decide(email, status) {
   const g = findGuest(email);
   d1(`UPDATE guests SET status = ${q(status)}, decided_at = ${q(now())}, decided_by = 'cli', updated_at = ${q(now())} WHERE id = ${q(g.id)};`);
+  if (status === 'approved' && g.decline_mail_id) {
+    // The Studio calls a scheduled decline off on approval; this script has no Brevo key.
+    console.warn(`A decline mail is still scheduled in Brevo for ${g.email} (messageId ${g.decline_mail_id}). Approve in the Studio instead, or delete it in Brevo, or they get it within 48 hours.`);
+  }
   if (status === 'approved') console.log(`${g.first_name} ${g.last_name}: approved. Code: ${makeCode(codeName(g), g.email, g.code_version)}`);
   else console.log(`${g.first_name} ${g.last_name}: denied, ${endSessions(g.id)} session(s) ended.`);
 }
