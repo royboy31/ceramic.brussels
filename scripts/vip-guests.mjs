@@ -426,7 +426,7 @@ function addGuest(email) {
 function decide(email, status) {
   const g = findGuest(email);
   d1(`UPDATE guests SET status = ${q(status)}, decided_at = ${q(now())}, decided_by = 'cli', updated_at = ${q(now())} WHERE id = ${q(g.id)};`);
-  if (status === 'approved') console.log(`${g.first_name} ${g.last_name}: approved. Code: ${makeCode(g.first_name, g.email, g.code_version)}`);
+  if (status === 'approved') console.log(`${g.first_name} ${g.last_name}: approved. Code: ${makeCode(g.email, g.code_version, g.created_at)}`);
   else console.log(`${g.first_name} ${g.last_name}: denied, ${endSessions(g.id)} session(s) ended.`);
 }
 

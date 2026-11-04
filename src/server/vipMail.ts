@@ -16,7 +16,9 @@ import { EDITION, renderVipMail, type VipMail } from './vipMailLayout';
  *   import never sends it, the invitation mailing is the team's;
  * - `member` - an approved guest asked again, so their code goes back to
  *   the address on file (routes/vip-request.ts);
- * - `decline` - the VIP tool denied a request.
+ * - `decline` - the VIP tool denied a request; Brevo sends it 48 hours later
+ *   (Baïlo, 4 Nov: so the selection does not feel automated), and an
+ *   approval or a deletion in between calls it off (routes/vip-admin.ts).
  *
  * The acknowledgement and the decline share a subject so the answer lands
  * in the request's thread. The texts are English: the guest list keeps no
@@ -30,7 +32,7 @@ import { EDITION, renderVipMail, type VipMail } from './vipMailLayout';
  */
 
 export type MailOutcome =
-  | { sent: true; to: string }
+  | { sent: true; to: string; messageId?: string; scheduledAt?: string }
   | { sent: false; to: string; reason: 'unconfigured' | 'dry-run' | 'failed'; detail?: string };
 
 export type VipMailKind = 'acknowledgement' | 'code' | 'member' | 'decline';
@@ -150,12 +152,16 @@ export async function mailVip(
   guest: { first_name: string; last_name: string; email: string },
   origin: string,
   code?: string,
+  scheduledAt?: Date,
 ): Promise<MailOutcome> {
   const to = guest.email;
   const apiKey = brevoKey();
   if (!apiKey) {
     if (mailDryRun()) {
-      console.warn(`[vip] APPLY_DRY_RUN: ${kind} mail not sent`, JSON.stringify({ to, ...(code ? { code } : {}) }));
+      console.warn(
+        `[vip] APPLY_DRY_RUN: ${kind} mail not sent`,
+        JSON.stringify({ to, ...(code ? { code } : {}), ...(scheduledAt ? { scheduledAt: scheduledAt.toISOString() } : {}) }),
+      );
       return { sent: false, to, reason: 'dry-run' };
     }
     return { sent: false, to, reason: 'unconfigured' };
@@ -167,15 +173,16 @@ export async function mailVip(
     const { subject, mail } = vipMailContent(kind, guest.first_name?.trim() || 'guest', mailSite(origin), code);
     const { html, text } = renderVipMail(mail, mailSite(origin));
     const recipient: Address = { email: to, ...(name ? { name } : {}) };
-    await sendMail(apiKey, {
+    const messageId = await sendMail(apiKey, {
       sender: senderFor(cfg.senderName || cfg.siteName, cfg.senderEmail),
       to: [recipient],
       ...(cfg.contactEmail ? { replyTo: { email: cfg.contactEmail } } : {}),
       subject,
       text,
       html,
+      scheduledAt,
     });
-    return { sent: true, to };
+    return { sent: true, to, ...(messageId ? { messageId } : {}), ...(scheduledAt ? { scheduledAt: scheduledAt.toISOString() } : {}) };
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     console.error(`[vip] ${kind} mail not sent:`, detail);

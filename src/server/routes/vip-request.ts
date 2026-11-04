@@ -224,7 +224,14 @@ export const POST: APIRoute = async ({ request }) => {
       const created = await createGuest(
         env.VIP_DB,
         pepper,
-        { firstName: submission.firstName, lastName: submission.lastName, email: submission.email, institution: submission.institution, function: submission.jobTitle },
+        {
+          firstName: submission.firstName,
+          lastName: submission.lastName,
+          email: submission.email,
+          institution: submission.institution,
+          function: submission.jobTitle,
+          lang: submission.lang,
+        },
         'pending',
         null,
         submission.audience,
