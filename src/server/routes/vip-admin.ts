@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { codePepper, vipEnv } from '../vip';
 import { verifySanityAdmin } from '../sanityIdentity';
-import { mailVipCode } from '../vipMail';
+import { mailVip, mailVipCode } from '../vipMail';
 import {
   cleanEmail,
   codeFor,
@@ -142,6 +142,13 @@ export const POST: APIRoute = async ({ request }) => {
       const decided = await decideGuest(db, guest.id, body.action === 'approve' ? 'approved' : 'denied', admin.name);
       // A denial ends what an earlier approval may have opened.
       const ended = body.action === 'deny' ? await endSessions(env.VIP_SESSIONS, guest.id) : 0;
+      // Declining a request answers it (Baïlo, 3 Nov: on every decline). Only
+      // a pending request: a member taken off the list is not "declined". The
+      // decline speaks of the VIP programme, so an exhibitor's request gets none.
+      if (body.action === 'deny') {
+        const mail = guest.status === 'pending' && guest.audience !== 'exhibitor' ? await mailVip('decline', decided!, site) : undefined;
+        return json(200, { ok: true, guest: view(decided!), code: null, ...(mail ? { mail } : {}), ended });
+      }
       return json(200, { ok: true, guest: view(decided!), ...(await withMail(decided!)), ended });
     }
 

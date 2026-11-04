@@ -4,7 +4,7 @@ import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { localePath } from '../../lib/i18n';
 import { codePepper, vipEnv } from '../vip';
 import { codeFor, createGuest, formatName, getGuest, guestId, type GuestRow } from '../vipGuests';
-import { mailVipCode } from '../vipMail';
+import { mailVip, mailVipCode } from '../vipMail';
 import { brevoKey, fill, mailDryRun, paragraphs, rowsHtml, sendMail, senderFor } from '../mail';
 
 /**
@@ -22,8 +22,8 @@ import { brevoKey, fill, mailDryRun, paragraphs, rowsHtml, sendMail, senderFor }
  * team hears nothing: there is nothing to decide. The answer on screen is
  * the same for everyone, so the form never tells who is on the list.
  *
- * The emails through Brevo - the request to the VIP team, a confirmation to
- * the requester when Site settings → VIP has one - are a notification now,
+ * The emails through Brevo - the request to the VIP team, and the branded
+ * acknowledgement to the requester (vipMail.ts, Baïlo's text) - are a notification now,
  * not the record, so a request filed without them still counts as received.
  * Only when it could be neither filed nor mailed does this answer 503 and
  * the form show its failure state with the VIP address - never a false
@@ -156,9 +156,10 @@ async function deliver(apiKey: string, s: Submission, cfg: FormSettings): Promis
     html: `<p>Someone asked for ${s.audience === 'exhibitor' ? 'exhibitors platform' : 'VIP'} access through the website. It waits under Requests in the Studio's VIP guests tool.</p>${rowsHtml(rows)}`,
   });
 
-  // A confirmation only when the team wrote one: a VIP request is a judgement
-  // call, and a stock "we have received it" can read as a yes.
-  if (!cfg.confirmationSubject && !cfg.confirmationText) return;
+  // A VIP request gets the branded acknowledgement (vipMail.ts). An
+  // exhibitor's gets a confirmation only when the team wrote one: a stock
+  // "we have received it" can read as a yes.
+  if (s.audience !== 'exhibitor' || (!cfg.confirmationSubject && !cfg.confirmationText)) return;
   const values = { firstName: s.firstName, lastName: s.lastName, institution: s.institution, email: s.email };
   const text = fill(
     cfg.confirmationText ||
@@ -257,6 +258,17 @@ export const POST: APIRoute = async ({ request }) => {
       console.error('[vip] request delivery failed:', error instanceof Error ? error.message : error);
       if (!filed) return answer(502, 'delivery', 'Could not send', `Your request could not be sent. Please write to ${cfg.contactEmail || 'the VIP team'}.`);
     }
+  }
+
+  // The applicant's acknowledgement, on its own: a failed team mail must not
+  // take it down, and it does not decide whether the request was received.
+  // An exhibitor's request keeps the plain confirmation in deliver().
+  if (!member && submission.audience === 'vip' && (filed || apiKey)) {
+    await mailVip(
+      'acknowledgement',
+      { first_name: submission.firstName, last_name: submission.lastName, email: submission.email },
+      new URL(request.url).origin,
+    );
   }
   if (!filed && !apiKey && !dryRun) {
     return answer(502, 'delivery', 'Could not send', `Your request could not be sent. Please write to ${cfg.contactEmail || 'the VIP team'}.`);
