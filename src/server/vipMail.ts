@@ -14,6 +14,11 @@ import { brevoKey, fill, mailDryRun, sendMail, senderFor } from './mail';
  * English text when the team wrote none: the guest list keeps no language.
  * The outcome goes back to the tool, so an editor always knows whether the
  * guest has the code or must be sent it by hand.
+ *
+ * The same code goes out a second way, as the "already a member" mail: an
+ * approved guest who fills in the "not a VIP yet?" form again gets their
+ * code back at the address on file (routes/vip-request.ts). That text has
+ * no Site settings field yet and is always the stock one below.
  */
 
 export type MailOutcome =
@@ -29,7 +34,10 @@ interface CodeMailSettings {
   siteName?: string;
 }
 
+export type CodeMailKind = 'code' | 'member';
+
 const DEFAULT_SUBJECT = 'Your VIP code for ceramic brussels';
+const MEMBER_SUBJECT = 'Your ceramic brussels VIP code';
 const DEFAULT_TEXT = `Dear {firstName},
 
 Welcome to the VIP programme of ceramic brussels. Your personal access code is
@@ -37,6 +45,18 @@ Welcome to the VIP programme of ceramic brussels. Your personal access code is
 {code}
 
 Enter it at {link} to open the VIP programme, the VIP lounge and the hotel deal. The code is yours alone; type it in any case, with or without the hyphens.
+
+The ceramic brussels VIP team
+{contact}`;
+const MEMBER_TEXT = `Dear {firstName},
+
+We have received a new VIP request with your email address. You are already a member of the ceramic brussels VIP programme, so there is nothing more to do: here is your personal access code.
+
+{code}
+
+Enter it at {link} to open the VIP programme, the VIP lounge and the hotel deal. The code is yours alone; type it in any case, with or without the hyphens.
+
+If you did not make this request, you can simply ignore this email.
 
 The ceramic brussels VIP team
 {contact}`;
@@ -62,6 +82,7 @@ export async function mailVipCode(
   guest: { first_name: string; last_name: string; email: string },
   code: string,
   origin: string,
+  kind: CodeMailKind = 'code',
 ): Promise<MailOutcome> {
   const to = guest.email;
   const apiKey = brevoKey();
@@ -74,8 +95,10 @@ export async function mailVipCode(
   }
   try {
     const cfg = await settings();
+    const name = `${guest.first_name} ${guest.last_name}`.trim();
     const values = {
-      firstName: guest.first_name,
+      // Most of the imported list has no first name yet: "Dear guest", never "Dear ,".
+      firstName: guest.first_name || 'guest',
       lastName: guest.last_name,
       code,
       link: accessLink(origin),
@@ -83,10 +106,10 @@ export async function mailVipCode(
     };
     await sendMail(apiKey, {
       sender: senderFor(cfg.senderName || cfg.siteName, cfg.senderEmail),
-      to: [{ email: to, name: `${guest.first_name} ${guest.last_name}` }],
+      to: [{ email: to, ...(name ? { name } : {}) }],
       ...(cfg.contactEmail ? { replyTo: { email: cfg.contactEmail } } : {}),
-      subject: fill(cfg.codeSubject || DEFAULT_SUBJECT, values),
-      text: fill(cfg.codeText || DEFAULT_TEXT, values),
+      subject: fill(kind === 'member' ? MEMBER_SUBJECT : cfg.codeSubject || DEFAULT_SUBJECT, values),
+      text: fill(kind === 'member' ? MEMBER_TEXT : cfg.codeText || DEFAULT_TEXT, values),
     });
     return { sent: true, to };
   } catch (error) {
