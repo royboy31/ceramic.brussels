@@ -105,7 +105,7 @@ const optional = `(${t('vip.details.optional')})`;
     const field = (name: string) => form.querySelector<HTMLInputElement | HTMLSelectElement>(`[name=${name}]`)!;
 
     const wanted = params.get('next');
-    if (wanted && wanted.startsWith('/') && !wanted.startsWith('//')) field('next').value = wanted;
+    if (wanted && /^\/(?![\/\\])[^\x00-\x20\x7f]*$/.test(wanted)) field('next').value = wanted;
     if (params.get('error') === 'names') status.textContent = form.dataset.names!;
 
     // Required: no Escape, no backdrop click.
