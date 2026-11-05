@@ -219,6 +219,7 @@ export const POST: APIRoute = async ({ request }) => {
   // The record: a pending row for the Studio's VIP tool.
   let filed = false;
   let member: GuestRow | null = null;
+  let asked = false; // a new request row, which someone will answer
   if (env && pepper) {
     try {
       const created = await createGuest(
@@ -236,6 +237,7 @@ export const POST: APIRoute = async ({ request }) => {
         null,
         submission.audience,
       );
+      asked = !!created;
       if (!created) {
         const existing = await getGuest(env.VIP_DB, await guestId(submission.email));
         // The "already a member" mail speaks of VIP access only: an exhibitor
@@ -270,7 +272,10 @@ export const POST: APIRoute = async ({ request }) => {
   // The applicant's acknowledgement, on its own: a failed team mail must not
   // take it down, and it does not decide whether the request was received.
   // An exhibitor's request keeps the plain confirmation in deliver().
-  if (!member && submission.audience === 'vip' && (filed || apiKey)) {
+  // It promises an answer, so only for a new request, or one that reached
+  // the team by mail alone: someone already on the list (pending, denied,
+  // an exhibitor) is not filed again and gets the same screen, no promise.
+  if (!member && submission.audience === 'vip' && (asked || (!filed && apiKey))) {
     await mailVip(
       'acknowledgement',
       { first_name: submission.firstName, last_name: submission.lastName, email: submission.email },
