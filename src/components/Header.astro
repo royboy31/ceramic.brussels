@@ -38,10 +38,11 @@ const home = localePath(lang);
 const partnerName = mainPartner?.name ?? 'Puilaetco';
 const Lockup = mainPartner?.url ? 'a' : 'div';
 const current = LOCALES.find((l) => l.id === lang)!;
-/* The offered languages, which is not every language: Dutch is held back
-   for the launch (see `SWITCHER_LOCALES`). `current` still reads the full
-   list, so a visitor already on a Dutch page sees NL as their language and
-   can switch away from it rather than being stranded. */
+/* The offered languages, which need not be every language: a language can
+   be held back (see `SWITCHER_LOCALES`; none is, since Dutch came back on
+   2026-11-06). `current` still reads the full list, so a visitor already on
+   a held-back page sees their language and can switch away from it rather
+   than being stranded. */
 const others = SWITCHER_LOCALES.filter((l) => l.id !== lang);
 ---
 

@@ -12,33 +12,34 @@ export const LOCALES = [
 export type LocaleId = (typeof LOCALES)[number]['id'];
 
 /**
- * The languages the header's switcher offers. Dutch is held back for the
- * launch, which went out in English and French (Kamindu, 2026-10-05), and is
- * **off the site** since 2026-10-17 while it is retranslated: the old site's
- * Dutch is machine-made and in places says something other than the English.
+ * The languages the header's switcher offers. **All three, since 2026-11-06**:
+ * the fair asked for Dutch to go online and the retranslation it was waiting
+ * for is in the dataset (`scripts/nl-3-pages-2026-10-17.mjs` and
+ * `scripts/nl-fill-2026-10-17.mjs`, 2026-10-17, plus the 2027 gallery bios of
+ * 2026-10-28 - see [[nl-retranslation]]).
  *
- * `LOCALES` above is untouched, so /nl/ still builds, the Studio still has
- * its Dutch fields, and every Dutch page keeps its URL and its hreflang -
- * which `scripts/legacy-redirects.mjs` reads to find the Dutch target of
- * every old-site rule. Nothing is deleted and no translation is lost; the
- * pages are simply not served.
+ * Dutch was out of the switcher from the launch, which went out in English
+ * and French (Kamindu, 2026-10-05), and **off the site** from 2026-10-17
+ * while it was retranslated: the old site's Dutch was machine-made and in
+ * places said something other than the English. It never stopped building,
+ * so no URL, hreflang or Studio field changed when it came back.
  *
- * Being held back now lives in three places, and putting Dutch back means
- * all three:
+ * To hold a language back again, put its id in the list here and mind the
+ * other two places, which this list does not reach on its own:
  *
  * 1. **here** - out of the switcher (`SWITCHER_LOCALES`, read by
  *    `Header.astro`) and out of search (`isHeldBack`, below);
- * 2. **`public/_redirects`** - the three `/nl` rules at the top of the file,
- *    a 302 to the English homepage for every Dutch address;
+ * 2. **`public/_redirects`** - a 302 to the English homepage for every
+ *    address in that language, at the top of the file, above the generated
+ *    block;
  * 3. **`src/middleware.ts`** - the same 302 for the VIP hub's locked tabs,
- *    which the Worker answers and a `_redirects` rule never reaches.
+ *    which the Worker answers and a `_redirects` rule never reaches. That one
+ *    reads `isHeldBack`, so it follows this list by itself.
  *
- * `/preview/nl/…` is deliberately untouched: the drafts preview still renders
- * Dutch, so the retranslation can be read page by page before it goes live.
+ * `/preview/…` is untouched either way: the drafts preview renders every
+ * language in `LOCALES`, so a translation can always be read before it goes
+ * live.
  */
-// On this branch alone, nothing is held back: the kamindu preview is where
-// the Dutch retranslation is read, switcher button included. On main this
-// line says ['nl'] - never carry this change there.
 const HELD_BACK: LocaleId[] = [];
 
 export const SWITCHER_LOCALES = LOCALES.filter((l) => !HELD_BACK.includes(l.id));
