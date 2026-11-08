@@ -749,7 +749,7 @@ const STRINGS = {
     'nav.close': 'Sluiten',
     'nav.newsletter': 'Nieuwsbrief',
     'nav.tickets': 'Tickets',
-    'tabs.about': 'over',
+    'tabs.about': 'info',
     'tabs.interview': 'interview',
     'tabs.laureates': 'laureaten',
     'tabs.awards': 'awards',
