@@ -167,6 +167,7 @@ const LINK = `{
 const VIDEO = `{
   url,
   ${styled('title')},
+  hideTitle,
   poster ${IMAGE}
 }`;
 
