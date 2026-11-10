@@ -28,8 +28,9 @@ const t = useTranslations(lang);
    still show at a time, which is what that gallery does and what keeps the
    frame's proportions; the rest are scrolled to. Until the field is filled
    the cover and the first archive photo stand in, so the row is never empty
-   and never a 60-picture gallery. */
-const chosen: any[] = ((edition.leadImages ?? []).filter((img: any) => img?.asset) as any[]).slice(0, 5);
+   and never a 60-picture gallery. Ten since 2026-11-09, when she sent ten
+   for 2025. */
+const chosen: any[] = ((edition.leadImages ?? []).filter((img: any) => img?.asset) as any[]).slice(0, 10);
 const fallbackPair = [edition.cover, (edition.images ?? []).find((img: any) => img?.asset)].filter(
   (img: any) => img?.asset,
 );
@@ -179,6 +180,24 @@ const highlights = (edition.highlights ?? [])
     width: 100%;
     height: auto;
     display: block;
+  }
+  /* "It should work just as the slideshow on Marion Verboom's about page -
+     so, captions centered on the photo, no need to show slideshow marks
+     (1/10, 2/10, etc.)" - Léonie, 2026-11-09. That gallery sets its line
+     at 16/20, centred, with no count; `Slideshow` prints a count at the left
+     and the caption at the right, so both are overridden here, at every
+     width. `!important` for the reason given below. */
+  .lead-images :global(.counter) {
+    display: none !important;
+  }
+  .lead-images :global(figcaption) {
+    justify-content: center !important;
+    font-size: 16px !important;
+    line-height: 20px !important;
+  }
+  .lead-images :global(.caption) {
+    text-align: center !important;
+    padding-inline-end: 0 !important;
   }
   /**
    * Two slides in view need two captions and two visible dots, and

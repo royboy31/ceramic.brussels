@@ -222,7 +222,7 @@ export const edition = defineType({
       group: 'archive',
       of: [defineArrayMember({ type: 'figure' })],
       options: { layout: 'grid' },
-      description: 'The pair shown under the lead on the overview tab. The first two are used, side by side, 3:2.',
+      description: 'The slideshow under the lead on the overview tab: up to ten pictures, two in view at a time, 3:2.',
     }),
     defineField({
       name: 'highlights',
