@@ -181,10 +181,14 @@ const speakersOf = (event: any) =>
      same grid, which is how the frame sets it beside the third talk. */
   .talk h3 {
     margin: 0 0 10px;
-    font-size: clamp(1.2rem, 2.1vw, 1.75rem);
+    /* The art prize page's award titles, value for value (ArtPrize.astro
+       `.award h3`): "make sure the talks titles are the same font size &
+       styling as the prizes' titles on the art prize page. They currently
+       look smaller" (Léonie, 2026-11-09). They were 28px to its 32. */
+    font-size: clamp(1.35rem, 2.4vw, 2rem);
     font-weight: 400;
     line-height: 1.15;
-    letter-spacing: -0.035em;
+    letter-spacing: -0.04em;
   }
   /* Body text: "the text explaining every talk should be body-text size,
      it currently is smaller" (Léonie, 2026-10-26). It was 18px. */

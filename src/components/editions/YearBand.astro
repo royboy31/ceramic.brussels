@@ -68,7 +68,10 @@ const t = useTranslations(lang);
        the design. */
     font-size: 24px;
     line-height: 1.2;
-    letter-spacing: 0.01em;
+    /* No tracking, as the site's other bold capitals: "could you reduce the
+       letter-spacing a teeny tiny bit in the 3 year buttons on top of each
+       page?" (Léonie, 2026-11-09). It was 0.01em. */
+    letter-spacing: 0;
     /* The design sets these in small caps; the content is lowercase in the
        data ("2nd edition"), so the band does the casing. */
     text-transform: uppercase;

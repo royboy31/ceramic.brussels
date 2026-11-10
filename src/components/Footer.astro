@@ -108,6 +108,17 @@ const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
     gap: 0.25em;
     white-space: nowrap;
     border-radius: 0;
+    /* The size of an edition's section pills - "overview", "guest of
+       honour" (YearBand.astro: 20px, 4px 13px) - so the way into the
+       section, and "back to 2027" out of it, is as visible as the pills it
+       leads to: "could you try making the «previous editions» button bigger
+       in the footer, maybe the same size as all the buttons for each section
+       for each year (adapt the «back to 2027» button too)" (Léonie,
+       2026-11-09). It was the footer's own 16px. */
+    padding: 4px 13px;
+    font-size: 20px;
+    line-height: 30px;
+    letter-spacing: -0.045em;
   }
   @media (max-width: 700px) {
     /* Three groups do not sit on one line on a phone: the pill takes the
