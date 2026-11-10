@@ -83,6 +83,7 @@ const highlights = (edition.highlights ?? [])
           widths={[600, 900, 1400]}
           label={t('prevEd.overview')}
           id="lead"
+          step="slide"
         />
       </div>
     )
@@ -164,17 +165,29 @@ const highlights = (edition.highlights ?? [])
   .lead-images {
     margin-bottom: 88px;
   }
+  /* "So that it really looks like the slideshow on the guest of honour
+     page: the photos a bit smaller, with less margin separating them, and
+     the photo n°3 cropped but already visible on the right" - Léonie,
+     2026-11-10. Those are that row's own numbers (hubs/GuestOfHonour.astro):
+     16px between the pictures, two and a quarter in view, and the row run
+     out to the window's right edge so the third is cut by the window and
+     not by a margin. It was two in view, 40px apart, as the frame drew the
+     original pair. */
+  .lead-images {
+    margin-right: calc(-1 * var(--gutter));
+  }
   .lead-images :global(.track) {
-    gap: var(--ed-gap, 40px);
+    gap: 16px;
   }
   .lead-images :global(.slide) {
-    flex-basis: calc((100% - var(--ed-gap, 40px)) / 2);
+    flex-basis: calc((100% - var(--gutter) - 16px) / 2.25);
   }
   .lead-images.single :global(.slide) {
     flex-basis: 100%;
   }
   .lead-images.single {
     max-width: 670px;
+    margin-right: 0;
   }
   .lead-images :global(img) {
     width: 100%;
@@ -192,8 +205,6 @@ const highlights = (edition.highlights ?? [])
   }
   .lead-images :global(figcaption) {
     justify-content: center !important;
-    font-size: 16px !important;
-    line-height: 20px !important;
   }
   .lead-images :global(.caption) {
     text-align: center !important;
@@ -221,19 +232,29 @@ const highlights = (edition.highlights ?? [])
     .lead-images :global(.slideshow[data-one-caption] .slide:not([data-current]) figcaption) {
       opacity: 1 !important;
     }
-    .lead-images :global(.dots) {
-      position: static !important;
-      aspect-ratio: auto !important;
-      height: auto !important;
-      padding: 14px 0 0 !important;
+    /* 16/20 is that gallery's desktop line. On a phone the caption keeps
+       the size every other slideshow's has (site.css) - at 16px it read
+       "bigger than elsewhere" (Léonie, 2026-11-10). */
+    .lead-images :global(figcaption) {
+      font-size: 16px !important;
+      line-height: 20px !important;
     }
-    .lead-images :global(.dots a) {
-      background: var(--ink) !important;
+    /* No dots here: "we can remove all the slideshow marks (so the 10 dot
+       shapes)" - the arrow does the leading, as on that gallery. A phone
+       keeps them, where there is no arrow. */
+    .lead-images :global(.dots) {
+      display: none !important;
     }
   }
 
   /* One picture per screen on a phone, as every other slideshow is. */
   @media (max-width: 900px) {
+    .lead-images {
+      margin-right: 0;
+    }
+    .lead-images :global(.track) {
+      gap: 0;
+    }
     .lead-images :global(.slide) {
       flex-basis: 100%;
     }

@@ -142,7 +142,21 @@ const credit = captionParts(guest?.portrait)?.credit;
       margin-top: 48px;
     }
     .guest-portrait {
-      max-width: 420px;
+      max-width: none;
+    }
+  }
+  /* "Could you make the portrait of the guest of honour take up the full
+     width of the page?" (Léonie, 2026-11-10, of the phone). It was held to
+     420px inside the gutters; it now runs to both screen edges below 700px,
+     as the installation's slideshow under it and the 2027 portrait do. The
+     gutter, not 100vw - the figure is a grid item (the WebKit lesson noted
+     in hubs/GuestOfHonour.astro). */
+  @media (max-width: 700px) {
+    .guest-portrait {
+      margin-inline: calc(-1 * var(--gutter));
+    }
+    .guest-portrait figcaption {
+      padding-inline: var(--gutter);
     }
   }
 </style>
