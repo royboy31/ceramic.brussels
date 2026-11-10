@@ -35,6 +35,9 @@ export interface GuestRow {
   decided_by: string | null;
   created_at: string;
   audience: RowAudience;
+  details_at: string | null;
+  lang: string | null;
+  decline_mail_id: string | null;
 }
 
 export interface GuestInput {
@@ -43,16 +46,58 @@ export interface GuestInput {
   email: string;
   institution?: string;
   function?: string;
+  /** en | fr | nl: the page the request form was sent from (Baïlo, 3 Nov: for mails in their language later). */
+  lang?: string;
 }
 
+/**
+ * The functions the name step offers (Baïlo, 4 Nov 2026), stored as written
+ * here, in English, whatever the page's language. The request form and the
+ * Studio still take free text, so a row may hold anything else too.
+ */
+export const GUEST_FUNCTIONS = [
+  'Collector / Patron',
+  'Art Advisor',
+  'Interior Designer / Architect',
+  'Curator',
+  'Museum / Foundation',
+  'Embassy / Cultural Institute',
+  'Gallery / Auction House',
+  'Artist / Designer',
+  'Press / Media',
+  'Brand Partner',
+  'Academic / Education',
+  'Other',
+] as const;
+
 const COLUMNS =
-  'id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, decided_at, decided_by, created_at, audience';
+  'id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, decided_at, decided_by, created_at, audience, details_at, lang, decline_mail_id';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const now = () => new Date().toISOString();
 
 export const cleanEmail = (email: unknown) => (typeof email === 'string' ? email.trim().toLowerCase() : '');
 export const isEmail = (email: string) => EMAIL.test(email) && email.length <= 254;
+
+/**
+ * A name as it is saved, whatever the guest typed: "marie DUPONT" → "Marie
+ * Dupont", "jean-luc" → "Jean-Luc", "o'brien" → "O'Brien", "BAÏLO" → "Baïlo".
+ * A word typed all in lower or all in upper case gets a capital initial; one
+ * already in mixed case ("McDonald", "DiCaprio") is left as typed. Particles
+ * are words like any other: "van der berg" → "Van Der Berg". Case only, so a
+ * guest's code never moves with it (it is made from the email). The import
+ * script has the same function: change one and change both.
+ */
+export function formatName(name: string): string {
+  return String(name ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[\p{L}\p{M}]+/gu, (word) =>
+      word === word.toLocaleLowerCase() || word === word.toLocaleUpperCase()
+        ? word.charAt(0).toLocaleUpperCase() + word.slice(1).toLocaleLowerCase()
+        : word,
+    );
+}
 
 /** First 20 hex of sha256(lower(email)), as the import script makes it. */
 export const guestId = async (email: string) => (await sha256Hex(cleanEmail(email))).slice(0, 20);
@@ -125,14 +170,14 @@ export async function createGuest(
   const hash = await codeHash(await makeCode(pepper, email, 1, stamp), pepper);
   await db
     .prepare(
-      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, requested_at, decided_at, decided_by, created_at, updated_at, audience)
-       VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
+      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, requested_at, decided_at, decided_by, created_at, updated_at, audience, lang)
+       VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
     )
     .bind(
       id,
       hash,
-      input.firstName,
-      input.lastName,
+      formatName(input.firstName),
+      formatName(input.lastName),
       email,
       input.institution || null,
       input.function || null,
@@ -143,6 +188,7 @@ export async function createGuest(
       stamp,
       stamp,
       audience,
+      input.lang || null,
     )
     .run();
   return getGuest(db, id);
@@ -198,7 +244,7 @@ export async function importGuests(
             `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at, audience)
              VALUES (?, ?, 1, ?, ?, ?, ?, ?, 'approved', ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
           )
-          .bind(id, hash, input.firstName, input.lastName, email, input.institution || null, input.function || null, stamp, by, stamp, stamp, audience),
+          .bind(id, hash, formatName(input.firstName), formatName(input.lastName), email, input.institution || null, input.function || null, stamp, by, stamp, stamp, audience),
       );
       existing.set(id, { id, status: 'approved', audience });
       created++;
@@ -230,7 +276,7 @@ export async function updateGuest(
   if (!before) return null;
   await db
     .prepare('UPDATE guests SET first_name = ?, last_name = ?, institution = ?, function = ?, updated_at = ? WHERE id = ?')
-    .bind(fields.firstName, fields.lastName, fields.institution || null, fields.function || null, now(), id)
+    .bind(formatName(fields.firstName), formatName(fields.lastName), fields.institution || null, fields.function || null, now(), id)
     .run();
   return { guest: (await getGuest(db, id))!, codeChanged: false };
 }
@@ -286,3 +332,34 @@ export async function endSessions(kv: KVLike, id: string): Promise<number> {
 /** The code a guest types, for the ones who have a working one. */
 export const codeFor = (pepper: string, g: GuestRow) =>
   g.status === 'approved' && !g.revoked ? makeCode(pepper, g.email, g.code_version, g.created_at) : Promise.resolve(null);
+
+/** Whether the gate still has to ask this guest for their name (Baïlo: required, and once). */
+export const needsDetails = (g: Pick<GuestRow, 'first_name' | 'last_name'>) => !(g.first_name ?? '').trim() || !(g.last_name ?? '').trim();
+
+/**
+ * What a guest gives at the name step: both names, and the function and
+ * institution if they like. The code is made from the email alone, so it
+ * stays the one already mailed. An optional field left empty keeps what the
+ * row had.
+ */
+export async function saveDetails(
+  db: D1Like,
+  id: string,
+  fields: { firstName: string; lastName: string; function?: string; institution?: string },
+): Promise<GuestRow | null> {
+  const stamp = now();
+  await db
+    .prepare(
+      `UPDATE guests SET first_name = ?, last_name = ?,
+         function = COALESCE(?, function), institution = COALESCE(?, institution), details_at = ?, updated_at = ?
+       WHERE id = ?`,
+    )
+    .bind(formatName(fields.firstName), formatName(fields.lastName), fields.function || null, fields.institution || null, stamp, stamp, id)
+    .run();
+  return getGuest(db, id);
+}
+
+/** The Brevo id of a decline waiting to go out, or null once it went or was called off. */
+export async function setDeclineMail(db: D1Like, id: string, messageId: string | null): Promise<void> {
+  await db.prepare('UPDATE guests SET decline_mail_id = ? WHERE id = ?').bind(messageId, id).run();
+}

@@ -392,6 +392,10 @@ const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs
      Its first line is the BOLD & CAPS label. */
   .platform-body :global(.sections section:not(:has(.panel-title)):has(.cs-links)) {
     position: relative;
+    /* The 28px the VIP tab's own frame stands on, which the port here left
+       behind: "the frame with all the hotel deal info is right up against
+       the text above - it shouldn't be!" (Léonie, 2026-11-09). */
+    margin-top: 28px;
     padding: 14px 20px 22px;
     border: 1px solid var(--ink);
     transition: background-color 0.18s;

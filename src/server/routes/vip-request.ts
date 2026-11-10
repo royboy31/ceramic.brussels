@@ -3,7 +3,8 @@ import { sanityClient } from 'sanity:client';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { localePath } from '../../lib/i18n';
 import { codePepper, vipEnv } from '../vip';
-import { createGuest } from '../vipGuests';
+import { codeFor, createGuest, formatName, getGuest, guestId, type GuestRow } from '../vipGuests';
+import { mailVip, mailVipCode } from '../vipMail';
 import { brevoKey, fill, mailDryRun, paragraphs, rowsHtml, sendMail, senderFor } from '../mail';
 
 /**
@@ -15,10 +16,14 @@ import { brevoKey, fill, mailDryRun, paragraphs, rowsHtml, sendMail, senderFor }
  * whose dataset is public. A Sanity administrator grants or denies it in
  * the Studio's VIP tool; a pending row's code opens nothing (vip.ts
  * findGuestByCode). Someone already in the list, whatever their state, is
- * left as they are: asking twice changes nothing.
+ * left as they are: asking twice changes nothing. An approved guest who asks
+ * again has lost their code, so it goes back to the address on file (the
+ * row's id is that address's hash, so it is the one just typed), and the
+ * team hears nothing: there is nothing to decide. The answer on screen is
+ * the same for everyone, so the form never tells who is on the list.
  *
- * The emails through Brevo - the request to the VIP team, a confirmation to
- * the requester when Site settings → VIP has one - are a notification now,
+ * The emails through Brevo - the request to the VIP team, and the branded
+ * acknowledgement to the requester (vipMail.ts, Baïlo's text) - are a notification now,
  * not the record, so a request filed without them still counts as received.
  * Only when it could be neither filed nor mailed does this answer 503 and
  * the form show its failure state with the VIP address - never a false
@@ -151,9 +156,10 @@ async function deliver(apiKey: string, s: Submission, cfg: FormSettings): Promis
     html: `<p>Someone asked for ${s.audience === 'exhibitor' ? 'exhibitors platform' : 'VIP'} access through the website. It waits under Requests in the Studio's VIP guests tool.</p>${rowsHtml(rows)}`,
   });
 
-  // A confirmation only when the team wrote one: a VIP request is a judgement
-  // call, and a stock "we have received it" can read as a yes.
-  if (!cfg.confirmationSubject && !cfg.confirmationText) return;
+  // A VIP request gets the branded acknowledgement (vipMail.ts). An
+  // exhibitor's gets a confirmation only when the team wrote one: a stock
+  // "we have received it" can read as a yes.
+  if (s.audience !== 'exhibitor' || (!cfg.confirmationSubject && !cfg.confirmationText)) return;
   const values = { firstName: s.firstName, lastName: s.lastName, institution: s.institution, email: s.email };
   const text = fill(
     cfg.confirmationText ||
@@ -185,8 +191,8 @@ export const POST: APIRoute = async ({ request }) => {
 
   const lang = (LOCALE_IDS as string[]).includes(body.lang) ? (body.lang as LocaleId) : DEFAULT_LOCALE;
   const submission: Submission = {
-    firstName: clean(body.firstName, 120),
-    lastName: clean(body.lastName, 120),
+    firstName: formatName(clean(body.firstName, 120)),
+    lastName: formatName(clean(body.lastName, 120)),
     institution: clean(body.institution, 200),
     jobTitle: clean(body.function, 200),
     email: clean(body.email, 254),
@@ -212,29 +218,69 @@ export const POST: APIRoute = async ({ request }) => {
 
   // The record: a pending row for the Studio's VIP tool.
   let filed = false;
+  let member: GuestRow | null = null;
+  let asked = false; // a new request row, which someone will answer
   if (env && pepper) {
     try {
-      await createGuest(
+      const created = await createGuest(
         env.VIP_DB,
         pepper,
-        { firstName: submission.firstName, lastName: submission.lastName, email: submission.email, institution: submission.institution, function: submission.jobTitle },
+        {
+          firstName: submission.firstName,
+          lastName: submission.lastName,
+          email: submission.email,
+          institution: submission.institution,
+          function: submission.jobTitle,
+          lang: submission.lang,
+        },
         'pending',
         null,
         submission.audience,
       );
+      asked = !!created;
+      if (!created) {
+        const existing = await getGuest(env.VIP_DB, await guestId(submission.email));
+        // The "already a member" mail speaks of VIP access only: an exhibitor
+        // asking again, or a VIP-only guest on the exhibitors' form, is left
+        // as before.
+        const sameDoor = submission.audience === 'vip' && (existing?.audience === 'vip' || existing?.audience === 'all');
+        if (existing?.status === 'approved' && !existing.revoked && sameDoor) member = existing;
+      }
       filed = true;
     } catch (error) {
       console.error('[vip] request could not be filed:', error instanceof Error ? error.message : error);
     }
   }
 
-  // The notification. Its failure only matters when nothing was filed.
-  try {
-    if (apiKey) await deliver(apiKey, submission, cfg);
-    else if (dryRun) console.warn('[vip] APPLY_DRY_RUN: request not mailed', JSON.stringify({ ...submission, to: cfg.recipient, cc: cfg.cc }));
-  } catch (error) {
-    console.error('[vip] request delivery failed:', error instanceof Error ? error.message : error);
-    if (!filed) return answer(502, 'delivery', 'Could not send', `Your request could not be sent. Please write to ${cfg.contactEmail || 'the VIP team'}.`);
+  if (member) {
+    // Only a member's own inbox learns they are one. Their request is not
+    // filed again, so a failure here is logged and answered like any other.
+    const code = await codeFor(pepper!, member);
+    const mail = code ? await mailVipCode(member, code, new URL(request.url).origin, 'member') : null;
+    if (mail && !mail.sent && mail.reason !== 'dry-run') console.error('[vip] member code not mailed:', mail.reason, mail.detail ?? '');
+  } else {
+    // The notification. Its failure only matters when nothing was filed.
+    try {
+      if (apiKey) await deliver(apiKey, submission, cfg);
+      else if (dryRun) console.warn('[vip] APPLY_DRY_RUN: request not mailed', JSON.stringify({ ...submission, to: cfg.recipient, cc: cfg.cc }));
+    } catch (error) {
+      console.error('[vip] request delivery failed:', error instanceof Error ? error.message : error);
+      if (!filed) return answer(502, 'delivery', 'Could not send', `Your request could not be sent. Please write to ${cfg.contactEmail || 'the VIP team'}.`);
+    }
+  }
+
+  // The applicant's acknowledgement, on its own: a failed team mail must not
+  // take it down, and it does not decide whether the request was received.
+  // An exhibitor's request keeps the plain confirmation in deliver().
+  // It promises an answer, so only for a new request, or one that reached
+  // the team by mail alone: someone already on the list (pending, denied,
+  // an exhibitor) is not filed again and gets the same screen, no promise.
+  if (!member && submission.audience === 'vip' && (asked || (!filed && apiKey))) {
+    await mailVip(
+      'acknowledgement',
+      { first_name: submission.firstName, last_name: submission.lastName, email: submission.email },
+      new URL(request.url).origin,
+    );
   }
   if (!filed && !apiKey && !dryRun) {
     return answer(502, 'delivery', 'Could not send', `Your request could not be sent. Please write to ${cfg.contactEmail || 'the VIP team'}.`);

@@ -277,6 +277,23 @@ main .slideshow figure:has(> img) {
   }
 }
 
+/* The same square on a laptop (Léonie, 2026-11-09, Safari).
+ *
+ * The rule above is a phone rule, and the menu's focus moves on a desktop
+ * too: opening it focuses the ×, closing it focuses the opener again, so
+ * the keyboard keeps its place. Safari counts that script focus as
+ * :focus-visible where Chrome and Firefox do not, and the ring showed after
+ * a plain click.
+ *
+ * MenuOverlay marks the button when the focus followed a pointer, and drops
+ * the mark as soon as that focus ends or Tab is pressed - so this hides the
+ * ring exactly then, and a keyboard still rings every control, these two
+ * included.
+ */
+[data-focus-quiet]:focus-visible {
+  outline: none;
+}
+
 
 /* The dates mark on a phone: smaller, so it sits beside the wordmark rather
  * than against it - "reduce a little the size of the 20-24 jan dates on the

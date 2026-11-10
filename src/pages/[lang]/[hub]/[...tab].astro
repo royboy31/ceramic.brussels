@@ -20,6 +20,7 @@ import {
   editionTabPath,
 } from '../../../lib/previousEditions';
 import { localePath } from '../../../lib/i18n';
+import { isPreview } from '../../../lib/previewContext';
 import { PAST_EDITIONS_PUBLIC } from '../../../components/launch';
 
 /**
@@ -96,6 +97,12 @@ const atSectionRoot = inSection && (props.root || isSectionRoot(rest));
 const newestPast = atSectionRoot ? (await getPastEditionsIndex(lang))[0]?.year : undefined;
 if (atSectionRoot) {
   if (!newestPast) return Astro.rewrite('/404');
+  // A preview render stays inside /preview/, and temporarily: the browser
+  // must never cache a redirect for an address whose answer depends on a
+  // cookie, so 302, never the 301 below.
+  if (isPreview()) {
+    return Astro.redirect(`/preview${localePath(lang, editionTabPath(newestPast, undefined, lang))}`, 302);
+  }
   // Off for the launch, the root is a stub like every other address in the
   // section - a 301 onto a page that itself moves is two hops and a
   // permanent redirect that outlives the launch.
@@ -134,8 +141,11 @@ if (!edition && !Hub) return Astro.rewrite('/404');
 {
   edition ? (
     /* Off for the launch: the address keeps answering, its content does not.
-       See EditionHidden and `PAST_EDITIONS_PUBLIC`. */
-    PAST_EDITIONS_PUBLIC ? (
+       See EditionHidden and `PAST_EDITIONS_PUBLIC`. A preview render shows
+       the real section either way - the editors work on it from drafts while
+       the public pages stay hidden (Léonie, 2026-11-03), and a static build
+       never renders inside the preview store, so this cannot leak. */
+    PAST_EDITIONS_PUBLIC || isPreview() ? (
       <PreviousEdition lang={lang} year={edition.year} tab={edition.tab} />
     ) : (
       <EditionHidden lang={lang} year={edition.year} tab={edition.tab} />

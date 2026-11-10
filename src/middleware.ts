@@ -9,6 +9,7 @@ import { platformFromPath } from './lib/exhibitorsPlatform';
 import { localePath } from './lib/i18n';
 import { DEFAULT_LOCALE, isHeldBack, type LocaleId } from './lib/locales';
 import { gateOpen, vipEnv } from './server/vip';
+import { getGuest, needsDetails } from './server/vipGuests';
 import { readVipSession, REALMS } from './server/vipSession';
 
 /**
@@ -73,20 +74,28 @@ async function vipGate(context: Ctx, next: Next, locked: { lang: LocaleId; tab: 
   }
 
   const token = previewToken();
+  const access = localePath(locked.lang, hubTabPath('vip', 'access', locked.lang));
+  const toAccess = (query: string) =>
+    new Response(null, {
+      status: 302,
+      headers: { location: `${access}?${query}`, 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow' },
+    });
+
   let allowed = !!token && (await verifyPreviewCookie(readPreviewCookie(request), token));
   if (!allowed) allowed = !(await gateOpen());
-  if (!allowed) allowed = (await readVipSession(env.VIP_SESSIONS, request)) !== null;
-
   if (!allowed) {
-    const access = localePath(locked.lang, hubTabPath('vip', 'access', locked.lang));
-    return new Response(null, {
-      status: 302,
-      headers: {
-        location: `${access}?next=${encodeURIComponent(url.pathname)}`,
-        'cache-control': 'private, no-store',
-        'x-robots-tag': 'noindex, nofollow',
-      },
-    });
+    const session = await readVipSession(env.VIP_SESSIONS, request);
+    if (!session) return toAccess(`next=${encodeURIComponent(url.pathname)}`);
+    // The name step (Baïlo, 4 Nov 2026): required, asked once, before any
+    // locked tab. A session from before it carries no answer: ask the list.
+    // A session that still says "needed" may be on another device of a guest
+    // who has since answered, so the list has the last word.
+    let owesDetails = false;
+    if (session.details !== 'ok') {
+      const guest = await getGuest(env.VIP_DB, session.guestId).catch(() => null);
+      owesDetails = !!guest && needsDetails(guest);
+    }
+    if (owesDetails) return toAccess(`next=${encodeURIComponent(url.pathname)}&step=details#vip-details`);
   }
 
   // Read to the end inside the store, as the preview does: the frontmatter
@@ -169,7 +178,16 @@ async function preview(context: Ctx, next: Next): Promise<Response> {
   // stream is pulled - which would otherwise happen after this returns.
   const response = await runWithPreview(client, async () => {
     const rendered = await next();
-    const body = await rendered.text();
+    // Internal links keep the reader inside /preview/: a page's links are
+    // written site-absolute (/en/…), and following one out of the preview
+    // lands on the published site - for a hidden page (previous editions,
+    // while PAST_EDITIONS_PUBLIC is off) that is a bounce to /exhibitors/,
+    // which reads as "the preview is broken" (Léonie, 2026-11-03). Only a
+    // root-relative href with a locale prefix is rewritten: canonical,
+    // hreflang and og URLs are absolute with a host, /api/ and /studio
+    // carry no locale, and hrefs are never stega-encoded (url and path are
+    // PLAIN_KEYS), so the pattern cannot tear an encoded string.
+    const body = (await rendered.text()).replace(/href="\/(en|fr|nl)\//g, 'href="/preview/$1/');
     return new Response(body, rendered);
   });
 

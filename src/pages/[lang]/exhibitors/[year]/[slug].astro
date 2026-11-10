@@ -4,6 +4,7 @@ import ExhibitorDetail from '../../../../components/ExhibitorDetail.astro';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../../../lib/locales';
 import { getExhibitor, getExhibitorPaths, getEditions, exhibitorEditions } from '../../../../lib/queries';
 import { editionTabPath } from '../../../../lib/previousEditions';
+import { isPreview } from '../../../../lib/previewContext';
 import { PAST_EDITIONS_PUBLIC } from '../../../../components/launch';
 
 /**
