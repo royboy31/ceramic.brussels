@@ -41,7 +41,12 @@ const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
       </a>
     )
   }
-  <p class="footer-credit">{line}</p>
+  <p class="footer-credit">
+    {line}
+    <br />
+    {/* Roy, 2026-11-10: the studio's credit, as ceramic basel's footer has it. */}
+    <a href="https://fr.perelweb.be/" target="_blank" rel="noopener noreferrer">Web development by Perel Web Studio</a>
+  </p>
   {
     (links.length > 0 || consentLabel) && (
       <nav class="footer-pills flex flex-wrap justify-end" aria-label={siteName}>
@@ -67,6 +72,15 @@ const line = copyright ?? `© ${siteName}, ${new Date().getFullYear()}`;
   .footer-credit {
     font-size: clamp(0.8125rem, 1.1vw, 1rem);
     letter-spacing: -0.02em;
+  }
+  /* design.css turns every `footer a` white on black under the pointer, which
+     suits a pill and not a line of text: the credit underlines instead. */
+  .footer-credit a:hover,
+  .footer-credit a:focus-visible {
+    color: inherit !important;
+    background-color: transparent !important;
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
   }
   .footer-pills {
     gap: 8px;
