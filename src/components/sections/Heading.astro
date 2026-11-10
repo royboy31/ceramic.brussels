@@ -57,11 +57,14 @@ const { section, variant = 'default' } = Astro.props;
      they touched: "there's a slight margin problem in between titles, I
      think they're missing space between each other. It's very noticeable on
      smartphone" (Léonie, 2026-11-09, with the Figma frame as the reference).
-     The frame sets 34px from that rule to the next line, which is this 26px
-     plus the 8px the row's own title carries. The lounge's "agenda" does not
-     move: the rows under it already carry 56px, which this collapses into. */
+     The frame sets 34px from that rule to the next line, and this is all of
+     it. It was 26px at first, counting on 8px from the row's own title -
+     but that 8px was an editor's Space above on "discovery tours" alone, so
+     "beyond the fair" came out at 26 (found against the frame, 2026-11-10).
+     The lounge's "agenda" does not move: the rows under it already carry
+     56px, which this collapses into. */
   .group-title.subgroup {
-    margin: 2.25rem 0 1.625rem;
+    margin: 2.25rem 0 2.125rem;
     padding: 0 0 0.1rem;
     border-top: 0;
     border-bottom: 2px solid var(--ink);

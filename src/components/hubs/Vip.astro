@@ -202,7 +202,7 @@ const rateLink =
 >
   <HubNav lang={lang} route="vip" active={tab} pages={pages} class="vip-band" />
 
-  <div class="content-wrap vip">
+  <div class:list={['content-wrap', 'vip', { 'vip-about': tab === 'about' }]}>
     {intro && <p class="intro-large" {...styleAttrs(page?.introStyle)}>{intro}</p>}
 
     {/* ------------------------------------------------------------ about */}
@@ -745,6 +745,13 @@ const rateLink =
   .lounge-top .panel-title,
   .hotel .panel-title {
     margin-bottom: 18px;
+  }
+  /* The about tab's two closing columns from the CMS ("The Hoxton", "contact"):
+     the frame (897:1285) sets 34px from the title's rule to the copy, where
+     `.panel-title` gives 24 everywhere else. Found against the frame on
+     2026-11-10, after Léonie named it the margin reference. */
+  .vip-about :global(.sections.two-col .panel-title) {
+    margin-bottom: 34px;
   }
   /* VIP lounge against Léonie's frame (Félicie, 2026-09-25: the spacing
      around the titles was off): the letters stand 7px clear of the rule,
