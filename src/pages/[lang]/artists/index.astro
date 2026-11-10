@@ -1,6 +1,6 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import { focusLockup } from '../../../components/exhibitorBadges';
+import { focusLockup, juryPrizeLockup } from '../../../components/exhibitorBadges';
 import ExhibitorHead from '../../../components/ExhibitorHead.astro';
 import PageSections from '../../../components/PageSections.astro';
 import { LOCALE_IDS, type LocaleId } from '../../../lib/locales';
@@ -125,16 +125,38 @@ const focusOf = new Map(editions.map((e: any) => [e.year, e.countryFocus]));
 const focusLogoOf = (ex: any) => (ex?.inCountryFocus ? focusLockup(clean(focusOf.get(ex.year) ?? '')) : null);
 
 /**
- * The FILTERS row of the frame: solo show, focus, publishers, jury prize,
- * awards. Only the solo show can be told from what `getArtists` returns.
- * BACKEND-REQUEST #4: `exhibitors[]` needs `_id`, `kind` and `inCountryFocus`
- * for the focus, publishers, jury prize and awards pills; until then they are
- * left out rather than guessed.
+ * The jury prize oval beside a laureate's name, as on the exhibitor cards:
+ * the badge of the prize year, which is the year before the stand
+ * (`juryPrizeLockup`). Null for everyone else, and for a year with no
+ * artwork yet.
  */
-const rowFilters = (a: any) => [showingNow(a)?.soloShow && 'solo-show'].filter(Boolean).join(' ');
-const filters = [{ id: 'solo-show', label: t('exhibitors.soloShow'), has: (a: any) => showingNow(a)?.soloShow }].filter((f) =>
-  artists.some(f.has),
-);
+const juryLogoOf = (ex: any) => (ex?.kind === 'jury-prize' ? juryPrizeLockup(ex.year) : null);
+
+/**
+ * The FILTERS row of the frame: solo show, focus, publishers, jury prize,
+ * awards. Solo show and jury prize are here; the others wait for someone to
+ * ask. `getArtists` has carried `kind` and `inCountryFocus` since request #4.
+ *
+ * The jury prize pill: "there's no «jury prize 2026» filter, even though
+ * Marie Pic, the jury prize laureate, is part of the list. Could you add
+ * this filter, and add the logo next to the solo show logo where her name is
+ * on the list?" (Léonie, 2026-11-09). Its label is the galleries list's,
+ * the prize year being the one before the edition. A pill no row answers to
+ * is left out, so a year without a laureate shows none.
+ */
+const FILTERS = [
+  { id: 'solo-show', label: t('exhibitors.soloShow'), has: (a: any) => !!showingNow(a)?.soloShow },
+  {
+    id: 'jury-prize',
+    label: `${t('exhibitors.juryPrize')}${edition?.year ? ` ${edition.year - 1}` : ''}`,
+    has: (a: any) => showingNow(a)?.kind === 'jury-prize',
+  },
+];
+const rowFilters = (a: any) =>
+  FILTERS.filter((f) => f.has(a))
+    .map((f) => f.id)
+    .join(' ');
+const filters = FILTERS.filter((f) => artists.some(f.has));
 
 /**
  * The letters flow into two columns the way the frame stacks them: each letter
@@ -208,7 +230,7 @@ for (const letter of letters) {
                               {a.name}
                               {a.countryCode && <sup>{a.countryCode}</sup>}
                             </span>
-                            {(ex?.soloShow || ex?.booth || focusLogoOf(ex)) && (
+                            {(ex?.soloShow || ex?.booth || focusLogoOf(ex) || juryLogoOf(ex)) && (
                               <span class="tail">
                                 {focusLogoOf(ex) && (
                                   <img
@@ -221,6 +243,15 @@ for (const letter of letters) {
                                 )}
                                 {ex.soloShow && (
                                   <img class="solo" src="/assets/exhibitors/solo-show.png" alt={t('exhibitors.soloShow')} width="40" height="40" />
+                                )}
+                                {juryLogoOf(ex) && (
+                                  <img
+                                    class="prize"
+                                    src={juryLogoOf(ex)}
+                                    alt={`${t('exhibitors.juryPrize')} ${ex.year - 1}`}
+                                    width="600"
+                                    height="282"
+                                  />
                                 )}
                                 {ex.booth && <span class="booth">{ex.booth} ●</span>}
                               </span>
@@ -396,7 +427,8 @@ for (const letter of letters) {
      and the focus España mark beside it at the same height. The negative
      margin lets them stand taller than the name without opening the row. */
   .solo,
-  .focus {
+  .focus,
+  .prize {
     flex: none;
     height: 40px;
     margin-block: -5px;
@@ -404,7 +436,8 @@ for (const letter of letters) {
   .solo {
     width: 40px;
   }
-  .focus {
+  .focus,
+  .prize {
     width: auto;
   }
   .empty {
@@ -433,7 +466,8 @@ for (const letter of letters) {
       left: 52px;
     }
     .solo,
-    .focus {
+    .focus,
+    .prize {
       height: 32px;
       margin-block: -4px;
     }
