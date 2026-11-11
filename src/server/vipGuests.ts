@@ -1,4 +1,5 @@
-import { codeHash, sha256Hex, type D1Like, type KVLike } from './vip';
+import type { StringKey } from '../lib/i18n';
+import { codeHash, sha256Hex, type Audience, type RowAudience, type D1Like, type KVLike } from './vip';
 
 /**
  * The guest list, as the Worker edits it (docs/vip-access.md): what the
@@ -34,6 +35,10 @@ export interface GuestRow {
   decided_at: string | null;
   decided_by: string | null;
   created_at: string;
+  audience: RowAudience;
+  details_at: string | null;
+  lang: string | null;
+  decline_mail_id: string | null;
 }
 
 export interface GuestInput {
@@ -42,10 +47,49 @@ export interface GuestInput {
   email: string;
   institution?: string;
   function?: string;
+  /** en | fr | nl: the page the request form was sent from (Baïlo, 3 Nov: for mails in their language later). */
+  lang?: string;
 }
 
+/**
+ * The functions the name step and the request form offer (Baïlo, 4 and
+ * 10 Nov 2026), stored as written here, in English, whatever the page's
+ * language. The Studio still takes free text, and requests filed before
+ * 10 Nov hold whatever was typed, so a row may hold anything else too.
+ */
+export const GUEST_FUNCTIONS = [
+  'Collector / Patron',
+  'Art Advisor',
+  'Interior Designer / Architect',
+  'Curator',
+  'Museum / Foundation',
+  'Embassy / Cultural Institute',
+  'Gallery / Auction House',
+  'Artist / Designer',
+  'Press / Media',
+  'Brand Partner',
+  'Academic / Education',
+  'Other',
+] as const;
+
+/** The label of each of GUEST_FUNCTIONS on the page, in the same order. */
+export const GUEST_FUNCTION_KEYS: readonly StringKey[] = [
+  'vip.fn.collector',
+  'vip.fn.advisor',
+  'vip.fn.interior',
+  'vip.fn.curator',
+  'vip.fn.museum',
+  'vip.fn.embassy',
+  'vip.fn.gallery',
+  'vip.fn.artist',
+  'vip.fn.press',
+  'vip.fn.brand',
+  'vip.fn.academic',
+  'vip.fn.other',
+];
+
 const COLUMNS =
-  'id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, decided_at, decided_by, created_at';
+  'id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, decided_at, decided_by, created_at, audience, details_at, lang, decline_mail_id';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const now = () => new Date().toISOString();
@@ -53,18 +97,40 @@ const now = () => new Date().toISOString();
 export const cleanEmail = (email: unknown) => (typeof email === 'string' ? email.trim().toLowerCase() : '');
 export const isEmail = (email: string) => EMAIL.test(email) && email.length <= 254;
 
+/**
+ * A name as it is saved, whatever the guest typed: "marie DUPONT" → "Marie
+ * Dupont", "jean-luc" → "Jean-Luc", "o'brien" → "O'Brien", "BAÏLO" → "Baïlo".
+ * A word typed all in lower or all in upper case gets a capital initial; one
+ * already in mixed case ("McDonald", "DiCaprio") is left as typed. Particles
+ * are words like any other: "van der berg" → "Van Der Berg". Case only, so a
+ * guest's code never moves with it (it is made from the email). The import
+ * script has the same function: change one and change both.
+ */
+export function formatName(name: string): string {
+  return String(name ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[\p{L}\p{M}]+/gu, (word) =>
+      word === word.toLocaleLowerCase() || word === word.toLocaleUpperCase()
+        ? word.charAt(0).toLocaleUpperCase() + word.slice(1).toLocaleLowerCase()
+        : word,
+    );
+}
+
 /** First 20 hex of sha256(lower(email)), as the import script makes it. */
 export const guestId = async (email: string) => (await sha256Hex(cleanEmail(email))).slice(0, 20);
 
-/** "Émilie-Louise" → "EMILIELOUISE"; nothing usable → "VIP". */
-function namePart(firstName: string): string {
-  const ascii = String(firstName ?? '')
+/** The email's local part, first three characters plus the last -
+ *  "marie.dupont@x" → "MART", "info@x" → "INFO"; nothing usable → "VIP". */
+function emailPart(email: string): string {
+  const ascii = String(email ?? '')
+    .split('@')[0]
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toUpperCase()
-    .replace(/[^A-Z]/g, '')
-    .slice(0, 10);
-  return ascii || 'VIP';
+    .replace(/[^A-Z0-9]/g, '');
+  const part = ascii.length <= 4 ? ascii : ascii.slice(0, 3) + ascii.slice(-1);
+  return part || 'VIP';
 }
 
 /** The pepper as an HMAC key, imported once: an export makes thousands of codes. */
@@ -76,17 +142,25 @@ function hmacKey(pepper: string): Promise<CryptoKey> {
   return hmac.key;
 }
 
-export async function makeCode(pepper: string, firstName: string, email: string, version: number): Promise<string> {
+/** The row's created_at is in the MAC, so a guest deleted and added again
+ *  gets a code that never existed before. Must stay the same function as
+ *  makeCode in scripts/vip-guests.mjs. */
+export async function makeCode(pepper: string, email: string, version: number, createdAt: string): Promise<string> {
   const encoder = new TextEncoder();
   const key = await hmacKey(pepper);
-  const mac = new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(`${cleanEmail(email)}:${version}`)));
+  const mac = new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(`${cleanEmail(email)}:${version}:${createdAt}`)));
   let tail = '';
   for (let i = 0; i < 6; i++) tail += ALPHABET[mac[i] % ALPHABET.length];
-  return `${PREFIX}-${namePart(firstName)}-${tail}`;
+  return `${PREFIX}-${emailPart(email)}-${tail}`;
 }
 
-export async function listGuests(db: D1Like): Promise<GuestRow[]> {
-  const { results } = await db.prepare(`SELECT ${COLUMNS} FROM guests ORDER BY last_name, first_name`).bind().all<GuestRow>();
+/** One audience's guests: the VIP list and the exhibitors platform's are two
+ *  screens, and a row marked `all` sits on both. */
+export async function listGuests(db: D1Like, audience: Audience = 'vip'): Promise<GuestRow[]> {
+  const { results } = await db
+    .prepare(`SELECT ${COLUMNS} FROM guests WHERE audience IN (?, 'all') ORDER BY last_name, first_name`)
+    .bind(audience)
+    .all<GuestRow>();
   return results;
 }
 
@@ -105,22 +179,23 @@ export async function createGuest(
   input: GuestInput,
   status: GuestStatus,
   by: string | null,
+  audience: Audience = 'vip',
 ): Promise<GuestRow | null> {
   const email = cleanEmail(input.email);
   const id = await guestId(email);
   if (await getGuest(db, id)) return null;
   const stamp = now();
-  const hash = await codeHash(await makeCode(pepper, input.firstName, email, 1), pepper);
+  const hash = await codeHash(await makeCode(pepper, email, 1, stamp), pepper);
   await db
     .prepare(
-      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, requested_at, decided_at, decided_by, created_at, updated_at)
-       VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
+      `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, requested_at, decided_at, decided_by, created_at, updated_at, audience, lang)
+       VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
     )
     .bind(
       id,
       hash,
-      input.firstName,
-      input.lastName,
+      formatName(input.firstName),
+      formatName(input.lastName),
       email,
       input.institution || null,
       input.function || null,
@@ -130,6 +205,8 @@ export async function createGuest(
       status === 'pending' ? null : by,
       stamp,
       stamp,
+      audience,
+      input.lang || null,
     )
     .run();
   return getGuest(db, id);
@@ -146,47 +223,66 @@ export async function importGuests(
   pepper: string,
   inputs: GuestInput[],
   by: string,
-): Promise<{ created: number; approved: number; unchanged: number }> {
-  const { results } = await db.prepare('SELECT id, status FROM guests').bind().all<{ id: string; status: GuestStatus }>();
-  const existing = new Map(results.map((r) => [r.id, r.status]));
+  audience: Audience = 'vip',
+): Promise<{ created: number; approved: number; unchanged: number; crossed: number }> {
+  const { results } = await db.prepare('SELECT id, status, audience FROM guests').bind().all<{ id: string; status: GuestStatus; audience: RowAudience }>();
+  const existing = new Map(results.map((r) => [r.id, r]));
   const stamp = now();
   const statements = [];
   let created = 0;
   let approved = 0;
   let unchanged = 0;
+  // One email is one row: importing it into the other audience sets the row
+  // to `all` - the same code now opens both doors (Tiphaine, 2026-10-22) -
+  // and keeps the row's own name and details, which the other list owns.
+  let crossed = 0;
   for (const input of inputs) {
     const email = cleanEmail(input.email);
     const id = await guestId(email);
-    const status = existing.get(id);
-    if (!status) {
-      const hash = await codeHash(await makeCode(pepper, input.firstName, email, 1), pepper);
+    const was = existing.get(id);
+    if (was && (was.audience ?? 'vip') !== audience && was.audience !== 'all') {
       statements.push(
         db
           .prepare(
-            `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at)
-             VALUES (?, ?, 1, ?, ?, ?, ?, ?, 'approved', ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
+            `UPDATE guests SET audience = 'all',
+               decided_at = CASE WHEN status = 'pending' THEN ? ELSE decided_at END,
+               decided_by = CASE WHEN status = 'pending' THEN ? ELSE decided_by END,
+               status = CASE WHEN status = 'pending' THEN 'approved' ELSE status END,
+               updated_at = ? WHERE id = ?`,
           )
-          .bind(id, hash, input.firstName, input.lastName, email, input.institution || null, input.function || null, stamp, by, stamp, stamp),
+          .bind(stamp, by, stamp, id),
       );
-      existing.set(id, 'approved');
+      existing.set(id, { ...was, audience: 'all', status: was.status === 'pending' ? 'approved' : was.status });
+      crossed++;
+    } else if (!was) {
+      const hash = await codeHash(await makeCode(pepper, email, 1, stamp), pepper);
+      statements.push(
+        db
+          .prepare(
+            `INSERT INTO guests (id, code_hash, code_version, first_name, last_name, email, institution, function, status, decided_at, decided_by, created_at, updated_at, audience)
+             VALUES (?, ?, 1, ?, ?, ?, ?, ?, 'approved', ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`,
+          )
+          .bind(id, hash, formatName(input.firstName), formatName(input.lastName), email, input.institution || null, input.function || null, stamp, by, stamp, stamp, audience),
+      );
+      existing.set(id, { id, status: 'approved', audience });
       created++;
-    } else if (status === 'pending') {
+    } else if (was.status === 'pending') {
       statements.push(
         db.prepare("UPDATE guests SET status = 'approved', decided_at = ?, decided_by = ?, updated_at = ? WHERE id = ?").bind(stamp, by, stamp, id),
       );
-      existing.set(id, 'approved');
+      existing.set(id, { ...was, status: 'approved' });
       approved++;
     } else unchanged++;
   }
   if (statements.length) await db.batch(statements);
-  return { created, approved, unchanged };
+  return { created, approved, unchanged, crossed };
 }
 
 /**
  * Name, institution and function. The email is the guest's identity - their
  * id and their code both come from it - so it is not editable: delete and
- * add again. The first name is part of the code as printed, so the hash is
- * made again from the new one and the caller is told when the code moved.
+ * add again. The code is made from the email, version and created_at alone,
+ * so editing names never moves it; codeChanged stays for the API's shape.
  */
 export async function updateGuest(
   db: D1Like,
@@ -196,13 +292,11 @@ export async function updateGuest(
 ): Promise<{ guest: GuestRow; codeChanged: boolean } | null> {
   const before = await getGuest(db, id);
   if (!before) return null;
-  const was = await makeCode(pepper, before.first_name, before.email, before.code_version);
-  const is = await makeCode(pepper, fields.firstName, before.email, before.code_version);
   await db
-    .prepare('UPDATE guests SET first_name = ?, last_name = ?, institution = ?, function = ?, code_hash = ?, updated_at = ? WHERE id = ?')
-    .bind(fields.firstName, fields.lastName, fields.institution || null, fields.function || null, await codeHash(is, pepper), now(), id)
+    .prepare('UPDATE guests SET first_name = ?, last_name = ?, institution = ?, function = ?, updated_at = ? WHERE id = ?')
+    .bind(formatName(fields.firstName), formatName(fields.lastName), fields.institution || null, fields.function || null, now(), id)
     .run();
-  return { guest: (await getGuest(db, id))!, codeChanged: was !== is };
+  return { guest: (await getGuest(db, id))!, codeChanged: false };
 }
 
 export async function decideGuest(db: D1Like, id: string, status: 'approved' | 'denied', by: string): Promise<GuestRow | null> {
@@ -221,7 +315,7 @@ export async function reissueGuest(db: D1Like, pepper: string, id: string): Prom
   const guest = await getGuest(db, id);
   if (!guest) return null;
   const version = Number(guest.code_version) + 1;
-  const code = await makeCode(pepper, guest.first_name, guest.email, version);
+  const code = await makeCode(pepper, guest.email, version, guest.created_at);
   await db
     .prepare('UPDATE guests SET code_version = ?, code_hash = ?, revoked = 0, updated_at = ? WHERE id = ?')
     .bind(version, await codeHash(code, pepper), now(), id)
@@ -236,18 +330,54 @@ export async function deleteGuest(db: D1Like, id: string): Promise<void> {
 /** Ends every session of a guest: their keys share a prefix in KV. */
 export async function endSessions(kv: KVLike, id: string): Promise<number> {
   let ended = 0;
-  let cursor: string | undefined;
-  do {
-    const page = await kv.list({ prefix: `s:${id}:`, cursor });
-    for (const key of page.keys) {
-      await kv.delete(key.name);
-      ended++;
-    }
-    cursor = page.list_complete ? undefined : page.cursor;
-  } while (cursor);
+  // Both realms (vipSession.ts REALMS): a guest only ever has one audience,
+  // but clearing the other prefix costs one empty list and closes the gap
+  // where a row's audience was edited after a session was opened.
+  for (const prefix of ['s', 'x']) {
+    let cursor: string | undefined;
+    do {
+      const page = await kv.list({ prefix: `${prefix}:${id}:`, cursor });
+      for (const key of page.keys) {
+        await kv.delete(key.name);
+        ended++;
+      }
+      cursor = page.list_complete ? undefined : page.cursor;
+    } while (cursor);
+  }
   return ended;
 }
 
 /** The code a guest types, for the ones who have a working one. */
 export const codeFor = (pepper: string, g: GuestRow) =>
-  g.status === 'approved' && !g.revoked ? makeCode(pepper, g.first_name, g.email, g.code_version) : Promise.resolve(null);
+  g.status === 'approved' && !g.revoked ? makeCode(pepper, g.email, g.code_version, g.created_at) : Promise.resolve(null);
+
+/** Whether the gate still has to ask this guest for their name (Baïlo: required, and once). */
+export const needsDetails = (g: Pick<GuestRow, 'first_name' | 'last_name'>) => !(g.first_name ?? '').trim() || !(g.last_name ?? '').trim();
+
+/**
+ * What a guest gives at the name step: both names, and the function and
+ * institution if they like. The code is made from the email alone, so it
+ * stays the one already mailed. An optional field left empty keeps what the
+ * row had.
+ */
+export async function saveDetails(
+  db: D1Like,
+  id: string,
+  fields: { firstName: string; lastName: string; function?: string; institution?: string },
+): Promise<GuestRow | null> {
+  const stamp = now();
+  await db
+    .prepare(
+      `UPDATE guests SET first_name = ?, last_name = ?,
+         function = COALESCE(?, function), institution = COALESCE(?, institution), details_at = ?, updated_at = ?
+       WHERE id = ?`,
+    )
+    .bind(formatName(fields.firstName), formatName(fields.lastName), fields.function || null, fields.institution || null, stamp, stamp, id)
+    .run();
+  return getGuest(db, id);
+}
+
+/** The Brevo id of a decline waiting to go out, or null once it went or was called off. */
+export async function setDeclineMail(db: D1Like, id: string, messageId: string | null): Promise<void> {
+  await db.prepare('UPDATE guests SET decline_mail_id = ? WHERE id = ?').bind(messageId, id).run();
+}

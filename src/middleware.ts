@@ -5,10 +5,12 @@ import { runLive, runWithPreview } from './lib/previewContext';
 import { previewToken } from './server/runtime';
 import { readPreviewCookie, verifyPreviewCookie } from './server/preview';
 import { hubTabPath, lockedTabFromPath } from './lib/hubs';
+import { platformFromPath } from './lib/exhibitorsPlatform';
 import { localePath } from './lib/i18n';
 import { DEFAULT_LOCALE, isHeldBack, type LocaleId } from './lib/locales';
 import { gateOpen, vipEnv } from './server/vip';
-import { readVipSession } from './server/vipSession';
+import { getGuest, needsDetails } from './server/vipGuests';
+import { readVipSession, REALMS } from './server/vipSession';
 
 /**
  * Two jobs, only on the deployed Worker (and `astro dev`):
@@ -30,6 +32,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const locked = lockedTabFromPath(pathname);
   if (locked) return vipGate(context, next, locked);
+
+  if (platformFromPath(pathname)) return platformGate(context, next);
 
   return next();
 });
@@ -70,24 +74,68 @@ async function vipGate(context: Ctx, next: Next, locked: { lang: LocaleId; tab: 
   }
 
   const token = previewToken();
+  const access = localePath(locked.lang, hubTabPath('vip', 'access', locked.lang));
+  const toAccess = (query: string) =>
+    new Response(null, {
+      status: 302,
+      headers: { location: `${access}?${query}`, 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow' },
+    });
+
   let allowed = !!token && (await verifyPreviewCookie(readPreviewCookie(request), token));
   if (!allowed) allowed = !(await gateOpen());
-  if (!allowed) allowed = (await readVipSession(env.VIP_SESSIONS, request)) !== null;
-
   if (!allowed) {
-    const access = localePath(locked.lang, hubTabPath('vip', 'access', locked.lang));
-    return new Response(null, {
-      status: 302,
-      headers: {
-        location: `${access}?next=${encodeURIComponent(url.pathname)}`,
-        'cache-control': 'private, no-store',
-        'x-robots-tag': 'noindex, nofollow',
-      },
-    });
+    const session = await readVipSession(env.VIP_SESSIONS, request);
+    if (!session) return toAccess(`next=${encodeURIComponent(url.pathname)}`);
+    // The name step (Baïlo, 4 Nov 2026): required, asked once, before any
+    // locked tab. A session from before it carries no answer: ask the list.
+    // A session that still says "needed" may be on another device of a guest
+    // who has since answered, so the list has the last word.
+    let owesDetails = false;
+    if (session.details !== 'ok') {
+      const guest = await getGuest(env.VIP_DB, session.guestId).catch(() => null);
+      owesDetails = !!guest && needsDetails(guest);
+    }
+    if (owesDetails) return toAccess(`next=${encodeURIComponent(url.pathname)}&step=details#vip-details`);
   }
 
   // Read to the end inside the store, as the preview does: the frontmatter
   // runs as the stream is pulled.
+  const response = await runLive(async () => {
+    const rendered = await next();
+    const body = await rendered.text();
+    return new Response(body, rendered);
+  });
+  response.headers.set('cache-control', 'private, no-store');
+  response.headers.set('x-robots-tag', 'noindex, nofollow');
+  return response;
+}
+
+/**
+ * The exhibitors platform's gate (docs/exhibitors-platform.md). Unlike the
+ * VIP tabs there is no separate access page: the one address renders the
+ * password form or the platform, and this gate only decides which, through
+ * `locals.exhibitorEntered` - an exhibitor session, or the editors' preview
+ * cookie. Both states are rendered live by the Worker, never cached, never
+ * indexed. Under `astro dev` there is no Worker and no KV: the platform
+ * renders entered, exactly as the VIP tabs render unlocked there.
+ */
+async function platformGate(context: Ctx, next: Next): Promise<Response> {
+  const { request, url } = context;
+  const env = await vipEnv();
+  if (!env) {
+    (context.locals as Record<string, unknown>).exhibitorEntered = true;
+    return next();
+  }
+
+  if (!url.pathname.endsWith('/')) {
+    return new Response(null, { status: 308, headers: { location: `${url.pathname}/${url.search}`, 'cache-control': 'no-store' } });
+  }
+
+  const token = previewToken();
+  let entered = !!token && (await verifyPreviewCookie(readPreviewCookie(request), token));
+  if (!entered) entered = (await readVipSession(env.VIP_SESSIONS, request, REALMS.exhibitor)) !== null;
+  (context.locals as Record<string, unknown>).exhibitorEntered = entered;
+
   const response = await runLive(async () => {
     const rendered = await next();
     const body = await rendered.text();
@@ -130,7 +178,16 @@ async function preview(context: Ctx, next: Next): Promise<Response> {
   // stream is pulled - which would otherwise happen after this returns.
   const response = await runWithPreview(client, async () => {
     const rendered = await next();
-    const body = await rendered.text();
+    // Internal links keep the reader inside /preview/: a page's links are
+    // written site-absolute (/en/…), and following one out of the preview
+    // lands on the published site - for a hidden page (previous editions,
+    // while PAST_EDITIONS_PUBLIC is off) that is a bounce to /exhibitors/,
+    // which reads as "the preview is broken" (Léonie, 2026-11-03). Only a
+    // root-relative href with a locale prefix is rewritten: canonical,
+    // hreflang and og URLs are absolute with a host, /api/ and /studio
+    // carry no locale, and hrefs are never stega-encoded (url and path are
+    // PLAIN_KEYS), so the pattern cannot tear an encoded string.
+    const body = (await rendered.text()).replace(/href="\/(en|fr|nl)\//g, 'href="/preview/$1/');
     return new Response(body, rendered);
   });
 
@@ -161,11 +218,16 @@ const PLAIN_KEYS = new Set([
   // built into ids, codes and links. `slug` covers the per-language page
   // slugs (slug.en.current), which the client's own rule misses: encoded,
   // no hub tab found its page and preview dropped every tab's own text.
-  'anchor', 'countryCode', 'country', 'instagram', 'phone', 'slug',
+  // `url` covers the embed block's per-language address (url.en …): an
+  // encoded address would break the iframe src outright.
+  'anchor', 'countryCode', 'country', 'instagram', 'phone', 'slug', 'url',
   // addresses built into mailto: links (contact page, press, the application form)
   'contactEmail', 'pressEmail', 'recipient', 'cc', 'senderEmail',
   // a "link to this site" mark's path in rich text (links.ts sitePath)
   'path',
+  // agenda calendar entries (pageBuilder agendaEntry): the component parses
+  // these into Date objects, and an encoded ISO string is not a date
+  'date', 'endDate',
 ]);
 
 const stegaFilter: FilterDefault = (props) =>

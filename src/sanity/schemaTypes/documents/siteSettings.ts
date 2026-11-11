@@ -381,6 +381,23 @@ export const siteSettings = defineType({
           description:
             'Plain text; a blank line starts a new paragraph. {firstName}, {lastName}, {code}, {link} (the access page) and {contact} (the VIP team address) are filled in. Empty: a stock English text.',
         }),
+        // The exhibitors platform's counterpart (docs/exhibitors-platform.md):
+        // the same tool mails an exhibitor their password with this text and
+        // {link} pointing at the platform instead of the VIP access page.
+        defineField({
+          name: 'exhibitorCodeSubject',
+          title: 'Exhibitor password email: subject',
+          type: 'string',
+          description: 'Sent to a gallery with their exhibitors platform password. {firstName}, {lastName}, {code} are filled in. Empty: a stock English subject.',
+        }),
+        defineField({
+          name: 'exhibitorCodeText',
+          title: 'Exhibitor password email: text',
+          type: 'text',
+          rows: 10,
+          description:
+            'Plain text; a blank line starts a new paragraph. {firstName}, {lastName}, {code}, {link} (the exhibitors platform) and {contact} are filled in. Empty: a stock English text.',
+        }),
         defineField({
           name: 'successPage',
           title: 'Page shown after sending',

@@ -216,6 +216,21 @@ export const structure: StructureResolver = async (S, context) => {
                   .initialValueTemplate('page-main', { section: 'exhibitors', slug: 'awards', title: 'Exhibitor awards' }),
           ),
         byYear('exhibitor-awards', 'Exhibitor awards by year (the site shows the newest)', 'award', 'family == "fair"', byOrder, true),
+        // The password-gated exhibitors platform (docs/exhibitors-platform.md):
+        // one page, section "exhibitors", English slug "platform", rendered
+        // live behind the gate - a publish shows immediately, no rebuild.
+        S.listItem()
+          .id('page-exhibitors-platform-entry')
+          .title('Exhibitors platform page')
+          .schemaType('page')
+          .child(
+            pageIds['exhibitors/platform']
+              ? S.document().schemaType('page').documentId(pageIds['exhibitors/platform'])
+              : S.document()
+                  .schemaType('page')
+                  .documentId('page-exhibitors-platform')
+                  .initialValueTemplate('page-main', { section: 'exhibitors', slug: 'platform', title: 'Exhibitors platform' }),
+          ),
       ]),
 
       folder('artists', 'Artists', [mainPage('artists', 'Artists page'), list('artists-all', 'All artists', 'artist', 'true', {}, byName)]),

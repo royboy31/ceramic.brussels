@@ -2,11 +2,17 @@ import type { APIRoute } from 'astro';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { localePath } from '../../lib/i18n';
 import { hubTabPath } from '../../lib/hubs';
-import { codeHash, codePepper, findGuestByCode, normaliseCode, recordEntry, safeNext, vipEnv } from '../vip';
-import { createVipSession } from '../vipSession';
+import { PLATFORM_PATH } from '../../lib/exhibitorsPlatform';
+import { codeHash, codePepper, findGuestByCode, normaliseCode, recordEntry, safeNext, vipEnv, type Audience } from '../vip';
+import { createVipSession, REALMS } from '../vipSession';
+import { needsDetails } from '../vipGuests';
 
 /**
- * POST /api/vip/enter - the "VIP already? enter your code" box.
+ * POST /api/vip/enter - the "VIP already? enter your code" box, and (with
+ * `audience=exhibitor`) the exhibitors platform's password box: same codes,
+ * same throttle, same rate limiting rule, separate realm - an exhibitor
+ * session lives in its own cookie and can never open the VIP tabs, nor a
+ * VIP's code the platform (docs/exhibitors-platform.md).
  *
  * Takes `code`, `next` (the path to land on) and `lang`. A code that hashes
  * to a guest who is not revoked gets a session in KV and the cookie, and the
@@ -18,6 +24,10 @@ import { createVipSession } from '../vipSession';
  * name, and an address that fails twenty times in ten minutes is refused
  * for the rest of them (the Cache API, per colo, which is enough). A
  * Cloudflare rate limiting rule on this path is the belt to that brace.
+ *
+ * A guest the list has no first or last name for goes to the name step
+ * first - the access page's "One last detail" window (routes/vip-details.ts)
+ * - and on to `next` from there. The gate holds every locked tab until then.
  */
 export const prerender = false;
 
@@ -64,8 +74,14 @@ export const POST: APIRoute = async ({ request }) => {
   const wantsJson = (request.headers.get('accept') ?? '').includes('application/json');
   const body = await readBody(request);
   const lang = (LOCALE_IDS as string[]).includes(body.lang) ? (body.lang as LocaleId) : DEFAULT_LOCALE;
-  const accessPage = localePath(lang, hubTabPath('vip', 'access', lang));
-  const next = safeNext(body.next, localePath(lang, hubTabPath('vip', 'programme', lang)));
+  const audience: Audience = body.audience === 'exhibitor' ? 'exhibitor' : 'vip';
+  // The platform is its own access page: a wrong code lands back on its form.
+  const accessPage =
+    audience === 'exhibitor' ? localePath(lang, PLATFORM_PATH) : localePath(lang, hubTabPath('vip', 'access', lang));
+  const next = safeNext(
+    body.next,
+    audience === 'exhibitor' ? localePath(lang, PLATFORM_PATH) : localePath(lang, hubTabPath('vip', 'programme', lang)),
+  );
   const back = (error: string) =>
     wantsJson ? json(401, { ok: false, error }) : redirect(`${accessPage}?error=${error}&next=${encodeURIComponent(next)}`);
 
@@ -84,16 +100,25 @@ export const POST: APIRoute = async ({ request }) => {
   if (code.length < 6 || code.length > 40) return back('code');
   if (await tooManyFailures(request, false)) return wantsJson ? json(429, { ok: false, error: 'throttled' }) : back('throttled');
 
-  const guest = await findGuestByCode(env.VIP_DB, await codeHash(code, pepper));
+  const guest = await findGuestByCode(env.VIP_DB, await codeHash(code, pepper), audience);
   if (!guest || guest.revoked) {
     await tooManyFailures(request, true);
     return back('code');
   }
 
-  const cookie = await createVipSession(env.VIP_SESSIONS, guest.id, request);
+  // The name step is the VIP hub's: the platform asks no name.
+  const owesDetails = audience === 'vip' && needsDetails(guest);
+  const cookie = await createVipSession(
+    env.VIP_SESSIONS,
+    guest.id,
+    request,
+    REALMS[audience],
+    audience === 'vip' ? (owesDetails ? 'needed' : 'ok') : undefined,
+  );
   await recordEntry(env.VIP_DB, guest.id).catch((error) => console.error('[vip] could not record the entry:', error));
 
-  return wantsJson ? json(200, { ok: true, next }, { 'set-cookie': cookie }) : redirect(next, { 'set-cookie': cookie });
+  const to = owesDetails ? `${accessPage}?next=${encodeURIComponent(next)}&step=details#vip-details` : next;
+  return wantsJson ? json(200, { ok: true, next: to }, { 'set-cookie': cookie }) : redirect(to, { 'set-cookie': cookie });
 };
 
 export const GET: APIRoute = () => json(405, { ok: false, error: 'method' });

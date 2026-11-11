@@ -126,6 +126,17 @@ export const page = defineType({
       hidden: pageHides('heroImages'),
     }),
     sectionsField({ group: 'main', hidden: pageHides('sections') }),
+    // The exhibitors platform's sidebar: the frame's narrow right column,
+    // rendered beside Sections (src/server/routes/exhibitors-platform.astro).
+    // pageKinds shows it on that one page.
+    sectionsField({
+      name: 'aside',
+      title: 'Sidebar',
+      group: 'main',
+      hidden: pageHides('aside'),
+      description:
+        'The narrow right column beside the sections - forms, kit, links, contact. A spacer here means "continue below the full-width image band", which is what puts the transport partner beside the hotel.',
+    }),
     defineField({
       name: 'body',
       title: 'Body',

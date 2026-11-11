@@ -11,6 +11,7 @@ import LinkPill from '../../components/LinkPill.astro';
 import VipShot from '../../components/VipShot.astro';
 import VipCodeForm from '../../components/VipCodeForm.astro';
 import VipRequestForm from '../../components/VipRequestForm.astro';
+import VipDetailsForm from '../../components/VipDetailsForm.astro';
 import type { LocaleId } from '../../lib/locales';
 import { useTranslations, localePath, formatDayLong, formatTime } from '../../lib/i18n';
 import { getHubPages, getProgramme, getPartners, getSettings, getVipSettings } from '../../lib/queries';
@@ -202,7 +203,7 @@ const rateLink =
 >
   <HubNav lang={lang} route="vip" active={tab} pages={pages} class="vip-band" />
 
-  <div class="content-wrap vip">
+  <div class:list={['content-wrap', 'vip', { 'vip-about': tab === 'about' }]}>
     {intro && <p class="intro-large" {...styleAttrs(page?.introStyle)}>{intro}</p>}
 
     {/* ------------------------------------------------------------ about */}
@@ -633,6 +634,10 @@ const rateLink =
     }
 
     {
+      isAccess && <VipDetailsForm lang={lang} contact={contact} />
+    }
+
+    {
       locked && (
         <>
         <form class="leave" method="post" action="/api/vip/leave/">
@@ -745,6 +750,40 @@ const rateLink =
   .lounge-top .panel-title,
   .hotel .panel-title {
     margin-bottom: 18px;
+  }
+  /* The about tab's two closing columns from the CMS ("The Hoxton", "contact"):
+     the frame (897:1285) sets 34px from the title's rule to the copy, where
+     `.panel-title` gives 24 everywhere else. Found against the frame on
+     2026-11-10, after Léonie named it the margin reference. */
+  .vip-about :global(.sections.two-col .panel-title) {
+    margin-bottom: 34px;
+  }
+  /* Léonie, 2026-11-10, three things on this tab, each read off the frame
+     (897:1285).
+
+     "programme overview": its rule was 1px where every other ruled title on
+     the site is 2px - the hubs draw theirs at 2, and this one comes from the
+     page builder's section title, which draws 1. And it stood 30px under
+     the slideshow's caption where the frame has 51. */
+  .vip-about :global(.page-sections > .group-title:not(.subgroup)) {
+    border-top-width: 2px;
+  }
+  .vip-about :global(.page-sections > .group-title:first-child) {
+    margin-top: 37px;
+  }
+  /* The picture beside the first row of a part starts on that part's rule,
+     not on the row's title 36px under it: the frame has the photo at y 1354
+     against the rule at 1357, and again at 2105 against 2107. Side by side
+     only - stacked on a phone the picture follows the rule at its 34px. */
+  @media (min-width: 900.02px) {
+    .vip-about :global(.group-title.subgroup + .image-text .shot) {
+      margin-top: -36px;
+    }
+  }
+  @media (max-width: 900px) {
+    .vip-about :global(.page-sections > .group-title:first-child) {
+      margin-top: 30px;
+    }
   }
   /* VIP lounge against Léonie's frame (Félicie, 2026-09-25: the spacing
      around the titles was off): the letters stand 7px clear of the rule,

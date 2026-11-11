@@ -90,9 +90,16 @@ Pages → Plans. The session store is one module, `src/server/vipSession.ts`,
 so if the plan is not wanted it can be pointed at a `sessions` table in D1
 instead, whose free writes are a hundred times higher.
 
-**Codes.** Format `CB27-<FIRSTNAME>-<6 chars>` from an alphabet without
-0/O/1/I, upper-case, hyphens and case ignored on entry. Around 700 million
-per first name, and a Cloudflare rate limiting rule on the entry route.
+**Codes.** Format `CB27-<3-4 chars of the email's local part>-<6 chars>`
+(`marie.dupont@x` → `CB27-MART-X7K2P9`), the six from an HMAC of the
+guest's email, code version **and created_at** - so a guest removed and
+added again gets a code that never existed before, and editing names never
+changes a code. The tail alphabet has no 0/O/1/I; upper-case, hyphens and
+case ignored on entry. Around 700 million codes per visible part, the
+import refuses to write two identical full codes, and a Cloudflare rate
+limiting rule guards the entry route. (Until 2026-10-18 the visible part
+was the first name; names are optional everywhere since Félicie's Mailchimp
+list carries almost none.)
 
 **Entering.** `POST /api/vip/enter/` with `code` and `next` (the path to
 return to, same-site only). The Worker hashes the code, looks the guest up
@@ -118,11 +125,12 @@ Sanity query keeps the request count trivial. `scripts/pages-worker.mjs`
 adds the locked paths to `_routes.json` from the built hub list.
 
 **Issuing codes.** `scripts/vip-guests.mjs --import guests.csv` reads the
-team's spreadsheet (first name, last name, email, institution, function),
-generates a code per row, writes the hashes to D1 through `wrangler d1
-execute --remote` and writes `guests-with-codes.csv` back for the
-invitation mailing. Deterministic on email, so a re-run updates rather than
-duplicates and never changes a code already issued. `--revoke <email>`,
+team's spreadsheet (email required; first name, last name, institution,
+function optional), generates a code per row, writes the hashes to D1
+through `wrangler d1 execute --remote` and writes `guests-with-codes.csv`
+back for the invitation mailing. Deterministic on email + created_at, so a
+re-run updates rather than duplicates and never changes a code already
+issued. `--revoke <email>`,
 `--export` (the list without codes; codes are not recoverable, a lost one is
 reissued with `--reissue <email>`). Sending the invitations stays with the
 team's mailing tool.
@@ -200,7 +208,49 @@ above; the tool only edits rows.
   mails the team as a notification when Brevo is connected. It therefore
   works before Brevo exists. Someone already in the list, in any state, is
   left alone: asking twice changes nothing, and a denied guest cannot ask
-  their way back to pending. Ten requests an hour per address.
+  their way back to pending. An approved, unrevoked guest who asks again
+  is mailed their code at the address on file ("already a member",
+  `vipMail.ts`) and the team is not mailed; the answer on screen is the
+  same for everyone. Ten requests an hour per address.
+- **Every mail to a guest is branded** (`vipMailLayout.ts`, texts in
+  `vipMail.ts`, from Baïlo's mockup of 2 Nov 2026): the acknowledgement
+  after the form (always, in its own step so a failed team mail cannot
+  drop it), the welcome with the code, the "already a member" reminder,
+  and the decline, sent when a **pending** request is denied in the VIP
+  tool. The code buttons link to the access page with `#code=…`, which
+  `VipCodeForm.astro` puts in the box.
+- **The decline goes out 48 hours later** (Baïlo, 4 Nov 2026, so the
+  selection does not feel automated). Brevo holds it (`scheduledAt`, at
+  most 72 hours ahead), its messageId waits on the row in
+  `decline_mail_id` (migration `0004`), and approving or deleting the
+  guest before then calls it off (`cancelMail` in `mail.ts`).
+- **The name step** (Baïlo, 3 and 4 Nov 2026; migration `0004`). Most of
+  the list came in with an email and no name. A guest whose first or last
+  name is missing is sent, once their code is accepted, to the access page's
+  "One last detail" window (`VipDetailsForm.astro` →
+  `routes/vip-details.ts`): first and last name required, function (her
+  list of twelve, stored in English, `GUEST_FUNCTIONS`) and institution
+  optional. It cannot be dismissed, and `src/middleware.ts` holds every
+  locked tab until it is answered; once both names are stored nobody is
+  asked again. The session says whether the step is owed (`details` in its
+  KV value), so the gate does not read D1 per page; answering swaps the
+  session for a new one, because the edge may cache the old one for a
+  minute. A session from before the step carries no answer and the gate
+  looks the guest up instead.
+- **A filled-in name never moves a code**: a code is made from the email,
+  its version and `created_at`, never from a name. Migration `0004` also
+  adds a `code_name` column, written for codes made from the first name
+  before main moved to email codes; it is unused and stays empty.
+- **The request form's language is kept** (`lang`, migration `0004`): en,
+  fr or nl, from the page the form was sent from, for mails in the guest's
+  language later. Mails are English for now.
+- **Names are saved with a capital initial** (`formatName` in
+  `vipGuests.ts`, and the same function in `scripts/vip-guests.mjs`): the
+  form, the Studio's add, edit and import, and the script's import and
+  `--add`. A word typed all in lower or upper case is re-cased ("marie
+  DUPONT" → "Marie Dupont", "jean-luc" → "Jean-Luc"); mixed case is kept
+  ("McDonald"). Case never moves a code. Rows saved before this keep
+  their casing until edited.
 - **Codes are the same function on both sides.** `makeCode` in
   `src/server/vipGuests.ts` is the script's, on WebCrypto; checked against
   the test guest's code. Change one and change both.
@@ -214,9 +264,10 @@ above; the tool only edits rows.
   page on `PUBLIC_SITE_URL`) and `{contact}` filled in, stock English when
   empty. An import mails nobody: the invitation mailing of ~3,000 guests is
   the team's, from the export.
-- **Editing a first name changes the code**, because the name is part of it;
-  the tool says so and shows the new one. The email cannot be edited - it is
-  the guest's identity: delete and add again.
+- **Editing names never changes the code** (since 2026-10-18 it is made
+  from the email, version and created_at alone). The email cannot be
+  edited - it is the guest's identity: delete and add again, which also
+  makes a brand-new code.
 - The import goes up 300 rows a call and the export comes down 500 a call,
   each one read and one batch: a Worker may make only so many database
   calls per request.

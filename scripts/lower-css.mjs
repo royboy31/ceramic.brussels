@@ -35,6 +35,25 @@ const DIST = path.resolve('dist');
 // {} silently and nothing lowers.
 const TARGETS = { chrome: 90 << 16, firefox: 90 << 16, safari: 15 << 16, ios_saf: 15 << 16 };
 const RANGE = /\(\s*width\s*[<>]/;
+/**
+ * What the guards at the foot actually police.
+ *
+ * `RANGE` is right for deciding whether a sheet is worth re-printing, but it
+ * is too broad to fail a build on: a **container** query carries the same
+ * `(width>=1800px)` shape and Lightning CSS leaves it exactly as it found it,
+ * because there is no classic syntax to lower it to - `@container` is itself
+ * Safari 16 and up, so a phone that cannot read the range cannot read the
+ * query either and loses nothing. The bug this script exists for is the
+ * **media** query one: `(max-width: 700px)` modernised into `(width<=700px)`
+ * and silently dropped by iOS Safari before 16.4.
+ *
+ * The distinction arrived with @sanity/ui 4.4.10 (2026-10-27 dependency
+ * round), whose Studio stylesheet ships one container query. It is in
+ * dist/studio/index.html alone, never a site page, and the build failed on
+ * it: "range syntax still in: lib.*.css", which stopped `legacy-redirects`
+ * and `sitemap-noindex` from running at all.
+ */
+const MEDIA_RANGE = /@media[^{]*\(\s*width\s*[<>]/;
 
 const lower = (css, name) =>
   transform({ filename: name, code: Buffer.isBuffer(css) ? css : Buffer.from(css), minify: true, targets: TARGETS }).code;
@@ -109,16 +128,15 @@ for (const p of htmlFiles) {
 }
 
 // The guards this script exists for: no modern range syntax may ship in a
-// stylesheet or a page, and no reference to a replaced name may remain.
+// **media** query, in a stylesheet or a page, and no reference to a replaced
+// name may remain. See MEDIA_RANGE for why a container query is let through.
 const badCss = fs
   .readdirSync(dir)
   .filter((n) => n.endsWith('.css'))
-  .filter((n) => RANGE.test(fs.readFileSync(path.join(dir, n), 'utf8')));
+  .filter((n) => MEDIA_RANGE.test(fs.readFileSync(path.join(dir, n), 'utf8')));
 const badHtml = htmlFiles.filter((p) => {
   const html = fs.readFileSync(p, 'utf8');
-  return /(<style(?:\s[^>]*)?>)([\s\S]*?)(<\/style>)/gi[Symbol.match]
-    ? [...html.matchAll(/<style(?:\s[^>]*)?>([\s\S]*?)<\/style>/gi)].some((m) => RANGE.test(m[1]))
-    : false;
+  return [...html.matchAll(/<style(?:\s[^>]*)?>([\s\S]*?)<\/style>/gi)].some((m) => MEDIA_RANGE.test(m[1]));
 });
 if (badCss.length || badHtml.length) {
   console.error(`[lower-css] range syntax still in: ${[...badCss, ...badHtml.slice(0, 5).map((p) => path.relative(DIST, p))].join(', ')}`);

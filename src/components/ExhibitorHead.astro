@@ -4,6 +4,7 @@ import { useTranslations, localePath } from '../lib/i18n';
 import { editionTabPath } from '../lib/previousEditions';
 import { PAST_EDITIONS_PUBLIC } from './launch';
 import { getNavigation } from '../lib/queries';
+import { PLATFORM_PATH } from '../lib/exhibitorsPlatform';
 import { stegaClean } from '@sanity/client/stega';
 
 /**
@@ -58,6 +59,11 @@ const tabs = [
   { key: 'artists', label: t('nav.artists').toLowerCase(), href: localePath(lang, 'artists') },
   edition?.catalogueUrl && { key: 'catalogue', label: t('home.catalogue').toLowerCase(), href: edition.catalogueUrl, external: true },
   { key: 'awards', label: t('nav.awards').toLowerCase(), href: localePath(lang, 'exhibitors/awards') },
+  /* The way back into the gated platform (Léonie, 2026-10-22: leaving it
+     through "back to all exhibitors" stranded her on this page). The session
+     survives the round trip, so for an entered gallery this pill reopens the
+     platform directly; everyone else meets the gate. */
+  { key: 'platform', label: t('platform.title'), href: localePath(lang, PLATFORM_PATH) },
 ].filter(Boolean) as { key: string; label: string; href: string; external?: boolean }[];
 const mark = activeLetter.toUpperCase();
 

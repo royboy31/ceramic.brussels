@@ -1,6 +1,6 @@
 import type { SchemaTypeDefinition } from 'sanity';
 
-import { localeString, localeText, localeBlock, localeSlug } from './objects/localeString';
+import { localeString, localeText, localeBlock, localeSlug, localeFile } from './objects/localeString';
 import { figure } from './objects/figure';
 import { seo } from './objects/seo';
 import { textStyle } from './objects/textStyle';
@@ -47,6 +47,7 @@ export const objectTypes: SchemaTypeDefinition[] = [
   localeText,
   localeBlock,
   localeSlug,
+  localeFile,
   figure,
   seo,
   textStyle,

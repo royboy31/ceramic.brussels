@@ -75,15 +75,26 @@ export interface Guest {
 }
 
 /**
+ * Which door a guest's code opens (migration 0004): the VIP hub's locked
+ * tabs, or the exhibitors platform (docs/exhibitors-platform.md). One table,
+ * two audiences, and a code opens its own - except a row marked `all`,
+ * which opens both with the one code (Tiphaine, 2026-10-22: a gallery that
+ * is also a VIP gets one code, not two). `Audience` stays the request side -
+ * which door is being tried - and only a row carries `all`.
+ */
+export type Audience = 'vip' | 'exhibitor';
+export type RowAudience = Audience | 'all';
+
+/**
  * Approved guests only. A request filed through the "not a VIP yet?" form is
  * a row like any other, and its code can be worked out from its email the
  * moment it exists - so a pending or denied row must never match here, or
  * asking for access would be the same as having it.
  */
-export async function findGuestByCode(db: D1Like, hash: string): Promise<Guest | null> {
+export async function findGuestByCode(db: D1Like, hash: string, audience: Audience = 'vip'): Promise<Guest | null> {
   return db
-    .prepare("SELECT id, first_name, last_name, revoked FROM guests WHERE code_hash = ? AND status = 'approved'")
-    .bind(hash)
+    .prepare("SELECT id, first_name, last_name, revoked FROM guests WHERE code_hash = ? AND status = 'approved' AND audience IN (?, 'all')")
+    .bind(hash, audience)
     .first<Guest>();
 }
 
@@ -131,7 +142,8 @@ export function safeNext(input: unknown, fallback: string): string {
   if (typeof input !== 'string') return fallback;
   const value = input.trim();
   // A path of this site: one slash, then anything but a second slash or a
-  // backslash, and no line breaks anywhere.
-  if (!value.startsWith('/') || value.startsWith('//') || value.charAt(1) === '\\' || /[\r\n]/.test(value)) return fallback;
+  // backslash, and no whitespace or control character anywhere - a browser
+  // drops a tab from a URL, so "/<tab>/evil.example" would become "//evil.example".
+  if (!value.startsWith('/') || value.startsWith('//') || value.charAt(1) === '\\' || /[\x00-\x20\x7f]/.test(value)) return fallback;
   return value;
 }
