@@ -3,7 +3,7 @@ import { sanityClient } from 'sanity:client';
 import { DEFAULT_LOCALE, LOCALE_IDS, type LocaleId } from '../../lib/locales';
 import { localePath } from '../../lib/i18n';
 import { codePepper, vipEnv } from '../vip';
-import { codeFor, createGuest, formatName, getGuest, guestId, type GuestRow } from '../vipGuests';
+import { GUEST_FUNCTIONS, codeFor, createGuest, formatName, getGuest, guestId, type GuestRow } from '../vipGuests';
 import { mailVip, mailVipCode } from '../vipMail';
 import { brevoKey, fill, mailDryRun, paragraphs, rowsHtml, sendMail, senderFor } from '../mail';
 
@@ -201,6 +201,10 @@ export const POST: APIRoute = async ({ request }) => {
   };
   if (!submission.firstName || !submission.lastName || !submission.institution || !submission.jobTitle || !EMAIL.test(submission.email)) {
     return answer(400, 'invalid', 'Something is missing', 'Please fill in every field with a valid email address.');
+  }
+  // Function is one of Baïlo's twelve, as the form's list offers them (10 Nov 2026).
+  if (!(GUEST_FUNCTIONS as readonly string[]).includes(submission.jobTitle)) {
+    return answer(400, 'invalid', 'Something is missing', 'Please choose your function from the list.');
   }
 
   const cfg = await settings(lang);

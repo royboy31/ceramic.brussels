@@ -1,13 +1,16 @@
 ---
 import type { LocaleId } from '../lib/locales';
 import { localePath, useTranslations } from '../lib/i18n';
+import { GUEST_FUNCTIONS, GUEST_FUNCTION_KEYS } from '../server/vipGuests';
 
 /**
  * "Not a VIP yet? Fill in the form below" - the right half of the VIP
  * access page (Figma VIP frames, docs/vip-access.md): first name, last
  * name, institution, function, email, send. The gallery application form's
  * behaviour, field for field: inline validation, a visible success and
- * failure state, a button that cannot be pressed twice.
+ * failure state, a button that cannot be pressed twice. Function is a choice
+ * from Baïlo's twelve (GUEST_FUNCTIONS, the name step's list), required, so
+ * the team can sort requests by it (Baïlo, 10 Nov 2026).
  *
  * Posts to `/api/vip/request/` on the Worker (src/server/routes/
  * vip-request.ts), which emails the VIP team once Brevo is connected and
@@ -31,7 +34,7 @@ const fields = [
   { name: 'firstName', label: t('vip.firstName'), type: 'text', autocomplete: 'given-name', max: 120 },
   { name: 'lastName', label: t('vip.lastName'), type: 'text', autocomplete: 'family-name', max: 120 },
   { name: 'institution', label: t('vip.institution'), type: 'text', autocomplete: 'organization', max: 200 },
-  { name: 'function', label: t('vip.function'), type: 'text', autocomplete: 'organization-title', max: 200 },
+  { name: 'function', label: t('vip.function'), type: 'select', autocomplete: 'organization-title', max: 200 },
   { name: 'email', label: t('vip.email'), type: 'email', autocomplete: 'email', max: 254 },
 ];
 ---
@@ -71,15 +74,24 @@ const fields = [
               *
             </span>
           </label>
-          <input
-            id={`${id}-${f.name}`}
-            name={f.name}
-            type={f.type}
-            required
-            autocomplete={f.autocomplete}
-            maxlength={f.max}
-            inputmode={f.type === 'email' ? 'email' : undefined}
-          />
+          {f.type === 'select' ? (
+            <select id={`${id}-${f.name}`} name={f.name} required autocomplete={f.autocomplete}>
+              <option value="">—</option>
+              {GUEST_FUNCTIONS.map((value, i) => (
+                <option value={value}>{t(GUEST_FUNCTION_KEYS[i])}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              id={`${id}-${f.name}`}
+              name={f.name}
+              type={f.type}
+              required
+              autocomplete={f.autocomplete}
+              maxlength={f.max}
+              inputmode={f.type === 'email' ? 'email' : undefined}
+            />
+          )}
           <p class="hint" data-hint aria-live="polite" />
         </div>
       ))
@@ -107,7 +119,8 @@ const fields = [
       status.dataset.kind = kind;
     };
 
-    const check = (input: HTMLInputElement): boolean => {
+    type Field = HTMLInputElement | HTMLSelectElement;
+    const check = (input: Field): boolean => {
       const hint = input.parentElement?.querySelector<HTMLElement>('[data-hint]');
       let problem = '';
       if (input.required && !input.value.trim()) problem = form.dataset.required!;
@@ -117,16 +130,17 @@ const fields = [
       return !problem;
     };
 
-    form.querySelectorAll<HTMLInputElement>('.field input').forEach((input) => {
+    form.querySelectorAll<Field>('.field input, .field select').forEach((input) => {
       input.addEventListener('blur', () => check(input));
-      input.addEventListener('input', () => {
+      // A select reports its choice with change; input covers typing.
+      input.addEventListener(input instanceof HTMLSelectElement ? 'change' : 'input', () => {
         if (input.getAttribute('aria-invalid') === 'true') check(input);
       });
     });
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const inputs = [...form.querySelectorAll<HTMLInputElement>('.field input')];
+      const inputs = [...form.querySelectorAll<Field>('.field input, .field select')];
       const bad = inputs.filter((input) => !check(input));
       if (bad.length) {
         bad[0].focus();
@@ -146,7 +160,7 @@ const fields = [
         const body = await response.json().catch(() => ({}));
         if (response.ok) {
           form.classList.add('sent');
-          form.querySelectorAll<HTMLInputElement>('input, button').forEach((el) => (el.disabled = true));
+          form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>('input, select, button').forEach((el) => (el.disabled = true));
           const next = form.dataset.successUrl;
           if (next) {
             say(form.dataset.sending!, '');
@@ -200,7 +214,8 @@ const fields = [
   .req {
     color: var(--ink-3, #6b6b6b);
   }
-  input {
+  input,
+  select {
     width: 100%;
     margin-top: 6px;
     padding: 6px 12px 8px;
@@ -212,11 +227,13 @@ const fields = [
     line-height: 1.25;
     letter-spacing: -0.025em;
   }
-  input:focus-visible {
+  input:focus-visible,
+  select:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: 2px;
   }
-  input[aria-invalid='true'] {
+  input[aria-invalid='true'],
+  select[aria-invalid='true'] {
     border-color: #c8102e;
     box-shadow: inset 0 0 0 1px #c8102e;
   }
@@ -288,7 +305,8 @@ const fields = [
       margin-top: 6px;
       padding-bottom: 0;
     }
-    input {
+    input,
+    select {
       font-size: 18px;
     }
   }

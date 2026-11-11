@@ -1,6 +1,7 @@
 import { sanityClient } from 'sanity:client';
 import { DEFAULT_LOCALE } from '../lib/locales';
 import { localePath } from '../lib/i18n';
+import { hubTabPath } from '../lib/hubs';
 import { PLATFORM_PATH } from '../lib/exhibitorsPlatform';
 import { brevoKey, fill, mailDryRun, sendMail, senderFor, type Address } from './mail';
 import type { RowAudience } from './vip';
@@ -136,8 +137,8 @@ export function vipMailContent(kind: VipMailKind, firstName: string, site: strin
             'As the number of places in our VIP programme is deliberately limited, we are not in a position to extend a VIP invitation to you for this edition.',
             `We would nevertheless be delighted to welcome you at the fair, held at ${EDITION.venue} from ${EDITION.dates}, and warmly invite you to discover ceramic and the city, our free programme of exhibitions, talks and book launches across Brussels.`,
           ],
-          // The "ceramic and the city" page is still to be confirmed (mockup, note 3): the programme hub until then.
-          button: { label: 'discover ceramic and the city', href: new URL(localePath(DEFAULT_LOCALE, 'programme'), site).href },
+          // Visitors info, Baïlo's answer to the mockup's note 3 (10 Nov 2026).
+          button: { label: 'plan your visit', href: new URL(localePath(DEFAULT_LOCALE, hubTabPath('visit')), site).href },
           closing: ['With your permission, we will gladly keep your details for our future editions.'],
           signOff: 'With kind regards,',
           signature: team,

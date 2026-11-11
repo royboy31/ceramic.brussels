@@ -1,3 +1,4 @@
+import type { StringKey } from '../lib/i18n';
 import { codeHash, sha256Hex, type Audience, type RowAudience, type D1Like, type KVLike } from './vip';
 
 /**
@@ -51,9 +52,10 @@ export interface GuestInput {
 }
 
 /**
- * The functions the name step offers (Baïlo, 4 Nov 2026), stored as written
- * here, in English, whatever the page's language. The request form and the
- * Studio still take free text, so a row may hold anything else too.
+ * The functions the name step and the request form offer (Baïlo, 4 and
+ * 10 Nov 2026), stored as written here, in English, whatever the page's
+ * language. The Studio still takes free text, and requests filed before
+ * 10 Nov hold whatever was typed, so a row may hold anything else too.
  */
 export const GUEST_FUNCTIONS = [
   'Collector / Patron',
@@ -69,6 +71,22 @@ export const GUEST_FUNCTIONS = [
   'Academic / Education',
   'Other',
 ] as const;
+
+/** The label of each of GUEST_FUNCTIONS on the page, in the same order. */
+export const GUEST_FUNCTION_KEYS: readonly StringKey[] = [
+  'vip.fn.collector',
+  'vip.fn.advisor',
+  'vip.fn.interior',
+  'vip.fn.curator',
+  'vip.fn.museum',
+  'vip.fn.embassy',
+  'vip.fn.gallery',
+  'vip.fn.artist',
+  'vip.fn.press',
+  'vip.fn.brand',
+  'vip.fn.academic',
+  'vip.fn.other',
+];
 
 const COLUMNS =
   'id, code_version, first_name, last_name, email, institution, function, status, revoked, entries, last_entry_at, requested_at, decided_at, decided_by, created_at, audience, details_at, lang, decline_mail_id';

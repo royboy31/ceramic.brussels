@@ -1,8 +1,8 @@
 ---
 import type { LocaleId } from '../lib/locales';
-import { localePath, useTranslations, type StringKey } from '../lib/i18n';
+import { localePath, useTranslations } from '../lib/i18n';
 import { hubTabPath } from '../lib/hubs';
-import { GUEST_FUNCTIONS } from '../server/vipGuests';
+import { GUEST_FUNCTIONS, GUEST_FUNCTION_KEYS } from '../server/vipGuests';
 
 /**
  * "One last detail" - the name step (Baïlo, 3 and 4 Nov 2026), a window
@@ -31,20 +31,6 @@ interface Props {
 const { lang, contact = 'vip@ceramic.brussels' } = Astro.props;
 const t = useTranslations(lang);
 const fallback = localePath(lang, hubTabPath('vip', 'programme', lang));
-const FUNCTION_KEYS: StringKey[] = [
-  'vip.fn.collector',
-  'vip.fn.advisor',
-  'vip.fn.interior',
-  'vip.fn.curator',
-  'vip.fn.museum',
-  'vip.fn.embassy',
-  'vip.fn.gallery',
-  'vip.fn.artist',
-  'vip.fn.press',
-  'vip.fn.brand',
-  'vip.fn.academic',
-  'vip.fn.other',
-];
 const optional = `(${t('vip.details.optional')})`;
 ---
 
@@ -75,7 +61,7 @@ const optional = `(${t('vip.details.optional')})`;
         <span>{t('vip.function')} <em>{optional}</em></span>
         <select name="function">
           <option value="">—</option>
-          {GUEST_FUNCTIONS.map((value, i) => <option value={value}>{t(FUNCTION_KEYS[i])}</option>)}
+          {GUEST_FUNCTIONS.map((value, i) => <option value={value}>{t(GUEST_FUNCTION_KEYS[i])}</option>)}
         </select>
       </label>
       <label>
