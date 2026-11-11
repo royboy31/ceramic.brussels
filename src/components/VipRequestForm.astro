@@ -227,6 +227,14 @@ const fields = [
     line-height: 1.25;
     letter-spacing: -0.025em;
   }
+  /* A select draws itself shorter than an input of the same font: held to
+     the input's own height (line + padding + border) so the row lines up. */
+  select {
+    box-sizing: border-box;
+    height: calc(1.25em + 16px);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
   input:focus-visible,
   select:focus-visible {
     outline: 2px solid currentColor;
