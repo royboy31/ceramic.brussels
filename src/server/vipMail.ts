@@ -135,7 +135,8 @@ export function vipMailContent(kind: VipMailKind, firstName: string, site: strin
           intro: [
             'Thank you for your interest in ceramic brussels and for the time you took to share your application with us.',
             'As the number of places in our VIP programme is deliberately limited, we are not in a position to extend a VIP invitation to you for this edition.',
-            `We would nevertheless be delighted to welcome you at the fair, held at ${EDITION.venue} from ${EDITION.dates}, and warmly invite you to discover ceramic and the city, our free programme of exhibitions, talks and book launches across Brussels.`,
+            // Gilles' sentence, word for word (Baïlo, 12 Nov 2026). The fair opens to the public on the 21st, so not EDITION.dates (20 to 24, VIP days included).
+            `We would nevertheless be delighted to welcome you to the fair, held at ${EDITION.venue} from 21 to 24 January 2027, and we would be delighted for you to discover the programme we have prepared for this edition.`,
           ],
           // Visitors info, Baïlo's answer to the mockup's note 3 (10 Nov 2026); the label is hers (11 Nov 2026).
           button: { label: 'visitors info', href: new URL(localePath(DEFAULT_LOCALE, hubTabPath('visit')), site).href },
