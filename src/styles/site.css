@@ -238,11 +238,17 @@ main :is(strong, b) {
  *
  * Everything outside a slideshow keeps both.
  */
+/* The guest of honour's works strip ([data-gallery], GuestOfHonour.astro) is
+ * a slideshow by another name, and kept zooming until Léonie asked again
+ * (2026-11-12, Marion Verboom's page: "remove the zooming effect on the
+ * photos ... a bit disturbing"). */
 main .slideshow figure:hover > img,
-main .slideshow figure:hover > a > img {
+main .slideshow figure:hover > a > img,
+main [data-gallery] figure:hover > img {
   scale: 1;
 }
-.slideshow img.motion-image[data-image-pending] {
+.slideshow img.motion-image[data-image-pending],
+[data-gallery] img.motion-image[data-image-pending] {
   scale: 1;
   filter: none;
 }
