@@ -66,7 +66,13 @@ export const person = defineType({
     // were kept, so most members already have one.
     countryCodeField({
       title: 'Nationality (code)',
-      description: 'Two letters after the name on the jury and advisory board: BE, FR, NL, GB… Leave empty to show none.',
+      description:
+        'Two letters after the name on the jury and advisory board: BE, FR, NL, GB… Two nationalities as FR/ZA. Leave empty to show none.',
+      // "Wendy Gers is French/South African. Is there a way to put FR/ZA" -
+      // Tiphaine, 2026-11-17. People only: exhibitors keep one code, which
+      // their country filter counts on.
+      validation: (rule: any) =>
+        rule.regex(/^[A-Z]{2}(\/[A-Z]{2})?$/, { name: 'country code' }).error('Two uppercase letters, or two codes as FR/ZA.'),
     }),
     defineField({ name: 'bio', title: 'Biography', type: 'localeBlock' }),
     defineField({ name: 'portrait', title: 'Portrait', type: 'figure' }),
