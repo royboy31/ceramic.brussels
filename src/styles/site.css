@@ -215,6 +215,21 @@ main :is(strong, b) {
   }
 }
 
+/* "The Puilaetco logo and « main partner » should diminish in size, or even
+ * be gone when the window is this width" - Léonie, 2026-11-17, from a
+ * ~1075px window, where the lockup crowds the centred wordmark. Smaller from
+ * 1280 down, and gone below 1100 (design.css only hid it below 1000). */
+@media (max-width: 1280px) {
+  .site-partner {
+    zoom: 0.8;
+  }
+}
+@media (max-width: 1100px) {
+  .site-partner {
+    display: none;
+  }
+}
+
 /* A slideshow does not zoom, on hover or on arrival - client, 2026-10-01:
  * *"the current transition can look like a visual glitch because one image is
  * zoomed while the next starts at normal scale … maintain the same zoom
@@ -238,11 +253,17 @@ main :is(strong, b) {
  *
  * Everything outside a slideshow keeps both.
  */
+/* The guest of honour's works strip ([data-gallery], GuestOfHonour.astro) is
+ * a slideshow by another name, and kept zooming until Léonie asked again
+ * (2026-11-12, Marion Verboom's page: "remove the zooming effect on the
+ * photos ... a bit disturbing"). */
 main .slideshow figure:hover > img,
-main .slideshow figure:hover > a > img {
+main .slideshow figure:hover > a > img,
+main [data-gallery] figure:hover > img {
   scale: 1;
 }
-.slideshow img.motion-image[data-image-pending] {
+.slideshow img.motion-image[data-image-pending],
+[data-gallery] img.motion-image[data-image-pending] {
   scale: 1;
   filter: none;
 }

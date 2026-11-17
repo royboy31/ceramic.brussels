@@ -167,8 +167,11 @@ const external = (link: ResolvedLink | null) =>
   }
   .hero h1 {
     letter-spacing: -0.055em;
-    /* Smaller than the build's 70px: the statement felt too big (client feedback, 2026-09-15). */
-    font-size: clamp(40px, 3.75vw, 54px);
+    /* Smaller than the build's 70px: the statement felt too big (client feedback, 2026-09-15).
+       Never below 44px: it must stay bigger than the news texts under it at
+       every width (Léonie, 2026-11-17 - in a ~1075px window it was 40 against
+       their 42). Those now scale too, to 32px at 900 (Feature.astro). */
+    font-size: clamp(44px, 3.75vw, 54px);
     font-weight: 400;
     line-height: 0.98;
   }
@@ -183,18 +186,27 @@ const external = (link: ResolvedLink | null) =>
     line-height: 1;
     display: inline-flex;
   }
+  /* The frame's 98px gap and 30px type at 1440, shrinking with the window.
+     Fixed, they squeezed "infos pratiques" onto two lines in a ~1075px
+     window, every button grew to its height and the one-line labels sat at
+     the top of the taller boxes ("an awkward shape and the text inside isn't
+     centered anymore", Léonie, 2026-11-17). The labels are centred both
+     ways now, whatever wraps. */
   .quicklinks {
     grid-template-columns: repeat(4, 1fr);
-    gap: 98px;
+    gap: clamp(12px, 6.8vw, 98px);
     margin: 0 var(--gutter) 60px;
     display: grid;
   }
   .quicklinks a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     background: var(--color-acid);
     border: 1px solid #000;
     padding: 13px;
-    font-size: 30px;
+    font-size: clamp(22px, 2.1vw, 30px);
     line-height: 1;
     /* Tighter (client feedback, 2026-09-16). */
     letter-spacing: -0.03em;
