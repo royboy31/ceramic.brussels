@@ -343,8 +343,14 @@ export const editionPublication = defineType({
       name: 'url',
       title: 'Reader URL',
       type: 'url',
-      description: 'The page-flip reader, embedded full width, e.g. https://online.fliphtml5.com/qogyd/xffh/',
+      description: 'The page-flip reader, embedded full width, e.g. https://online.fliphtml5.com/qogyd/xffh/. English, and every language without its own below.',
     }),
+    // "The publication was done in 3 languages. Is it possible to put the
+    // correct link in each language" - Tiphaine, 2026-11-17. Two more URLs
+    // rather than turning `url` into a per-language field, so the links
+    // already stored stay valid with no migration.
+    defineField({ name: 'urlFr', title: 'Reader URL (French)', type: 'url', description: 'Leave empty to show the English one.' }),
+    defineField({ name: 'urlNl', title: 'Reader URL (Dutch)', type: 'url', description: 'Leave empty to show the English one.' }),
     defineField({ name: 'title', title: 'Title', type: 'localeString' }),
     defineField({ name: 'cover', title: 'Cover', type: 'figure' }),
   ],
