@@ -141,6 +141,8 @@ export interface EditionSummary {
   ordinal?: string;
   countryFocus?: string;
   guestOfHonour?: { name?: string } | null;
+  /** The year's own wording for the guest of honour pill ("invité d'honneur"). */
+  guestOfHonourLabel?: string | null;
   exhibitorCount?: number;
   laureateCount?: number;
   eventCount?: number;
@@ -163,7 +165,10 @@ export interface EditionSummary {
  *   about it* - a lead, its galleries or its talks. 2024 has no focus at all;
  *   2025 and 2026 have one but nothing filled under it yet (#35), so the pill
  *   appears with the content and not before.
- * - **programme** when that year has events.
+ * - **programme** never, since 2026-11-17: "you can delete the programme
+ *   page from all the previous editions" (Tiphaine). The tab stays in TABS
+ *   so its slug and segments are still known, it just earns no pill and no
+ *   page.
  * - **publication** when a reader URL is set (request #36).
  */
 export function tabsFor(edition: EditionSummary): EditionTab[] {
@@ -173,24 +178,30 @@ export function tabsFor(edition: EditionSummary): EditionTab[] {
     exhibitors: (edition.exhibitorCount ?? 0) > 0,
     'art-prize': (edition.laureateCount ?? 0) > 0,
     focus: !!edition.countryFocus && (!!edition.hasFocusLead || (edition.focusCount ?? 0) > 0),
-    programme: (edition.eventCount ?? 0) > 0,
+    programme: false,
     publication: !!edition.publication?.url,
   };
   return TABS.filter((tab) => has[tab.slug]);
 }
 
 /**
- * The focus tab's pill: the country, the way the design writes it -
- * "norway focus", "españa focus". `countryFocus` is stored as the exhibitor
- * badge ("focus Norway"), which reads the other way round, so the two words
- * are swapped when it is in that shape and left alone otherwise. An editor
- * who writes something that is not two words gets it back untouched.
+ * The focus tab's pill. `countryFocus` is stored as the exhibitor badge
+ * ("focus Norway") and the pill now reads the same way - "focus españa" in
+ * every language, "focus norvège" in French (Tiphaine, 2026-11-17).
+ *
+ * The one exception is English with an English country name, which keeps the
+ * design's "norway focus": the words are swapped only in English, and only
+ * when the country is not written in its own language - which is what
+ * `ownName` says ("España" is, "Norway" is not). An editor who writes
+ * something that is not "focus <country>" gets it back untouched.
  */
-export function focusLabel(countryFocus: string | undefined, fallback: string): string {
+const OWN_NAMES = ['españa'];
+export function focusLabel(countryFocus: string | undefined, fallback: string, lang?: LocaleId): string {
   const raw = (countryFocus ?? '').trim();
   if (!raw) return fallback;
   const match = raw.match(/^focus\s+(.+)$/i);
-  return (match ? `${match[1]} focus` : raw).toLowerCase();
+  const ownName = !!match && OWN_NAMES.includes(match[1].trim().toLowerCase());
+  return (match && lang === 'en' && !ownName ? `${match[1]} focus` : raw).toLowerCase();
 }
 
 /** A tab's pill label: the focus tab's country, otherwise its STRINGS label. */
@@ -198,8 +209,11 @@ export function tabLabel(
   tab: EditionTab,
   edition: EditionSummary,
   t: (key: StringKey) => string,
+  lang?: LocaleId,
 ): string {
-  return tab.slug === 'focus' ? focusLabel(edition.countryFocus, t(tab.label)) : t(tab.label);
+  if (tab.slug === 'focus') return focusLabel(edition.countryFocus, t(tab.label), lang);
+  if (tab.slug === 'guest-of-honour' && edition.guestOfHonourLabel?.trim()) return edition.guestOfHonourLabel.trim();
+  return t(tab.label);
 }
 
 /* ------------------------------------------------------- ordinal wording */

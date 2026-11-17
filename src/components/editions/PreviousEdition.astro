@@ -61,6 +61,7 @@ const summary: EditionSummary = editions.find((e: any) => e.year === year) ?? {
   ordinal: edition.ordinal,
   countryFocus: edition.countryFocus,
   guestOfHonour: edition.guestOfHonour,
+  guestOfHonourLabel: edition.guestOfHonourLabel,
   publication: edition.publication,
   exhibitorCount: edition.exhibitorCount,
   laureateCount: edition.laureates?.length ?? 0,
@@ -70,7 +71,7 @@ const tabs = tabsFor(summary);
 
 const items = tabs.map((x) => ({
   slug: x.slug,
-  label: tabLabel(x, summary, t),
+  label: tabLabel(x, summary, t, lang),
   href: localePath(lang, editionTabHref(year, x, lang)),
 }));
 
@@ -83,7 +84,7 @@ const lead =
   (tab === 'overview' ? edition.intro : undefined);
 
 const label = tabs.find((x) => x.slug === tab) ?? TABS.find((x) => x.slug === tab);
-const tabName = label ? tabLabel(label, summary, t) : tab;
+const tabName = label ? tabLabel(label, summary, t, lang) : tab;
 const title = `${heading} — ${tabName}`;
 
 const path = editionTabPath(year, tab, lang);

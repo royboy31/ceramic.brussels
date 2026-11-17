@@ -97,7 +97,7 @@ const speakersOf = (event: any) =>
     talks.length > 0 && (
       <section class="talks">
         <h2 class="panel-title">{t('prevEd.talks')}</h2>
-        <div class="ed-split half talk-grid">
+        <div class:list={['ed-split', 'half', 'talk-grid', { few: talks.length === 2 && talkShots.length > 0 }]}>
           {talks.map((talk: any) => (
             <article class="talk">
               <h3 {...styleAttrs(talk.titleStyle)}>{talk.title}</h3>
@@ -220,9 +220,35 @@ const speakersOf = (event: any) =>
     letter-spacing: var(--body-ls);
   }
 
+  /* Two talks (España, 2026): the talks one under the other on the
+     left and the slideshow beside them on the right, rather than two talks
+     across and the picture alone under them - "as there are only 2 talks, is
+     it possible to change the layout so that the picture is on the right and
+     the talks on the left?" (Tiphaine, 2026-11-17). */
+  .talk-grid.few {
+    /* The picture spans both rows; the second takes whatever height it
+       leaves, so the two talks stay one gap apart. */
+    grid-template-rows: auto 1fr;
+  }
+  .talk-grid.few .talk {
+    grid-column: 1;
+  }
+  .talk-grid.few .talk-shots {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
   @media (max-width: 900px) {
     .talks {
       margin-top: 48px;
+    }
+    .talk-grid.few {
+      grid-template-rows: none;
+    }
+    .talk-grid.few .talk,
+    .talk-grid.few .talk-shots {
+      grid-column: auto;
+      grid-row: auto;
     }
   }
 </style>
