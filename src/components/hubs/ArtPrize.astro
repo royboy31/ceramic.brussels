@@ -869,11 +869,21 @@ const captionOf = (img: any, fallback?: string) => ({
   @media (max-width: 700px) {
     /* `.prize-about` on the gallery too: the shorter selector lost to the
        site.css sweep's and the pictures kept the 50vw pull. */
+    /* The gallery's pictures have been `<figure>`s since they gained their
+       captions (2026-10-05), so `.gallery > img` matched nothing and the
+       site.css sweep's 100vw + 50vw pull took over - which WebKit ignores on
+       a grid item: on an iPhone each picture kept the gutter on its left and
+       ran off the screen on its right ("a margin on the left but none on the
+       right", Léonie, 2026-11-17). */
     .hero figure,
-    .prize-about .gallery > :global(img) {
+    .prize-about .gallery > figure {
       width: calc(100% + 2 * var(--gutter));
       max-width: none;
       margin-inline: calc(-1 * var(--gutter));
+    }
+    /* The caption stays in the text column, as the hero's does. */
+    .prize-about .gallery > figure :global(figcaption) {
+      padding-inline: var(--gutter);
     }
   }
 </style>

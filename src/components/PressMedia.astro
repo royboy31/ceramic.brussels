@@ -743,6 +743,11 @@ const logoHeight = (p: any) => {
   .room-grid.single {
     grid-template-columns: 1fr;
   }
+  /* The tracking every other panel title has (`.panel-title`, -0.04em): these
+     set none and read wider than the rest of the site - "reduce
+     letter-spacing for the bold and underlined titles ... + the press
+     releases titles" (Léonie, 2026-11-17). The same for the release
+     headlines and the underlined press-review links below. */
   .room-grid h3,
   .agencies h3 {
     border-bottom: 2px solid;
@@ -750,6 +755,7 @@ const logoHeight = (p: any) => {
     font-size: 34px;
     font-weight: 600;
     line-height: 1;
+    letter-spacing: -0.04em;
   }
   .sort {
     flex-wrap: wrap;
@@ -792,6 +798,7 @@ const logoHeight = (p: any) => {
     font-size: 38px;
     font-weight: 400;
     line-height: 1.08;
+    letter-spacing: -0.04em;
   }
   .languages {
     flex-wrap: wrap;
@@ -809,6 +816,7 @@ const logoHeight = (p: any) => {
     gap: 0.3em;
     padding: 16px 0 8px;
     font-size: 36px;
+    letter-spacing: -0.04em;
     text-decoration: underline 1px;
     display: flex;
   }
