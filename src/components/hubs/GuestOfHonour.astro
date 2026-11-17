@@ -431,7 +431,10 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
       height: 12px;
       border-radius: 50%;
       background: var(--color-white);
-      opacity: 0.45;
+      /* A hairline of shadow: the works are photographed on white and grey,
+         where plain white dots vanished (checked live, 2026-11-17). */
+      box-shadow: 0 0 0 1px rgb(0 0 0 / 0.35);
+      opacity: 0.6;
       transition: opacity 0.18s;
     }
     .gallery-dots span[data-current] {
