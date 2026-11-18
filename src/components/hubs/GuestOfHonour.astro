@@ -392,6 +392,13 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
       margin-top: 48px;
       font-size: 30px;
     }
+    /* The section's own 50px is the gap; the heading's 48px on top of it
+       left ~100px under the works ("the spacing is very big between the
+       slideshow and the following sculptural practice text", Léonie,
+       2026-11-18). */
+    .practice h3 {
+      margin-top: 0;
+    }
     .columns {
       columns: 1;
     }
@@ -431,10 +438,9 @@ const caption = (img: any, work: any) => [img.caption ?? artist?.name, img.workT
       height: 12px;
       border-radius: 50%;
       background: var(--color-white);
-      /* A hairline of shadow: the works are photographed on white and grey,
-         where plain white dots vanished (checked live, 2026-11-17). */
-      box-shadow: 0 0 0 1px rgb(0 0 0 / 0.35);
-      opacity: 0.6;
+      /* Plain, as on every other slideshow: the hairline of shadow added on
+         2026-11-17 read as a grey outline (Léonie, 2026-11-18). */
+      opacity: 0.45;
       transition: opacity 0.18s;
     }
     .gallery-dots span[data-current] {

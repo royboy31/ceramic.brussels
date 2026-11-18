@@ -6,7 +6,9 @@ import { LOCALE_IDS, type LocaleId } from '../lib/locales';
 import { useTranslations, localePath, formatDateNumeric, formatMonthYear } from '../lib/i18n';
 import { instagramUrl, resolveLink } from '../lib/links';
 import { styleAttrs } from '../lib/textStyle';
-import { getPressClips, getNews, getEditions, getPartners, getStories } from '../lib/queries';
+import { getPressClips, getNews, getEditions, getPartners, getStories, getPastEditionsIndex } from '../lib/queries';
+import { editionTabPath } from '../lib/previousEditions';
+import { PAST_EDITIONS_PUBLIC } from './launch';
 import { urlFor } from '../sanity/image';
 
 /**
@@ -110,6 +112,10 @@ const galleries = editions
   }))
   .filter((g: any) => g.images.length > 0 || g.film);
 const hasPhotos = galleries.length > 0;
+/** The years with a previous-editions page to lead to, while the section is public. */
+const pastYears = new Set<number>(
+  tab === 'photos-videos' && PAST_EDITIONS_PUBLIC ? (await getPastEditionsIndex(lang)).map((e: any) => e.year) : [],
+);
 
 /**
  * "Arrange the photos automatically by format" (Félicie, 2026-10-01). The
@@ -408,14 +414,33 @@ const logoHeight = (p: any) => {
         {!hasPhotos && <p class="empty">{t('about.imagesEmpty')}</p>}
         {/* The frame's "search by media ↓" pill is not built: nothing says
             what it searches (question for the designer, request #19). */}
-        {galleries.length > 1 && (
-          <div class="sort filters" data-filter-bar="photos">
-            <b>{t('faq.filters')}:</b>
-            {galleries.map((g: any, i: number) => (
-              <button type="button" data-filter={g.year} aria-pressed={String(i === 0)}>
-                {g.year}
-              </button>
-            ))}
+        {/* The years as rectangles the size of the tabs above, grey on hover
+            and while selected, with no "filters:" label; under them, "discover
+            the edition →" for the year shown, leading to its previous-editions
+            page (Léonie's frame 1153:1447, 2026-11-18). A year with no such
+            page - the current one, or every year while the section is off -
+            has no pill rather than one leading nowhere. */}
+        {(galleries.length > 1 || pastYears.size > 0) && (
+          <div class="photo-head">
+            {galleries.length > 1 && (
+              <div class="year-filter" data-filter-bar="photos">
+                {galleries.map((g: any, i: number) => (
+                  <button type="button" data-filter={g.year} aria-pressed={String(i === 0)}>
+                    {g.year}
+                  </button>
+                ))}
+              </div>
+            )}
+            {galleries.map(
+              (g: any, i: number) =>
+                pastYears.has(g.year) && (
+                  <p class="discover-edition" data-filter-group="photos" data-value={g.year} hidden={i > 0}>
+                    <a class="small-pill" href={localePath(lang, editionTabPath(g.year, undefined, lang))}>
+                      {t('press.discoverEdition')} →
+                    </a>
+                  </p>
+                ),
+            )}
           </div>
         )}
         {galleries.map((g: any, i: number) => (
@@ -873,9 +898,48 @@ const logoHeight = (p: any) => {
     display: flex;
   }
 
-  /* photos & videos */
-  .filters {
+  /* photos & videos: the year rectangles at the title band's tab size
+     (HubNav `.section-head a` at rest), grey - the ash pages' #d9d9d9 - on
+     hover and while selected. The `!important`s answer the shared
+     `[data-filter]:hover` rule in design.css, which turns every filter black. */
+  .photo-head {
     margin: 20px 0 45px;
+  }
+  .year-filter {
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    display: flex;
+  }
+  .year-filter button {
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid #050505;
+    padding: 7px 15px;
+    font-size: 24px;
+    line-height: 30px;
+    letter-spacing: -0.045em;
+  }
+  /* The band's tabs get smaller here (HubNav), so the years follow. */
+  @media (max-width: 1180px) {
+    .year-filter {
+      gap: 8px;
+    }
+    .year-filter button {
+      padding: 5px 12px;
+      font-size: 20px;
+      line-height: 26px;
+    }
+  }
+  .year-filter button:is(:hover, [aria-pressed='true']) {
+    color: #050505 !important;
+    background-color: var(--ash-ground) !important;
+  }
+  .discover-edition {
+    margin: 18px 0 0;
+  }
+  .discover-edition .small-pill:hover {
+    color: #050505;
+    background: var(--ash-ground);
   }
   .photo-grid {
     grid-template-columns: repeat(6, 1fr);

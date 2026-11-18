@@ -102,19 +102,17 @@ const countries = ([...new Set(exhibitors.map(codeOf).filter(Boolean))] as strin
 const links = [] as { href: string; label: string }[];
 
 /**
- * The year row, on /exhibitors only. The year being read is a filled pill;
- * every other year leads to **its previous-editions page**, which is where a
- * past year's content lives - galleries included, as that section's exhibitors
- * tab. It used to lead to /exhibitors/<year>, a second address for the same
- * list, which is what put two sets of year links on one page.
- *
- * A past year's tab passes no `years`, so nothing renders there: the section's
- * own year band is the year switcher in that context.
+ * The year buttons under the title band: one per **other** year, "2026 →",
+ * each leading to that year's galleries - the previous-editions section's
+ * exhibitors tab, or /exhibitors for the landing year. On "exhibitors 2025"
+ * that is 2027, 2026 and 2024 (Léonie's frame 609:244, 2026-11-18). They used
+ * to be pills on /exhibitors alone, with the year being read filled in;
+ * a past year's tab now draws them too, between its band and the A-Z row.
  */
 const viewedYear = year ?? edition?.year;
-// Off for the launch: with previous editions hidden there is one year to
-// read, so the row would be a single filled pill leading nowhere.
-const yearRow = inSection || !PAST_EDITIONS_PUBLIC ? [] : years.length > 1 ? years : [];
+// Off for the launch: with previous editions hidden every other year's
+// button would lead to a redirect.
+const yearRow = PAST_EDITIONS_PUBLIC ? years.filter((y) => y.year !== viewedYear) : [];
 ---
 
 <ExhibitorHead
@@ -124,29 +122,26 @@ const yearRow = inSection || !PAST_EDITIONS_PUBLIC ? [] : years.length > 1 ? yea
   year={year}
   alphabet={exhibitors.length > 0}
   bandless={inSection}
-/>
+>
+  {yearRow.length > 0 && (
+    <nav class="year-buttons" aria-label={t('prevEd.section')}>
+      {yearRow.map((y) => (
+        <a href={localePath(lang, y.current ? 'exhibitors' : editionTabPath(y.year, 'exhibitors', lang))}>{y.year} →</a>
+      ))}
+    </nav>
+  )}
+</ExhibitorHead>
 
 {
-  (page?.intro || links.length > 0 || yearRow.length > 0) && (
+  (page?.intro || links.length > 0) && (
     <div class="exhibitor-intro">
       {page?.intro && (
         <p class="intro-large" {...styleAttrs(page.introStyle)}>
           {page.intro}
         </p>
       )}
-      {(links.length > 0 || yearRow.length > 0) && (
+      {links.length > 0 && (
         <p class="edition-links">
-          {yearRow.map((y) =>
-            y.year === viewedYear ? (
-              <span class="edition-links__year" aria-current="page">
-                {y.year}
-              </span>
-            ) : (
-              <a href={localePath(lang, y.current ? 'exhibitors' : editionTabPath(y.year, 'exhibitors', lang))}>
-                {y.year} →
-              </a>
-            ),
-          )}
           {links.map((l) => (
             <a href={l.href} target="_blank" rel="noopener noreferrer">
               {l.label} ↗
@@ -290,16 +285,49 @@ const yearRow = inSection || !PAST_EDITIONS_PUBLIC ? [] : years.length > 1 ? yea
     margin-top: 18px;
     font-size: clamp(1rem, 2vw, 1.75rem);
   }
-  .edition-links a,
-  .edition-links__year {
+  .edition-links a {
     border: 1px solid;
     border-radius: 999px;
     padding: 3px 18px;
     text-decoration: none;
   }
-  /* The year being read: filled like the active tab above it. */
-  .edition-links__year {
-    background: var(--color-acid);
+  /* The year buttons: the band's tab size at rest, the ash grey of the
+     previous-editions pages, black on hover with the arrow sliding on (the
+     shared `a:hover .link-arrow` in design.css). Frame 609:244: 24px apart,
+     ~50px under the band, ~30px over the letters. */
+  .year-buttons {
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    padding: 48px var(--gutter) 6px;
+    display: flex;
+  }
+  .year-buttons a {
+    white-space: nowrap;
+    background: var(--ash-ground);
+    border: 1px solid #050505;
+    padding: 7px 15px;
+    font-size: 24px;
+    line-height: 30px;
+    letter-spacing: -0.045em;
+    text-decoration: none;
+    transition:
+      color 0.18s,
+      background-color 0.18s;
+  }
+  .year-buttons a:is(:hover, :focus-visible) {
+    color: #fff;
+    background: #050505;
+  }
+  @media (max-width: 1180px) {
+    .year-buttons {
+      gap: 8px;
+      padding-top: 28px;
+    }
+    .year-buttons a {
+      padding: 5px 12px;
+      font-size: 20px;
+      line-height: 26px;
+    }
   }
   @media (max-width: 900px) {
     .gallery-grid {

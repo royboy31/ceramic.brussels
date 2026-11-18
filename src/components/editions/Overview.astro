@@ -89,6 +89,16 @@ const highlights = (edition.highlights ?? [])
     )
   }
 
+  {/* The text under the pictures, two columns at the highlights' size
+      (Léonie, 2026-11-18, frame 1405:650): Edition → Overview text. */}
+  {
+    edition.overviewText?.length > 0 && (
+      <div class="overview-text">
+        <PortableText value={edition.overviewText} fieldStyle={edition.overviewTextStyle} />
+      </div>
+    )
+  }
+
   <div class="ed-split half panels">
     {
       figures.length > 0 && (
@@ -142,7 +152,7 @@ const highlights = (edition.highlights ?? [])
     /* Nothing entered for this year yet: say so rather than draw empty rules.
        Every past edition has key figures today, so this is the 2027-becomes-
        past case, not a normal one. */
-    figures.length === 0 && highlights.length === 0 && images.length === 0 && !lead && (
+    figures.length === 0 && highlights.length === 0 && images.length === 0 && !lead && !edition.overviewText?.length && (
       <p class="empty">{t('editions.empty')}</p>
     )
   }
@@ -184,6 +194,30 @@ const highlights = (edition.highlights ?? [])
   }
   .lead-images.single :global(.slide) {
     flex-basis: 100%;
+  }
+  /* The overview text, when there is one, sits closer under the pictures
+     and keeps the old gap to the panels: 40px over it, 60px under it on the
+     frame. Two columns, 40px apart like the pictures above them, the
+     letters at the highlights' size and tracking. */
+  .lead-images:has(+ .overview-text) {
+    margin-bottom: 44px;
+  }
+  .overview-text {
+    columns: 2;
+    column-gap: 40px;
+    margin-bottom: 64px;
+    font-size: clamp(1.15rem, 2.2vw, 2rem);
+    line-height: 1.25;
+    letter-spacing: -0.035em;
+  }
+  .overview-text :global(p + p) {
+    margin-top: 0.8em;
+  }
+  @media (max-width: 700px) {
+    .overview-text {
+      columns: 1;
+      margin-bottom: 44px;
+    }
   }
   .lead-images.single {
     max-width: 670px;
