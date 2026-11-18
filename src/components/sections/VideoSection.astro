@@ -105,10 +105,14 @@ const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) :
     display: grid;
   }
   /* Picture 887px and copy 423px at the 1440 frame. */
+  /* The same space as the news rows around it (Feature.astro: 30px above,
+     2.5rem under) - it was 80px above and nothing under, so the gaps either
+     side of the film differed from the rest (Léonie, 2026-11-18). */
   .feature--video {
     grid-template-columns: minmax(0, 887fr) minmax(310px, 423fr);
     align-items: start;
-    margin-top: 80px;
+    margin-top: 30px;
+    padding-bottom: 2.5rem;
   }
   .video-frame :global(.film) {
     margin: 0;
@@ -174,6 +178,7 @@ const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) :
     /* Stretched: the frame has no width of its own to shrink to. */
     .feature--video {
       align-items: stretch;
+      margin-top: 30px;
     }
     /* Film first, then its text, like every news row above it: the copy
        used to jump ahead of the film, so on a phone the last news text and

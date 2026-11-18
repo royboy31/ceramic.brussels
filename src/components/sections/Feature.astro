@@ -184,9 +184,11 @@ const AUTOPLAY_MS = 4500;
     line-height: 1;
     display: inline-flex;
   }
-  .split.feature--guest {
-    margin-top: 82px;
-  }
+  /* The guest row used to set its own 82px (and 50px on a phone), and the
+     film row 80px: "the spacing between each news is different. Could we
+     have the same everywhere?" (Léonie, 2026-11-18). Every homepage row now
+     keeps the news rows' 30px + the `.feature` 2.5rem under it, and
+     VideoSection.astro gives the film the same. */
   @media (max-width: 900px) {
     .split {
       gap: 20px;
@@ -223,9 +225,6 @@ const AUTOPLAY_MS = 4500;
     }
     .arrow-link {
       font-size: 26px;
-    }
-    .split.feature--guest {
-      margin-top: 50px;
     }
   }
 
