@@ -2,7 +2,7 @@
 import PortableText from '../PortableText.astro';
 import ExhibitorsListing from '../ExhibitorsListing.astro';
 import type { LocaleId } from '../../lib/locales';
-import { getExhibitorsByYear, getAwards } from '../../lib/queries';
+import { getExhibitorsByYear, getAwards, getEditions, exhibitorEditions } from '../../lib/queries';
 
 /**
  * A previous edition's galleries: that year's exhibitor list, as the
@@ -10,7 +10,7 @@ import { getExhibitorsByYear, getAwards } from '../../lib/queries';
  *
  * It is the same `ExhibitorsListing` /exhibitors uses - the A-Z row, the
  * filters and the card grid are one implementation - with `inSection`, which
- * drops the component's own title band and year row because
+ * drops the component's own title band (but keeps the other-year buttons, 2026-11-18) because
  * PreviousEdition.astro has already drawn the year band and the pills.
  *
  * **The list used to live at `/exhibitors/<year>`**, the address the old site
@@ -28,7 +28,9 @@ const { lang, year, edition, lead } = Astro.props as {
 };
 
 /** One request each, memoised by `run()`, so the year's other tabs pay nothing. */
-const [exhibitors, awards] = await Promise.all([getExhibitorsByYear(lang, year), getAwards(lang)]);
+const [exhibitors, awards, editions] = await Promise.all([getExhibitorsByYear(lang, year), getAwards(lang), getEditions(lang)]);
+/** Every year with galleries, for the other-year buttons above the letters (2026-11-18). */
+const { years } = exhibitorEditions(editions);
 
 /**
  * That year's fair-award winners, for the "awards" filter pill - the 2025 list
@@ -53,5 +55,6 @@ const awarded = new Set<string>(
   edition={edition}
   year={year}
   awarded={awarded}
+  years={years}
   inSection
 />

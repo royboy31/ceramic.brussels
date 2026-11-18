@@ -236,6 +236,16 @@ export const edition = defineType({
       description: 'The pair shown under the lead on the overview tab. The first two are used, side by side, 3:2.',
     }),
     defineField({
+      // "On every overview page (for every year), a new text-field right
+      // underneath the slideshow, the same size as the highlights text" -
+      // Léonie, 2026-11-18, Figma frame 1405:650.
+      name: 'overviewText',
+      title: 'Overview text',
+      type: 'localeBlock',
+      group: 'archive',
+      description: 'The text under the overview pictures, set in two columns at the size of the highlights. Leave empty to show nothing there.',
+    }),
+    defineField({
       // "I can't choose the pictures on this page, could you create a field" -
       // Tiphaine, 2026-11-17. The art prize tab borrowed the first five
       // pictures of the year's general gallery.
