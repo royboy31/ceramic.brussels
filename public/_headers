@@ -37,9 +37,3 @@ https://ceramic-brussels.pages.dev/*
 # linked only from the noindexed platform page, so kept out of search too.
 /assets/exhibitors-kit/*
   X-Robots-Tag: noindex
-
-# The old Twill site, kept as a static archive for the team (scripts/old-site/).
-# Linked from nowhere; noindex rather than a robots.txt Disallow, because a
-# disallowed page can still be listed from a link while its noindex goes unread.
-/old-site/*
-  X-Robots-Tag: noindex, nofollow
