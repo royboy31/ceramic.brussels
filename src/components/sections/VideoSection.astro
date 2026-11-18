@@ -201,6 +201,17 @@ const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) :
     }
   }
 
+  /* The film row stacks at 640 but site.css bleeds `.video-frame` from 700:
+     in between, the film ran over its text and off the window (Léonie,
+     2026-11-18). Feature.astro holds the news rows back the same way. */
+  @media (min-width: 641px) and (max-width: 700px) {
+    .feature--video > .video-frame {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-inline: 0 !important;
+    }
+  }
+
   /* The hub treatment. */
   .video-block {
     margin: 0 0 3rem;

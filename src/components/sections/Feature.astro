@@ -296,7 +296,25 @@ const AUTOPLAY_MS = 4500;
      homepage's Hoxton spotlight and the Bureau Rouge film). The rule lives
      here rather than in site.css because this component's scoped selectors
      outrank a global one. */
-  @media (max-width: 700px) {
+  /* 640, not the 700 of the site's other bleeds: a homepage row only stacks
+     at 640, and between the two its picture was pulled out of a column that
+     still sat beside the text - over the copy and past the right edge of
+     the window ("the responsiveness on the homepage seems to slightly bug
+     when the window is very thin, but not quite mobile-wide yet", Léonie,
+     2026-11-18, screenshot at about 680px). The global bleeds in site.css
+     (`.bleed-m` on the slideshow, `main .feature > figure`, the film) are
+     held back the same way just below. */
+  @media (min-width: 641px) and (max-width: 700px) {
+    .split.feature > :global(*) {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-inline: 0 !important;
+    }
+    .split.feature :global(figcaption) {
+      padding-inline: 0 !important;
+    }
+  }
+  @media (max-width: 640px) {
     /* By the gutter, not 50% - 50vw: these are grid items, where WebKit
        does not honour a percentage pull though the simulator does
        (2026-10-03, the programme/visitors-info lesson). */
