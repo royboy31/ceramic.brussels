@@ -708,6 +708,8 @@ export function getEditionArchive(lang: LocaleId, year: number) {
       "archiveLeads": archiveLeads[]{ tab, ${styled('lead')} },
       // BACKEND-REQUEST #33: the overview's image pair and its highlights.
       "leadImages": leadImages[] ${IMAGE},
+      // The text under the overview pictures (Léonie, 2026-11-18).
+      ${styled('overviewText')},
       "highlights": highlights[]{ _key, ${styled('label')}, "link": link ${LINK} },
       // BACKEND-REQUEST #34: what the guest of honour showed that year.
       "guestInstallation": guestInstallation{
