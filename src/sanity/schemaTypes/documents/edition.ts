@@ -259,19 +259,6 @@ export const edition = defineType({
       description: 'The text under the overview pictures, set in two columns at the size of the highlights. Leave empty to show nothing there.',
     }),
     defineField({
-      // "I can't choose the pictures on this page, could you create a field" -
-      // Tiphaine, 2026-11-17. The art prize tab borrowed the first five
-      // pictures of the year's general gallery.
-      name: 'prizeImages',
-      title: 'Art prize pictures',
-      type: 'array',
-      group: 'archive',
-      of: [defineArrayMember({ type: 'figure' })],
-      options: { layout: 'grid' },
-      description:
-        "The slideshow beside the laureates on the art prize tab, in this order. Leave empty to use the first five pictures of the year's gallery.",
-    }),
-    defineField({
       name: 'highlights',
       title: 'Overview highlights',
       type: 'array',
