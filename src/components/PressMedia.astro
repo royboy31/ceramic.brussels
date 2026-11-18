@@ -932,14 +932,14 @@ const logoHeight = (p: any) => {
   }
   .year-filter button:is(:hover, [aria-pressed='true']) {
     color: #050505 !important;
-    background-color: var(--ash-ground) !important;
+    background-color: var(--ash-ground, #d9d9d9) !important;
   }
   .discover-edition {
     margin: 18px 0 0;
   }
   .discover-edition .small-pill:hover {
     color: #050505;
-    background: var(--ash-ground);
+    background: var(--ash-ground, #d9d9d9);
   }
   .photo-grid {
     grid-template-columns: repeat(6, 1fr);
