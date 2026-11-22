@@ -82,7 +82,16 @@ const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) :
             {section.text}
           </p>
         )}
-        <VideoEmbed class="film" url={video.url} poster={poster} label={video.title ?? t('home.watch')} />
+        {/* "Hide the title over the picture" on the Video field: an editor can
+            take the acid title off the still without emptying the title,
+            which only renamed it to "watch" (Félicie, 2026-11-09). */}
+        <VideoEmbed
+          class="film"
+          url={video.url}
+          poster={poster}
+          label={video.title ?? t('home.watch')}
+          quiet={video.hideTitle === true}
+        />
       </section>
     ))
 }

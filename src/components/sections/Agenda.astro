@@ -1,0 +1,351 @@
+---
+import type { LocaleId } from '../../lib/locales';
+import { formatDate } from '../../lib/i18n';
+import { resolveLink } from '../../lib/links';
+import { styleAttrs } from '../../lib/textStyle';
+
+/**
+ * The agenda calendar: a Monday-first month grid that draws itself around
+ * the entries, first date to last, as the exhibitors platform frame has it
+ * (Figma 1813:964 - deadlines acid yellow, the payment date violet, build-up
+ * days grey, fair days black with white text). An entry with an end date
+ * repeats on every day it covers; a deadline or payment entry closes on the
+ * bold DEADLINE word; the month's name takes the place of its first day's
+ * number, the way the frame writes DÉCEMBRE 2026 into the grid. Below 700px
+ * the grid gives way to a list of the same entries - seven columns have no
+ * place on a phone.
+ */
+interface Props {
+  lang: LocaleId;
+  section: any;
+}
+
+const { lang, section } = Astro.props;
+const locale = { en: 'en-GB', fr: 'fr-BE', nl: 'nl-BE' }[lang];
+
+type Entry = {
+  _key: string;
+  kind?: string;
+  date?: string;
+  endDate?: string;
+  label?: string;
+  text?: string;
+  link?: any;
+};
+
+const KINDS = new Set(['deadline', 'payment', 'montage', 'fair']);
+
+// Dates are plain YYYY-MM-DD strings; everything below works in UTC so no
+// time zone can shift a day. An unreadable date drops its entry rather than
+// the page (the 2026-09-30 lesson in CLAUDE.md).
+const parse = (value: string | undefined): Date | null => {
+  if (!value) return null;
+  const date = new Date(`${value.slice(0, 10)}T00:00:00Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+const dayKey = (date: Date) => date.toISOString().slice(0, 10);
+
+const entries = ((section.entries ?? []) as Entry[]).filter((e) => e?.label && parse(e.date));
+
+// Every entry on every day it covers.
+const byDay = new Map<string, Entry[]>();
+let first: Date | null = null;
+let last: Date | null = null;
+for (const entry of entries) {
+  const start = parse(entry.date)!;
+  const end = parse(entry.endDate) ?? start;
+  for (let t = start.getTime(); t <= end.getTime(); t += 86_400_000) {
+    const day = new Date(t);
+    const key = dayKey(day);
+    byDay.set(key, [...(byDay.get(key) ?? []), entry]);
+    if (!first || day < first) first = day;
+    if (!last || day > last) last = day;
+  }
+}
+
+// One continuous grid, from the Monday of the week holding the first month's
+// 1st to the Sunday closing the last entry's week.
+const weeks: { date: Date; inRange: boolean }[][] = [];
+if (first && last) {
+  const start = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth(), 1));
+  start.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 6) % 7));
+  const end = new Date(last);
+  end.setUTCDate(end.getUTCDate() + ((7 - end.getUTCDay()) % 7));
+  for (let t = start.getTime(); t <= end.getTime(); t += 7 * 86_400_000) {
+    weeks.push(
+      Array.from({ length: 7 }, (_, i) => {
+        const date = new Date(t + i * 86_400_000);
+        return { date, inRange: date >= new Date(Date.UTC(first!.getUTCFullYear(), first!.getUTCMonth(), 1)) && date <= end };
+      }),
+    );
+  }
+}
+
+// Monday-first weekday initials in the page's language (L M M J V S D in French).
+const weekdayLetters = weeks.length
+  ? weeks[0].map(({ date }) => new Intl.DateTimeFormat(locale, { weekday: 'narrow', timeZone: 'UTC' }).format(date))
+  : [];
+
+const monthName = (date: Date) =>
+  new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date).toUpperCase();
+
+// The strongest kind present colours the cell; fair beats montage beats the markers.
+const cellKind = (dayEntries: Entry[]): string | null => {
+  for (const kind of ['fair', 'montage', 'deadline', 'payment']) {
+    if (dayEntries.some((e) => e.kind === kind)) return kind;
+  }
+  return null;
+};
+
+const entryLink = (entry: Entry) => (entry.link ? resolveLink(lang, entry.link) : null);
+const lines = (entry: Entry) => (entry.text ?? '').split('\n').map((line) => line.trim()).filter(Boolean);
+---
+
+{
+  entries.length > 0 && (
+    <section class="agenda-block" id={section.anchor || undefined}>
+      {section.heading && (
+        <h2 class="panel-title" {...styleAttrs(section.headingStyle)}>
+          {section.heading}
+        </h2>
+      )}
+
+      <table class="agenda-grid" role="grid">
+        <thead>
+          <tr>
+            {weekdayLetters.map((letter) => (
+              <th scope="col">
+                <span class="agenda-weekday">{letter}</span>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {weeks.map((week) => (
+            <tr>
+              {week.map(({ date, inRange }) => {
+                const dayEntries = inRange ? (byDay.get(dayKey(date)) ?? []) : [];
+                const kind = cellKind(dayEntries);
+                const firstOfMonth = inRange && date.getUTCDate() === 1;
+                const badges = dayEntries.filter((e) => e.kind === 'fair' || e.kind === 'montage');
+                return (
+                  <td class:list={['agenda-day', kind && `k-${kind}`, !inRange && 'out']}>
+                    {inRange && (
+                      <>
+                        <div class="agenda-day-head">
+                          {firstOfMonth ? (
+                            <span class="agenda-month">{monthName(date)}</span>
+                          ) : (
+                            <span class="agenda-num">{date.getUTCDate()}</span>
+                          )}
+                          {badges.length > 0 && <span class="agenda-badge">{badges[0].label}</span>}
+                        </div>
+                        {dayEntries.map((entry) => {
+                          const link = entryLink(entry);
+                          const marker = entry.kind === 'deadline' || entry.kind === 'payment';
+                          const isBadge = entry.kind === 'fair' || entry.kind === 'montage';
+                          return (
+                            <div class="agenda-entry">
+                              {!isBadge &&
+                                (link ? (
+                                  <a
+                                    class="agenda-label"
+                                    href={link.href}
+                                    {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                                  >
+                                    {entry.label}
+                                  </a>
+                                ) : (
+                                  <span class="agenda-label">{entry.label}</span>
+                                ))}
+                              {lines(entry).map((line) => (
+                                <span class="agenda-line">{line}</span>
+                              ))}
+                              {marker && <strong class="agenda-deadline">DEADLINE</strong>}
+                            </div>
+                          );
+                        })}
+                      </>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <ul class="agenda-list">
+        {entries.map((entry) => {
+          const link = entryLink(entry);
+          const marker = entry.kind === 'deadline' || entry.kind === 'payment';
+          return (
+            <li class:list={['agenda-item', entry.kind && KINDS.has(entry.kind) && `k-${entry.kind}`]}>
+              <span class="agenda-item-date">
+                {formatDate(entry.date, lang)}
+                {entry.endDate ? ` → ${formatDate(entry.endDate, lang)}` : ''}
+              </span>
+              <span class="agenda-item-body">
+                {link ? (
+                  <a class="agenda-label" href={link.href} {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+                    {entry.label}
+                  </a>
+                ) : (
+                  <span class="agenda-label">{entry.label}</span>
+                )}
+                {lines(entry).map((line) => (
+                  <span class="agenda-line">{line}</span>
+                ))}
+                {marker && <strong class="agenda-deadline">DEADLINE</strong>}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  /* The frame's palette. The acid and violet are the design's own values,
+     fixed here so a restyle never needs a content migration; the fair days
+     swap ink and ground, which keeps them readable in dark mode too. */
+  .agenda-block {
+    margin: 0 0 3rem;
+    --agenda-acid: #fff350;
+    --agenda-violet: #8b8bf5;
+    --agenda-grey: var(--surface-2, #e5e5e3);
+  }
+  .agenda-grid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .agenda-grid th {
+    padding: 0 0 10px;
+    font-weight: 400;
+    text-align: center;
+  }
+  .agenda-weekday {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    font-size: 13px;
+  }
+  .agenda-day {
+    border: 1px solid var(--ink);
+    vertical-align: top;
+    padding: 6px 8px 10px;
+    height: 86px;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .agenda-day.out {
+    border: 0;
+  }
+  .agenda-day.k-deadline {
+    background: var(--agenda-acid);
+    color: #1a1a1a;
+  }
+  .agenda-day.k-payment {
+    background: var(--agenda-violet);
+    color: #1a1a1a;
+  }
+  .agenda-day.k-montage {
+    background: var(--agenda-grey);
+  }
+  .agenda-day.k-fair {
+    background: var(--ink);
+    color: var(--ground);
+  }
+  .agenda-day-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .agenda-num {
+    font-size: 15px;
+  }
+  .agenda-month {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    position: relative;
+    z-index: 1;
+  }
+  .agenda-badge {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .agenda-entry {
+    margin: 0 0 6px;
+  }
+  .agenda-label {
+    display: block;
+    font-weight: 600;
+    color: inherit;
+  }
+  a.agenda-label {
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+  }
+  .agenda-line {
+    display: block;
+  }
+  .agenda-deadline {
+    display: block;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  /* The phone fallback: the same entries as rows. */
+  .agenda-list {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .agenda-item {
+    border-top: 1px solid var(--rule);
+    padding: 10px 10px 12px;
+    font-size: 15px;
+  }
+  .agenda-list .agenda-item:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+  .agenda-item.k-deadline {
+    background: var(--agenda-acid);
+    color: #1a1a1a;
+  }
+  .agenda-item.k-payment {
+    background: var(--agenda-violet);
+    color: #1a1a1a;
+  }
+  .agenda-item.k-montage {
+    background: var(--agenda-grey);
+  }
+  .agenda-item.k-fair {
+    background: var(--ink);
+    color: var(--ground);
+  }
+  .agenda-item-date {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+  @media (max-width: 700px) {
+    .agenda-grid {
+      display: none;
+    }
+    .agenda-list {
+      display: block;
+    }
+  }
+</style>

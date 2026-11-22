@@ -1,0 +1,464 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageSections from '../../components/PageSections.astro';
+import PortableText from '../../components/PortableText.astro';
+import { type LocaleId, LOCALE_IDS, DEFAULT_LOCALE } from '../../lib/locales';
+import { useTranslations, localePath } from '../../lib/i18n';
+import { PLATFORM_PATH } from '../../lib/exhibitorsPlatform';
+import { getCurrentEdition, getPlatformPage } from '../../lib/queries';
+
+/**
+ * The exhibitors platform, `/[lang]/exhibitors/platform/` - one address, two
+ * states (docs/exhibitors-platform.md; Figma 1813:716 and 1813:964).
+ *
+ * Mounted on request by src/integrations/vip-routes.mjs on a build with the
+ * preview runtime; never prerendered, so no static file exists to fetch
+ * around the gate. src/middleware.ts has already decided the state and left
+ * it in `locals.exhibitorEntered`: the editors' preview cookie or an
+ * exhibitor session (REALMS.exhibitor - a VIP session does not count) renders
+ * the platform page, everyone else the password form. Both answers leave the
+ * Worker uncached and noindex.
+ *
+ * The platform's content is the `page` document in section "exhibitors"
+ * whose English slug is "platform" - an ordinary section stack an editor
+ * owns, so forms, deadlines and hours change without a deploy, and a publish
+ * shows immediately: this renders live on every request. First build's
+ * markup is deliberately plain; the styling pass to the frames is Lilanga's.
+ */
+export const prerender = false;
+
+const lang = ((LOCALE_IDS as readonly string[]).includes(Astro.params.lang as string) ? Astro.params.lang : DEFAULT_LOCALE) as LocaleId;
+const t = useTranslations(lang);
+const entered = (Astro.locals as Record<string, unknown>).exhibitorEntered === true;
+const error = Astro.url.searchParams.get('error');
+
+const [page, edition] = await Promise.all([entered ? getPlatformPage(lang) : null, getCurrentEdition(lang)]);
+const year = edition?.year ?? new Date().getFullYear() + 1;
+
+// The design names Tiphaine (Exhibitor Relations) for lost passwords. Her
+// address is on the page in the "more questions?" block too; if the role
+// moves, this becomes a Site settings field - until then one constant.
+const contactName = 'Tiphaine Quéguineur';
+const contactEmail = 'tiphaine@ceramic.brussels';
+
+const here = localePath(lang, PLATFORM_PATH);
+const exhibitorsList = localePath(lang, 'exhibitors');
+const altPaths = Object.fromEntries(LOCALE_IDS.map((l) => [l, PLATFORM_PATH]));
+
+/**
+ * The frame is three bands: two columns, the full-width booths strip, two
+ * columns again. Both stacks carry that as explicit markers: in Sections a
+ * gallerySection renders as a full-width band interrupting the columns
+ * (with a section title straight above it, the pair goes together), and in
+ * the Sidebar a spacer means "continue below the band", which is what drops
+ * the transport partner beside the hotel.
+ */
+/**
+ * The frame opens on one line, "On this page, you will find all useful
+ * information…", at the intro size, in place of the locked state's
+ * "exclusively dedicated" line (Léonie, 2026-10-21). The editors already
+ * wrote it as the first block, a text block with no heading, so that block
+ * becomes the intro rather than a second, smaller paragraph under it.
+ */
+const blocks = (page?.sections ?? []).filter(Boolean);
+const first = blocks[0];
+const introBlock =
+  first?._type === 'contentSection' && !first.heading && first.body && !(first.links ?? []).length && !(first.images ?? []).length
+    ? blocks.shift()
+    : null;
+
+type Seg = { cols: any[]; band: any[] };
+const segs: Seg[] = [{ cols: [], band: [] }];
+for (const block of blocks) {
+  const cur = segs[segs.length - 1];
+  if (block._type === 'gallerySection') {
+    if (cur.band.length === 0 && cur.cols[cur.cols.length - 1]?._type === 'headingSection') {
+      cur.band.push(cur.cols.pop());
+    }
+    cur.band.push(block);
+  } else if (cur.band.length > 0) {
+    segs.push({ cols: [block], band: [] });
+  } else {
+    cur.cols.push(block);
+  }
+}
+const asideSegs: any[][] = [[]];
+for (const block of (page?.aside ?? []).filter(Boolean)) {
+  if (block._type === 'spacerSection') asideSegs.push([]);
+  else asideSegs[asideSegs.length - 1].push(block);
+}
+while (asideSegs.length > segs.length) segs.push({ cols: [], band: [] });
+const hasContent = segs.some((s) => s.cols.length || s.band.length) || asideSegs.some((s) => s.length);
+---
+
+<Base
+  lang={lang}
+  title={page?.seo?.title ?? t('platform.title')}
+  description={page?.seo?.description}
+  path={PLATFORM_PATH}
+  altPaths={altPaths}
+  noIndex={true}
+  editId={entered ? page?._id : undefined}
+  editType={entered ? page?._type : undefined}
+  crossBanner={false}
+>
+  <div class="band">
+    <h1>{t('platform.title')}</h1>
+    <a class="back" href={exhibitorsList}>← {t('platform.back')}</a>
+  </div>
+
+  <div class="intro">
+    {entered && introBlock ? <PortableText value={introBlock.body} /> : <p>{t('platform.intro', { year })}</p>}
+  </div>
+
+  {
+    !entered ? (
+      <section class="gate">
+        <div class="box">
+          <h2>{t('platform.boxTitle')}</h2>
+          <p>{t('platform.boxText')}</p>
+          {error && <p class="error">{t('platform.wrongCode', { email: contactEmail })}</p>}
+          <form method="post" action="/api/vip/enter/">
+            <input type="hidden" name="audience" value="exhibitor" />
+            <input type="hidden" name="lang" value={lang} />
+            <input type="hidden" name="next" value={here} />
+            {/* Shown as typed (Léonie, 2026-10-21): a gallery's code is
+                read off an email, and the dots hid the typo. */}
+            <input
+              type="text"
+              name="code"
+              required
+              autocomplete="off"
+              autocapitalize="characters"
+              autocorrect="off"
+              spellcheck="false"
+              aria-label={t('platform.password')}
+            />
+            <button type="submit">→ {t('platform.enter')}</button>
+          </form>
+        </div>
+        <aside>
+          <h3>{t('platform.forgot')}</h3>
+          <p>
+            {t('platform.forgotText', { name: contactName, email: '' })}
+            <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+          </p>
+        </aside>
+      </section>
+    ) : (
+      <>
+        {hasContent ? (
+          <div class="platform-body">
+            {segs.map((seg, i) => (
+              <>
+                {(seg.cols.length > 0 || (asideSegs[i]?.length ?? 0) > 0) && (
+                  <div class="platform-row">
+                    <div class="platform-main">
+                      <PageSections lang={lang} sections={seg.cols} />
+                    </div>
+                    {(asideSegs[i]?.length ?? 0) > 0 && (
+                      <aside class="platform-aside">
+                        <PageSections lang={lang} sections={asideSegs[i]} />
+                      </aside>
+                    )}
+                  </div>
+                )}
+                {seg.band.length > 0 && (
+                  <div class="platform-band">
+                    <PageSections lang={lang} sections={seg.band} />
+                  </div>
+                )}
+              </>
+            ))}
+          </div>
+        ) : (
+          <p class="empty">{t('platform.empty')}</p>
+        )}
+        <form class="leave" method="post" action="/api/vip/leave/">
+          <input type="hidden" name="audience" value="exhibitor" />
+          <input type="hidden" name="lang" value={lang} />
+          <button type="submit">← {t('platform.leave')}</button>
+        </form>
+      </>
+    )
+  }
+</Base>
+
+<style>
+  /* First build: the frame's bones (title band, intro, the grey box beside
+     the "forgot your password?" column). The styling pass is Lilanga's. */
+  .band {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 20px;
+    padding: 36px var(--gutter) 0;
+  }
+  /* The size every other page's title has (HubNav, ExhibitorHead: 70px,
+     48px on a phone; Léonie, 2026-10-22: it read smaller than the others).
+     A literal, not --band-h1: this band is not sticky, and the token shrinks
+     on scroll, which would move the page under the reader. */
+  .band h1 {
+    text-transform: lowercase;
+    letter-spacing: -0.04em;
+    font-size: 70px;
+    font-weight: 600;
+    line-height: 1;
+    margin: 0;
+  }
+  /* Rectangular, as the buttons at the top of every other page are
+     (HubNav, ExhibitorHead): Léonie, 2026-10-21, after the pill of the
+     20th. Same --band-pill tokens, so it shrinks with the others on scroll. */
+  .band .back {
+    border: 1px solid var(--ink);
+    padding: var(--band-pill-pad, 7px 15px);
+    font-size: var(--band-pill, 24px);
+    line-height: 30px;
+    letter-spacing: -0.045em;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s ease;
+  }
+  .band .back:hover,
+  .band .back:focus-visible {
+    background: var(--acid);
+  }
+  .intro {
+    padding: 28px var(--gutter) 34px;
+  }
+  .intro p,
+  .intro :global(.rich-text p) {
+    letter-spacing: -0.035em;
+    max-width: 1120px;
+    font-size: clamp(24px, 2.2vw, 34px);
+    line-height: 1.2;
+    margin: 0;
+  }
+  .gate {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+    padding: 0 var(--gutter) 90px;
+    align-items: start;
+  }
+  /* The frame's flat #d9d9d9, the grey of the ash pages. */
+  .gate .box {
+    background: #d9d9d9;
+    padding: 34px 40px 40px;
+  }
+  .gate .box h2 {
+    letter-spacing: -0.035em;
+    font-size: clamp(26px, 2.4vw, 38px);
+    font-weight: 400;
+    line-height: 1.15;
+    margin: 0 0 14px;
+  }
+  .gate .box p {
+    font-size: clamp(20px, 1.8vw, 28px);
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    margin: 0 0 28px;
+    max-width: 26em;
+  }
+  .gate form {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  /* The frame's field: white, square, black edge, 195 x 58. */
+  .gate input[name='code'] {
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    background: #fff;
+    font: inherit;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    height: 58px;
+    padding: 0 14px;
+    width: min(195px, 60%);
+  }
+  .gate button {
+    background: var(--ink);
+    color: var(--ground);
+    border: 0;
+    font: inherit;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 10px 14px;
+    cursor: pointer;
+  }
+  .gate .error {
+    color: #b00020;
+    font-size: 17px;
+    max-width: none;
+    margin-bottom: 18px;
+  }
+  /* The site's BOLD & CAPS label and its body text, size and tracking
+     (Léonie, 2026-10-21: the title was smaller than the others, the text
+     smaller and tighter than the body). */
+  .gate aside h3 {
+    text-transform: uppercase;
+    font-size: var(--body-size, 22px);
+    line-height: var(--body-lh, 30px);
+    font-weight: 600;
+    letter-spacing: 0;
+    margin: 6px 0 4px;
+  }
+  .gate aside p {
+    font-size: var(--body-size, 22px);
+    line-height: var(--body-lh, 30px);
+    letter-spacing: var(--body-ls, -0.03em);
+    margin: 0;
+  }
+  .gate aside a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.12em;
+  }
+  /* An email address ends in the ↗ every outbound link carries, outside
+     the underline (Léonie, 2026-10-21; the frame's contact block). */
+  .gate aside a[href^='mailto:']::after,
+  .platform-body :global(a[href^='mailto:'])::after {
+    content: '↗';
+    display: inline-block;
+    margin-left: 0.2em;
+    text-decoration: none;
+  }
+  .empty {
+    padding: 10px var(--gutter) 60px;
+    font-size: 22px;
+  }
+  /* The frame's bands: each row is the wide stack beside the narrow one,
+     907:433 in the design, 2:1 here, and a gallery (booths) spans the full
+     width between the rows. Below 1000px a row stacks, sidebar after. The
+     blocks bring their own vertical rhythm. */
+  .platform-body {
+    padding: 0 var(--gutter) 40px;
+  }
+  .platform-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0 44px;
+    align-items: start;
+  }
+  @media (min-width: 1000px) {
+    .platform-row {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+  .platform-main,
+  .platform-aside {
+    min-width: 0;
+  }
+
+  /* Two title levels, one look across the page (Léonie, 2026-10-21, with
+     the frame): a section title ("agenda", "useful links", "hotel deal") is
+     the medium bold lowercase line ruled underneath across its column - the
+     .subgroup heading, full column width; a name over a text block ("the
+     hoxton", "tiphaine quéguineur", "embelco") is the BOLD & CAPS label. */
+  .platform-body :global(.group-title) {
+    margin: 3rem 0 1.25rem;
+    padding: 0 0 0.15rem;
+    border-top: 0;
+    /* 2px, the site's rule weight (Vip.astro; Léonie, 2026-10-22). */
+    border-bottom: 2px solid var(--ink);
+    max-width: none;
+    font-size: clamp(1.625rem, 2.5vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    text-transform: lowercase;
+  }
+  .platform-body :global(.page-sections > .group-title:first-child) {
+    margin-top: 0;
+  }
+  .platform-body :global(.panel-title) {
+    margin: 0 0 0.25rem;
+    padding: 0;
+    border: 0;
+    max-width: none;
+    font-size: 24px;
+    line-height: 30px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  /* The hotel offer: a text block with no name over it that ends in a link
+     is the framed card, and the whole card answers the pointer - light grey,
+     the click anywhere following its link - as the rate frame on the VIP
+     hotel tab does (Vip.astro .rate; Léonie's Figma comment, 2026-10-21).
+     Its first line is the BOLD & CAPS label. */
+  .platform-body :global(.sections section:not(:has(.panel-title)):has(.cs-links)) {
+    position: relative;
+    /* The 28px the VIP tab's own frame stands on, which the port here left
+       behind: "the frame with all the hotel deal info is right up against
+       the text above - it shouldn't be!" (Léonie, 2026-11-09). */
+    margin-top: 28px;
+    padding: 14px 20px 22px;
+    border: 1px solid var(--ink);
+    transition: background-color 0.18s;
+  }
+  .platform-body :global(.sections section:not(:has(.panel-title)):has(.cs-links):hover),
+  .platform-body :global(.sections section:not(:has(.panel-title)):has(.cs-links):focus-within) {
+    background-color: #d4d4d4;
+  }
+  .platform-body :global(.sections section:not(:has(.panel-title)):has(.cs-links) .cs-links a::after) {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .platform-body :global(.sections section:not(:has(.panel-title)):has(.cs-links) .rich-text > p:first-child) {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+  .leave {
+    padding: 0 var(--gutter) 70px;
+  }
+  /* The site's pill with the arrow to its left, as "← back to 2027"
+     (Léonie, 2026-10-21: it was a small grey one-off). */
+  .leave button {
+    background: none;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    font: inherit;
+    padding: var(--pill-pad);
+    font-size: var(--pill-size);
+    line-height: var(--pill-lh);
+    letter-spacing: var(--pill-ls);
+    cursor: pointer;
+    color: var(--ink);
+    transition: background-color 0.15s ease;
+  }
+  .leave button:hover,
+  .leave button:focus-visible {
+    background: var(--acid);
+  }
+  /* Stacked, the frame's rows need air the desktop grid gets from its
+     columns: first-title margins are zeroed to align the two columns, so
+     when the sidebar, the booths band and the next row pile up on a phone
+     they ran into each other (Léonie, 2026-10-22, screenshots - "booths"
+     on the phone number, "transport partner" on the hotel card). */
+  @media (max-width: 999px) {
+    .platform-aside,
+    .platform-band,
+    .platform-row:not(:first-child) {
+      margin-top: 48px;
+    }
+  }
+  @media (max-width: 760px) {
+    .gate {
+      grid-template-columns: 1fr;
+    }
+    .band {
+      flex-wrap: wrap;
+    }
+  }
+  @media (max-width: 640px) {
+    .band h1 {
+      font-size: 48px;
+    }
+  }
+</style>

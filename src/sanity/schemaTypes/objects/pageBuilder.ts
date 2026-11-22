@@ -2,6 +2,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity';
 // @sanity/icons 5 exposes each icon as its own subpath; the root exports only
 // the generic <Icon symbol=… /> and the map.
 import { BarChartIcon } from '@sanity/icons/BarChart';
+import { CalendarIcon } from '@sanity/icons/Calendar';
 import { BlockquoteIcon } from '@sanity/icons/Blockquote';
 import { CodeBlockIcon } from '@sanity/icons/CodeBlock';
 import { ComponentIcon } from '@sanity/icons/Component';
@@ -501,6 +502,101 @@ export const faqSection = defineType({
   },
 });
 
+/**
+ * One dated entry on the agenda calendar (agendaSection below). The kind
+ * colours the whole day cell - the exhibitors platform frame's calendar
+ * paints deadlines acid yellow, the payment date violet, build-up days grey
+ * and fair days black - and an entry with an end date repeats over every day
+ * it covers. The colours are fixed in the component
+ * (src/components/sections/Agenda.astro); only the name is stored, so a
+ * restyle never needs a content migration, the same rule as the text swatches.
+ */
+export const AGENDA_KINDS = [
+  { title: 'Deadline (yellow)', value: 'deadline' },
+  { title: 'Payment (violet)', value: 'payment' },
+  { title: 'Build-up (grey)', value: 'montage' },
+  { title: 'Fair day (black)', value: 'fair' },
+  { title: 'Plain', value: 'info' },
+] as const;
+
+export const agendaEntry = defineType({
+  name: 'agendaEntry',
+  title: 'Agenda entry',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'label',
+      title: 'Label',
+      type: 'localeString',
+      validation: (rule) => rule.required(),
+      description: 'The entry’s name in its day cell, e.g. "Form 1", "Build-up", "Fair".',
+    }),
+    defineField({
+      name: 'kind',
+      title: 'Kind',
+      type: 'string',
+      options: { list: [...AGENDA_KINDS], layout: 'radio' },
+      initialValue: 'info',
+      description: 'Colours the day cell. A deadline or payment entry also gets the bold DEADLINE word.',
+    }),
+    defineField({ name: 'date', title: 'Date', type: 'date', validation: (rule) => rule.required() }),
+    defineField({
+      name: 'endDate',
+      title: 'Until',
+      type: 'date',
+      description: 'Optional. The entry repeats on every day up to and including this one, e.g. the fair days.',
+      validation: (rule) =>
+        rule.custom((value, context) => {
+          const start = (context.parent as { date?: string } | undefined)?.date;
+          return !value || !start || value >= start ? true : 'Ends before it starts';
+        }),
+    }),
+    defineField({
+      name: 'text',
+      title: 'Details',
+      type: 'localeText',
+      description: 'Optional. Small lines under the label - times, access notes. Each line of its own.',
+    }),
+    defineField({ name: 'link', title: 'Link', type: 'link', description: 'Optional. Makes the label a link, e.g. to the form.' }),
+  ],
+  preview: {
+    select: { label: 'label.en', kind: 'kind', date: 'date', endDate: 'endDate' },
+    prepare: ({ label, kind, date, endDate }) => ({
+      title: label ?? '(no label)',
+      subtitle: [date, endDate ? `→ ${endDate}` : null, AGENDA_KINDS.find((k) => k.value === kind)?.title]
+        .filter(Boolean)
+        .join(' '),
+    }),
+  },
+});
+
+/** A month-grid calendar drawn from dated entries, as on the exhibitors platform. */
+export const agendaSection = defineType({
+  name: 'agendaSection',
+  title: 'Agenda calendar',
+  type: 'object',
+  icon: CalendarIcon,
+  fields: [
+    headingField('Optional.'),
+    defineField({
+      name: 'entries',
+      title: 'Entries',
+      type: 'array',
+      of: [defineArrayMember({ type: 'agendaEntry' })],
+      description: 'The month grid draws itself around these, first date to last.',
+    }),
+    anchorField(),
+    hiddenField(),
+  ],
+  preview: {
+    select: { heading: 'heading.en', entries: 'entries', hidden: 'hidden' },
+    prepare: ({ heading, entries, hidden }) => ({
+      title: heading ?? 'Agenda calendar',
+      subtitle: sectionSubtitle('Agenda calendar', hidden, `· ${entries?.length ?? 0} entries`),
+    }),
+  },
+});
+
 /** The latest news items as feature blocks, alternating text and picture. */
 export const newsSection = defineType({
   name: 'newsSection',
@@ -569,6 +665,63 @@ export const linksSection = defineType({
           .filter(Boolean)
           .join(' · ') || '(buttons)',
       subtitle: sectionSubtitle('Buttons', hidden),
+    }),
+  },
+});
+
+/**
+ * The exhibitors platform's "forms" column (Figma 1813:716, Léonie's comment
+ * of 2026-10-21): one row per form - an underlined link, a line saying what
+ * it is for, its deadline in bold capitals - with a rule under each, and the
+ * whole row turning acid on hover like the artists list. A row with no link
+ * yet still shows, without the hover: the client sends the form addresses
+ * later.
+ */
+export const formRow = defineType({
+  name: 'formRow',
+  title: 'Form',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'link',
+      title: 'Link',
+      type: 'link',
+      description: 'The form. Its label is the row title, e.g. "Form 1". Leave the address empty until the form exists.',
+    }),
+    defineField({ name: 'text', title: 'Description', type: 'localeText', description: 'One line on what the form is for.' }),
+    defineField({ name: 'deadline', title: 'Deadline', type: 'localeString', description: 'Shown in bold capitals, e.g. "before 4 Dec. 2026".' }),
+  ],
+  preview: {
+    select: { label: 'link.label.en', deadline: 'deadline.en' },
+    prepare: ({ label, deadline }) => ({ title: label ?? '(no label)', subtitle: deadline }),
+  },
+});
+
+export const formsSection = defineType({
+  name: 'formsSection',
+  title: 'Forms',
+  type: 'object',
+  icon: DocumentTextIcon,
+  fields: [
+    defineField({
+      name: 'forms',
+      title: 'Forms',
+      type: 'array',
+      of: [defineArrayMember({ type: 'formRow' })],
+      validation: (rule) => rule.min(1),
+    }),
+    anchorField(),
+    hiddenField(),
+  ],
+  preview: {
+    select: { forms: 'forms', hidden: 'hidden' },
+    prepare: ({ forms, hidden }) => ({
+      title:
+        (forms ?? [])
+          .map((f: any) => f?.link?.label?.en)
+          .filter(Boolean)
+          .join(' · ') || '(forms)',
+      subtitle: sectionSubtitle('Forms', hidden),
     }),
   },
 });
@@ -645,9 +798,21 @@ export const embedSection = defineType({
     defineField({
       name: 'url',
       title: 'Address to embed',
-      type: 'url',
-      validation: (rule) => rule.required().uri({ scheme: ['https'] }),
-      description: 'The https address of the map, form or widget. Only the address - not an <iframe> tag.',
+      // Per language since 2026-10-23: the exhibitor guide flipbook exists in
+      // French and English, and one shared address showed the same book on
+      // both (Tiphaine). An empty language falls back to English, so a map or
+      // form that is the same everywhere only needs its English field filled.
+      type: 'localeString',
+      validation: (rule) =>
+        rule.custom((value: Record<string, unknown> | undefined) => {
+          if (!value || typeof value === 'string') return true;
+          for (const [k, v] of Object.entries(value)) {
+            if (k.startsWith('_') || k === 'style' || !v) continue;
+            if (typeof v === 'string' && !/^https:\/\//i.test(v.trim())) return `The ${k.toUpperCase()} address must start with https://`;
+          }
+          return true;
+        }),
+      description: 'The https address of the map, form or widget. Only the address - not an <iframe> tag. Switch language to give the French or Dutch page its own address; empty languages use the English one.',
     }),
     defineField({
       name: 'height',
@@ -656,12 +821,29 @@ export const embedSection = defineType({
       initialValue: 600,
       validation: (rule) => rule.min(100).max(3000),
     }),
+    defineField({
+      name: 'download',
+      title: 'Downloadable file',
+      type: 'localeFile',
+      description:
+        'Upload a file (the exhibitor guide PDF, say) and a download button appears under the embed. Switch language to upload the French or Dutch version; empty languages offer the English file.',
+    }),
+    defineField({
+      name: 'downloadLabel',
+      title: 'Download button label',
+      type: 'localeString',
+      description: 'The button’s text, e.g. "download the guide". Empty shows plain "download".',
+      hidden: ({ parent }) => !parent?.download,
+    }),
     anchorField(),
     hiddenField(),
   ],
   preview: {
-    select: { heading: 'heading.en', url: 'url', hidden: 'hidden' },
-    prepare: ({ heading, url, hidden }) => ({ title: heading ?? url ?? '(embed)', subtitle: sectionSubtitle('Embed', hidden) }),
+    select: { heading: 'heading.en', url: 'url.en', legacyUrl: 'url', hidden: 'hidden' },
+    prepare: ({ heading, url, legacyUrl, hidden }) => ({
+      title: heading ?? url ?? (typeof legacyUrl === 'string' ? legacyUrl : undefined) ?? '(embed)',
+      subtitle: sectionSubtitle('Embed', hidden),
+    }),
   },
 });
 
@@ -752,6 +934,8 @@ export const PAGE_SECTION_TYPES = [
   'keyFiguresSection',
   'newsSection',
   'faqSection',
+  'agendaSection',
+  'formsSection',
   'embedSection',
   'applicationFormSection',
   'newsletterSection',
@@ -791,9 +975,9 @@ export function sectionsField(
   const { name = 'sections', title = 'Sections', group, description, hidden, types = PAGE_SECTION_TYPES } = overrides;
   const has = (t: string) => types.includes(t);
   const groups = [
-    { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection', 'spacerSection'] },
+    { name: 'text', title: 'Text', of: ['contentSection', 'imageTextSection', 'quoteSection', 'headingSection', 'faqSection', 'agendaSection', 'spacerSection'] },
     { name: 'media', title: 'Images & video', of: ['gallerySection', 'slideshowSection', 'videoSection', 'spotlight'] },
-    { name: 'action', title: 'Links & banners', of: ['bannerSection', 'linksSection', 'embedSection', 'applicationFormSection', 'newsletterSection'] },
+    { name: 'action', title: 'Links & banners', of: ['bannerSection', 'linksSection', 'formsSection', 'embedSection', 'applicationFormSection', 'newsletterSection'] },
     { name: 'lists', title: 'From other content', of: ['peopleSection', 'partnersSection', 'keyFiguresSection', 'newsSection'] },
   ]
     .map((g) => ({ ...g, of: g.of.filter(has) }))
@@ -835,8 +1019,12 @@ export const pageBuilderTypes = [
   headingSection,
   spacerSection,
   faqSection,
+  agendaEntry,
+  agendaSection,
   newsSection,
   linksSection,
+  formRow,
+  formsSection,
   embedSection,
   applicationFormSection,
   newsletterSection,

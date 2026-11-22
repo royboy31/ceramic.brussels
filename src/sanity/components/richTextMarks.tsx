@@ -42,6 +42,18 @@ export const HighlightIcon = () => <Swatch fill={ACID} ink={INK} label="Highligh
 export const MutedIcon = () => <Swatch fill={GROUND} ink={INK_2} label="Muted" />;
 export const InverseIcon = () => <Swatch fill={INK} ink={GROUND} label="Inverse" />;
 
+/* @sanity/icons 5 ships no superscript glyph, so: an m² in the toolbar. */
+export const SupIcon = () => (
+  <svg width="17" height="17" viewBox="0 0 17 17" role="img" aria-label="Superscript">
+    <text x="2" y="13" fontSize="11" fontWeight="600" fill="currentColor" fontFamily="Helvetica, Arial, sans-serif">
+      m
+    </text>
+    <text x="11" y="8" fontSize="7" fontWeight="600" fill="currentColor" fontFamily="Helvetica, Arial, sans-serif">
+      2
+    </text>
+  </svg>
+);
+
 /* Previews inside the editor, so a mark looks on screen like it will on the
    page instead of being an invisible state on a toolbar button. */
 
@@ -56,6 +68,8 @@ export const MutedDecorator = (props: BlockDecoratorProps) => (
 export const InverseDecorator = (props: BlockDecoratorProps) => (
   <span style={{ background: INK, color: GROUND, padding: '0 0.2em' }}>{props.children}</span>
 );
+
+export const SupDecorator = (props: BlockDecoratorProps) => <sup>{props.children}</sup>;
 
 export const LeadStyle = (props: BlockStyleProps) => (
   <div style={{ fontSize: '1.2em', lineHeight: 1.45 }}>{props.children}</div>

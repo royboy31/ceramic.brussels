@@ -105,6 +105,42 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
   let closing = false;
   let savedOverflow = '';
 
+  let closedByPointer = false;
+
+  // The ring on a button the script focused itself.
+  //
+  // Opening moves focus to the × and closing moves it back to the opener, so
+  // the keyboard keeps its place. Whether a focus() call also counts as
+  // :focus-visible is left to the browser: Safari says yes, so after a click
+  // the site's focus ring - `outline: 2px solid` with a 5px offset - drew a
+  // black square around the ×. "On Safari, when opening the menu, there's a
+  // black square around the cross" (Léonie, 2026-11-09); the same report from
+  // an iPhone on 2026-10-01 was answered with a `pointer: coarse` rule in
+  // site.css, which a laptop never matches.
+  //
+  // So a focus that follows a pointer is marked and site.css drops the ring
+  // while the mark is there; a focus that follows a key is not marked and
+  // keeps it. The mark lasts only as long as that one focus.
+  const focusQuietly = (el: HTMLElement | null | undefined, quiet: boolean) => {
+    if (!el) return;
+    if (quiet) {
+      el.setAttribute('data-focus-quiet', '');
+      el.addEventListener('blur', () => el.removeAttribute('data-focus-quiet'), { once: true });
+    }
+    el.focus({ preventScroll: true });
+  };
+  // Tabbing away from a marked button is the keyboard arriving: rings return.
+  addEventListener(
+    'keydown',
+    (e) => {
+      if (e.key !== 'Tab') return;
+      document
+        .querySelectorAll('[data-focus-quiet]')
+        .forEach((el) => el.removeAttribute('data-focus-quiet'));
+    },
+    true,
+  );
+
   const expand = (row: Element, open: boolean) => row.classList.toggle('expanded', open);
   const panel = dialog?.querySelector<HTMLElement>('.menu-panel');
   const closeButton = dialog?.querySelector<HTMLButtonElement>('[data-menu-close]');
@@ -136,8 +172,10 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
   };
 
   openers.forEach((btn) =>
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
       if (!dialog || dialog.open) return;
+      // A real click reports detail > 0; Enter or Space on the button is 0.
+      const viaPointer = (e as MouseEvent).detail > 0;
       lastOpener = btn;
       savedOverflow = document.documentElement.style.overflow;
       document.documentElement.style.overflow = 'hidden';
@@ -147,7 +185,7 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
       // panel sideways - the rows landed out of place or all at once,
       // differently per browser (client feedback, 2026-09-23).
       panel && (panel.scrollLeft = 0);
-      closeButton?.focus({ preventScroll: true });
+      focusQuietly(closeButton, viaPointer);
       openers.forEach((b) => b.setAttribute('aria-expanded', 'true'));
       measure();
       requestAnimationFrame(() =>
@@ -158,13 +196,19 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
     }),
   );
 
-  dialog?.querySelector('[data-menu-close]')?.addEventListener('click', close);
+  dialog?.querySelector('[data-menu-close]')?.addEventListener('click', (e) => {
+    closedByPointer = (e as MouseEvent).detail > 0;
+    close();
+  });
   dialog?.addEventListener('cancel', (e) => {
     e.preventDefault();
+    closedByPointer = false;
     close();
   });
   dialog?.addEventListener('click', (e) => {
-    if (e.target === dialog) close();
+    if (e.target !== dialog) return;
+    closedByPointer = true;
+    close();
   });
   dialog?.addEventListener('close', () => {
     closing = false;
@@ -172,7 +216,7 @@ const rel = (external?: boolean) => (external ? { rel: 'noopener noreferrer', ta
     document.documentElement.style.overflow = savedOverflow;
     openers.forEach((b) => b.setAttribute('aria-expanded', 'false'));
     dialog.querySelectorAll('.menu-row').forEach((row) => expand(row, false));
-    lastOpener?.focus({ preventScroll: true });
+    focusQuietly(lastOpener, closedByPointer);
   });
 
   dialog?.querySelectorAll('.menu-row').forEach((row) => {

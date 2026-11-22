@@ -56,9 +56,19 @@ const full = base ? `${base}?autoplay=1&mute=0&controls=1&playsinline=1&rel=0` :
         </button>
       </div>
     ) : (
-      <a class="frame fallback" href={url} rel="noopener noreferrer">
+      <a
+        class="frame fallback"
+        href={url}
+        rel="noopener noreferrer"
+        aria-label={quiet ? label : undefined}
+      >
         <img class="poster" src={poster} alt="" width="1600" height="1066" loading="lazy" decoding="async" />
-        <span class="label">{label}</span>
+        {/* `quiet` held for the button branch only until 2026-11-10, so a link
+            that is not a YouTube address wrote the acid title over the
+            picture wherever it was used - the homepage film row among them
+            ("I can't seem to remove the big yellow title that covers the
+            poster image", Félicie, 2026-11-09). */}
+        {!quiet && <span class="label">{label}</span>}
       </a>
     )
   }

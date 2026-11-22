@@ -25,6 +25,7 @@ export type PageField =
   | 'cover'
   | 'heroImages'
   | 'sections'
+  | 'aside'
   | 'body'
   | 'links'
   | 'settingsPointer'
@@ -83,7 +84,13 @@ const LISTING: Record<string, PageField[]> = {
 
 export function pageFields(section?: string | null, slug?: string | null): Set<PageField> {
   if (!section) return new Set(STANDALONE);
-  if (LISTING[section]) return new Set(LISTING[section]);
+  if (LISTING[section]) {
+    const fields = new Set(LISTING[section]);
+    // The exhibitors platform page renders two stacks side by side - its
+    // Sidebar is the frame's narrow right column (docs/exhibitors-platform.md).
+    if (section === 'exhibitors' && slug === 'platform') fields.add('aside');
+    return fields;
+  }
   const hub = HUBS[section];
   if (!hub) return new Set(STANDALONE);
   const tabSlug = slug || hub.tabs[0]?.slug;

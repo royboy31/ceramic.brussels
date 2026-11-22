@@ -1,7 +1,8 @@
 import type { APIRoute } from 'astro';
 import { codePepper, vipEnv } from '../vip';
 import { verifySanityAdmin } from '../sanityIdentity';
-import { mailVipCode } from '../vipMail';
+import { mailVip, mailVipCode } from '../vipMail';
+import { brevoKey, cancelMail } from '../mail';
 import {
   cleanEmail,
   codeFor,
@@ -14,6 +15,7 @@ import {
   isEmail,
   listGuests,
   reissueGuest,
+  setDeclineMail,
   setRevoked,
   updateGuest,
   type GuestInput,
@@ -39,10 +41,15 @@ import {
  * and `mail` sends it again on request. The answer always carries the
  * outcome, so the tool can say "emailed" or "send it yourself". An import
  * mails nobody: the invitation mailing is the team's, from the export.
+ *
+ * A declined request is answered 48 hours later (Baïlo, 4 Nov 2026): Brevo
+ * holds the mail, its id waits on the row, and approving or deleting the
+ * guest before it goes calls it off.
  */
 export const prerender = false;
 
 const IMPORT_CHUNK = 300;
+const DECLINE_DELAY_MS = 48 * 3600 * 1000;
 const EXPORT_PAGE = 500;
 
 const json = (status: number, body: Record<string, unknown>) =>
@@ -62,13 +69,14 @@ function readGuest(body: Record<string, unknown>): GuestInput | string {
     institution: clean(body.institution, 200),
     function: clean(body.function, 200),
   };
-  if (!input.firstName || !input.lastName) return 'A first name and a last name are required.';
+  // Names are optional since 2026-10-18: the code is made from the email alone.
   return input;
 }
 
 /** What the tool shows of a guest. The code is asked for, never listed. */
 const view = (g: GuestRow) => ({
   id: g.id,
+  audience: g.audience ?? 'vip',
   firstName: g.first_name,
   lastName: g.last_name,
   email: g.email,
@@ -97,9 +105,23 @@ export const POST: APIRoute = async ({ request }) => {
 
   const body = ((await request.json().catch(() => null)) ?? {}) as Record<string, unknown>;
   const db = env.VIP_DB;
+  // Which list the tool is on (docs/exhibitors-platform.md). Only list, add,
+  // import and export are scoped by it; everything else acts on a row by id.
+  const audience = body.audience === 'exhibitor' ? ('exhibitor' as const) : ('vip' as const);
   const id = clean(body.id, 64);
   const found = async () => (/^[a-f0-9]{8,64}$/.test(id) ? getGuest(db, id) : null);
   const site = new URL(request.url).origin;
+  /** A decline still waiting at Brevo, called off. Logged, never fatal: the decision stands either way. */
+  const cancelDecline = async (guest: GuestRow) => {
+    const key = brevoKey();
+    if (!guest.decline_mail_id || !key) return;
+    try {
+      await cancelMail(key, guest.decline_mail_id);
+      await setDeclineMail(db, guest.id, null);
+    } catch (error) {
+      console.error('[vip] scheduled decline not cancelled:', guest.decline_mail_id, error instanceof Error ? error.message : error);
+    }
+  };
   /** The guest's working code and, when there is one, the outcome of mailing it. */
   const withMail = async (guest: GuestRow) => {
     const code = await codeFor(pepper, guest);
@@ -108,14 +130,14 @@ export const POST: APIRoute = async ({ request }) => {
 
   switch (body.action) {
     case 'list':
-      return json(200, { ok: true, me: admin.name, guests: (await listGuests(db)).map(view) });
+      return json(200, { ok: true, me: admin.name, guests: (await listGuests(db, audience)).map(view) });
 
     case 'add': {
       const input = readGuest(body);
       if (typeof input === 'string') return fail(400, input);
       if (!isEmail(input.email)) return fail(400, 'A valid email address is required.');
-      const guest = await createGuest(db, pepper, input, 'approved', admin.name);
-      if (!guest) return fail(409, 'A guest with that email is already in the list.');
+      const guest = await createGuest(db, pepper, input, 'approved', admin.name, audience);
+      if (!guest) return fail(409, 'A guest with that email is already in the list (this one or the other audience’s).');
       // The tool's "email them their code now" box; unticked, the code is only shown.
       const send = body.mail !== false;
       return json(200, { ok: true, guest: view(guest), ...(send ? await withMail(guest) : { code: await codeFor(pepper, guest) }) });
@@ -138,6 +160,18 @@ export const POST: APIRoute = async ({ request }) => {
       const decided = await decideGuest(db, guest.id, body.action === 'approve' ? 'approved' : 'denied', admin.name);
       // A denial ends what an earlier approval may have opened.
       const ended = body.action === 'deny' ? await endSessions(env.VIP_SESSIONS, guest.id) : 0;
+      // Declining a request answers it (Baïlo, 3 Nov: on every decline). Only
+      // a pending request: a member taken off the list is not "declined". The
+      // decline speaks of the VIP programme, so an exhibitor's request gets none.
+      if (body.action === 'deny') {
+        const mail =
+          guest.status === 'pending' && guest.audience !== 'exhibitor'
+            ? await mailVip('decline', decided!, site, undefined, new Date(Date.now() + DECLINE_DELAY_MS))
+            : undefined;
+        if (mail?.sent && mail.messageId) await setDeclineMail(db, guest.id, mail.messageId);
+        return json(200, { ok: true, guest: view(decided!), code: null, ...(mail ? { mail } : {}), ended });
+      }
+      await cancelDecline(guest);
       return json(200, { ok: true, guest: view(decided!), ...(await withMail(decided!)), ended });
     }
 
@@ -161,6 +195,7 @@ export const POST: APIRoute = async ({ request }) => {
     case 'delete': {
       const guest = await found();
       if (!guest) return fail(404, 'No such guest.');
+      await cancelDecline(guest);
       await deleteGuest(db, guest.id);
       return json(200, { ok: true, ended: await endSessions(env.VIP_SESSIONS, guest.id) });
     }
@@ -193,14 +228,14 @@ export const POST: APIRoute = async ({ request }) => {
         if (typeof input === 'string' || !isEmail(input.email)) rejected.push(String(row.email ?? '(no email)').slice(0, 254));
         else inputs.push(input);
       }
-      return json(200, { ok: true, ...(await importGuests(db, pepper, inputs, admin.name)), rejected });
+      return json(200, { ok: true, ...(await importGuests(db, pepper, inputs, admin.name, audience)), rejected });
     }
 
     // Every working code, for the invitation mailing, a page at a time.
     // Made, not read: no code is stored anywhere.
     case 'export': {
       const offset = Math.max(0, Number(body.offset) || 0);
-      const guests = await listGuests(db);
+      const guests = await listGuests(db, audience);
       const page = guests.slice(offset, offset + EXPORT_PAGE);
       const out = [];
       for (const g of page) out.push({ ...view(g), code: (await codeFor(pepper, g)) ?? '' });

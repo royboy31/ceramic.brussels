@@ -46,6 +46,7 @@ const MARK_TAGS: Record<string, string> = {
   underline: 'u',
   'strike-through': 's',
   code: 'code',
+  sup: 'sup',
   highlight: 'mark',
   muted: 'span',
   inverse: 'span',
@@ -216,6 +217,11 @@ const grouped = Array.isArray(value) ? group(value.filter(Boolean)) : [];
   .rich-text :global(u) {
     text-decoration-thickness: 1px;
     text-underline-offset: 0.12em;
+  }
+  /* Superscript (m², Léonie 2026-10-21) without stretching the line it sits on. */
+  .rich-text :global(sup) {
+    font-size: 0.65em;
+    line-height: 0;
   }
   .rich-text :global(figure) {
     margin: 1.75rem 0;

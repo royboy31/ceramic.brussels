@@ -32,3 +32,8 @@
 # Planned to go once the real domain is live.
 https://ceramic-brussels.pages.dev/*
   X-Robots-Tag: noindex
+
+# The exhibitors platform's communication kit: downloads for the galleries,
+# linked only from the noindexed platform page, so kept out of search too.
+/assets/exhibitors-kit/*
+  X-Robots-Tag: noindex

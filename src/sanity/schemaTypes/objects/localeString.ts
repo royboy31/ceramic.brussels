@@ -90,6 +90,27 @@ export const localeBlock = defineType({
 });
 
 /**
+ * A per-language file upload, behind the same language switcher. Made for
+ * the embed block's "downloadable file" (the exhibitor guide PDF exists in
+ * French and English); an empty language falls back to English like every
+ * other localised field.
+ */
+export const localeFile = defineType({
+  name: 'localeFile',
+  title: 'File',
+  type: 'object',
+  components: { input: LocaleInput },
+  fields: localeFields('file'),
+  preview: {
+    select: { en: 'en.asset.originalFilename', fr: 'fr.asset.originalFilename', nl: 'nl.asset.originalFilename' },
+    prepare: (value: Record<string, any>) => ({
+      title: value[DEFAULT_LOCALE] ?? '(no file)',
+      subtitle: translationSummary(value),
+    }),
+  },
+});
+
+/**
  * A slug is unique within its hub, not across the dataset. Hub tabs share
  * their English slugs by design - the art prize and the VIP hub both have an
  * `about` tab, found by section + slug - and Sanity's default check compared
