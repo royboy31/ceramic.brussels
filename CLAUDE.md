@@ -662,9 +662,13 @@ questions.
   stay on that domain, or Brevo refuses the message. The Studio's VIP
   guests tool mails a guest their code when they are approved or given a
   new code, asks when one is added by hand, and has "Email code" on every
-  approved row for the rest; the text is Site
-  settings → VIP → "Code email", stock English when empty
-  (`src/server/vipMail.ts`). An import mails nobody.
+  approved row for the rest. Every VIP mail (acknowledgement, welcome
+  with the code, "already a member", decline) is drawn in one branded
+  layout, `src/server/vipMailLayout.ts`, with Baïlo's English texts in
+  `src/server/vipMail.ts`; Site settings → VIP gives only the sender and
+  reply-to now, its "Code email" and confirmation texts are no longer
+  read. The footer's dates and venue are `EDITION` in the layout: change
+  them each edition. An import mails nobody.
 - **Preview renders read the page to the end inside the store.** Astro
   streams responses, so the frontmatter (and its queries) runs when the body
   is pulled. `src/middleware.ts` awaits `response.text()` inside

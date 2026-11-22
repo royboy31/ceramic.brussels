@@ -200,7 +200,24 @@ above; the tool only edits rows.
   mails the team as a notification when Brevo is connected. It therefore
   works before Brevo exists. Someone already in the list, in any state, is
   left alone: asking twice changes nothing, and a denied guest cannot ask
-  their way back to pending. Ten requests an hour per address.
+  their way back to pending. An approved, unrevoked guest who asks again
+  is mailed their code at the address on file ("already a member",
+  `vipMail.ts`) and the team is not mailed; the answer on screen is the
+  same for everyone. Ten requests an hour per address.
+- **Every mail to a guest is branded** (`vipMailLayout.ts`, texts in
+  `vipMail.ts`, from Baïlo's mockup of 2 Nov 2026): the acknowledgement
+  after the form (always, in its own step so a failed team mail cannot
+  drop it), the welcome with the code, the "already a member" reminder,
+  and the decline, sent when a **pending** request is denied in the VIP
+  tool. The code buttons link to the access page with `#code=…`, which
+  `VipCodeForm.astro` puts in the box.
+- **Names are saved with a capital initial** (`formatName` in
+  `vipGuests.ts`, and the same function in `scripts/vip-guests.mjs`): the
+  form, the Studio's add, edit and import, and the script's import and
+  `--add`. A word typed all in lower or upper case is re-cased ("marie
+  DUPONT" → "Marie Dupont", "jean-luc" → "Jean-Luc"); mixed case is kept
+  ("McDonald"). Case never moves a code. Rows saved before this keep
+  their casing until edited.
 - **Codes are the same function on both sides.** `makeCode` in
   `src/server/vipGuests.ts` is the script's, on WebCrypto; checked against
   the test guest's code. Change one and change both.
