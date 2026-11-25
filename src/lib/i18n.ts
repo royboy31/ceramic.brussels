@@ -525,7 +525,7 @@ const STRINGS = {
     'press.mediaPartners': 'partenaires médias',
     'press.interviews': 'entretiens',
     'press.collectorsVoices': 'paroles de collectionneur·euses',
-    'press.readInterview': 'lire l’entretien',
+    'press.readInterview': 'lire l’interview',
     'press.discoverEdition': 'découvrir l’édition',
     'press.moreInterviews': 'lire d’autres entretiens',
     'press.asSeen': 'vu dans la presse',
