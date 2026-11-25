@@ -28,6 +28,15 @@ export default defineConfig({
   title: 'Ceramic Brussels',
   projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
   dataset: import.meta.env.PUBLIC_SANITY_DATASET,
+  /**
+   * Keep the sign-in as a token in the browser, never as a sanity.io cookie.
+   * The VIP guests tool and the newsletter pane prove the editor is an
+   * administrator by sending that token to our own Worker
+   * (src/server/sanityIdentity.ts); a cookie belongs to sanity.io and the
+   * Studio cannot read it, so on a cookie session both answered 403 to a real
+   * administrator (2026-11-25). Changing this signs everyone out once.
+   */
+  auth: { loginMethod: 'token' },
   plugins: [
     structureTool({
       structure,
