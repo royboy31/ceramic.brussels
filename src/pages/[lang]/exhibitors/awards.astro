@@ -141,7 +141,7 @@ const logoHeight = (image: any, max = 78, base = 92) => {
                   as one column and the copy starts at the gutter. */}
               {images.length > 0 && (
                 <figure>
-                  <Slideshow images={images} aspect={1.5} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 50vw" label={a.name} id={`award-${i + 1}`} captions={false} />
+                  <Slideshow images={images} aspect={1.5} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 50vw" label={a.name} id={`award-${i + 1}`} />
                 </figure>
               )}
               <div class="award-copy">
@@ -164,7 +164,11 @@ const logoHeight = (image: any, max = 78, base = 92) => {
                 )}
                 {gallery && (
                   <div class="laureate">
-                    <p class="label">{t('exhibitors.previousLaureate', { year: prev.year })}</p>
+                    {/* The winning gallery alone: the "PREVIOUS LAUREATE (2026)"
+                        label over it went, on every award (Tiphaine,
+                        2026-11-25, struck through in red on her screenshot).
+                        The row's title and its place in the year order say
+                        which year. */}
                     <p>
                       {gallery.slug ? (
                         <a class="hl-link" href={localePath(lang, exhibitorPath(gallery))}>
@@ -282,9 +286,6 @@ const logoHeight = (image: any, max = 78, base = 92) => {
     font-size: var(--body-size);
     line-height: var(--body-lh);
     letter-spacing: var(--body-ls);
-  }
-  .laureate .label {
-    margin-top: 0;
   }
   /* Underlined, as the client's awards frame of 2026-09-24 draws the gallery. */
   .laureate a {
