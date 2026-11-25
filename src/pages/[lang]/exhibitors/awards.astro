@@ -60,28 +60,29 @@ const current: number | undefined = edition?.year ?? fair[0]?.year;
 const year = current;
 
 /**
- * One row per award *name* given in this edition or the one before it, so
- * the page reads the way the awards are entered: an award may be a document
- * on this edition, or only last edition's (with its winner) until this
- * year's is made. The row takes this edition's document when there is one,
- * else the latest; "previous laureate" is the latest earlier winner of that
- * name; an award nobody has won yet is "new this year". An older award not
- * given in either edition (Ceramic Art Andenne, 2025) stays off the page.
- * Rows follow the documents' Order field.
+ * Every year's awards, newest year first, each award document its own row
+ * with its own winner ("all the awards from all the years visible, not only
+ * the most recent" - Tiphaine, 2026-11-24). Until then the page showed one
+ * row per award name of this edition or the last, so 2025's best booth was
+ * off the page. Within a year the rows follow the Order field. An award
+ * nobody has won under that name yet is "new this year"; a won one says
+ * "previous laureate (<year>)" over its winner, as before.
+ *
+ * The picture changes side with each year - left for the newest, right for
+ * the year before, and so on - "to allow the visitors to notice the
+ * difference from one year to the other" (same message). `flip` marks it.
+ * Only years with a picture count, so a year whose awards have none (2027's
+ * new award, so far) does not push the next year's pictures to the right.
  */
-const names: any[] = [];
-for (const a of fair) {
-  if (current && a.year < current - 1) continue;
-  if (!names.some((n) => sameAward(n, a))) names.push(a);
-}
-const awards = names
-  .map((first: any) => {
-    const all = fair.filter((b: any) => sameAward(first, b));
-    const shown = all.find((b: any) => b.year === current) ?? all[0];
-    const previous = all.find((b: any) => b.gallery && (!current || b.year < current)) ?? null;
-    return { ...shown, previous, isNew: !all.some((b: any) => b.gallery) };
-  })
-  .sort((a: any, b: any) => (a.order ?? 100) - (b.order ?? 100));
+const years = [...new Set(fair.filter((a: any) => imagesOf(a).length).map((a: any) => a.year))].sort((a: any, b: any) => b - a);
+const awards = fair
+  .map((a: any) => ({
+    ...a,
+    previous: a.gallery ? a : null,
+    isNew: !a.gallery && (!current || a.year >= current) && !fair.some((b: any) => sameAward(a, b) && b.gallery),
+    flip: years.indexOf(a.year) % 2 === 1,
+  }))
+  .sort((a: any, b: any) => b.year - a.year || (a.order ?? 100) - (b.order ?? 100));
 
 /**
  * The award's own slideshow (`images`, request #5), else its single image.
@@ -89,11 +90,11 @@ const awards = names
  * an award with no picture should show none ("see best group show" -
  * Tiphaine, 2026-10-02).
  */
-const imagesOf = (a: any): any[] => {
+function imagesOf(a: any): any[] {
   const slides = (a.images ?? []).filter((img: any) => img?.asset);
   if (slides.length) return slides;
   return a.image?.asset ? [a.image] : [];
-};
+}
 
 /* The partner logos' slot height, as Partners.astro sizes its cards. */
 const logoHeight = (image: any, max = 78, base = 92) => {
@@ -132,7 +133,7 @@ const logoHeight = (image: any, max = 78, base = 92) => {
           const gallery = prev?.gallery;
           const code = gallery ? countryCode(gallery.countryCode ?? gallery.country) : null;
           return (
-            <article class:list={{ 'no-shot': !images.length }}>
+            <article class:list={{ 'no-shot': !images.length, flip: a.flip }}>
               {/* No picture, no frame: an award with nothing to show drew an
                   empty grey rectangle beside its text ("we currently don't
                   have a photo to put there. Maybe just align the block of
@@ -233,6 +234,12 @@ const logoHeight = (image: any, max = 78, base = 92) => {
   .no-shot .award-copy {
     max-width: calc(50% - 20px);
   }
+  /* Every other year the picture moves to the right half (Tiphaine,
+     2026-11-24). Only the order changes; on a phone the row is one column
+     and the picture stays on top. */
+  .awards-list article.flip:not(.no-shot) figure {
+    order: 2;
+  }
   .awards-list figure {
     margin: 0;
     position: relative;
@@ -292,6 +299,9 @@ const logoHeight = (image: any, max = 78, base = 92) => {
   @media (max-width: 640px) {
     .awards-list article {
       display: block;
+    }
+    .awards-list article.flip:not(.no-shot) figure {
+      order: 0;
     }
     .award-copy {
       padding-top: 16px;

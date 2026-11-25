@@ -30,12 +30,8 @@
  *
  * Set it back to `true` and the section returns exactly as it was.
  *
- * **On this branch alone it IS `true`**, so the kamindu preview serves the
- * whole section and Léonie can read her 2026-10-26 round on a real URL
- * (docs/client-feedback-2026-10-26.md). On main this line says `false` -
- * never carry this change there; the section is not public until the client
- * says so. Same arrangement as `HELD_BACK` in src/lib/locales.ts once was,
- * for the Dutch retranslation; that one is `[]` everywhere since 2026-11-06,
- * so this is the only switch left that differs between this branch and main.
+ * **On since 2026-11-25**: Tiphaine, 2026-11-24, "The past editions are
+ * ready to be online". Setting it to `false` again takes the section back
+ * off as described above.
  */
 export const PAST_EDITIONS_PUBLIC = true;

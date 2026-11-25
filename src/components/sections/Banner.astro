@@ -74,7 +74,11 @@ const Tag = link ? 'a' : 'div';
       var(--acid) 100%
     );
     min-height: 126px;
-    margin-top: 68px;
+    /* 30px, as every homepage row above it: with the row's 2.5rem under it
+       that is the same 70px between blocks, where 68 made 108 and the band
+       stood apart from the rest ("the spacing between each news is
+       different, could we have the same everywhere?", Léonie, 2026-11-18). */
+    margin-top: 30px;
     font-size: 40px;
     letter-spacing: -0.04em;
   }

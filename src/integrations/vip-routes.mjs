@@ -9,7 +9,7 @@ import { platformPaths } from '../lib/exhibitorsPlatform';
  * 1. With the preview runtime on (`onDemand`), the locked tabs are mounted
  *    as an on-demand route, `/[lang]/vip/[tab]` → src/server/routes/
  *    vip-tab.astro, which renders the ordinary hub route once
- *    src/middleware.ts has let the request in; and the three API routes
+ *    src/middleware.ts has let the request in; and the API routes
  *    under `/api/vip/`. Without the runtime there is nothing to run them
  *    in, and the locked tabs are simply not built (hubs.ts).
  *
@@ -30,6 +30,8 @@ export function vipRoutes({ onDemand = false } = {}) {
         injectRoute({ pattern: '/api/vip/enter', entrypoint: './src/server/routes/vip-enter.ts', prerender: false });
         injectRoute({ pattern: '/api/vip/leave', entrypoint: './src/server/routes/vip-leave.ts', prerender: false });
         injectRoute({ pattern: '/api/vip/request', entrypoint: './src/server/routes/vip-request.ts', prerender: false });
+        // The name step: a guest without a first or last name gives it once, after their code.
+        injectRoute({ pattern: '/api/vip/details', entrypoint: './src/server/routes/vip-details.ts', prerender: false });
         // The guest list, for the Studio's VIP tool (Sanity administrators only).
         injectRoute({ pattern: '/api/vip/admin', entrypoint: './src/server/routes/vip-admin.ts', prerender: false });
         logger.info('VIP locked tabs mounted on request at /[lang]/vip/[tab], plus /api/vip/ and /[lang]/exhibitors/platform');

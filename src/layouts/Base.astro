@@ -472,7 +472,7 @@ const copyright = settings?.copyright ?? `© ${siteName}, ${new Date().getFullYe
           // arrival animation played mid-swipe and read as a glitch - one
           // picture zoomed, the next at rest (client, 2026-10-01). The fade
           // stays everywhere else.
-          if (img.closest('.slideshow')) return;
+          if (img.closest('.slideshow, [data-gallery]')) return;
           img.classList.add('motion-image');
           img.setAttribute('data-image-pending', '');
           const done = () => img.removeAttribute('data-image-pending');

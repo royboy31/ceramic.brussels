@@ -11,6 +11,7 @@ import LinkPill from '../../components/LinkPill.astro';
 import VipShot from '../../components/VipShot.astro';
 import VipCodeForm from '../../components/VipCodeForm.astro';
 import VipRequestForm from '../../components/VipRequestForm.astro';
+import VipDetailsForm from '../../components/VipDetailsForm.astro';
 import type { LocaleId } from '../../lib/locales';
 import { useTranslations, localePath, formatDayLong, formatTime } from '../../lib/i18n';
 import { getHubPages, getProgramme, getPartners, getSettings, getVipSettings } from '../../lib/queries';
@@ -630,6 +631,10 @@ const rateLink =
           <VipRequestForm lang={lang} settings={settings} />
         </div>
       )
+    }
+
+    {
+      isAccess && <VipDetailsForm lang={lang} contact={contact} />
     }
 
     {

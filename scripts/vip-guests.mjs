@@ -121,6 +121,18 @@ function emailPart(email) {
   return part || 'VIP';
 }
 
+/** src/server/vipGuests.ts' formatName: "marie DUPONT" → "Marie Dupont". Change one and change both. */
+function formatName(name) {
+  return String(name ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[\p{L}\p{M}]+/gu, (word) =>
+      word === word.toLocaleLowerCase() || word === word.toLocaleUpperCase()
+        ? word.charAt(0).toLocaleUpperCase() + word.slice(1).toLocaleLowerCase()
+        : word,
+    );
+}
+
 /** The row's created_at is in the MAC, so a guest deleted and added again
  *  gets a code that never existed before. Must stay the same function as
  *  makeCode in src/server/vipGuests.ts. */
@@ -257,8 +269,8 @@ function readSheet(file) {
   const get = (r, k) => (index[k] === undefined ? '' : (r[index[k]] ?? '').trim());
   return data
     .map((r) => ({
-      firstName: get(r, 'firstName'),
-      lastName: get(r, 'lastName'),
+      firstName: formatName(get(r, 'firstName')),
+      lastName: formatName(get(r, 'lastName')),
       email: get(r, 'email').toLowerCase(),
       institution: get(r, 'institution'),
       function: get(r, 'function'),
@@ -375,7 +387,7 @@ function exportList() {
 
 function findGuest(email) {
   const id = guestId(email);
-  const [g] = rows(d1(`SELECT id, code_version, first_name, last_name, email, status, revoked, created_at FROM guests WHERE id = ${q(id)}`));
+  const [g] = rows(d1(`SELECT id, code_version, first_name, last_name, email, status, revoked, created_at, decline_mail_id FROM guests WHERE id = ${q(id)}`));
   if (!g) {
     console.error(`No guest with the email ${email}.`);
     process.exit(1);
@@ -400,7 +412,7 @@ function reissue(email) {
 }
 
 function addGuest(email) {
-  const g = { email: email.trim().toLowerCase(), firstName: value('first')?.trim() ?? '', lastName: value('last')?.trim() ?? '' };
+  const g = { email: email.trim().toLowerCase(), firstName: formatName(value('first')), lastName: formatName(value('last')) };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g.email)) throw new Error('--add needs an email (--first and --last are optional)');
   const id = guestId(g.email);
   if (rows(d1(`SELECT id FROM guests WHERE id = ${q(id)}`)).length) throw new Error(`${g.email} is already in the list (--approve, --restore or --reissue).`);
@@ -414,7 +426,11 @@ function addGuest(email) {
 function decide(email, status) {
   const g = findGuest(email);
   d1(`UPDATE guests SET status = ${q(status)}, decided_at = ${q(now())}, decided_by = 'cli', updated_at = ${q(now())} WHERE id = ${q(g.id)};`);
-  if (status === 'approved') console.log(`${g.first_name} ${g.last_name}: approved. Code: ${makeCode(g.first_name, g.email, g.code_version)}`);
+  if (status === 'approved' && g.decline_mail_id) {
+    // The Studio calls a scheduled decline off on approval; this script has no Brevo key.
+    console.warn(`A decline mail is still scheduled in Brevo for ${g.email} (messageId ${g.decline_mail_id}). Approve in the Studio instead, or delete it in Brevo, or they get it within 48 hours.`);
+  }
+  if (status === 'approved') console.log(`${g.first_name} ${g.last_name}: approved. Code: ${makeCode(g.email, g.code_version, g.created_at)}`);
   else console.log(`${g.first_name} ${g.last_name}: denied, ${endSessions(g.id)} session(s) ended.`);
 }
 

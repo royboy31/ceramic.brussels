@@ -1,0 +1,258 @@
+---
+import type { LocaleId } from '../lib/locales';
+import { localePath, useTranslations } from '../lib/i18n';
+import { hubTabPath } from '../lib/hubs';
+import { GUEST_FUNCTIONS, GUEST_FUNCTION_KEYS } from '../server/vipGuests';
+
+/**
+ * "One last detail" - the name step (Baïlo, 3 and 4 Nov 2026), a window
+ * over the VIP access page.
+ *
+ * A guest the list has no first or last name for is sent to the access page
+ * with `?step=details#vip-details` once their code is accepted, and by the
+ * gate from any locked tab until they answer (src/middleware.ts). First and
+ * last name are required; function and institution are optional, so the
+ * step does not feel intrusive. The window cannot be dismissed. Posts to
+ * `/api/vip/details/` (src/server/routes/vip-details.ts), which saves the
+ * names capitalised, keeps the guest's code as it is, and sends the browser
+ * on to `next`.
+ *
+ * With JavaScript it is a modal, filled in with what the list already has.
+ * Without, `:target` shows it in the page and the form posts as usual.
+ * Function values are stored in English, as Baïlo wrote them; only the
+ * labels follow the page.
+ */
+interface Props {
+  lang: LocaleId;
+  /** The VIP team's address, for the "could not be saved" line. */
+  contact?: string;
+}
+
+const { lang, contact = 'vip@ceramic.brussels' } = Astro.props;
+const t = useTranslations(lang);
+const fallback = localePath(lang, hubTabPath('vip', 'programme', lang));
+const optional = `(${t('vip.details.optional')})`;
+---
+
+<dialog id="vip-details" class="vip-details" aria-labelledby="vip-details-title" data-vip-details>
+  <form
+    method="post"
+    action="/api/vip/details/"
+    novalidate
+    data-names={t('vip.details.error')}
+    data-failed={t('vip.details.failed', { email: contact })}
+    data-sending={t('vip.sending')}
+  >
+    <input type="hidden" name="lang" value={lang} />
+    <input type="hidden" name="next" value={fallback} data-next />
+    <h2 id="vip-details-title" class="panel-title">{t('vip.details.title')}</h2>
+    <p class="lead">{t('vip.details.text')}</p>
+
+    <div class="fields">
+      <label>
+        <span>{t('vip.firstName')}*</span>
+        <input name="firstName" type="text" required autocomplete="given-name" maxlength="120" />
+      </label>
+      <label>
+        <span>{t('vip.lastName')}*</span>
+        <input name="lastName" type="text" required autocomplete="family-name" maxlength="120" />
+      </label>
+      <label>
+        <span>{t('vip.function')} <em>{optional}</em></span>
+        <select name="function">
+          <option value="">—</option>
+          {GUEST_FUNCTIONS.map((value, i) => <option value={value}>{t(GUEST_FUNCTION_KEYS[i])}</option>)}
+        </select>
+      </label>
+      <label>
+        <span>{t('vip.details.institution')} <em>{optional}</em></span>
+        <input name="institution" type="text" autocomplete="organization" maxlength="200" />
+      </label>
+    </div>
+
+    <button type="submit" class="enter" data-submit>
+      <span class="link-arrow" aria-hidden="true">→</span> {t('vip.details.continue')}
+    </button>
+    <p class="status body-24" data-status role="status" aria-live="polite"></p>
+    <p class="small">{t('vip.details.privacy')}</p>
+  </form>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('dialog[data-vip-details]');
+  if (dialog) {
+    // From here the script shows the window; `:target` is for a page without it.
+    dialog.dataset.js = '1';
+    const form = dialog.querySelector('form')!;
+    const params = new URLSearchParams(location.search);
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const button = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const idle = button.innerHTML;
+    const field = (name: string) => form.querySelector<HTMLInputElement | HTMLSelectElement>(`[name=${name}]`)!;
+
+    const wanted = params.get('next');
+    if (wanted && /^\/(?![\/\\])[^\x00-\x20\x7f]*$/.test(wanted)) field('next').value = wanted;
+    if (params.get('error') === 'names') status.textContent = form.dataset.names!;
+
+    // Required: no Escape, no backdrop click.
+    dialog.addEventListener('cancel', (event) => event.preventDefault());
+
+    if (params.get('step') === 'details') {
+      fetch('/api/vip/details/', { headers: { accept: 'application/json' }, credentials: 'same-origin' })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((guest) => {
+          // No session (it ran out, or the address was shared): the code box is the way in.
+          if (!guest?.ok) return;
+          for (const name of ['firstName', 'lastName', 'function', 'institution']) {
+            const input = field(name);
+            const value = String(guest[name] ?? '');
+            // Never over what the guest has already typed.
+            if (!value || input.value) continue;
+            if (input instanceof HTMLSelectElement && ![...input.options].some((o) => o.value === value)) continue;
+            input.value = value;
+          }
+          dialog.showModal();
+          (field('firstName').value ? field('lastName') : field('firstName')).focus();
+        })
+        .catch(() => {});
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const first = field('firstName');
+      const last = field('lastName');
+      if (!first.value.trim() || !last.value.trim()) {
+        status.textContent = form.dataset.names!;
+        (first.value.trim() ? last : first).focus();
+        return;
+      }
+      button.disabled = true;
+      button.textContent = form.dataset.sending!;
+      status.textContent = '';
+      const data: Record<string, string> = {};
+      new FormData(form).forEach((value, key) => (data[key] = String(value)));
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const body = await response.json().catch(() => ({}));
+        if (response.ok && body?.next) {
+          location.assign(body.next);
+          return;
+        }
+        status.textContent = body?.error === 'names' ? form.dataset.names! : form.dataset.failed!;
+      } catch {
+        status.textContent = form.dataset.failed!;
+      }
+      button.disabled = false;
+      button.innerHTML = idle;
+    });
+  }
+</script>
+
+<style>
+  .vip-details {
+    width: min(560px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    padding: 28px 30px 30px;
+    border: 0;
+    border-radius: 0;
+    background: var(--surface-2, #f2f2f2);
+    color: var(--ink, #050505);
+  }
+  /* The site's reset zeroes every margin; a modal is centred by them. */
+  .vip-details[open] {
+    margin: auto;
+    height: fit-content;
+    outline: none;
+  }
+  .vip-details::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+  /* No script: the address's #vip-details shows the window in the page. */
+  .vip-details:target:not([data-js]) {
+    display: block;
+    position: static;
+    margin: 0 auto 32px;
+  }
+  .panel-title {
+    border: 0;
+    margin-bottom: 8px;
+  }
+  .lead {
+    font-size: clamp(20px, 2vw, 26px);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
+  .fields {
+    display: grid;
+    gap: 14px;
+    margin: 24px 0;
+  }
+  label {
+    display: grid;
+    gap: 4px;
+    font-size: 16px;
+  }
+  label em {
+    font-style: normal;
+    color: var(--ink-3, #6b6b6b);
+  }
+  input,
+  select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid currentColor;
+    border-radius: 0;
+    background: #fff;
+    color: #050505;
+    font: inherit;
+    font-size: 18px;
+    line-height: 1.25;
+  }
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid;
+    outline-offset: 2px;
+  }
+  .enter {
+    cursor: pointer;
+    background: #050505;
+    border: 1px solid #050505;
+    border-radius: 0;
+    color: #fff;
+    padding: 9px 18px;
+    font-size: 18px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .enter:hover,
+  .enter:focus-visible {
+    background: var(--color-acid);
+    color: #050505;
+  }
+  .enter:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+  .status {
+    margin: 16px 0 0;
+    color: #c8102e;
+  }
+  .status:empty {
+    display: none;
+  }
+  .small {
+    margin: 16px 0 0;
+    font-size: 14px;
+    color: var(--ink-3, #6b6b6b);
+  }
+  @media (max-width: 700px) {
+    .vip-details {
+      padding: 20px 16px 22px;
+    }
+  }
+</style>

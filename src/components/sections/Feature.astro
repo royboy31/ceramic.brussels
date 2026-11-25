@@ -162,11 +162,15 @@ const AUTOPLAY_MS = 4500;
     letter-spacing: -0.03em;
     text-transform: uppercase;
   }
+  /* 42px at the 1440 frame, down to the 32px of a 900px window in step with
+     it: a fixed 42 outgrew the homepage statement (which scales) in a
+     ~1000-1100px window - "the baseline is suddenly very small, way smaller
+     than the latest news texts" (Léonie, 2026-11-17). */
   .split.feature h3 {
     letter-spacing: -0.04em;
     max-width: 590px;
     margin-top: 18px;
-    font-size: 42px;
+    font-size: clamp(32px, 2.92vw, 42px);
     font-weight: 400;
     line-height: 1.2;
   }
@@ -180,9 +184,11 @@ const AUTOPLAY_MS = 4500;
     line-height: 1;
     display: inline-flex;
   }
-  .split.feature--guest {
-    margin-top: 82px;
-  }
+  /* The guest row used to set its own 82px (and 50px on a phone), and the
+     film row 80px: "the spacing between each news is different. Could we
+     have the same everywhere?" (Léonie, 2026-11-18). Every homepage row now
+     keeps the news rows' 30px + the `.feature` 2.5rem under it, and
+     VideoSection.astro gives the film the same. */
   @media (max-width: 900px) {
     .split {
       gap: 20px;
@@ -219,9 +225,6 @@ const AUTOPLAY_MS = 4500;
     }
     .arrow-link {
       font-size: 26px;
-    }
-    .split.feature--guest {
-      margin-top: 50px;
     }
   }
 
@@ -293,7 +296,25 @@ const AUTOPLAY_MS = 4500;
      homepage's Hoxton spotlight and the Bureau Rouge film). The rule lives
      here rather than in site.css because this component's scoped selectors
      outrank a global one. */
-  @media (max-width: 700px) {
+  /* 640, not the 700 of the site's other bleeds: a homepage row only stacks
+     at 640, and between the two its picture was pulled out of a column that
+     still sat beside the text - over the copy and past the right edge of
+     the window ("the responsiveness on the homepage seems to slightly bug
+     when the window is very thin, but not quite mobile-wide yet", Léonie,
+     2026-11-18, screenshot at about 680px). The global bleeds in site.css
+     (`.bleed-m` on the slideshow, `main .feature > figure`, the film) are
+     held back the same way just below. */
+  @media (min-width: 641px) and (max-width: 700px) {
+    .split.feature > :global(*) {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-inline: 0 !important;
+    }
+    .split.feature :global(figcaption) {
+      padding-inline: 0 !important;
+    }
+  }
+  @media (max-width: 640px) {
     /* By the gutter, not 50% - 50vw: these are grid items, where WebKit
        does not honour a percentage pull though the simulator does
        (2026-10-03, the programme/visitors-info lesson). */

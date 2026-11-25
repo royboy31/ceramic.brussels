@@ -144,6 +144,8 @@ const heading = year ? `${stegaClean(name ?? '').trim().replace(/\s+\d{4}$/, '')
   </div>
 </header>
 )}
+{/* Between the band and the letters: the listing's year buttons (2026-11-18). */}
+<slot />
 {
   /* The letters sit under the band, outside it, so only the band stays pinned. */
   alphabet && (

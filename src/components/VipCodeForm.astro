@@ -76,6 +76,13 @@ const fallback = localePath(lang, hubTabPath('vip', 'programme', lang));
     const wanted = params.get('next');
     if (wanted && wanted.startsWith('/') && !wanted.startsWith('//')) next.value = wanted;
     if (params.get('error') === 'code') status.textContent = form.dataset.wrong!;
+    // The button in the code mails links here with `#code=` (src/server/vipMail.ts):
+    // the code waits in the box, and a fragment never reaches a server log.
+    const mailed = new URLSearchParams(location.hash.slice(1)).get('code');
+    if (mailed) {
+      form.querySelector<HTMLInputElement>('[name=code]')!.value = mailed.slice(0, 40);
+      history.replaceState(null, '', location.pathname + location.search);
+    }
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();

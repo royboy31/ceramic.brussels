@@ -208,7 +208,49 @@ above; the tool only edits rows.
   mails the team as a notification when Brevo is connected. It therefore
   works before Brevo exists. Someone already in the list, in any state, is
   left alone: asking twice changes nothing, and a denied guest cannot ask
-  their way back to pending. Ten requests an hour per address.
+  their way back to pending. An approved, unrevoked guest who asks again
+  is mailed their code at the address on file ("already a member",
+  `vipMail.ts`) and the team is not mailed; the answer on screen is the
+  same for everyone. Ten requests an hour per address.
+- **Every mail to a guest is branded** (`vipMailLayout.ts`, texts in
+  `vipMail.ts`, from Baïlo's mockup of 2 Nov 2026): the acknowledgement
+  after the form (always, in its own step so a failed team mail cannot
+  drop it), the welcome with the code, the "already a member" reminder,
+  and the decline, sent when a **pending** request is denied in the VIP
+  tool. The code buttons link to the access page with `#code=…`, which
+  `VipCodeForm.astro` puts in the box.
+- **The decline goes out 48 hours later** (Baïlo, 4 Nov 2026, so the
+  selection does not feel automated). Brevo holds it (`scheduledAt`, at
+  most 72 hours ahead), its messageId waits on the row in
+  `decline_mail_id` (migration `0004`), and approving or deleting the
+  guest before then calls it off (`cancelMail` in `mail.ts`).
+- **The name step** (Baïlo, 3 and 4 Nov 2026; migration `0004`). Most of
+  the list came in with an email and no name. A guest whose first or last
+  name is missing is sent, once their code is accepted, to the access page's
+  "One last detail" window (`VipDetailsForm.astro` →
+  `routes/vip-details.ts`): first and last name required, function (her
+  list of twelve, stored in English, `GUEST_FUNCTIONS`) and institution
+  optional. It cannot be dismissed, and `src/middleware.ts` holds every
+  locked tab until it is answered; once both names are stored nobody is
+  asked again. The session says whether the step is owed (`details` in its
+  KV value), so the gate does not read D1 per page; answering swaps the
+  session for a new one, because the edge may cache the old one for a
+  minute. A session from before the step carries no answer and the gate
+  looks the guest up instead.
+- **A filled-in name never moves a code**: a code is made from the email,
+  its version and `created_at`, never from a name. Migration `0004` also
+  adds a `code_name` column, written for codes made from the first name
+  before main moved to email codes; it is unused and stays empty.
+- **The request form's language is kept** (`lang`, migration `0004`): en,
+  fr or nl, from the page the form was sent from, for mails in the guest's
+  language later. Mails are English for now.
+- **Names are saved with a capital initial** (`formatName` in
+  `vipGuests.ts`, and the same function in `scripts/vip-guests.mjs`): the
+  form, the Studio's add, edit and import, and the script's import and
+  `--add`. A word typed all in lower or upper case is re-cased ("marie
+  DUPONT" → "Marie Dupont", "jean-luc" → "Jean-Luc"); mixed case is kept
+  ("McDonald"). Case never moves a code. Rows saved before this keep
+  their casing until edited.
 - **Codes are the same function on both sides.** `makeCode` in
   `src/server/vipGuests.ts` is the script's, on WebCrypto; checked against
   the test guest's code. Change one and change both.
