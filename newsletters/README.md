@@ -5,7 +5,10 @@ pictures of text. This folder is not part of the website build.
 
 | File | What |
 | :-- | :-- |
-| `mailchimp/vip.html` | "VIPs of ceramic", the black VIP theme. The first template, a prototype. |
+| `mailchimp/vip.html` | "VIPs of ceramic", black theme. |
+| `mailchimp/monthly.html` | "ceramic brussels monthly" (November edition), white with the yellow header. |
+| `mailchimp/galleries.html` | "Participating galleries 2027", white with yellow. |
+| `mailchimp/basel.html` | "Destination Basel!", white with ochre. |
 | `preview.html` | Shows a template at desktop (660 px) and phone (375 px) width, with sample values in place of the merge fields, images on/off and the font on/off. Shows the first layout of the top photo, as Mailchimp does; `?variant=2` shows the second. |
 | `../public/assets/newsletter/wordmark-white.png` | The white logo over the top photo, served from `www.ceramic.brussels/assets/newsletter/` once this branch is deployed. Cut from the footer artwork (`CB27_VIP NEWS_Nov 26_FOOTER.jpg`) with a transparent background. |
 
@@ -18,7 +21,8 @@ not a double-click. From the repo root:
 python -m http.server 4400 --bind 127.0.0.1
 ```
 
-then open <http://localhost:4400/newsletters/preview.html>.
+then open <http://localhost:4400/newsletters/preview.html> (the VIP one), or
+`preview.html?t=mailchimp/monthly.html`, `...galleries.html`, `...basel.html`.
 
 ## Sharing a review link
 
@@ -51,15 +55,16 @@ from its Share menu).
   `mc:hideable`), so a month with two hotel offers repeats the row and a month
   without the Discovery Tours hides it.
 - **Theme** (Design tab): newsletter colour, text, headline, label, button,
-  line and highlight colours, and the font sizes. The four themes are one
-  template with different colours:
+  line and highlight colours, and the font sizes. Each newsletter is its own
+  template, because their blocks differ; the colours, measured from
+  Félicie's images:
 
-  | Theme | Newsletter colour |
+  | Template | Colours |
   | :-- | :-- |
-  | VIP | `#000000` |
-  | Monthly | `#feed00` |
-  | Galleries | `#ffffff` with `#dfe11f` |
-  | Basel | `#c39c27` |
+  | VIP | `#000000` with white, yellow `#ffee00` banner |
+  | Monthly | `#ffffff`, yellow `#ffee00` header, ochre `#c39c27` Basel block, grey `#bfbfbf` buttons |
+  | Galleries | `#ffffff`, yellow `#ffee00` banner and button |
+  | Basel | `#ffffff`, ochre `#c39c27` |
 
   The VIP black is `#000000`, not `#121212`: the logo and partner images
   are cut on pure black, and on `#121212` they show as darker boxes.
@@ -90,7 +95,7 @@ own code. The footer's `*|UNSUB|*`, `*|ABOUT_LIST|*` and
 ## Matching the design
 
 The template follows the image version closely: the logo and the title over
-the photo, the yellow banner fading to white, the white label bars, the
+the photo, the yellow banner (white in the middle), the white label bars, the
 drop capitals, the oval buttons, the practical-info card with its lines,
 the Discovery Tours logo and the dotted offer box.
 
@@ -114,6 +119,42 @@ What still differs, by necessity:
   capitals at normal size, Arial throughout.
 - Gmail: Helvetica / Arial instead of Noi Grotesk.
 - No italic font file yet: the italic lines are slanted by the mail app.
+
+## The other three templates
+
+Built the same way, to the letter of Félicie's campaigns: every text as she
+wrote it, her photos cut out of her images (credit lines included), the
+same colours, sizes and line breaks as close as live text allows.
+
+Kept as images, as in the originals:
+
+- **Animated GIFs**: the "Participating galleries 2027" title (19 frames:
+  the title over changing artworks) and the Basel photos beside the
+  "Destination Basel" introduction (7 frames). Their text is in the alt text.
+- **The video still** in the monthly (Marion Verboom, with its play button
+  and caption), linked to the video.
+- **Logos**: the footer logo and dates, and the partner logos.
+
+**Links to fill in.** The original campaigns' links are Mailchimp
+click-tracking links tied to the recipient, so they were not followed (that
+would have counted clicks in her statistics). Links to ceramic.brussels
+pages are set; these are `#` until Félicie sets them in the campaign:
+
+- every template: "Lire en français" and "In het Nederlands lezen" (each
+  campaign's own FR/NL version)
+- monthly: the video, "learn more about MAD Brussels", "dicover IAC",
+  "read more about ceramic basel", "apply → here ←", "discover the
+  exhibition"
+- galleries: the title GIF
+- Basel: the photos GIF, "more on ceramic basel's new website"
+
+**Kept exactly as in the originals, worth a look:**
+
+- Monthly: the button says "dicover IAC" (sic).
+- Galleries: the footer is the **ceramic basel** one (15-20 June 2027),
+  not the ceramic brussels one, in the original too.
+- VIP: the original says "participating galeries"; that one was corrected
+  to "galleries" in the template.
 
 ## Not checked yet
 

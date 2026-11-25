@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light only">
+<title>*|MC:SUBJECT|*</title>
+<!--
+  ceramic brussels - "ceramic brussels monthly" newsletter (November edition),
+  Mailchimp custom-coded template. Same build as vip.html: live text, 660 px,
+  two 330 px columns stacking on a phone, Outlook ghost tables, mc:edit on
+  every text, image and button, mc:repeatable + mc:hideable on every row.
+  Theme: white, with the yellow header (#ffee00 fading to white).
+
+  Links marked href="#" were Mailchimp click-tracking links in the original
+  campaign; their destinations are set per campaign in Mailchimp.
+-->
+<!--[if mso]>
+<noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+<style>
+  * { font-family: Arial, Helvetica, sans-serif !important; }
+  .col { width: 330px !important; }
+  .dropcap { font-size: inherit !important; line-height: inherit !important; padding: 0 !important; }
+</style>
+<![endif]-->
+<style>
+  @media screen {
+    @font-face { font-family: 'Noi Grotesk'; font-weight: 400; font-style: normal; src: url('https://www.ceramic.brussels/fonts/noi-grotesk-400.woff2') format('woff2'); }
+    @font-face { font-family: 'Noi Grotesk'; font-weight: 500; font-style: normal; src: url('https://www.ceramic.brussels/fonts/noi-grotesk-500.woff2') format('woff2'); }
+    @font-face { font-family: 'Noi Grotesk'; font-weight: 600; font-style: normal; src: url('https://www.ceramic.brussels/fonts/noi-grotesk-600.woff2') format('woff2'); }
+    @font-face { font-family: 'Noi Grotesk'; font-weight: 900; font-style: normal; src: url('https://www.ceramic.brussels/fonts/noi-grotesk-900.woff2') format('woff2'); }
+  }
+
+  body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; }
+  img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; display: block; height: auto; }
+  p { margin: 0 0 10px; }
+  p:last-child { margin-bottom: 0; }
+  a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }
+
+  /**
+   * @tab Page
+   * @section Background
+   */
+  body, .page {
+    /*@editable*/ background-color: #e9e9e6;
+  }
+  /**
+   * @tab Page
+   * @section Newsletter colour
+   */
+  .sheet {
+    /*@editable*/ background-color: #ffffff;
+  }
+  /**
+   * @tab Body
+   * @section Text
+   */
+  .text {
+    /*@editable*/ color: #000000;
+    /*@editable*/ font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif;
+    /*@editable*/ font-size: 12.5px;
+    /*@editable*/ line-height: 128%;
+  }
+  .text a {
+    /*@editable*/ color: #000000;
+  }
+  /**
+   * @tab Body
+   * @section Labels
+   * @tip The black bars: MAIN FOCUS, PEOPLE...
+   */
+  .label {
+    /*@editable*/ background-color: #000000;
+    /*@editable*/ color: #ffffff;
+    /*@editable*/ font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif;
+    /*@editable*/ font-size: 22px;
+  }
+  /**
+   * @tab Body
+   * @section Subtitles
+   */
+  .subtitle {
+    /*@editable*/ color: #000000;
+    /*@editable*/ font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif;
+    /*@editable*/ font-size: 19px;
+    /*@editable*/ font-weight: 900;
+  }
+  /**
+   * @tab Body
+   * @section Header colour
+   * @tip The yellow at the top, fading to white.
+   */
+  .header {
+    /*@editable*/ background-color: #ffee00;
+  }
+  /**
+   * @tab Body
+   * @section Basel colour
+   * @tip The ochre of the ceramic basel block.
+   */
+  .ochre-bg {
+    /*@editable*/ background-color: #c39c27;
+  }
+  .ochre {
+    /*@editable*/ color: #c39c27;
+    /*@editable*/ border-color: #c39c27;
+  }
+  /**
+   * @tab Footer
+   * @section Footer text
+   */
+  .legal, .legal a {
+    /*@editable*/ color: #6b6b6b;
+    /*@editable*/ font-family: Helvetica, Arial, sans-serif;
+    /*@editable*/ font-size: 11px;
+  }
+
+  /* Styles for the text editor's source view */
+  .mark { background-color: #ffee00; padding: 0 3px; }
+  .yellow-underline { text-decoration: underline; text-decoration-color: #ffee00; text-decoration-thickness: 3px; text-underline-offset: 3px; }
+  .dropcap { float: left; font-size: 38px; line-height: 28px; padding: 2px 2px 0 0; font-weight: 400; }
+
+  /* Fixed pieces */
+  .f { font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif; }
+  .label { padding: 2px 6px 1px; line-height: 120%; text-transform: uppercase; font-weight: 400; }
+  .subtitle { font-style: italic; line-height: 120%; }
+  .oval { border-radius: 50%; text-align: center; padding: 10px 24px; }
+  .oval a, .pill a { font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif; text-decoration: none; line-height: 105%; }
+
+  @media only screen and (max-width: 680px) {
+    .sheet { width: 100% !important; }
+    .col { max-width: 100% !important; width: 100% !important; }
+    .col-pad { padding-left: 20px !important; padding-right: 20px !important; }
+    .img-fluid { width: 100% !important; max-width: 100% !important; }
+    .title { font-size: 29px !important; white-space: normal !important; }
+    .tight-top { padding-top: 0 !important; }
+    .edition { font-size: 22px !important; }
+    .title-line { display: none !important; }
+    .footer-cell { display: block !important; width: 100% !important; text-align: center !important; padding: 8px 0 !important; }
+    .footer-cell img { margin: 0 auto !important; }
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;">
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;">*|MC_PREVIEW_TEXT|*&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;</div>
+
+<table role="presentation" class="page" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td align="center" style="padding:0;">
+
+<!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+<table role="presentation" class="sheet" width="660" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:660px;">
+
+  <!-- ===== Header: languages, title, edition (yellow fading to white) ===== -->
+  <tr mc:repeatable="header" mc:hideable>
+    <td class="header" bgcolor="#ffee00" style="background-image:linear-gradient(180deg,#ffee00 0%,#ffee00 32%,#ffffff 100%);padding:0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="padding:14px 12px 16px;font-size:0;" align="center">
+          <!--[if mso]><table role="presentation" width="636" cellpadding="0" cellspacing="0" border="0"><tr><td width="318" align="center" valign="top"><![endif]-->
+          <div class="col" style="display:inline-block;width:100%;max-width:318px;vertical-align:top;">
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:4px auto;border-collapse:separate;"><tr>
+              <td style="border:1px solid #000000;border-radius:7px;padding:5px 14px;" mc:edit="lang_fr"><a href="#" class="f" style="font-size:12px;color:#000000;text-decoration:none;">Lire en français</a></td>
+            </tr></table>
+          </div>
+          <!--[if mso]></td><td width="318" align="center" valign="top"><![endif]-->
+          <div class="col" style="display:inline-block;width:100%;max-width:318px;vertical-align:top;">
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:4px auto;border-collapse:separate;"><tr>
+              <td style="border:1px solid #000000;border-radius:7px;padding:5px 14px;" mc:edit="lang_nl"><a href="#" class="f" style="font-size:12px;color:#000000;text-decoration:none;">In het Nederlands lezen</a></td>
+            </tr></table>
+          </div>
+          <!--[if mso]></td></tr></table><![endif]-->
+        </td></tr>
+        <tr><td class="col-pad" style="padding:6px 12px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td class="f title" style="font-size:50px;font-weight:900;line-height:100%;letter-spacing:-0.6px;color:#000000;white-space:nowrap;" mc:edit="title">ceramic brussels monthly</td>
+            <td class="title-line" width="100%" valign="middle" style="padding:0 0 4px 10px;"><div style="border-top:3px solid #000000;font-size:0;line-height:0;">&nbsp;</div></td>
+          </tr></table>
+        </td></tr>
+        <tr><td class="col-pad f edition" style="padding:2px 12px 34px;font-size:31px;line-height:110%;color:#000000;text-transform:uppercase;" mc:edit="edition">November edition</td></tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- ===== Row: Agenda | photo ===== -->
+  <tr mc:repeatable="row_agenda" mc:hideable>
+    <td style="padding:0;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:4px 12px 6px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+              <td class="f" style="font-size:31px;font-weight:900;line-height:110%;color:#000000;white-space:nowrap;padding-right:6px;" mc:edit="agenda_title">Agenda</td>
+              <td width="100%" valign="top" style="padding-top:2px;"><div style="width:100%;max-width:190px;overflow:hidden;white-space:nowrap;font-size:7px;line-height:10px;letter-spacing:7.3px;color:#000000;">&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;</div></td>
+            </tr></table>
+          </td></tr>
+          <tr><td class="col-pad text" style="padding:0 12px 12px;font-size:15.3px;line-height:112%;font-style:italic;" mc:edit="agenda_text">
+            <p>This month, we take you into the studio of Marion Verboom, who opens the doors to her world. We also introduce Anaïs Sandra Carion, Managing Director of MAD, the Fashion and Design Centre in Brussels, as well as the International Academy of Ceramics (IAC), whose 75th anniversary we will celebrate at the fair in 2027. Not forgetting our news and cultural picks, as well as a new section that will keep you posted on the preparations for ceramic basel.</p>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:5px 17px 12px;">
+            <img mc:edit="agenda_image" class="img-fluid" src="https://dim.mcusercontent.com/cs/73ff2542d8372d84abeedd5a2/images/6218576f-5ff3-d76c-2c55-d2f3c723ea3d.jpg?rect=66,20,1151,768&amp;w=296&amp;h=198&amp;dpr=2" width="296" alt="A visitor looks at a large ceramic wall work (photo: Bureau Rouge)" style="width:100%;max-width:296px;">
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Row: Main focus | text ===== -->
+  <tr mc:repeatable="row_focus" mc:hideable>
+    <td style="padding:0;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:0 12px 10px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="label" mc:edit="focus_label">Main focus</td></tr></table></td></tr>
+          <tr><td class="col-pad subtitle" style="padding:2px 12px 10px;" mc:edit="focus_subtitle">interview with Marion Verboom &#9679;</td></tr>
+          <tr><td class="col-pad text" style="padding:0 12px 4px;" mc:edit="focus_text">
+            <p><span class="dropcap">S</span>he is French, a sculptor, and works with clay, glass and many other materials&hellip; and above all, she will be the guest of honour of ceramic brussels 2027: Marion Verboom.</p>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad text tight-top" style="padding:43px 17px 4px;" mc:edit="focus_text_2">
+            <p>She opened the doors of her studio to talk to us about her creative process, the place of clay and drawing in her work, and the exhibition she is preparing for Tour &amp; Taxis next January, in collaboration with Galerie Lelong Paris.</p>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Video (a still with a play button, linked to the video) ===== -->
+  <tr mc:repeatable="video" mc:hideable>
+    <td style="padding:0;">
+      <a href="#"><img mc:edit="video_image" class="img-fluid" src="https://mcusercontent.com/73ff2542d8372d84abeedd5a2/images/3a7625bf-e8fc-6288-eedf-7ecc29196adc.png" width="660" alt="Video: Marion Verboom, guest of honour 2027" style="width:100%;max-width:660px;"></a>
+    </td>
+  </tr>
+
+  <!-- ===== Row: People | Partner spotlight ===== -->
+  <tr mc:repeatable="row_people" mc:hideable>
+    <td style="padding:0;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:14px 12px 10px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="label" mc:edit="people_label">People</td></tr></table></td></tr>
+          <tr><td class="col-pad subtitle" style="padding:2px 12px 10px;" mc:edit="people_subtitle">meet Anaïs Sandra Carion, CEO of MAD Brussels &#9679;</td></tr>
+          <tr><td class="col-pad" style="padding:0 12px 10px;">
+            <img mc:edit="people_image" class="img-fluid" src="https://dim.mcusercontent.com/cs/73ff2542d8372d84abeedd5a2/images/c1be7294-1d74-a3d7-b503-c3c6e84f2450.jpg?rect=66,426,1151,738&amp;w=296&amp;h=190&amp;dpr=2" width="296" alt="Anaïs Sandra Carion at MAD Brussels (photo: Bureau Rouge)" style="width:100%;max-width:296px;">
+          </td></tr>
+          <tr><td class="col-pad text" style="padding:0 12px 14px;" mc:edit="people_text">
+            <p><span class="dropcap">A</span>naïs Sandra Carion has worked closely with ceramic brussels since its earliest days. With her sharp eye on the contemporary scene and her drive to break down boundaries between disciplines, she weaves original connections each year between ceramics, design, and Brussels&rsquo; creative scene. This year, the MAD team is going even further, reimagining our brand-new VIP lounge: a space for meeting and exchange bringing together a carefully curated selection of creations by Belgian designers, through sensory experiences that invite visitors to discover design in a whole new way.</p>
+          </td></tr>
+          <tr><td class="col-pad" align="center" style="padding:0 12px 22px;">
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;"><tr>
+              <td class="oval" bgcolor="#000000" style="background-color:#000000;padding:11px 24px;" mc:edit="people_button"><a href="#" style="color:#ffffff;font-size:16px;font-weight:500;">learn more<br>about MAD Brussels<br>&rarr; here &larr;</a></td>
+            </tr></table>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:14px 17px 10px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="label" mc:edit="partner_label">Partner spotlight</td></tr></table></td></tr>
+          <tr><td class="col-pad subtitle" style="padding:2px 17px 12px;" mc:edit="partner_subtitle">IAC &mdash; International Academy of Ceramics &#9679;</td></tr>
+          <tr><td class="col-pad text" style="padding:0 17px 14px;" mc:edit="partner_text">
+            <p style="margin-bottom:0;"><span class="dropcap" style="font-size:30px;line-height:26px;">I</span>n 2027, ceramic brussels will celebrate the 75th anniversary of the International Academy of Ceramics (IAC) with a special programme. On 22 January, two talks will focus in particular on the future of the Academy, followed by an exclusive gathering for its members invited to the fair.</p>
+            <p style="text-indent:26px;">Founded in 1952 and based at the Musée Ariana in Geneva, the IAC is a global organisation dedicated to ceramic art and culture. It brings together more than 1,200 members from 92 countries: artists, curators, collectors, museums and schools. Guided by the belief that clay is a universal material that connects people and cultures, the Academy fosters exchange between ceramic communities worldwide.</p>
+          </td></tr>
+          <tr><td class="col-pad" align="center" style="padding:6px 17px 22px;">
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;"><tr>
+              <td class="oval" bgcolor="#bfbfbf" style="background-color:#bfbfbf;padding:9px 34px;" mc:edit="partner_button"><a href="#" style="color:#000000;font-size:16px;font-weight:500;">dicover IAC<br>&rarr; here &larr;</a></td>
+            </tr></table>
+          </td></tr>
+          <tr><td class="col-pad" style="padding:0 17px 22px;">
+            <img mc:edit="partner_image" class="img-fluid" src="https://dim.mcusercontent.com/cs/73ff2542d8372d84abeedd5a2/images/555bcf68-9a6a-d1f0-8e9b-61c2fa820d2e.jpg?rect=68,1730,1150,696&amp;w=296&amp;h=179&amp;dpr=2" width="296" alt="Two visitors in front of ceramic works at ceramic brussels 2026 (photo: Geoffrey Fritsch)" style="width:100%;max-width:296px;">
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Row: All eyes on Basel | applications ===== -->
+  <tr mc:repeatable="row_basel" mc:hideable>
+    <td style="padding:0;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:0 12px 10px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="label ochre-bg" style="color:#000000;" mc:edit="basel_label">All eyes on Basel</td></tr></table></td></tr>
+          <tr><td class="col-pad subtitle" style="padding:2px 12px 10px;" mc:edit="basel_subtitle">ceramic basel: next chapter &#9679;</td></tr>
+          <tr><td class="col-pad text" style="padding:0 12px 12px;" mc:edit="basel_text">
+            <p style="margin-bottom:14px;"><span class="dropcap">A</span>s you may already know, the first edition of ceramic basel will take place from 15 to 20 June 2027. Built on a shared vision and a strong complementarity with ceramic brussels, the fair will bring together around 65 leading international galleries at the heart of the most influential week in the art world, united by one engagement: celebrating fire and māteria.</p>
+            <p>The fair will unfold in two sections:</p>
+          </td></tr>
+          <tr><td class="col-pad" style="padding:0 12px 16px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+              <td width="47%" valign="top" style="width:47%;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+                  <td class="ochre f" style="border:3px dotted #c39c27;padding:5px 5px 6px;font-size:13px;line-height:120%;color:#c39c27;" mc:edit="basel_fire"><span style="font-weight:600;font-size:15px;">fire &#9679;</span><br>celebrating the arts of ceramics and glass</td>
+                </tr></table>
+              </td>
+              <td width="6%" style="width:6%;">&nbsp;</td>
+              <td width="47%" valign="top" style="width:47%;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+                  <td class="ochre f" style="border:1.5px dashed #c39c27;padding:5px 5px 6px;font-size:13px;line-height:120%;color:#c39c27;" mc:edit="basel_materia"><span style="font-weight:600;font-size:15px;">māteria &#9632;</span><br>devoted to matter in sculptural practice, from textile, stone and wood</td>
+                </tr></table>
+              </td>
+            </tr></table>
+          </td></tr>
+          <tr><td class="col-pad" align="center" style="padding:0 12px 22px;">
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;"><tr>
+              <td class="oval ochre-bg" bgcolor="#c39c27" style="padding:11px 24px;" mc:edit="basel_button"><a href="#" style="color:#000000;font-size:16px;font-weight:500;">read more<br>about ceramic basel<br>&rarr; here &larr;</a></td>
+            </tr></table>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad f" style="padding:28px 17px 14px;font-size:14px;font-weight:900;line-height:122%;color:#000000;" mc:edit="apply_text">&rarr; The first round of applications for ceramic basel is now open.</td></tr>
+          <tr><td class="col-pad" align="center" style="padding:0 17px 28px;">
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;"><tr>
+              <td class="ochre-bg" bgcolor="#c39c27" align="center" style="border-radius:12px;padding:8px 20px;" mc:edit="apply_button"><a href="#" class="f" style="color:#000000;font-size:17px;font-weight:500;text-decoration:none;">apply &rarr; here &larr;</a></td>
+            </tr></table>
+          </td></tr>
+          <tr><td class="col-pad" style="padding:0 17px 22px;">
+            <img mc:edit="apply_image" class="img-fluid" src="https://dim.mcusercontent.com/cs/73ff2542d8372d84abeedd5a2/images/7c0800a4-70f0-5bd2-10a4-3743375c8cb6.jpg?rect=66,644,1152,1101&amp;w=296&amp;h=283&amp;dpr=2" width="296" alt="Messe Basel seen from above (photo: Basel Tourismus)" style="width:100%;max-width:296px;">
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Row: In case you missed it | Memento ===== -->
+  <tr mc:repeatable="row_memento" mc:hideable>
+    <td style="padding:0;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:8px 12px 10px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="label" mc:edit="missed_label">In case you missed it</td></tr></table></td></tr>
+          <tr><td class="col-pad text" style="padding:2px 12px 14px;font-size:14.8px;line-height:120%;" mc:edit="missed_text">
+            <p><strong><em>&#9679; The final list of galleries taking part in ceramic brussels has been unveiled!</em></strong> On the programme: 65 exhibitors from 18 countries, more than 150 artists and 40% solo shows.</p>
+          </td></tr>
+          <tr><td class="col-pad" align="center" style="padding:0 12px 36px;">
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;"><tr>
+              <td bgcolor="#bfbfbf" align="center" style="background-color:#bfbfbf;border-radius:10px;padding:8px 16px;" mc:edit="missed_button"><a href="https://www.ceramic.brussels/en/exhibitors/" class="f" style="color:#000000;font-size:15px;text-decoration:none;">see the full list <strong>&rarr; here &larr;</strong></a></td>
+            </tr></table>
+          </td></tr>
+          <tr><td class="col-pad" style="padding:0 12px 22px;">
+            <img mc:edit="missed_image" class="img-fluid" src="https://dim.mcusercontent.com/cs/73ff2542d8372d84abeedd5a2/images/cec81860-63cd-4fd1-f0ca-a1f58ebcfb74.jpg?rect=66,821,1150,863&amp;w=296&amp;h=222&amp;dpr=2" width="296" alt="Nina Khemchyan, ceramic vessel, PM Gallery" style="width:100%;max-width:296px;">
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:8px 17px 10px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="label" mc:edit="memento_label">Memento</td></tr></table></td></tr>
+          <tr><td class="col-pad subtitle" style="padding:2px 17px 12px;" mc:edit="memento_subtitle">what the team warmly recommends this month &#9679;</td></tr>
+          <tr><td class="col-pad f" style="padding:0 17px 8px;font-size:16px;font-weight:500;color:#000000;" mc:edit="memento_title">&rarr; Ceramics, Sensitive Bodies</td></tr>
+          <tr><td class="col-pad text" style="padding:0 17px 12px;" mc:edit="memento_text">
+            <p><span class="dropcap">T</span>he neck of a vase, its belly, its foot, its shoulders: these are the words used to describe a form shaped by the potter&rsquo;s hand, as one would describe a human body&hellip; Bringing together 80 works from different periods and regions of the world, this exhibition, which marks the reopening of the MADD Bordeaux, highlights the unique relationship between the body and ceramic technique. Video archives complete the visit, taking us to the heart of the workshops.</p>
+          </td></tr>
+          <tr><td class="col-pad" style="padding:0 17px 20px;" mc:edit="memento_info">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr><td colspan="2" class="f" style="border-top:1px solid #000000;padding:6px 0 4px;color:#000000;"><span style="font-size:16px;">MADD Bordeaux</span><br><span style="font-size:10px;">Musée des Arts Décoratifs et du Design</span></td></tr>
+              <tr>
+                <td class="f" style="border-top:1px solid #000000;border-bottom:1px solid #000000;border-right:1px solid #000000;padding:8px 6px 8px 0;font-size:16px;color:#000000;white-space:nowrap;">&rarr; 04.01.2027</td>
+                <td class="f" align="right" style="border-top:1px solid #000000;border-bottom:1px solid #000000;padding:8px 0 8px 6px;font-size:16px;color:#000000;">Bordeaux, France</td>
+              </tr>
+            </table>
+          </td></tr>
+          <tr><td class="col-pad" align="center" style="padding:0 17px 26px;">
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;"><tr>
+              <td class="oval" style="border:1px solid #000000;padding:10px 28px;" mc:edit="memento_button"><a href="#" style="color:#000000;font-size:16px;font-weight:500;">discover<br>the exhibition<br>&rarr; here &larr;</a></td>
+            </tr></table>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Footer: logo, dates, Instagram ===== -->
+  <tr>
+    <td style="padding:10px 12px 0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="border-top:1px solid #000000;font-size:0;line-height:0;">&nbsp;</td></tr>
+        <tr><td style="padding:12px 0 10px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td class="footer-cell" width="33%" valign="middle" style="width:33%;">
+              <a href="https://www.ceramic.brussels/en/"><img src="https://dim.mcusercontent.com/cs/73ff2542d8372d84abeedd5a2/images/beae7d63-d454-67c7-e0f8-fd089d38f52f.jpg?rect=60,160,332,178&amp;w=85&amp;h=46&amp;dpr=2" width="85" alt="ceramic brussels" style="width:85px;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#000000;"></a>
+            </td>
+            <td class="footer-cell" width="34%" align="center" valign="middle" style="width:34%;">
+              <img src="https://dim.mcusercontent.com/cs/73ff2542d8372d84abeedd5a2/images/beae7d63-d454-67c7-e0f8-fd089d38f52f.jpg?rect=935,160,630,178&amp;w=162&amp;h=46&amp;dpr=2" width="162" alt="20 to 24 January 2027" style="width:162px;margin:0 auto;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#000000;">
+            </td>
+            <td class="footer-cell f" width="33%" align="right" valign="middle" style="width:33%;font-size:16px;" mc:edit="footer_social">
+              <a href="https://www.instagram.com/ceramic.brussels/" style="color:#000000;text-decoration:none;">@ceramic.brussels</a>
+            </td>
+          </tr></table>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- ===== Partners (one image; its top edge is the line above it) ===== -->
+  <tr mc:repeatable="partners" mc:hideable>
+    <td style="padding:0 0 6px;">
+      <a href="https://www.ceramic.brussels/en/partners/"><img mc:edit="partners_image" class="img-fluid" src="https://mcusercontent.com/73ff2542d8372d84abeedd5a2/images/4c5ab58f-766d-158f-0025-f764882efed5.jpg" width="660" alt="Main partner: Puilaetco, a Quintet private bank. Logistics partner: Embelco" style="width:100%;max-width:660px;font-family:Helvetica,Arial,sans-serif;font-size:12px;color:#000000;"></a>
+    </td>
+  </tr>
+
+</table>
+<!--[if mso]></td></tr></table><![endif]-->
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:660px;">
+  <tr><td class="legal" align="center" style="padding:22px 20px 30px;line-height:160%;" mc:edit="legal">
+    This email was sent to <a href="mailto:*|EMAIL|*">*|EMAIL|*</a><br>
+    <a href="*|ABOUT_LIST|*">why did I get this?</a> &nbsp; <a href="*|UNSUB|*">unsubscribe from this list</a> &nbsp; <a href="*|UPDATE_PROFILE|*">update subscription preferences</a><br>
+    *|LIST:ADDRESSLINE|*
+  </td></tr>
+</table>
+
+</td></tr>
+</table>
+</body>
+</html>
