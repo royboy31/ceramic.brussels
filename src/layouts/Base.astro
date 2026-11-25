@@ -111,12 +111,13 @@ const siteName = settings?.siteName ?? 'ceramic brussels';
  * which pass "← back to <current year>" instead.
  */
 const newestPast = PAST_EDITIONS_PUBLIC ? pastEditions[0]?.year : undefined;
+const prevEditionsHref = newestPast ? localePath(lang, editionTabPath(newestPast, undefined, lang)) : undefined;
 const footerBack =
   backLink ??
-  (newestPast
+  (prevEditionsHref
     ? {
         label: t('prevEd.section'),
-        href: localePath(lang, editionTabPath(newestPast, undefined, lang)),
+        href: prevEditionsHref,
         arrow: '→',
       }
     : undefined);
@@ -165,6 +166,16 @@ const editorNav = (navigation?.items ?? [])
     const link = resolveNavItem(lang, item);
     if (!link) return null;
     const children = (item.children ?? []).map((c: any) => resolveNavItem(lang, c)).filter(Boolean);
+    /* About ends on "previous editions", after contact & team, like the
+       About hub's pills (Tiphaine, 2026-11-25: "add previous editions in the
+       menu in the about section"). Added here rather than in Setup → Menu
+       and footer because the section has no index: the row leads to the
+       newest past edition, which a stored link would pin to one year. It
+       follows `PAST_EDITIONS_PUBLIC` like the footer pill, and steps aside
+       if an editor has already put a row there pointing to the same page. */
+    if (prevEditionsHref && (item.route === 'about' || /^\/?about\/?$/.test(item.path ?? '')) && !children.some((c: any) => c.href === prevEditionsHref)) {
+      children.push({ href: prevEditionsHref, label: t('prevEd.section'), external: false, arrow: '→' });
+    }
     return { ...link, children, sub: children.length ? children.map((c: any) => c.label).join(' / ') : undefined };
   })
   .filter(Boolean) as { label: string; href: string; external: boolean; sub?: string; children: any[] }[];

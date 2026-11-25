@@ -141,7 +141,7 @@ const logoHeight = (image: any, max = 78, base = 92) => {
                   as one column and the copy starts at the gutter. */}
               {images.length > 0 && (
                 <figure>
-                  <Slideshow images={images} aspect={1.5} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 50vw" label={a.name} id={`award-${i + 1}`} />
+                  <Slideshow images={images} aspect={1.5} widths={[600, 900, 1200, 1600]} sizes="(max-width: 640px) 100vw, 50vw" label={a.name} id={`award-${i + 1}`} captions={false} />
                 </figure>
               )}
               <div class="award-copy">

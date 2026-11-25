@@ -65,6 +65,13 @@ interface Props {
    * than one slide is in view, so the same slideshow is one-up on a phone.
    */
   step?: 'page' | 'slide';
+  /**
+   * `false` drops the caption line ("Artist, *Title*, 2024 © credit") and
+   * keeps the counter. For a slideshow whose pictures speak for the row
+   * beside them - the exhibitor awards ("remove the sentence in the picture
+   * (for every award)" - Tiphaine, 2026-11-25).
+   */
+  captions?: boolean;
   class?: string;
 }
 
@@ -79,6 +86,7 @@ const {
   id = 'slideshow',
   bleed = true,
   step = 'page',
+  captions = true,
   class: className,
 } = Astro.props;
 
@@ -129,7 +137,7 @@ const widthFit = fit === 'width';
               <span class="counter">
                 {i + 1}/{slides.length}
               </span>
-              <span class="caption">
+              {captions && <span class="caption">
                 {img.caption}
                 {img.workTitle && (
                   <>
@@ -139,7 +147,7 @@ const widthFit = fit === 'width';
                 )}
                 {img.year && `, ${img.year}`}
                 {img.credit && <span class="credit"> © {img.credit}</span>}
-              </span>
+              </span>}
             </figcaption>
           </figure>
         ))}
