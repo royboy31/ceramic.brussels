@@ -128,13 +128,16 @@ export const programmeEvent = defineType({
       type: 'string',
       description: 'Shown under the speakers on a previous edition\'s country focus tab.',
     }),
-    // Shown for VIP events, whose row in the design carries a paragraph;
-    // hidden elsewhere, where the programme row has no place for it.
+    // Shown for VIP events, whose row in the design carries a paragraph, and
+    // for country focus talks, which print it on a previous edition's focus
+    // tab ("where is it on the cms that I can add/change the description of
+    // the talk?", Tiphaine, 2026-11-17). Hidden elsewhere, where the
+    // programme row has no place for it.
     defineField({
       name: 'description',
       title: 'Description',
       type: 'localeBlock',
-      hidden: ({ document }) => document?.section !== 'vip',
+      hidden: ({ document }) => document?.section !== 'vip' && document?.section !== 'focus',
     }),
     defineField({
       name: 'image',

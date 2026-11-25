@@ -2,7 +2,9 @@
 import { LOCALE_IDS, type LocaleId } from '../lib/locales';
 import { useTranslations, localePath } from '../lib/i18n';
 import { HUBS, hubSegment, hubTabHref, tabHasPage } from '../lib/hubs';
-import { getNavigation } from '../lib/queries';
+import { getNavigation, getPastEditionsIndex } from '../lib/queries';
+import { editionTabPath } from '../lib/previousEditions';
+import { PAST_EDITIONS_PUBLIC } from './launch';
 
 /**
  * The title band of a hub page, as the design draws it on every hub frame:
@@ -80,6 +82,26 @@ const tabs = items
         const page = tab.link ? null : pages.find((p) => p?.slugs?.en === tab.slug);
         return { slug: tab.slug, label: page?.tabLabel ?? t(tab.label), href: hubTabHref(route!, tab, lang), link: !!tab.link, locked: !!tab.locked, own: false };
       });
+
+/**
+ * About ends on a "previous editions" pill (Tiphaine, WhatsApp 2026-11-19,
+ * after "contact & team"). The section is not a hub and has no index, so the
+ * pill leads to the newest past edition - the footer button's target - and
+ * is there only once the section is public (`PAST_EDITIONS_PUBLIC`).
+ */
+if (route === 'about' && !items && PAST_EDITIONS_PUBLIC) {
+  const newestPast = (await getPastEditionsIndex(lang))[0]?.year;
+  if (newestPast) {
+    tabs.push({
+      slug: 'previous-editions',
+      label: t('prevEd.section'),
+      href: editionTabPath(newestPast, undefined, lang),
+      link: true,
+      locked: false,
+      own: false,
+    });
+  }
+}
 ---
 
 <div class:list={['section-head', 'page-grid', 'title-band', className]}>

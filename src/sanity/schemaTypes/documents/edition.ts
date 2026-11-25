@@ -129,6 +129,17 @@ export const edition = defineType({
       to: [{ type: 'artist' }],
     }),
     defineField({
+      // "In French, for 2024 and 2026, change from invitée to invité" -
+      // Tiphaine, 2026-11-17. The label is one string for every year, and the
+      // guest's gender is the year's, so the year can override it.
+      name: 'guestOfHonourLabel',
+      title: 'Guest of honour label (previous editions)',
+      type: 'localeString',
+      group: 'main',
+      description:
+        "The guest of honour pill on this year's previous-editions page. Leave empty for the usual \"guest of honour / invitée d'honneur / eregast\"; e.g. \"invité d'honneur\" in French for a man.",
+    }),
+    defineField({
       name: 'countryFocus',
       title: 'Country focus',
       type: 'localeString',
@@ -223,6 +234,29 @@ export const edition = defineType({
       of: [defineArrayMember({ type: 'figure' })],
       options: { layout: 'grid' },
       description: 'The pair shown under the lead on the overview tab. The first two are used, side by side, 3:2.',
+    }),
+    defineField({
+      // "On every overview page (for every year), a new text-field right
+      // underneath the slideshow, the same size as the highlights text" -
+      // Léonie, 2026-11-18, Figma frame 1405:650.
+      name: 'overviewText',
+      title: 'Overview text',
+      type: 'localeBlock',
+      group: 'archive',
+      description: 'The text under the overview pictures, set in two columns at the size of the highlights. Leave empty to show nothing there.',
+    }),
+    defineField({
+      // "I can't choose the pictures on this page, could you create a field" -
+      // Tiphaine, 2026-11-17. The art prize tab borrowed the first five
+      // pictures of the year's general gallery.
+      name: 'prizeImages',
+      title: 'Art prize pictures',
+      type: 'array',
+      group: 'archive',
+      of: [defineArrayMember({ type: 'figure' })],
+      options: { layout: 'grid' },
+      description:
+        "The slideshow beside the laureates on the art prize tab, in this order. Leave empty to use the first five pictures of the year's gallery.",
     }),
     defineField({
       name: 'highlights',

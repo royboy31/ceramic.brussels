@@ -117,6 +117,24 @@ export const video = defineType({
     defineField({ name: 'url', title: 'Video URL', type: 'url' }),
     defineField({ name: 'poster', title: 'Poster image', type: 'figure' }),
     defineField({ name: 'title', title: 'Title', type: 'localeString' }),
+    // The acid title over the still has been asked away twice - "delete the
+    // yellow title that gets in front of the video" (Tiphaine, 2026-10-02)
+    // and "I can't seem to remove the big yellow title that covers the poster
+    // image" (Félicie, 2026-11-09) - and both times the only answer was a
+    // prop in the code. This is the editor's own switch. It can hide the
+    // title, never add one: where a layout writes the title beside the film
+    // (the homepage row, press & media) nothing is drawn over the picture
+    // whatever this says.
+    // Negative, like `hidden` on a block: a video saved before today has no
+    // value, and a switch reading "off" next to a title that is plainly over
+    // the picture would be a lie. Off means the page is as it was.
+    defineField({
+      name: 'hideTitle',
+      title: 'Hide the title over the picture',
+      type: 'boolean',
+      description:
+        'The title is written across the still unless this is on. Turn it on for the picture alone - the title still names the film for screen readers and for the player. Where the title is already written beside the film, it is never drawn over it.',
+    }),
   ],
   preview: {
     select: { title: 'title.en', url: 'url', media: 'poster' },

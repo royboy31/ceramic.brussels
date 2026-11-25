@@ -72,6 +72,28 @@ export const artist = defineType({
       description: 'Without the @',
     }),
     defineField({
+      // A duo is one record ("Nitsa Meletopoulos & Victor Alarçon"), so one
+      // Instagram; "is there a way to put 2 different links that each leads
+      // to their personal instagram" - Tiphaine, 2026-11-17.
+      name: 'members',
+      title: 'Duo / collective members',
+      type: 'array',
+      group: 'main',
+      description:
+        "Only for a duo or collective: each member with their own Instagram. When filled, the previous editions' laureates list shows each name with its own link instead of the one above.",
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'member',
+          fields: [
+            defineField({ name: 'name', title: 'Name', type: 'string', validation: (r) => r.required() }),
+            defineField({ name: 'instagram', title: 'Instagram handle', type: 'string', description: 'Without the @' }),
+          ],
+          preview: { select: { title: 'name', subtitle: 'instagram' } },
+        }),
+      ],
+    }),
+    defineField({
       name: 'gallery',
       title: 'Represented by',
       type: 'string',

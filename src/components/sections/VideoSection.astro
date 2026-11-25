@@ -82,7 +82,16 @@ const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) :
             {section.text}
           </p>
         )}
-        <VideoEmbed class="film" url={video.url} poster={poster} label={video.title ?? t('home.watch')} />
+        {/* "Hide the title over the picture" on the Video field: an editor can
+            take the acid title off the still without emptying the title,
+            which only renamed it to "watch" (Félicie, 2026-11-09). */}
+        <VideoEmbed
+          class="film"
+          url={video.url}
+          poster={poster}
+          label={video.title ?? t('home.watch')}
+          quiet={video.hideTitle === true}
+        />
       </section>
     ))
 }
@@ -96,10 +105,14 @@ const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) :
     display: grid;
   }
   /* Picture 887px and copy 423px at the 1440 frame. */
+  /* The same space as the news rows around it (Feature.astro: 30px above,
+     2.5rem under) - it was 80px above and nothing under, so the gaps either
+     side of the film differed from the rest (Léonie, 2026-11-18). */
   .feature--video {
     grid-template-columns: minmax(0, 887fr) minmax(310px, 423fr);
     align-items: start;
-    margin-top: 80px;
+    margin-top: 30px;
+    padding-bottom: 2.5rem;
   }
   .video-frame :global(.film) {
     margin: 0;
@@ -129,7 +142,7 @@ const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) :
     letter-spacing: -0.04em;
     max-width: 590px;
     margin-top: 18px;
-    font-size: 42px;
+    font-size: clamp(32px, 2.92vw, 42px);
     font-weight: 400;
     line-height: 1.2;
   }
@@ -165,9 +178,17 @@ const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) :
     /* Stretched: the frame has no width of its own to shrink to. */
     .feature--video {
       align-items: stretch;
+      margin-top: 30px;
     }
-    .feature--video .feature__copy {
-      order: -1;
+    /* Film first, then its text, like every news row above it: the copy
+       used to jump ahead of the film, so on a phone the last news text and
+       the film's text followed each other with no picture between them
+       ("always photo followed by text", Léonie, 2026-11-17). The DOM order
+       is already film, then copy. */
+    /* The film bleeds to the screen edges (Feature.astro); its credit stays
+       in the text column. */
+    .video-frame small {
+      padding-inline: var(--gutter);
     }
     .kicker {
       font-size: 22px;
@@ -177,6 +198,17 @@ const textLines: string[] = section.text ? String(section.text).split(/\r?\n/) :
     }
     .arrow-link {
       font-size: 26px;
+    }
+  }
+
+  /* The film row stacks at 640 but site.css bleeds `.video-frame` from 700:
+     in between, the film ran over its text and off the window (Léonie,
+     2026-11-18). Feature.astro holds the news rows back the same way. */
+  @media (min-width: 641px) and (max-width: 700px) {
+    .feature--video > .video-frame {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-inline: 0 !important;
     }
   }
 

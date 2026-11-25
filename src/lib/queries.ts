@@ -167,6 +167,7 @@ const LINK = `{
 const VIDEO = `{
   url,
   ${styled('title')},
+  hideTitle,
   poster ${IMAGE}
 }`;
 
@@ -707,18 +708,29 @@ export function getEditionArchive(lang: LocaleId, year: number) {
       "archiveLeads": archiveLeads[]{ tab, ${styled('lead')} },
       // BACKEND-REQUEST #33: the overview's image pair and its highlights.
       "leadImages": leadImages[] ${IMAGE},
+      // The text under the overview pictures (Léonie, 2026-11-18).
+      ${styled('overviewText')},
       "highlights": highlights[]{ _key, ${styled('label')}, "link": link ${LINK} },
       // BACKEND-REQUEST #34: what the guest of honour showed that year.
       "guestInstallation": guestInstallation{
         ${styled('title')}, ${styled('text')}, author, "images": images[] ${IMAGE}
       },
       // BACKEND-REQUEST #36: the publication reader.
-      "publication": publication{ url, ${styled('title')}, cover ${IMAGE} },
+      // The reader in the page's language when that issue was printed in it
+      // (urlFr / urlNl, Tiphaine 2026-11-17), the English one otherwise.
+      "publication": publication{
+        "url": select($lang == "fr" && defined(urlFr) => urlFr, $lang == "nl" && defined(urlNl) => urlNl, url),
+        ${styled('title')}, cover ${IMAGE}
+      },
+      // The art prize tab's own slideshow (Tiphaine 2026-11-17); empty falls
+      // back to the gallery in the component.
+      "prizeImages": prizeImages[] ${IMAGE},
+      ${styled('guestOfHonourLabel')},
       "guest": guestOfHonour->{
         _id, name, countryCode, "slug": slug.current, ${styled('nationality')}, ${styled('bio')}, portrait ${IMAGE}
       },
       "laureates": *[_type == "laureate" && references(^._id)] | order(order asc){
-        _id, "artist": artist->{ name, instagram, ${styled('nationality')}, "slug": slug.current, ${ARTIST_GALLERY} }
+        _id, "artist": artist->{ name, instagram, members[]{ _key, name, instagram }, ${styled('nationality')}, "slug": slug.current, ${ARTIST_GALLERY} }
       },
       "awards": *[_type == "award" && family == "art-prize" && references(^._id)] | order(order asc){
         _id, ${styled('name')}, ${styled('outcome')}, ${styled('description')},
@@ -768,6 +780,7 @@ export function getPastEditionsIndex(lang: LocaleId) {
       ${styled('ordinal')},
       ${styled('countryFocus')},
       "guestOfHonour": guestOfHonour->{ name },
+      ${styled('guestOfHonourLabel')},
       "publication": publication{ url },
       "exhibitorCount": count(*[_type == "exhibitor" && references(^._id)]),
       "laureateCount": count(*[_type == "laureate" && references(^._id)]),
