@@ -26,17 +26,25 @@ then open <http://localhost:4400/newsletters/preview.html> (the VIP one), or
 
 ## Sharing a review link
 
-`build-share.mjs` makes one self-contained page (the template at desktop and
-phone width, every image and font embedded, sample merge values) for a
-review link, from `share-shell.html`:
+`build-share.mjs` makes one self-contained page from `share-shell.html`: a
+tab per template, each at desktop and phone width with sample merge
+values, every image and font embedded (a file used by several templates
+only once). `shrink-share.py` then redraws the heavy images smaller for
+that page only - the galleries title GIF is 8.4 MB on its own, and a
+shared page must stay under 16 MB:
 
 ```sh
-node newsletters/build-share.mjs newsletters/mailchimp/vip.html vip-review.html
+node newsletters/build-share.mjs review.html newsletters/mailchimp/vip.html newsletters/mailchimp/monthly.html newsletters/mailchimp/galleries.html newsletters/mailchimp/basel.html
+python -I newsletters/shrink-share.py review.html
 ```
 
-The VIP prototype is shared this way at
+The four prototypes are shared this way at
 <https://claude.ai/artifact/AAT3kMyKRJeJVqzaS7Jsi4> (private until shared
-from its Share menu).
+from its Share menu; `#vip`, `#monthly`, `#galleries`, `#basel` open a tab).
+
+**The galleries title GIF is 8.4 MB in the real campaign too** - every
+recipient downloads it, slowly on a phone. A smaller export (fewer
+colours or a narrower width) is worth asking Léo for.
 
 ## Putting it into Mailchimp
 
