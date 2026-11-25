@@ -41,6 +41,7 @@ import { story } from './documents/story';
 import { homepage } from './documents/homepage';
 import { siteSettings } from './documents/siteSettings';
 import { navigation } from './documents/navigation';
+import { newsletter, newsletterTypes } from './documents/newsletter';
 
 export const objectTypes: SchemaTypeDefinition[] = [
   localeString,
@@ -72,6 +73,8 @@ export const objectTypes: SchemaTypeDefinition[] = [
   guestInstallation,
   editionFocus,
   editionPublication,
+  // Newsletters (2026-11-25): the blocks of src/newsletter/render.ts.
+  ...newsletterTypes,
 ];
 
 export const documentTypes: SchemaTypeDefinition[] = [
@@ -92,6 +95,7 @@ export const documentTypes: SchemaTypeDefinition[] = [
   homepage,
   siteSettings,
   navigation,
+  newsletter,
 ];
 
 export const schemaTypes: SchemaTypeDefinition[] = [...objectTypes, ...documentTypes];

@@ -372,6 +372,15 @@ export const structure: StructureResolver = async (S, context) => {
             .initialValueTemplates([S.initialValueTemplateItem('page-text'), S.initialValueTemplateItem('page-sections')]),
         ),
 
+      /* Newsletters (2026-11-25): each one opens on its form, with a second
+         tab showing the email at desktop and phone width and sending it
+         through Mailchimp (NewsletterPane.tsx, set up in sanity.config.ts). */
+      S.listItem()
+        .id('newsletters')
+        .title('Newsletters')
+        .schemaType('newsletter')
+        .child(S.documentTypeList('newsletter').title('Newsletters').defaultOrdering([{ field: '_updatedAt', direction: 'desc' }])),
+
       S.divider(),
 
       folder('setup', 'Setup', [

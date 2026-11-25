@@ -10,6 +10,7 @@ import { PreviewLauncher, PreviewIcon } from './src/sanity/components/PreviewLau
 import { openPreviewAction } from './src/sanity/components/OpenPreviewAction';
 import { VipTool, VipToolIcon } from './src/sanity/components/VipTool';
 import { PREVIEWABLE_TYPES } from './src/sanity/previewPaths';
+import { NewsletterPane } from './src/sanity/components/NewsletterPane';
 
 // Singletons must not be creatable or deletable from the Studio.
 const SINGLETONS = new Set(['siteSettings', 'navigation', 'homepage']);
@@ -27,7 +28,17 @@ export default defineConfig({
   title: 'Ceramic Brussels',
   projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
   dataset: import.meta.env.PUBLIC_SANITY_DATASET,
-  plugins: [structureTool({ structure })],
+  plugins: [
+    structureTool({
+      structure,
+      // A newsletter opens on its form, with "Preview & send" beside it:
+      // the email at desktop and phone width, and Mailchimp under it.
+      defaultDocumentNode: (S, { schemaType }) =>
+        schemaType === 'newsletter'
+          ? S.document().views([S.view.form(), S.view.component(NewsletterPane).title('Preview & send').id('preview')])
+          : S.document(),
+    }),
+  ],
 
   tools: (prev) => [
     ...prev,
