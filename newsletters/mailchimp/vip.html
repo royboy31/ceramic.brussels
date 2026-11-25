@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light only">
+<title>*|MC:SUBJECT|*</title>
+<!--
+  ceramic brussels - "VIPs of ceramic" newsletter, Mailchimp custom-coded template.
+
+  Live text instead of pictures of text: readable with images off, searchable,
+  and far less likely to be taken for spam. Every text, image and button is an
+  editable region (mc:edit); every row can be duplicated or hidden
+  (mc:repeatable, mc:hideable); the top photo has two layouts to choose from
+  (mc:variant). The colours and sizes of the theme are in the Design tab of
+  Mailchimp's classic builder (the @editable rules below).
+
+  Layout: 660 px, two columns of 330 px that stack into one column on a phone
+  without needing a media query (inline-block columns), with "ghost tables"
+  for Outlook on Windows, which ignores inline-block. The title over the
+  photo is a background image, with a VML copy of it for Outlook on Windows.
+
+  Font: Noi Grotesk, loaded from www.ceramic.brussels, where the client's
+  licensed cut is served. Apple Mail and iOS show it; Gmail and Outlook do not
+  load web fonts and show Helvetica / Arial instead. Outlook on Windows is
+  forced to Arial (it would otherwise fall back to Times New Roman).
+-->
+<!--[if mso]>
+<noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+<style>
+  * { font-family: Arial, Helvetica, sans-serif !important; }
+  .col { width: 330px !important; }
+  .dropcap { font-size: 14px !important; line-height: 150% !important; padding: 0 !important; }
+</style>
+<![endif]-->
+<style>
+  @media screen {
+    @font-face { font-family: 'Noi Grotesk'; font-weight: 400; font-style: normal; src: url('https://www.ceramic.brussels/fonts/noi-grotesk-400.woff2') format('woff2'); }
+    @font-face { font-family: 'Noi Grotesk'; font-weight: 500; font-style: normal; src: url('https://www.ceramic.brussels/fonts/noi-grotesk-500.woff2') format('woff2'); }
+    @font-face { font-family: 'Noi Grotesk'; font-weight: 600; font-style: normal; src: url('https://www.ceramic.brussels/fonts/noi-grotesk-600.woff2') format('woff2'); }
+    @font-face { font-family: 'Noi Grotesk'; font-weight: 900; font-style: normal; src: url('https://www.ceramic.brussels/fonts/noi-grotesk-900.woff2') format('woff2'); }
+  }
+
+  /* ---------- Reset ---------- */
+  body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; }
+  img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; display: block; height: auto; }
+  p { margin: 0 0 12px; }
+  p:last-child { margin-bottom: 0; }
+  a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }
+  #outlook a { padding: 0; }
+
+  /* ---------- Theme: VIP (black). The other themes change only these colours. ---------- */
+
+  /**
+   * @tab Page
+   * @section Background
+   * @tip The colour around the newsletter.
+   */
+  body, .page {
+    /*@editable*/ background-color: #e9e9e6;
+  }
+
+  /**
+   * @tab Page
+   * @section Newsletter colour
+   * @tip The background of the newsletter itself. VIP: #000000 (the black of the logo and partner images; #121212 would show them as boxes). Monthly: #feed00. Galleries: #ffffff. Basel: #c39c27.
+   */
+  .sheet {
+    /*@editable*/ background-color: #000000;
+  }
+
+  /**
+   * @tab Body
+   * @section Text
+   */
+  .text, .text p, .text li {
+    /*@editable*/ color: #ffffff;
+    /*@editable*/ font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif;
+    /*@editable*/ font-size: 14px;
+    /*@editable*/ line-height: 150%;
+  }
+
+  /**
+   * @tab Body
+   * @section Links
+   */
+  .text a, .card a {
+    /*@editable*/ color: #ffffff;
+    /*@editable*/ text-decoration: underline;
+  }
+
+  /**
+   * @tab Body
+   * @section Big headline
+   * @tip "The latest exclusive news..."
+   */
+  .headline, .headline p {
+    /*@editable*/ color: #ffffff;
+    /*@editable*/ font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif;
+    /*@editable*/ font-size: 23px;
+    /*@editable*/ font-weight: 900;
+    /*@editable*/ line-height: 125%;
+  }
+
+  /**
+   * @tab Body
+   * @section Title over the photo
+   */
+  .hero-title {
+    /*@editable*/ color: #ffffff;
+    /*@editable*/ font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif;
+    /*@editable*/ font-size: 40px;
+    /*@editable*/ font-weight: 900;
+    /*@editable*/ line-height: 110%;
+  }
+
+  /**
+   * @tab Body
+   * @section Labels
+   * @tip The white bars: YOUR EXCLUSIVE VIP ACCESS, MEMO...
+   */
+  .label {
+    /*@editable*/ background-color: #ffffff;
+    /*@editable*/ color: #000000;
+    /*@editable*/ font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif;
+    /*@editable*/ font-size: 18px;
+    /*@editable*/ font-weight: 500;
+  }
+
+  /**
+   * @tab Body
+   * @section Subtitles
+   * @tip The italic lines: Discovery Tours by Puilaetco, special rate...
+   */
+  .subtitle, .subtitle p {
+    /*@editable*/ color: #ffffff;
+    /*@editable*/ font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif;
+    /*@editable*/ font-size: 16px;
+    /*@editable*/ font-weight: 600;
+  }
+
+  /**
+   * @tab Body
+   * @section Buttons
+   * @tip The white ovals.
+   */
+  .pill {
+    /*@editable*/ background-color: #ffffff;
+  }
+  .pill a {
+    /*@editable*/ color: #000000;
+    /*@editable*/ font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif;
+    /*@editable*/ font-size: 15px;
+    /*@editable*/ font-weight: 600;
+  }
+
+  /**
+   * @tab Body
+   * @section Outlined buttons
+   * @tip "discover the full list of exhibitors"
+   */
+  .button-outline {
+    /*@editable*/ border-color: #ffffff;
+  }
+  .button-outline a {
+    /*@editable*/ color: #ffffff;
+  }
+
+  /**
+   * @tab Body
+   * @section Highlight colour
+   * @tip The yellow of the banner and of highlighted words.
+   */
+  .band, .mark {
+    /*@editable*/ background-color: #ffed00;
+  }
+  .band, .band a {
+    /*@editable*/ color: #000000;
+  }
+
+  /**
+   * @tab Body
+   * @section Lines
+   */
+  .rule {
+    /*@editable*/ border-color: #4a4a4a;
+  }
+  .card, .card-rule, .dotted {
+    /*@editable*/ border-color: #ffffff;
+  }
+
+  /**
+   * @tab Footer
+   * @section Footer text
+   */
+  .legal, .legal a {
+    /*@editable*/ color: #6b6b6b;
+    /*@editable*/ font-family: Helvetica, Arial, sans-serif;
+    /*@editable*/ font-size: 11px;
+  }
+
+  /* ---------- Styles Félicie can pick in the text editor (source view) ---------- */
+  .mark { color: #000000; padding: 0 3px; }                          /* yellow background */
+  .yellow-underline { text-decoration: underline; text-decoration-color: #ffed00; text-decoration-thickness: 3px; text-underline-offset: 3px; }
+  .big { font-size: 18px !important; line-height: 140% !important; }
+  .small { font-size: 12px !important; }
+  .italic { font-style: italic; }
+  /* A large first letter over two lines: <span class="dropcap">M</span>ain partner... */
+  .dropcap { float: left; font-size: 44px; line-height: 38px; padding: 2px 3px 0 0; font-weight: 400; }
+
+  /* ---------- Fixed layout pieces ---------- */
+  .label { padding: 3px 5px 2px; text-transform: uppercase; letter-spacing: 0.2px; line-height: 120%; }
+  .subtitle { font-style: italic; }
+  .pill { border-radius: 50%; padding: 11px 24px; text-align: center; }
+  .pill a { line-height: 115%; text-decoration: none; }
+  .info-key { font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; color: #ffffff; line-height: 120%; }
+  .info-value { font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif; font-size: 13px; color: #ffffff; line-height: 140%; }
+  .list-item { font-family: 'Noi Grotesk', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 140%; color: #ffffff; }
+
+  /* ---------- Phones ---------- */
+  @media only screen and (max-width: 680px) {
+    .sheet { width: 100% !important; }
+    .col { max-width: 100% !important; width: 100% !important; }
+    .col-pad { padding-left: 20px !important; padding-right: 20px !important; }
+    .hero-top { height: 150px !important; }
+    .hero-title { font-size: 32px !important; }
+    .headline { font-size: 22px !important; }
+    .img-fluid { width: 100% !important; max-width: 100% !important; }
+    .footer-cell { display: block !important; width: 100% !important; text-align: center !important; padding: 8px 0 !important; }
+    .footer-cell img { margin: 0 auto !important; }
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;">
+<!-- Preview text: set it in the campaign's "Preview text" field. -->
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;">*|MC_PREVIEW_TEXT|*&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;</div>
+
+<table role="presentation" class="page" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td align="center" style="padding:0;">
+
+<!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+<table role="presentation" class="sheet" width="660" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:660px;">
+
+  <!-- ===== Language buttons ===== -->
+  <tr mc:repeatable="languages" mc:hideable>
+    <td style="padding:14px 12px 12px;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="636" cellpadding="0" cellspacing="0" border="0"><tr><td width="318" align="center" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:318px;vertical-align:top;">
+        <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:4px auto;">
+          <tr><td class="dotted" style="border:1px solid #ffffff;border-radius:7px;padding:5px 14px;" mc:edit="lang_fr">
+            <a href="https://mailchi.mp/ceramic/bayw9e3s7s" style="font-family:'Noi Grotesk',Helvetica,Arial,sans-serif;font-size:12px;color:#ffffff;text-decoration:none;">Lire en français</a>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td><td width="318" align="center" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:318px;vertical-align:top;">
+        <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin:4px auto;">
+          <tr><td class="dotted" style="border:1px solid #ffffff;border-radius:7px;padding:5px 14px;" mc:edit="lang_nl">
+            <a href="https://mailchi.mp/ceramic/v6bsw50dmb" style="font-family:'Noi Grotesk',Helvetica,Arial,sans-serif;font-size:12px;color:#ffffff;text-decoration:none;">In het Nederlands lezen</a>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Yellow banner (fades to white at the top and bottom where gradients are supported) ===== -->
+  <tr mc:repeatable="banner" mc:hideable>
+    <td class="band" align="center" style="padding:13px 20px;background-image:linear-gradient(180deg,#fffef2 0%,#ffed00 32%,#ffed00 68%,#fffef2 100%);font-family:'Noi Grotesk',Helvetica,Arial,sans-serif;font-size:21px;font-weight:600;font-style:italic;" mc:edit="banner_text">
+      <a href="https://www.ceramic.brussels/en/" style="text-decoration:none;">our new website is live! &rarr;</a>
+    </td>
+  </tr>
+
+  <!-- ===== Photo, layout 1: logo and title over the photo =====
+       To change the photo, replace its address in the three places marked PHOTO
+       (the editor's source view of this block): the td, the style and the v:fill. -->
+  <tr mc:repeatable="hero" mc:variant="Title over the photo" mc:hideable>
+    <td class="hero" valign="top" bgcolor="#000000" background="https://cdn.sanity.io/images/5hqzhin7/production/c5590ea2f11810cf0950b0dd8a7334579fa9fb6a-670x447.webp?rect=0,70,670,283&amp;w=670&amp;fm=jpg&amp;q=85" style="background-image:url('https://cdn.sanity.io/images/5hqzhin7/production/c5590ea2f11810cf0950b0dd8a7334579fa9fb6a-670x447.webp?rect=0,70,670,283&amp;w=670&amp;fm=jpg&amp;q=85');background-position:center top;background-size:cover;background-repeat:no-repeat;">
+      <!--[if gte mso 9]>
+      <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:495pt;height:209pt;">
+      <v:fill type="frame" src="https://cdn.sanity.io/images/5hqzhin7/production/c5590ea2f11810cf0950b0dd8a7334579fa9fb6a-670x447.webp?rect=0,70,670,283&amp;w=670&amp;fm=jpg&amp;q=85" color="#000000" />
+      <v:textbox inset="0,0,0,0">
+      <![endif]-->
+      <div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="hero-top" valign="top" height="206" style="height:206px;padding:16px 14px 0;">
+            <a href="https://www.ceramic.brussels/en/"><img src="https://www.ceramic.brussels/assets/newsletter/wordmark-white.png" width="78" alt="ceramic brussels" style="width:78px;font-family:Helvetica,Arial,sans-serif;font-size:16px;color:#ffffff;"></a>
+          </td></tr>
+          <tr><td class="hero-title" valign="bottom" style="padding:0 14px 16px;text-shadow:0 1px 12px rgba(0,0,0,0.35);" mc:edit="hero_title">VIPs of ceramic brussels</td></tr>
+        </table>
+      </div>
+      <!--[if gte mso 9]></v:textbox></v:rect><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Photo, layout 2: photo, then the title under it (the photo is swapped like any image) ===== -->
+  <tr mc:repeatable="hero" mc:variant="Title under the photo" mc:hideable>
+    <td style="padding:0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td><img mc:edit="hero_image" class="img-fluid" src="https://cdn.sanity.io/images/5hqzhin7/production/c5590ea2f11810cf0950b0dd8a7334579fa9fb6a-670x447.webp?rect=0,70,670,283&amp;w=670&amp;fm=jpg&amp;q=85" width="660" alt="VIP guests on a Discovery Tour of the fair" style="width:100%;max-width:660px;"></td></tr>
+        <tr><td class="col-pad hero-title" style="padding:18px 12px 6px;" mc:edit="hero_title_under">VIPs of ceramic brussels</td></tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- ===== Row: headline | text ===== -->
+  <tr mc:repeatable="row_intro" mc:hideable>
+    <td style="padding:0;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td class="col-pad headline" style="padding:24px 12px 22px;" mc:edit="intro_left">
+            The latest exclusive news, straight to our VIPs, every month in your mailbox.
+          </td>
+        </tr></table>
+      </div>
+      <!--[if mso]></td><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td class="col-pad text" style="padding:26px 12px 22px;font-style:italic;" mc:edit="intro_right">
+            <p>With this exclusive newsletter, be the first to hear our news. Every month, and sometimes more often, discover the initiatives our partners have in store for you, what&rsquo;s new in our programme, and your upcoming VIP events.</p>
+          </td>
+        </tr></table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <tr><td style="padding:0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="rule" style="border-top:1px solid #4a4a4a;font-size:0;line-height:0;height:1px;">&nbsp;</td></tr></table></td></tr>
+
+  <!-- ===== Row: VIP access | VIP code ===== -->
+  <tr mc:repeatable="row_access" mc:hideable>
+    <td style="padding:0;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:20px 12px 12px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="label" mc:edit="access_label">Your exclusive VIP access</td></tr></table>
+          </td></tr>
+          <tr><td class="col-pad text" style="padding:0 12px 18px;" mc:edit="access_text">
+            <p>As a VIP guest, you have exclusive access to the <a href="https://www.ceramic.brussels/en/vip/">VIP section of our website</a>, where you&rsquo;ll find all the details about the VIP lounge, our programme of events and the benefits reserved for you.</p>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td><td width="330" valign="middle"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:middle;text-align:center;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" align="center" style="padding:26px 12px 24px;">
+            <!-- The code is a merge field: each guest sees their own. Keep *|VIPCODE|* as it is. -->
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0">
+              <tr><td class="label" style="padding:2px 4px 1px;font-size:19px;font-weight:600;text-transform:none;" mc:edit="code_label">Your VIP code:</td></tr>
+            </table>
+            <div style="padding-top:7px;font-family:'Noi Grotesk',Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;letter-spacing:1px;color:#ffffff;">*|VIPCODE|*</div>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Row: rendez-vous | practical info card ===== -->
+  <tr mc:repeatable="row_rendezvous" mc:hideable>
+    <td style="padding:0;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:8px 12px 12px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="label" mc:edit="rdv_label">Your VIP rendez-vous</td></tr></table>
+          </td></tr>
+          <tr><td class="col-pad subtitle" style="padding:2px 12px 12px;" mc:edit="rdv_subtitle">Discovery Tours by Puilaetco &#9679;</td></tr>
+          <tr><td class="col-pad text" style="padding:0 12px 18px;" mc:edit="rdv_text">
+            <p><span class="dropcap">M</span>ain partner of the fair since its very first edition, Puilaetco offers our VIP guests the Discovery Tours: guided walks through the aisles of the fair, led by specialised guides and equipped with audio headsets, to explore the diversity of this fourth edition. Designed as exploratory journeys, the tours offer a unique way to experience the galleries&rsquo; presentations and the fair&rsquo;s programme.</p>
+          </td></tr>
+          <tr><td class="col-pad" style="padding:0 12px 22px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+              <td valign="middle" align="left">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+                  <td class="pill" align="center" mc:edit="rdv_button">
+                    <a href="https://www.ceramic.brussels/en/vip/programme/">book your<br>Discovery Tour<br>&rarr; here &larr;</a>
+                  </td>
+                </tr></table>
+              </td>
+              <td valign="middle" align="right" width="105" style="width:105px;">
+                <img mc:edit="rdv_logo" src="https://dim.mcusercontent.com/cs/73ff2542d8372d84abeedd5a2/images/2c4b37a5-c62a-ec22-08de-7cafb8f359e1.jpg?rect=820,1005,410,305&amp;w=105&amp;h=78&amp;dpr=2" width="105" alt="Discovery Tours by Puilaetco" style="width:105px;font-family:Helvetica,Arial,sans-serif;font-size:11px;color:#ffffff;">
+              </td>
+            </tr></table>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:8px 12px 22px;">
+            <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #ffffff;">
+              <tr><td style="padding:12px 10px 14px;" mc:edit="info_card">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr><td align="right" style="padding-bottom:8px;font-family:'Noi Grotesk',Helvetica,Arial,sans-serif;font-size:17px;font-weight:500;color:#ffffff;text-decoration:underline;text-underline-offset:3px;text-transform:uppercase;">Practical info</td></tr>
+                  <tr><td style="padding:5px 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="info-key" style="white-space:nowrap;padding-right:6px;">when</td><td width="100%" valign="bottom" style="padding-bottom:5px;"><div class="card-rule" style="border-bottom:1px solid #ffffff;height:1px;font-size:1px;line-height:1px;">&nbsp;</div></td></tr></table></td></tr>
+                  <tr><td class="info-value" style="padding:1px 0 6px;">every afternoon from 20 to 24 January</td></tr>
+                  <tr><td style="padding:5px 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="info-key" style="white-space:nowrap;padding-right:6px;">duration</td><td width="100%" valign="bottom" style="padding-bottom:5px;"><div class="card-rule" style="border-bottom:1px solid #ffffff;height:1px;font-size:1px;line-height:1px;">&nbsp;</div></td></tr></table></td></tr>
+                  <tr><td class="info-value" style="padding:1px 0 6px;">40 minutes, with audio headsets</td></tr>
+                  <tr><td style="padding:5px 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="info-key" style="white-space:nowrap;padding-right:6px;">group size</td><td width="100%" valign="bottom" style="padding-bottom:5px;"><div class="card-rule" style="border-bottom:1px solid #ffffff;height:1px;font-size:1px;line-height:1px;">&nbsp;</div></td></tr></table></td></tr>
+                  <tr><td class="info-value" style="padding:1px 0 6px;">up to 20 people per tour</td></tr>
+                  <tr><td style="padding:5px 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="info-key" style="white-space:nowrap;padding-right:6px;">languages</td><td width="100%" valign="bottom" style="padding-bottom:5px;"><div class="card-rule" style="border-bottom:1px solid #ffffff;height:1px;font-size:1px;line-height:1px;">&nbsp;</div></td></tr></table></td></tr>
+                  <tr><td class="info-value" style="padding:1px 0 6px;">English, French and Dutch</td></tr>
+                  <tr><td style="padding:5px 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="info-key" style="white-space:nowrap;padding-right:6px;">meeting point</td><td width="100%" valign="bottom" style="padding-bottom:5px;"><div class="card-rule" style="border-bottom:1px solid #ffffff;height:1px;font-size:1px;line-height:1px;">&nbsp;</div></td></tr></table></td></tr>
+                  <tr><td class="info-value" style="padding:1px 0 12px;">hall C, Puilaetco desk</td></tr>
+                  <tr><td align="center">
+                    <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0"><tr>
+                      <td class="dotted" style="border:2px dotted #ffffff;border-radius:40px;padding:4px 14px;font-family:'Noi Grotesk',Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;color:#ffffff;">free, upon registration</td>
+                    </tr></table>
+                  </td></tr>
+                </table>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Row: image | text ===== -->
+  <tr mc:repeatable="row_hotel" mc:hideable>
+    <td style="padding:0;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:14px 12px 22px;">
+            <img mc:edit="hotel_image" class="img-fluid" src="https://dim.mcusercontent.com/cs/73ff2542d8372d84abeedd5a2/images/5982c86e-0e17-ad0a-7811-999bfb22abc6.jpg?rect=66,56,1152,867&amp;w=306&amp;h=230&amp;dpr=2" width="306" alt="A bedroom at The Hoxton, Brussels (photo: The Hoxton)" style="width:100%;max-width:306px;">
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:14px 12px 12px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="label" mc:edit="hotel_label">Tailored for you</td></tr></table>
+          </td></tr>
+          <tr><td class="col-pad subtitle" style="padding:2px 12px 10px;font-style:normal;text-transform:uppercase;" mc:edit="hotel_subtitle">The Hoxton &#9679;</td></tr>
+          <tr><td class="col-pad text" style="padding:0 12px 22px;" mc:edit="hotel_text">
+            <p><span class="dropcap">S</span>et just above the Botanical Gardens and a short walk from Brussels&rsquo; historic centre, <strong>The Hoxton is our new hotel partner</strong> &mdash; a design-led address with bold, 70s-inspired interiors and sweeping views over the city skyline. Beyond its rooms, it&rsquo;s also a lively meeting point, from Cantina Valentina&rsquo;s Peruvian-inspired plates to Tope&rsquo;s rooftop terrace.</p>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Row: offer box | memo ===== -->
+  <tr mc:repeatable="row_offer" mc:hideable>
+    <td style="padding:0;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:8px 12px 22px;">
+            <table role="presentation" class="dotted" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:2px dotted #ffffff;">
+              <tr><td class="subtitle" align="right" style="padding:12px 10px 6px;font-size:19px;" mc:edit="offer_title">special rate</td></tr>
+              <tr><td class="text" style="padding:0 10px 10px;" mc:edit="offer_text">
+                <p>As VIP, enjoy an exclusive offer and stay at The Hoxton for <strong>&euro;165 for single occupancy or &euro;185 for double occupancy</strong> on all rooms (cosy, roomy and biggy), fixed price, breakfast included. Simply use the code <strong>CERAMIC27</strong> when booking (first come first served!).</p>
+                <p style="font-style:italic;">Valid for stays between 18 and 25 January 2027.</p>
+              </td></tr>
+              <tr><td align="center" style="padding:4px 10px 18px;">
+                <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0"><tr>
+                  <td class="pill" align="center" mc:edit="offer_button">
+                    <a href="https://www.ceramic.brussels/en/vip/hotel-deal/">select your dates<br>&amp; book your stay<br>&rarr; here &larr;</a>
+                  </td>
+                </tr></table>
+              </td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:8px 12px 12px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="label" mc:edit="memo_label">Memo</td></tr></table>
+          </td></tr>
+          <tr><td class="col-pad text" style="padding:2px 12px 14px;" mc:edit="memo_text">
+            <p><strong><em>&#9679; The final list of participating galleries for ceramic brussels has been revealed!</em></strong><br>On the programme: 65 exhibitors, 17 countries, 150 artists and a unique selection of artworks.</p>
+          </td></tr>
+          <tr><td class="col-pad" align="center" style="padding:0 12px 18px;">
+            <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0"><tr>
+              <td class="button-outline" align="center" style="border:1px solid #ffffff;border-radius:8px;padding:8px 18px;" mc:edit="memo_button">
+                <a href="https://www.ceramic.brussels/en/exhibitors/" style="font-family:'Noi Grotesk',Helvetica,Arial,sans-serif;font-size:16px;font-weight:500;text-decoration:none;line-height:120%;">discover the full list<br>of exhibitors &rarr; here &larr;</a>
+              </td>
+            </tr></table>
+          </td></tr>
+          <tr><td class="col-pad" style="padding:0 12px 22px;">
+            <img mc:edit="memo_image" class="img-fluid" src="https://dim.mcusercontent.com/cs/73ff2542d8372d84abeedd5a2/images/e495d48b-1f60-ccd9-e12d-14f0f430bd6b.jpg?rect=66,850,1152,500&amp;w=306&amp;h=133&amp;dpr=2" width="306" alt="Janis Löhrer, ceramic rose, Galerie Judith Andreae" style="width:100%;max-width:306px;">
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Row: image | list ===== -->
+  <tr mc:repeatable="row_programme" mc:hideable>
+    <td style="padding:0;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:8px 12px 22px;">
+            <img mc:edit="programme_image" class="img-fluid" src="https://dim.mcusercontent.com/cs/73ff2542d8372d84abeedd5a2/images/341399e7-a562-e23b-a8a1-58abb8f050f8.jpg?rect=64,0,1155,966&amp;w=306&amp;h=256&amp;dpr=2" width="306" alt="Anastasia Bay, ceramic vase, Sorry We're Closed" style="width:100%;max-width:306px;">
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;text-align:left;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td class="col-pad" style="padding:8px 12px 12px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="label" mc:edit="programme_label">Programme</td></tr></table>
+          </td></tr>
+          <tr><td class="col-pad subtitle" style="padding:2px 12px 10px;" mc:edit="programme_subtitle">what&rsquo;s new this year? &#9679;</td></tr>
+          <tr><td class="col-pad text" style="padding:0 12px 10px;" mc:edit="programme_text">
+            <p><span class="dropcap">F</span>or our 4th edition, we&rsquo;re sparing no effort. Here&rsquo;s what you can expect:</p>
+          </td></tr>
+          <tr><td class="col-pad" style="padding:0 12px 22px;" mc:edit="programme_list">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr><td class="list-item card-rule" style="border-top:1px solid #ffffff;padding:7px 0;">&#8600; A VIP lounge with aperitivos, artist meet-ups, and networking opportunities</td></tr>
+              <tr><td class="list-item card-rule" style="border-top:1px solid #ffffff;padding:7px 0;">&#8600; 15+ talks and after-talks conversation in our VIP lounge</td></tr>
+              <tr><td class="list-item card-rule" style="border-top:1px solid #ffffff;border-bottom:1px solid #ffffff;padding:7px 0;">&#8600; Special evenings and networking meetings</td></tr>
+            </table>
+          </td></tr>
+        </table>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+  <!-- ===== Footer: logo, dates, Instagram ===== -->
+  <tr>
+    <td style="padding:14px 12px 0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td class="card-rule" style="border-top:1px solid #ffffff;font-size:0;line-height:0;">&nbsp;</td></tr>
+        <tr><td style="padding:14px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+            <td class="footer-cell" width="33%" valign="middle" style="width:33%;">
+              <a href="https://www.ceramic.brussels/en/"><img src="https://cdn.sanity.io/images/5hqzhin7/production/5e4ae2db68db3c5dd6e0e29c52dc81ebf7770f10-2567x486.jpg?rect=40,200,400,250&amp;w=200&amp;fm=jpg&amp;q=85" width="100" alt="ceramic brussels" style="width:100px;font-family:Helvetica,Arial,sans-serif;font-size:16px;color:#ffffff;"></a>
+            </td>
+            <td class="footer-cell" width="34%" align="center" valign="middle" style="width:34%;">
+              <img src="https://cdn.sanity.io/images/5hqzhin7/production/5e4ae2db68db3c5dd6e0e29c52dc81ebf7770f10-2567x486.jpg?rect=900,215,700,240&amp;w=280&amp;fm=jpg&amp;q=85" width="140" alt="20 to 24 January 2027" style="width:140px;margin:0 auto;font-family:Helvetica,Arial,sans-serif;font-size:16px;color:#ffffff;">
+            </td>
+            <td class="footer-cell" width="33%" align="right" valign="middle" style="width:33%;font-family:'Noi Grotesk',Helvetica,Arial,sans-serif;font-size:16px;" mc:edit="footer_social">
+              <a href="https://www.instagram.com/ceramic.brussels/" style="color:#ffffff;text-decoration:none;">@ceramic.brussels</a>
+            </td>
+          </tr></table>
+        </td></tr>
+        <!-- The line under this row is the top edge of the partner images. -->
+      </table>
+    </td>
+  </tr>
+
+  <!-- ===== Partners ===== -->
+  <tr mc:repeatable="partners" mc:hideable>
+    <td style="padding:6px 0 10px;font-size:0;" align="center">
+      <!--[if mso]><table role="presentation" width="660" cellpadding="0" cellspacing="0" border="0"><tr><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;">
+        <a href="https://www.ceramic.brussels/en/partners/"><img mc:edit="partner_1" class="img-fluid" src="https://mcusercontent.com/73ff2542d8372d84abeedd5a2/images/4614f924-13eb-5c74-9439-a74f4b374926.jpg" width="330" alt="Main partner: Puilaetco, a Quintet private bank" style="width:100%;max-width:330px;font-family:Helvetica,Arial,sans-serif;font-size:12px;color:#ffffff;"></a>
+      </div>
+      <!--[if mso]></td><td width="330" valign="top"><![endif]-->
+      <div class="col" style="display:inline-block;width:100%;max-width:330px;vertical-align:top;">
+        <a href="https://www.ceramic.brussels/en/partners/event/"><img mc:edit="partner_2" class="img-fluid" src="https://mcusercontent.com/73ff2542d8372d84abeedd5a2/images/ca2c8971-d785-43ca-e8af-ac03be9c4423.jpg" width="330" alt="Logistics partner: Embelco" style="width:100%;max-width:330px;font-family:Helvetica,Arial,sans-serif;font-size:12px;color:#ffffff;"></a>
+      </div>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td>
+  </tr>
+
+</table>
+<!--[if mso]></td></tr></table><![endif]-->
+
+<!-- ===== Mailchimp's required footer (unsubscribe and address) ===== -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:660px;">
+  <tr><td class="legal" align="center" style="padding:22px 20px 30px;line-height:160%;" mc:edit="legal">
+    This email was sent to <a href="mailto:*|EMAIL|*">*|EMAIL|*</a><br>
+    <a href="*|ABOUT_LIST|*">why did I get this?</a> &nbsp; <a href="*|UNSUB|*">unsubscribe from this list</a> &nbsp; <a href="*|UPDATE_PROFILE|*">update subscription preferences</a><br>
+    *|LIST:ADDRESSLINE|*
+  </td></tr>
+</table>
+
+</td></tr>
+</table>
+</body>
+</html>

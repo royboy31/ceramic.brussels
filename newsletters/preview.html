@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newsletter preview</title>
+<!--
+  Shows a Mailchimp template at desktop and phone width, with sample values
+  in place of the merge fields (*|VIPCODE|* and so on), the way a guest would
+  see it. Serve the folder (any static server) and open
+  preview.html?t=mailchimp/vip.html - fetch() does not work from file://.
+-->
+<style>
+  :root { --ground: #f4f4f1; --ink: #121212; --ink-2: #666; --rule: #d6d6d2; }
+  @media (prefers-color-scheme: dark) { :root { --ground: #1b1b1b; --ink: #f2f2f2; --ink-2: #aaa; --rule: #3a3a3a; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 20px 16px 40px; background: var(--ground); color: var(--ink); font: 14px/1.4 Helvetica, Arial, sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: baseline; margin-bottom: 18px; }
+  h1 { font-size: 18px; margin: 0; }
+  label { color: var(--ink-2); }
+  .frames { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+  figure { margin: 0; }
+  figcaption { color: var(--ink-2); margin-bottom: 8px; }
+  iframe { display: block; border: 1px solid var(--rule); background: #fff; }
+  .desktop iframe { width: 700px; max-width: calc(100vw - 32px); height: 2900px; }
+  .mobile iframe { width: 375px; max-width: calc(100vw - 32px); height: 4200px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Newsletter preview</h1>
+  <label><input type="checkbox" id="images" checked> images on</label>
+  <label><input type="checkbox" id="font" checked> Noi Grotesk (off = what Gmail and Outlook show)</label>
+</header>
+<div class="frames">
+  <figure class="desktop"><figcaption>Desktop, 660 px</figcaption><iframe id="d" title="Desktop preview"></iframe></figure>
+  <figure class="mobile"><figcaption>Phone, 375 px</figcaption><iframe id="m" title="Phone preview"></iframe></figure>
+</div>
+<script>
+  const template = new URLSearchParams(location.search).get('t') || 'mailchimp/vip.html';
+  const SAMPLE = {
+    VIPCODE: 'CB27-7KQ4-XM2P',
+    MC_PREVIEW_TEXT: 'Your VIP news for November',
+    'MC:SUBJECT': 'VIPs of ceramic',
+    EMAIL: 'guest@example.com',
+    ABOUT_LIST: '#', UNSUB: '#', UPDATE_PROFILE: '#',
+    'LIST:ADDRESSLINE': 'ceramic brussels · 148c rue Franz Merjay · Ixelles 1050 · Belgium',
+  };
+  let source = '';
+
+  // Mailchimp shows one variant of a repeatable block at a time - the first
+  // until the editor picks another. ?variant=2 shows the second, and so on.
+  const pick = Number(new URLSearchParams(location.search).get('variant') || 1);
+  function variants(html) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const groups = {};
+    for (const el of doc.querySelectorAll('[mc\\:variant]')) {
+      (groups[el.getAttribute('mc:repeatable')] ??= []).push(el);
+    }
+    for (const list of Object.values(groups)) {
+      const keep = list[Math.min(pick, list.length) - 1];
+      for (const el of list) if (el !== keep) el.remove();
+    }
+    return '<!doctype html>\n' + doc.documentElement.outerHTML;
+  }
+
+  function render() {
+    let html = variants(source).replace(/\*\|([A-Z_:]+)\|\*/g, (m, k) => (k in SAMPLE ? SAMPLE[k] : m));
+    // Files this branch adds to the site are not on www.ceramic.brussels until it is deployed.
+    html = html.replaceAll('https://www.ceramic.brussels/assets/newsletter/', '/public/assets/newsletter/');
+    const extra = [];
+    if (!document.getElementById('images').checked) extra.push('img{visibility:hidden!important}');
+    if (!document.getElementById('font').checked) extra.push("*{font-family:Helvetica,Arial,sans-serif!important}");
+    if (extra.length) html = html.replace('</head>', `<style>${extra.join('')}</style></head>`);
+    for (const id of ['d', 'm']) document.getElementById(id).srcdoc = html;
+  }
+
+  fetch(template).then((r) => r.text()).then((t) => { source = t; render(); });
+  document.getElementById('images').addEventListener('change', render);
+  document.getElementById('font').addEventListener('change', render);
+</script>
+</body>
+</html>
