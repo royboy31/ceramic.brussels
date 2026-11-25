@@ -61,6 +61,7 @@ const summary: EditionSummary = editions.find((e: any) => e.year === year) ?? {
   ordinal: edition.ordinal,
   countryFocus: edition.countryFocus,
   guestOfHonour: edition.guestOfHonour,
+  guestOfHonourLabel: edition.guestOfHonourLabel,
   publication: edition.publication,
   exhibitorCount: edition.exhibitorCount,
   laureateCount: edition.laureates?.length ?? 0,
@@ -70,7 +71,7 @@ const tabs = tabsFor(summary);
 
 const items = tabs.map((x) => ({
   slug: x.slug,
-  label: tabLabel(x, summary, t),
+  label: tabLabel(x, summary, t, lang),
   href: localePath(lang, editionTabHref(year, x, lang)),
 }));
 
@@ -83,7 +84,7 @@ const lead =
   (tab === 'overview' ? edition.intro : undefined);
 
 const label = tabs.find((x) => x.slug === tab) ?? TABS.find((x) => x.slug === tab);
-const tabName = label ? tabLabel(label, summary, t) : tab;
+const tabName = label ? tabLabel(label, summary, t, lang) : tab;
 const title = `${heading} — ${tabName}`;
 
 const path = editionTabPath(year, tab, lang);
@@ -168,5 +169,30 @@ if (!Content) return Astro.rewrite('/404');
       grid-template-columns: minmax(0, 1fr);
       gap: 28px;
     }
+  }
+
+  /**
+   * A highlighted **link** is knocked out black here, not marked acid:
+   * "when there's a link, the highlight should be black and the text white,
+   * and not yellow, to respect the « grey & black » codes of this section of
+   * the site" (Léonie, 2026-10-26, on "Norwegian Crafts" in the focus lead).
+   *
+   * The editor applies Highlight and the link mark to the same span, and
+   * `renderSpans` nests them in whichever order the marks are stored, so
+   * both shapes are addressed. A highlight with no link keeps the acid
+   * marker - this is about the link, not about the mark.
+   *
+   * Keyed on `body.ash-page`, which is this section and nothing else, so an
+   * acid-marked link on any other page is untouched. `!important` because
+   * PortableText scopes its own `.t-highlight` rule with its cid, which
+   * outweighs anything written from outside it.
+   */
+  body.ash-page .t-highlight:has(a),
+  body.ash-page a .t-highlight {
+    background: #050505 !important;
+    color: #fff !important;
+  }
+  body.ash-page .t-highlight:has(a) a {
+    color: #fff !important;
   }
 </style>

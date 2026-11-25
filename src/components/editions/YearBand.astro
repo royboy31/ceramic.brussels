@@ -62,9 +62,16 @@ const t = useTranslations(lang);
     justify-content: center;
     min-height: 53px;
     padding: 6px 12px;
-    font-size: 16px;
+    /* 24px, the frame's own size (node 1462:1889, Noi Grotesk Fix 24) -
+       "all these caps titles could be a little bit bigger" (Léonie,
+       2026-10-26). It was 16px, and 20px, tried first, was still short of
+       the design. */
+    font-size: 24px;
     line-height: 1.2;
-    letter-spacing: 0.01em;
+    /* No tracking, as the site's other bold capitals: "could you reduce the
+       letter-spacing a teeny tiny bit in the 3 year buttons on top of each
+       page?" (Léonie, 2026-11-09). It was 0.01em. */
+    letter-spacing: 0;
     /* The design sets these in small caps; the content is lowercase in the
        data ("2nd edition"), so the band does the casing. */
     text-transform: uppercase;
@@ -97,11 +104,13 @@ const t = useTranslations(lang);
       grid-auto-flow: row;
       grid-auto-columns: auto;
     }
+    /* Centred, as on a desktop (Léonie, 2026-11-10); they stood at the left. */
     .year-cell {
-      justify-content: flex-start;
       min-height: 38px;
       padding-inline: var(--gutter);
-      font-size: 14px;
+      /* The design is desktop-only; three stacked rows at the frame's 24px
+         are heavy on a phone, so the band steps down here as it always has. */
+      font-size: 18px;
     }
     .year-cell + .year-cell {
       border-top: 1px solid var(--color-ink, #050505);

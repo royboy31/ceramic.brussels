@@ -56,6 +56,15 @@ interface Props {
    * there for a slideshow that must keep the gutter.
    */
   bleed?: boolean;
+  /**
+   * What a click on the arrow moves by. `page` (the default) is one track
+   * width, right for the one-up carousel this component is. `slide` is one
+   * picture, for a parent that lays several in view with the next one
+   * showing at the edge - the previous-editions overview, set like the guest
+   * of honour's works row (Léonie, 2026-11-10). It only applies while more
+   * than one slide is in view, so the same slideshow is one-up on a phone.
+   */
+  step?: 'page' | 'slide';
   class?: string;
 }
 
@@ -69,6 +78,7 @@ const {
   label,
   id = 'slideshow',
   bleed = true,
+  step = 'page',
   class: className,
 } = Astro.props;
 
@@ -85,6 +95,7 @@ const widthFit = fit === 'width';
       id={id}
       data-slides={slides.length}
       data-autoplay={autoplay && slides.length > 1 ? autoplay : undefined}
+      data-step={step === 'slide' ? 'slide' : undefined}
       style={aspect && !widthFit ? `--aspect: ${aspect}` : undefined}
     >
       {/* The clip the height is animated on. It wraps the track rather than
@@ -547,6 +558,19 @@ const widthFit = fit === 'width';
       });
       track.addEventListener('pointerleave', () => (arrow.hidden = true));
       track.addEventListener('click', () => {
+        // Several pictures in view (`step="slide"`): one picture at a time,
+        // round to the other end past either one - the guest of honour's
+        // works row, to the line. A page is not a slide there, so the
+        // arithmetic below would drift a quarter picture every click.
+        const pitch = slides[1] ? slides[1].offsetLeft - slides[0].offsetLeft : track.clientWidth;
+        if (show.dataset.step === 'slide' && pitch < track.clientWidth - 2) {
+          const max = track.scrollWidth - track.clientWidth;
+          let left = track.scrollLeft + dir * pitch;
+          if (track.scrollLeft >= max - 2 && dir > 0) left = 0;
+          else if (track.scrollLeft <= 2 && dir < 0) left = max;
+          track.scrollTo({ left, behavior: reduced ? 'auto' : 'smooth' });
+          return;
+        }
         const next = (current() + dir + slides.length) % slides.length;
         track.scrollTo({ left: next * track.clientWidth, behavior: reduced ? 'auto' : 'smooth' });
         mark(next);

@@ -42,15 +42,12 @@ const label = publication?.title ?? `${edition.title ?? edition.year} — ${t('p
   }
 
   {
-    /* The reader needs a window to be read in; a page that cannot show one
-       still has to lead somewhere. */
-    url && (
-      <p class="away">
-        <a class="pill" href={url} rel="noopener noreferrer" target="_blank">
-          {t('prevEd.publication')} ↗
-        </a>
-      </p>
-    )
+    /* The "publication ↗" pill that used to sit under the reader is gone
+       ("remove the « publication » button underneath the inserted
+       publication", Léonie, 2026-10-26). It was there so a browser that
+       could not show the iframe still led somewhere; the reader is
+       FlipHTML5 in an ordinary iframe and has been fine everywhere it was
+       tried, and the pill read as a duplicate of the page itself. */
   }
 </div>
 
@@ -79,10 +76,6 @@ const label = publication?.title ?? `${edition.title ?? edition.year} — ${t('p
     height: 100%;
     border: 0;
     display: block;
-  }
-
-  .away {
-    margin: 20px 0 0;
   }
 
   @media (max-width: 700px) {

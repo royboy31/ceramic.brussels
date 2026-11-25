@@ -233,17 +233,7 @@ export const edition = defineType({
       group: 'archive',
       of: [defineArrayMember({ type: 'figure' })],
       options: { layout: 'grid' },
-      description: 'The pair shown under the lead on the overview tab. The first two are used, side by side, 3:2.',
-    }),
-    defineField({
-      // "On every overview page (for every year), a new text-field right
-      // underneath the slideshow, the same size as the highlights text" -
-      // Léonie, 2026-11-18, Figma frame 1405:650.
-      name: 'overviewText',
-      title: 'Overview text',
-      type: 'localeBlock',
-      group: 'archive',
-      description: 'The text under the overview pictures, set in two columns at the size of the highlights. Leave empty to show nothing there.',
+      description: 'The slideshow under the lead on the overview tab: up to ten pictures, two in view at a time, 3:2.',
     }),
     defineField({
       // "I can't choose the pictures on this page, could you create a field" -
@@ -257,6 +247,16 @@ export const edition = defineType({
       options: { layout: 'grid' },
       description:
         "The slideshow beside the laureates on the art prize tab, in this order. Leave empty to use the first five pictures of the year's gallery.",
+    }),
+    defineField({
+      // "On every overview page (for every year), a new text-field right
+      // underneath the slideshow, the same size as the highlights text" -
+      // Léonie, 2026-11-18, Figma frame 1405:650.
+      name: 'overviewText',
+      title: 'Overview text',
+      type: 'localeBlock',
+      group: 'archive',
+      description: 'The text under the overview pictures, set in two columns at the size of the highlights. Leave empty to show nothing there.',
     }),
     defineField({
       name: 'highlights',

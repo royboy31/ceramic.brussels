@@ -29,5 +29,9 @@
  *   editions →" pill are not drawn.
  *
  * Set it back to `true` and the section returns exactly as it was.
+ *
+ * **On since 2026-11-25**: Tiphaine, 2026-11-24, "The past editions are
+ * ready to be online". Setting it to `false` again takes the section back
+ * off as described above.
  */
-export const PAST_EDITIONS_PUBLIC = false;
+export const PAST_EDITIONS_PUBLIC = true;

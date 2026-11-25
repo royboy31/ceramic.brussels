@@ -37,14 +37,31 @@ const t = useTranslations(lang);
 const laureates: any[] = (edition.laureates ?? []).filter((l: any) => l?.artist?.name);
 const jury: any[] = edition.jury ?? [];
 const awards: any[] = edition.awards ?? [];
-const images: any[] = (edition.images ?? []).filter((img: any) => img?.asset).slice(0, 5);
+/* The tab's own "Art prize pictures" (Tiphaine, 2026-11-17), or, until they
+   are chosen, the first five of the year's gallery as before. */
+const prizeImages: any[] = (edition.prizeImages ?? []).filter((img: any) => img?.asset);
+const images: any[] = prizeImages.length
+  ? prizeImages
+  : (edition.images ?? []).filter((img: any) => img?.asset).slice(0, 5);
+
+/** "A", "A and B", "A, B and C" - the art prize hub's joiner. */
+const names = (list: string[]) =>
+  list.length < 2 ? (list[0] ?? '') : `${list.slice(0, -1).join(', ')} ${t('common.and')} ${list[list.length - 1]}`;
 
 /**
  * The one line an award gets: its `outcome`, or the last paragraph of its
  * description, which is where the import put the winner sentence.
  */
 const winnerLine = (award: any): string | null => {
-  if (award.outcome) return award.outcome;
+  /* `outcome` is the sentence without its subject ("is the winner of the
+     jury prize"), so the winners go in front, as on the art prize hub - "it
+     should say Marie Pic is the winner…" (Tiphaine, 2026-11-17). An outcome
+     that already names one of them is left as it is. */
+  if (award.outcome) {
+    const winners: string[] = (award.laureates ?? []).map((l: any) => l?.name).filter(Boolean);
+    const named = winners.some((n) => award.outcome.includes(n));
+    return winners.length && !named ? `${names(winners)} ${award.outcome}` : award.outcome;
+  }
   const blocks = Array.isArray(award.description) ? award.description : [];
   const last = blocks[blocks.length - 1];
   if (last?._type !== 'block') return null;
@@ -95,6 +112,29 @@ const suffix = (artist: any) => {
             {laureates.map((l: any) => {
               const href = instagramUrl(l.artist.instagram);
               const name = `${l.artist.name}${suffix(l.artist)}`;
+              /* A duo filled in member by member: each name to its own
+                 Instagram (Tiphaine, 2026-11-17), joined as the record's
+                 name is, the country after the last. */
+              const members: any[] = (l.artist.members ?? []).filter((m: any) => m?.name);
+              if (members.length > 1) {
+                return (
+                  <li>
+                    {members.map((m: any, i: number) => (
+                      <>
+                        {i > 0 && (i === members.length - 1 ? ' & ' : ', ')}
+                        {instagramUrl(m.instagram) ? (
+                          <a class="text-link" href={instagramUrl(m.instagram)} rel="noopener noreferrer">
+                            {m.name}
+                            {i === members.length - 1 && suffix(l.artist)} <span class="link-arrow" data-arrow="↗">↗</span>
+                          </a>
+                        ) : (
+                          <>{m.name}{i === members.length - 1 && suffix(l.artist)}</>
+                        )}
+                      </>
+                    ))}
+                  </li>
+                );
+              }
               return (
                 <li>
                   {href ? (
@@ -190,6 +230,11 @@ const suffix = (artist: any) => {
   }
   .laureates a {
     text-decoration: underline;
+    /* 2px, measured off the frame (node 1457:1403, two solid rows under
+       40px type) - "make underline thinner for the laureates names"
+       (Léonie, 2026-10-26) meant thinner than the browser's `auto`, not
+       hairline. */
+    text-decoration-thickness: 2px;
     text-underline-offset: 0.14em;
   }
 
@@ -210,13 +255,17 @@ const suffix = (artist: any) => {
     font-size: 0.5em;
     vertical-align: super;
   }
-  /* The frame sets a jury member's role in small caps under the name. */
+  /* A jury member's role is the site's one BOLD & CAPS line - body size,
+     600, no extra tracking - and not a 15px small-caps of its own ("these
+     subtitles should be the same text-style as all the other bold & caps
+     ones throughout the website", Léonie, 2026-10-26). Same values as the
+     VIP programme's date lines and the platform's labels. */
   .role {
     margin: 6px 0 0;
-    font-size: 15px;
+    font-size: var(--body-size);
     font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: 0.01em;
+    line-height: var(--body-lh);
+    letter-spacing: 0;
     text-transform: uppercase;
   }
   .pills {
@@ -225,17 +274,18 @@ const suffix = (artist: any) => {
     gap: 8px;
     margin: 12px 0 0;
   }
-  .pills .pill {
-    padding: 1px 11px 0;
-    border-radius: 999px;
-    font-size: 15px;
-    line-height: 1.6;
-  }
+  /* No size of their own any more: `.pill` carries the site's --pill tokens
+     (22px, 3px 20px) and these were overridden down to 15px - "these
+     website & instagram buttons should be bigger, just like they are on the
+     rest of the website" (Léonie, 2026-10-26). Dropping the override is the
+     whole fix. */
   .award .outcome {
     margin: 6px 0 0;
-    font-size: 18px;
-    line-height: 1.35;
-    letter-spacing: -0.02em;
+    /* Body text, as under every other heading on the site ("the sentence
+       under each award should be body-text size", Léonie, 2026-10-26). */
+    font-size: var(--body-size);
+    line-height: var(--body-lh);
+    letter-spacing: var(--body-ls);
   }
 
   @media (max-width: 900px) {
