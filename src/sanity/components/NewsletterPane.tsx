@@ -189,7 +189,7 @@ export function NewsletterPane({ document, documentId }: Props) {
 
   return (
     <Box padding={4}>
-      <Stack space={4}>
+      <Stack gap={4}>
         <Flex gap={2} align="center" wrap="wrap">
           <Button mode={width === 'desktop' ? 'default' : 'ghost'} text="Desktop" onClick={() => setWidth('desktop')} />
           <Button mode={width === 'phone' ? 'default' : 'ghost'} text="Phone" onClick={() => setWidth('phone')} />
@@ -211,7 +211,7 @@ export function NewsletterPane({ document, documentId }: Props) {
         </Card>
 
         <Card padding={4} radius={2} shadow={1}>
-          <Stack space={4}>
+          <Stack gap={4}>
             <Flex align="center" gap={2}>
               <Text weight="semibold">Send with Mailchimp</Text>
               {doc.mailchimp?.status && <Badge tone={sent ? 'positive' : 'primary'}>{sent ? 'sent' : 'campaign ready in Mailchimp'}</Badge>}
@@ -224,8 +224,8 @@ export function NewsletterPane({ document, documentId }: Props) {
             ) : !audiences ? (
               <Button text="Connect to Mailchimp" tone="primary" onClick={loadAudiences} disabled={!!busy} icon={busy === 'audiences' ? Spinner : undefined} />
             ) : (
-              <Stack space={3}>
-                <Stack space={2}>
+              <Stack gap={3}>
+                <Stack gap={2}>
                   <Text size={1} weight="semibold">Audience</Text>
                   <Select value={listId} onChange={(e) => { setListId(e.currentTarget.value); setSegmentId(''); setPrepared(null); }}>
                     <option value="">Choose…</option>
@@ -247,7 +247,7 @@ export function NewsletterPane({ document, documentId }: Props) {
                   )}
                 </Stack>
 
-                <Stack space={2}>
+                <Stack gap={2}>
                   <Text size={1} weight="semibold">Test first</Text>
                   <Flex gap={2}>
                     <Box flex={1}>
@@ -258,7 +258,7 @@ export function NewsletterPane({ document, documentId }: Props) {
                   <Text size={1} muted>Up to five addresses. The VIP code shows as *|VIPCODE|* in a test.</Text>
                 </Stack>
 
-                <Stack space={2}>
+                <Stack gap={2}>
                   <Text size={1} weight="semibold">Send for real</Text>
                   {unpublished && <Text size={1}>Publish your changes first: what goes out must be what the document says.</Text>}
                   <Flex gap={2}>
@@ -300,7 +300,7 @@ export function NewsletterPane({ document, documentId }: Props) {
       {confirming && prepared && (
         <Dialog id="newsletter-send" header="Send this newsletter?" onClose={() => setConfirming(false)} width={1}>
           <Box padding={4}>
-            <Stack space={4}>
+            <Stack gap={4}>
               <Text>
                 “{doc.subject}” goes to <strong>{prepared.recipients} people</strong> in {prepared.listName}
                 {prepared.segment ? ` (${prepared.segment})` : ''}. This cannot be undone.
