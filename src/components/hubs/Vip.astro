@@ -142,14 +142,8 @@ const byDay = (list: any[]): DayGroup[] => {
 };
 const onSiteDays = byDay(onSite);
 const offSiteDays = byDay(offSite);
-/* Under a day heading the date line keeps only its time: "20 JANUARY 2027 —
-   13:00 / 16:00" and "EVERYDAY — 17:30 / 19:00" read "13:00 / 16:00" and
-   "17:30 / 19:00", the heading already saying which day. */
-const timeOnly = (s: string) => {
-  const parts = String(s).split(/\s[—–]\s/);
-  return parts.length > 1 ? parts.slice(1).join(' — ') : s;
-};
-const whenLine = (e: any) => (e.whenText ? timeOnly(e.whenText) : formatTime(e.startsAt, lang));
+/* The date line as the editor typed it ("everyday — 11:00 / 16:00", #15). */
+const whenLine = (e: any) => e.whenText ?? formatTime(e.startsAt, lang);
 const lines = (s: string) => String(s ?? '').split(/\r?\n/);
 
 const path = hubTabPath('vip', tab, lang);
@@ -499,8 +493,8 @@ const rateLink =
                           </>
                         ))}
                       </h4>
-                      {/* The time from the editor's date line ("everyday — 11:00 /
-                          16:00", #15), the day heading above saying which day. */}
+                      {/* "everyday — 11:00 / 16:00" as the editor typed it, where one
+                          datetime cannot say it (#15). */}
                       <p class="event-when">{whenLine(e)}</p>
                       {e.description && (
                         <div class="event-text body-20">
@@ -944,16 +938,12 @@ const rateLink =
   /* The off-site programme and the lounge's agenda stop short of the right
      edge in the frames - the day rule, the rows and the group rule all end
      on the same line, a fifth in from the page edge. */
+  .on-site .day-title,
   .off-site .day-title,
   .off-site .rows,
   .agenda .group-title,
   .agenda .rows {
     max-width: 83%;
-  }
-  /* The on-site half's day headings rule across both its columns, as wide
-     as its rows. */
-  .on-site .day-title {
-    max-width: none;
   }
   .off-site .tba {
     margin: 12px 0 0;
@@ -1085,6 +1075,7 @@ const rateLink =
     }
     .subgroup-title,
     .day-title,
+    .on-site .day-title,
     .off-site .day-title,
     .off-site .rows,
     .agenda .group-title,
