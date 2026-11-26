@@ -119,8 +119,37 @@ if (hotelCode && page) {
 const listed = tab === 'programme' ? events.filter((e: any) => e.section === 'vip' && e.startsAt) : [];
 const onSite = listed.filter((e: any) => e.venue === 'on-site');
 const offSite = listed.filter((e: any) => e.venue !== 'on-site');
-const days = [...new Set(offSite.map((e: any) => e.startsAt.slice(0, 10)))] as string[];
-const onDay = (day: string) => offSite.filter((e: any) => e.startsAt.startsWith(day));
+/*
+ * Both halves are set out by day (Félicie, 2026-11-26: the on-site half was
+ * by event, the off-site half by day). An event whose date line starts
+ * "everyday" (the aperitivos, the discovery tours) is not tied to its
+ * start date and goes under one "everyday" heading after the dated days.
+ */
+const EVERYDAY = /^\s*(every\s?day|tous les jours|elke dag)\b/i;
+const isEveryday = (e: any) => EVERYDAY.test(String(e.whenText ?? ''));
+type DayGroup = { key: string; title: string; events: any[] };
+const byDay = (list: any[]): DayGroup[] => {
+  const dated = list.filter((e) => !isEveryday(e));
+  const days = [...new Set(dated.map((e) => e.startsAt.slice(0, 10)))].sort() as string[];
+  const groups: DayGroup[] = days.map((day) => ({
+    key: day,
+    title: formatDayLong(day, lang),
+    events: dated.filter((e) => e.startsAt.startsWith(day)),
+  }));
+  const daily = list.filter(isEveryday);
+  if (daily.length) groups.push({ key: 'everyday', title: t('vip.everyday'), events: daily });
+  return groups;
+};
+const onSiteDays = byDay(onSite);
+const offSiteDays = byDay(offSite);
+/* Under a day heading the date line keeps only its time: "20 JANUARY 2027 —
+   13:00 / 16:00" and "EVERYDAY — 17:30 / 19:00" read "13:00 / 16:00" and
+   "17:30 / 19:00", the heading already saying which day. */
+const timeOnly = (s: string) => {
+  const parts = String(s).split(/\s[—–]\s/);
+  return parts.length > 1 ? parts.slice(1).join(' — ') : s;
+};
+const whenLine = (e: any) => (e.whenText ? timeOnly(e.whenText) : formatTime(e.startsAt, lang));
 const lines = (s: string) => String(s ?? '').split(/\r?\n/);
 
 const path = hubTabPath('vip', tab, lang);
@@ -444,11 +473,14 @@ const rateLink =
     {/* -------------------------------------------------------- programme */}
     {
       tab === 'programme' && (
-        <section class="group">
+        <section class="group on-site">
           <h2 class="group-title">{t('vip.venue.on-site')}</h2>
-          <div class="rows">
-            {!fromDesign
-              ? onSite.map((e: any) => (
+          {!fromDesign
+            ? onSiteDays.map((g) => (
+                <section class="day">
+                  <h3 class="day-title">{g.title}</h3>
+                  <div class="rows">
+                {g.events.map((e: any) => (
                   <article class="row row-half">
                     <Slideshow
                       images={e.image?.asset ? [e.image] : []}
@@ -459,17 +491,17 @@ const rateLink =
                       widths={[600, 900, 1200]}
                     />
                     <div class="row-copy">
-                      <h3 class="event-title ruled" {...styleAttrs(e.titleStyle)}>
+                      <h4 class="event-title ruled" {...styleAttrs(e.titleStyle)}>
                         {lines(e.title).map((line, k) => (
                           <>
                             {k > 0 && <br />}
                             {line}
                           </>
                         ))}
-                      </h3>
-                      {/* "everyday — 11:00 / 16:00" as the editor typed it, where one
-                          datetime cannot say it (#15). */}
-                      <p class="event-when">{e.whenText ?? formatTime(e.startsAt, lang)}</p>
+                      </h4>
+                      {/* The time from the editor's date line ("everyday — 11:00 /
+                          16:00", #15), the day heading above saying which day. */}
+                      <p class="event-when">{whenLine(e)}</p>
                       {e.description && (
                         <div class="event-text body-20">
                           <PortableText value={e.description} fieldStyle={e.descriptionStyle} />
@@ -485,8 +517,13 @@ const rateLink =
                       )}
                     </div>
                   </article>
-                ))
-              : C.programme.onSite.rows.map((row: VipRow) => (
+                ))}
+                  </div>
+                </section>
+              ))
+            : (
+              <div class="rows">
+                {C.programme.onSite.rows.map((row: VipRow) => (
                   <article class="row row-half">
                     <VipShot
                       image={row.image}
@@ -510,7 +547,8 @@ const rateLink =
                     </div>
                   </article>
                 ))}
-          </div>
+              </div>
+            )}
         </section>
       )
     }
@@ -522,17 +560,17 @@ const rateLink =
           {/* No off-site event published yet: the title stays, with the date
               the programme is due (client, 2026-10-21). Publishing the events
               again brings the rows back and this line goes by itself. */}
-          {!fromDesign && days.length === 0 && <p class="body-20 tba">{t('vip.offSite.tba')}</p>}
+          {!fromDesign && offSiteDays.length === 0 && <p class="body-20 tba">{t('vip.offSite.tba')}</p>}
           {!fromDesign
-            ? days.map((day) => (
+            ? offSiteDays.map((g) => (
                 <section class="day">
-                  <h3 class="day-title">{formatDayLong(day, lang)}</h3>
+                  <h3 class="day-title">{g.title}</h3>
                   <div class="rows">
-                    {onDay(day).map((e: any) => (
+                    {g.events.map((e: any) => (
                       <article class="row">
                         <div class="row-copy">
                           <h4 class="event-line" {...styleAttrs(e.titleStyle)}>
-                            {lines(e.title).join(' ')} — {e.whenText ?? formatTime(e.startsAt, lang)}
+                            {lines(e.title).join(' ')} — {whenLine(e)}
                           </h4>
                           {e.description && (
                             <div class="event-text body-20">
@@ -911,6 +949,11 @@ const rateLink =
   .agenda .group-title,
   .agenda .rows {
     max-width: 83%;
+  }
+  /* The on-site half's day headings rule across both its columns, as wide
+     as its rows. */
+  .on-site .day-title {
+    max-width: none;
   }
   .off-site .tba {
     margin: 12px 0 0;
