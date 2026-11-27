@@ -35,7 +35,7 @@ footer (ceramic brussels or ceramic basel), and **Sections**:
 - **Yellow banner**: "our new website is live! →".
 - **Top photo with title**: title over the photo with the logo (a
   background image, VML for Outlook), or title under it.
-- **Row**: one or two columns; a column is a stack of **label bar**,
+- **Row**: a list of one or two columns (never a `left` and a `right` field: see the attribute budget below); a column is a stack of **label bar**,
   **subtitle**, **headline**, **text**, **button** (oval or outlined),
   **image**, **info card**, **list with lines**, **offer box (dotted)**,
   **VIP code** (`*|VIPCODE|*`), **key figures**. Background: none,
@@ -47,6 +47,28 @@ choices: large, small, italic paragraph, drop capital; bold, italic,
 **yellow background**, **yellow underline**; **text colour** (yellow, ochre,
 grey) and **text size** (12/18/24/32/40), plus links. A theme decides what
 each one looks like, so restyling never touches content.
+
+## The attribute budget
+
+Sanity's free plan caps the dataset at **2,000 attributes**: every distinct
+field path and value type, counted once however many documents use it
+(array positions do not count). On 2026-11-27 the site stood at 1,938,
+mostly because every rich-text field is stored three times over (EN, FR,
+NL). A newsletter field costs attributes the first time anyone fills it,
+so the schema is kept lean on purpose:
+
+- a row's columns are **one list** (`columns`, at most two), so every item
+  type is counted once, not once per side;
+- newsletter images are **plain images with alt text** (plus a credit on
+  content images, a focus point on the top photo only), not the site's
+  `figure` with its caption, work title, year, crop and hotspot.
+
+That brought what a newsletter using every block can add from about 118
+attributes to 54; the dataset was 1,919 after the sample draft moved to the
+new shape. Check before adding a field or block:
+`GET https://5hqzhin7.api.sanity.io/v2021-06-07/data/stats/production`
+(with a token) answers `fields.count`. The real fix is the Growth plan,
+asked of Roy on 2026-11-27.
 
 ## Sending
 
