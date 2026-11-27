@@ -106,6 +106,32 @@ export const nlRichText = defineType({
   ],
 });
 
+/* --------------------------------------------------------------- images */
+
+/**
+ * Newsletter images are plain Sanity images with alt text, not the site's
+ * `figure`: an email has no caption line, and every field a type carries is
+ * an attribute in the dataset, which the free plan caps at 2,000 (we were at
+ * 1,938 on 2026-11-27). Only the top photo keeps a focus point, because it is
+ * the one image cut to a fixed frame whatever its shape.
+ */
+const altField = defineField({
+  name: 'alt',
+  title: 'Alt text',
+  type: 'string',
+  description: 'What a reader sees with images off, and what a screen reader says.',
+});
+
+const picture = (name: string, title: string, o: { hotspot?: boolean; credit?: boolean; description?: string } = {}) =>
+  defineField({
+    name,
+    title,
+    type: 'image',
+    description: o.description,
+    options: { hotspot: !!o.hotspot },
+    fields: [altField, ...(o.credit ? [defineField({ name: 'credit', title: 'Credit', type: 'string', description: 'A small line under the picture: "© photographer".' })] : [])],
+  });
+
 /* ------------------------------------------------------- column items */
 
 const plain = (name: string, title: string, field: { title: string; rows?: number; description?: string }) =>
@@ -195,7 +221,7 @@ export const nlImage = defineType({
   title: 'Image',
   type: 'object',
   fields: [
-    defineField({ name: 'image', title: 'Image', type: 'figure', description: 'Give it alt text: it is what a reader sees with images off.' }),
+    picture('image', 'Image', { credit: true, description: 'Give it alt text. A shape below cuts it around the middle.' }),
     defineField({ name: 'url', title: 'Link', type: 'url', validation: (rule) => rule.uri({ scheme: ['http', 'https'] }) }),
     defineField({
       name: 'aspect',
@@ -298,17 +324,6 @@ export const nlFigures = defineType({
 
 const ITEM_TYPES = ['nlLabel', 'nlSubtitle', 'nlHeadline', 'nlText', 'nlButton', 'nlImage', 'nlInfoCard', 'nlList', 'nlOffer', 'nlVipCode', 'nlFigures'];
 
-export const nlColumn = defineType({
-  name: 'nlColumn',
-  title: 'Column',
-  type: 'object',
-  fields: [defineField({ name: 'items', title: 'Content', type: 'array', of: ITEM_TYPES.map((type) => defineArrayMember({ type })) })],
-});
-
-/* ------------------------------------------------------------ sections */
-
-const hidden = defineField({ name: 'hidden', title: 'Hide this section', type: 'boolean', initialValue: false });
-
 const summary = (col: any) =>
   (col?.items ?? [])
     .map((i: any) => i.text ?? i.title ?? i.label ?? (i._type === 'nlImage' ? 'image' : i._type === 'nlVipCode' ? 'VIP code' : ''))
@@ -317,13 +332,36 @@ const summary = (col: any) =>
     .replace(/\n/g, ' ')
     .slice(0, 60);
 
+export const nlColumn = defineType({
+  name: 'nlColumn',
+  title: 'Column',
+  type: 'object',
+  fields: [defineField({ name: 'items', title: 'Content', type: 'array', of: ITEM_TYPES.map((type) => defineArrayMember({ type })) })],
+  preview: { select: { items: 'items' }, prepare: ({ items }) => ({ title: summary({ items }) || 'Empty column', subtitle: `Column · ${(items ?? []).length} items` }) },
+});
+
+/* ------------------------------------------------------------ sections */
+
+const hidden = defineField({ name: 'hidden', title: 'Hide this section', type: 'boolean', initialValue: false });
+
 export const nlRow = defineType({
   name: 'nlRow',
   title: 'Row (one or two columns)',
   type: 'object',
   fields: [
-    defineField({ name: 'left', title: 'Left column (or the whole width when the right one is empty)', type: 'nlColumn' }),
-    defineField({ name: 'right', title: 'Right column', type: 'nlColumn', description: 'On a phone it goes under the left one.' }),
+    /**
+     * One list of up to two columns rather than a `left` and a `right`
+     * field: two fields store every item type twice over in the dataset's
+     * attribute count, a list once.
+     */
+    defineField({
+      name: 'columns',
+      title: 'Columns',
+      type: 'array',
+      description: 'One column is the whole width, two sit side by side. On a phone the second goes under the first.',
+      of: [defineArrayMember({ type: 'nlColumn' })],
+      validation: (rule) => rule.max(2),
+    }),
     defineField({
       name: 'align',
       title: 'Columns aligned',
@@ -349,10 +387,10 @@ export const nlRow = defineType({
     hidden,
   ],
   preview: {
-    select: { left: 'left', right: 'right', hidden: 'hidden' },
-    prepare: ({ left, right, hidden: h }) => ({
-      title: [summary(left), summary(right)].filter(Boolean).join('  |  ') || 'Empty row',
-      subtitle: `${right?.items?.length ? 'Two columns' : 'Full width'}${h ? ' · hidden' : ''}`,
+    select: { columns: 'columns', hidden: 'hidden' },
+    prepare: ({ columns, hidden: h }) => ({
+      title: (columns ?? []).map(summary).filter(Boolean).join('  |  ') || 'Empty row',
+      subtitle: `${(columns ?? []).filter((c: any) => c?.items?.length).length > 1 ? 'Two columns' : 'Full width'}${h ? ' · hidden' : ''}`,
     }),
   },
 });
@@ -379,7 +417,7 @@ export const nlHero = defineType({
   title: 'Top photo with title',
   type: 'object',
   fields: [
-    defineField({ name: 'image', title: 'Photo', type: 'figure', description: 'Cut to 660 × 283 around its focus point.' }),
+    picture('image', 'Photo', { hotspot: true, description: 'Cut to 660 × 283 around its focus point.' }),
     defineField({ name: 'title', title: 'Title', type: 'text', rows: 2 }),
     defineField({
       name: 'layout',
@@ -415,7 +453,7 @@ export const nlPartners = defineType({
         defineArrayMember({
           type: 'object',
           name: 'nlLogo',
-          fields: [defineField({ name: 'image', title: 'Logo', type: 'figure' }), defineField({ name: 'url', title: 'Link', type: 'url' })],
+          fields: [picture('image', 'Logo'), defineField({ name: 'url', title: 'Link', type: 'url' })],
           preview: { select: { media: 'image', title: 'image.alt' } },
         }),
       ],

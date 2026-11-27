@@ -290,21 +290,26 @@ function column(col: Any | undefined, width: number, t: Theme, o: RenderOptions)
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${inner || '<tr><td>&nbsp;</td></tr>'}</table>`;
 }
 
-/** One or two columns. Two stack into one on a phone, the left one first. */
+/**
+ * One or two columns (the row's `columns` list, at most two). Two stack into
+ * one on a phone, the first one first. A second column with nothing in it
+ * leaves the first at the whole width.
+ */
 function row(s: Any, t: Theme, o: RenderOptions): string {
   const bg = BG(t, s.background);
   const style = `padding:0;font-size:0;${bg ? `background-color:${bg};` : ''}`;
-  if (!s.right?.items?.length) {
-    return `<tr><td style="${style}" align="left">${column(s.left, SHEET, t, o)}</td></tr>`;
+  const [first, second] = (s.columns ?? []) as Any[];
+  if (!second?.items?.length) {
+    return `<tr><td style="${style}" align="left">${column(first, SHEET, t, o)}</td></tr>`;
   }
   const valign = s.align === 'middle' ? 'middle' : 'top';
   const col = (c: Any) =>
     `<div class="col" style="display:inline-block;width:100%;max-width:${COL}px;vertical-align:${valign};text-align:left;">${column(c, COL, t, o)}</div>`;
   return `<tr><td style="${style}" align="center">
 <!--[if mso]><table role="presentation" width="${SHEET}" cellpadding="0" cellspacing="0" border="0"><tr><td width="${COL}" valign="${valign}"><![endif]-->
-${col(s.left)}
+${col(first)}
 <!--[if mso]></td><td width="${COL}" valign="${valign}"><![endif]-->
-${col(s.right)}
+${col(second)}
 <!--[if mso]></td></tr></table><![endif]-->
 </td></tr>`;
 }
